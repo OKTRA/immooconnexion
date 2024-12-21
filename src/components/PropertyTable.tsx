@@ -7,37 +7,58 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Eye } from "lucide-react"
+import { Eye, Pencil, Trash2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-
-const properties = [
-  {
-    id: 1,
-    bien: "Appartement Jaune Block 1",
-    type: "Appartement",
-    chambres: 3,
-    ville: "Kati",
-    loyer: "60000",
-    caution: "120000",
-    statut: "Occupé",
-  },
-  {
-    id: 2,
-    bien: "Maison M201",
-    type: "Maison",
-    chambres: 4,
-    ville: "Bamako",
-    loyer: "75000",
-    caution: "150000",
-    statut: "Libre",
-  },
-]
+import { useState } from "react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { PropertyDialog } from "./PropertyDialog"
+import { useToast } from "./ui/use-toast"
+import { supabase } from "@/integrations/supabase/client"
 
 export function PropertyTable() {
   const navigate = useNavigate()
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [selectedProperty, setSelectedProperty] = useState<any>(null)
+  const { toast } = useToast()
+
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', selectedProperty.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Bien supprimé",
+        description: "Le bien a été supprimé avec succès",
+      })
+    } catch (error) {
+      console.error('Error:', error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suppression",
+        variant: "destructive",
+      })
+    } finally {
+      setDeleteDialogOpen(false)
+      setSelectedProperty(null)
+    }
+  }
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -54,7 +75,7 @@ export function PropertyTable() {
         <TableBody>
           {properties.map((property) => (
             <TableRow key={property.id}>
-              <TableCell>{property.bien}</TableCell>
+              <TableCell className="font-medium">{property.bien}</TableCell>
               <TableCell>{property.type}</TableCell>
               <TableCell>{property.chambres}</TableCell>
               <TableCell>{property.ville}</TableCell>
@@ -62,18 +83,62 @@ export function PropertyTable() {
               <TableCell>{property.caution} FCFA</TableCell>
               <TableCell>{property.statut}</TableCell>
               <TableCell>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => navigate(`/biens/${property.id}`)}
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigate(`/biens/${property.id}`)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setSelectedProperty(property)
+                      setEditDialogOpen(true)
+                    }}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setSelectedProperty(property)
+                      setDeleteDialogOpen(true)
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. Cela supprimera définitivement le bien
+              et toutes les données associées.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Supprimer</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <PropertyDialog
+        property={selectedProperty}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      />
     </div>
   )
 }
