@@ -91,21 +91,29 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     e.preventDefault();
     
     try {
-      // Créer le profil du locataire
+      // First create the user in auth.users
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: 'temporary-password-' + Math.random().toString(36).slice(2), // Generate a random password
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("No user data returned");
+
+      // Now create the profile with the user's ID
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .insert([
-          {
-            first_name: formData.prenom,
-            last_name: formData.nom,
-          }
-        ])
+        .insert({
+          id: authData.user.id,
+          first_name: formData.prenom,
+          last_name: formData.nom,
+        })
         .select()
         .single();
 
       if (profileError) throw profileError;
 
-      // Créer le contrat pour la propriété
+      // Create the contract for the property
       if (formData.propertyId) {
         const { error: contractError } = await supabase
           .from('contracts')
@@ -120,7 +128,7 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
 
         if (contractError) throw contractError;
 
-        // Mettre à jour le statut de la propriété
+        // Update property status
         const { error: propertyError } = await supabase
           .from('properties')
           .update({ statut: 'occupé' })
