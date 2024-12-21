@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { useMobile } from "@/hooks/use-mobile"
+import { useIsMobile } from "@/hooks/use-mobile"
 import {
   BarChart3,
   Building2,
@@ -19,7 +19,7 @@ import { supabase } from "@/integrations/supabase/client"
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function AppSidebar({ className }: SidebarProps) {
-  const isMobile = useMobile()
+  const isMobile = useIsMobile()
   const location = useLocation()
   const navigate = useNavigate()
 
