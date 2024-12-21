@@ -1,8 +1,7 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
+import { SidebarProvider } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/AppSidebar"
+import { ExpenseDialog } from "@/components/ExpenseDialog"
+import { ExpenseTable } from "@/components/ExpenseTable"
 
 const Expenses = () => {
   return (
@@ -12,19 +11,14 @@ const Expenses = () => {
         <main className="flex-1 p-8">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold">Gestion des Dépenses</h1>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" /> Ajouter une dépense
-            </Button>
+            <ExpenseDialog />
           </div>
 
-          {/* Table des dépenses à implémenter */}
-          <div className="rounded-md border p-4">
-            Table des dépenses à venir
-          </div>
+          <ExpenseTable />
         </main>
       </div>
     </SidebarProvider>
-  );
-};
+  )
+}
 
-export default Expenses;
+export default Expenses
