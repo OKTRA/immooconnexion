@@ -49,8 +49,8 @@ export function TenantPaymentsReport() {
   const uniqueTenants = Array.from(new Set(tenantPayments.map(p => p.tenant)))
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="print:shadow-none print:border-none">
+      <CardHeader className="flex flex-row items-center justify-between print:hidden">
         <CardTitle>Historique des Paiements</CardTitle>
         <div className="flex gap-4">
           <Select value={selectedTenant} onValueChange={setSelectedTenant}>
@@ -71,7 +71,7 @@ export function TenantPaymentsReport() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border">
+        <div className="rounded-md border print:border-none">
           <table className="w-full">
             <thead>
               <tr className="border-b">

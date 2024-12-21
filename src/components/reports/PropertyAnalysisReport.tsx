@@ -33,8 +33,8 @@ export function PropertyAnalysisReport() {
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="print:shadow-none print:border-none">
+      <CardHeader className="flex flex-row items-center justify-between print:hidden">
         <CardTitle>Analyse des Biens</CardTitle>
         <Button variant="outline" onClick={handlePrint}>
           <Printer className="h-4 w-4 mr-2" />
@@ -42,7 +42,7 @@ export function PropertyAnalysisReport() {
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border">
+        <div className="rounded-md border print:border-none">
           <table className="w-full">
             <thead>
               <tr className="border-b">
