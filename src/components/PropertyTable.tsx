@@ -23,6 +23,7 @@ import {
 import { PropertyDialog } from "./PropertyDialog"
 import { useToast } from "./ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 export function PropertyTable() {
   const navigate = useNavigate()
@@ -30,6 +31,19 @@ export function PropertyTable() {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedProperty, setSelectedProperty] = useState<any>(null)
   const { toast } = useToast()
+  const queryClient = useQueryClient()
+
+  const { data: properties, isLoading } = useQuery({
+    queryKey: ['properties'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+      
+      if (error) throw error
+      return data
+    }
+  })
 
   const handleDelete = async () => {
     try {
@@ -39,6 +53,8 @@ export function PropertyTable() {
         .eq('id', selectedProperty.id)
 
       if (error) throw error
+
+      queryClient.invalidateQueries({ queryKey: ['properties'] })
 
       toast({
         title: "Bien supprimé",
@@ -57,6 +73,10 @@ export function PropertyTable() {
     }
   }
 
+  if (isLoading) {
+    return <div>Chargement...</div>
+  }
+
   return (
     <div className="rounded-md border overflow-x-auto">
       <Table>
@@ -73,7 +93,7 @@ export function PropertyTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {properties.map((property) => (
+          {properties && properties.map((property) => (
             <TableRow key={property.id}>
               <TableCell className="font-medium">{property.bien}</TableCell>
               <TableCell>{property.type}</TableCell>
