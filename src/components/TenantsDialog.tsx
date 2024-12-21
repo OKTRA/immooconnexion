@@ -9,6 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface TenantsDialogProps {
   open: boolean;
@@ -25,15 +34,31 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     telephone: "",
     photoId: null as File | null,
     fraisAgence: "",
+    propertyId: "",
   });
   const { toast } = useToast();
   const [previewUrl, setPreviewUrl] = useState<string>("");
+
+  // Récupérer la liste des propriétés
+  const { data: properties } = useQuery({
+    queryKey: ['properties'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('statut', 'disponible');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
 
   useEffect(() => {
     if (tenant) {
       setFormData({
         ...tenant,
         photoId: null,
+        propertyId: tenant.propertyId || "",
       });
       if (tenant.photoIdUrl) {
         setPreviewUrl(tenant.photoIdUrl);
@@ -47,6 +72,7 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
         telephone: "",
         photoId: null,
         fraisAgence: "",
+        propertyId: "",
       });
       setPreviewUrl("");
     }
@@ -61,15 +87,63 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: tenant ? "Locataire modifié" : "Locataire ajouté",
-      description: tenant
-        ? "Le locataire a été modifié avec succès."
-        : "Le locataire a été ajouté avec succès.",
-    });
-    onOpenChange(false);
+    
+    try {
+      // Créer le profil du locataire
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            first_name: formData.prenom,
+            last_name: formData.nom,
+          }
+        ])
+        .select()
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Créer le contrat pour la propriété
+      if (formData.propertyId) {
+        const { error: contractError } = await supabase
+          .from('contracts')
+          .insert([
+            {
+              property_id: formData.propertyId,
+              tenant_id: profileData.id,
+              montant: parseFloat(formData.fraisAgence),
+              type: 'location',
+            }
+          ]);
+
+        if (contractError) throw contractError;
+
+        // Mettre à jour le statut de la propriété
+        const { error: propertyError } = await supabase
+          .from('properties')
+          .update({ statut: 'occupé' })
+          .eq('id', formData.propertyId);
+
+        if (propertyError) throw propertyError;
+      }
+
+      toast({
+        title: tenant ? "Locataire modifié" : "Locataire ajouté",
+        description: tenant
+          ? "Le locataire a été modifié avec succès."
+          : "Le locataire a été ajouté avec succès.",
+      });
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Erreur:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'opération.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -138,6 +212,24 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
                 }
                 required
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="propertyId">Propriété</Label>
+              <Select 
+                value={formData.propertyId} 
+                onValueChange={(value) => setFormData({ ...formData, propertyId: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une propriété" />
+                </SelectTrigger>
+                <SelectContent>
+                  {properties?.map((property) => (
+                    <SelectItem key={property.id} value={property.id}>
+                      {property.bien} - {property.ville}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="fraisAgence">Frais d'Agence (FCFA)</Label>
