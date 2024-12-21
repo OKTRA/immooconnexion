@@ -167,6 +167,36 @@ export type Database = {
         }
         Relationships: []
       }
+      tenants: {
+        Row: {
+          agency_fees: number | null
+          birth_date: string | null
+          created_at: string
+          id: string
+          phone_number: string | null
+          photo_id_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          agency_fees?: number | null
+          birth_date?: string | null
+          created_at?: string
+          id: string
+          phone_number?: string | null
+          photo_id_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agency_fees?: number | null
+          birth_date?: string | null
+          created_at?: string
+          id?: string
+          phone_number?: string | null
+          photo_id_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
