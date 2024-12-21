@@ -18,6 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getOrCreateUser } from "@/utils/authUtils";
+import { createTenantContract } from "@/utils/contractUtils";
 
 interface TenantsDialogProps {
   open: boolean;
@@ -39,7 +41,6 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
   const { toast } = useToast();
   const [previewUrl, setPreviewUrl] = useState<string>("");
 
-  // Récupérer la liste des propriétés
   const { data: properties } = useQuery({
     queryKey: ['properties'],
     queryFn: async () => {
@@ -91,50 +92,27 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     e.preventDefault();
     
     try {
-      // First create the user in auth.users
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: 'temporary-password-' + Math.random().toString(36).slice(2), // Generate a random password
-      });
+      // Get or create user and their profile
+      const userId = await getOrCreateUser(formData.email);
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("No user data returned");
-
-      // Now create the profile with the user's ID
-      const { data: profileData, error: profileError } = await supabase
+      // Create or update profile
+      const { error: profileError } = await supabase
         .from('profiles')
-        .insert({
-          id: authData.user.id,
+        .upsert({
+          id: userId,
           first_name: formData.prenom,
           last_name: formData.nom,
-        })
-        .select()
-        .single();
+        });
 
       if (profileError) throw profileError;
 
-      // Create the contract for the property
+      // Create contract if property is selected
       if (formData.propertyId) {
-        const { error: contractError } = await supabase
-          .from('contracts')
-          .insert([
-            {
-              property_id: formData.propertyId,
-              tenant_id: profileData.id,
-              montant: parseFloat(formData.fraisAgence),
-              type: 'location',
-            }
-          ]);
-
-        if (contractError) throw contractError;
-
-        // Update property status
-        const { error: propertyError } = await supabase
-          .from('properties')
-          .update({ statut: 'occupé' })
-          .eq('id', formData.propertyId);
-
-        if (propertyError) throw propertyError;
+        await createTenantContract(
+          formData.propertyId,
+          userId,
+          parseFloat(formData.fraisAgence)
+        );
       }
 
       toast({
