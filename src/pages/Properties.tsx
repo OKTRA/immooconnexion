@@ -1,9 +1,8 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import { PropertyTable } from "@/components/PropertyTable";
+import { useState } from "react"
+import { SidebarProvider } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/AppSidebar"
+import { PropertyTable } from "@/components/PropertyTable"
+import { PropertyDialog } from "@/components/PropertyDialog"
 
 const Properties = () => {
   return (
@@ -13,16 +12,14 @@ const Properties = () => {
         <main className="flex-1 p-8">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold">Gestion des Biens</h1>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" /> Ajouter un bien
-            </Button>
+            <PropertyDialog />
           </div>
 
           <PropertyTable />
         </main>
       </div>
     </SidebarProvider>
-  );
-};
+  )
+}
 
-export default Properties;
+export default Properties
