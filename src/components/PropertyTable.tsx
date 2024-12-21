@@ -25,11 +25,26 @@ import { useToast } from "./ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
+interface Property {
+  id: string
+  bien: string
+  type: string
+  chambres: number
+  ville: string
+  loyer: number
+  caution: number
+  statut: string
+  photo_url: string | null
+  user_id: string
+  created_at: string
+  updated_at: string
+}
+
 export function PropertyTable() {
   const navigate = useNavigate()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [selectedProperty, setSelectedProperty] = useState<any>(null)
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -41,11 +56,13 @@ export function PropertyTable() {
         .select('*')
       
       if (error) throw error
-      return data
+      return data as Property[]
     }
   })
 
   const handleDelete = async () => {
+    if (!selectedProperty) return
+
     try {
       const { error } = await supabase
         .from('properties')

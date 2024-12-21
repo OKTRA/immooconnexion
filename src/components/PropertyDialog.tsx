@@ -12,9 +12,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useEffect } from "react"
 import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { useQueryClient } from "@tanstack/react-query"
+
+interface Property {
+  id: string
+  bien: string
+  type: string
+  chambres: number
+  ville: string
+  loyer: number
+  frais_agence: number
+  taux_commission: number
+  caution: number
+  photo_url: string | null
+  statut: string
+  user_id: string
+  created_at: string
+  updated_at: string
+}
 
 interface PropertyDialogProps {
-  property?: any
+  property?: Property | null
   onOpenChange?: (open: boolean) => void
   open?: boolean
 }
@@ -22,28 +40,29 @@ interface PropertyDialogProps {
 export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogProps) {
   const [image, setImage] = useState<File | null>(null)
   const [formData, setFormData] = useState({
-    nom: "",
+    bien: "",
     type: "",
     chambres: "",
     ville: "",
     loyer: "",
-    fraisAgence: "",
-    tauxCommission: "",
+    frais_agence: "",
+    taux_commission: "",
     caution: "",
   })
   const { toast } = useToast()
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     if (property) {
       setFormData({
-        nom: property.bien || "",
+        bien: property.bien || "",
         type: property.type || "",
         chambres: property.chambres?.toString() || "",
         ville: property.ville || "",
-        loyer: property.loyer || "",
-        fraisAgence: property.fraisAgence || "",
-        tauxCommission: property.tauxCommission || "",
-        caution: property.caution || "",
+        loyer: property.loyer?.toString() || "",
+        frais_agence: property.frais_agence?.toString() || "",
+        taux_commission: property.taux_commission?.toString() || "",
+        caution: property.caution?.toString() || "",
       })
     }
   }, [property])
@@ -61,7 +80,7 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
 
   const handleSubmit = async () => {
     try {
-      let photoUrl = property?.photoUrl
+      let photo_url = property?.photo_url
 
       if (image) {
         const fileExt = image.name.split('.').pop()
@@ -71,13 +90,21 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
           .upload(fileName, image)
 
         if (uploadError) throw uploadError
-        photoUrl = data.path
+        photo_url = data.path
       }
 
       const propertyData = {
-        ...formData,
-        photoUrl,
-        updated_at: new Date(),
+        bien: formData.bien,
+        type: formData.type,
+        chambres: parseInt(formData.chambres),
+        ville: formData.ville,
+        loyer: parseFloat(formData.loyer),
+        frais_agence: parseFloat(formData.frais_agence),
+        taux_commission: parseFloat(formData.taux_commission),
+        caution: parseFloat(formData.caution),
+        photo_url,
+        user_id: (await supabase.auth.getUser()).data.user?.id,
+        updated_at: new Date().toISOString(),
       }
 
       if (property?.id) {
@@ -96,7 +123,7 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
         // Create new property
         const { error } = await supabase
           .from('properties')
-          .insert([{ ...propertyData, created_at: new Date() }])
+          .insert([{ ...propertyData, created_at: new Date().toISOString() }])
 
         if (error) throw error
         toast({
@@ -105,6 +132,7 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
         })
       }
 
+      queryClient.invalidateQueries({ queryKey: ['properties'] })
       if (onOpenChange) onOpenChange(false)
     } catch (error) {
       console.error('Error:', error)
@@ -123,11 +151,11 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
       </DialogHeader>
       <div className="grid gap-4 py-4">
         <div className="grid gap-2">
-          <Label htmlFor="nom">Nom du bien</Label>
+          <Label htmlFor="bien">Nom du bien</Label>
           <Input 
-            id="nom" 
+            id="bien" 
             placeholder="Ex: Appartement Jaune Block 1" 
-            value={formData.nom}
+            value={formData.bien}
             onChange={handleInputChange}
           />
         </div>
@@ -176,24 +204,24 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="fraisAgence">Frais d'agence (FCFA)</Label>
+          <Label htmlFor="frais_agence">Frais d'agence (FCFA)</Label>
           <Input 
-            id="fraisAgence" 
+            id="frais_agence" 
             type="number" 
             placeholder="Montant négocié avec le locataire"
-            value={formData.fraisAgence}
+            value={formData.frais_agence}
             onChange={handleInputChange}
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="tauxCommission">Taux de commission (%)</Label>
+          <Label htmlFor="taux_commission">Taux de commission (%)</Label>
           <Input 
-            id="tauxCommission" 
+            id="taux_commission" 
             type="number" 
             min="5" 
             max="15" 
             placeholder="Entre 5 et 15%"
-            value={formData.tauxCommission}
+            value={formData.taux_commission}
             onChange={handleInputChange}
           />
         </div>
@@ -214,10 +242,10 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
             accept="image/*" 
             onChange={handleImageChange}
           />
-          {(image || property?.photoUrl) && (
+          {(image || property?.photo_url) && (
             <div className="mt-2">
               <img
-                src={image ? URL.createObjectURL(image) : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/product_photos/${property.photoUrl}`}
+                src={image ? URL.createObjectURL(image) : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/product_photos/${property.photo_url}`}
                 alt="Aperçu"
                 className="max-w-full h-auto rounded-md"
               />

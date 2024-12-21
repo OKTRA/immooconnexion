@@ -33,6 +33,57 @@ export type Database = {
         }
         Relationships: []
       }
+      properties: {
+        Row: {
+          bien: string
+          caution: number | null
+          chambres: number | null
+          created_at: string
+          frais_agence: number | null
+          id: string
+          loyer: number | null
+          photo_url: string | null
+          statut: string | null
+          taux_commission: number | null
+          type: string
+          updated_at: string
+          user_id: string | null
+          ville: string | null
+        }
+        Insert: {
+          bien: string
+          caution?: number | null
+          chambres?: number | null
+          created_at?: string
+          frais_agence?: number | null
+          id?: string
+          loyer?: number | null
+          photo_url?: string | null
+          statut?: string | null
+          taux_commission?: number | null
+          type: string
+          updated_at?: string
+          user_id?: string | null
+          ville?: string | null
+        }
+        Update: {
+          bien?: string
+          caution?: number | null
+          chambres?: number | null
+          created_at?: string
+          frais_agence?: number | null
+          id?: string
+          loyer?: number | null
+          photo_url?: string | null
+          statut?: string | null
+          taux_commission?: number | null
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+          ville?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
