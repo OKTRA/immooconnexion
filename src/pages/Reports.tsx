@@ -7,6 +7,7 @@ import { addDays } from "date-fns"
 import { useState } from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DateRange } from "react-day-picker"
 
 const occupancyData = [
   { status: 'Occupé', value: 15 },
@@ -65,7 +66,7 @@ const propertyExpenses = [
 const COLORS = ['#0088FE', '#FF8042', '#00C49F', '#FFBB28']
 
 const Reports = () => {
-  const [date, setDate] = useState({
+  const [date, setDate] = useState<DateRange>({
     from: new Date(2024, 0, 1),
     to: addDays(new Date(), 0),
   })
