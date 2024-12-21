@@ -8,6 +8,8 @@ import { useState } from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DateRange } from "react-day-picker"
+import { TenantPaymentsReport } from "@/components/reports/TenantPaymentsReport"
+import { PropertyAnalysisReport } from "@/components/reports/PropertyAnalysisReport"
 
 const occupancyData = [
   { status: 'Occupé', value: 15 },
@@ -21,46 +23,6 @@ const revenueData = [
   { month: 'Avr', revenue: 1600000 },
   { month: 'Mai', revenue: 2000000 },
   { month: 'Jun', revenue: 1900000 },
-]
-
-const tenantPayments = [
-  {
-    id: 1,
-    tenant: "Awa MAIGA",
-    property: "Appartement Jaune Block 1",
-    amount: 155000,
-    type: "Loyer",
-    date: "2024-02-20",
-    status: "Payé",
-    agencyFees: 25000,
-  },
-  {
-    id: 2,
-    tenant: "Awa MAIGA",
-    property: "Appartement Jaune Block 1",
-    amount: 155000,
-    type: "Loyer",
-    date: "2024-03-20",
-    status: "En retard",
-    agencyFees: 0,
-  },
-]
-
-const propertyExpenses = [
-  {
-    id: 1,
-    property: "Appartement Jaune Block 1",
-    totalExpenses: 250000,
-    maintenanceCount: 5,
-    lastExpenseDate: "2024-03-15",
-  },
-  {
-    id: 2,
-    property: "Maison M201",
-    totalExpenses: 180000,
-    maintenanceCount: 3,
-    lastExpenseDate: "2024-03-10",
-  },
 ]
 
 const COLORS = ['#0088FE', '#FF8042', '#00C49F', '#FFBB28']
@@ -192,79 +154,11 @@ const Reports = () => {
             </TabsContent>
 
             <TabsContent value="tenants">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Historique des Paiements</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="rounded-md border">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="p-4 text-left">Locataire</th>
-                          <th className="p-4 text-left">Bien</th>
-                          <th className="p-4 text-left">Montant</th>
-                          <th className="p-4 text-left">Type</th>
-                          <th className="p-4 text-left">Date</th>
-                          <th className="p-4 text-left">Statut</th>
-                          <th className="p-4 text-left">Frais d'Agence</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {tenantPayments.map((payment) => (
-                          <tr key={payment.id} className="border-b">
-                            <td className="p-4">{payment.tenant}</td>
-                            <td className="p-4">{payment.property}</td>
-                            <td className="p-4">{payment.amount} FCFA</td>
-                            <td className="p-4">{payment.type}</td>
-                            <td className="p-4">{payment.date}</td>
-                            <td className="p-4">
-                              <span className={`px-2 py-1 rounded-full text-sm ${
-                                payment.status === 'Payé' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                              }`}>
-                                {payment.status}
-                              </span>
-                            </td>
-                            <td className="p-4">{payment.agencyFees} FCFA</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
+              <TenantPaymentsReport />
             </TabsContent>
 
             <TabsContent value="properties">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Analyse des Biens</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="rounded-md border">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="p-4 text-left">Bien</th>
-                          <th className="p-4 text-left">Total Dépenses</th>
-                          <th className="p-4 text-left">Nombre Maintenances</th>
-                          <th className="p-4 text-left">Dernière Dépense</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {propertyExpenses.map((property) => (
-                          <tr key={property.id} className="border-b">
-                            <td className="p-4">{property.property}</td>
-                            <td className="p-4">{property.totalExpenses} FCFA</td>
-                            <td className="p-4">{property.maintenanceCount}</td>
-                            <td className="p-4">{property.lastExpenseDate}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
+              <PropertyAnalysisReport />
             </TabsContent>
 
             <TabsContent value="expenses">
