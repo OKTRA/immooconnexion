@@ -12,28 +12,37 @@ export type Database = {
       contracts: {
         Row: {
           created_at: string
+          end_date: string | null
           id: string
           montant: number
           property_id: string
+          start_date: string
           statut: string
+          tenant_id: string | null
           type: string
           updated_at: string
         }
         Insert: {
           created_at?: string
+          end_date?: string | null
           id?: string
           montant: number
           property_id: string
+          start_date?: string
           statut?: string
+          tenant_id?: string | null
           type: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          end_date?: string | null
           id?: string
           montant?: number
           property_id?: string
+          start_date?: string
           statut?: string
+          tenant_id?: string | null
           type?: string
           updated_at?: string
         }

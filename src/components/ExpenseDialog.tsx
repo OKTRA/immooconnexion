@@ -16,17 +16,27 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Plus } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 const formSchema = z.object({
   montant: z.string().min(1, "Le montant est requis"),
   type: z.string().default("loyer"),
+  tenant_id: z.string().min(1, "Le locataire est requis"),
+  start_date: z.string().min(1, "La date de début est requise"),
+  end_date: z.string().min(1, "La date de fin est requise"),
 })
 
 type ExpenseFormData = z.infer<typeof formSchema>
@@ -40,11 +50,25 @@ export function ExpenseDialog({ propertyId, propertyRent }: ExpenseDialogProps) 
   const { toast } = useToast()
   const queryClient = useQueryClient()
   
+  const { data: tenants } = useQuery({
+    queryKey: ['profiles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+      
+      if (error) throw error
+      return data
+    }
+  })
+
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       montant: propertyRent?.toString() || "",
       type: "loyer",
+      start_date: new Date().toISOString().split('T')[0],
+      end_date: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0],
     },
   })
 
@@ -54,9 +78,12 @@ export function ExpenseDialog({ propertyId, propertyRent }: ExpenseDialogProps) 
         .from('contracts')
         .insert({
           property_id: propertyId,
+          tenant_id: data.tenant_id,
           montant: parseFloat(data.montant),
           type: data.type,
           statut: "payé",
+          start_date: data.start_date,
+          end_date: data.end_date,
         })
 
       if (error) throw error
@@ -96,12 +123,62 @@ export function ExpenseDialog({ propertyId, propertyRent }: ExpenseDialogProps) 
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
+              name="tenant_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Locataire</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner un locataire" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {tenants?.map((tenant) => (
+                        <SelectItem key={tenant.id} value={tenant.id}>
+                          {tenant.first_name} {tenant.last_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="montant"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Montant (FCFA)</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="0" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="start_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date de début</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="end_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date de fin</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
