@@ -8,13 +8,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Home, Users, DollarSign, PieChart } from "lucide-react"
+import { Home, Users, DollarSign, PieChart, Coins } from "lucide-react"
 import { Link } from "react-router-dom"
 
 const menuItems = [
   { title: "Gestion des Biens", icon: Home, url: "/biens" },
   { title: "Gestion des Locataires", icon: Users, url: "/locataires" },
   { title: "Gestion des Dépenses", icon: DollarSign, url: "/depenses" },
+  { title: "Gain d'Agence", icon: Coins, url: "/gains" },
   { title: "Gestion des Commissions", icon: PieChart, url: "/commissions" },
 ]
 
