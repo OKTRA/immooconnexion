@@ -15,6 +15,8 @@ const earnings = [
     fraisAgence: "30000",
     tauxCommission: "10",
     commissionMensuelle: "6000",
+    gainProprietaire: "54000",
+    gainAgence: "36000",
     datePerception: "2024-03-15",
   },
   {
@@ -24,6 +26,8 @@ const earnings = [
     fraisAgence: "35000",
     tauxCommission: "8",
     commissionMensuelle: "6000",
+    gainProprietaire: "69000",
+    gainAgence: "41000",
     datePerception: "2024-03-10",
   },
 ]
@@ -39,6 +43,8 @@ export function AgencyEarningsTable() {
             <TableHead>Frais d'Agence</TableHead>
             <TableHead>Taux Commission (%)</TableHead>
             <TableHead>Commission Mensuelle</TableHead>
+            <TableHead>Gain Propriétaire</TableHead>
+            <TableHead>Gain Agence</TableHead>
             <TableHead>Date Perception</TableHead>
           </TableRow>
         </TableHeader>
@@ -50,6 +56,8 @@ export function AgencyEarningsTable() {
               <TableCell>{earning.fraisAgence} FCFA</TableCell>
               <TableCell>{earning.tauxCommission}%</TableCell>
               <TableCell>{earning.commissionMensuelle} FCFA</TableCell>
+              <TableCell>{earning.gainProprietaire} FCFA</TableCell>
+              <TableCell>{earning.gainAgence} FCFA</TableCell>
               <TableCell>{earning.datePerception}</TableCell>
             </TableRow>
           ))}

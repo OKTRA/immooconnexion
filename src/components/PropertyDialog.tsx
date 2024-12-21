@@ -10,14 +10,23 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState } from "react"
+import { useToast } from "@/components/ui/use-toast"
 
 export function PropertyDialog() {
   const [image, setImage] = useState<File | null>(null)
+  const { toast } = useToast()
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setImage(e.target.files[0])
     }
+  }
+
+  const handleSubmit = () => {
+    toast({
+      title: "Bien ajouté avec succès",
+      description: "Le bien immobilier a été ajouté à la liste",
+    })
   }
 
   return (
@@ -61,6 +70,24 @@ export function PropertyDialog() {
             <Input id="loyer" type="number" />
           </div>
           <div className="grid gap-2">
+            <Label htmlFor="fraisAgence">Frais d'agence (FCFA)</Label>
+            <Input 
+              id="fraisAgence" 
+              type="number" 
+              placeholder="Montant négocié avec le locataire"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="tauxCommission">Taux de commission (%)</Label>
+            <Input 
+              id="tauxCommission" 
+              type="number" 
+              min="5" 
+              max="15" 
+              placeholder="Entre 5 et 15%"
+            />
+          </div>
+          <div className="grid gap-2">
             <Label htmlFor="caution">Caution (FCFA)</Label>
             <Input id="caution" type="number" />
           </div>
@@ -80,7 +107,7 @@ export function PropertyDialog() {
         </div>
         <div className="flex justify-end gap-2">
           <Button variant="outline">Annuler</Button>
-          <Button>Enregistrer</Button>
+          <Button onClick={handleSubmit}>Enregistrer</Button>
         </div>
       </DialogContent>
     </Dialog>
