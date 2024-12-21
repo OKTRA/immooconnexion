@@ -1,6 +1,8 @@
-import { Contract, ContractInsert, ContractUpdate } from './contracts'
-import { Profile, ProfileInsert, ProfileUpdate } from './profiles'
-import { Property, PropertyInsert, PropertyUpdate } from './properties'
+import { Contract, ContractInsert, ContractUpdate } from './contracts';
+import { Profile, ProfileInsert, ProfileUpdate } from './profiles';
+import { Property, PropertyInsert, PropertyUpdate } from './properties';
+import { Tenant, TenantInsert, TenantUpdate } from './tenants';
+import { Administrator, AdministratorInsert, AdministratorUpdate } from './administrators';
 
 export type Json =
   | string
@@ -8,52 +10,64 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
 
 export type Database = {
   public: {
     Tables: {
+      administrators: {
+        Row: Administrator;
+        Insert: AdministratorInsert;
+        Update: AdministratorUpdate;
+        Relationships: [];
+      };
       contracts: {
-        Row: Contract
-        Insert: ContractInsert
-        Update: ContractUpdate
+        Row: Contract;
+        Insert: ContractInsert;
+        Update: ContractUpdate;
         Relationships: [
           {
-            foreignKeyName: "contracts_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
+            foreignKeyName: "contracts_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
           }
-        ]
-      }
+        ];
+      };
       profiles: {
-        Row: Profile
-        Insert: ProfileInsert
-        Update: ProfileUpdate
-        Relationships: []
-      }
+        Row: Profile;
+        Insert: ProfileInsert;
+        Update: ProfileUpdate;
+        Relationships: [];
+      };
       properties: {
-        Row: Property
-        Insert: PropertyInsert
-        Update: PropertyUpdate
-        Relationships: []
-      }
-    }
+        Row: Property;
+        Insert: PropertyInsert;
+        Update: PropertyUpdate;
+        Relationships: [];
+      };
+      tenants: {
+        Row: Tenant;
+        Insert: TenantInsert;
+        Update: TenantUpdate;
+        Relationships: [];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Enums: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
 export type Tables<
   PublicTableNameOrOptions extends
@@ -66,7 +80,7 @@ export type Tables<
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions['schema']]['Tables'] &
       Database[PublicTableNameOrOptions['schema']]['Views'])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
@@ -74,11 +88,11 @@ export type Tables<
       Database['public']['Views'])
   ? (Database['public']['Tables'] &
       Database['public']['Views'])[PublicTableNameOrOptions] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
-  : never
+  : never;
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
@@ -89,17 +103,17 @@ export type TablesInsert<
     : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : PublicTableNameOrOptions extends keyof Database['public']['Tables']
   ? Database['public']['Tables'][PublicTableNameOrOptions] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
-  : never
+  : never;
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
@@ -110,18 +124,20 @@ export type TablesUpdate<
     : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : PublicTableNameOrOptions extends keyof Database['public']['Tables']
   ? Database['public']['Tables'][PublicTableNameOrOptions] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
-  : never
+  : never;
 
-export * from './contracts'
-export * from './profiles'
-export * from './properties'
+export * from './contracts';
+export * from './profiles';
+export * from './properties';
+export * from './tenants';
+export * from './administrators';
