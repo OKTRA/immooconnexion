@@ -13,19 +13,19 @@ export const getOrCreateUser = async (email: string) => {
   }
 
   // If no profile exists, try to get the user from auth
-  const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers({
-    filters: {
-      email: email
-    }
+  const { data: { users } } = await supabase.auth.admin.listUsers({
+    page: 1,
+    perPage: 1
   });
 
-  if (getUserError) throw getUserError;
+  // Find user with matching email
+  const existingUser = users?.find(user => user.email === email);
 
   let userId;
 
-  if (users && users.length > 0) {
+  if (existingUser) {
     // User exists in auth but not in profiles
-    userId = users[0].id;
+    userId = existingUser.id;
   } else {
     // Create new user in auth
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
