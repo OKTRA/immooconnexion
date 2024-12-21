@@ -24,6 +24,7 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     email: "",
     telephone: "",
     photoId: null as File | null,
+    fraisAgence: "",
   });
   const { toast } = useToast();
   const [previewUrl, setPreviewUrl] = useState<string>("");
@@ -45,6 +46,7 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
         email: "",
         telephone: "",
         photoId: null,
+        fraisAgence: "",
       });
       setPreviewUrl("");
     }
@@ -134,6 +136,19 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="fraisAgence">Frais d'Agence (FCFA)</Label>
+              <Input
+                id="fraisAgence"
+                type="number"
+                value={formData.fraisAgence}
+                onChange={(e) =>
+                  setFormData({ ...formData, fraisAgence: e.target.value })
+                }
+                placeholder="Montant négocié avec le locataire"
                 required
               />
             </div>
