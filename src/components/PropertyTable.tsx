@@ -32,6 +32,8 @@ interface Property {
   chambres: number
   ville: string
   loyer: number
+  frais_agence: number
+  taux_commission: number
   caution: number
   statut: string
   photo_url: string | null
