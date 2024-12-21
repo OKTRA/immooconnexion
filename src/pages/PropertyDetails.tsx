@@ -48,16 +48,16 @@ const PropertyDetails = () => {
   return (
     <SidebarProvider>
       <div className="flex">
-        <AppSidebar className="w-64" /> {/* Reduced sidebar width */}
-        <main className="flex-1 p-4 md:p-6"> {/* Reduced padding */}
-          <div className="max-w-4xl mx-auto space-y-4"> {/* Reduced max width and spacing */}
+        <AppSidebar className="w-64" />
+        <main className="flex-1 p-4 md:p-6">
+          <div className="max-w-4xl mx-auto space-y-4">
             {/* Informations principales */}
             <Card>
               <CardHeader>
                 <CardTitle>Informations du bien</CardTitle>
               </CardHeader>
-              <CardContent className="grid md:grid-cols-2 gap-4"> {/* Reduced gap */}
-                <div className="space-y-3"> {/* Reduced spacing */}
+              <CardContent className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-3">
                   <div>
                     <h3 className="font-semibold">Nom du bien</h3>
                     <p>{property?.bien}</p>
@@ -93,7 +93,7 @@ const PropertyDetails = () => {
                     <img
                       src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/product_photos/${property.photo_url}`}
                       alt={property.bien}
-                      className="rounded-lg w-full object-cover h-48" {/* Fixed height */}
+                      className="rounded-lg w-full object-cover h-48"
                     />
                   </div>
                 )}
