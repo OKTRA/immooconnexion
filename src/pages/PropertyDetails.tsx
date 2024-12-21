@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import { ExpenseDialog } from "@/components/ExpenseDialog"
 
 const PropertyDetails = () => {
   const { id } = useParams()
@@ -16,7 +17,7 @@ const PropertyDetails = () => {
         .from('properties')
         .select('*')
         .eq('id', id)
-        .single()
+        .maybeSingle()
       
       if (error) throw error
       return data
@@ -40,19 +41,23 @@ const PropertyDetails = () => {
     return <div>Chargement...</div>
   }
 
+  if (!property) {
+    return <div>Bien non trouvé</div>
+  }
+
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex">
-        <AppSidebar />
-        <main className="flex-1 p-4 md:p-8">
-          <div className="grid gap-6 max-w-5xl mx-auto">
+      <div className="flex">
+        <AppSidebar className="w-64" /> {/* Reduced sidebar width */}
+        <main className="flex-1 p-4 md:p-6"> {/* Reduced padding */}
+          <div className="max-w-4xl mx-auto space-y-4"> {/* Reduced max width and spacing */}
             {/* Informations principales */}
             <Card>
               <CardHeader>
                 <CardTitle>Informations du bien</CardTitle>
               </CardHeader>
-              <CardContent className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
+              <CardContent className="grid md:grid-cols-2 gap-4"> {/* Reduced gap */}
+                <div className="space-y-3"> {/* Reduced spacing */}
                   <div>
                     <h3 className="font-semibold">Nom du bien</h3>
                     <p>{property?.bien}</p>
@@ -88,19 +93,19 @@ const PropertyDetails = () => {
                     <img
                       src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/product_photos/${property.photo_url}`}
                       alt={property.bien}
-                      className="rounded-lg w-full object-cover"
+                      className="rounded-lg w-full object-cover h-48" {/* Fixed height */}
                     />
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Contrats et paiements */}
+            {/* Historique des paiements */}
             <Card>
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle>Historique des paiements</CardTitle>
-                  <Button variant="outline">Enregistrer un paiement</Button>
+                  <ExpenseDialog propertyId={id} propertyRent={property.loyer} />
                 </div>
               </CardHeader>
               <CardContent>
@@ -120,7 +125,13 @@ const PropertyDetails = () => {
                           <td className="p-2">{new Date(contract.created_at).toLocaleDateString()}</td>
                           <td className="p-2">{contract.montant?.toLocaleString()} FCFA</td>
                           <td className="p-2 capitalize">{contract.type}</td>
-                          <td className="p-2 capitalize">{contract.statut}</td>
+                          <td className="p-2">
+                            <span className={`px-2 py-1 rounded-full text-sm ${
+                              contract.statut === 'payé' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {contract.statut}
+                            </span>
+                          </td>
                         </tr>
                       ))}
                       {(!contracts || contracts.length === 0) && (

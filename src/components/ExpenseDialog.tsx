@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -15,78 +16,90 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Plus } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { useToast } from "@/components/ui/use-toast"
+import { supabase } from "@/integrations/supabase/client"
+import { useQueryClient } from "@tanstack/react-query"
+import * as z from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 
-type ExpenseFormData = {
+const formSchema = z.object({
+  montant: z.string().min(1, "Le montant est requis"),
+  type: z.string().default("loyer"),
+})
+
+type ExpenseFormData = z.infer<typeof formSchema>
+
+interface ExpenseDialogProps {
   propertyId: string
-  amount: string
-  description: string
-  date: string
-  type: string
+  propertyRent?: number
 }
 
-export function ExpenseDialog() {
+export function ExpenseDialog({ propertyId, propertyRent }: ExpenseDialogProps) {
   const { toast } = useToast()
-  const form = useForm<ExpenseFormData>()
+  const queryClient = useQueryClient()
+  
+  const form = useForm<ExpenseFormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      montant: propertyRent?.toString() || "",
+      type: "loyer",
+    },
+  })
 
-  const onSubmit = (data: ExpenseFormData) => {
-    console.log(data)
-    toast({
-      title: "Dépense ajoutée",
-      description: "La dépense a été ajoutée avec succès",
-    })
+  const onSubmit = async (data: ExpenseFormData) => {
+    try {
+      const { error } = await supabase
+        .from('contracts')
+        .insert({
+          property_id: propertyId,
+          montant: parseFloat(data.montant),
+          type: data.type,
+          statut: "payé",
+        })
+
+      if (error) throw error
+
+      toast({
+        title: "Paiement enregistré",
+        description: "Le paiement a été enregistré avec succès",
+      })
+
+      queryClient.invalidateQueries({ queryKey: ['contracts', propertyId] })
+      form.reset()
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement du paiement:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'enregistrement du paiement",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="mr-2 h-4 w-4" /> Ajouter une dépense
+          <Plus className="mr-2 h-4 w-4" /> Enregistrer un paiement
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Ajouter une dépense</DialogTitle>
+          <DialogTitle>Enregistrer un paiement</DialogTitle>
+          <DialogDescription>
+            Enregistrez un paiement de loyer pour ce bien
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="propertyId"
+              name="montant"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Bien immobilier</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un bien" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="1">Appartement Jaune Block 1</SelectItem>
-                      <SelectItem value="2">Maison M201</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Montant</FormLabel>
+                  <FormLabel>Montant (FCFA)</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="0" {...field} />
                   </FormControl>
@@ -94,56 +107,7 @@ export function ExpenseDialog() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Type de dépense</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="maintenance">Maintenance</SelectItem>
-                      <SelectItem value="repairs">Réparations</SelectItem>
-                      <SelectItem value="utilities">Charges</SelectItem>
-                      <SelectItem value="taxes">Taxes</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Date</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Description de la dépense" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit">Ajouter</Button>
+            <Button type="submit">Enregistrer</Button>
           </form>
         </Form>
       </DialogContent>
