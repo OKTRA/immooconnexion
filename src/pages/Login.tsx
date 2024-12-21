@@ -4,16 +4,27 @@ import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useToast } from "@/components/ui/use-toast"
 
 const Login = () => {
   const navigate = useNavigate()
+  const { toast } = useToast()
 
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
+    console.log("Setting up auth state change listener")
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event, session)
       if (session) {
         navigate("/")
       }
     })
+
+    return () => {
+      console.log("Cleaning up auth state change listener")
+      subscription.unsubscribe()
+    }
   }, [navigate])
 
   return (
@@ -25,9 +36,23 @@ const Login = () => {
         <CardContent>
           <Auth
             supabaseClient={supabase}
-            appearance={{ theme: ThemeSupa }}
+            appearance={{ 
+              theme: ThemeSupa,
+              style: {
+                button: { background: 'rgb(59 130 246)', color: 'white' },
+                anchor: { color: 'rgb(59 130 246)' },
+              }
+            }}
             theme="light"
             providers={[]}
+            onError={(error) => {
+              console.error("Auth error:", error)
+              toast({
+                variant: "destructive",
+                title: "Erreur de connexion",
+                description: "Une erreur s'est produite lors de la connexion. Veuillez réessayer."
+              })
+            }}
           />
         </CardContent>
       </Card>
