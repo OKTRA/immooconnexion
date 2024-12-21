@@ -36,15 +36,15 @@ const tenantPayments = [
 ]
 
 export function TenantPaymentsReport() {
-  const [selectedTenant, setSelectedTenant] = useState<string>("")
+  const [selectedTenant, setSelectedTenant] = useState<string>("all")
   
   const handlePrint = () => {
     window.print()
   }
 
-  const filteredPayments = selectedTenant 
-    ? tenantPayments.filter(payment => payment.tenant === selectedTenant)
-    : tenantPayments
+  const filteredPayments = selectedTenant === "all"
+    ? tenantPayments
+    : tenantPayments.filter(payment => payment.tenant === selectedTenant)
 
   const uniqueTenants = Array.from(new Set(tenantPayments.map(p => p.tenant)))
 
@@ -58,7 +58,7 @@ export function TenantPaymentsReport() {
               <SelectValue placeholder="Sélectionner un locataire" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous les locataires</SelectItem>
+              <SelectItem value="all">Tous les locataires</SelectItem>
               {uniqueTenants.map(tenant => (
                 <SelectItem key={tenant} value={tenant}>{tenant}</SelectItem>
               ))}
