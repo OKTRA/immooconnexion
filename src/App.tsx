@@ -9,6 +9,7 @@ import Properties from "./pages/Properties"
 import PropertyDetails from "./pages/PropertyDetails"
 import Expenses from "./pages/Expenses"
 import AgencyEarnings from "./pages/AgencyEarnings"
+import Reports from "./pages/Reports"
 
 const queryClient = new QueryClient()
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/biens/:id" element={<PropertyDetails />} />
           <Route path="/depenses" element={<Expenses />} />
           <Route path="/gains" element={<AgencyEarnings />} />
+          <Route path="/rapports" element={<Reports />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

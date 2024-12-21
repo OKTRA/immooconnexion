@@ -8,7 +8,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Home, Users, DollarSign, PieChart, Coins } from "lucide-react"
+import { Home, Users, DollarSign, PieChart, Coins, FileBarChart } from "lucide-react"
 import { Link } from "react-router-dom"
 
 const menuItems = [
@@ -16,6 +16,7 @@ const menuItems = [
   { title: "Gestion des Locataires", icon: Users, url: "/locataires" },
   { title: "Gestion des Dépenses", icon: DollarSign, url: "/depenses" },
   { title: "Gain d'Agence", icon: Coins, url: "/gains" },
+  { title: "Rapports", icon: FileBarChart, url: "/rapports" },
   { title: "Gestion des Commissions", icon: PieChart, url: "/commissions" },
 ]
 
