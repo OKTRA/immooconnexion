@@ -59,9 +59,9 @@ const Login = () => {
                   },
                   className: {
                     container: "space-y-4",
-                    button: "w-full",
-                    label: "text-sm font-medium text-gray-700 dark:text-gray-300",
-                    input: "rounded-md border border-gray-300 dark:border-gray-700",
+                    button: "w-full bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded transition-colors",
+                    label: "block text-sm font-medium text-gray-700 dark:text-gray-300",
+                    input: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm",
                     anchor: "text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200",
                   },
                 }}
@@ -85,14 +85,16 @@ const Login = () => {
                   },
                 }}
                 view="sign_in"
-                showLinks={true}
+                showLinks={false}
                 redirectTo={window.location.origin}
                 onlyThirdPartyProviders={false}
                 magicLink={false}
-                additionalData={{
-                  signUpDisabled: true
-                }}
               />
+              <div className="text-center mt-4">
+                <a href="#" className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">
+                  Mot de passe oublié ?
+                </a>
+              </div>
             </TabsContent>
             <TabsContent value="admin">
               <AdminLoginForm />
