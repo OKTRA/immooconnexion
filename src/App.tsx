@@ -13,6 +13,7 @@ import PropertyDetails from "./pages/PropertyDetails"
 import Expenses from "./pages/Expenses"
 import AgencyEarnings from "./pages/AgencyEarnings"
 import Reports from "./pages/Reports"
+import TenantContracts from "./pages/TenantContracts"
 
 const queryClient = new QueryClient()
 
@@ -65,6 +66,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Tenants />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/locataires/:id/contrats"
+            element={
+              <ProtectedRoute>
+                <TenantContracts />
               </ProtectedRoute>
             }
           />
