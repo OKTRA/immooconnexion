@@ -89,6 +89,9 @@ const Login = () => {
                 redirectTo={window.location.origin}
                 onlyThirdPartyProviders={false}
                 magicLink={false}
+                additionalData={{
+                  signUpDisabled: true
+                }}
               />
             </TabsContent>
             <TabsContent value="admin">
