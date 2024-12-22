@@ -86,6 +86,7 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     try {
       const userId = await getOrCreateUser(formData.email);
 
+      // Insérer dans la table profiles
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -97,6 +98,19 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
 
       if (profileError) throw profileError;
 
+      // Insérer dans la table tenants
+      const { error: tenantError } = await supabase
+        .from('tenants')
+        .upsert({
+          id: userId,
+          birth_date: formData.dateNaissance,
+          phone_number: formData.telephone,
+          agency_fees: parseFloat(formData.fraisAgence),
+        });
+
+      if (tenantError) throw tenantError;
+
+      // Gérer le contrat si une propriété est sélectionnée
       if (formData.propertyId) {
         await createTenantContract(
           formData.propertyId,
