@@ -27,17 +27,20 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
   const { data: contract } = useQuery({
     queryKey: ['tenant-contract', tenant.id],
     queryFn: async () => {
+      console.log('Fetching contract for tenant:', tenant.id);
+      
       const { data, error } = await supabase
         .from('contracts')
         .select('property_id')
         .eq('tenant_id', tenant.id)
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error('Error fetching contract:', error);
         return null;
       }
       
+      console.log('Contract data:', data);
       return data;
     }
   });
