@@ -27,6 +27,15 @@ const Login = () => {
     }
   }, [navigate])
 
+  const handleError = (error: Error) => {
+    console.error("Auth error:", error)
+    toast({
+      variant: "destructive",
+      title: "Erreur de connexion",
+      description: "Une erreur s'est produite lors de la connexion. Veuillez réessayer."
+    })
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
@@ -45,13 +54,15 @@ const Login = () => {
             }}
             theme="light"
             providers={[]}
-            onError={(error) => {
-              console.error("Auth error:", error)
-              toast({
-                variant: "destructive",
-                title: "Erreur de connexion",
-                description: "Une erreur s'est produite lors de la connexion. Veuillez réessayer."
-              })
+            localization={{
+              variables: {
+                sign_in: {
+                  email_label: "Email",
+                  password_label: "Mot de passe",
+                  button_label: "Se connecter",
+                  loading_button_label: "Connexion en cours...",
+                },
+              },
             }}
           />
         </CardContent>
