@@ -1,5 +1,7 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TenantReceiptProps {
   tenant: {
@@ -7,15 +9,33 @@ interface TenantReceiptProps {
     prenom: string;
     telephone: string;
     fraisAgence: string;
-  };
-  property?: {
-    bien: string;
-    loyer: number;
-    caution: number;
+    propertyId?: string;
   };
 }
 
-export function TenantReceipt({ tenant, property }: TenantReceiptProps) {
+export function TenantReceipt({ tenant }: TenantReceiptProps) {
+  // Fetch property details if propertyId exists
+  const { data: property } = useQuery({
+    queryKey: ['property', tenant.propertyId],
+    queryFn: async () => {
+      if (!tenant.propertyId) return null;
+      
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('id', tenant.propertyId)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching property:', error);
+        throw error;
+      }
+      
+      return data;
+    },
+    enabled: !!tenant.propertyId
+  });
+
   const printReceipt = () => {
     const receiptWindow = window.open('', '_blank');
     if (!receiptWindow) return;

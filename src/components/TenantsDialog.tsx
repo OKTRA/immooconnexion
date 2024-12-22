@@ -178,8 +178,13 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
         ) : (
           <div className="space-y-4">
             <TenantReceipt 
-              tenant={formData}
-              property={selectedProperty}
+              tenant={{
+                nom: formData.nom,
+                prenom: formData.prenom,
+                telephone: formData.telephone,
+                fraisAgence: formData.fraisAgence,
+                propertyId: formData.propertyId,
+              }}
             />
             <div className="flex justify-end">
               <Button
