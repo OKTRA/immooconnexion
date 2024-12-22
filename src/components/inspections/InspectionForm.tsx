@@ -10,6 +10,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { Contract } from "@/integrations/supabase/types/contracts"
 import { Card, CardContent } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Image } from "lucide-react"
 
 interface InspectionFormProps {
   contract: Contract
@@ -21,19 +22,28 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
   const [description, setDescription] = useState("")
   const [repairCosts, setRepairCosts] = useState("")
   const [photos, setPhotos] = useState<FileList | null>(null)
+  const [previewUrls, setPreviewUrls] = useState<string[]>([])
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  const handlePhotosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files) {
+      setPhotos(files)
+      const urls = Array.from(files).map(file => URL.createObjectURL(file))
+      setPreviewUrls(urls)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     try {
-      const depositAmount = contract.montant // Montant de la caution
+      const depositAmount = contract.montant
       const returnedAmount = hasDamages ? 
         depositAmount - parseFloat(repairCosts) : 
         depositAmount
 
-      // Upload photos if any
       const photoUrls: string[] = []
       if (photos) {
         for (let i = 0; i < photos.length; i++) {
@@ -92,7 +102,7 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
                 <>
                   <p className="mt-2">Coûts de réparation: {parseFloat(repairCosts).toLocaleString()} FCFA</p>
                   <p className="mt-2">Montant à retourner: {(contract.montant - parseFloat(repairCosts)).toLocaleString()} FCFA</p>
-                  <p className="text-xs mt-2 text-yellow-600">
+                  <p className="text-xs mt-2 text-yellow-600 dark:text-yellow-400">
                     Note: Le montant retourné sera déduit des bénéfices réalisés sur le bien
                   </p>
                 </>
@@ -120,7 +130,7 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Décrivez les dégâts constatés..."
                 required={hasDamages}
-                className="min-h-[100px]"
+                className="min-h-[100px] dark:bg-gray-800"
               />
             </div>
 
@@ -133,6 +143,7 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
                 onChange={(e) => setRepairCosts(e.target.value)}
                 placeholder="Montant des réparations"
                 required={hasDamages}
+                className="dark:bg-gray-800"
               />
             </div>
           </>
@@ -140,14 +151,33 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
 
         <div className="space-y-2">
           <Label htmlFor="photos" className="text-sm md:text-base">Photos de l'inspection</Label>
-          <Input
-            id="photos"
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => setPhotos(e.target.files)}
-            className="cursor-pointer"
-          />
+          <div className="relative">
+            <Input
+              id="photos"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handlePhotosChange}
+              className="cursor-pointer dark:bg-gray-800"
+            />
+            <div className="absolute right-2 top-1/2 -translate-y-1/2">
+              <Image className="h-5 w-5 text-gray-500" />
+            </div>
+          </div>
+          
+          {previewUrls.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+              {previewUrls.map((url, index) => (
+                <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
+                  <img
+                    src={url}
+                    alt={`Preview ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="pt-4 flex justify-end space-x-2">
