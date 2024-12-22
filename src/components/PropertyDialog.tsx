@@ -14,29 +14,6 @@ import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useQueryClient } from "@tanstack/react-query"
 
-interface Property {
-  id: string
-  bien: string
-  type: string
-  chambres: number
-  ville: string
-  loyer: number
-  frais_agence: number
-  taux_commission: number
-  caution: number
-  photo_url: string | null
-  statut: string
-  user_id: string
-  created_at: string
-  updated_at: string
-}
-
-interface PropertyDialogProps {
-  property?: Property | null
-  onOpenChange?: (open: boolean) => void
-  open?: boolean
-}
-
 export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogProps) {
   const [image, setImage] = useState<File | null>(null)
   const [formData, setFormData] = useState({
@@ -45,7 +22,6 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
     chambres: "",
     ville: "",
     loyer: "",
-    frais_agence: "",
     taux_commission: "",
     caution: "",
   })
@@ -60,7 +36,6 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
         chambres: property.chambres?.toString() || "",
         ville: property.ville || "",
         loyer: property.loyer?.toString() || "",
-        frais_agence: property.frais_agence?.toString() || "",
         taux_commission: property.taux_commission?.toString() || "",
         caution: property.caution?.toString() || "",
       })
@@ -99,7 +74,6 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
         chambres: parseInt(formData.chambres),
         ville: formData.ville,
         loyer: parseFloat(formData.loyer),
-        frais_agence: parseFloat(formData.frais_agence),
         taux_commission: parseFloat(formData.taux_commission),
         caution: parseFloat(formData.caution),
         photo_url,
@@ -108,7 +82,6 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
       }
 
       if (property?.id) {
-        // Update existing property
         const { error } = await supabase
           .from('properties')
           .update(propertyData)
@@ -120,7 +93,6 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
           description: "Le bien immobilier a été mis à jour",
         })
       } else {
-        // Create new property
         const { error } = await supabase
           .from('properties')
           .insert([{ ...propertyData, created_at: new Date().toISOString() }])
@@ -200,16 +172,6 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
             id="loyer" 
             type="number" 
             value={formData.loyer}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="frais_agence">Frais d'agence (FCFA)</Label>
-          <Input 
-            id="frais_agence" 
-            type="number" 
-            placeholder="Montant négocié avec le locataire"
-            value={formData.frais_agence}
             onChange={handleInputChange}
           />
         </div>

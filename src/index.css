@@ -57,3 +57,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Dark mode overrides for mobile */
+@media (max-width: 768px) {
+  .dark body {
+    @apply bg-background text-foreground;
+  }
+  
+  .dark .sheet {
+    @apply bg-background border-border;
+  }
+  
+  .dark .dialog {
+    @apply bg-background border-border;
+  }
+}
