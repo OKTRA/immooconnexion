@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { UserMinus, Trash2, UserPlus, Edit } from "lucide-react"
+import { UserMinus, Trash2, UserPlus, Edit, UserCheck } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 
 export function AdminProfiles() {
@@ -34,24 +34,43 @@ export function AdminProfiles() {
     },
   })
 
-  const handleBlockUser = async (userId: string) => {
+  const handleToggleBlockUser = async (userId: string, currentRole: string) => {
+    const newRole = currentRole === "blocked" ? "user" : "blocked"
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ role: "blocked" })
+        .update({ role: newRole })
         .eq("id", userId)
 
       if (error) throw error
 
       toast({
-        title: "Utilisateur bloqué",
-        description: "L'utilisateur a été bloqué avec succès",
+        title: currentRole === "blocked" ? "Utilisateur débloqué" : "Utilisateur bloqué",
+        description: currentRole === "blocked" 
+          ? "L'utilisateur a été débloqué avec succès"
+          : "L'utilisateur a été bloqué avec succès",
       })
       refetch()
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors du blocage de l'utilisateur",
+        description: "Une erreur est survenue lors de la modification du statut de l'utilisateur",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleUpdateUser = async (userId: string) => {
+    try {
+      // Pour l'instant, on simule juste une mise à jour
+      toast({
+        title: "Fonctionnalité à venir",
+        description: "La modification de profil sera bientôt disponible",
+      })
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la mise à jour de l'utilisateur",
         variant: "destructive",
       })
     }
@@ -80,6 +99,13 @@ export function AdminProfiles() {
     }
   }
 
+  const handleAddUser = () => {
+    toast({
+      title: "Fonctionnalité à venir",
+      description: "L'ajout de profil sera bientôt disponible",
+    })
+  }
+
   const filteredProfiles = profiles.filter(
     (profile) =>
       profile.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -96,7 +122,7 @@ export function AdminProfiles() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
         />
-        <Button>
+        <Button onClick={handleAddUser}>
           <UserPlus className="mr-2" />
           Ajouter un profil
         </Button>
@@ -135,13 +161,19 @@ export function AdminProfiles() {
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => handleBlockUser(profile.id)}
+                      onClick={() => handleToggleBlockUser(profile.id, profile.role || "user")}
+                      title={profile.role === "blocked" ? "Débloquer" : "Bloquer"}
                     >
-                      <UserMinus className="h-4 w-4" />
+                      {profile.role === "blocked" ? (
+                        <UserCheck className="h-4 w-4" />
+                      ) : (
+                        <UserMinus className="h-4 w-4" />
+                      )}
                     </Button>
                     <Button
                       variant="outline"
                       size="icon"
+                      onClick={() => handleUpdateUser(profile.id)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
