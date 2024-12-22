@@ -2,10 +2,11 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/AppSidebar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useParams } from "react-router-dom"
+import { useParams, Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { ExpenseDialog } from "@/components/ExpenseDialog"
+import { FileText } from "lucide-react"
 
 const PropertyDetails = () => {
   const { id } = useParams()
@@ -28,7 +29,7 @@ const PropertyDetails = () => {
     queryKey: ['contracts', id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('contracts')
+        .from('payment_history_with_tenant')
         .select('*')
         .eq('property_id', id)
       
@@ -114,15 +115,23 @@ const PropertyDetails = () => {
                     <thead>
                       <tr className="border-b">
                         <th className="p-2 text-left">Date</th>
+                        <th className="p-2 text-left">Locataire</th>
                         <th className="p-2 text-left">Montant</th>
                         <th className="p-2 text-left">Type</th>
                         <th className="p-2 text-left">Statut</th>
+                        <th className="p-2 text-left">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {contracts?.map((contract: any) => (
                         <tr key={contract.id} className="border-b">
                           <td className="p-2">{new Date(contract.created_at).toLocaleDateString()}</td>
+                          <td className="p-2">
+                            {contract.tenant_nom && contract.tenant_prenom 
+                              ? `${contract.tenant_prenom} ${contract.tenant_nom}`
+                              : 'Non renseigné'
+                            }
+                          </td>
                           <td className="p-2">{contract.montant?.toLocaleString()} FCFA</td>
                           <td className="p-2 capitalize">{contract.type}</td>
                           <td className="p-2">
@@ -132,11 +141,20 @@ const PropertyDetails = () => {
                               {contract.statut}
                             </span>
                           </td>
+                          <td className="p-2">
+                            {contract.tenant_id && (
+                              <Link to={`/locataires/${contract.tenant_id}/contrats`}>
+                                <Button variant="ghost" size="icon">
+                                  <FileText className="h-4 w-4" />
+                                </Button>
+                              </Link>
+                            )}
+                          </td>
                         </tr>
                       ))}
                       {(!contracts || contracts.length === 0) && (
                         <tr>
-                          <td colSpan={4} className="p-4 text-center text-muted-foreground">
+                          <td colSpan={6} className="p-4 text-center text-muted-foreground">
                             Aucun paiement enregistré
                           </td>
                         </tr>
