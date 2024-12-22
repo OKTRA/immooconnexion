@@ -23,6 +23,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useQueryClient } from "@tanstack/react-query"
 import { useQuery } from "@tanstack/react-query"
+import { useEffect } from "react"
 
 const formSchema = z.object({
   propertyId: z.string().min(1, "La propriété est requise"),
@@ -42,17 +43,24 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
+  // Fetch user's properties
   const { data: properties } = useQuery({
     queryKey: ['properties'],
     queryFn: async () => {
+      const { data: session } = await supabase.auth.getSession()
+      if (!session?.session?.user?.id) {
+        throw new Error("User not authenticated")
+      }
+
       const { data, error } = await supabase
         .from('properties')
         .select('*')
+        .eq('user_id', session.session.user.id)
       
       if (error) throw error
       return data
     },
-    enabled: !propertyId
+    enabled: !propertyId // Only fetch if propertyId is not provided
   })
 
   const form = useForm<ExpenseFormData>({
@@ -65,8 +73,42 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
     },
   })
 
+  // Set propertyId when it's provided as a prop
+  useEffect(() => {
+    if (propertyId) {
+      form.setValue('propertyId', propertyId)
+    }
+  }, [propertyId, form])
+
   const onSubmit = async (data: ExpenseFormData) => {
     try {
+      // Check authentication
+      const { data: session } = await supabase.auth.getSession()
+      if (!session?.session?.user?.id) {
+        toast({
+          title: "Erreur",
+          description: "Vous devez être connecté pour enregistrer une dépense",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Verify property ownership
+      const { data: property } = await supabase
+        .from('properties')
+        .select('user_id')
+        .eq('id', data.propertyId)
+        .single()
+
+      if (!property || property.user_id !== session.session.user.id) {
+        toast({
+          title: "Erreur",
+          description: "Vous n'avez pas les droits pour enregistrer une dépense pour cette propriété",
+          variant: "destructive",
+        })
+        return
+      }
+
       console.log("Submitting expense with data:", {
         property_id: data.propertyId,
         montant: parseFloat(data.montant),
