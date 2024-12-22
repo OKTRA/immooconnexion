@@ -74,6 +74,11 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
         date: data.date
       });
 
+      // For expenses, we use the same date for both start and end
+      const expenseDate = new Date(data.date);
+      // Set the time to noon to avoid timezone issues
+      expenseDate.setHours(12, 0, 0, 0);
+
       const { error } = await supabase
         .from('contracts')
         .insert({
@@ -82,8 +87,8 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
           type: 'depense',
           description: data.description,
           statut: 'payé',
-          start_date: data.date,
-          end_date: data.date // For expenses, both dates are the same
+          start_date: expenseDate.toISOString(),
+          end_date: expenseDate.toISOString() // Using the same date for both
         })
 
       if (error) {
