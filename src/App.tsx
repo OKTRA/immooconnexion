@@ -14,6 +14,7 @@ import Expenses from "./pages/Expenses"
 import AgencyEarnings from "./pages/AgencyEarnings"
 import Reports from "./pages/Reports"
 import TenantContracts from "./pages/TenantContracts"
+import AdminDashboard from "./pages/AdminDashboard"
 
 const queryClient = new QueryClient()
 
@@ -58,6 +59,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Index />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
               </ProtectedRoute>
             }
           />
