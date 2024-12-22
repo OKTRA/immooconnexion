@@ -86,19 +86,7 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     try {
       const userId = await getOrCreateUser(formData.email);
 
-      // Insérer dans la table profiles
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: userId,
-          first_name: formData.prenom,
-          last_name: formData.nom,
-          email: formData.email,
-        });
-
-      if (profileError) throw profileError;
-
-      // Insérer dans la table tenants
+      // Insérer uniquement dans la table tenants
       const { error: tenantError } = await supabase
         .from('tenants')
         .upsert({
