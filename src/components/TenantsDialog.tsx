@@ -82,15 +82,29 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     setIsSubmitting(true);
     
     try {
-      // Generate a UUID for the tenant
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No authenticated user");
+      // First create a new user in auth.users
+      const email = `${formData.nom.toLowerCase()}.${formData.prenom.toLowerCase()}@tenant.local`;
+      const password = Math.random().toString(36).slice(-8);
+      
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: formData.prenom,
+            last_name: formData.nom,
+          }
+        }
+      });
 
-      // Insert into tenants table
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("Failed to create user");
+
+      // Now we can create the tenant record using the new user's ID
       const { error: tenantError } = await supabase
         .from('tenants')
         .insert({
-          id: crypto.randomUUID(), // Generate a new UUID for the tenant
+          id: authData.user.id,
           birth_date: formData.dateNaissance,
           phone_number: formData.telephone,
           agency_fees: parseFloat(formData.fraisAgence),
