@@ -4,7 +4,7 @@ import { FileText, Printer, Ban } from "lucide-react"
 import { Link } from "react-router-dom"
 import { PaymentDialog } from "@/components/payment/PaymentDialog"
 import { InspectionDialog } from "@/components/inspections/InspectionDialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
 interface PaymentHistoryProps {
   propertyId: string
@@ -28,8 +28,8 @@ export function PaymentHistory({
         </div>
       </CardHeader>
       <CardContent className="p-4">
-        <ScrollArea className="w-full overflow-auto">
-          <div className="rounded-lg border dark:border-gray-700 min-w-[800px] md:min-w-0">
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="rounded-lg border dark:border-gray-700">
             <table className="w-full">
               <thead>
                 <tr className="border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
@@ -91,7 +91,7 @@ export function PaymentHistory({
                             >
                               <FileText className="h-4 w-4" />
                             </Button>
-                            <InspectionDialog contract={contract} />
+                            <InspectionDialog contract={contract} className="inline-flex" />
                           </>
                         ) : (
                           <Ban className="h-4 w-4 text-muted-foreground" />
@@ -110,6 +110,7 @@ export function PaymentHistory({
               </tbody>
             </table>
           </div>
+          <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </CardContent>
     </Card>

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { InspectionHistory } from "@/components/inspections/InspectionHistory"
 import { ClipboardList } from "lucide-react"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
 interface InspectionsListProps {
   contracts: any[]
@@ -23,7 +24,10 @@ export function InspectionsList({ contracts }: InspectionsListProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <InspectionHistory contractId={contract.id} />
+            <ScrollArea className="w-full whitespace-nowrap">
+              <InspectionHistory contractId={contract.id} />
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           </CardContent>
         </Card>
       ))}
