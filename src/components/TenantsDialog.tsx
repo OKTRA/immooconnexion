@@ -9,8 +9,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { getOrCreateUser } from "@/utils/authUtils";
-import { createTenantContract } from "@/utils/contractUtils";
 import { TenantFormFields } from "./tenants/TenantFormFields";
 
 interface TenantsDialogProps {
@@ -84,28 +82,18 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     e.preventDefault();
     
     try {
-      const userId = await getOrCreateUser(formData.email);
-
-      // Insérer uniquement dans la table tenants
+      // Insert directly into tenants table
       const { error: tenantError } = await supabase
         .from('tenants')
         .upsert({
-          id: userId,
+          id: tenant?.id || undefined, // Use existing ID if editing
           birth_date: formData.dateNaissance,
           phone_number: formData.telephone,
           agency_fees: parseFloat(formData.fraisAgence),
+          photo_id_url: previewUrl || null,
         });
 
       if (tenantError) throw tenantError;
-
-      // Gérer le contrat si une propriété est sélectionnée
-      if (formData.propertyId) {
-        await createTenantContract(
-          formData.propertyId,
-          userId,
-          parseFloat(formData.fraisAgence)
-        );
-      }
 
       toast({
         title: tenant ? "Locataire modifié" : "Locataire ajouté",
