@@ -10,11 +10,14 @@ import {
   FileText,
   LogOut,
   Menu,
+  Moon,
+  Sun,
   Users,
   Wallet,
 } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
+import { useTheme } from "next-themes"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -22,6 +25,7 @@ export function AppSidebar({ className }: SidebarProps) {
   const isMobile = useIsMobile()
   const location = useLocation()
   const navigate = useNavigate()
+  const { theme, setTheme } = useTheme()
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -89,6 +93,18 @@ export function AppSidebar({ className }: SidebarProps) {
                 Rapports
               </Button>
             </Link>
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            >
+              {theme === "dark" ? (
+                <Sun className="mr-2 h-4 w-4" />
+              ) : (
+                <Moon className="mr-2 h-4 w-4" />
+              )}
+              {theme === "dark" ? "Mode clair" : "Mode sombre"}
+            </Button>
             <Button
               variant="ghost"
               className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-100"

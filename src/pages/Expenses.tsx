@@ -12,13 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
 
 const Expenses = () => {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>("")
-  const { theme, setTheme } = useTheme()
 
   const { data: properties } = useQuery({
     queryKey: ['properties'],
@@ -40,17 +36,6 @@ const Expenses = () => {
           <div className="flex flex-col gap-4 mb-8">
             <div className="flex justify-between items-center">
               <h1 className="text-3xl font-bold">Gestion des Dépenses</h1>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-[1.2rem] w-[1.2rem]" />
-                ) : (
-                  <Moon className="h-[1.2rem] w-[1.2rem]" />
-                )}
-              </Button>
             </div>
             <div className="flex items-center gap-4">
               <div className="w-64">
