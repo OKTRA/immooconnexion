@@ -44,13 +44,6 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
 
   const onSubmit = async (data: ExpenseFormData) => {
     try {
-      console.log("Submitting expense with data:", {
-        property_id: propertyId,
-        montant: data.montant,
-        description: data.description,
-        date: data.date,
-      })
-
       const { error } = await supabase
         .from('contracts')
         .insert({
@@ -106,7 +99,11 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea placeholder="Description de la dépense" {...field} />
+                <Textarea 
+                  placeholder="Description de la dépense" 
+                  className="resize-none" 
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -125,7 +122,7 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
             </FormItem>
           )}
         />
-        <Button type="submit">Enregistrer</Button>
+        <Button type="submit" className="w-full">Enregistrer</Button>
       </form>
     </Form>
   )
