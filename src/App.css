@@ -40,3 +40,30 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Dark mode overrides */
+.dark body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.dark .recharts-cartesian-grid line {
+  stroke: hsl(var(--border));
+}
+
+.dark .recharts-cartesian-axis-line {
+  stroke: hsl(var(--border));
+}
+
+.dark .recharts-cartesian-axis-tick-line {
+  stroke: hsl(var(--border));
+}
+
+.dark .recharts-cartesian-axis-tick-value {
+  fill: hsl(var(--foreground));
+}
+
+.dark .recharts-tooltip-wrapper {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}

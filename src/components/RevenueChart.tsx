@@ -1,16 +1,42 @@
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
-const data = [
-  { name: 'Jan', revenue: 42000 },
-  { name: 'Fév', revenue: 43500 },
-  { name: 'Mar', revenue: 45500 },
-  { name: 'Avr', revenue: 44800 },
-  { name: 'Mai', revenue: 46200 },
-  { name: 'Jun', revenue: 45500 },
-]
-
 export function RevenueChart() {
+  const { data: revenueData, isLoading } = useQuery({
+    queryKey: ['revenue-chart'],
+    queryFn: async () => {
+      console.log('Fetching revenue data...')
+      const { data: contracts, error } = await supabase
+        .from('contracts')
+        .select('montant, created_at')
+        .eq('type', 'loyer')
+        .order('created_at', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching revenue data:', error)
+        throw error
+      }
+
+      // Group by month and sum revenues
+      const monthlyRevenue = contracts.reduce((acc: Record<string, number>, contract) => {
+        const month = new Date(contract.created_at).toLocaleString('fr-FR', { month: 'short' })
+        acc[month] = (acc[month] || 0) + contract.montant
+        return acc
+      }, {})
+
+      return Object.entries(monthlyRevenue).map(([month, revenue]) => ({
+        name: month,
+        revenue: revenue
+      }))
+    }
+  })
+
+  if (isLoading) {
+    return <div>Chargement...</div>
+  }
+
   return (
     <Card className="col-span-4">
       <CardHeader>
@@ -19,12 +45,17 @@ export function RevenueChart() {
       <CardContent>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
+            <LineChart data={revenueData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Line type="monotone" dataKey="revenue" stroke="#3498db" strokeWidth={2} />
+              <Line 
+                type="monotone" 
+                dataKey="revenue" 
+                stroke="hsl(var(--primary))" 
+                strokeWidth={2} 
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>

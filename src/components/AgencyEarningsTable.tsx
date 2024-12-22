@@ -1,3 +1,5 @@
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 import {
   Table,
   TableBody,
@@ -7,32 +9,50 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-const earnings = [
-  {
-    id: 1,
-    bien: "Appartement Jaune Block 1",
-    loyer: "60000",
-    fraisAgence: "30000",
-    tauxCommission: "10",
-    commissionMensuelle: "6000",
-    gainProprietaire: "54000",
-    gainAgence: "36000",
-    datePerception: "2024-03-15",
-  },
-  {
-    id: 2,
-    bien: "Maison M201",
-    loyer: "75000",
-    fraisAgence: "35000",
-    tauxCommission: "8",
-    commissionMensuelle: "6000",
-    gainProprietaire: "69000",
-    gainAgence: "41000",
-    datePerception: "2024-03-10",
-  },
-]
-
 export function AgencyEarningsTable() {
+  const { data: earnings, isLoading } = useQuery({
+    queryKey: ['agency-earnings'],
+    queryFn: async () => {
+      console.log('Fetching agency earnings...')
+      const { data: contracts, error } = await supabase
+        .from('contracts')
+        .select(`
+          id,
+          property_id,
+          montant,
+          type,
+          properties (
+            bien,
+            frais_agence,
+            taux_commission
+          )
+        `)
+        .eq('type', 'loyer')
+        .order('created_at', { ascending: false })
+      
+      if (error) {
+        console.error('Error fetching contracts:', error)
+        throw error
+      }
+
+      return contracts.map(contract => ({
+        id: contract.id,
+        bien: contract.properties?.bien || '',
+        loyer: contract.montant,
+        fraisAgence: contract.properties?.frais_agence || 0,
+        tauxCommission: contract.properties?.taux_commission || 0,
+        commissionMensuelle: (contract.montant * (contract.properties?.taux_commission || 0)) / 100,
+        gainProprietaire: contract.montant - ((contract.montant * (contract.properties?.taux_commission || 0)) / 100),
+        gainAgence: ((contract.montant * (contract.properties?.taux_commission || 0)) / 100) + (contract.properties?.frais_agence || 0),
+        datePerception: new Date(contract.created_at).toISOString().split('T')[0],
+      }))
+    }
+  })
+
+  if (isLoading) {
+    return <div>Chargement...</div>
+  }
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -49,7 +69,7 @@ export function AgencyEarningsTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {earnings.map((earning) => (
+          {(earnings || []).map((earning) => (
             <TableRow key={earning.id}>
               <TableCell>{earning.bien}</TableCell>
               <TableCell>{earning.loyer} FCFA</TableCell>
