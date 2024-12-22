@@ -82,11 +82,29 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     e.preventDefault();
     
     try {
-      // Insert directly into tenants table
+      // First, create or get the user profile
+      const { data: userData, error: userError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: Math.random().toString(36).slice(-8), // Generate a random password
+        options: {
+          data: {
+            first_name: formData.prenom,
+            last_name: formData.nom,
+          }
+        }
+      });
+
+      if (userError) throw userError;
+
+      if (!userData.user) {
+        throw new Error("Failed to create user");
+      }
+
+      // Insert into tenants table
       const { error: tenantError } = await supabase
         .from('tenants')
         .upsert({
-          id: tenant?.id || undefined, // Use existing ID if editing
+          id: userData.user.id,
           birth_date: formData.dateNaissance,
           phone_number: formData.telephone,
           agency_fees: parseFloat(formData.fraisAgence),
