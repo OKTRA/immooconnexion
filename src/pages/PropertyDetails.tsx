@@ -10,9 +10,8 @@ import { PaymentHistory } from "@/components/property-details/PaymentHistory"
 import { InspectionsList } from "@/components/property-details/InspectionsList"
 import { useToast } from "@/components/ui/use-toast"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { Loader2, Menu } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Loader2 } from "lucide-react"
+import { MobileMenu } from "@/components/property-details/MobileMenu"
 
 interface Property {
   id: string
@@ -29,13 +28,6 @@ interface Property {
   user_id: string
   created_at: string
   updated_at: string
-}
-
-interface PropertyDialogProps {
-  property?: Property | null
-  onOpenChange?: (open: boolean) => void
-  open?: boolean
-  className?: string
 }
 
 const PropertyDetails = () => {
@@ -194,20 +186,7 @@ const PropertyDetails = () => {
         {!isMobile && <AppSidebar className="w-64 flex-shrink-0" />}
         <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto p-4 space-y-6 pb-16">
-            {isMobile && (
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" className="mb-4">
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="p-0 w-72">
-                  <div className="h-full overflow-y-auto">
-                    <AppSidebar />
-                  </div>
-                </SheetContent>
-              </Sheet>
-            )}
+            {isMobile && <MobileMenu />}
             <PropertyInfo property={property} />
             <PaymentHistory 
               propertyId={id || ''} 
