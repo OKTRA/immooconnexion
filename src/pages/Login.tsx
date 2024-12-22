@@ -62,6 +62,7 @@ const Login = () => {
                     button: "w-full",
                     label: "text-sm font-medium text-gray-700 dark:text-gray-300",
                     input: "rounded-md border border-gray-300 dark:border-gray-700",
+                    anchor: "text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200",
                   },
                 }}
                 theme="light"
@@ -84,7 +85,7 @@ const Login = () => {
                   },
                 }}
                 view="sign_in"
-                showLinks={false}
+                showLinks={true}
                 redirectTo={window.location.origin}
                 onlyThirdPartyProviders={false}
                 magicLink={false}
