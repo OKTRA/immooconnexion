@@ -7,11 +7,10 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Pencil, Trash2, FileText } from "lucide-react"
+import { Trash2 } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Link } from "react-router-dom"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 
@@ -27,7 +26,7 @@ export function ExpenseTable({ propertyId }: ExpenseTableProps) {
     queryFn: async () => {
       console.log("Fetching payments for property:", propertyId)
       const query = supabase
-        .from('payment_history_with_tenant')
+        .from('contracts')
         .select('*')
       
       if (propertyId) {
@@ -73,8 +72,6 @@ export function ExpenseTable({ propertyId }: ExpenseTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Bien</TableHead>
-            <TableHead>Locataire</TableHead>
             <TableHead>Montant</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Date de début</TableHead>
@@ -85,13 +82,6 @@ export function ExpenseTable({ propertyId }: ExpenseTableProps) {
         <TableBody>
           {payments.map((payment) => (
             <TableRow key={payment.id}>
-              <TableCell>{payment.property_name}</TableCell>
-              <TableCell>
-                {payment.tenant_nom && payment.tenant_prenom 
-                  ? `${payment.tenant_prenom} ${payment.tenant_nom}`
-                  : 'Non renseigné'
-                }
-              </TableCell>
               <TableCell>{payment.montant} FCFA</TableCell>
               <TableCell>{payment.type}</TableCell>
               <TableCell>
@@ -104,20 +94,13 @@ export function ExpenseTable({ propertyId }: ExpenseTableProps) {
                 }
               </TableCell>
               <TableCell>
-                <div className="flex gap-2">
-                  <Link to={`/locataires/${payment.tenant_id}/contrats`}>
-                    <Button variant="ghost" size="icon">
-                      <FileText className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(payment.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDelete(payment.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </TableCell>
             </TableRow>
           ))}
