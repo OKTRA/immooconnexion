@@ -9,14 +9,23 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 
 const formSchema = z.object({
+  propertyId: z.string().min(1, "La propriété est requise"),
   montant: z.string().min(1, "Le montant est requis"),
   description: z.string().min(1, "La description est requise"),
   date: z.string().min(1, "La date est requise"),
@@ -25,7 +34,7 @@ const formSchema = z.object({
 type ExpenseFormData = z.infer<typeof formSchema>
 
 interface ExpenseFormFieldsProps {
-  propertyId: string
+  propertyId?: string
   onSuccess?: () => void
 }
 
@@ -33,9 +42,23 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
+  const { data: properties } = useQuery({
+    queryKey: ['properties'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+      
+      if (error) throw error
+      return data
+    },
+    enabled: !propertyId // Only fetch properties if propertyId is not provided
+  })
+
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      propertyId: propertyId || "",
       montant: "",
       description: "",
       date: new Date().toISOString().split('T')[0],
@@ -47,7 +70,7 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
       const { error } = await supabase
         .from('contracts')
         .insert({
-          property_id: propertyId,
+          property_id: data.propertyId,
           montant: -parseFloat(data.montant), // Negative amount for expenses
           type: 'depense',
           description: data.description,
@@ -79,6 +102,32 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {!propertyId && (
+          <FormField
+            control={form.control}
+            name="propertyId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Propriété</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner une propriété" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {properties?.map((property) => (
+                      <SelectItem key={property.id} value={property.id}>
+                        {property.bien} - {property.ville}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         <FormField
           control={form.control}
           name="montant"

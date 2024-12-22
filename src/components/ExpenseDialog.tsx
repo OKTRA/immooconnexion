@@ -11,7 +11,7 @@ import { Plus } from "lucide-react"
 import { ExpenseFormFields } from "./expense/ExpenseFormFields"
 
 interface ExpenseDialogProps {
-  propertyId: string
+  propertyId?: string
 }
 
 export function ExpenseDialog({ propertyId }: ExpenseDialogProps) {
