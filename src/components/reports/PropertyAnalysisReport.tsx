@@ -1,33 +1,48 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Printer } from "lucide-react"
-
-interface PropertyExpense {
-  id: number
-  property: string
-  totalExpenses: number
-  maintenanceCount: number
-  lastExpenseDate: string
-}
-
-const propertyExpenses = [
-  {
-    id: 1,
-    property: "Appartement Jaune Block 1",
-    totalExpenses: 250000,
-    maintenanceCount: 5,
-    lastExpenseDate: "2024-03-15",
-  },
-  {
-    id: 2,
-    property: "Maison M201",
-    totalExpenses: 180000,
-    maintenanceCount: 3,
-    lastExpenseDate: "2024-03-10",
-  },
-]
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
 export function PropertyAnalysisReport() {
+  const { data: propertyExpenses } = useQuery({
+    queryKey: ['property-expenses'],
+    queryFn: async () => {
+      const { data: expenses } = await supabase
+        .from('expenses')
+        .select(`
+          id,
+          montant,
+          date,
+          properties (
+            bien
+          )
+        `)
+        .order('date', { ascending: false })
+
+      // Group expenses by property
+      const groupedExpenses = expenses?.reduce((acc, expense) => {
+        const propertyName = expense.properties?.bien || 'Unknown'
+        if (!acc[propertyName]) {
+          acc[propertyName] = {
+            property: propertyName,
+            totalExpenses: 0,
+            maintenanceCount: 0,
+            lastExpenseDate: null
+          }
+        }
+        acc[propertyName].totalExpenses += expense.montant
+        acc[propertyName].maintenanceCount++
+        if (!acc[propertyName].lastExpenseDate || new Date(expense.date) > new Date(acc[propertyName].lastExpenseDate)) {
+          acc[propertyName].lastExpenseDate = expense.date
+        }
+        return acc
+      }, {} as Record<string, any>) || {}
+
+      return Object.values(groupedExpenses)
+    }
+  })
+
   const handlePrint = () => {
     window.print()
   }
@@ -53,12 +68,12 @@ export function PropertyAnalysisReport() {
               </tr>
             </thead>
             <tbody>
-              {propertyExpenses.map((property) => (
-                <tr key={property.id} className="border-b">
+              {propertyExpenses?.map((property, index) => (
+                <tr key={index} className="border-b">
                   <td className="p-4">{property.property}</td>
-                  <td className="p-4">{property.totalExpenses} FCFA</td>
+                  <td className="p-4">{property.totalExpenses.toLocaleString()} FCFA</td>
                   <td className="p-4">{property.maintenanceCount}</td>
-                  <td className="p-4">{property.lastExpenseDate}</td>
+                  <td className="p-4">{new Date(property.lastExpenseDate).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>

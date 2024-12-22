@@ -13,8 +13,10 @@ import { PropertyAnalysisReport } from "@/components/reports/PropertyAnalysisRep
 import { OverviewStats } from "@/components/reports/OverviewStats"
 import { RevenueEvolution } from "@/components/reports/RevenueEvolution"
 import { OccupancyStatus } from "@/components/reports/OccupancyStatus"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
-const COLORS = ['#0088FE', '#FF8042', '#00C49F', '#FFBB28']
+const COLORS = ['#0088FE', '#FF8042', '#00C49F']
 
 const Reports = () => {
   const [date, setDate] = useState<DateRange>({
@@ -22,6 +24,42 @@ const Reports = () => {
     to: addDays(new Date(), 0),
   })
   const [selectedProperty, setSelectedProperty] = useState<string>("")
+
+  const { data: expensesData } = useQuery({
+    queryKey: ['expenses-stats'],
+    queryFn: async () => {
+      const { data: expenses } = await supabase
+        .from('expenses')
+        .select('montant, description')
+        .gte('date', date.from?.toISOString() || '')
+        .lte('date', date.to?.toISOString() || '')
+
+      // Group expenses by type
+      const expensesByType = expenses?.reduce((acc, expense) => {
+        const type = expense.description?.includes('Maintenance') ? 'Maintenance' :
+                    expense.description?.includes('Réparation') ? 'Réparations' : 'Charges'
+        acc[type] = (acc[type] || 0) + expense.montant
+        return acc
+      }, {} as Record<string, number>) || {}
+
+      // Calculate statistics
+      const totalExpenses = expenses?.reduce((sum, exp) => sum + exp.montant, 0) || 0
+      const averageExpense = totalExpenses / (expenses?.length || 1)
+
+      return {
+        expensesByType,
+        totalExpenses,
+        averageExpense,
+        interventionsCount: expenses?.length || 0
+      }
+    },
+    enabled: !!(date.from && date.to)
+  })
+
+  const chartData = expensesData ? Object.entries(expensesData.expensesByType).map(([name, value]) => ({
+    name,
+    value
+  })) : []
 
   return (
     <SidebarProvider>
@@ -79,21 +117,17 @@ const Reports = () => {
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
-                            data={[
-                              { name: 'Maintenance', value: 250000 },
-                              { name: 'Réparations', value: 150000 },
-                              { name: 'Charges', value: 100000 },
-                            ]}
+                            data={chartData}
                             cx="50%"
                             cy="50%"
                             labelLine={false}
-                            label={({ name, value }) => `${name}: ${value} FCFA`}
+                            label={({ name, value }) => `${name}: ${value.toLocaleString()} FCFA`}
                             outerRadius={150}
                             fill="#8884d8"
                             dataKey="value"
                           >
-                            {COLORS.map((color, index) => (
-                              <Cell key={`cell-${index}`} fill={color} />
+                            {chartData.map((_, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
                           <Tooltip />
@@ -110,15 +144,21 @@ const Reports = () => {
                   <CardContent className="space-y-4">
                     <div>
                       <h3 className="font-medium mb-2">Dépense Moyenne par Bien</h3>
-                      <p className="text-2xl font-bold">215,000 FCFA</p>
+                      <p className="text-2xl font-bold">
+                        {expensesData?.averageExpense.toLocaleString()} FCFA
+                      </p>
                     </div>
                     <div>
                       <h3 className="font-medium mb-2">Total Dépenses Période</h3>
-                      <p className="text-2xl font-bold">430,000 FCFA</p>
+                      <p className="text-2xl font-bold">
+                        {expensesData?.totalExpenses.toLocaleString()} FCFA
+                      </p>
                     </div>
                     <div>
                       <h3 className="font-medium mb-2">Nombre d'Interventions</h3>
-                      <p className="text-2xl font-bold">8</p>
+                      <p className="text-2xl font-bold">
+                        {expensesData?.interventionsCount}
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
