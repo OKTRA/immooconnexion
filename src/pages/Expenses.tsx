@@ -58,6 +58,7 @@ const Expenses = () => {
               </div>
               <ExpenseDialog 
                 propertyId={selectedPropertyId === "all" ? "" : selectedPropertyId} 
+                propertyRent={properties?.find(p => p.id === selectedPropertyId)?.loyer}
               />
             </div>
           </div>

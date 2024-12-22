@@ -12,10 +12,9 @@ import { ExpenseFormFields } from "./expense/ExpenseFormFields"
 
 interface ExpenseDialogProps {
   propertyId: string
-  propertyRent?: number
 }
 
-export function ExpenseDialog({ propertyId, propertyRent }: ExpenseDialogProps) {
+export function ExpenseDialog({ propertyId }: ExpenseDialogProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
