@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useParams, Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { ExpenseDialog } from "@/components/ExpenseDialog"
+import { PaymentDialog } from "@/components/payment/PaymentDialog"
 import { FileText } from "lucide-react"
 
 const PropertyDetails = () => {
@@ -106,7 +106,7 @@ const PropertyDetails = () => {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle>Historique des paiements</CardTitle>
-                  <ExpenseDialog propertyId={id} />
+                  <PaymentDialog propertyId={id || ''} />
                 </div>
               </CardHeader>
               <CardContent>
