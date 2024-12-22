@@ -31,10 +31,13 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: Tenant) => void }) {
     queryFn: async () => {
       console.log('Fetching tenants...');
       
-      // First get all tenants
+      // First get all tenants with their profiles in a single query
       const { data: tenantsData, error: tenantsError } = await supabase
         .from('tenants')
-        .select('*');
+        .select(`
+          *,
+          profiles:profiles(*)
+        `);
       
       if (tenantsError) {
         console.error('Error fetching tenants:', tenantsError);
@@ -43,31 +46,15 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: Tenant) => void }) {
       
       console.log('Tenants data:', tenantsData);
 
-      // Then get the profiles for these tenants
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('id', tenantsData.map(t => t.id));
-
-      if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
-        throw profilesError;
-      }
-
-      console.log('Profiles data:', profilesData);
-
-      // Combine the data
-      return tenantsData.map(tenant => {
-        const profile = profilesData.find(p => p.id === tenant.id);
-        return {
-          id: tenant.id,
-          nom: profile?.last_name || '',
-          prenom: profile?.first_name || '',
-          dateNaissance: tenant.birth_date || '',
-          telephone: tenant.phone_number || '',
-          photoIdUrl: tenant.photo_id_url,
-        };
-      });
+      // Map the data to our interface
+      return tenantsData.map(tenant => ({
+        id: tenant.id,
+        nom: tenant.profiles?.last_name || '',
+        prenom: tenant.profiles?.first_name || '',
+        dateNaissance: tenant.birth_date || '',
+        telephone: tenant.phone_number || '',
+        photoIdUrl: tenant.photo_id_url,
+      }));
     }
   });
 
