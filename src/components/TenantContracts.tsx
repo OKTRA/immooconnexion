@@ -11,13 +11,16 @@ import { supabase } from "@/integrations/supabase/client"
 import { useParams } from "react-router-dom"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import { Loader2 } from "lucide-react"
 
 export function TenantContracts() {
   const { id } = useParams()
 
-  const { data: contracts = [] } = useQuery({
+  const { data: contracts = [], isLoading, error } = useQuery({
     queryKey: ["tenant-contracts", id],
     queryFn: async () => {
+      if (!id) throw new Error("ID du locataire non fourni")
+      
       console.log("Fetching contracts for tenant:", id)
 
       const { data: contractsData, error } = await supabase
@@ -36,7 +39,24 @@ export function TenantContracts() {
       console.log("Contracts data:", contractsData)
       return contractsData
     },
+    enabled: !!id,
   })
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8 text-red-500">
+        Une erreur est survenue lors du chargement des contrats
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
