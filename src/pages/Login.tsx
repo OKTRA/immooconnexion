@@ -88,7 +88,6 @@ const Login = () => {
                 redirectTo={window.location.origin}
                 onlyThirdPartyProviders={false}
                 magicLink={false}
-                forgotPasswordLink={true}
               />
             </TabsContent>
             <TabsContent value="admin">
