@@ -11,6 +11,7 @@ import { Pencil, Trash2, Phone, MessageSquare, FileText } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface Tenant {
   id: string;
@@ -23,6 +24,7 @@ interface Tenant {
 
 export function TenantsTable({ onEdit }: { onEdit: (tenant: Tenant) => void }) {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const { data: tenants = [], refetch } = useQuery({
     queryKey: ['tenants'],
@@ -92,6 +94,10 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: Tenant) => void }) {
     });
   };
 
+  const handleViewContracts = (tenantId: string) => {
+    navigate(`/locataires/${tenantId}/contrats`);
+  };
+
   return (
     <div className="space-y-4">
       <div className="rounded-md border">
@@ -137,7 +143,7 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: Tenant) => void }) {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => {/* TODO: Implement contracts view */}}
+                    onClick={() => handleViewContracts(tenant.id)}
                   >
                     <FileText className="h-4 w-4" />
                   </Button>
