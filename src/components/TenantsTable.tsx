@@ -28,9 +28,28 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
     queryFn: async () => {
       console.log('Fetching tenants...');
       
+      // Récupérer d'abord les profils qui sont des locataires
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('is_tenant', true);
+      
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        throw profilesError;
+      }
+
+      console.log('Profiles data:', profilesData);
+
+      if (!profilesData || profilesData.length === 0) {
+        return [];
+      }
+
+      // Récupérer les informations des locataires
       const { data: tenantsData, error: tenantsError } = await supabase
         .from('tenants')
-        .select('*');
+        .select('*')
+        .in('id', profilesData.map(profile => profile.id));
       
       if (tenantsError) {
         console.error('Error fetching tenants:', tenantsError);
@@ -52,26 +71,42 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
   });
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase
-      .from('tenants')
-      .delete()
-      .eq('id', id);
+    try {
+      // Supprimer d'abord le profil (cela déclenchera la suppression en cascade)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ is_tenant: false })
+        .eq('id', id);
 
-    if (error) {
-      console.error('Error deleting tenant:', error);
+      if (profileError) {
+        console.error('Error updating profile:', profileError);
+        throw profileError;
+      }
+
+      // Supprimer ensuite les données du locataire
+      const { error: tenantError } = await supabase
+        .from('tenants')
+        .delete()
+        .eq('id', id);
+
+      if (tenantError) {
+        console.error('Error deleting tenant:', tenantError);
+        throw tenantError;
+      }
+
+      refetch();
+      toast({
+        title: "Locataire supprimé",
+        description: "Le locataire a été supprimé avec succès.",
+      });
+    } catch (error: any) {
+      console.error('Error in handleDelete:', error);
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de la suppression.",
         variant: "destructive",
       });
-      return;
     }
-
-    refetch();
-    toast({
-      title: "Locataire supprimé",
-      description: "Le locataire a été supprimé avec succès.",
-    });
   };
 
   return (
