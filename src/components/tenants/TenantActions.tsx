@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { InspectionDialog } from "../inspections/InspectionDialog";
 
 interface TenantActionsProps {
   tenant: {
@@ -22,6 +23,7 @@ interface TenantActionsProps {
 export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) {
   const navigate = useNavigate();
   const [showReceipt, setShowReceipt] = useState(false);
+  const [showInspection, setShowInspection] = useState(false);
 
   const { data: contract } = useQuery({
     queryKey: ['tenant-contract', tenant.id],
@@ -39,12 +41,6 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
 
   const handleViewContracts = (tenantId: string) => {
     navigate(`/locataires/${tenantId}/contrats`);
-  };
-
-  const handleEndContract = () => {
-    if (contract?.id) {
-      navigate(`/inspections/${contract.id}`);
-    }
   };
 
   return (
@@ -88,7 +84,7 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
         {contract && (
           <Button
             variant="outline"
-            onClick={handleEndContract}
+            onClick={() => setShowInspection(true)}
           >
             Mettre fin au contrat
           </Button>
@@ -116,6 +112,14 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
           />
         </DialogContent>
       </Dialog>
+
+      {contract && (
+        <InspectionDialog 
+          contract={contract}
+          open={showInspection}
+          onOpenChange={setShowInspection}
+        />
+      )}
     </>
   );
 }
