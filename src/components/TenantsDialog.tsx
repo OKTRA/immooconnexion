@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TenantFormFields } from "./tenants/TenantFormFields";
+import { TenantReceipt } from "./tenants/TenantReceipt";
 
 interface TenantsDialogProps {
   open: boolean;
@@ -30,6 +31,8 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
   const { toast } = useToast();
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<any>(null);
 
   const { data: properties } = useQuery({
     queryKey: ['properties'],
@@ -68,6 +71,13 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     }
   }, [tenant]);
 
+  useEffect(() => {
+    if (formData.propertyId && properties) {
+      const property = properties.find(p => p.id === formData.propertyId);
+      setSelectedProperty(property);
+    }
+  }, [formData.propertyId, properties]);
+
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -82,7 +92,6 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     setIsSubmitting(true);
     
     try {
-      // First create a new user in auth.users
       const email = `${formData.nom.toLowerCase()}.${formData.prenom.toLowerCase()}@tenant.local`;
       const password = Math.random().toString(36).slice(-8);
       
@@ -100,7 +109,6 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
       if (authError) throw authError;
       if (!authData.user) throw new Error("Failed to create user");
 
-      // Now we can create the tenant record using the new user's ID
       const { error: tenantError } = await supabase
         .from('tenants')
         .insert({
@@ -122,7 +130,8 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
         title: tenant ? "Locataire modifié" : "Locataire ajouté",
         description: "Le locataire a été ajouté avec succès.",
       });
-      onOpenChange(false);
+      
+      setShowReceipt(true);
     } catch (error: any) {
       console.error('Erreur détaillée:', error);
       toast({
@@ -143,28 +152,49 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
             {tenant ? "Modifier le locataire" : "Ajouter un locataire"}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <TenantFormFields
-            formData={formData}
-            setFormData={setFormData}
-            properties={properties || []}
-            handlePhotoChange={handlePhotoChange}
-            previewUrl={previewUrl}
-          />
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isSubmitting}
-            >
-              Annuler
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Chargement..." : (tenant ? "Modifier" : "Ajouter")}
-            </Button>
+        {!showReceipt ? (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <TenantFormFields
+              formData={formData}
+              setFormData={setFormData}
+              properties={properties || []}
+              handlePhotoChange={handlePhotoChange}
+              previewUrl={previewUrl}
+            />
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
+              >
+                Annuler
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Chargement..." : (tenant ? "Modifier" : "Ajouter")}
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-4">
+            <TenantReceipt 
+              tenant={formData}
+              property={selectedProperty}
+            />
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowReceipt(false);
+                  onOpenChange(false);
+                }}
+              >
+                Fermer
+              </Button>
+            </div>
           </div>
-        </form>
+        )}
       </DialogContent>
     </Dialog>
   );
