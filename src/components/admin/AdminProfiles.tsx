@@ -10,11 +10,22 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { UserPlus } from "lucide-react"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { ProfileTableRow } from "./ProfileTableRow"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export function AdminProfiles() {
   const [searchTerm, setSearchTerm] = useState("")
+  const [showAddDialog, setShowAddDialog] = useState(false)
+  const [newProfile, setNewProfile] = useState({
+    email: "",
+    first_name: "",
+    last_name: "",
+    role: "user",
+    agency_name: "",
+  })
   const { toast } = useToast()
   
   const { data: profiles = [], refetch } = useQuery({
@@ -30,18 +41,63 @@ export function AdminProfiles() {
     },
   })
 
-  const handleAddUser = () => {
-    toast({
-      title: "Fonctionnalité à venir",
-      description: "L'ajout de profil sera bientôt disponible",
-    })
+  const handleAddUser = async () => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .insert([newProfile])
+
+      if (error) throw error
+
+      toast({
+        title: "Profil ajouté",
+        description: "Le nouveau profil a été ajouté avec succès",
+      })
+      setShowAddDialog(false)
+      setNewProfile({
+        email: "",
+        first_name: "",
+        last_name: "",
+        role: "user",
+        agency_name: "",
+      })
+      refetch()
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'ajout du profil",
+        variant: "destructive",
+      })
+    }
   }
 
-  const handleEditUser = (profile: any) => {
-    toast({
-      title: "Fonctionnalité à venir",
-      description: "La modification de profil sera bientôt disponible",
-    })
+  const handleEditUser = async (profile: any) => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          email: profile.email,
+          role: profile.role,
+          agency_name: profile.agency_name,
+        })
+        .eq("id", profile.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Profil mis à jour",
+        description: "Le profil a été mis à jour avec succès",
+      })
+      refetch()
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la mise à jour du profil",
+        variant: "destructive",
+      })
+    }
   }
 
   const filteredProfiles = profiles.filter(
@@ -61,7 +117,7 @@ export function AdminProfiles() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
         />
-        <Button onClick={handleAddUser}>
+        <Button onClick={() => setShowAddDialog(true)}>
           <UserPlus className="mr-2" />
           Ajouter un profil
         </Button>
@@ -91,6 +147,66 @@ export function AdminProfiles() {
           </TableBody>
         </Table>
       </div>
+
+      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajouter un nouveau profil</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                value={newProfile.email}
+                onChange={(e) => setNewProfile({ ...newProfile, email: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="first_name">Prénom</Label>
+              <Input
+                id="first_name"
+                value={newProfile.first_name}
+                onChange={(e) => setNewProfile({ ...newProfile, first_name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="last_name">Nom</Label>
+              <Input
+                id="last_name"
+                value={newProfile.last_name}
+                onChange={(e) => setNewProfile({ ...newProfile, last_name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="agency_name">Nom de l'agence</Label>
+              <Input
+                id="agency_name"
+                value={newProfile.agency_name}
+                onChange={(e) => setNewProfile({ ...newProfile, agency_name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="role">Rôle</Label>
+              <Select
+                value={newProfile.role}
+                onValueChange={(value) => setNewProfile({ ...newProfile, role: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">Utilisateur</SelectItem>
+                  <SelectItem value="admin">Administrateur</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={handleAddUser} className="w-full">
+              Ajouter
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

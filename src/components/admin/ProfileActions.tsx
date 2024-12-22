@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
-import { UserMinus, Trash2, UserPlus, Edit, UserCheck } from "lucide-react"
-import { useToast } from "@/components/ui/use-toast"
+import { UserMinus, Trash2, Edit, UserCheck } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 
 interface ProfileActionsProps {
@@ -8,7 +8,7 @@ interface ProfileActionsProps {
     id: string
     role: string
   }
-  onEdit: (profile: any) => void
+  onEdit: () => void
   refetch: () => void
 }
 
@@ -81,7 +81,7 @@ export function ProfileActions({ profile, onEdit, refetch }: ProfileActionsProps
       <Button
         variant="outline"
         size="icon"
-        onClick={() => onEdit(profile)}
+        onClick={onEdit}
       >
         <Edit className="h-4 w-4" />
       </Button>
