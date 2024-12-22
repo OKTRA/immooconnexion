@@ -26,9 +26,8 @@ export function ExpenseTable({ propertyId }: ExpenseTableProps) {
     queryFn: async () => {
       console.log("Fetching expenses for property:", propertyId)
       const query = supabase
-        .from('contracts')
+        .from('expenses')
         .select('*')
-        .eq('type', 'depense')
       
       if (propertyId) {
         query.eq('property_id', propertyId)
@@ -48,7 +47,7 @@ export function ExpenseTable({ propertyId }: ExpenseTableProps) {
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase
-      .from('contracts')
+      .from('expenses')
       .delete()
       .eq('id', id)
 
@@ -92,7 +91,7 @@ export function ExpenseTable({ propertyId }: ExpenseTableProps) {
                 <TableCell>{Math.abs(expense.montant)} FCFA</TableCell>
                 <TableCell>{expense.description || 'N/A'}</TableCell>
                 <TableCell>
-                  {format(new Date(expense.start_date), "PP", { locale: fr })}
+                  {format(new Date(expense.date), "PP", { locale: fr })}
                 </TableCell>
                 <TableCell>
                   <Button

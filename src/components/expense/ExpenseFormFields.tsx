@@ -69,26 +69,18 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
     try {
       console.log("Submitting expense with data:", {
         property_id: data.propertyId,
-        montant: -parseFloat(data.montant),
+        montant: parseFloat(data.montant),
         description: data.description,
         date: data.date
       });
 
-      // For expenses, we use the same date for both start and end
-      const expenseDate = new Date(data.date);
-      // Set the time to noon to avoid timezone issues
-      expenseDate.setHours(12, 0, 0, 0);
-
       const { error } = await supabase
-        .from('contracts')
+        .from('expenses')
         .insert({
           property_id: data.propertyId,
-          montant: -parseFloat(data.montant), // Negative amount for expenses
-          type: 'depense',
+          montant: parseFloat(data.montant),
           description: data.description,
-          statut: 'payé',
-          start_date: expenseDate.toISOString(),
-          end_date: expenseDate.toISOString() // Using the same date for both
+          date: data.date
         })
 
       if (error) {
