@@ -14,6 +14,30 @@ import { Loader2, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
+interface Property {
+  id: string
+  bien: string
+  type: string
+  chambres: number
+  ville: string
+  loyer: number
+  frais_agence: number
+  taux_commission: number
+  caution: number
+  statut: string
+  photo_url: string | null
+  user_id: string
+  created_at: string
+  updated_at: string
+}
+
+interface PropertyDialogProps {
+  property?: Property | null
+  onOpenChange?: (open: boolean) => void
+  open?: boolean
+  className?: string
+}
+
 const PropertyDetails = () => {
   const { id } = useParams()
   const { toast } = useToast()
@@ -178,7 +202,9 @@ const PropertyDetails = () => {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="p-0 w-72">
-                  <AppSidebar />
+                  <div className="h-full overflow-y-auto">
+                    <AppSidebar />
+                  </div>
                 </SheetContent>
               </Sheet>
             )}
