@@ -44,7 +44,27 @@ export function PropertyAnalysisReport() {
   })
 
   const handlePrint = () => {
+    const style = document.createElement('style')
+    style.textContent = `
+      @page {
+        size: portrait;
+        margin: 2cm;
+      }
+      @media print {
+        body {
+          padding: 0;
+          margin: 0;
+        }
+        .print-content {
+          width: 100%;
+          margin: 0;
+          padding: 20px;
+        }
+      }
+    `
+    document.head.appendChild(style)
     window.print()
+    document.head.removeChild(style)
   }
 
   return (
@@ -57,7 +77,7 @@ export function PropertyAnalysisReport() {
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border print:border-none">
+        <div className="rounded-md border print:border-none print-content">
           <table className="w-full">
             <thead>
               <tr className="border-b">

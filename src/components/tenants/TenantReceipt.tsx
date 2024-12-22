@@ -20,39 +20,46 @@ export function TenantReceipt({ tenant, contractId, isEndOfContract, inspection 
     const receiptWindow = window.open('', '_blank');
     if (!receiptWindow) return;
 
+    const style = document.createElement('style')
+    style.textContent = `
+      @page {
+        size: portrait;
+        margin: 2cm;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        line-height: 1.6;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+      th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f8f9fa;
+      }
+      .signature {
+        margin-top: 50px;
+        text-align: right;
+      }
+    `
+
     receiptWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
           <title>Reçu de ${isEndOfContract ? 'Fin de Contrat' : 'Paiement'}</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              margin: 40px;
-              line-height: 1.6;
-            }
-            .header {
-              text-align: center;
-              margin-bottom: 30px;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin: 20px 0;
-            }
-            th, td {
-              border: 1px solid #ddd;
-              padding: 8px;
-              text-align: left;
-            }
-            th {
-              background-color: #f8f9fa;
-            }
-            .signature {
-              margin-top: 50px;
-              text-align: right;
-            }
-          </style>
+          ${style.outerHTML}
         </head>
         <body>
           <div id="receipt-content">
