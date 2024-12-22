@@ -6,7 +6,8 @@ import {
   Card, 
   CardContent, 
   CardHeader, 
-  CardTitle 
+  CardTitle,
+  CardDescription 
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { supabase } from "@/integrations/supabase/client"
@@ -29,18 +30,21 @@ const Login = () => {
   }, [navigate])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center">Connexion</CardTitle>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="space-y-2">
+          <CardTitle className="text-2xl font-bold text-center">Connexion</CardTitle>
+          <CardDescription className="text-center text-gray-600 dark:text-gray-400">
+            Bienvenue sur votre espace de gestion immobilière
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 mb-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="user">Utilisateur</TabsTrigger>
               <TabsTrigger value="admin">Super Admin</TabsTrigger>
             </TabsList>
-            <TabsContent value="user">
+            <TabsContent value="user" className="space-y-4">
               <Auth
                 supabaseClient={supabase}
                 appearance={{
@@ -53,6 +57,12 @@ const Login = () => {
                       },
                     },
                   },
+                  className: {
+                    container: "space-y-4",
+                    button: "w-full",
+                    label: "text-sm font-medium text-gray-700 dark:text-gray-300",
+                    input: "rounded-md border border-gray-300 dark:border-gray-700",
+                  },
                 }}
                 theme="light"
                 providers={[]}
@@ -63,11 +73,18 @@ const Login = () => {
                       password_label: "Mot de passe",
                       button_label: "Se connecter",
                       loading_button_label: "Connexion en cours...",
-                    }
+                    },
+                    forgotten_password: {
+                      link_text: "Mot de passe oublié ?",
+                      button_label: "Réinitialiser le mot de passe",
+                      email_label: "Email",
+                      password_label: "Nouveau mot de passe",
+                      confirmation_text: "Vérifiez vos emails pour réinitialiser votre mot de passe",
+                    },
                   },
                 }}
                 view="sign_in"
-                showLinks={false}
+                showLinks={true}
               />
             </TabsContent>
             <TabsContent value="admin">
