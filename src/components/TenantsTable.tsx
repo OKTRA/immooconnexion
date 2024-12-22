@@ -108,10 +108,10 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: Tenant) => void }) {
           <TableBody>
             {tenants.map((tenant) => (
               <TableRow key={tenant.id}>
-                <TableCell>{tenant.nom}</TableCell>
-                <TableCell>{tenant.prenom}</TableCell>
-                <TableCell>{tenant.dateNaissance}</TableCell>
-                <TableCell>{tenant.telephone}</TableCell>
+                <TableCell className="font-medium">{tenant.nom || 'Non renseigné'}</TableCell>
+                <TableCell>{tenant.prenom || 'Non renseigné'}</TableCell>
+                <TableCell>{tenant.dateNaissance || 'Non renseigné'}</TableCell>
+                <TableCell>{tenant.telephone || 'Non renseigné'}</TableCell>
                 <TableCell className="flex gap-2">
                   <Button
                     variant="outline"
