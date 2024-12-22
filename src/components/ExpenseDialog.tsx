@@ -8,33 +8,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Plus } from "lucide-react"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { ExpenseForm } from "./expense/ExpenseForm"
+import { ExpenseFormFields } from "./expense/ExpenseFormFields"
 
 interface ExpenseDialogProps {
   propertyId: string
-  propertyRent?: number
 }
 
-export function ExpenseDialog({ propertyId, propertyRent }: ExpenseDialogProps) {
-  const { data: tenants } = useQuery({
-    queryKey: ['tenants'],
-    queryFn: async () => {
-      console.log("Fetching tenants")
-      const { data, error } = await supabase
-        .from('tenants')
-        .select('*')
-      
-      if (error) {
-        console.error("Error fetching tenants:", error)
-        throw error
-      }
-      console.log("Tenants data:", data)
-      return data
-    }
-  })
-
+export function ExpenseDialog({ propertyId }: ExpenseDialogProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -49,11 +29,7 @@ export function ExpenseDialog({ propertyId, propertyRent }: ExpenseDialogProps) 
             Enregistrez une dépense pour ce bien
           </DialogDescription>
         </DialogHeader>
-        <ExpenseForm 
-          propertyId={propertyId}
-          propertyRent={propertyRent}
-          tenants={tenants}
-        />
+        <ExpenseFormFields propertyId={propertyId} />
       </DialogContent>
     </Dialog>
   )
