@@ -12,9 +12,10 @@ interface TenantReceiptProps {
   };
   contractId?: string;
   isEndOfContract?: boolean;
+  inspection?: any;
 }
 
-export function TenantReceipt({ tenant, contractId, isEndOfContract }: TenantReceiptProps) {
+export function TenantReceipt({ tenant, contractId, isEndOfContract, inspection }: TenantReceiptProps) {
   const printReceipt = () => {
     const receiptWindow = window.open('', '_blank');
     if (!receiptWindow) return;
@@ -73,16 +74,13 @@ export function TenantReceipt({ tenant, contractId, isEndOfContract }: TenantRec
         propertyId={tenant.propertyId}
         isEndOfContract={isEndOfContract}
         contractId={contractId}
+        inspection={inspection}
       />
       <div className="text-right mb-8">
         <p className="font-bold">Signature:</p>
         <div className="mt-4 border-t border-gray-400 w-48 ml-auto"></div>
       </div>
-      <ReceiptActions
-        onPrint={printReceipt}
-        contractId={contractId}
-        isEndOfContract={isEndOfContract}
-      />
+      <ReceiptActions onPrint={printReceipt} />
     </div>
   );
 }

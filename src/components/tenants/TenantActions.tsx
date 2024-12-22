@@ -22,25 +22,17 @@ interface TenantActionsProps {
 export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) {
   const navigate = useNavigate();
   const [showReceipt, setShowReceipt] = useState(false);
-  const [isEndOfContract, setIsEndOfContract] = useState(false);
 
   const { data: contract } = useQuery({
     queryKey: ['tenant-contract', tenant.id],
     queryFn: async () => {
-      console.log('Fetching contract for tenant:', tenant.id);
-      
       const { data, error } = await supabase
         .from('contracts')
         .select('*')
         .eq('tenant_id', tenant.id)
         .maybeSingle();
       
-      if (error) {
-        console.error('Error fetching contract:', error);
-        return null;
-      }
-      
-      console.log('Contract data:', data);
+      if (error) throw error;
       return data;
     }
   });
@@ -89,10 +81,7 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
         <Button
           variant="outline"
           size="icon"
-          onClick={() => {
-            setIsEndOfContract(false);
-            setShowReceipt(true);
-          }}
+          onClick={() => setShowReceipt(true)}
         >
           <Receipt className="h-4 w-4" />
         </Button>
@@ -124,7 +113,6 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
               propertyId: contract?.property_id || "",
             }}
             contractId={contract?.id}
-            isEndOfContract={isEndOfContract}
           />
         </DialogContent>
       </Dialog>

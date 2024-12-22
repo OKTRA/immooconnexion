@@ -1,101 +1,130 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Button } from "@/components/ui/button";
+import { Receipt } from "lucide-react";
+import { useState } from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { TenantReceipt } from "../tenants/TenantReceipt";
 
 interface InspectionHistoryProps {
-  contractId: string
+  contractId: string;
 }
 
 export function InspectionHistory({ contractId }: InspectionHistoryProps) {
-  const { data: inspections = [] } = useQuery({
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [selectedInspection, setSelectedInspection] = useState<any>(null);
+
+  const { data: inspections, isLoading } = useQuery({
     queryKey: ['inspections', contractId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('property_inspections')
-        .select('*')
-        .eq('contract_id', contractId)
-        .order('inspection_date', { ascending: false })
+        .select(`
+          *,
+          contract:contracts(
+            tenant_id,
+            property_id,
+            montant,
+            tenant:tenants(
+              nom,
+              prenom,
+              phone_number,
+              agency_fees
+            )
+          )
+        `)
+        .eq('contract_id', contractId);
 
-      if (error) throw error
-      return data
+      if (error) throw error;
+      return data;
     }
-  })
+  });
+
+  const handleShowReceipt = (inspection: any) => {
+    setSelectedInspection(inspection);
+    setShowReceipt(true);
+  };
+
+  if (isLoading) {
+    return <div>Chargement...</div>;
+  }
+
+  if (!inspections || inspections.length === 0) {
+    return <div className="text-center py-4">Aucune inspection enregistrée</div>;
+  }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Date d'inspection</TableHead>
-            <TableHead>État</TableHead>
-            <TableHead>Dégâts</TableHead>
-            <TableHead>Coûts réparation</TableHead>
-            <TableHead>Caution retournée</TableHead>
-            <TableHead>Photos</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {inspections.map((inspection) => (
-            <TableRow key={inspection.id}>
-              <TableCell>
-                {format(new Date(inspection.inspection_date), 'PP', { locale: fr })}
-              </TableCell>
-              <TableCell>
-                <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                  inspection.status === 'completé' 
-                    ? 'bg-green-50 text-green-700'
-                    : 'bg-yellow-50 text-yellow-700'
-                }`}>
-                  {inspection.status}
-                </span>
-              </TableCell>
-              <TableCell>
-                {inspection.has_damages ? (
-                  <span className="text-red-600">Oui</span>
-                ) : (
-                  <span className="text-green-600">Non</span>
-                )}
-              </TableCell>
-              <TableCell>
-                {inspection.repair_costs?.toLocaleString()} FCFA
-              </TableCell>
-              <TableCell>
-                {inspection.deposit_returned?.toLocaleString()} FCFA
-              </TableCell>
-              <TableCell>
-                {inspection.photo_urls && inspection.photo_urls.length > 0 && (
-                  <div className="flex gap-2">
-                    {inspection.photo_urls.map((url: string, index: number) => (
-                      <img
-                        key={index}
-                        src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/inspection_photos/${url}`}
-                        alt={`Photo d'inspection ${index + 1}`}
-                        className="w-10 h-10 object-cover rounded"
-                      />
-                    ))}
-                  </div>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-          {inspections.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center py-4">
-                Aucune inspection enregistrée
-              </TableCell>
-            </TableRow>
+    <>
+      <div className="rounded-md border">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b">
+              <th className="p-2 text-left">Date d'inspection</th>
+              <th className="p-2 text-left">État</th>
+              <th className="p-2 text-left">Dégâts</th>
+              <th className="p-2 text-left">Coûts réparation</th>
+              <th className="p-2 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {inspections.map((inspection) => (
+              <tr key={inspection.id} className="border-b">
+                <td className="p-2">
+                  {format(new Date(inspection.inspection_date), 'PP', { locale: fr })}
+                </td>
+                <td className="p-2">
+                  <span className={`px-2 py-1 rounded-full text-sm ${
+                    inspection.status === 'completé' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {inspection.status}
+                  </span>
+                </td>
+                <td className="p-2">
+                  <span className={inspection.has_damages ? 'text-red-600' : 'text-green-600'}>
+                    {inspection.has_damages ? 'Oui' : 'Non'}
+                  </span>
+                </td>
+                <td className="p-2">
+                  {inspection.repair_costs?.toLocaleString()} FCFA
+                </td>
+                <td className="p-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleShowReceipt(inspection)}
+                  >
+                    <Receipt className="h-4 w-4 mr-2" />
+                    Reçu de fin
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
+        <DialogContent>
+          {selectedInspection && (
+            <TenantReceipt 
+              tenant={{
+                nom: selectedInspection.contract.tenant.nom,
+                prenom: selectedInspection.contract.tenant.prenom,
+                telephone: selectedInspection.contract.tenant.phone_number,
+                fraisAgence: selectedInspection.contract.tenant.agency_fees?.toString() || "0",
+                propertyId: selectedInspection.contract.property_id,
+              }}
+              contractId={contractId}
+              isEndOfContract={true}
+              inspection={selectedInspection}
+            />
           )}
-        </TableBody>
-      </Table>
-    </div>
-  )
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }
