@@ -95,6 +95,7 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
       const email = `${formData.nom.toLowerCase()}.${formData.prenom.toLowerCase()}@tenant.local`;
       const password = Math.random().toString(36).slice(-8);
       
+      // Créer l'utilisateur dans auth.users
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -109,6 +110,22 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
       if (authError) throw authError;
       if (!authData.user) throw new Error("Failed to create user");
 
+      // Mettre à jour le profil pour indiquer que c'est un locataire
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
+          is_tenant: true,
+          first_name: formData.prenom,
+          last_name: formData.nom 
+        })
+        .eq('id', authData.user.id);
+
+      if (profileError) {
+        console.error("Profile update error:", profileError);
+        throw profileError;
+      }
+
+      // Créer l'entrée dans la table tenants
       const { error: tenantError } = await supabase
         .from('tenants')
         .insert({
