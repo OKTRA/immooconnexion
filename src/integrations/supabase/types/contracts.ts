@@ -9,6 +9,7 @@ export type Contract = {
   tenant_id: string | null;
   start_date: string;
   end_date: string | null;
+  description: string | null;
 };
 
 export type ContractInsert = {
@@ -22,6 +23,7 @@ export type ContractInsert = {
   tenant_id?: string | null;
   start_date?: string;
   end_date?: string | null;
+  description?: string | null;
 };
 
 export type ContractUpdate = {
@@ -35,4 +37,5 @@ export type ContractUpdate = {
   tenant_id?: string | null;
   start_date?: string;
   end_date?: string | null;
+  description?: string | null;
 };
