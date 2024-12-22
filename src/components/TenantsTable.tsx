@@ -1,27 +1,14 @@
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Phone, MessageSquare, FileText } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
-
-interface Tenant {
-  id: string;
-  nom: string | null;
-  prenom: string | null;
-  birth_date: string | null;
-  phone_number: string | null;
-  photo_id_url: string | null;
-  agency_fees: number | null;
-}
+import { TenantTableRow } from "./tenants/TenantTableRow";
 
 interface TenantDisplay {
   id: string;
@@ -30,11 +17,11 @@ interface TenantDisplay {
   dateNaissance: string;
   telephone: string;
   photoIdUrl?: string;
+  fraisAgence?: string;
 }
 
 export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => void }) {
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const { data: tenants = [], refetch } = useQuery({
     queryKey: ['tenants'],
@@ -52,13 +39,14 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
       
       console.log('Tenants data:', tenantsData);
 
-      return (tenantsData as Tenant[]).map(tenant => ({
+      return tenantsData.map((tenant: any) => ({
         id: tenant.id,
         nom: tenant.nom || '',
         prenom: tenant.prenom || '',
         dateNaissance: tenant.birth_date || '',
         telephone: tenant.phone_number || '',
         photoIdUrl: tenant.photo_id_url,
+        fraisAgence: tenant.agency_fees?.toString(),
       }));
     }
   });
@@ -86,10 +74,6 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
     });
   };
 
-  const handleViewContracts = (tenantId: string) => {
-    navigate(`/locataires/${tenantId}/contrats`);
-  };
-
   return (
     <div className="space-y-4">
       <div className="rounded-md border">
@@ -105,49 +89,12 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
           </TableHeader>
           <TableBody>
             {tenants.map((tenant) => (
-              <TableRow key={tenant.id}>
-                <TableCell className="font-medium">{tenant.nom || 'Non renseigné'}</TableCell>
-                <TableCell>{tenant.prenom || 'Non renseigné'}</TableCell>
-                <TableCell>{tenant.dateNaissance || 'Non renseigné'}</TableCell>
-                <TableCell>{tenant.telephone || 'Non renseigné'}</TableCell>
-                <TableCell className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => onEdit(tenant)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => window.location.href = `tel:${tenant.telephone}`}
-                  >
-                    <Phone className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => window.location.href = `sms:${tenant.telephone}`}
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleViewContracts(tenant.id)}
-                  >
-                    <FileText className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => handleDelete(tenant.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
+              <TenantTableRow
+                key={tenant.id}
+                tenant={tenant}
+                onEdit={onEdit}
+                onDelete={handleDelete}
+              />
             ))}
           </TableBody>
         </Table>
