@@ -1,38 +1,15 @@
 import { Button } from "@/components/ui/button"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Form } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
 import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useQueryClient } from "@tanstack/react-query"
 import { useQuery } from "@tanstack/react-query"
 import { useEffect } from "react"
-
-const formSchema = z.object({
-  propertyId: z.string().min(1, "La propriété est requise"),
-  montant: z.string().min(1, "Le montant est requis"),
-  description: z.string().min(1, "La description est requise"),
-  date: z.string().min(1, "La date est requise"),
-});
-
-type ExpenseFormData = z.infer<typeof formSchema>
+import { PropertySelect } from "./PropertySelect"
+import { ExpenseFields } from "./ExpenseFields"
+import { expenseFormSchema, type ExpenseFormData } from "./types"
 
 interface ExpenseFormFieldsProps {
   propertyId?: string
@@ -64,7 +41,7 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
   })
 
   const form = useForm<ExpenseFormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(expenseFormSchema),
     defaultValues: {
       propertyId: propertyId || "",
       montant: "",
@@ -82,28 +59,11 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
 
   const onSubmit = async (data: ExpenseFormData) => {
     try {
-      // Check authentication
       const { data: session } = await supabase.auth.getSession()
       if (!session?.session?.user?.id) {
         toast({
           title: "Erreur",
           description: "Vous devez être connecté pour enregistrer une dépense",
-          variant: "destructive",
-        })
-        return
-      }
-
-      // Verify property ownership
-      const { data: property } = await supabase
-        .from('properties')
-        .select('user_id')
-        .eq('id', data.propertyId)
-        .single()
-
-      if (!property || property.user_id !== session.session.user.id) {
-        toast({
-          title: "Erreur",
-          description: "Vous n'avez pas les droits pour enregistrer une dépense pour cette propriété",
           variant: "destructive",
         })
         return
@@ -151,75 +111,12 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {!propertyId && (
-          <FormField
-            control={form.control}
-            name="propertyId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Propriété</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner une propriété" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {properties?.map((property) => (
-                      <SelectItem key={property.id} value={property.id}>
-                        {property.bien} - {property.ville}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-        <FormField
-          control={form.control}
-          name="montant"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Montant (FCFA)</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="0" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+        <PropertySelect 
+          form={form}
+          properties={properties}
+          propertyId={propertyId}
         />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Description de la dépense" 
-                  className="resize-none" 
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Date</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <ExpenseFields form={form} />
         <Button type="submit" className="w-full">Enregistrer</Button>
       </form>
     </Form>
