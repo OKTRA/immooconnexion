@@ -2,6 +2,8 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
 import { StatCard } from "@/components/StatCard"
+import { RevenueChart } from "@/components/RevenueChart"
+import { AppSidebar } from "@/components/AppSidebar"
 import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 
@@ -33,7 +35,6 @@ const Index = () => {
 
         if (!profile) {
           console.log("No profile found for user:", user.id)
-          // Create a profile if it doesn't exist
           const { error: insertError } = await supabase
             .from("profiles")
             .insert([{ id: user.id, role: 'user' }])
@@ -51,7 +52,6 @@ const Index = () => {
         console.log("Profile found:", profile)
         setUserRole(profile.role)
 
-        // Check if user is a super admin
         if (profile.role === "admin") {
           const { data: adminData, error: adminError } = await supabase
             .from("administrators")
@@ -105,25 +105,40 @@ const Index = () => {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Tableau de bord</h1>
+    <div className="flex min-h-screen">
+      <div className="hidden lg:block w-64 border-r">
+        <AppSidebar />
+      </div>
       
-      <div className="grid gap-4 md:grid-cols-3 mb-6">
-        <StatCard
-          title="Total Biens"
-          value={stats?.properties.toString() || "0"}
-        />
-        <StatCard
-          title="Total Locataires"
-          value={stats?.tenants.toString() || "0"}
-        />
-        <StatCard
-          title="Revenus Totaux"
-          value={new Intl.NumberFormat("fr-FR", {
-            style: "currency",
-            currency: "XOF",
-          }).format(stats?.revenue || 0)}
-        />
+      <div className="flex-1 p-8">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold">Tableau de bord</h1>
+          <div className="lg:hidden">
+            <AppSidebar />
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3 mb-8">
+          <StatCard
+            title="Total Biens"
+            value={stats?.properties.toString() || "0"}
+          />
+          <StatCard
+            title="Total Locataires"
+            value={stats?.tenants.toString() || "0"}
+          />
+          <StatCard
+            title="Revenus Totaux"
+            value={new Intl.NumberFormat("fr-FR", {
+              style: "currency",
+              currency: "XOF",
+            }).format(stats?.revenue || 0)}
+          />
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <RevenueChart />
+        </div>
       </div>
     </div>
   )
