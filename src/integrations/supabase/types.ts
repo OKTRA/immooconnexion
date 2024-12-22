@@ -217,6 +217,7 @@ export type Database = {
           has_damages: boolean | null
           id: string
           inspection_date: string
+          photo_urls: string[] | null
           repair_costs: number | null
           status: string | null
           updated_at: string
@@ -229,6 +230,7 @@ export type Database = {
           has_damages?: boolean | null
           id?: string
           inspection_date?: string
+          photo_urls?: string[] | null
           repair_costs?: number | null
           status?: string | null
           updated_at?: string
@@ -241,6 +243,7 @@ export type Database = {
           has_damages?: boolean | null
           id?: string
           inspection_date?: string
+          photo_urls?: string[] | null
           repair_costs?: number | null
           status?: string | null
           updated_at?: string
