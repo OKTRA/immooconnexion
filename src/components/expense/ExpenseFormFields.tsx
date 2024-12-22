@@ -20,24 +20,33 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
+  // Fetch current user session
+  const { data: session } = useQuery({
+    queryKey: ['session'],
+    queryFn: async () => {
+      const { data: { session }, error } = await supabase.auth.getSession()
+      if (error) throw error
+      return session
+    }
+  })
+
   // Fetch user's properties
   const { data: properties } = useQuery({
     queryKey: ['properties'],
     queryFn: async () => {
-      const { data: session } = await supabase.auth.getSession()
-      if (!session?.session?.user?.id) {
+      if (!session?.user?.id) {
         throw new Error("User not authenticated")
       }
 
       const { data, error } = await supabase
         .from('properties')
         .select('*')
-        .eq('user_id', session.session.user.id)
+        .eq('user_id', session.user.id)
       
       if (error) throw error
       return data
     },
-    enabled: !propertyId // Only fetch if propertyId is not provided
+    enabled: !!session?.user?.id && !propertyId // Only fetch if user is authenticated and propertyId is not provided
   })
 
   const form = useForm<ExpenseFormData>({
@@ -59,8 +68,7 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
 
   const onSubmit = async (data: ExpenseFormData) => {
     try {
-      const { data: session } = await supabase.auth.getSession()
-      if (!session?.session?.user?.id) {
+      if (!session?.user?.id) {
         toast({
           title: "Erreur",
           description: "Vous devez être connecté pour enregistrer une dépense",
