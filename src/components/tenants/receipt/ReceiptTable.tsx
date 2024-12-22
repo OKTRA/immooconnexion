@@ -10,7 +10,7 @@ interface ReceiptTableProps {
   propertyId: string;
   isEndOfContract?: boolean;
   contractId?: string;
-  inspection?: any; // Added this line to fix the TypeScript error
+  inspection?: any;
 }
 
 export function ReceiptTable({ tenant, propertyId, isEndOfContract, contractId, inspection }: ReceiptTableProps) {
@@ -140,7 +140,7 @@ export function ReceiptTable({ tenant, propertyId, isEndOfContract, contractId, 
           <td className="border p-2">Total</td>
           <td className="border p-2">
             {isEndOfContract 
-              ? (inspection?.deposit_returned || 0).toLocaleString()
+              ? inspection?.deposit_returned.toLocaleString()
               : ((property?.loyer || 0) + (property?.caution || 0) + parseFloat(tenant.fraisAgence || "0")).toLocaleString()
             } FCFA
           </td>
