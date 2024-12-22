@@ -6,6 +6,8 @@ import { useParams, Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { PaymentDialog } from "@/components/payment/PaymentDialog"
+import { InspectionDialog } from "@/components/inspections/InspectionDialog"
+import { InspectionHistory } from "@/components/inspections/InspectionHistory"
 import { FileText } from "lucide-react"
 
 const PropertyDetails = () => {
@@ -142,13 +144,16 @@ const PropertyDetails = () => {
                             </span>
                           </td>
                           <td className="p-2">
-                            {contract.tenant_id && (
-                              <Link to={`/locataires/${contract.tenant_id}/contrats`}>
-                                <Button variant="ghost" size="icon">
-                                  <FileText className="h-4 w-4" />
-                                </Button>
-                              </Link>
-                            )}
+                            <div className="flex items-center gap-2">
+                              {contract.tenant_id && (
+                                <Link to={`/locataires/${contract.tenant_id}/contrats`}>
+                                  <Button variant="ghost" size="icon">
+                                    <FileText className="h-4 w-4" />
+                                  </Button>
+                                </Link>
+                              )}
+                              <InspectionDialog contract={contract} />
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -164,6 +169,23 @@ const PropertyDetails = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Historique des inspections */}
+            {contracts?.map((contract: any) => (
+              <Card key={`inspections-${contract.id}`}>
+                <CardHeader>
+                  <CardTitle>
+                    Inspections - {contract.tenant_nom && contract.tenant_prenom 
+                      ? `${contract.tenant_prenom} ${contract.tenant_nom}`
+                      : 'Locataire non renseigné'
+                    }
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <InspectionHistory contractId={contract.id} />
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </main>
       </div>

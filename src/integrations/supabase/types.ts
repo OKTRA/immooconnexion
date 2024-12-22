@@ -208,6 +208,60 @@ export type Database = {
         }
         Relationships: []
       }
+      property_inspections: {
+        Row: {
+          contract_id: string
+          created_at: string
+          damage_description: string | null
+          deposit_returned: number | null
+          has_damages: boolean | null
+          id: string
+          inspection_date: string
+          repair_costs: number | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string
+          damage_description?: string | null
+          deposit_returned?: number | null
+          has_damages?: boolean | null
+          id?: string
+          inspection_date?: string
+          repair_costs?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          damage_description?: string | null
+          deposit_returned?: number | null
+          has_damages?: boolean | null
+          id?: string
+          inspection_date?: string
+          repair_costs?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_inspections_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_inspections_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "payment_history_with_tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           agency_fees: number | null
