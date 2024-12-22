@@ -3,50 +3,54 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { Printer } from "lucide-react"
 import { useState } from "react"
-
-interface Payment {
-  id: number
-  tenant: string
-  property: string
-  amount: number
-  type: string
-  date: string
-  status: string
-}
-
-const tenantPayments = [
-  {
-    id: 1,
-    tenant: "Awa MAIGA",
-    property: "Appartement Jaune Block 1",
-    amount: 155000,
-    type: "Loyer",
-    date: "2024-02-20",
-    status: "Payé",
-  },
-  {
-    id: 2,
-    tenant: "Awa MAIGA",
-    property: "Appartement Jaune Block 1",
-    amount: 155000,
-    type: "Loyer",
-    date: "2024-03-20",
-    status: "En retard",
-  },
-]
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
 export function TenantPaymentsReport() {
   const [selectedTenant, setSelectedTenant] = useState<string>("all")
+  
+  const { data: payments = [], isLoading } = useQuery({
+    queryKey: ['tenant-payments'],
+    queryFn: async () => {
+      console.log('Fetching tenant payments')
+      const { data, error } = await supabase
+        .from('payment_history_with_tenant')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching payments:', error)
+        throw error
+      }
+
+      console.log('Payments data:', data)
+      return data || []
+    }
+  })
+
+  const { data: tenants = [] } = useQuery({
+    queryKey: ['tenants'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('id, nom, prenom')
+
+      if (error) throw error
+      return data || []
+    }
+  })
   
   const handlePrint = () => {
     window.print()
   }
 
   const filteredPayments = selectedTenant === "all"
-    ? tenantPayments
-    : tenantPayments.filter(payment => payment.tenant === selectedTenant)
+    ? payments
+    : payments.filter(payment => payment.tenant_id === selectedTenant)
 
-  const uniqueTenants = Array.from(new Set(tenantPayments.map(p => p.tenant)))
+  if (isLoading) {
+    return <div>Chargement...</div>
+  }
 
   return (
     <Card className="print:shadow-none print:border-none">
@@ -59,8 +63,10 @@ export function TenantPaymentsReport() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les locataires</SelectItem>
-              {uniqueTenants.map(tenant => (
-                <SelectItem key={tenant} value={tenant}>{tenant}</SelectItem>
+              {tenants.map(tenant => (
+                <SelectItem key={tenant.id} value={tenant.id}>
+                  {tenant.prenom} {tenant.nom}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -86,20 +92,39 @@ export function TenantPaymentsReport() {
             <tbody>
               {filteredPayments.map((payment) => (
                 <tr key={payment.id} className="border-b">
-                  <td className="p-4">{payment.tenant}</td>
-                  <td className="p-4">{payment.property}</td>
-                  <td className="p-4">{payment.amount} FCFA</td>
-                  <td className="p-4">{payment.type}</td>
-                  <td className="p-4">{payment.date}</td>
+                  <td className="p-4">
+                    {payment.tenant_nom && payment.tenant_prenom 
+                      ? `${payment.tenant_prenom} ${payment.tenant_nom}`
+                      : 'Non renseigné'
+                    }
+                  </td>
+                  <td className="p-4">{payment.property_name || 'Non renseigné'}</td>
+                  <td className="p-4">{payment.montant?.toLocaleString()} FCFA</td>
+                  <td className="p-4 capitalize">{payment.type || 'Non renseigné'}</td>
+                  <td className="p-4">
+                    {payment.created_at 
+                      ? new Date(payment.created_at).toLocaleDateString()
+                      : 'Non renseigné'
+                    }
+                  </td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-full text-sm ${
-                      payment.status === 'Payé' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      payment.statut === 'payé' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
                     }`}>
-                      {payment.status}
+                      {payment.statut || 'En attente'}
                     </span>
                   </td>
                 </tr>
               ))}
+              {filteredPayments.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="text-center py-4 text-muted-foreground">
+                    Aucun paiement trouvé
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
