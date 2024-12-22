@@ -67,31 +67,36 @@ export function PaymentHistory({
                       </span>
                     </td>
                     <td className="p-3">
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-col md:flex-row gap-2">
                         {contract.tenant_id ? (
                           <>
-                            <Link to={`/locataires/${contract.tenant_id}/contrats`}>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9">
+                            <div className="flex gap-2">
+                              <Link to={`/locataires/${contract.tenant_id}/contrats`}>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9">
+                                  <FileText className="h-4 w-4" />
+                                </Button>
+                              </Link>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                className="h-8 w-8 md:h-9 md:w-9"
+                                onClick={() => onPrintReceipt(contract)}
+                              >
+                                <Printer className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                className="h-8 w-8 md:h-9 md:w-9"
+                                onClick={() => onPrintContract(contract)}
+                              >
                                 <FileText className="h-4 w-4" />
                               </Button>
-                            </Link>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              className="h-8 w-8 md:h-9 md:w-9"
-                              onClick={() => onPrintReceipt(contract)}
-                            >
-                              <Printer className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              className="h-8 w-8 md:h-9 md:w-9"
-                              onClick={() => onPrintContract(contract)}
-                            >
-                              <FileText className="h-4 w-4" />
-                            </Button>
-                            <InspectionDialog contract={contract} />
+                            </div>
+                            <InspectionDialog 
+                              contract={contract} 
+                              className="w-full md:w-auto text-sm"
+                            />
                           </>
                         ) : (
                           <Ban className="h-4 w-4 text-muted-foreground" />
