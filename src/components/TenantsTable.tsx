@@ -28,11 +28,12 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
     queryFn: async () => {
       console.log('Début de la requête des locataires...');
       
-      // Vérifier d'abord le rôle de l'utilisateur
+      // Vérifier le rôle de l'utilisateur connecté uniquement
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('role')
-        .single();
+        .eq('id', (await supabase.auth.getUser()).data.user?.id)
+        .maybeSingle();
       
       if (profileError) {
         console.error('Erreur lors de la vérification du profil:', profileError);
@@ -69,17 +70,18 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
         photoIdUrl: tenant.photo_id_url,
         fraisAgence: tenant.agency_fees?.toString(),
       }));
+    },
+    meta: {
+      onError: (error: any) => {
+        console.error('Erreur de requête:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les locataires. Veuillez réessayer.",
+          variant: "destructive",
+        });
+      }
     }
   });
-
-  if (isError) {
-    console.error('Erreur de requête:', error);
-    toast({
-      title: "Erreur",
-      description: "Impossible de charger les locataires. Veuillez réessayer.",
-      variant: "destructive",
-    });
-  }
 
   return (
     <div className="space-y-4">
