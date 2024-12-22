@@ -25,6 +25,7 @@ export function AdminProfiles() {
     last_name: "",
     role: "user",
     agency_name: "",
+    password: "changeme123", // Mot de passe temporaire
   })
   const { toast } = useToast()
   
@@ -43,15 +44,33 @@ export function AdminProfiles() {
 
   const handleAddUser = async () => {
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .insert([newProfile])
+      // 1. Créer l'utilisateur dans auth.users
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: newProfile.email,
+        password: newProfile.password,
+        email_confirm: true,
+      })
 
-      if (error) throw error
+      if (authError) throw authError
+
+      if (!authData.user) throw new Error("Aucun utilisateur créé")
+
+      // 2. Mettre à jour le profil avec les informations supplémentaires
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          first_name: newProfile.first_name,
+          last_name: newProfile.last_name,
+          role: newProfile.role,
+          agency_name: newProfile.agency_name,
+        })
+        .eq("id", authData.user.id)
+
+      if (profileError) throw profileError
 
       toast({
         title: "Profil ajouté",
-        description: "Le nouveau profil a été ajouté avec succès",
+        description: "Le nouveau profil a été ajouté avec succès. Mot de passe temporaire: changeme123",
       })
       setShowAddDialog(false)
       setNewProfile({
@@ -60,12 +79,13 @@ export function AdminProfiles() {
         last_name: "",
         role: "user",
         agency_name: "",
+        password: "changeme123",
       })
       refetch()
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'ajout du profil",
+        description: error.message || "Une erreur est survenue lors de l'ajout du profil",
         variant: "destructive",
       })
     }
@@ -91,10 +111,10 @@ export function AdminProfiles() {
         description: "Le profil a été mis à jour avec succès",
       })
       refetch()
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la mise à jour du profil",
+        description: error.message || "Une erreur est survenue lors de la mise à jour du profil",
         variant: "destructive",
       })
     }
