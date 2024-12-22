@@ -7,7 +7,6 @@ import { Receipt } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { TenantReceipt } from "../tenants/TenantReceipt";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface InspectionHistoryProps {
   contractId: string;
@@ -20,6 +19,7 @@ export function InspectionHistory({ contractId }: InspectionHistoryProps) {
   const { data: inspections, isLoading } = useQuery({
     queryKey: ['inspections', contractId],
     queryFn: async () => {
+      // First, get the contract details including tenant_id
       const { data: contract, error: contractError } = await supabase
         .from('contracts')
         .select('tenant_id, property_id, montant')
@@ -27,8 +27,12 @@ export function InspectionHistory({ contractId }: InspectionHistoryProps) {
         .single();
 
       if (contractError) throw contractError;
-      if (!contract?.tenant_id) return [];
 
+      if (!contract?.tenant_id) {
+        return [];
+      }
+
+      // Then get the tenant details
       const { data: tenant, error: tenantError } = await supabase
         .from('tenants')
         .select('nom, prenom, phone_number, agency_fees')
@@ -37,6 +41,7 @@ export function InspectionHistory({ contractId }: InspectionHistoryProps) {
 
       if (tenantError) throw tenantError;
 
+      // Finally get the inspections with the collected data
       const { data: inspectionsData, error: inspectionsError } = await supabase
         .from('property_inspections')
         .select('*')
@@ -44,6 +49,7 @@ export function InspectionHistory({ contractId }: InspectionHistoryProps) {
 
       if (inspectionsError) throw inspectionsError;
 
+      // Combine the data
       return inspectionsData.map(inspection => ({
         ...inspection,
         contract: {
@@ -62,7 +68,7 @@ export function InspectionHistory({ contractId }: InspectionHistoryProps) {
   };
 
   if (isLoading) {
-    return <div className="p-4 text-center">Chargement...</div>;
+    return <div>Chargement...</div>;
   }
 
   if (!inspections || inspections.length === 0) {
@@ -71,80 +77,71 @@ export function InspectionHistory({ contractId }: InspectionHistoryProps) {
 
   return (
     <>
-      <ScrollArea className="w-full">
-        <div className="rounded-md border dark:border-gray-700">
-          <div className="min-w-full overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b dark:border-gray-700">
-                  <th className="p-2 text-left text-sm md:text-base">Date</th>
-                  <th className="p-2 text-left text-sm md:text-base">État</th>
-                  <th className="p-2 text-left text-sm md:text-base">Dégâts</th>
-                  <th className="p-2 text-left text-sm md:text-base">Coûts</th>
-                  <th className="p-2 text-left text-sm md:text-base">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inspections.map((inspection) => (
-                  <tr key={inspection.id} className="border-b dark:border-gray-700">
-                    <td className="p-2 text-sm md:text-base whitespace-nowrap">
-                      {format(new Date(inspection.inspection_date), 'PP', { locale: fr })}
-                    </td>
-                    <td className="p-2">
-                      <span className={`px-2 py-1 rounded-full text-xs md:text-sm ${
-                        inspection.status === 'completé' 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                      }`}>
-                        {inspection.status}
-                      </span>
-                    </td>
-                    <td className="p-2 text-sm md:text-base">
-                      <span className={inspection.has_damages ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}>
-                        {inspection.has_damages ? 'Oui' : 'Non'}
-                      </span>
-                    </td>
-                    <td className="p-2 text-sm md:text-base whitespace-nowrap">
-                      {inspection.repair_costs?.toLocaleString()} FCFA
-                    </td>
-                    <td className="p-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleShowReceipt(inspection)}
-                        className="w-full md:w-auto text-xs md:text-sm"
-                      >
-                        <Receipt className="h-4 w-4 mr-2" />
-                        Reçu de fin
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </ScrollArea>
+      <div className="rounded-md border">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b">
+              <th className="p-2 text-left">Date d'inspection</th>
+              <th className="p-2 text-left">État</th>
+              <th className="p-2 text-left">Dégâts</th>
+              <th className="p-2 text-left">Coûts réparation</th>
+              <th className="p-2 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {inspections.map((inspection) => (
+              <tr key={inspection.id} className="border-b">
+                <td className="p-2">
+                  {format(new Date(inspection.inspection_date), 'PP', { locale: fr })}
+                </td>
+                <td className="p-2">
+                  <span className={`px-2 py-1 rounded-full text-sm ${
+                    inspection.status === 'completé' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {inspection.status}
+                  </span>
+                </td>
+                <td className="p-2">
+                  <span className={inspection.has_damages ? 'text-red-600' : 'text-green-600'}>
+                    {inspection.has_damages ? 'Oui' : 'Non'}
+                  </span>
+                </td>
+                <td className="p-2">
+                  {inspection.repair_costs?.toLocaleString()} FCFA
+                </td>
+                <td className="p-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleShowReceipt(inspection)}
+                  >
+                    <Receipt className="h-4 w-4 mr-2" />
+                    Reçu de fin
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
-        <DialogContent className="max-w-3xl w-[95%] p-0">
+        <DialogContent>
           {selectedInspection && (
-            <ScrollArea className="max-h-[80vh]">
-              <div className="p-6">
-                <TenantReceipt 
-                  tenant={{
-                    nom: selectedInspection.contract.tenant.nom,
-                    prenom: selectedInspection.contract.tenant.prenom,
-                    telephone: selectedInspection.contract.tenant.phone_number,
-                    fraisAgence: selectedInspection.contract.tenant.agency_fees?.toString() || "0",
-                    propertyId: selectedInspection.contract.property_id,
-                  }}
-                  contractId={contractId}
-                  isEndOfContract={true}
-                  inspection={selectedInspection}
-                />
-              </div>
-            </ScrollArea>
+            <TenantReceipt 
+              tenant={{
+                nom: selectedInspection.contract.tenant.nom,
+                prenom: selectedInspection.contract.tenant.prenom,
+                telephone: selectedInspection.contract.tenant.phone_number,
+                fraisAgence: selectedInspection.contract.tenant.agency_fees?.toString() || "0",
+                propertyId: selectedInspection.contract.property_id,
+              }}
+              contractId={contractId}
+              isEndOfContract={true}
+              inspection={selectedInspection}
+            />
           )}
         </DialogContent>
       </Dialog>
