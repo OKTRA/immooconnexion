@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
 import { StatCard } from "@/components/StatCard"
 import { RevenueChart } from "@/components/RevenueChart"
+import { RecentActivities } from "@/components/RecentActivities"
 import { AppSidebar } from "@/components/AppSidebar"
 import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -136,8 +137,9 @@ const Index = () => {
           />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2 mb-8">
           <RevenueChart />
+          <RecentActivities />
         </div>
       </div>
     </div>
