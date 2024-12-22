@@ -19,26 +19,46 @@ export function InspectionHistory({ contractId }: InspectionHistoryProps) {
   const { data: inspections, isLoading } = useQuery({
     queryKey: ['inspections', contractId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, get the contract details including tenant_id
+      const { data: contract, error: contractError } = await supabase
+        .from('contracts')
+        .select('tenant_id, property_id, montant')
+        .eq('id', contractId)
+        .single();
+
+      if (contractError) throw contractError;
+
+      if (!contract?.tenant_id) {
+        return [];
+      }
+
+      // Then get the tenant details
+      const { data: tenant, error: tenantError } = await supabase
+        .from('tenants')
+        .select('nom, prenom, phone_number, agency_fees')
+        .eq('id', contract.tenant_id)
+        .single();
+
+      if (tenantError) throw tenantError;
+
+      // Finally get the inspections with the collected data
+      const { data: inspectionsData, error: inspectionsError } = await supabase
         .from('property_inspections')
-        .select(`
-          *,
-          contract:contracts(
-            tenant_id,
-            property_id,
-            montant,
-            tenant:tenants(
-              nom,
-              prenom,
-              phone_number,
-              agency_fees
-            )
-          )
-        `)
+        .select('*')
         .eq('contract_id', contractId);
 
-      if (error) throw error;
-      return data;
+      if (inspectionsError) throw inspectionsError;
+
+      // Combine the data
+      return inspectionsData.map(inspection => ({
+        ...inspection,
+        contract: {
+          tenant_id: contract.tenant_id,
+          property_id: contract.property_id,
+          montant: contract.montant,
+          tenant: tenant
+        }
+      }));
     }
   });
 
