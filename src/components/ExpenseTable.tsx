@@ -7,42 +7,64 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Pencil, Trash2 } from "lucide-react"
+import { Pencil, Trash2, FileText } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
+import { Link } from "react-router-dom"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
 
-const expenses = [
-  {
-    id: 1,
-    property: "Appartement Jaune Block 1",
-    amount: 25000,
-    type: "Maintenance",
-    date: "2024-02-20",
-    description: "Réparation plomberie",
-  },
-  {
-    id: 2,
-    property: "Maison M201",
-    amount: 15000,
-    type: "Charges",
-    date: "2024-02-18",
-    description: "Électricité février",
-  },
-]
+interface ExpenseTableProps {
+  propertyId?: string;
+}
 
-export function ExpenseTable() {
+export function ExpenseTable({ propertyId }: ExpenseTableProps) {
   const { toast } = useToast()
 
-  const handleDelete = (id: number) => {
-    toast({
-      title: "Dépense supprimée",
-      description: "La dépense a été supprimée avec succès",
-    })
-  }
+  const { data: payments = [], refetch } = useQuery({
+    queryKey: ['payments', propertyId],
+    queryFn: async () => {
+      console.log("Fetching payments for property:", propertyId)
+      const query = supabase
+        .from('payment_history_with_tenant')
+        .select('*')
+      
+      if (propertyId) {
+        query.eq('property_id', propertyId)
+      }
+      
+      const { data, error } = await query
+      
+      if (error) {
+        console.error("Error fetching payments:", error)
+        throw error
+      }
+      
+      console.log("Payments data:", data)
+      return data
+    }
+  })
 
-  const handleEdit = (id: number) => {
+  const handleDelete = async (id: number) => {
+    const { error } = await supabase
+      .from('contracts')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suppression",
+        variant: "destructive",
+      })
+      return
+    }
+
+    refetch()
     toast({
-      title: "Modification",
-      description: "Fonctionnalité à venir",
+      title: "Paiement supprimé",
+      description: "Le paiement a été supprimé avec succès",
     })
   }
 
@@ -52,34 +74,46 @@ export function ExpenseTable() {
         <TableHeader>
           <TableRow>
             <TableHead>Bien</TableHead>
+            <TableHead>Locataire</TableHead>
             <TableHead>Montant</TableHead>
             <TableHead>Type</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Description</TableHead>
+            <TableHead>Date de début</TableHead>
+            <TableHead>Date de fin</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {expenses.map((expense) => (
-            <TableRow key={expense.id}>
-              <TableCell>{expense.property}</TableCell>
-              <TableCell>{expense.amount} FCFA</TableCell>
-              <TableCell>{expense.type}</TableCell>
-              <TableCell>{expense.date}</TableCell>
-              <TableCell>{expense.description}</TableCell>
+          {payments.map((payment) => (
+            <TableRow key={payment.id}>
+              <TableCell>{payment.property_name}</TableCell>
+              <TableCell>
+                {payment.tenant_nom && payment.tenant_prenom 
+                  ? `${payment.tenant_prenom} ${payment.tenant_nom}`
+                  : 'Non renseigné'
+                }
+              </TableCell>
+              <TableCell>{payment.montant} FCFA</TableCell>
+              <TableCell>{payment.type}</TableCell>
+              <TableCell>
+                {format(new Date(payment.start_date), "PP", { locale: fr })}
+              </TableCell>
+              <TableCell>
+                {payment.end_date 
+                  ? format(new Date(payment.end_date), "PP", { locale: fr })
+                  : "En cours"
+                }
+              </TableCell>
               <TableCell>
                 <div className="flex gap-2">
+                  <Link to={`/locataires/${payment.tenant_id}/contrats`}>
+                    <Button variant="ghost" size="icon">
+                      <FileText className="h-4 w-4" />
+                    </Button>
+                  </Link>
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleEdit(expense.id)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(expense.id)}
+                    onClick={() => handleDelete(payment.id)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

@@ -39,14 +39,14 @@ export function ExpenseDialog({ propertyId, propertyRent }: ExpenseDialogProps) 
     <Dialog>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="mr-2 h-4 w-4" /> Enregistrer un paiement
+          <Plus className="mr-2 h-4 w-4" /> Enregistrer une dépense
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Enregistrer un paiement</DialogTitle>
+          <DialogTitle>Enregistrer une dépense</DialogTitle>
           <DialogDescription>
-            Enregistrez un paiement de loyer pour ce bien
+            Enregistrez une dépense pour ce bien
           </DialogDescription>
         </DialogHeader>
         <ExpenseForm 

@@ -205,7 +205,32 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      payment_history_with_tenant: {
+        Row: {
+          created_at: string | null
+          end_date: string | null
+          id: string | null
+          montant: number | null
+          property_id: string | null
+          property_name: string | null
+          start_date: string | null
+          statut: string | null
+          tenant_id: string | null
+          tenant_nom: string | null
+          tenant_prenom: string | null
+          type: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never
