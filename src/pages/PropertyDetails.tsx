@@ -10,6 +10,7 @@ import { PaymentHistory } from "@/components/property-details/PaymentHistory"
 import { InspectionsList } from "@/components/property-details/InspectionsList"
 import { useToast } from "@/components/ui/use-toast"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { Loader2 } from "lucide-react"
 
 const PropertyDetails = () => {
   const { id } = useParams()
@@ -146,19 +147,27 @@ const PropertyDetails = () => {
   }
 
   if (isLoadingProperty || isLoadingContracts) {
-    return <div className="p-4">Chargement...</div>
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
   }
 
   if (!property) {
-    return <div className="p-4">Bien non trouvé</div>
+    return (
+      <div className="flex items-center justify-center h-screen text-muted-foreground">
+        Bien non trouvé
+      </div>
+    )
   }
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
         {!isMobile && <AppSidebar className="w-64 flex-shrink-0" />}
         <main className="flex-1 overflow-y-auto">
-          <div className="container mx-auto p-4 space-y-4 pb-16">
+          <div className="container mx-auto p-4 space-y-6 pb-16">
             <PropertyInfo property={property} />
             <PaymentHistory 
               propertyId={id || ''} 
