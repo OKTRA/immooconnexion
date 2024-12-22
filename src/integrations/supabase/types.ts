@@ -173,8 +173,10 @@ export type Database = {
           birth_date: string | null
           created_at: string
           id: string
+          nom: string | null
           phone_number: string | null
           photo_id_url: string | null
+          prenom: string | null
           updated_at: string
         }
         Insert: {
@@ -182,8 +184,10 @@ export type Database = {
           birth_date?: string | null
           created_at?: string
           id: string
+          nom?: string | null
           phone_number?: string | null
           photo_id_url?: string | null
+          prenom?: string | null
           updated_at?: string
         }
         Update: {
@@ -191,8 +195,10 @@ export type Database = {
           birth_date?: string | null
           created_at?: string
           id?: string
+          nom?: string | null
           phone_number?: string | null
           photo_id_url?: string | null
+          prenom?: string | null
           updated_at?: string
         }
         Relationships: []

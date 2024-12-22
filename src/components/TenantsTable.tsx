@@ -15,6 +15,16 @@ import { useNavigate } from "react-router-dom";
 
 interface Tenant {
   id: string;
+  nom: string | null;
+  prenom: string | null;
+  birth_date: string | null;
+  phone_number: string | null;
+  photo_id_url: string | null;
+  agency_fees: number | null;
+}
+
+interface TenantDisplay {
+  id: string;
   nom: string;
   prenom: string;
   dateNaissance: string;
@@ -22,7 +32,7 @@ interface Tenant {
   photoIdUrl?: string;
 }
 
-export function TenantsTable({ onEdit }: { onEdit: (tenant: Tenant) => void }) {
+export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => void }) {
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -42,7 +52,7 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: Tenant) => void }) {
       
       console.log('Tenants data:', tenantsData);
 
-      return tenantsData.map(tenant => ({
+      return (tenantsData as Tenant[]).map(tenant => ({
         id: tenant.id,
         nom: tenant.nom || '',
         prenom: tenant.prenom || '',
