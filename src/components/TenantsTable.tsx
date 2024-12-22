@@ -26,30 +26,11 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
   const { data: tenants = [], refetch } = useQuery({
     queryKey: ['tenants'],
     queryFn: async () => {
-      console.log('Fetching tenants...');
+      console.log('Fetching tenants directly from tenants table...');
       
-      // Récupérer d'abord les profils qui sont des locataires
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('is_tenant', true);
-      
-      if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
-        throw profilesError;
-      }
-
-      console.log('Profiles data:', profilesData);
-
-      if (!profilesData || profilesData.length === 0) {
-        return [];
-      }
-
-      // Récupérer les informations des locataires
       const { data: tenantsData, error: tenantsError } = await supabase
         .from('tenants')
-        .select('*')
-        .in('id', profilesData.map(profile => profile.id));
+        .select('*');
       
       if (tenantsError) {
         console.error('Error fetching tenants:', tenantsError);
@@ -72,18 +53,6 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
 
   const handleDelete = async (id: string) => {
     try {
-      // Supprimer d'abord le profil (cela déclenchera la suppression en cascade)
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ is_tenant: false })
-        .eq('id', id);
-
-      if (profileError) {
-        console.error('Error updating profile:', profileError);
-        throw profileError;
-      }
-
-      // Supprimer ensuite les données du locataire
       const { error: tenantError } = await supabase
         .from('tenants')
         .delete()
