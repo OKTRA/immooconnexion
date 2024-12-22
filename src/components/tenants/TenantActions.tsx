@@ -55,11 +55,6 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
     }
   };
 
-  const showEndOfContractReceipt = () => {
-    setIsEndOfContract(true);
-    setShowReceipt(true);
-  };
-
   return (
     <>
       <div className="flex gap-2">
@@ -106,7 +101,7 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
             variant="outline"
             onClick={handleEndContract}
           >
-            Effectuer une inspection
+            Mettre fin au contrat
           </Button>
         )}
         <Button
