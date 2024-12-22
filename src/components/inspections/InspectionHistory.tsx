@@ -40,6 +40,7 @@ export function InspectionHistory({ contractId }: InspectionHistoryProps) {
             <TableHead>Dégâts</TableHead>
             <TableHead>Coûts réparation</TableHead>
             <TableHead>Caution retournée</TableHead>
+            <TableHead>Photos</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -70,11 +71,25 @@ export function InspectionHistory({ contractId }: InspectionHistoryProps) {
               <TableCell>
                 {inspection.deposit_returned?.toLocaleString()} FCFA
               </TableCell>
+              <TableCell>
+                {inspection.photo_urls && inspection.photo_urls.length > 0 && (
+                  <div className="flex gap-2">
+                    {inspection.photo_urls.map((url: string, index: number) => (
+                      <img
+                        key={index}
+                        src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/inspection_photos/${url}`}
+                        alt={`Photo d'inspection ${index + 1}`}
+                        className="w-10 h-10 object-cover rounded"
+                      />
+                    ))}
+                  </div>
+                )}
+              </TableCell>
             </TableRow>
           ))}
           {inspections.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-4">
+              <TableCell colSpan={6} className="text-center py-4">
                 Aucune inspection enregistrée
               </TableCell>
             </TableRow>

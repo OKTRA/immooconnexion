@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useQueryClient } from "@tanstack/react-query"
 import { Contract } from "@/integrations/supabase/types/contracts"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface InspectionFormProps {
   contract: Contract
@@ -18,6 +19,7 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
   const [hasDamages, setHasDamages] = useState(false)
   const [description, setDescription] = useState("")
   const [repairCosts, setRepairCosts] = useState("")
+  const [photos, setPhotos] = useState<FileList | null>(null)
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -25,10 +27,27 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
     e.preventDefault()
 
     try {
-      const depositAmount = contract.montant // Assuming this is the deposit amount
+      const depositAmount = contract.montant // Montant de la caution
       const returnedAmount = hasDamages ? 
         depositAmount - parseFloat(repairCosts) : 
         depositAmount
+
+      // Upload photos if any
+      const photoUrls: string[] = []
+      if (photos) {
+        for (let i = 0; i < photos.length; i++) {
+          const photo = photos[i]
+          const fileExt = photo.name.split('.').pop()
+          const fileName = `${crypto.randomUUID()}.${fileExt}`
+          
+          const { error: uploadError, data } = await supabase.storage
+            .from('inspection_photos')
+            .upload(fileName, photo)
+
+          if (uploadError) throw uploadError
+          if (data) photoUrls.push(data.path)
+        }
+      }
 
       const { error } = await supabase
         .from('property_inspections')
@@ -38,6 +57,7 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
           damage_description: description,
           repair_costs: hasDamages ? parseFloat(repairCosts) : 0,
           deposit_returned: returnedAmount > 0 ? returnedAmount : 0,
+          photo_urls: photoUrls,
           status: 'completé'
         }])
 
@@ -62,6 +82,23 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-sm text-muted-foreground mb-4">
+            <p>Montant de la caution: {contract.montant?.toLocaleString()} FCFA</p>
+            {hasDamages && repairCosts && (
+              <>
+                <p className="mt-2">Coûts de réparation: {parseFloat(repairCosts).toLocaleString()} FCFA</p>
+                <p className="mt-2">Montant à retourner: {(contract.montant - parseFloat(repairCosts)).toLocaleString()} FCFA</p>
+                <p className="text-xs mt-2 text-yellow-600">
+                  Note: Le montant retourné sera déduit des bénéfices réalisés sur le bien
+                </p>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex items-center space-x-2">
         <Checkbox
           id="damages"
@@ -97,6 +134,17 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
           </div>
         </>
       )}
+
+      <div className="space-y-2">
+        <Label htmlFor="photos">Photos de l'inspection</Label>
+        <Input
+          id="photos"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(e) => setPhotos(e.target.files)}
+        />
+      </div>
 
       <div className="pt-4 flex justify-end space-x-2">
         <Button type="submit">
