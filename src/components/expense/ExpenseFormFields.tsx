@@ -29,12 +29,6 @@ const formSchema = z.object({
   montant: z.string().min(1, "Le montant est requis"),
   description: z.string().min(1, "La description est requise"),
   date: z.string().min(1, "La date est requise"),
-}).refine((data) => {
-  // Since it's an expense, we set both start_date and end_date to the same date
-  // This ensures we don't violate the end_date_after_start_date constraint
-  return true;
-}, {
-  message: "La date de fin doit être après la date de début",
 });
 
 type ExpenseFormData = z.infer<typeof formSchema>
@@ -73,6 +67,13 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
 
   const onSubmit = async (data: ExpenseFormData) => {
     try {
+      console.log("Submitting expense with data:", {
+        property_id: data.propertyId,
+        montant: -parseFloat(data.montant),
+        description: data.description,
+        date: data.date
+      });
+
       const { error } = await supabase
         .from('contracts')
         .insert({
@@ -82,10 +83,13 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
           description: data.description,
           statut: 'payé',
           start_date: data.date,
-          end_date: data.date, // Set end_date same as start_date for expenses
+          end_date: data.date // For expenses, both dates are the same
         })
 
-      if (error) throw error
+      if (error) {
+        console.error("Error inserting expense:", error);
+        throw error;
+      }
 
       toast({
         title: "Dépense enregistrée",
