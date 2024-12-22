@@ -51,10 +51,10 @@ export function ExpenseDialog({ propertyId, propertyRent }: ExpenseDialogProps) 
   const queryClient = useQueryClient()
   
   const { data: tenants } = useQuery({
-    queryKey: ['profiles'],
+    queryKey: ['tenants'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('tenants')
         .select('*')
       
       if (error) throw error
@@ -74,7 +74,8 @@ export function ExpenseDialog({ propertyId, propertyRent }: ExpenseDialogProps) 
 
   const onSubmit = async (data: ExpenseFormData) => {
     try {
-      const { error } = await supabase
+      // Create the contract/payment record
+      const { error: contractError } = await supabase
         .from('contracts')
         .insert({
           property_id: propertyId,
@@ -86,7 +87,15 @@ export function ExpenseDialog({ propertyId, propertyRent }: ExpenseDialogProps) 
           end_date: data.end_date,
         })
 
-      if (error) throw error
+      if (contractError) throw contractError
+
+      // Update property status to "occupé"
+      const { error: propertyError } = await supabase
+        .from('properties')
+        .update({ statut: 'occupé' })
+        .eq('id', propertyId)
+
+      if (propertyError) throw propertyError
 
       toast({
         title: "Paiement enregistré",
@@ -94,6 +103,7 @@ export function ExpenseDialog({ propertyId, propertyRent }: ExpenseDialogProps) 
       })
 
       queryClient.invalidateQueries({ queryKey: ['contracts', propertyId] })
+      queryClient.invalidateQueries({ queryKey: ['properties'] })
       form.reset()
     } catch (error) {
       console.error("Erreur lors de l'enregistrement du paiement:", error)
@@ -136,7 +146,7 @@ export function ExpenseDialog({ propertyId, propertyRent }: ExpenseDialogProps) 
                     <SelectContent>
                       {tenants?.map((tenant) => (
                         <SelectItem key={tenant.id} value={tenant.id}>
-                          {tenant.first_name} {tenant.last_name}
+                          {tenant.prenom} {tenant.nom}
                         </SelectItem>
                       ))}
                     </SelectContent>
