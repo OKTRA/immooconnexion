@@ -3,8 +3,42 @@ import { AppSidebar } from "@/components/AppSidebar"
 import { StatCard } from "@/components/StatCard"
 import { AgencyEarningsTable } from "@/components/AgencyEarningsTable"
 import { RevenueChart } from "@/components/RevenueChart"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
 const AgencyEarnings = () => {
+  const { data: stats } = useQuery({
+    queryKey: ['agency-stats'],
+    queryFn: async () => {
+      const { data: contracts, error } = await supabase
+        .from('contracts')
+        .select(`
+          montant,
+          properties (
+            frais_agence,
+            taux_commission
+          )
+        `)
+        .eq('type', 'loyer')
+
+      if (error) throw error
+
+      const totalFraisAgence = contracts.reduce((sum, contract) => 
+        sum + (contract.properties?.frais_agence || 0), 0)
+
+      const totalCommissions = contracts.reduce((sum, contract) => 
+        sum + ((contract.montant * (contract.properties?.taux_commission || 0)) / 100), 0)
+
+      const totalGains = totalFraisAgence + totalCommissions
+
+      return {
+        totalFraisAgence,
+        totalCommissions,
+        totalGains
+      }
+    }
+  })
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -17,15 +51,15 @@ const AgencyEarnings = () => {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-8">
             <StatCard 
               title="Total Frais d'Agence" 
-              value="450 000 FCFA" 
+              value={`${stats?.totalFraisAgence?.toLocaleString() || 0} FCFA`}
             />
             <StatCard 
               title="Commission sur Loyers (Mensuel)" 
-              value="125 000 FCFA" 
+              value={`${stats?.totalCommissions?.toLocaleString() || 0} FCFA`}
             />
             <StatCard 
               title="Total Gains" 
-              value="575 000 FCFA" 
+              value={`${stats?.totalGains?.toLocaleString() || 0} FCFA`}
             />
           </div>
 
