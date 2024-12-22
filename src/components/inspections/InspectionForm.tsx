@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { useQueryClient } from "@tanstack/react-query"
 import { Contract } from "@/integrations/supabase/types/contracts"
 import { Card, CardContent } from "@/components/ui/card"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface InspectionFormProps {
   contract: Contract
@@ -81,76 +82,80 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-sm text-muted-foreground mb-4">
-            <p>Montant de la caution: {contract.montant?.toLocaleString()} FCFA</p>
-            {hasDamages && repairCosts && (
-              <>
-                <p className="mt-2">Coûts de réparation: {parseFloat(repairCosts).toLocaleString()} FCFA</p>
-                <p className="mt-2">Montant à retourner: {(contract.montant - parseFloat(repairCosts)).toLocaleString()} FCFA</p>
-                <p className="text-xs mt-2 text-yellow-600">
-                  Note: Le montant retourné sera déduit des bénéfices réalisés sur le bien
-                </p>
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+    <ScrollArea className="h-[calc(100vh-200px)] md:h-auto">
+      <form onSubmit={handleSubmit} className="space-y-4 p-1">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-sm text-muted-foreground mb-4">
+              <p>Montant de la caution: {contract.montant?.toLocaleString()} FCFA</p>
+              {hasDamages && repairCosts && (
+                <>
+                  <p className="mt-2">Coûts de réparation: {parseFloat(repairCosts).toLocaleString()} FCFA</p>
+                  <p className="mt-2">Montant à retourner: {(contract.montant - parseFloat(repairCosts)).toLocaleString()} FCFA</p>
+                  <p className="text-xs mt-2 text-yellow-600">
+                    Note: Le montant retourné sera déduit des bénéfices réalisés sur le bien
+                  </p>
+                </>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          id="damages"
-          checked={hasDamages}
-          onCheckedChange={(checked) => setHasDamages(checked as boolean)}
-        />
-        <Label htmlFor="damages">Dégâts constatés</Label>
-      </div>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="damages"
+            checked={hasDamages}
+            onCheckedChange={(checked) => setHasDamages(checked as boolean)}
+          />
+          <Label htmlFor="damages" className="text-sm md:text-base">Dégâts constatés</Label>
+        </div>
 
-      {hasDamages && (
-        <>
-          <div className="space-y-2">
-            <Label htmlFor="description">Description des dégâts</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Décrivez les dégâts constatés..."
-              required={hasDamages}
-            />
-          </div>
+        {hasDamages && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-sm md:text-base">Description des dégâts</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Décrivez les dégâts constatés..."
+                required={hasDamages}
+                className="min-h-[100px]"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="costs">Coûts de réparation (FCFA)</Label>
-            <Input
-              id="costs"
-              type="number"
-              value={repairCosts}
-              onChange={(e) => setRepairCosts(e.target.value)}
-              placeholder="Montant des réparations"
-              required={hasDamages}
-            />
-          </div>
-        </>
-      )}
+            <div className="space-y-2">
+              <Label htmlFor="costs" className="text-sm md:text-base">Coûts de réparation (FCFA)</Label>
+              <Input
+                id="costs"
+                type="number"
+                value={repairCosts}
+                onChange={(e) => setRepairCosts(e.target.value)}
+                placeholder="Montant des réparations"
+                required={hasDamages}
+              />
+            </div>
+          </>
+        )}
 
-      <div className="space-y-2">
-        <Label htmlFor="photos">Photos de l'inspection</Label>
-        <Input
-          id="photos"
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(e) => setPhotos(e.target.files)}
-        />
-      </div>
+        <div className="space-y-2">
+          <Label htmlFor="photos" className="text-sm md:text-base">Photos de l'inspection</Label>
+          <Input
+            id="photos"
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => setPhotos(e.target.files)}
+            className="cursor-pointer"
+          />
+        </div>
 
-      <div className="pt-4 flex justify-end space-x-2">
-        <Button type="submit">
-          Enregistrer l'inspection
-        </Button>
-      </div>
-    </form>
+        <div className="pt-4 flex justify-end space-x-2">
+          <Button type="submit" className="w-full md:w-auto">
+            Enregistrer l'inspection
+          </Button>
+        </div>
+      </form>
+    </ScrollArea>
   )
 }

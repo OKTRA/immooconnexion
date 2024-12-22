@@ -15,48 +15,48 @@ interface PropertyInfoProps {
 
 export function PropertyInfo({ property }: PropertyInfoProps) {
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Informations du bien</CardTitle>
+        <CardTitle className="text-xl md:text-2xl">Informations du bien</CardTitle>
       </CardHeader>
-      <CardContent className="grid md:grid-cols-2 gap-4">
-        <div className="space-y-3">
+      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <div>
-            <h3 className="font-semibold">Nom du bien</h3>
-            <p>{property?.bien}</p>
+            <h3 className="font-semibold text-sm md:text-base">Nom du bien</h3>
+            <p className="text-sm md:text-base">{property?.bien}</p>
           </div>
           <div>
-            <h3 className="font-semibold">Type</h3>
-            <p className="capitalize">{property?.type}</p>
+            <h3 className="font-semibold text-sm md:text-base">Type</h3>
+            <p className="capitalize text-sm md:text-base">{property?.type}</p>
           </div>
           <div>
-            <h3 className="font-semibold">Ville</h3>
-            <p>{property?.ville}</p>
+            <h3 className="font-semibold text-sm md:text-base">Ville</h3>
+            <p className="text-sm md:text-base">{property?.ville}</p>
           </div>
           <div>
-            <h3 className="font-semibold">Loyer Mensuel</h3>
-            <p>{property?.loyer?.toLocaleString()} FCFA</p>
+            <h3 className="font-semibold text-sm md:text-base">Loyer Mensuel</h3>
+            <p className="text-sm md:text-base">{property?.loyer?.toLocaleString()} FCFA</p>
           </div>
           <div>
-            <h3 className="font-semibold">Frais Agence</h3>
-            <p>{property?.frais_agence?.toLocaleString()} FCFA</p>
+            <h3 className="font-semibold text-sm md:text-base">Frais Agence</h3>
+            <p className="text-sm md:text-base">{property?.frais_agence?.toLocaleString()} FCFA</p>
           </div>
           <div>
-            <h3 className="font-semibold">Caution</h3>
-            <p>{property?.caution?.toLocaleString()} FCFA</p>
+            <h3 className="font-semibold text-sm md:text-base">Caution</h3>
+            <p className="text-sm md:text-base">{property?.caution?.toLocaleString()} FCFA</p>
           </div>
           <div>
-            <h3 className="font-semibold">Statut</h3>
-            <p className="capitalize">{property?.statut}</p>
+            <h3 className="font-semibold text-sm md:text-base">Statut</h3>
+            <p className="capitalize text-sm md:text-base">{property?.statut}</p>
           </div>
         </div>
         {property?.photo_url && (
-          <div>
-            <h3 className="font-semibold mb-2">Photo du bien</h3>
+          <div className="mt-4 md:mt-0">
+            <h3 className="font-semibold mb-2 text-sm md:text-base">Photo du bien</h3>
             <img
               src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/product_photos/${property.photo_url}`}
               alt={property.bien}
-              className="rounded-lg w-full object-cover h-48"
+              className="rounded-lg w-full h-48 md:h-64 object-cover"
             />
           </div>
         )}

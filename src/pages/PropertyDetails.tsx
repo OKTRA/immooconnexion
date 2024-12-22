@@ -9,10 +9,12 @@ import { PropertyInfo } from "@/components/property-details/PropertyInfo"
 import { PaymentHistory } from "@/components/property-details/PaymentHistory"
 import { InspectionsList } from "@/components/property-details/InspectionsList"
 import { useToast } from "@/components/ui/use-toast"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 const PropertyDetails = () => {
   const { id } = useParams()
   const { toast } = useToast()
+  const isMobile = useIsMobile()
 
   const { data: property, isLoading: isLoadingProperty } = useQuery({
     queryKey: ['property', id],
@@ -144,19 +146,19 @@ const PropertyDetails = () => {
   }
 
   if (isLoadingProperty || isLoadingContracts) {
-    return <div>Chargement...</div>
+    return <div className="p-4">Chargement...</div>
   }
 
   if (!property) {
-    return <div>Bien non trouvé</div>
+    return <div className="p-4">Bien non trouvé</div>
   }
 
   return (
     <SidebarProvider>
-      <div className="flex">
-        <AppSidebar className="w-64" />
-        <main className="flex-1 p-4 md:p-6">
-          <div className="max-w-4xl mx-auto space-y-4">
+      <div className="flex h-screen overflow-hidden">
+        {!isMobile && <AppSidebar className="w-64 flex-shrink-0" />}
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-4 space-y-4 pb-16">
             <PropertyInfo property={property} />
             <PaymentHistory 
               propertyId={id || ''} 
