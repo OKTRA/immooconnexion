@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
 import { StatCard } from "@/components/StatCard"
 import { useQuery } from "@tanstack/react-query"
+import { toast } from "sonner"
 
 const Index = () => {
   const navigate = useNavigate()
@@ -10,31 +11,66 @@ const Index = () => {
 
   useEffect(() => {
     const checkUserRole = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        navigate("/login")
-        return
-      }
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single()
-
-      setUserRole(profile?.role || null)
-
-      // Redirect super admins to their dedicated dashboard
-      if (profile?.role === "admin") {
-        const { data: adminData } = await supabase
-          .from("administrators")
-          .select("is_super_admin")
-          .eq("id", user.id)
-          .single()
-
-        if (adminData?.is_super_admin) {
-          navigate("/admin")
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          navigate("/login")
+          return
         }
+
+        console.log("Checking role for user:", user.id)
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle()
+
+        if (profileError) {
+          console.error("Error fetching profile:", profileError)
+          toast.error("Erreur lors de la vérification du profil")
+          return
+        }
+
+        if (!profile) {
+          console.log("No profile found for user:", user.id)
+          // Create a profile if it doesn't exist
+          const { error: insertError } = await supabase
+            .from("profiles")
+            .insert([{ id: user.id, role: 'user' }])
+
+          if (insertError) {
+            console.error("Error creating profile:", insertError)
+            toast.error("Erreur lors de la création du profil")
+            return
+          }
+          
+          setUserRole('user')
+          return
+        }
+
+        console.log("Profile found:", profile)
+        setUserRole(profile.role)
+
+        // Check if user is a super admin
+        if (profile.role === "admin") {
+          const { data: adminData, error: adminError } = await supabase
+            .from("administrators")
+            .select("is_super_admin")
+            .eq("id", user.id)
+            .maybeSingle()
+
+          if (adminError) {
+            console.error("Error checking admin status:", adminError)
+            return
+          }
+
+          if (adminData?.is_super_admin) {
+            navigate("/admin")
+          }
+        }
+      } catch (error) {
+        console.error("Unexpected error:", error)
+        toast.error("Une erreur inattendue s'est produite")
       }
     }
 
