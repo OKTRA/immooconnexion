@@ -8,7 +8,9 @@ import { supabase } from "@/integrations/supabase/client"
 import { PaymentDialog } from "@/components/payment/PaymentDialog"
 import { InspectionDialog } from "@/components/inspections/InspectionDialog"
 import { InspectionHistory } from "@/components/inspections/InspectionHistory"
-import { FileText } from "lucide-react"
+import { FileText, Printer } from "lucide-react"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
 
 const PropertyDetails = () => {
   const { id } = useParams()
@@ -39,6 +41,94 @@ const PropertyDetails = () => {
       return data
     }
   })
+
+  const handlePrintReceipt = (contract: any) => {
+    const receiptContent = `
+      <html>
+        <head>
+          <title>Reçu de Paiement</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .details { margin: 20px 0; }
+            .footer { margin-top: 50px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Reçu de Paiement</h1>
+            <p>Date: ${format(new Date(contract.created_at), 'PP', { locale: fr })}</p>
+          </div>
+          <div class="details">
+            <p><strong>Locataire:</strong> ${contract.tenant_prenom} ${contract.tenant_nom}</p>
+            <p><strong>Bien:</strong> ${contract.property_name}</p>
+            <p><strong>Montant:</strong> ${contract.montant?.toLocaleString()} FCFA</p>
+            <p><strong>Type:</strong> ${contract.type}</p>
+            <p><strong>Période:</strong> ${format(new Date(contract.start_date), 'PP', { locale: fr })} - ${format(new Date(contract.end_date), 'PP', { locale: fr })}</p>
+          </div>
+          <div class="footer">
+            <p>Signature: _____________________</p>
+          </div>
+        </body>
+      </html>
+    `
+
+    const printWindow = window.open('', '_blank')
+    if (printWindow) {
+      printWindow.document.write(receiptContent)
+      printWindow.document.close()
+      printWindow.print()
+    }
+  }
+
+  const handlePrintContract = (contract: any) => {
+    const contractContent = `
+      <html>
+        <head>
+          <title>Contrat de Location</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .section { margin: 20px 0; }
+            .signatures { margin-top: 50px; display: flex; justify-content: space-between; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Contrat de Location</h1>
+            <p>Date: ${format(new Date(contract.created_at), 'PP', { locale: fr })}</p>
+          </div>
+          <div class="section">
+            <h2>1. Parties</h2>
+            <p><strong>Locataire:</strong> ${contract.tenant_prenom} ${contract.tenant_nom}</p>
+            <p><strong>Propriété:</strong> ${contract.property_name}</p>
+          </div>
+          <div class="section">
+            <h2>2. Conditions</h2>
+            <p><strong>Loyer mensuel:</strong> ${contract.montant?.toLocaleString()} FCFA</p>
+            <p><strong>Durée du bail:</strong> Du ${format(new Date(contract.start_date), 'PP', { locale: fr })} au ${format(new Date(contract.end_date), 'PP', { locale: fr })}</p>
+          </div>
+          <div class="signatures">
+            <div>
+              <p>Le Propriétaire:</p>
+              <p>_____________________</p>
+            </div>
+            <div>
+              <p>Le Locataire:</p>
+              <p>_____________________</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    const printWindow = window.open('', '_blank')
+    if (printWindow) {
+      printWindow.document.write(contractContent)
+      printWindow.document.close()
+      printWindow.print()
+    }
+  }
 
   if (isLoadingProperty || isLoadingContracts) {
     return <div>Chargement...</div>
@@ -146,11 +236,27 @@ const PropertyDetails = () => {
                           <td className="p-2">
                             <div className="flex items-center gap-2">
                               {contract.tenant_id && (
-                                <Link to={`/locataires/${contract.tenant_id}/contrats`}>
-                                  <Button variant="ghost" size="icon">
+                                <>
+                                  <Link to={`/locataires/${contract.tenant_id}/contrats`}>
+                                    <Button variant="ghost" size="icon">
+                                      <FileText className="h-4 w-4" />
+                                    </Button>
+                                  </Link>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    onClick={() => handlePrintReceipt(contract)}
+                                  >
+                                    <Printer className="h-4 w-4" />
+                                  </Button>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    onClick={() => handlePrintContract(contract)}
+                                  >
                                     <FileText className="h-4 w-4" />
                                   </Button>
-                                </Link>
+                                </>
                               )}
                               <InspectionDialog contract={contract} />
                             </div>
