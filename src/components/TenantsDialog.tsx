@@ -82,10 +82,15 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     setIsSubmitting(true);
     
     try {
+      // Generate a UUID for the tenant
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No authenticated user");
+
       // Insert into tenants table
       const { error: tenantError } = await supabase
         .from('tenants')
         .insert({
+          id: crypto.randomUUID(), // Generate a new UUID for the tenant
           birth_date: formData.dateNaissance,
           phone_number: formData.telephone,
           agency_fees: parseFloat(formData.fraisAgence),
