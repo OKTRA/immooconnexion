@@ -32,6 +32,10 @@ export function AppSidebar({ className }: SidebarProps) {
     navigate("/login")
   }
 
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark")
+  }
+
   const SidebarContent = () => (
     <div className={cn("pb-12", className)}>
       <div className="space-y-4 py-4">
@@ -96,7 +100,7 @@ export function AppSidebar({ className }: SidebarProps) {
             <Button
               variant="ghost"
               className="w-full justify-start"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              onClick={toggleTheme}
             >
               {theme === "dark" ? (
                 <Sun className="mr-2 h-4 w-4" />
