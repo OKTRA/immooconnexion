@@ -31,13 +31,9 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: Tenant) => void }) {
     queryFn: async () => {
       console.log('Fetching tenants...');
       
-      // First get all tenants with their profiles in a single query
       const { data: tenantsData, error: tenantsError } = await supabase
         .from('tenants')
-        .select(`
-          *,
-          profiles:profiles(*)
-        `);
+        .select('*');
       
       if (tenantsError) {
         console.error('Error fetching tenants:', tenantsError);
@@ -46,11 +42,10 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: Tenant) => void }) {
       
       console.log('Tenants data:', tenantsData);
 
-      // Map the data to our interface
       return tenantsData.map(tenant => ({
         id: tenant.id,
-        nom: tenant.profiles?.last_name || '',
-        prenom: tenant.profiles?.first_name || '',
+        nom: tenant.nom || '',
+        prenom: tenant.prenom || '',
         dateNaissance: tenant.birth_date || '',
         telephone: tenant.phone_number || '',
         photoIdUrl: tenant.photo_id_url,
