@@ -84,7 +84,11 @@ const Login = () => {
                   },
                 }}
                 view="sign_in"
-                showLinks={true}
+                showLinks={false}
+                redirectTo={window.location.origin}
+                onlyThirdPartyProviders={false}
+                magicLink={false}
+                forgotPasswordLink={true}
               />
             </TabsContent>
             <TabsContent value="admin">
