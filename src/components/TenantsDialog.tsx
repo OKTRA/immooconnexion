@@ -30,6 +30,7 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
   });
   const { toast } = useToast();
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: properties } = useQuery({
     queryKey: ['properties'],
@@ -78,27 +79,48 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     }
   };
 
+  const generateSecurePassword = () => {
+    const length = 12;
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let password = "";
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * charset.length);
+      password += charset[randomIndex];
+    }
+    return password;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
     try {
-      // First, create or get the user profile
+      // Generate a secure random password
+      const password = generateSecurePassword();
+
+      console.log("Creating user account...");
       const { data: userData, error: userError } = await supabase.auth.signUp({
         email: formData.email,
-        password: Math.random().toString(36).slice(-8), // Generate a random password
+        password: password,
         options: {
           data: {
             first_name: formData.prenom,
             last_name: formData.nom,
-          }
+          },
+          emailRedirectTo: window.location.origin
         }
       });
 
-      if (userError) throw userError;
+      if (userError) {
+        console.error("User creation error:", userError);
+        throw userError;
+      }
 
       if (!userData.user) {
         throw new Error("Failed to create user");
       }
+
+      console.log("User created successfully, creating tenant profile...");
 
       // Insert into tenants table
       const { error: tenantError } = await supabase
@@ -111,22 +133,25 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
           photo_id_url: previewUrl || null,
         });
 
-      if (tenantError) throw tenantError;
+      if (tenantError) {
+        console.error("Tenant creation error:", tenantError);
+        throw tenantError;
+      }
 
       toast({
         title: tenant ? "Locataire modifié" : "Locataire ajouté",
-        description: tenant
-          ? "Le locataire a été modifié avec succès."
-          : "Le locataire a été ajouté avec succès.",
+        description: "Un email de confirmation a été envoyé au locataire.",
       });
       onOpenChange(false);
-    } catch (error) {
-      console.error('Erreur:', error);
+    } catch (error: any) {
+      console.error('Erreur détaillée:', error);
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'opération.",
+        description: error.message || "Une erreur est survenue lors de l'opération.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -151,11 +176,12 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
             >
               Annuler
             </Button>
-            <Button type="submit">
-              {tenant ? "Modifier" : "Ajouter"}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Chargement..." : (tenant ? "Modifier" : "Ajouter")}
             </Button>
           </div>
         </form>
