@@ -63,11 +63,7 @@ const Login = () => {
                       password_label: "Mot de passe",
                       button_label: "Se connecter",
                       loading_button_label: "Connexion en cours...",
-                    },
-                    forgotten_password: {
-                      link_text: "Mot de passe oublié ?",
-                      button_label: "Réinitialiser le mot de passe",
-                    },
+                    }
                   },
                 }}
                 view="sign_in"
