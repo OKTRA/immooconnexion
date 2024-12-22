@@ -10,9 +10,10 @@ interface ReceiptTableProps {
   propertyId: string;
   isEndOfContract?: boolean;
   contractId?: string;
+  inspection?: any; // Added this line to fix the TypeScript error
 }
 
-export function ReceiptTable({ tenant, propertyId, isEndOfContract, contractId }: ReceiptTableProps) {
+export function ReceiptTable({ tenant, propertyId, isEndOfContract, contractId, inspection }: ReceiptTableProps) {
   const { data: property } = useQuery({
     queryKey: ['property', propertyId],
     queryFn: async () => {
@@ -30,7 +31,7 @@ export function ReceiptTable({ tenant, propertyId, isEndOfContract, contractId }
     enabled: !!propertyId
   });
 
-  const { data: inspection } = useQuery({
+  const { data: inspectionData } = useQuery({
     queryKey: ['inspection', contractId],
     queryFn: async () => {
       if (!contractId) return null;
