@@ -6,9 +6,13 @@ import { AdminProfiles } from "@/components/admin/AdminProfiles"
 import { AdminProperties } from "@/components/admin/AdminProperties"
 import { AdminTenants } from "@/components/admin/AdminTenants"
 import { AdminStats } from "@/components/admin/AdminStats"
+import { Button } from "@/components/ui/button"
+import { LogOut } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
+  const { toast } = useToast()
 
   useEffect(() => {
     const checkSuperAdmin = async () => {
@@ -32,9 +36,36 @@ const AdminDashboard = () => {
     checkSuperAdmin()
   }, [navigate])
 
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut()
+      navigate("/login")
+      toast({
+        title: "Déconnexion réussie",
+        description: "Vous avez été déconnecté avec succès",
+      })
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la déconnexion",
+        variant: "destructive",
+      })
+    }
+  }
+
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Tableau de bord Super Admin</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Tableau de bord Super Admin</h1>
+        <Button 
+          variant="ghost" 
+          onClick={handleLogout}
+          className="text-red-500 hover:text-red-600 hover:bg-red-100"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Déconnexion
+        </Button>
+      </div>
       
       <AdminStats />
 
