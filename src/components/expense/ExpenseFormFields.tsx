@@ -52,7 +52,7 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
       if (error) throw error
       return data
     },
-    enabled: !propertyId // Only fetch properties if propertyId is not provided
+    enabled: !propertyId
   })
 
   const form = useForm<ExpenseFormData>({
@@ -86,7 +86,7 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
         description: "La dépense a été enregistrée avec succès",
       })
 
-      queryClient.invalidateQueries({ queryKey: ['contracts'] })
+      queryClient.invalidateQueries({ queryKey: ['expenses'] })
       form.reset()
       onSuccess?.()
     } catch (error) {

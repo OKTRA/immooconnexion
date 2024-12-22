@@ -21,13 +21,14 @@ interface ExpenseTableProps {
 export function ExpenseTable({ propertyId }: ExpenseTableProps) {
   const { toast } = useToast()
 
-  const { data: payments = [], refetch } = useQuery({
-    queryKey: ['payments', propertyId],
+  const { data: expenses = [], refetch } = useQuery({
+    queryKey: ['expenses', propertyId],
     queryFn: async () => {
-      console.log("Fetching payments for property:", propertyId)
+      console.log("Fetching expenses for property:", propertyId)
       const query = supabase
         .from('contracts')
         .select('*')
+        .eq('type', 'depense')
       
       if (propertyId) {
         query.eq('property_id', propertyId)
@@ -36,11 +37,11 @@ export function ExpenseTable({ propertyId }: ExpenseTableProps) {
       const { data, error } = await query
       
       if (error) {
-        console.error("Error fetching payments:", error)
+        console.error("Error fetching expenses:", error)
         throw error
       }
       
-      console.log("Payments data:", data)
+      console.log("Expenses data:", data)
       return data
     }
   })
@@ -62,8 +63,8 @@ export function ExpenseTable({ propertyId }: ExpenseTableProps) {
 
     refetch()
     toast({
-      title: "Paiement supprimé",
-      description: "Le paiement a été supprimé avec succès",
+      title: "Dépense supprimée",
+      description: "La dépense a été supprimée avec succès",
     })
   }
 
@@ -73,37 +74,38 @@ export function ExpenseTable({ propertyId }: ExpenseTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Montant</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Date de début</TableHead>
-            <TableHead>Date de fin</TableHead>
+            <TableHead>Description</TableHead>
+            <TableHead>Date</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {payments.map((payment) => (
-            <TableRow key={payment.id}>
-              <TableCell>{payment.montant} FCFA</TableCell>
-              <TableCell>{payment.type}</TableCell>
-              <TableCell>
-                {format(new Date(payment.start_date), "PP", { locale: fr })}
-              </TableCell>
-              <TableCell>
-                {payment.end_date 
-                  ? format(new Date(payment.end_date), "PP", { locale: fr })
-                  : "En cours"
-                }
-              </TableCell>
-              <TableCell>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDelete(payment.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+          {expenses.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4} className="text-center text-muted-foreground">
+                Aucune dépense enregistrée
               </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            expenses.map((expense) => (
+              <TableRow key={expense.id}>
+                <TableCell>{Math.abs(expense.montant)} FCFA</TableCell>
+                <TableCell>{expense.description || 'N/A'}</TableCell>
+                <TableCell>
+                  {format(new Date(expense.start_date), "PP", { locale: fr })}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDelete(expense.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </div>
