@@ -105,6 +105,8 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
         .from('tenants')
         .insert({
           id: authData.user.id,
+          nom: formData.nom,
+          prenom: formData.prenom,
           birth_date: formData.dateNaissance,
           phone_number: formData.telephone,
           agency_fees: parseFloat(formData.fraisAgence),
