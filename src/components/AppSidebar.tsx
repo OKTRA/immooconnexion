@@ -21,8 +21,7 @@ import { useTheme } from "next-themes"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export function AppSidebar({ className }: SidebarProps) {
-  const isMobile = useIsMobile()
+export function SidebarContent() {
   const location = useLocation()
   const navigate = useNavigate()
   const { theme, setTheme } = useTheme()
@@ -36,8 +35,8 @@ export function AppSidebar({ className }: SidebarProps) {
     setTheme(theme === "dark" ? "light" : "dark")
   }
 
-  const SidebarContent = () => (
-    <div className={cn("pb-12", className)}>
+  return (
+    <div className="pb-12">
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">
           <div className="space-y-1">
@@ -122,6 +121,10 @@ export function AppSidebar({ className }: SidebarProps) {
       </div>
     </div>
   )
+}
+
+export function AppSidebar({ className }: SidebarProps) {
+  const isMobile = useIsMobile()
 
   if (isMobile) {
     return (
