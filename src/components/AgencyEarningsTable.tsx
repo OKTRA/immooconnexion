@@ -9,6 +9,19 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
+interface ContractWithProperties {
+  id: string
+  property_id: string
+  montant: number
+  type: string
+  created_at: string
+  properties: {
+    bien: string
+    frais_agence: number | null
+    taux_commission: number | null
+  }
+}
+
 export function AgencyEarningsTable() {
   const { data: earnings, isLoading } = useQuery({
     queryKey: ['agency-earnings'],
@@ -21,6 +34,7 @@ export function AgencyEarningsTable() {
           property_id,
           montant,
           type,
+          created_at,
           properties (
             bien,
             frais_agence,
@@ -35,7 +49,7 @@ export function AgencyEarningsTable() {
         throw error
       }
 
-      return contracts.map(contract => ({
+      return (contracts as ContractWithProperties[]).map(contract => ({
         id: contract.id,
         bien: contract.properties?.bien || '',
         loyer: contract.montant,
