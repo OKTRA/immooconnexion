@@ -3,6 +3,8 @@ import { AppSidebar } from "@/components/AppSidebar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DatePickerWithRange } from "@/components/ui/date-range-picker"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { addDays } from "date-fns"
 import { useState } from "react"
 import { DateRange } from "react-day-picker"
@@ -11,6 +13,8 @@ import { PropertyAnalysisReport } from "@/components/reports/PropertyAnalysisRep
 import { OverviewStats } from "@/components/reports/OverviewStats"
 import { RevenueEvolution } from "@/components/reports/RevenueEvolution"
 import { OccupancyStatus } from "@/components/reports/OccupancyStatus"
+
+const COLORS = ['#0088FE', '#FF8042', '#00C49F', '#FFBB28']
 
 const Reports = () => {
   const [date, setDate] = useState<DateRange>({
