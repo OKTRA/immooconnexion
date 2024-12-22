@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { TenantReceipt } from "./TenantReceipt";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TenantActionsProps {
   tenant: {
@@ -20,6 +22,25 @@ interface TenantActionsProps {
 export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) {
   const navigate = useNavigate();
   const [showReceipt, setShowReceipt] = useState(false);
+
+  // Fetch the contract to get the propertyId
+  const { data: contract } = useQuery({
+    queryKey: ['tenant-contract', tenant.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('contracts')
+        .select('property_id')
+        .eq('tenant_id', tenant.id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching contract:', error);
+        return null;
+      }
+      
+      return data;
+    }
+  });
 
   const handleViewContracts = (tenantId: string) => {
     navigate(`/locataires/${tenantId}/contrats`);
@@ -80,6 +101,7 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
               prenom: tenant.prenom,
               telephone: tenant.telephone,
               fraisAgence: tenant.fraisAgence || "0",
+              propertyId: contract?.property_id || "",
             }}
           />
         </DialogContent>
