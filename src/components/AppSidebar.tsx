@@ -18,6 +18,7 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
 import { useTheme } from "next-themes"
+import { useToast } from "@/hooks/use-toast"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -25,10 +26,23 @@ export function SidebarContent() {
   const location = useLocation()
   const navigate = useNavigate()
   const { theme, setTheme } = useTheme()
+  const { toast } = useToast()
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    navigate("/login")
+    try {
+      await supabase.auth.signOut()
+      navigate("/login")
+      toast({
+        title: "Déconnexion réussie",
+        description: "Vous avez été déconnecté avec succès",
+      })
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la déconnexion",
+        variant: "destructive",
+      })
+    }
   }
 
   const toggleTheme = () => {
