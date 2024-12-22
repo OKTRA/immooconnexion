@@ -23,21 +23,42 @@ interface TenantDisplay {
 export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => void }) {
   const { toast } = useToast();
 
-  const { data: tenants = [], refetch } = useQuery({
+  const { data: tenants = [], refetch, isError, error } = useQuery({
     queryKey: ['tenants'],
     queryFn: async () => {
-      console.log('Fetching tenants directly from tenants table...');
+      console.log('Début de la requête des locataires...');
       
+      // Vérifier d'abord le rôle de l'utilisateur
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .single();
+      
+      if (profileError) {
+        console.error('Erreur lors de la vérification du profil:', profileError);
+        throw profileError;
+      }
+      
+      console.log('Profil utilisateur:', profileData);
+
       const { data: tenantsData, error: tenantsError } = await supabase
         .from('tenants')
-        .select('*');
+        .select(`
+          id,
+          nom,
+          prenom,
+          birth_date,
+          phone_number,
+          photo_id_url,
+          agency_fees
+        `);
       
       if (tenantsError) {
-        console.error('Error fetching tenants:', tenantsError);
+        console.error('Erreur lors de la récupération des locataires:', tenantsError);
         throw tenantsError;
       }
       
-      console.log('Tenants data:', tenantsData);
+      console.log('Données des locataires brutes:', tenantsData);
 
       return tenantsData.map((tenant: any) => ({
         id: tenant.id,
@@ -51,32 +72,14 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
     }
   });
 
-  const handleDelete = async (id: string) => {
-    try {
-      const { error: tenantError } = await supabase
-        .from('tenants')
-        .delete()
-        .eq('id', id);
-
-      if (tenantError) {
-        console.error('Error deleting tenant:', tenantError);
-        throw tenantError;
-      }
-
-      refetch();
-      toast({
-        title: "Locataire supprimé",
-        description: "Le locataire a été supprimé avec succès.",
-      });
-    } catch (error: any) {
-      console.error('Error in handleDelete:', error);
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la suppression.",
-        variant: "destructive",
-      });
-    }
-  };
+  if (isError) {
+    console.error('Erreur de requête:', error);
+    toast({
+      title: "Erreur",
+      description: "Impossible de charger les locataires. Veuillez réessayer.",
+      variant: "destructive",
+    });
+  }
 
   return (
     <div className="space-y-4">
@@ -92,14 +95,44 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tenants.map((tenant) => (
-              <TenantTableRow
-                key={tenant.id}
-                tenant={tenant}
-                onEdit={onEdit}
-                onDelete={handleDelete}
-              />
-            ))}
+            {tenants.length === 0 ? (
+              <TableRow>
+                <td colSpan={5} className="text-center py-4">
+                  Aucun locataire trouvé
+                </td>
+              </TableRow>
+            ) : (
+              tenants.map((tenant) => (
+                <TenantTableRow
+                  key={tenant.id}
+                  tenant={tenant}
+                  onEdit={onEdit}
+                  onDelete={async (id) => {
+                    try {
+                      const { error } = await supabase
+                        .from('tenants')
+                        .delete()
+                        .eq('id', id);
+
+                      if (error) throw error;
+
+                      refetch();
+                      toast({
+                        title: "Locataire supprimé",
+                        description: "Le locataire a été supprimé avec succès.",
+                      });
+                    } catch (error: any) {
+                      console.error('Error in handleDelete:', error);
+                      toast({
+                        title: "Erreur",
+                        description: "Une erreur est survenue lors de la suppression.",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                />
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
