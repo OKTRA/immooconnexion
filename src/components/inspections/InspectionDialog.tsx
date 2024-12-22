@@ -8,14 +8,16 @@ import {
 } from "@/components/ui/dialog"
 import { InspectionForm } from "./InspectionForm"
 import { Contract } from "@/integrations/supabase/types/contracts"
+import { cn } from "@/lib/utils"
 
 interface InspectionDialogProps {
   contract: Contract
   onOpenChange?: (open: boolean) => void
   open?: boolean
+  className?: string
 }
 
-export function InspectionDialog({ contract, onOpenChange, open }: InspectionDialogProps) {
+export function InspectionDialog({ contract, onOpenChange, open, className }: InspectionDialogProps) {
   const dialogContent = (
     <DialogContent className="sm:max-w-[500px]">
       <DialogHeader>
@@ -32,7 +34,7 @@ export function InspectionDialog({ contract, onOpenChange, open }: InspectionDia
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Effectuer une inspection</Button>
+        <Button variant="outline" className={cn(className)}>Effectuer une inspection</Button>
       </DialogTrigger>
       {dialogContent}
     </Dialog>
