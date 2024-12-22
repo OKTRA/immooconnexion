@@ -22,6 +22,7 @@ interface TenantActionsProps {
 export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) {
   const navigate = useNavigate();
   const [showReceipt, setShowReceipt] = useState(false);
+  const [isEndOfContract, setIsEndOfContract] = useState(false);
 
   const { data: contract } = useQuery({
     queryKey: ['tenant-contract', tenant.id],
@@ -52,6 +53,11 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
     if (contract?.id) {
       navigate(`/inspections/${contract.id}`);
     }
+  };
+
+  const showEndOfContractReceipt = () => {
+    setIsEndOfContract(true);
+    setShowReceipt(true);
   };
 
   return (
@@ -88,7 +94,10 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
         <Button
           variant="outline"
           size="icon"
-          onClick={() => setShowReceipt(true)}
+          onClick={() => {
+            setIsEndOfContract(false);
+            setShowReceipt(true);
+          }}
         >
           <Receipt className="h-4 w-4" />
         </Button>
@@ -97,7 +106,7 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
             variant="outline"
             onClick={handleEndContract}
           >
-            Mettre fin au contrat
+            Effectuer une inspection
           </Button>
         )}
         <Button
@@ -120,6 +129,7 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
               propertyId: contract?.property_id || "",
             }}
             contractId={contract?.id}
+            isEndOfContract={isEndOfContract}
           />
         </DialogContent>
       </Dialog>
