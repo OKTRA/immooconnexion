@@ -106,7 +106,7 @@ const PropertyDetails = () => {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle>Historique des paiements</CardTitle>
-                  <ExpenseDialog propertyId={id} propertyRent={property.loyer} />
+                  <ExpenseDialog propertyId={id || ""} />
                 </div>
               </CardHeader>
               <CardContent>
