@@ -46,7 +46,7 @@ export function ExpenseTable({ propertyId }: ExpenseTableProps) {
     }
   })
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     const { error } = await supabase
       .from('contracts')
       .delete()

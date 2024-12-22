@@ -62,7 +62,7 @@ const Expenses = () => {
                     <SelectValue placeholder="Sélectionner une propriété" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Tous les biens</SelectItem>
+                    <SelectItem value="all">Tous les biens</SelectItem>
                     {properties?.map((property) => (
                       <SelectItem key={property.id} value={property.id}>
                         {property.bien}
@@ -72,13 +72,13 @@ const Expenses = () => {
                 </Select>
               </div>
               <ExpenseDialog 
-                propertyId={selectedPropertyId} 
+                propertyId={selectedPropertyId === "all" ? "" : selectedPropertyId} 
                 propertyRent={properties?.find(p => p.id === selectedPropertyId)?.loyer}
               />
             </div>
           </div>
 
-          <ExpenseTable propertyId={selectedPropertyId} />
+          <ExpenseTable propertyId={selectedPropertyId === "all" ? undefined : selectedPropertyId} />
         </main>
       </div>
     </SidebarProvider>
