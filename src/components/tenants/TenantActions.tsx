@@ -23,7 +23,6 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
   const navigate = useNavigate();
   const [showReceipt, setShowReceipt] = useState(false);
 
-  // Fetch the contract to get the propertyId
   const { data: contract } = useQuery({
     queryKey: ['tenant-contract', tenant.id],
     queryFn: async () => {
@@ -31,7 +30,7 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
       
       const { data, error } = await supabase
         .from('contracts')
-        .select('property_id')
+        .select('*')
         .eq('tenant_id', tenant.id)
         .maybeSingle();
       
@@ -47,6 +46,12 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
 
   const handleViewContracts = (tenantId: string) => {
     navigate(`/locataires/${tenantId}/contrats`);
+  };
+
+  const handleEndContract = () => {
+    if (contract?.id) {
+      navigate(`/inspections/${contract.id}`);
+    }
   };
 
   return (
@@ -87,6 +92,14 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
         >
           <Receipt className="h-4 w-4" />
         </Button>
+        {contract && (
+          <Button
+            variant="outline"
+            onClick={handleEndContract}
+          >
+            Mettre fin au contrat
+          </Button>
+        )}
         <Button
           variant="destructive"
           size="icon"
@@ -106,6 +119,7 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
               fraisAgence: tenant.fraisAgence || "0",
               propertyId: contract?.property_id || "",
             }}
+            contractId={contract?.id}
           />
         </DialogContent>
       </Dialog>
