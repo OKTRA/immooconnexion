@@ -44,7 +44,7 @@ export function AdminLoginForm() {
         description: "Bienvenue dans l'interface d'administration",
       })
 
-      navigate("/admin/dashboard")
+      navigate("/admin")
     } catch (error: any) {
       toast({
         title: "Erreur de connexion",
