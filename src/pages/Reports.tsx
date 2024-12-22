@@ -1,31 +1,16 @@
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/AppSidebar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DatePickerWithRange } from "@/components/ui/date-range-picker"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { addDays } from "date-fns"
 import { useState } from "react"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DateRange } from "react-day-picker"
 import { TenantPaymentsReport } from "@/components/reports/TenantPaymentsReport"
 import { PropertyAnalysisReport } from "@/components/reports/PropertyAnalysisReport"
-
-const occupancyData = [
-  { status: 'Occupé', value: 15 },
-  { status: 'Libre', value: 5 },
-]
-
-const revenueData = [
-  { month: 'Jan', revenue: 1200000 },
-  { month: 'Fév', revenue: 1500000 },
-  { month: 'Mar', revenue: 1800000 },
-  { month: 'Avr', revenue: 1600000 },
-  { month: 'Mai', revenue: 2000000 },
-  { month: 'Jun', revenue: 1900000 },
-]
-
-const COLORS = ['#0088FE', '#FF8042', '#00C49F', '#FFBB28']
+import { OverviewStats } from "@/components/reports/OverviewStats"
+import { RevenueEvolution } from "@/components/reports/RevenueEvolution"
+import { OccupancyStatus } from "@/components/reports/OccupancyStatus"
 
 const Reports = () => {
   const [date, setDate] = useState<DateRange>({
@@ -64,92 +49,10 @@ const Reports = () => {
             </TabsList>
 
             <TabsContent value="overview">
-              <div className="grid gap-4 md:grid-cols-4 mb-8">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Total des Biens</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-3xl font-bold">20</p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Taux d'Occupation</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-3xl font-bold">75%</p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Revenu Total</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-3xl font-bold">10,050,000 FCFA</p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Frais d'Agence</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-3xl font-bold">1,505,000 FCFA</p>
-                  </CardContent>
-                </Card>
-              </div>
-
+              <OverviewStats />
               <div className="grid grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Évolution des Revenus</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[400px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={revenueData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="month" />
-                          <YAxis />
-                          <Tooltip />
-                          <Bar dataKey="revenue" fill="#0088FE" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>État d'Occupation</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[400px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={occupancyData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                            outerRadius={150}
-                            fill="#8884d8"
-                            dataKey="value"
-                          >
-                            {occupancyData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
+                <RevenueEvolution />
+                <OccupancyStatus />
               </div>
             </TabsContent>
 
@@ -185,8 +88,8 @@ const Reports = () => {
                             fill="#8884d8"
                             dataKey="value"
                           >
-                            {occupancyData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            {COLORS.map((color, index) => (
+                              <Cell key={`cell-${index}`} fill={color} />
                             ))}
                           </Pie>
                           <Tooltip />
