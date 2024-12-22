@@ -22,7 +22,6 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     nom: "",
     prenom: "",
     dateNaissance: "",
-    email: "",
     telephone: "",
     photoId: null as File | null,
     fraisAgence: "",
@@ -60,7 +59,6 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
         nom: "",
         prenom: "",
         dateNaissance: "",
-        email: "",
         telephone: "",
         photoId: null,
         fraisAgence: "",
@@ -79,54 +77,15 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     }
   };
 
-  const generateSecurePassword = () => {
-    const length = 12;
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-    let password = "";
-    for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * charset.length);
-      password += charset[randomIndex];
-    }
-    return password;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
-      // Generate a secure random password
-      const password = generateSecurePassword();
-
-      console.log("Creating user account...");
-      const { data: userData, error: userError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: password,
-        options: {
-          data: {
-            first_name: formData.prenom,
-            last_name: formData.nom,
-          },
-          emailRedirectTo: window.location.origin
-        }
-      });
-
-      if (userError) {
-        console.error("User creation error:", userError);
-        throw userError;
-      }
-
-      if (!userData.user) {
-        throw new Error("Failed to create user");
-      }
-
-      console.log("User created successfully, creating tenant profile...");
-
       // Insert into tenants table
       const { error: tenantError } = await supabase
         .from('tenants')
-        .upsert({
-          id: userData.user.id,
+        .insert({
           birth_date: formData.dateNaissance,
           phone_number: formData.telephone,
           agency_fees: parseFloat(formData.fraisAgence),
@@ -140,7 +99,7 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
 
       toast({
         title: tenant ? "Locataire modifié" : "Locataire ajouté",
-        description: "Un email de confirmation a été envoyé au locataire.",
+        description: "Le locataire a été ajouté avec succès.",
       });
       onOpenChange(false);
     } catch (error: any) {

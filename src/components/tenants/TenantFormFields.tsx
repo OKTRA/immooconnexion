@@ -13,7 +13,6 @@ interface TenantFormFieldsProps {
     nom: string;
     prenom: string;
     dateNaissance: string;
-    email: string;
     telephone: string;
     photoId: File | null;
     fraisAgence: string;
@@ -72,16 +71,6 @@ export function TenantFormFields({
           onChange={(e) =>
             setFormData({ ...formData, telephone: e.target.value })
           }
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           required
         />
       </div>
