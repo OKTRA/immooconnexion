@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Phone, MessageSquare } from "lucide-react";
+import { Pencil, Trash2, Phone, MessageSquare, FileText } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +17,6 @@ interface Tenant {
   nom: string;
   prenom: string;
   dateNaissance: string;
-  email: string;
   telephone: string;
   photoIdUrl?: string;
 }
@@ -63,7 +62,6 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: Tenant) => void }) {
           nom: profile?.last_name || '',
           prenom: profile?.first_name || '',
           dateNaissance: tenant.birth_date || '',
-          email: profile?.email || '',
           telephone: tenant.phone_number || '',
           photoIdUrl: tenant.photo_id_url,
         };
@@ -103,7 +101,6 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: Tenant) => void }) {
               <TableHead>Nom</TableHead>
               <TableHead>Prénom</TableHead>
               <TableHead>Date de Naissance</TableHead>
-              <TableHead>Email</TableHead>
               <TableHead>Téléphone</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
@@ -114,7 +111,6 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: Tenant) => void }) {
                 <TableCell>{tenant.nom}</TableCell>
                 <TableCell>{tenant.prenom}</TableCell>
                 <TableCell>{tenant.dateNaissance}</TableCell>
-                <TableCell>{tenant.email}</TableCell>
                 <TableCell>{tenant.telephone}</TableCell>
                 <TableCell className="flex gap-2">
                   <Button
@@ -137,6 +133,13 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: Tenant) => void }) {
                     onClick={() => window.location.href = `sms:${tenant.telephone}`}
                   >
                     <MessageSquare className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {/* TODO: Implement contracts view */}}
+                  >
+                    <FileText className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="destructive"
