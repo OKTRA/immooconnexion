@@ -16,6 +16,7 @@ import { AdminLoginForm } from "@/components/admin/AdminLoginForm"
 const Login = () => {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("user")
+  const [view, setView] = useState<"sign_in" | "forgotten_password">("sign_in")
 
   useEffect(() => {
     const {
@@ -84,17 +85,32 @@ const Login = () => {
                     },
                   },
                 }}
-                view="sign_in"
+                view={view}
                 showLinks={false}
                 redirectTo={window.location.origin}
                 onlyThirdPartyProviders={false}
                 magicLink={false}
               />
-              <div className="text-center mt-4">
-                <a href="#" className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">
-                  Mot de passe oublié ?
-                </a>
-              </div>
+              {view === "sign_in" && (
+                <div className="text-center mt-4">
+                  <button 
+                    onClick={() => setView("forgotten_password")}
+                    className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
+                    Mot de passe oublié ?
+                  </button>
+                </div>
+              )}
+              {view === "forgotten_password" && (
+                <div className="text-center mt-4">
+                  <button 
+                    onClick={() => setView("sign_in")}
+                    className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
+                    Retour à la connexion
+                  </button>
+                </div>
+              )}
             </TabsContent>
             <TabsContent value="admin">
               <AdminLoginForm />
