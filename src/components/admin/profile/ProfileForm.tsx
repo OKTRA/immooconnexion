@@ -27,9 +27,17 @@ export function ProfileForm({ newProfile, setNewProfile }: ProfileFormProps) {
     enabled: !!newProfile.subscription_plan_id,
   });
 
-  // Vérification si le plan permet d'afficher le numéro de téléphone
+  // Désactiver les fonctionnalités si le plan est Débutant
   const canShowPhoneNumber = subscriptionPlan?.name === "Professionnel" || subscriptionPlan?.name === "Enterprise";
   const canListProperties = subscriptionPlan?.name === "Professionnel" || subscriptionPlan?.name === "Enterprise";
+
+  // Réinitialiser les toggles si le plan ne permet pas ces fonctionnalités
+  if (!canShowPhoneNumber && newProfile.show_phone_on_site) {
+    setNewProfile({ ...newProfile, show_phone_on_site: false });
+  }
+  if (!canListProperties && newProfile.list_properties_on_site) {
+    setNewProfile({ ...newProfile, list_properties_on_site: false });
+  }
 
   return (
     <div className="space-y-4 w-full max-w-2xl mx-auto px-4 md:px-0">
@@ -40,7 +48,15 @@ export function ProfileForm({ newProfile, setNewProfile }: ProfileFormProps) {
       />
       <ProfilePlanSelect 
         value={newProfile.subscription_plan_id} 
-        onValueChange={(value) => setNewProfile({ ...newProfile, subscription_plan_id: value })}
+        onValueChange={(value) => {
+          setNewProfile({ 
+            ...newProfile, 
+            subscription_plan_id: value,
+            // Réinitialiser les toggles lors du changement de plan
+            show_phone_on_site: false,
+            list_properties_on_site: false
+          });
+        }}
       />
       <FeatureToggles 
         newProfile={newProfile}
