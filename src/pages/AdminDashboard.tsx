@@ -55,13 +55,15 @@ const AdminDashboard = () => {
       return adminData
     },
     retry: false,
-    onError: (error) => {
-      toast({
-        title: "Erreur d'accès",
-        description: "Vous n'avez pas les droits nécessaires pour accéder à cette page.",
-        variant: "destructive"
-      })
-      navigate("/")
+    meta: {
+      errorHandler: () => {
+        toast({
+          title: "Erreur d'accès",
+          description: "Vous n'avez pas les droits nécessaires pour accéder à cette page.",
+          variant: "destructive"
+        })
+        navigate("/")
+      }
     }
   })
 
