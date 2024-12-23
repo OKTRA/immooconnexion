@@ -29,7 +29,7 @@ const Index = () => {
       // Build base queries
       let propertiesQuery = supabase.from("properties").select("*", { count: "exact", head: true })
       let tenantsQuery = supabase.from("tenants").select("*", { count: "exact", head: true })
-      let contractsQuery = supabase.from("contracts").select("montant")
+      let contractsQuery = supabase.from("contracts").select("montant, type, created_at")
 
       // If not admin, filter by agency_id
       if (profile?.role !== 'admin') {
@@ -48,7 +48,22 @@ const Index = () => {
         contractsQuery,
       ])
 
-      const totalRevenue = contracts?.reduce((sum, contract) => sum + (contract.montant || 0), 0) || 0
+      // Log détaillé des contrats pour comprendre le calcul
+      console.log("Détail des contrats pour le calcul des revenus:", 
+        contracts?.map(c => ({
+          montant: c.montant,
+          type: c.type,
+          date: new Date(c.created_at).toLocaleDateString()
+        }))
+      )
+
+      const totalRevenue = contracts?.reduce((sum, contract) => {
+        const montant = contract.montant || 0
+        console.log(`Ajout du montant ${montant} au total`)
+        return sum + montant
+      }, 0) || 0
+
+      console.log("Revenu total calculé:", totalRevenue)
 
       return {
         properties: propertiesCount || 0,
