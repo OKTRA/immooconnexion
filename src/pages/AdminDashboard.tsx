@@ -6,8 +6,13 @@ import { AdminProperties } from "@/components/admin/AdminProperties"
 import { AdminTenants } from "@/components/admin/AdminTenants"
 import { AdminSubscriptionPlans } from "@/components/admin/subscription/AdminSubscriptionPlans"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useNavigate } from "react-router-dom"
+import { useToast } from "@/hooks/use-toast"
 
 const AdminDashboard = () => {
+  const navigate = useNavigate()
+  const { toast } = useToast()
+
   const { data: adminData, isLoading, error } = useQuery({
     queryKey: ["admin-status"],
     queryFn: async () => {
@@ -17,64 +22,47 @@ const AdminDashboard = () => {
         throw new Error("Non authentifié")
       }
 
-      // First, try to get the profile
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .maybeSingle()
-
-      if (profileError) {
-        console.error("Error fetching profile:", profileError)
-        throw profileError
-      }
-
-      // If no profile exists, create one with minimal required fields
-      if (!profile) {
-        const { error: insertError } = await supabase
-          .from("profiles")
-          .insert([{ 
-            id: user.id, 
-            role: 'admin',
-            email: user.email
-          }])
-
-        if (insertError) {
-          console.error("Error creating profile:", insertError)
-          throw insertError
-        }
-
-        // Fetch the newly created profile
-        const { data: newProfile, error: newProfileError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .maybeSingle()
-
-        if (newProfileError) throw newProfileError
-        if (!newProfile?.role) throw new Error("Profile role not set")
-        
-        if (newProfile.role !== 'admin') {
-          throw new Error("Accès non autorisé")
-        }
-      } else if (profile.role !== 'admin') {
-        throw new Error("Accès non autorisé")
-      }
-
-      // Now check admin status
-      const { data: adminData, error } = await supabase
+      // Vérifier d'abord si l'utilisateur est un super admin
+      const { data: adminData, error: adminError } = await supabase
         .from("administrators")
         .select("is_super_admin")
         .eq("id", user.id)
         .maybeSingle()
 
-      if (error) {
-        console.error("Error fetching admin status:", error)
-        throw error
+      if (adminError) {
+        console.error("Error fetching admin status:", adminError)
+        throw adminError
+      }
+
+      // Si l'utilisateur n'est pas un super admin, vérifier s'il a un profil admin
+      if (!adminData?.is_super_admin) {
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle()
+
+        if (profileError) {
+          console.error("Error fetching profile:", profileError)
+          throw profileError
+        }
+
+        if (!profile || profile.role !== 'admin') {
+          throw new Error("Accès non autorisé")
+        }
       }
 
       return adminData
     },
+    retry: false,
+    onError: (error) => {
+      toast({
+        title: "Erreur d'accès",
+        description: "Vous n'avez pas les droits nécessaires pour accéder à cette page.",
+        variant: "destructive"
+      })
+      navigate("/")
+    }
   })
 
   if (isLoading) {
@@ -82,7 +70,7 @@ const AdminDashboard = () => {
   }
 
   if (error) {
-    return <div>Erreur: {(error as Error).message}</div>
+    return null // La redirection est gérée par onError
   }
 
   return (
