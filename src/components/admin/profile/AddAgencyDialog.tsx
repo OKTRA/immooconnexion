@@ -18,6 +18,9 @@ export function AddAgencyDialog({ showDialog, setShowDialog, onAgencyCreated }: 
     address: "",
     phone: "",
     email: "",
+    subscription_plan_id: "",
+    show_phone_on_site: false,
+    list_properties_on_site: false,
   })
   const { toast } = useToast()
 
@@ -51,6 +54,9 @@ export function AddAgencyDialog({ showDialog, setShowDialog, onAgencyCreated }: 
         address: "",
         phone: "",
         email: "",
+        subscription_plan_id: "",
+        show_phone_on_site: false,
+        list_properties_on_site: false,
       })
       
       if (onAgencyCreated) {
