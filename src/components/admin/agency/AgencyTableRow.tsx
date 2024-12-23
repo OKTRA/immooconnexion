@@ -1,12 +1,12 @@
 import { TableCell, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Edit, Users } from "lucide-react"
+import { Edit, Users, Building2, UserPlus } from "lucide-react"
 import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Agency } from "./types"
-import { AgencyUsers } from "./AgencyUsers"
+import { AgencyOverview } from "./AgencyOverview"
 import { AgencyForm } from "./AgencyForm"
+import { AddProfileDialog } from "../profile/AddProfileDialog"
 
 interface AgencyTableRowProps {
   agency: Agency
@@ -16,13 +16,8 @@ interface AgencyTableRowProps {
 
 export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps) {
   const [showEditDialog, setShowEditDialog] = useState(false)
-  const [showUsersDialog, setShowUsersDialog] = useState(false)
-  const [editedAgency, setEditedAgency] = useState(agency)
-
-  const handleSaveEdit = () => {
-    onEdit(editedAgency)
-    setShowEditDialog(false)
-  }
+  const [showOverviewDialog, setShowOverviewDialog] = useState(false)
+  const [showAddProfileDialog, setShowAddProfileDialog] = useState(false)
 
   return (
     <>
@@ -32,50 +27,58 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         <TableCell>{agency.phone || "-"}</TableCell>
         <TableCell>{agency.email || "-"}</TableCell>
         <TableCell>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowUsersDialog(true)}
-          >
-            <Users className="h-4 w-4 mr-2" />
-            Voir les utilisateurs
-          </Button>
-        </TableCell>
-        <TableCell>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowEditDialog(true)}
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            Modifier
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowOverviewDialog(true)}
+            >
+              <Building2 className="h-4 w-4 mr-2" />
+              Vue d'ensemble
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAddProfileDialog(true)}
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              Ajouter un profil
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowEditDialog(true)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          </div>
         </TableCell>
       </TableRow>
 
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Modifier l'agence</DialogTitle>
-          </DialogHeader>
           <AgencyForm 
-            agency={editedAgency} 
-            setAgency={setEditedAgency} 
+            agency={agency}
+            onSubmit={(editedAgency) => {
+              onEdit(editedAgency)
+              setShowEditDialog(false)
+            }}
           />
-          <Button onClick={handleSaveEdit} className="w-full">
-            Enregistrer
-          </Button>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showUsersDialog} onOpenChange={setShowUsersDialog}>
+      <Dialog open={showOverviewDialog} onOpenChange={setShowOverviewDialog}>
         <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Utilisateurs de l'agence {agency.name}</DialogTitle>
-          </DialogHeader>
-          <AgencyUsers agencyId={agency.id} />
+          <AgencyOverview agency={agency} onRefetch={refetch} />
         </DialogContent>
       </Dialog>
+
+      <AddProfileDialog
+        open={showAddProfileDialog}
+        onOpenChange={setShowAddProfileDialog}
+        agencyId={agency.id}
+        onProfileCreated={refetch}
+      />
     </>
   )
 }
