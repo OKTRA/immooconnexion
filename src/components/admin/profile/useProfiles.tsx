@@ -11,7 +11,7 @@ export function useProfiles() {
         .from("profiles")
         .select(`
           *,
-          agency:agencies(
+          agencies!profiles_agency_id_fkey (
             name,
             address,
             phone,
@@ -25,8 +25,14 @@ export function useProfiles() {
         throw error
       }
 
-      console.log('Fetched profiles:', data)
-      return data
+      // Transform the data to include agency_name
+      const transformedData = data?.map(profile => ({
+        ...profile,
+        agency_name: profile.agencies?.name || '-'
+      }))
+
+      console.log('Fetched profiles:', transformedData)
+      return transformedData
     },
   })
 }
