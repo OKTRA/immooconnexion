@@ -15,10 +15,10 @@ interface RawProfile {
   show_phone_on_site: boolean | null
   list_properties_on_site: boolean | null
   created_at: string
-  agency: Agency | null
+  agency_id: string | null
 }
 
-interface TransformedProfile extends Omit<RawProfile, 'agency'> {
+interface TransformedProfile extends RawProfile {
   agency_name: string
 }
 
@@ -26,30 +26,45 @@ export function useProfiles() {
   return useQuery({
     queryKey: ["admin-profiles"],
     queryFn: async () => {
-      console.log('Fetching profiles...')
+      console.log('Début de la récupération des profils...')
       
+      // Récupérer d'abord tous les profils pour debug
+      const { data: allProfiles, error: allProfilesError } = await supabase
+        .from("profiles")
+        .select("*")
+      
+      console.log('Tous les profils dans la base:', allProfiles)
+      
+      if (allProfilesError) {
+        console.error("Erreur lors de la récupération de tous les profils:", allProfilesError)
+      }
+
+      // Maintenant, récupérer les profils avec les informations d'agence
       const { data, error } = await supabase
         .from("profiles")
         .select(`
           *,
-          agency:agencies!profiles_agency_id_fkey (
+          agency:agencies (
             name
           )
         `)
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Error fetching profiles:', error)
+        console.error('Erreur lors de la récupération des profils:', error)
+        console.error('Détails de l\'erreur:', error.message, error.details, error.hint)
         throw error
       }
 
-      // Transform the data to include agency_name
-      const transformedData = (data as RawProfile[])?.map(profile => ({
+      console.log('Données brutes récupérées:', data)
+
+      // Transformer les données pour inclure le nom de l'agence
+      const transformedData = data?.map(profile => ({
         ...profile,
         agency_name: profile.agency?.name || '-'
       })) as TransformedProfile[]
 
-      console.log('Fetched profiles:', transformedData)
+      console.log('Profils transformés:', transformedData)
       return transformedData
     },
   })
