@@ -36,6 +36,42 @@ export type Database = {
         }
         Relationships: []
       }
+      agencies: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          owner_id: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          owner_id?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          owner_id?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contracts: {
         Row: {
           agency_id: string | null
@@ -147,7 +183,6 @@ export type Database = {
       profiles: {
         Row: {
           agency_id: string | null
-          agency_name: string | null
           created_at: string
           email: string | null
           first_name: string | null
@@ -164,7 +199,6 @@ export type Database = {
         }
         Insert: {
           agency_id?: string | null
-          agency_name?: string | null
           created_at?: string
           email?: string | null
           first_name?: string | null
@@ -181,7 +215,6 @@ export type Database = {
         }
         Update: {
           agency_id?: string | null
-          agency_name?: string | null
           created_at?: string
           email?: string | null
           first_name?: string | null

@@ -16,7 +16,7 @@ export function RevenueChart() {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role, agency_name')
+        .select('role, agency_id')
         .eq('id', user.id)
         .maybeSingle()
 
