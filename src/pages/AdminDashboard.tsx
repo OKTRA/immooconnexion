@@ -13,7 +13,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
 
-  const { data: adminData, isLoading, error } = useQuery({
+  const { data: adminData, isLoading } = useQuery({
     queryKey: ["admin-status"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -69,10 +69,6 @@ const AdminDashboard = () => {
 
   if (isLoading) {
     return <div>Chargement...</div>
-  }
-
-  if (error) {
-    return null // La redirection est gérée par onError
   }
 
   return (
