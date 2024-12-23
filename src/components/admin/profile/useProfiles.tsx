@@ -27,30 +27,24 @@ export function useProfiles() {
     queryFn: async () => {
       console.log('Début de la récupération des admins...')
       
+      // Récupérer tous les administrateurs locaux avec leurs agences associées
       const { data, error } = await supabase
         .from("local_admins")
         .select(`
-          id,
-          first_name,
-          last_name,
-          email,
-          role,
-          phone_number,
-          created_at,
-          agency_id,
+          *,
           agency:agencies(name)
         `)
         .order('created_at', { ascending: false })
 
       if (error) {
         console.error('Erreur lors de la récupération des admins:', error)
-        console.error('Détails de l\'erreur:', error.message, error.details, error.hint)
         throw error
       }
 
       console.log('Données brutes récupérées:', data)
 
-      const transformedData = data?.map(admin => ({
+      // Transformer les données pour inclure le nom de l'agence directement
+      const transformedData = data.map(admin => ({
         ...admin,
         agency_name: admin.agency?.name || '-'
       })) as TransformedAdmin[]
