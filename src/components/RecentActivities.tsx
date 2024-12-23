@@ -18,7 +18,7 @@ export function RecentActivities() {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role, agency_name')
+        .select('role')
         .eq('id', user.id)
         .maybeSingle()
 
@@ -37,7 +37,7 @@ export function RecentActivities() {
           agency_id
         `)
 
-      // If not admin, filter by agency_id
+      // Si l'utilisateur n'est pas admin, on filtre par agency_id
       if (profile?.role !== 'admin') {
         query = query.eq('agency_id', user.id)
       }
