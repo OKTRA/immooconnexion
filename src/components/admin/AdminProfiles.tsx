@@ -28,6 +28,7 @@ export function AdminProfiles() {
   const { data: profiles = [], refetch } = useQuery({
     queryKey: ["admin-profiles"],
     queryFn: async () => {
+      console.log("Fetching profiles...")
       const { data, error } = await supabase
         .from("profiles")
         .select(`
@@ -41,13 +42,29 @@ export function AdminProfiles() {
         `)
         .order("created_at", { ascending: false })
 
-      if (error) throw error
-      return data
+      if (error) {
+        console.error("Error fetching profiles:", error)
+        throw error
+      }
+      
+      console.log("Fetched profiles:", data)
+      return data || []
     },
+    meta: {
+      errorHandler: (error: Error) => {
+        console.error("Query error:", error)
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les profils. Veuillez réessayer.",
+          variant: "destructive",
+        })
+      }
+    }
   })
 
   const handleEditProfile = async (editedProfile: any) => {
     try {
+      console.log("Updating profile:", editedProfile)
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -69,6 +86,7 @@ export function AdminProfiles() {
       })
       refetch()
     } catch (error: any) {
+      console.error("Error updating profile:", error)
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue lors de la mise à jour du profil",
@@ -79,19 +97,10 @@ export function AdminProfiles() {
 
   const handleAddUser = async (agencyData?: any) => {
     try {
-      if (!newProfile.password) {
+      if (!newProfile.email || !newProfile.password) {
         toast({
           title: "Erreur",
-          description: "Le mot de passe est obligatoire",
-          variant: "destructive",
-        })
-        return
-      }
-
-      if (newProfile.password.length < 6) {
-        toast({
-          title: "Erreur",
-          description: "Le mot de passe doit contenir au moins 6 caractères",
+          description: "L'email et le mot de passe sont obligatoires",
           variant: "destructive",
         })
         return
@@ -104,11 +113,10 @@ export function AdminProfiles() {
         .eq('email', newProfile.email)
         .maybeSingle()
 
-      let userId
+      let userId = existingUser?.id
 
-      if (existingUser) {
-        userId = existingUser.id
-      } else {
+      if (!userId) {
+        console.log("Creating new user...")
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: newProfile.email,
           password: newProfile.password,
@@ -118,12 +126,13 @@ export function AdminProfiles() {
         if (!authData.user) throw new Error("Aucun utilisateur créé")
         
         userId = authData.user.id
+        console.log("New user created:", userId)
       }
 
       let agencyId = null
       
-      // Create agency if data is provided
       if (agencyData && agencyData.name) {
+        console.log("Creating agency...")
         const { data: agency, error: agencyError } = await supabase
           .from('agencies')
           .insert({
@@ -138,9 +147,11 @@ export function AdminProfiles() {
 
         if (agencyError) throw agencyError
         agencyId = agency.id
+        console.log("Agency created:", agencyId)
       }
 
       // Update or create the profile
+      console.log("Updating profile...")
       const { error: profileError } = await supabase
         .from("profiles")
         .upsert({
@@ -180,6 +191,7 @@ export function AdminProfiles() {
       })
       refetch()
     } catch (error: any) {
+      console.error("Error adding/updating profile:", error)
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue lors de l'ajout du profil",
