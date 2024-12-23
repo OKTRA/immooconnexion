@@ -11,6 +11,8 @@ import { useToast } from "@/components/ui/use-toast"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Loader2 } from "lucide-react"
 import { MobileMenu } from "@/components/property-details/MobileMenu"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
 
 const PropertyDetails = () => {
   const { id } = useParams()
