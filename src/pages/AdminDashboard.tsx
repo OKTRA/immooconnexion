@@ -6,6 +6,7 @@ import { AdminProfiles } from "@/components/admin/AdminProfiles"
 import { AdminProperties } from "@/components/admin/AdminProperties"
 import { AdminTenants } from "@/components/admin/AdminTenants"
 import { AdminStats } from "@/components/admin/AdminStats"
+import { AdminSubscriptionPlans } from "@/components/admin/subscription/AdminSubscriptionPlans"
 import { Button } from "@/components/ui/button"
 import { LogOut } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
@@ -74,6 +75,7 @@ const AdminDashboard = () => {
           <TabsTrigger value="profiles">Profils</TabsTrigger>
           <TabsTrigger value="properties">Biens</TabsTrigger>
           <TabsTrigger value="tenants">Locataires</TabsTrigger>
+          <TabsTrigger value="plans">Plans d'abonnement</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profiles">
@@ -86,6 +88,10 @@ const AdminDashboard = () => {
 
         <TabsContent value="tenants">
           <AdminTenants />
+        </TabsContent>
+
+        <TabsContent value="plans">
+          <AdminSubscriptionPlans />
         </TabsContent>
       </Tabs>
     </div>
