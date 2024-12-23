@@ -9,6 +9,26 @@ interface TenantProfileProps {
   tenantId: string
 }
 
+interface Contract {
+  id: string
+  montant: number
+  start_date: string
+  statut: string
+  property: {
+    bien: string
+  }
+}
+
+interface Tenant {
+  id: string
+  prenom: string | null
+  nom: string | null
+  phone_number: string | null
+  birth_date: string | null
+  agency_fees: number | null
+  contracts: Contract[]
+}
+
 export function TenantProfile({ tenantId }: TenantProfileProps) {
   const { data: tenant, isLoading } = useQuery({
     queryKey: ['tenant-profile', tenantId],
@@ -26,7 +46,7 @@ export function TenantProfile({ tenantId }: TenantProfileProps) {
         .maybeSingle()
 
       if (error) throw error
-      return data
+      return data as Tenant
     }
   })
 
