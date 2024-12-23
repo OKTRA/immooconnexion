@@ -24,12 +24,7 @@ const Index = () => {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select(`
-          *,
-          agency:agencies(
-            name
-          )
-        `)
+        .select('*')
         .eq('id', user.id)
         .maybeSingle()
       
