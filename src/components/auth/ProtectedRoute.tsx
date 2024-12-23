@@ -15,44 +15,43 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   useEffect(() => {
     let mounted = true
 
+    // Nettoyage immédiat de toute session potentiellement corrompue
+    const cleanupSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        await supabase.auth.signOut()
+        if (mounted) setIsAuthenticated(false)
+        return
+      }
+    }
+
+    cleanupSession()
+
     const checkAuth = async () => {
       try {
-        // Get the current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
-        if (sessionError) {
-          console.error("Session error:", sessionError)
+        if (sessionError || !session) {
+          console.error("Session error or no session:", sessionError)
           if (mounted) {
             setIsAuthenticated(false)
-            await supabase.auth.signOut() // Clear any invalid session
+            await supabase.auth.signOut()
           }
           return
         }
 
-        if (!session) {
-          console.log("No active session")
-          if (mounted) setIsAuthenticated(false)
-          return
-        }
-
-        // Verify the session is valid by getting the user
         const { data: { user }, error: userError } = await supabase.auth.getUser()
         
         if (userError || !user) {
           console.error("User verification error:", userError)
           if (mounted) {
             setIsAuthenticated(false)
-            await supabase.auth.signOut() // Clear invalid session
-            toast({
-              title: "Session expirée",
-              description: "Veuillez vous reconnecter",
-              variant: "destructive"
-            })
+            await supabase.auth.signOut()
           }
           return
         }
 
-        // Check if profile exists
+        // Vérification du profil
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -68,7 +67,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           return
         }
 
-        // If no profile exists, create one
+        // Création du profil si nécessaire
         if (!profile) {
           const { error: insertError } = await supabase
             .from('profiles')
@@ -93,16 +92,11 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         console.error("Auth check error:", error)
         if (mounted) {
           setIsAuthenticated(false)
-          // Clear any potentially corrupted session state
           await supabase.auth.signOut()
         }
       }
     }
 
-    // Initial auth check
-    checkAuth()
-
-    // Subscribe to auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
