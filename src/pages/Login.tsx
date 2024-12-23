@@ -15,6 +15,7 @@ import { AdminLoginForm } from "@/components/admin/AdminLoginForm"
 import { Button } from "@/components/ui/button"
 import { ExternalLink } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { getSupabaseSessionKey } from "@/utils/sessionUtils"
 
 const Login = () => {
   const navigate = useNavigate()
@@ -26,21 +27,30 @@ const Login = () => {
     // First check and clear any invalid sessions
     const checkAndClearSession = async () => {
       try {
+        // Clear any existing session data first
+        const storageKey = getSupabaseSessionKey()
+        localStorage.removeItem(storageKey)
+
         const { data: { session }, error } = await supabase.auth.getSession()
-        if (error?.message.includes('User from sub claim in JWT does not exist')) {
-          await supabase.auth.signOut()
-          toast({
-            title: "Session expirée",
-            description: "Veuillez vous reconnecter",
-            variant: "default"
-          })
-        } else if (session) {
+        
+        if (error) {
+          if (error.message.includes('JWT')) {
+            await supabase.auth.signOut()
+            toast({
+              title: "Session expirée",
+              description: "Votre session a expiré. Veuillez vous reconnecter.",
+              variant: "default"
+            })
+          }
+          return
+        }
+
+        if (session) {
           navigate("/")
         }
       } catch (error: any) {
         console.error('Session check error:', error)
-        // Clear the session if there's any error
-        await supabase.auth.signOut()
+        // Don't show error toast here as it might be confusing for first-time users
       }
     }
     
