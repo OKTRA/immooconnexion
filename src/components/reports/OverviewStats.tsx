@@ -4,7 +4,7 @@ import { StatCard } from "@/components/StatCard"
 import { Building2, Users, Receipt, ArrowUpDown } from "lucide-react"
 
 export function OverviewStats() {
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading } = useQuery({
     queryKey: ['overview-stats'],
     queryFn: async () => {
       // Get current user's profile to check role
@@ -51,17 +51,21 @@ export function OverviewStats() {
     }
   })
 
+  if (isLoading) {
+    return <div>Chargement...</div>
+  }
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
       <StatCard
         title="Biens"
-        value={stats?.propertiesCount.toString() || "0"}
+        value={(stats?.propertiesCount || 0).toString()}
         description="Total des biens"
         icon={Building2}
       />
       <StatCard
         title="Locataires"
-        value={stats?.tenantsCount.toString() || "0"}
+        value={(stats?.tenantsCount || 0).toString()}
         description="Total des locataires"
         icon={Users}
       />
@@ -73,7 +77,7 @@ export function OverviewStats() {
       />
       <StatCard
         title="Contrats Actifs"
-        value={stats?.activeContracts.toString() || "0"}
+        value={(stats?.activeContracts || 0).toString()}
         description="Contrats en cours"
         icon={ArrowUpDown}
       />
