@@ -23,7 +23,7 @@ export function RecentActivities() {
 
       console.log("User profile:", profile)
 
-      // Build the base query for contracts with tenant info
+      // Build the base query for contracts
       let query = supabase
         .from("contracts")
         .select(`
@@ -31,13 +31,8 @@ export function RecentActivities() {
           montant,
           type,
           created_at,
-          tenants (
-            nom,
-            prenom
-          ),
-          properties (
-            bien
-          )
+          tenant_id,
+          property_id
         `)
 
       // If not admin, only show agency's contracts
@@ -45,7 +40,7 @@ export function RecentActivities() {
         query = query.eq('agency_id', user.id)
       }
 
-      const { data, error } = await query
+      const { data: contracts, error } = await query
         .order("created_at", { ascending: false })
         .limit(5)
 
@@ -54,18 +49,35 @@ export function RecentActivities() {
         throw error
       }
 
-      console.log("Recent activities data:", data)
+      // Fetch related tenant and property information
+      const contractsWithDetails = await Promise.all(
+        contracts.map(async (contract) => {
+          const [tenantResult, propertyResult] = await Promise.all([
+            contract.tenant_id
+              ? supabase
+                  .from('tenants')
+                  .select('nom, prenom')
+                  .eq('id', contract.tenant_id)
+                  .single()
+              : { data: null },
+            supabase
+              .from('properties')
+              .select('bien')
+              .eq('id', contract.property_id)
+              .single()
+          ])
 
-      // Transform the data to match the expected format
-      return data?.map(contract => ({
-        id: contract.id,
-        montant: contract.montant,
-        type: contract.type,
-        created_at: contract.created_at,
-        tenant_nom: contract.tenants?.nom,
-        tenant_prenom: contract.tenants?.prenom,
-        property_name: contract.properties?.bien
-      })) || []
+          return {
+            ...contract,
+            tenant_nom: tenantResult.data?.nom,
+            tenant_prenom: tenantResult.data?.prenom,
+            property_name: propertyResult.data?.bien
+          }
+        })
+      )
+
+      console.log("Recent activities data:", contractsWithDetails)
+      return contractsWithDetails
     },
   })
 

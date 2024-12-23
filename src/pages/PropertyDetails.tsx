@@ -59,17 +59,17 @@ const PropertyDetails = () => {
     queryKey: ['contracts', id],
     queryFn: async () => {
       console.log("Fetching contracts for property:", id)
-      const { data, error } = await supabase
+      const { data: contracts, error } = await supabase
         .from('contracts')
         .select(`
-          *,
-          tenants (
-            nom,
-            prenom
-          ),
-          properties (
-            bien
-          )
+          id,
+          montant,
+          type,
+          created_at,
+          tenant_id,
+          property_id,
+          start_date,
+          end_date
         `)
         .eq('property_id', id)
         .order('created_at', { ascending: false })
@@ -79,16 +79,35 @@ const PropertyDetails = () => {
         throw error
       }
 
-      // Transform the data to match the expected format
-      const transformedData = data?.map(contract => ({
-        ...contract,
-        tenant_nom: contract.tenants?.nom,
-        tenant_prenom: contract.tenants?.prenom,
-        property_name: contract.properties?.bien
-      })) || []
+      // Fetch related tenant and property information
+      const contractsWithDetails = await Promise.all(
+        contracts.map(async (contract) => {
+          const [tenantResult, propertyResult] = await Promise.all([
+            contract.tenant_id
+              ? supabase
+                  .from('tenants')
+                  .select('nom, prenom')
+                  .eq('id', contract.tenant_id)
+                  .single()
+              : { data: null },
+            supabase
+              .from('properties')
+              .select('bien')
+              .eq('id', contract.property_id)
+              .single()
+          ])
 
-      console.log("Contracts data:", transformedData)
-      return transformedData
+          return {
+            ...contract,
+            tenant_nom: tenantResult.data?.nom,
+            tenant_prenom: tenantResult.data?.prenom,
+            property_name: propertyResult.data?.bien
+          }
+        })
+      )
+
+      console.log("Contracts data:", contractsWithDetails)
+      return contractsWithDetails
     },
     enabled: !!id
   })
