@@ -17,6 +17,10 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
     const checkAuth = async () => {
       try {
+        // Clear any existing session first to ensure we start fresh
+        const storageKey = 'sb-' + supabase.projectId + '-auth-token';
+        localStorage.removeItem(storageKey);
+
         // Get current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
@@ -31,11 +35,21 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           return;
         }
 
+        // Verify the session is valid by getting the user
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !user) {
+          console.error('User verification error:', userError);
+          await supabase.auth.signOut();
+          if (mounted) setIsAuthenticated(false);
+          return;
+        }
+
         // Then check if profile exists
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', session.user.id)
+          .eq('id', user.id)
           .maybeSingle();
 
         if (profileError) {
@@ -54,8 +68,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           const { error: insertError } = await supabase
             .from('profiles')
             .insert([{ 
-              id: session.user.id,
-              email: session.user.email,
+              id: user.id,
+              email: user.email,
               role: 'user'
             }]);
 
