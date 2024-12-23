@@ -374,6 +374,7 @@ export type Database = {
           photo_id_url: string | null
           prenom: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           agency_fees?: number | null
@@ -386,6 +387,7 @@ export type Database = {
           photo_id_url?: string | null
           prenom?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           agency_fees?: number | null
@@ -398,6 +400,7 @@ export type Database = {
           photo_id_url?: string | null
           prenom?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {

@@ -19,6 +19,7 @@ interface TenantDisplay {
   telephone: string
   photoIdUrl?: string
   fraisAgence?: string
+  user_id?: string
 }
 
 export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => void }) {
@@ -62,13 +63,14 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
           phone_number,
           photo_id_url,
           agency_fees,
-          agency_id
+          agency_id,
+          user_id
         `)
 
-      // Si l'utilisateur n'est pas admin, filtrer par son ID comme agency_id
+      // Si l'utilisateur n'est pas admin, filtrer par son ID comme user_id ou agency_id
       if (profileData?.role !== 'admin') {
-        query = query.eq('agency_id', user.id)
-        console.log('Filtrage par agency_id (user id):', user.id)
+        query = query.or(`user_id.eq.${user.id},agency_id.eq.${user.id}`)
+        console.log('Filtrage par user_id ou agency_id:', user.id)
       }
       
       const { data: tenantsData, error: tenantsError } = await query
@@ -89,6 +91,7 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
         telephone: tenant.phone_number || '',
         photoIdUrl: tenant.photo_id_url,
         fraisAgence: tenant.agency_fees?.toString(),
+        user_id: tenant.user_id,
       }))
     },
     meta: {

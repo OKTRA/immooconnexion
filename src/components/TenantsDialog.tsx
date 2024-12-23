@@ -92,6 +92,10 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     setIsSubmitting(true);
     
     try {
+      // Récupérer l'utilisateur courant
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifié");
+
       const email = `${formData.nom.toLowerCase()}.${formData.prenom.toLowerCase()}@tenant.local`;
       const password = Math.random().toString(36).slice(-8);
       
@@ -136,6 +140,8 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
           phone_number: formData.telephone,
           agency_fees: parseFloat(formData.fraisAgence),
           photo_id_url: previewUrl || null,
+          user_id: user.id, // Ajouter l'ID de l'utilisateur courant comme user_id
+          agency_id: user.id, // Ajouter l'ID de l'utilisateur courant comme agency_id
         });
 
       if (tenantError) {
