@@ -22,11 +22,12 @@ const Login = () => {
   const [activeTab, setActiveTab] = useState("user")
   const [view, setView] = useState<"sign_in" | "forgotten_password">("sign_in")
   const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // First check and clear any invalid sessions
     const checkAndClearSession = async () => {
       try {
+        setIsLoading(true)
         // Clear any existing session data first
         const storageKey = getSupabaseSessionKey()
         localStorage.removeItem(storageKey)
@@ -34,7 +35,14 @@ const Login = () => {
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
-          if (error.message.includes('JWT')) {
+          console.error('Session check error:', error)
+          if (error.message.includes('Failed to fetch')) {
+            toast({
+              title: "Erreur de connexion",
+              description: "Impossible de se connecter au serveur. Veuillez vérifier votre connexion internet.",
+              variant: "destructive"
+            })
+          } else if (error.message.includes('JWT')) {
             await supabase.auth.signOut()
             toast({
               title: "Session expirée",
@@ -50,7 +58,15 @@ const Login = () => {
         }
       } catch (error: any) {
         console.error('Session check error:', error)
-        // Don't show error toast here as it might be confusing for first-time users
+        if (error.message.includes('Failed to fetch')) {
+          toast({
+            title: "Erreur de connexion",
+            description: "Impossible de se connecter au serveur. Veuillez vérifier votre connexion internet.",
+            variant: "destructive"
+          })
+        }
+      } finally {
+        setIsLoading(false)
       }
     }
     
@@ -66,6 +82,19 @@ const Login = () => {
 
     return () => subscription.unsubscribe()
   }, [navigate, toast])
+
+  if (isLoading) {
+    return (
+      <div 
+        className="min-h-screen flex items-center justify-center p-4"
+        style={{
+          background: `linear-gradient(to right, #243949 0%, #517fa4 100%)`,
+        }}
+      >
+        <div className="text-white">Chargement...</div>
+      </div>
+    )
+  }
 
   return (
     <div 
