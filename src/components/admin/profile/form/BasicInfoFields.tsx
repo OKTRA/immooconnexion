@@ -1,5 +1,8 @@
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface BasicInfoFieldsProps {
   newProfile: any;
@@ -7,6 +10,55 @@ interface BasicInfoFieldsProps {
 }
 
 export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsProps) {
+  // Fetch available agencies
+  const { data: agencies } = useQuery({
+    queryKey: ["agencies"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("agencies")
+        .select("*")
+        .order("name")
+      
+      if (error) throw error
+      return data
+    }
+  })
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Math.random()}.${fileExt}`
+      const filePath = `${fileName}`
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('product_photos')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('product_photos')
+        .getPublicUrl(filePath)
+
+      // Update agency with logo URL
+      if (newProfile.agency_id) {
+        const { error: updateError } = await supabase
+          .from('agencies')
+          .update({ logo_url: publicUrl })
+          .eq('id', newProfile.agency_id)
+
+        if (updateError) throw updateError
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error)
+    }
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
@@ -55,12 +107,32 @@ export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsPr
           placeholder="Entrez un mot de passe"
         />
       </div>
+      <div>
+        <Label htmlFor="agency">Agence</Label>
+        <Select 
+          value={newProfile.agency_id} 
+          onValueChange={(value) => setNewProfile({ ...newProfile, agency_id: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Sélectionner une agence" />
+          </SelectTrigger>
+          <SelectContent>
+            {agencies?.map((agency) => (
+              <SelectItem key={agency.id} value={agency.id}>
+                {agency.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       <div className="md:col-span-2">
-        <Label htmlFor="agency_name">Nom de l'agence</Label>
+        <Label htmlFor="logo">Logo de l'agence (optionnel)</Label>
         <Input
-          id="agency_name"
-          value={newProfile.agency_name}
-          onChange={(e) => setNewProfile({ ...newProfile, agency_name: e.target.value })}
+          id="logo"
+          type="file"
+          accept="image/*"
+          onChange={handleFileUpload}
+          className="cursor-pointer"
         />
       </div>
     </div>
