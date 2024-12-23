@@ -29,8 +29,16 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
       console.log("Fetching users for agency:", agencyId)
       const { data, error } = await supabase
         .from("profiles")
-        .select("*")
+        .select(`
+          id,
+          first_name,
+          last_name,
+          email,
+          role,
+          agency_id
+        `)
         .eq("agency_id", agencyId)
+        .order('created_at', { ascending: false })
       
       if (error) {
         console.error("Error fetching users:", error)
@@ -141,7 +149,7 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
             {users.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-4">
-                  Aucun utilisateur trouvé
+                  Aucun utilisateur trouvé pour cette agence
                 </TableCell>
               </TableRow>
             )}
