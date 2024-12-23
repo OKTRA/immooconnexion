@@ -1,9 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle }Je vais déplacer les fonctionnalités de recherche et de gestion des profils dans l'onglet Agences, et ajouter la possibilité de voir les biens et locataires associés à chaque agence.
-
-<lov-code>
-Nous allons créer plusieurs nouveaux composants et mettre à jour les existants :
-
-<lov-write file_path="src/components/admin/agency/AgencyOverview.tsx">
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AgencyUsers } from "./AgencyUsers"
