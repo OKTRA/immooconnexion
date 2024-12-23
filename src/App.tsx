@@ -28,11 +28,21 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // First clear any potentially invalid session
+        // First clear any potentially invalid session from localStorage
+        const currentSession = localStorage.getItem('sb-' + supabase.supabaseUrl + '-auth-token')
+        if (currentSession) {
+          const session = JSON.parse(currentSession)
+          if (!session?.access_token) {
+            localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token')
+            setIsAuthenticated(false)
+            return
+          }
+        }
+
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
         if (sessionError || !session) {
-          await supabase.auth.signOut()
+          localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token')
           setIsAuthenticated(false)
           if (sessionError?.message.includes('User from sub claim in JWT does not exist')) {
             toast({
@@ -43,24 +53,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           }
           return
         }
-        
-        // Verify the user exists
-        const { error: userError } = await supabase.auth.getUser()
-        if (userError) {
-          await supabase.auth.signOut()
-          setIsAuthenticated(false)
-          toast({
-            title: "Erreur d'authentification",
-            description: "Une erreur est survenue. Veuillez vous reconnecter.",
-            variant: "destructive"
-          })
-          return
-        }
 
         setIsAuthenticated(true)
       } catch (error) {
         console.error('Auth check error:', error)
-        await supabase.auth.signOut()
+        localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token')
         setIsAuthenticated(false)
       }
     }
@@ -71,6 +68,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token')
         setIsAuthenticated(false)
         return
       }
@@ -81,14 +79,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           return
         }
 
-        const { error } = await supabase.auth.getUser()
-        if (error) {
-          throw error
-        }
         setIsAuthenticated(true)
       } catch (error) {
         console.error('Auth state change error:', error)
-        await supabase.auth.signOut()
+        localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token')
         setIsAuthenticated(false)
       }
     })

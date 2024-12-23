@@ -19,7 +19,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
 import { useTheme } from "next-themes"
 import { useToast } from "@/hooks/use-toast"
-import { useEffect } from "react"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -29,31 +28,14 @@ export function SidebarContent() {
   const { theme, setTheme } = useTheme()
   const { toast } = useToast()
 
-  // Check authentication on component mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        navigate("/login")
-      }
-    }
-    checkAuth()
-
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || !session) {
-        navigate("/login")
-      }
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [navigate])
-
   const handleLogout = async () => {
     try {
+      // First clear the session from localStorage
+      localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token')
+      
+      // Then attempt to sign out from Supabase
       await supabase.auth.signOut()
+      
       navigate("/login")
       toast({
         title: "Déconnexion réussie",
@@ -61,10 +43,11 @@ export function SidebarContent() {
       })
     } catch (error: any) {
       console.error('Logout error:', error)
+      // Even if the signOut fails, we still want to clear local session and redirect
+      navigate("/login")
       toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la déconnexion",
-        variant: "destructive",
+        title: "Déconnexion",
+        description: "Vous avez été déconnecté",
       })
     }
   }
