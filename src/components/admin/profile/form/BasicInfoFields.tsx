@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useToast } from "@/components/ui/use-toast"
 
 interface BasicInfoFieldsProps {
   newProfile: any;
@@ -10,6 +11,8 @@ interface BasicInfoFieldsProps {
 }
 
 export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsProps) {
+  const { toast } = useToast()
+  
   // Fetch available agencies
   const { data: agencies } = useQuery({
     queryKey: ["agencies"],
@@ -53,9 +56,19 @@ export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsPr
           .eq('id', newProfile.agency_id)
 
         if (updateError) throw updateError
+
+        toast({
+          title: "Logo mis à jour",
+          description: "Le logo de l'agence a été mis à jour avec succès",
+        })
       }
     } catch (error) {
       console.error('Error uploading file:', error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la mise à jour du logo",
+        variant: "destructive",
+      })
     }
   }
 
