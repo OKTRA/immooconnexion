@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client"
 import Index from "./pages/Index"
 import Login from "./pages/Login"
 import PublicProperties from "./pages/PublicProperties"
+import Pricing from "./pages/Pricing"
 import Tenants from "./pages/Tenants"
 import Properties from "./pages/Properties"
 import PropertyDetails from "./pages/PropertyDetails"
@@ -56,6 +57,7 @@ const App = () => (
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/public" element={<PublicProperties />} />
+          <Route path="/pricing" element={<Pricing />} />
           <Route
             path="/"
             element={

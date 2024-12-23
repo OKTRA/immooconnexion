@@ -4,6 +4,8 @@ import { PropertyCard } from "@/components/home/PropertyCard"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
+import { PublicNavbar } from "@/components/home/PublicNavbar"
+import { HomeBanner } from "@/components/home/HomeBanner"
 
 const PublicProperties = () => {
   const [searchTerm, setSearchTerm] = useState("")
@@ -30,18 +32,9 @@ const PublicProperties = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Trouvez votre bien immobilier</h1>
-          <a
-            href="/login"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-          >
-            Espace propriétaire
-          </a>
-        </div>
-      </header>
-
+      <PublicNavbar />
+      <HomeBanner />
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="relative mb-8">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
