@@ -18,7 +18,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     const checkAuth = async () => {
       try {
         // Get current session
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
           console.error('Session error:', sessionError);
@@ -26,16 +26,25 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           return;
         }
 
-        if (!sessionData.session) {
+        if (!session) {
           if (mounted) setIsAuthenticated(false);
           return;
         }
 
-        // Check if profile exists
+        // First verify the user exists in auth.users
+        const { data: authUser, error: authError } = await supabase.auth.getUser();
+        
+        if (authError || !authUser.user) {
+          console.error('Auth user error:', authError);
+          if (mounted) setIsAuthenticated(false);
+          return;
+        }
+
+        // Then check if profile exists
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('id')
-          .eq('id', sessionData.session.user.id)
+          .eq('id', session.user.id)
           .single();
 
         if (profileError && profileError.code !== 'PGRST116') {
@@ -54,8 +63,9 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           const { error: insertError } = await supabase
             .from('profiles')
             .insert([{ 
-              id: sessionData.session.user.id,
-              email: sessionData.session.user.email
+              id: session.user.id,
+              email: session.user.email,
+              role: 'user'  // Set a default role
             }]);
 
           if (insertError) {
@@ -87,7 +97,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         return;
       }
       
-      if (mounted) setIsAuthenticated(true);
+      // Re-run checkAuth when auth state changes
+      checkAuth();
     });
 
     return () => {
