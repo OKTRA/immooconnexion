@@ -35,14 +35,24 @@ const PropertyDetails = () => {
   const { toast } = useToast()
   const isMobile = useIsMobile()
 
-  const { data: property, isLoading: isLoadingProperty } = useQuery({
+  console.log("Property ID:", id) // Log the property ID
+
+  const { data: property, isLoading: isLoadingProperty, error: propertyError } = useQuery({
     queryKey: ['property', id],
     queryFn: async () => {
+      console.log("Fetching property details for ID:", id)
+      
+      const { data: { user } } = await supabase.auth.getUser()
+      console.log("Current user:", user)
+
       const { data, error } = await supabase
         .from('properties')
         .select('*')
         .eq('id', id)
         .maybeSingle()
+      
+      console.log("Property data:", data)
+      console.log("Property error:", error)
       
       if (error) {
         toast({
@@ -53,16 +63,22 @@ const PropertyDetails = () => {
         throw error
       }
       return data
-    }
+    },
+    enabled: !!id
   })
 
-  const { data: contracts, isLoading: isLoadingContracts } = useQuery({
+  const { data: contracts, isLoading: isLoadingContracts, error: contractsError } = useQuery({
     queryKey: ['contracts', id],
     queryFn: async () => {
+      console.log("Fetching contracts for property ID:", id)
+      
       const { data, error } = await supabase
         .from('payment_history_with_tenant')
         .select('*')
         .eq('property_id', id)
+      
+      console.log("Contracts data:", data)
+      console.log("Contracts error:", error)
       
       if (error) {
         toast({
@@ -73,8 +89,42 @@ const PropertyDetails = () => {
         throw error
       }
       return data
-    }
+    },
+    enabled: !!id
   })
+
+  // Log loading states and errors
+  console.log("Loading states:", { isLoadingProperty, isLoadingContracts })
+  console.log("Errors:", { propertyError, contractsError })
+  console.log("Property data:", property)
+  console.log("Contracts data:", contracts)
+
+  if (isLoadingProperty || isLoadingContracts) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (propertyError || contractsError) {
+    console.error("Property error:", propertyError)
+    console.error("Contracts error:", contractsError)
+    return (
+      <div className="flex items-center justify-center h-screen text-red-500">
+        Une erreur est survenue lors du chargement des données
+      </div>
+    )
+  }
+
+  if (!property) {
+    console.log("No property found")
+    return (
+      <div className="flex items-center justify-center h-screen text-muted-foreground">
+        Bien non trouvé
+      </div>
+    )
+  }
 
   const handlePrintReceipt = (contract: any) => {
     const receiptContent = `
@@ -162,22 +212,6 @@ const PropertyDetails = () => {
       printWindow.document.close()
       printWindow.print()
     }
-  }
-
-  if (isLoadingProperty || isLoadingContracts) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
-
-  if (!property) {
-    return (
-      <div className="flex items-center justify-center h-screen text-muted-foreground">
-        Bien non trouvé
-      </div>
-    )
   }
 
   return (
