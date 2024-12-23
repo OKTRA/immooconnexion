@@ -20,7 +20,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
   const handleAddUser = async () => {
     try {
-      // Check if admin already exists
+      // Vérifier si l'admin existe déjà
       const { data: existingAdmin } = await supabase
         .from('local_admins')
         .select('id')
@@ -36,7 +36,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         return
       }
 
-      // Create new admin
+      // Créer le nouvel admin - le trigger handle_new_local_admin s'occupera de créer l'utilisateur auth
       const { error: createError } = await supabase
         .from("local_admins")
         .insert({
@@ -52,7 +52,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
       toast({
         title: "Administrateur ajouté",
-        description: "Le nouvel administrateur a été ajouté avec succès.",
+        description: "Le nouvel administrateur a été ajouté avec succès. Un mot de passe temporaire a été généré.",
       })
       
       onClose()
@@ -65,6 +65,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       })
       onSuccess()
     } catch (error: any) {
+      console.error('Erreur lors de la création:', error)
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue lors de l'ajout de l'administrateur",
