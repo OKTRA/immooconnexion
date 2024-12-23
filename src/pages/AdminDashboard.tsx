@@ -33,11 +33,20 @@ const AdminDashboard = () => {
         .maybeSingle()
 
       if (error) {
+        console.error("Error fetching admin status:", error)
         throw error
       }
 
       if (!adminData?.is_super_admin) {
-        throw new Error("Accès non autorisé")
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle()
+
+        if (profile?.role !== 'admin') {
+          throw new Error("Accès non autorisé")
+        }
       }
 
       return adminData
