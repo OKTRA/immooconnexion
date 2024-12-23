@@ -1,6 +1,5 @@
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -12,8 +11,6 @@ interface AgencyFieldsProps {
     phone: string;
     email: string;
     subscription_plan_id?: string;
-    show_phone_on_site?: boolean;
-    list_properties_on_site?: boolean;
   };
   setAgencyData: (data: any) => void;
 }
@@ -31,11 +28,6 @@ export function AgencyFields({ agencyData, setAgencyData }: AgencyFieldsProps) {
       return data
     },
   })
-
-  // Vérifier si le plan permet ces fonctionnalités
-  const selectedPlan = plans.find(plan => plan.id === agencyData.subscription_plan_id)
-  const canShowPhoneNumber = selectedPlan?.name === "Professionnel" || selectedPlan?.name === "Enterprise"
-  const canListProperties = selectedPlan?.name === "Professionnel" || selectedPlan?.name === "Enterprise"
 
   return (
     <div className="space-y-4">
@@ -80,14 +72,7 @@ export function AgencyFields({ agencyData, setAgencyData }: AgencyFieldsProps) {
         <Label htmlFor="subscription_plan">Plan d'abonnement</Label>
         <Select 
           value={agencyData.subscription_plan_id} 
-          onValueChange={(value) => {
-            setAgencyData({ 
-              ...agencyData, 
-              subscription_plan_id: value,
-              show_phone_on_site: false,
-              list_properties_on_site: false
-            })
-          }}
+          onValueChange={(value) => setAgencyData({ ...agencyData, subscription_plan_id: value })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Sélectionner un plan" />
@@ -100,35 +85,6 @@ export function AgencyFields({ agencyData, setAgencyData }: AgencyFieldsProps) {
             ))}
           </SelectContent>
         </Select>
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex items-center justify-between space-x-4">
-          <Label htmlFor="show_phone" className={!canShowPhoneNumber ? "text-gray-400" : ""}>
-            Afficher le numéro sur le site {!canShowPhoneNumber && "(Nécessite un abonnement Professionnel ou Enterprise)"}
-          </Label>
-          <Switch
-            id="show_phone"
-            checked={agencyData.show_phone_on_site}
-            onCheckedChange={(checked) => 
-              setAgencyData({ ...agencyData, show_phone_on_site: checked })
-            }
-            disabled={!canShowPhoneNumber}
-          />
-        </div>
-        <div className="flex items-center justify-between space-x-4">
-          <Label htmlFor="list_properties" className={!canListProperties ? "text-gray-400" : ""}>
-            Lister les propriétés sur le site {!canListProperties && "(Nécessite un abonnement Professionnel ou Enterprise)"}
-          </Label>
-          <Switch
-            id="list_properties"
-            checked={agencyData.list_properties_on_site}
-            onCheckedChange={(checked) => 
-              setAgencyData({ ...agencyData, list_properties_on_site: checked })
-            }
-            disabled={!canListProperties}
-          />
-        </div>
       </div>
     </div>
   )
