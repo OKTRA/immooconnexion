@@ -10,6 +10,7 @@ import { AgencyUserActions } from "./AgencyUserActions"
 import { Plus } from "lucide-react"
 import { AddProfileDialog } from "../profile/AddProfileDialog"
 import { useAddProfileHandler } from "../profile/AddProfileHandler"
+import { useToast } from "@/hooks/use-toast"
 
 interface AgencyUsersProps {
   agencyId: string
@@ -20,17 +21,29 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
+  const { toast } = useToast()
 
-  const { data: users = [], refetch } = useQuery({
+  const { data: users = [], refetch, isLoading, error } = useQuery({
     queryKey: ["agency-users", agencyId],
     queryFn: async () => {
+      console.log("Fetching users for agency:", agencyId)
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("agency_id", agencyId)
       
-      if (error) throw error
-      return data
+      if (error) {
+        console.error("Error fetching users:", error)
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les utilisateurs",
+          variant: "destructive",
+        })
+        throw error
+      }
+
+      console.log("Fetched users:", data)
+      return data || []
     },
   })
 
@@ -38,6 +51,10 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
     onSuccess: () => {
       refetch()
       setShowAddDialog(false)
+      toast({
+        title: "Succès",
+        description: "L'utilisateur a été ajouté avec succès",
+      })
     },
     onClose: () => setShowAddDialog(false),
     agencyId
@@ -56,11 +73,29 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
         .eq("id", editedUser.id)
 
       if (error) throw error
+
+      toast({
+        title: "Succès",
+        description: "Le profil a été mis à jour avec succès",
+      })
       refetch()
       setShowEditDialog(false)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating user:", error)
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de la mise à jour",
+        variant: "destructive",
+      })
     }
+  }
+
+  if (isLoading) {
+    return <div>Chargement des utilisateurs...</div>
+  }
+
+  if (error) {
+    return <div>Erreur lors du chargement des utilisateurs</div>
   }
 
   return (
