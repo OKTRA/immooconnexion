@@ -16,9 +16,7 @@ interface BasicInfoFieldsProps {
 
 export function BasicInfoFields({ newProfile = {}, setNewProfile }: BasicInfoFieldsProps) {
   const handleChange = (field: keyof Profile, value: string) => {
-    if (typeof setNewProfile === 'function') {
-      setNewProfile({ ...newProfile, [field]: value });
-    }
+    setNewProfile({ ...newProfile, [field]: value });
   };
 
   return (
@@ -27,6 +25,7 @@ export function BasicInfoFields({ newProfile = {}, setNewProfile }: BasicInfoFie
         <Label htmlFor="email">Email</Label>
         <Input
           id="email"
+          type="email"
           value={newProfile?.email || ''}
           onChange={(e) => handleChange('email', e.target.value)}
           required

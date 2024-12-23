@@ -9,10 +9,11 @@ import { ProfileForm } from "../profile/ProfileForm"
 import { AgencyUserActions } from "./AgencyUserActions"
 import { Plus } from "lucide-react"
 import { AddProfileDialog } from "../profile/AddProfileDialog"
+import { useAddProfileHandler } from "../profile/AddProfileHandler"
 
 interface AgencyUsersProps {
   agencyId: string
-  onRefetch?: () => void  // Make onRefetch optional
+  onRefetch?: () => void
 }
 
 export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
@@ -31,6 +32,15 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
       if (error) throw error
       return data
     },
+  })
+
+  const { newProfile, setNewProfile, handleAddUser } = useAddProfileHandler({
+    onSuccess: () => {
+      refetch()
+      setShowAddDialog(false)
+    },
+    onClose: () => setShowAddDialog(false),
+    agencyId
   })
 
   const handleEdit = (user: any) => {
@@ -124,19 +134,9 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
         onOpenChange={setShowAddDialog}
         agencyId={agencyId}
         onProfileCreated={refetch}
-        newProfile={{
-          email: "",
-          first_name: "",
-          last_name: "",
-          role: "user",
-          agency_id: agencyId,
-          phone_number: "",
-        }}
-        setNewProfile={(newUser) => {
-          // Logique d'ajout d'utilisateur
-          refetch()
-          setShowAddDialog(false)
-        }}
+        newProfile={newProfile}
+        setNewProfile={setNewProfile}
+        handleAddUser={handleAddUser}
       />
     </div>
   )

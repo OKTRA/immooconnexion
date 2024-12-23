@@ -27,6 +27,15 @@ export function AddProfileDialog({
   const isOpen = open ?? showAddDialog
   const handleOpenChange = onOpenChange ?? setShowAddDialog
 
+  const handleSubmit = () => {
+    if (handleAddUser) {
+      handleAddUser();
+    }
+    if (onProfileCreated) {
+      onProfileCreated();
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -36,7 +45,7 @@ export function AddProfileDialog({
         <ProfileForm 
           newProfile={newProfile} 
           setNewProfile={setNewProfile}
-          onSubmit={handleAddUser}
+          onSubmit={handleSubmit}
           selectedAgencyId={agencyId}
         />
       </DialogContent>
