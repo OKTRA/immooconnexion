@@ -19,12 +19,12 @@ export function AdminLoginForm() {
     setIsLoading(true)
 
     try {
-      const { data: { user }, error } = await supabase.auth.signInWithPassword({
+      const { data: { user }, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) throw error
+      if (authError) throw authError
 
       // Vérifier si l'utilisateur est un super admin
       const { data: adminData, error: adminError } = await supabase
@@ -33,9 +33,16 @@ export function AdminLoginForm() {
         .eq('id', user?.id)
         .maybeSingle()
 
-      if (adminError) throw adminError
+      if (adminError) {
+        console.error("Erreur lors de la vérification des droits admin:", adminError)
+        throw new Error("Erreur lors de la vérification des droits administrateur")
+      }
 
-      if (!adminData?.is_super_admin) {
+      if (!adminData) {
+        throw new Error("Accès non autorisé. Vous n'avez pas de droits administrateur.")
+      }
+
+      if (!adminData.is_super_admin) {
         throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent se connecter ici.")
       }
 
