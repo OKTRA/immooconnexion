@@ -10,7 +10,7 @@ interface AddProfileDialogProps {
   setShowAddDialog: (show: boolean) => void;
   newProfile: any;
   setNewProfile: (profile: any) => void;
-  handleAddUser: (agencyData?: any) => void;
+  handleAddUser: (agencyData?: any) => Promise<void>;
 }
 
 export function AddProfileDialog({ 
@@ -26,6 +26,16 @@ export function AddProfileDialog({
     phone: "",
     email: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      await handleAddUser(agencyData);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
@@ -45,8 +55,12 @@ export function AddProfileDialog({
             <AgencyFields agencyData={agencyData} setAgencyData={setAgencyData} />
           </TabsContent>
         </Tabs>
-        <Button onClick={() => handleAddUser(agencyData)} className="w-full">
-          Ajouter
+        <Button 
+          onClick={handleSubmit} 
+          className="w-full"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Chargement..." : "Ajouter"}
         </Button>
       </DialogContent>
     </Dialog>
