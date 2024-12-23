@@ -26,6 +26,47 @@ const AdminDashboard = () => {
         return null
       }
 
+      // First, try to get the profile
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle()
+
+      if (profileError) {
+        console.error("Error fetching profile:", profileError)
+        throw profileError
+      }
+
+      // If no profile exists, create one
+      if (!profile) {
+        const { error: insertError } = await supabase
+          .from("profiles")
+          .insert([{ id: user.id, role: 'user' }])
+
+        if (insertError) {
+          console.error("Error creating profile:", insertError)
+          throw insertError
+        }
+
+        // Fetch the newly created profile
+        const { data: newProfile, error: newProfileError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle()
+
+        if (newProfileError) throw newProfileError
+        if (!newProfile?.role) throw new Error("Profile role not set")
+        
+        if (newProfile.role !== 'admin') {
+          throw new Error("Accès non autorisé")
+        }
+      } else if (profile.role !== 'admin') {
+        throw new Error("Accès non autorisé")
+      }
+
+      // Now check admin status
       const { data: adminData, error } = await supabase
         .from("administrators")
         .select("is_super_admin")
@@ -35,18 +76,6 @@ const AdminDashboard = () => {
       if (error) {
         console.error("Error fetching admin status:", error)
         throw error
-      }
-
-      if (!adminData?.is_super_admin) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .maybeSingle()
-
-        if (profile?.role !== 'admin') {
-          throw new Error("Accès non autorisé")
-        }
       }
 
       return adminData
