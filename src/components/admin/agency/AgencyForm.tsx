@@ -1,6 +1,9 @@
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Agency } from "./types"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface AgencyFormProps {
   agency: Agency
@@ -8,6 +11,19 @@ interface AgencyFormProps {
 }
 
 export function AgencyForm({ agency, setAgency }: AgencyFormProps) {
+  const { data: plans = [] } = useQuery({
+    queryKey: ["subscription-plans"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("subscription_plans")
+        .select("*")
+        .order("price", { ascending: true })
+      
+      if (error) throw error
+      return data
+    },
+  })
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
@@ -43,6 +59,24 @@ export function AgencyForm({ agency, setAgency }: AgencyFormProps) {
           value={agency.email || ""}
           onChange={(e) => setAgency({ ...agency, email: e.target.value })}
         />
+      </div>
+      <div>
+        <Label htmlFor="subscription_plan">Plan d'abonnement</Label>
+        <Select 
+          value={agency.subscription_plan_id || ""} 
+          onValueChange={(value) => setAgency({ ...agency, subscription_plan_id: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Sélectionner un plan" />
+          </SelectTrigger>
+          <SelectContent>
+            {plans.map((plan) => (
+              <SelectItem key={plan.id} value={plan.id}>
+                {plan.name} ({plan.price} FCFA)
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   )
