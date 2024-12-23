@@ -43,7 +43,7 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
   const handleSaveEdit = async (editedUser: any) => {
     try {
       const { error } = await supabase
-        .from("local_admins")
+        .from("profiles")
         .update(editedUser)
         .eq("id", editedUser.id)
 
