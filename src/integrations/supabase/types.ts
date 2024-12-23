@@ -133,7 +133,10 @@ export type Database = {
           id: string
           is_tenant: boolean | null
           last_name: string | null
+          list_properties_on_site: boolean | null
+          phone_number: string | null
           role: string | null
+          show_phone_on_site: boolean | null
           subscription_plan_id: string | null
           updated_at: string
         }
@@ -145,7 +148,10 @@ export type Database = {
           id: string
           is_tenant?: boolean | null
           last_name?: string | null
+          list_properties_on_site?: boolean | null
+          phone_number?: string | null
           role?: string | null
+          show_phone_on_site?: boolean | null
           subscription_plan_id?: string | null
           updated_at?: string
         }
@@ -157,7 +163,10 @@ export type Database = {
           id?: string
           is_tenant?: boolean | null
           last_name?: string | null
+          list_properties_on_site?: boolean | null
+          phone_number?: string | null
           role?: string | null
+          show_phone_on_site?: boolean | null
           subscription_plan_id?: string | null
           updated_at?: string
         }
