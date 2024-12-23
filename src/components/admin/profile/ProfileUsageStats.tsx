@@ -68,7 +68,7 @@ export function ProfileUsageStats({ userId, planId }: ProfileUsageStatsProps) {
         </div>
         <Progress value={propertiesPercentage} className="h-2" />
         {isNearLimit(propertiesPercentage) && (
-          <Alert variant="warning" className="mt-2">
+          <Alert variant="destructive" className="mt-2">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               Proche de la limite de propriétés. Envisagez une mise à niveau.
@@ -84,7 +84,7 @@ export function ProfileUsageStats({ userId, planId }: ProfileUsageStatsProps) {
         </div>
         <Progress value={tenantsPercentage} className="h-2" />
         {isNearLimit(tenantsPercentage) && (
-          <Alert variant="warning" className="mt-2">
+          <Alert variant="destructive" className="mt-2">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               Proche de la limite de locataires. Envisagez une mise à niveau.

@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { ProfilePlanSelect } from "./profile/ProfilePlanSelect"
+import { ProfileUsageStats } from "./profile/ProfileUsageStats"
 
 interface ProfileTableRowProps {
   profile: any
