@@ -26,13 +26,31 @@ const Reports = () => {
   const [selectedProperty, setSelectedProperty] = useState<string>("")
 
   const { data: expensesData } = useQuery({
-    queryKey: ['expenses-stats'],
+    queryKey: ['expenses-stats', date],
     queryFn: async () => {
-      const { data: expenses } = await supabase
+      // Get current user's profile to check role
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      // Build the query
+      const query = supabase
         .from('expenses')
         .select('montant, description')
         .gte('date', date.from?.toISOString() || '')
         .lte('date', date.to?.toISOString() || '')
+
+      // If not admin, only show agency's expenses
+      if (profile?.role !== 'admin') {
+        query.eq('agency_id', user.id)
+      }
+
+      const { data: expenses } = await query
 
       // Group expenses by type
       const expensesByType = expenses?.reduce((acc, expense) => {
