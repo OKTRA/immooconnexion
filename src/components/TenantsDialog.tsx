@@ -34,27 +34,42 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
   const [showReceipt, setShowReceipt] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
 
-  const { data: properties } = useQuery({
-    queryKey: ['properties'],
+  const { data: userProfile } = useQuery({
+    queryKey: ['user-profile'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
-      const { data: userProfile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('*, agency_id')
         .eq('id', user.id)
         .single();
 
-      const { data, error } = await supabase
+      if (error) throw error;
+      return profile;
+    }
+  });
+
+  const { data: properties } = useQuery({
+    queryKey: ['properties'],
+    queryFn: async () => {
+      if (!userProfile) return [];
+
+      let query = supabase
         .from('properties')
         .select('*')
-        .eq('statut', 'disponible')
-        .eq(userProfile?.role === 'admin' ? 'id' : 'agency_id', userProfile?.role === 'admin' ? 'id' : user.id);
+        .eq('statut', 'disponible');
+
+      if (userProfile.role !== 'admin') {
+        query = query.eq('agency_id', userProfile.agency_id);
+      }
       
+      const { data, error } = await query;
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !!userProfile
   });
 
   useEffect(() => {
@@ -102,14 +117,13 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     setIsSubmitting(true);
     
     try {
-      // Récupérer l'utilisateur courant
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
+      // Créer l'utilisateur dans auth.users
       const email = `${formData.nom.toLowerCase()}.${formData.prenom.toLowerCase()}@tenant.local`;
       const password = Math.random().toString(36).slice(-8);
       
-      // Créer l'utilisateur dans auth.users
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -130,16 +144,14 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
         .update({ 
           is_tenant: true,
           first_name: formData.prenom,
-          last_name: formData.nom 
+          last_name: formData.nom,
+          agency_id: userProfile?.agency_id // Ajouter l'ID de l'agence au profil
         })
         .eq('id', authData.user.id);
 
-      if (profileError) {
-        console.error("Profile update error:", profileError);
-        throw profileError;
-      }
+      if (profileError) throw profileError;
 
-      // Créer l'entrée dans la table tenants
+      // Créer l'entrée dans la table tenants avec l'ID de l'agence
       const { error: tenantError } = await supabase
         .from('tenants')
         .insert({
@@ -150,14 +162,11 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
           phone_number: formData.telephone,
           agency_fees: parseFloat(formData.fraisAgence),
           photo_id_url: previewUrl || null,
-          user_id: user.id, // Ajouter l'ID de l'utilisateur courant comme user_id
-          agency_id: user.id, // Ajouter l'ID de l'utilisateur courant comme agency_id
+          user_id: user.id,
+          agency_id: userProfile?.agency_id // Ajouter l'ID de l'agence
         });
 
-      if (tenantError) {
-        console.error("Tenant creation error:", tenantError);
-        throw tenantError;
-      }
+      if (tenantError) throw tenantError;
 
       toast({
         title: tenant ? "Locataire modifié" : "Locataire ajouté",
