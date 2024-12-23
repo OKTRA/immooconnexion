@@ -52,7 +52,6 @@ export function ProfileForm({ newProfile, setNewProfile }: ProfileFormProps) {
           setNewProfile({ 
             ...newProfile, 
             subscription_plan_id: value,
-            // Réinitialiser les toggles lors du changement de plan
             show_phone_on_site: false,
             list_properties_on_site: false
           });

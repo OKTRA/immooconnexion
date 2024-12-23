@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { AgencyFields } from "./AgencyFields"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { AgencyLogoUpload } from "./form/AgencyLogoUpload"
 
 interface AddAgencyDialogProps {
   showDialog: boolean
@@ -72,6 +73,7 @@ export function AddAgencyDialog({ showDialog, setShowDialog, onAgencyCreated }: 
           <DialogTitle>Créer une nouvelle agence</DialogTitle>
         </DialogHeader>
         <AgencyFields agencyData={agencyData} setAgencyData={setAgencyData} />
+        <AgencyLogoUpload agencyId={null} />
         <Button onClick={handleCreateAgency} className="w-full">
           Créer l'agence
         </Button>
