@@ -11,10 +11,12 @@ import { useNavigate } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { LogOut } from "lucide-react"
+import { useState, useEffect } from "react"
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const [adminDetails, setAdminDetails] = useState<any>(null)
 
   const handleLogout = async () => {
     try {
@@ -34,59 +36,64 @@ const AdminDashboard = () => {
     }
   }
 
-  const { data: adminData, isLoading } = useQuery({
+  const { data: adminData, isLoading, error } = useQuery({
     queryKey: ["admin-status"],
     queryFn: async () => {
+      console.log("Début de la vérification du statut admin")
+      
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
+        console.error("Aucun utilisateur connecté")
         throw new Error("Non authentifié")
       }
 
-      // Vérifier d'abord si l'utilisateur est un super admin
+      console.log("ID utilisateur:", user.id)
+      console.log("Email utilisateur:", user.email)
+
+      // Vérification dans la table administrators
       const { data: adminData, error: adminError } = await supabase
         .from("administrators")
-        .select("is_super_admin")
+        .select("*")
         .eq("id", user.id)
         .maybeSingle()
 
+      console.log("Données admin récupérées:", adminData)
+      console.log("Erreur admin:", adminError)
+
       if (adminError) {
-        console.error("Error fetching admin status:", adminError)
+        console.error("Erreur lors de la récupération du statut admin:", adminError)
         throw adminError
       }
 
-      // Si l'utilisateur n'est pas un super admin, vérifier s'il a un profil admin
+      // Vérification explicite du statut de super admin
       if (!adminData?.is_super_admin) {
-        const { data: profile, error: profileError } = await supabase
-          .from("local_admins")
-          .select("role")
-          .eq("id", user.id)
-          .maybeSingle()
-
-        if (profileError) {
-          console.error("Error fetching profile:", profileError)
-          throw profileError
-        }
-
-        if (!profile || profile.role !== 'admin') {
-          throw new Error("Accès non autorisé")
-        }
+        console.warn("L'utilisateur n'est pas un super admin")
+        throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent se connecter ici.")
       }
 
+      setAdminDetails(adminData)
       return adminData
     },
     retry: false,
     meta: {
-      errorHandler: () => {
+      errorHandler: (error: any) => {
+        console.error("Erreur de gestion de l'accès:", error)
         toast({
           title: "Erreur d'accès",
-          description: "Vous n'avez pas les droits nécessaires pour accéder à cette page.",
+          description: error.message || "Vous n'avez pas les droits nécessaires pour accéder à cette page.",
           variant: "destructive"
         })
         navigate("/")
       }
     }
   })
+
+  useEffect(() => {
+    if (error) {
+      console.error("Erreur de requête:", error)
+    }
+  }, [error])
 
   if (isLoading) {
     return <div>Chargement...</div>
