@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import { ProfilePlanSelect } from "./ProfilePlanSelect"
 
 interface ProfileFormProps {
   newProfile: any;
@@ -88,6 +89,10 @@ export function ProfileForm({ newProfile, setNewProfile }: ProfileFormProps) {
           </SelectContent>
         </Select>
       </div>
+      <ProfilePlanSelect 
+        value={newProfile.subscription_plan_id} 
+        onValueChange={(value) => setNewProfile({ ...newProfile, subscription_plan_id: value })}
+      />
       <div className="flex items-center space-x-2">
         <Switch
           id="show_phone"
