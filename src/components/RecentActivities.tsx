@@ -6,24 +6,37 @@ import { fr } from "date-fns/locale"
 import { Loader2 } from "lucide-react"
 
 export function RecentActivities() {
-  const { data: recentContracts, isLoading } = useQuery({
-    queryKey: ["recent-activities"],
+  // Récupérer d'abord le profil de l'utilisateur
+  const { data: userProfile, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ["user-profile"],
     queryFn: async () => {
-      console.log("Fetching recent activities...")
-      
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
-      console.log('User ID:', user.id)
-
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
-        .select('role')
+        .select('*')
         .eq('id', user.id)
         .maybeSingle()
 
-      console.log("User profile:", profile)
+      if (error) {
+        console.error("Erreur lors de la récupération du profil:", error)
+        throw error
+      }
 
+      console.log("Profil complet:", profile)
+      return profile
+    },
+  })
+
+  // Utiliser le profil pour récupérer les contrats
+  const { data: recentContracts, isLoading: isLoadingContracts } = useQuery({
+    queryKey: ["recent-activities", userProfile?.id],
+    queryFn: async () => {
+      if (!userProfile) return []
+      
+      console.log("Récupération des activités récentes pour le profil:", userProfile)
+      
       // Build the base query for contracts
       let query = supabase
         .from("contracts")
@@ -38,8 +51,8 @@ export function RecentActivities() {
         `)
 
       // Si l'utilisateur n'est pas admin, on filtre par agency_id
-      if (profile?.role !== 'admin') {
-        query = query.eq('agency_id', user.id)
+      if (userProfile.role !== 'admin') {
+        query = query.eq('agency_id', userProfile.id)
       }
 
       const { data: contracts, error } = await query
@@ -85,9 +98,10 @@ export function RecentActivities() {
       console.log("Recent activities data:", contractsWithDetails)
       return contractsWithDetails
     },
+    enabled: !!userProfile,
   })
 
-  if (isLoading) {
+  if (isLoadingProfile || isLoadingContracts) {
     return (
       <div className="flex justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
