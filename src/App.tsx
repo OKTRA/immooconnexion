@@ -29,11 +29,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const checkAuth = async () => {
       try {
         // First clear any potentially invalid session from localStorage
-        const currentSession = localStorage.getItem('sb-' + supabase.supabaseUrl + '-auth-token')
+        const storageKey = `sb-${supabase.getClientConfig().supabaseUrl?.split('//')[1]}-auth-token`
+        const currentSession = localStorage.getItem(storageKey)
         if (currentSession) {
           const session = JSON.parse(currentSession)
           if (!session?.access_token) {
-            localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token')
+            localStorage.removeItem(storageKey)
             setIsAuthenticated(false)
             return
           }
@@ -42,7 +43,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
         if (sessionError || !session) {
-          localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token')
+          localStorage.removeItem(storageKey)
           setIsAuthenticated(false)
           if (sessionError?.message.includes('User from sub claim in JWT does not exist')) {
             toast({
@@ -57,7 +58,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         setIsAuthenticated(true)
       } catch (error) {
         console.error('Auth check error:', error)
-        localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token')
+        const storageKey = `sb-${supabase.getClientConfig().supabaseUrl?.split('//')[1]}-auth-token`
+        localStorage.removeItem(storageKey)
         setIsAuthenticated(false)
       }
     }
@@ -67,8 +69,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const storageKey = `sb-${supabase.getClientConfig().supabaseUrl?.split('//')[1]}-auth-token`
+      
       if (event === 'SIGNED_OUT') {
-        localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token')
+        localStorage.removeItem(storageKey)
         setIsAuthenticated(false)
         return
       }
@@ -82,7 +86,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         setIsAuthenticated(true)
       } catch (error) {
         console.error('Auth state change error:', error)
-        localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token')
+        localStorage.removeItem(storageKey)
         setIsAuthenticated(false)
       }
     })

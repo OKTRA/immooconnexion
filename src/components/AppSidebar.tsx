@@ -31,7 +31,8 @@ export function SidebarContent() {
   const handleLogout = async () => {
     try {
       // First clear the session from localStorage
-      localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token')
+      const storageKey = `sb-${supabase.getClientConfig().supabaseUrl?.split('//')[1]}-auth-token`
+      localStorage.removeItem(storageKey)
       
       // Then attempt to sign out from Supabase
       await supabase.auth.signOut()
@@ -44,6 +45,8 @@ export function SidebarContent() {
     } catch (error: any) {
       console.error('Logout error:', error)
       // Even if the signOut fails, we still want to clear local session and redirect
+      const storageKey = `sb-${supabase.getClientConfig().supabaseUrl?.split('//')[1]}-auth-token`
+      localStorage.removeItem(storageKey)
       navigate("/login")
       toast({
         title: "Déconnexion",
