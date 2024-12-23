@@ -79,18 +79,10 @@ const PropertyDetails = () => {
     )
   }
 
-  if (propertyError || contractsError) {
+  if (propertyError || contractsError || !property) {
     return (
       <div className="flex items-center justify-center h-screen text-red-500">
         Une erreur est survenue lors du chargement des données
-      </div>
-    )
-  }
-
-  if (!property) {
-    return (
-      <div className="flex items-center justify-center h-screen text-muted-foreground">
-        Bien non trouvé
       </div>
     )
   }
@@ -103,10 +95,10 @@ const PropertyDetails = () => {
           <div className="container mx-auto p-4 space-y-6 pb-16">
             {isMobile && <MobileMenu />}
             <PropertyInfo property={property} />
-            <PropertyActions propertyId={id || ''} contracts={contracts || []} />
+            <PropertyActions propertyId={id || ''} contracts={contracts} />
             <PaymentHistory 
               propertyId={id || ''} 
-              contracts={contracts || []}
+              contracts={contracts}
               onPrintReceipt={(contract) => {
                 const receiptContent = `
                   <html>
@@ -137,7 +129,6 @@ const PropertyDetails = () => {
                     </body>
                   </html>
                 `
-
                 const printWindow = window.open('', '_blank')
                 if (printWindow) {
                   printWindow.document.write(receiptContent)
@@ -185,7 +176,6 @@ const PropertyDetails = () => {
                     </body>
                   </html>
                 `
-
                 const printWindow = window.open('', '_blank')
                 if (printWindow) {
                   printWindow.document.write(contractContent)
@@ -194,7 +184,7 @@ const PropertyDetails = () => {
                 }
               }}
             />
-            <InspectionsList contracts={contracts || []} />
+            <InspectionsList contracts={contracts} />
           </div>
         </main>
       </div>
