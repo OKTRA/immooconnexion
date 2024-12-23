@@ -98,10 +98,11 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
           agency_id
         `)
 
-      // Si l'utilisateur n'est pas admin, filtrer par user_id ou agency_id
+      // Si l'utilisateur n'est pas admin, filtrer par user_id
       if (profileData?.role !== 'admin') {
-        query = query.or(`user_id.eq.${user.id},agency_id.eq.${user.id}`)
-        console.log('Filtrage par user_id ou agency_id:', user.id)
+        // On cherche les locataires créés par cet utilisateur
+        query = query.eq('user_id', user.id)
+        console.log('Filtrage par créateur:', user.id)
       }
       
       const { data: tenantsData, error: tenantsError } = await query
