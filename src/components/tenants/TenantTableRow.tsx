@@ -19,6 +19,8 @@ interface TenantTableRowProps {
     telephone: string
     photoIdUrl?: string
     fraisAgence?: string
+    user_id?: string
+    role?: string
   }
   onEdit: (tenant: any) => void
   onDelete: (id: string) => void
@@ -47,20 +49,29 @@ export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps
     }
   })
 
-  const handlePrintReceipt = () => {
-    setShowReceipt(true)
-  }
-
-  const handlePrintContract = () => {
-    if (!contract) {
-      toast({
-        title: "Aucun contrat trouvé",
-        description: "Ce locataire n'a pas de contrat actif",
-        variant: "destructive"
-      })
-      return
-    }
-
+  return (
+    <TableRow>
+      <TableCell>{tenant.nom}</TableCell>
+      <TableCell>{tenant.prenom}</TableCell>
+      <TableCell>
+        {tenant.dateNaissance ? format(new Date(tenant.dateNaissance), 'PP', { locale: fr }) : 'Non renseigné'}
+      </TableCell>
+      <TableCell>{tenant.telephone}</TableCell>
+      <TableCell>{tenant.role || 'N/A'}</TableCell>
+      <TableCell>{tenant.user_id || 'N/A'}</TableCell>
+      <TableCell>
+        <TenantActionButtons
+          tenant={tenant}
+          onPrintReceipt={() => setShowReceipt(true)}
+          onPrintContract={() => {
+            if (!contract) {
+              toast({
+                title: "Aucun contrat trouvé",
+                description: "Ce locataire n'a pas de contrat actif",
+                variant: "destructive"
+              })
+              return
+            }
     const contractContent = `
       <html>
         <head>
@@ -108,20 +119,7 @@ export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps
       printWindow.print()
     }
   }
-
-  return (
-    <TableRow>
-      <TableCell>{tenant.nom}</TableCell>
-      <TableCell>{tenant.prenom}</TableCell>
-      <TableCell>
-        {tenant.dateNaissance ? format(new Date(tenant.dateNaissance), 'PP', { locale: fr }) : 'Non renseigné'}
-      </TableCell>
-      <TableCell>{tenant.telephone}</TableCell>
-      <TableCell>
-        <TenantActionButtons
-          tenant={tenant}
-          onPrintReceipt={handlePrintReceipt}
-          onPrintContract={handlePrintContract}
+          }}
           onInspection={() => setShowInspection(true)}
         />
       </TableCell>

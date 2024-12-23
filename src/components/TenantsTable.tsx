@@ -20,6 +20,7 @@ interface TenantDisplay {
   photoIdUrl?: string
   fraisAgence?: string
   user_id?: string
+  role?: string
 }
 
 export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => void }) {
@@ -52,7 +53,7 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
       
       console.log('Profil utilisateur:', profileData)
 
-      // Construction de la requête en fonction du rôle de l'utilisateur
+      // Construction de la requête pour récupérer les locataires avec leurs profils
       let query = supabase
         .from('tenants')
         .select(`
@@ -64,7 +65,10 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
           photo_id_url,
           agency_fees,
           agency_id,
-          user_id
+          user_id,
+          profiles:user_id (
+            role
+          )
         `)
 
       // Si l'utilisateur n'est pas admin, filtrer par son ID comme user_id ou agency_id
@@ -92,6 +96,7 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
         photoIdUrl: tenant.photo_id_url,
         fraisAgence: tenant.agency_fees?.toString(),
         user_id: tenant.user_id,
+        role: tenant.profiles?.role || 'N/A',
       }))
     },
     meta: {
@@ -132,13 +137,15 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
               <TableHead>Prénom</TableHead>
               <TableHead>Date de Naissance</TableHead>
               <TableHead>Téléphone</TableHead>
+              <TableHead>Rôle</TableHead>
+              <TableHead>ID Utilisateur</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {tenants.length === 0 ? (
               <TableRow>
-                <td colSpan={5} className="text-center py-4">
+                <td colSpan={7} className="text-center py-4">
                   Aucun locataire trouvé
                 </td>
               </TableRow>
