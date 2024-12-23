@@ -10,13 +10,39 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useNavigate } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
-import { LogOut } from "lucide-react"
+import { LogOut, Loader2 } from "lucide-react"
 import { useState, useEffect } from "react"
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
   const [adminDetails, setAdminDetails] = useState<any>(null)
+
+  // Vérifier la session au chargement
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      
+      if (sessionError || !session) {
+        console.error("Session error:", sessionError)
+        navigate("/login")
+        return
+      }
+    }
+
+    checkSession()
+
+    // Écouter les changements de session
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        navigate("/login")
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [navigate])
 
   const handleLogout = async () => {
     try {
@@ -89,14 +115,12 @@ const AdminDashboard = () => {
     }
   })
 
-  useEffect(() => {
-    if (error) {
-      console.error("Erreur de requête:", error)
-    }
-  }, [error])
-
   if (isLoading) {
-    return <div>Chargement...</div>
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
   }
 
   return (
