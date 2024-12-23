@@ -51,14 +51,6 @@ export function UserLoginForm() {
         }}
         view={view}
         showLinks={false}
-        onError={(error) => {
-          console.error("Auth error:", error)
-          toast({
-            title: "Erreur de connexion",
-            description: "Email ou mot de passe incorrect",
-            variant: "destructive",
-          })
-        }}
       />
       {view === "sign_in" && (
         <div className="text-center mt-4">
