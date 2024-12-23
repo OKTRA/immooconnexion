@@ -41,11 +41,16 @@ export default function Pricing() {
                 <h3 className="text-lg font-semibold leading-8 text-gray-900">
                   {plan.name}
                 </h3>
-                <p className="mt-4 text-sm leading-6 text-gray-600">
-                  {plan.max_properties === -1 
-                    ? "Propriétés illimitées" 
-                    : `Jusqu'à ${plan.max_properties} propriétés`}
-                </p>
+                <div className="mt-4 flex items-baseline gap-x-2">
+                  <span className="text-sm font-medium text-gray-900">
+                    {plan.max_properties === -1 
+                      ? "Propriétés illimitées" 
+                      : `${plan.max_properties} propriété${plan.max_properties > 1 ? 's' : ''} maximum`}
+                  </span>
+                  {plan.max_properties !== -1 && (
+                    <span className="text-sm text-gray-500">incluses</span>
+                  )}
+                </div>
                 <p className="mt-6 flex items-baseline gap-x-1">
                   <span className="text-4xl font-bold tracking-tight text-gray-900">{plan.price}</span>
                   <span className="text-sm font-semibold leading-6 text-gray-600">FCFA/mois</span>
