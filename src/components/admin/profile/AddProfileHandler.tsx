@@ -5,15 +5,17 @@ import { supabase } from "@/integrations/supabase/client"
 interface AddProfileHandlerProps {
   onSuccess: () => void;
   onClose: () => void;
+  agencyId?: string;
 }
 
-export function useAddProfileHandler({ onSuccess, onClose }: AddProfileHandlerProps) {
+export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfileHandlerProps) {
   const [newProfile, setNewProfile] = useState({
     email: "",
     first_name: "",
     last_name: "",
     phone_number: "",
     password: "",
+    agency_id: agencyId || "",
   })
   const { toast } = useToast()
 
@@ -69,6 +71,8 @@ export function useAddProfileHandler({ onSuccess, onClose }: AddProfileHandlerPr
           last_name: newProfile.last_name,
           phone_number: newProfile.phone_number,
           email: newProfile.email,
+          agency_id: newProfile.agency_id || agencyId,
+          role: 'user'
         })
 
       if (profileError) throw profileError
@@ -87,6 +91,7 @@ export function useAddProfileHandler({ onSuccess, onClose }: AddProfileHandlerPr
         last_name: "",
         phone_number: "",
         password: "",
+        agency_id: agencyId || "",
       })
       onSuccess()
     } catch (error: any) {

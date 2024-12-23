@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { ProfileForm } from "../profile/ProfileForm"
 import { AgencyUserActions } from "./AgencyUserActions"
 import { Plus } from "lucide-react"
+import { AddProfileDialog } from "../profile/AddProfileDialog"
 
 interface AgencyUsersProps {
   agencyId: string
@@ -112,33 +113,31 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
             <ProfileForm
               newProfile={selectedUser}
               setNewProfile={handleSaveEdit}
+              selectedAgencyId={agencyId}
             />
           )}
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Ajouter un agent</DialogTitle>
-          </DialogHeader>
-          <ProfileForm
-            newProfile={{
-              email: "",
-              first_name: "",
-              last_name: "",
-              role: "user",
-              agency_id: agencyId,
-              phone_number: "",
-            }}
-            setNewProfile={(newUser) => {
-              // Logique d'ajout d'utilisateur
-              refetch()
-              setShowAddDialog(false)
-            }}
-          />
-        </DialogContent>
-      </Dialog>
+      <AddProfileDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        agencyId={agencyId}
+        onProfileCreated={refetch}
+        newProfile={{
+          email: "",
+          first_name: "",
+          last_name: "",
+          role: "user",
+          agency_id: agencyId,
+          phone_number: "",
+        }}
+        setNewProfile={(newUser) => {
+          // Logique d'ajout d'utilisateur
+          refetch()
+          setShowAddDialog(false)
+        }}
+      />
     </div>
   )
 }

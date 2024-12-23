@@ -1,5 +1,4 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
 import { ProfileForm } from "./ProfileForm"
 
 export interface AddProfileDialogProps {
@@ -36,11 +35,10 @@ export function AddProfileDialog({
         </DialogHeader>
         <ProfileForm 
           newProfile={newProfile} 
-          setNewProfile={setNewProfile} 
+          setNewProfile={setNewProfile}
+          onSubmit={handleAddUser}
+          selectedAgencyId={agencyId}
         />
-        <Button onClick={handleAddUser} className="w-full">
-          Ajouter
-        </Button>
       </DialogContent>
     </Dialog>
   )
