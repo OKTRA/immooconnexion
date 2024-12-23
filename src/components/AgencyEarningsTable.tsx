@@ -15,6 +15,7 @@ interface ContractWithProperties {
   montant: number
   type: string
   created_at: string
+  agency_id: string | null
   properties: {
     bien: string
     frais_agence: number | null
@@ -27,7 +28,18 @@ export function AgencyEarningsTable() {
     queryKey: ['agency-earnings'],
     queryFn: async () => {
       console.log('Fetching agency earnings...')
-      const { data: contracts, error } = await supabase
+      
+      // Get current user's profile to check role
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      let query = supabase
         .from('contracts')
         .select(`
           id,
@@ -35,6 +47,7 @@ export function AgencyEarningsTable() {
           montant,
           type,
           created_at,
+          agency_id,
           properties (
             bien,
             frais_agence,
@@ -43,6 +56,13 @@ export function AgencyEarningsTable() {
         `)
         .eq('type', 'loyer')
         .order('created_at', { ascending: false })
+
+      // If not admin, only show agency's contracts
+      if (profile?.role !== 'admin') {
+        query = query.eq('agency_id', user.id)
+      }
+      
+      const { data: contracts, error } = await query
       
       if (error) {
         console.error('Error fetching contracts:', error)
