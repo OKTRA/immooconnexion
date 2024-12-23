@@ -25,12 +25,27 @@ export function ExpenseTable({ propertyId }: ExpenseTableProps) {
     queryKey: ['expenses', propertyId],
     queryFn: async () => {
       console.log("Fetching expenses for property:", propertyId)
+      
+      // Get current user's profile
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle()
+
+      // Build the query
       const query = supabase
         .from('expenses')
         .select('*')
       
       if (propertyId) {
         query.eq('property_id', propertyId)
+      } else if (profile?.role !== 'admin') {
+        // If not admin and no specific property, show only agency's expenses
+        query.eq('agency_id', user.id)
       }
       
       const { data, error } = await query

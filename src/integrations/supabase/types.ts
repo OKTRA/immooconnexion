@@ -38,6 +38,7 @@ export type Database = {
       }
       contracts: {
         Row: {
+          agency_id: string | null
           created_at: string
           description: string | null
           end_date: string | null
@@ -51,6 +52,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          agency_id?: string | null
           created_at?: string
           description?: string | null
           end_date?: string | null
@@ -64,6 +66,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          agency_id?: string | null
           created_at?: string
           description?: string | null
           end_date?: string | null
@@ -78,6 +81,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "contracts_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "contracts_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
@@ -88,6 +98,7 @@ export type Database = {
       }
       expenses: {
         Row: {
+          agency_id: string | null
           created_at: string
           date: string
           description: string | null
@@ -97,6 +108,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          agency_id?: string | null
           created_at?: string
           date?: string
           description?: string | null
@@ -106,6 +118,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          agency_id?: string | null
           created_at?: string
           date?: string
           description?: string | null
@@ -115,6 +128,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "expenses_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "expenses_property_id_fkey"
             columns: ["property_id"]
@@ -185,6 +205,7 @@ export type Database = {
       }
       properties: {
         Row: {
+          agency_id: string | null
           bien: string
           caution: number | null
           chambres: number | null
@@ -201,6 +222,7 @@ export type Database = {
           ville: string | null
         }
         Insert: {
+          agency_id?: string | null
           bien: string
           caution?: number | null
           chambres?: number | null
@@ -217,6 +239,7 @@ export type Database = {
           ville?: string | null
         }
         Update: {
+          agency_id?: string | null
           bien?: string
           caution?: number | null
           chambres?: number | null
@@ -232,7 +255,15 @@ export type Database = {
           user_id?: string | null
           ville?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "properties_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       property_inspections: {
         Row: {
@@ -324,6 +355,7 @@ export type Database = {
       tenants: {
         Row: {
           agency_fees: number | null
+          agency_id: string | null
           birth_date: string | null
           created_at: string
           id: string
@@ -335,6 +367,7 @@ export type Database = {
         }
         Insert: {
           agency_fees?: number | null
+          agency_id?: string | null
           birth_date?: string | null
           created_at?: string
           id: string
@@ -346,6 +379,7 @@ export type Database = {
         }
         Update: {
           agency_fees?: number | null
+          agency_id?: string | null
           birth_date?: string | null
           created_at?: string
           id?: string
@@ -355,7 +389,15 @@ export type Database = {
           prenom?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tenants_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

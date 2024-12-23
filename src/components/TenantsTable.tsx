@@ -28,11 +28,14 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
     queryFn: async () => {
       console.log('Début de la requête des locataires...');
       
-      // Vérifier le rôle de l'utilisateur connecté uniquement
+      // Get current user's profile
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', (await supabase.auth.getUser()).data.user?.id)
+        .eq('id', user.id)
         .maybeSingle();
       
       if (profileError) {
@@ -42,7 +45,8 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
       
       console.log('Profil utilisateur:', profileData);
 
-      const { data: tenantsData, error: tenantsError } = await supabase
+      // Build the query based on user role
+      const query = supabase
         .from('tenants')
         .select(`
           id,
@@ -53,6 +57,13 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
           photo_id_url,
           agency_fees
         `);
+
+      // If not admin, only show tenants for this agency
+      if (profileData?.role !== 'admin') {
+        query.eq('agency_id', user.id);
+      }
+      
+      const { data: tenantsData, error: tenantsError } = await query;
       
       if (tenantsError) {
         console.error('Erreur lors de la récupération des locataires:', tenantsError);

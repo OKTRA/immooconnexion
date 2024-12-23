@@ -17,14 +17,30 @@ import { useState } from "react"
 export function AdminProperties() {
   const [searchTerm, setSearchTerm] = useState("")
   
-  const { data: properties = [] } = useQuery({
+  const { data: properties = [], isLoading } = useQuery({
     queryKey: ["admin-properties"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Get the current user's profile to check if they're an admin
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle()
+
+      // If admin, get all properties, otherwise get only agency's properties
+      const query = supabase
         .from("properties")
-        .select("*")
+        .select("*, profiles(agency_name)")
         .order("created_at", { ascending: false })
 
+      if (profile?.role !== 'admin') {
+        query.eq('agency_id', user.id)
+      }
+
+      const { data, error } = await query
       if (error) throw error
       return data
     },
@@ -36,6 +52,10 @@ export function AdminProperties() {
       property.ville?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       property.type.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  if (isLoading) {
+    return <div>Chargement...</div>
+  }
 
   return (
     <div className="space-y-4">
@@ -54,6 +74,7 @@ export function AdminProperties() {
               <TableHead>Type</TableHead>
               <TableHead>Ville</TableHead>
               <TableHead>Loyer</TableHead>
+              <TableHead>Agence</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead>Date de création</TableHead>
             </TableRow>
@@ -72,6 +93,7 @@ export function AdminProperties() {
                       }).format(property.loyer)
                     : "-"}
                 </TableCell>
+                <TableCell>{property.profiles?.agency_name || "N/A"}</TableCell>
                 <TableCell>
                   <Badge
                     variant={
