@@ -121,6 +121,11 @@ export function PropertyTable() {
     }
   }
 
+  const handleViewProperty = (propertyId: string) => {
+    console.log("Navigation vers le bien:", propertyId)
+    navigate(`/biens/${propertyId}`)
+  }
+
   if (isLoading) {
     return <div>Chargement...</div>
   }
@@ -155,7 +160,7 @@ export function PropertyTable() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => navigate(`/biens/${property.id}`)}
+                    onClick={() => handleViewProperty(property.id)}
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
