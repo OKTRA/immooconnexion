@@ -61,19 +61,36 @@ export function AdminProfiles() {
         return
       }
 
-      // Créer l'utilisateur avec Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: newProfile.email,
-        password: newProfile.password,
-      })
+      // First check if user exists
+      const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', newProfile.email)
+        .maybeSingle()
 
-      if (authError) throw authError
-      if (!authData.user) throw new Error("Aucun utilisateur créé")
+      let userId
 
-      // Mettre à jour le profil avec les informations supplémentaires
+      if (existingUser) {
+        // If user exists, just update their profile
+        userId = existingUser.id
+      } else {
+        // If user doesn't exist, create them
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: newProfile.email,
+          password: newProfile.password,
+        })
+
+        if (authError) throw authError
+        if (!authData.user) throw new Error("Aucun utilisateur créé")
+        
+        userId = authData.user.id
+      }
+
+      // Update or create the profile
       const { error: profileError } = await supabase
         .from("profiles")
-        .update({
+        .upsert({
+          id: userId,
           first_name: newProfile.first_name,
           last_name: newProfile.last_name,
           role: newProfile.role,
@@ -83,16 +100,17 @@ export function AdminProfiles() {
           list_properties_on_site: newProfile.list_properties_on_site,
           subscription_plan_id: newProfile.subscription_plan_id,
           email: newProfile.email,
-          password_hash: newProfile.password,
         })
-        .eq("id", authData.user.id)
 
       if (profileError) throw profileError
 
       toast({
-        title: "Profil ajouté",
-        description: "Le nouveau profil a été ajouté avec succès.",
+        title: existingUser ? "Profil mis à jour" : "Profil ajouté",
+        description: existingUser 
+          ? "Le profil a été mis à jour avec succès."
+          : "Le nouveau profil a été ajouté avec succès.",
       })
+      
       setShowAddDialog(false)
       setNewProfile({
         email: "",
