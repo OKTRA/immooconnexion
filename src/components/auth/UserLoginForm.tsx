@@ -39,6 +39,8 @@ export function UserLoginForm() {
               password_label: "Mot de passe",
               button_label: "Se connecter",
               loading_button_label: "Connexion en cours...",
+              email_input_placeholder: "Votre email",
+              password_input_placeholder: "Votre mot de passe",
             },
             forgotten_password: {
               link_text: "Mot de passe oublié ?",

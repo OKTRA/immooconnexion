@@ -59,6 +59,11 @@ const Login = () => {
         }
       } catch (error: any) {
         console.error('Session check error:', error)
+        toast({
+          title: "Erreur",
+          description: "Une erreur est survenue lors de la vérification de la session.",
+          variant: "destructive"
+        })
       } finally {
         setIsLoading(false)
       }
@@ -70,17 +75,30 @@ const Login = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-        // Vérifier si l'utilisateur est un administrateur
-        const { data: adminData } = await supabase
-          .from('local_admins')
-          .select('role')
-          .eq('id', session.user.id)
-          .single()
+        try {
+          // Vérifier si l'utilisateur est un administrateur
+          const { data: adminData, error: adminError } = await supabase
+            .from('local_admins')
+            .select('role')
+            .eq('id', session.user.id)
+            .single()
 
-        if (adminData?.role === 'admin') {
-          navigate("/admin")
-        } else {
-          navigate("/")
+          if (adminError && !adminError.message.includes('No rows found')) {
+            throw adminError
+          }
+
+          if (adminData?.role === 'admin') {
+            navigate("/admin")
+          } else {
+            navigate("/")
+          }
+        } catch (error: any) {
+          console.error('Auth state change error:', error)
+          toast({
+            title: "Erreur",
+            description: "Une erreur est survenue lors de la vérification des droits d'accès.",
+            variant: "destructive"
+          })
         }
       }
     })
