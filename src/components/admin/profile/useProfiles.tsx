@@ -15,7 +15,7 @@ interface RawProfile {
   show_phone_on_site: boolean | null
   list_properties_on_site: boolean | null
   created_at: string
-  agency: Agency[] | null
+  agency: Agency | null
 }
 
 interface TransformedProfile extends Omit<RawProfile, 'agency'> {
@@ -46,7 +46,7 @@ export function useProfiles() {
       // Transform the data to include agency_name
       const transformedData = (data as RawProfile[])?.map(profile => ({
         ...profile,
-        agency_name: profile.agency?.[0]?.name || '-'
+        agency_name: profile.agency?.name || '-'
       })) as TransformedProfile[]
 
       console.log('Fetched profiles:', transformedData)
