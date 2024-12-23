@@ -27,6 +27,7 @@ interface Property {
   statut: string
   photo_url: string | null
   user_id: string
+  agency_id: string
   created_at: string
   updated_at: string
 }
@@ -79,6 +80,20 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
 
   const handleSubmit = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      // Récupérer le profil de l'utilisateur pour obtenir l'agency_id
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('agency_id')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile?.agency_id) {
+        throw new Error("Aucune agence associée à ce compte")
+      }
+
       let photo_url = property?.photo_url
 
       if (image) {
@@ -101,7 +116,8 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
         taux_commission: parseFloat(formData.taux_commission),
         caution: parseFloat(formData.caution),
         photo_url,
-        user_id: (await supabase.auth.getUser()).data.user?.id,
+        user_id: user.id,
+        agency_id: profile.agency_id,
         updated_at: new Date().toISOString(),
       }
 
@@ -130,11 +146,11 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
 
       queryClient.invalidateQueries({ queryKey: ['properties'] })
       if (onOpenChange) onOpenChange(false)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error)
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'opération",
+        description: error.message || "Une erreur est survenue lors de l'opération",
         variant: "destructive",
       })
     }
