@@ -35,8 +35,8 @@ const AdminDashboard = () => {
           .from("profiles")
           .insert([{ 
             id: user.id, 
-            role: 'user',
-            // Ne pas inclure agency_id ici
+            role: 'admin',
+            email: user.email
           }])
 
         if (insertError) {
