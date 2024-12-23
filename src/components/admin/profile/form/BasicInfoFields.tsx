@@ -41,6 +41,16 @@ export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsPr
           onChange={(e) => setNewProfile({ ...newProfile, phone_number: e.target.value })}
         />
       </div>
+      <div>
+        <Label htmlFor="password">Mot de passe</Label>
+        <Input
+          id="password"
+          type="password"
+          value={newProfile.password || ''}
+          onChange={(e) => setNewProfile({ ...newProfile, password: e.target.value })}
+          placeholder="Laisser vide pour un mot de passe aléatoire"
+        />
+      </div>
       <div className="md:col-span-2">
         <Label htmlFor="agency_name">Nom de l'agence</Label>
         <Input

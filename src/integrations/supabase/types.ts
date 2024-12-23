@@ -134,6 +134,7 @@ export type Database = {
           is_tenant: boolean | null
           last_name: string | null
           list_properties_on_site: boolean | null
+          password_hash: string | null
           phone_number: string | null
           role: string | null
           show_phone_on_site: boolean | null
@@ -149,6 +150,7 @@ export type Database = {
           is_tenant?: boolean | null
           last_name?: string | null
           list_properties_on_site?: boolean | null
+          password_hash?: string | null
           phone_number?: string | null
           role?: string | null
           show_phone_on_site?: boolean | null
@@ -164,6 +166,7 @@ export type Database = {
           is_tenant?: boolean | null
           last_name?: string | null
           list_properties_on_site?: boolean | null
+          password_hash?: string | null
           phone_number?: string | null
           role?: string | null
           show_phone_on_site?: boolean | null

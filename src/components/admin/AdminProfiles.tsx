@@ -8,6 +8,7 @@ import { UserPlus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { ProfileTableRow } from "./ProfileTableRow"
 import { AddProfileDialog } from "./profile/AddProfileDialog"
+import { createClient } from '@supabase/supabase-js'
 
 export function AdminProfiles() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -22,7 +23,7 @@ export function AdminProfiles() {
     show_phone_on_site: false,
     list_properties_on_site: false,
     subscription_plan_id: null,
-    password: "changeme123",
+    password: "",
   })
   const { toast } = useToast()
   
@@ -41,15 +42,19 @@ export function AdminProfiles() {
 
   const handleAddUser = async () => {
     try {
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // Générer un mot de passe aléatoire si non fourni
+      const password = newProfile.password || Math.random().toString(36).slice(-8)
+
+      // Créer l'utilisateur avec Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newProfile.email,
-        password: newProfile.password,
-        email_confirm: true,
+        password: password,
       })
 
       if (authError) throw authError
       if (!authData.user) throw new Error("Aucun utilisateur créé")
 
+      // Mettre à jour le profil avec les informations supplémentaires
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
@@ -61,6 +66,7 @@ export function AdminProfiles() {
           show_phone_on_site: newProfile.show_phone_on_site,
           list_properties_on_site: newProfile.list_properties_on_site,
           subscription_plan_id: newProfile.subscription_plan_id,
+          password_hash: password, // Stocker le mot de passe
         })
         .eq("id", authData.user.id)
 
@@ -68,7 +74,7 @@ export function AdminProfiles() {
 
       toast({
         title: "Profil ajouté",
-        description: "Le nouveau profil a été ajouté avec succès. Mot de passe temporaire: changeme123",
+        description: `Le nouveau profil a été ajouté avec succès. Mot de passe: ${password}`,
       })
       setShowAddDialog(false)
       setNewProfile({
@@ -81,45 +87,13 @@ export function AdminProfiles() {
         show_phone_on_site: false,
         list_properties_on_site: false,
         subscription_plan_id: null,
-        password: "changeme123",
+        password: "",
       })
       refetch()
     } catch (error: any) {
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue lors de l'ajout du profil",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const handleEditUser = async (profile: any) => {
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          email: profile.email,
-          role: profile.role,
-          agency_name: profile.agency_name,
-          phone_number: profile.phone_number,
-          show_phone_on_site: profile.show_phone_on_site,
-          list_properties_on_site: profile.list_properties_on_site,
-        })
-        .eq("id", profile.id)
-
-      if (error) throw error
-
-      toast({
-        title: "Profil mis à jour",
-        description: "Le profil a été mis à jour avec succès",
-      })
-      refetch()
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de la mise à jour du profil",
         variant: "destructive",
       })
     }
@@ -166,7 +140,6 @@ export function AdminProfiles() {
               <ProfileTableRow
                 key={profile.id}
                 profile={profile}
-                onEdit={handleEditUser}
                 refetch={refetch}
               />
             ))}
