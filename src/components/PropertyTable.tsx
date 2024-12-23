@@ -1,14 +1,7 @@
 import {
   Table,
   TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
 } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Eye, Pencil, Trash2 } from "lucide-react"
-import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 import {
   AlertDialog,
@@ -24,6 +17,8 @@ import { PropertyDialog } from "./PropertyDialog"
 import { useToast } from "./ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { PropertyTableHeader } from "./property-table/PropertyTableHeader"
+import { PropertyTableRow } from "./property-table/PropertyTableRow"
 
 interface Property {
   id: string
@@ -43,7 +38,6 @@ interface Property {
 }
 
 export function PropertyTable() {
-  const navigate = useNavigate()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
@@ -74,7 +68,6 @@ export function PropertyTable() {
         .from('properties')
         .select('*')
 
-      // Si l'utilisateur n'est pas admin, filtrer par user_id ou agency_id
       if (profile?.role !== 'admin') {
         query = query.or(`user_id.eq.${user.id},agency_id.eq.${user.id}`)
       }
@@ -121,11 +114,6 @@ export function PropertyTable() {
     }
   }
 
-  const handleViewProperty = (propertyId: string) => {
-    console.log("Navigation vers le bien:", propertyId)
-    navigate(`/biens/${propertyId}`)
-  }
-
   if (isLoading) {
     return <div>Chargement...</div>
   }
@@ -133,60 +121,21 @@ export function PropertyTable() {
   return (
     <div className="rounded-md border overflow-x-auto">
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Bien</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Chambres</TableHead>
-            <TableHead>Ville</TableHead>
-            <TableHead>Loyer</TableHead>
-            <TableHead>Caution</TableHead>
-            <TableHead>Statut</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
+        <PropertyTableHeader />
         <TableBody>
           {properties && properties.map((property) => (
-            <TableRow key={property.id}>
-              <TableCell className="font-medium">{property.bien}</TableCell>
-              <TableCell>{property.type}</TableCell>
-              <TableCell>{property.chambres}</TableCell>
-              <TableCell>{property.ville}</TableCell>
-              <TableCell>{property.loyer} FCFA</TableCell>
-              <TableCell>{property.caution} FCFA</TableCell>
-              <TableCell>{property.statut}</TableCell>
-              <TableCell>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleViewProperty(property.id)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      setSelectedProperty(property)
-                      setEditDialogOpen(true)
-                    }}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      setSelectedProperty(property)
-                      setDeleteDialogOpen(true)
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
+            <PropertyTableRow
+              key={property.id}
+              property={property}
+              onEdit={() => {
+                setSelectedProperty(property)
+                setEditDialogOpen(true)
+              }}
+              onDelete={() => {
+                setSelectedProperty(property)
+                setDeleteDialogOpen(true)
+              }}
+            />
           ))}
         </TableBody>
       </Table>
