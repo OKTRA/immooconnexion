@@ -28,26 +28,17 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
     queryFn: async () => {
       console.log("Fetching users for agency:", agencyId)
       
-      // Vérifions d'abord tous les profils pour debug
-      const { data: allProfiles, error: allProfilesError } = await supabase
-        .from("profiles")
-        .select("*")
-      
-      console.log("All profiles in database:", allProfiles)
-      
-      if (allProfilesError) {
-        console.error("Error fetching all profiles:", allProfilesError)
-      }
-
-      // Maintenant, récupérons les profils pour cette agence
+      // Récupération des administrateurs locaux pour cette agence
       const { data, error } = await supabase
-        .from("profiles")
+        .from("local_admins")
         .select(`
           id,
           first_name,
           last_name,
           email,
           role,
+          phone_number,
+          created_at,
           agency_id
         `)
         .eq("agency_id", agencyId)
@@ -91,7 +82,7 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
     try {
       console.log("Saving edited user:", editedUser)
       const { error } = await supabase
-        .from("profiles")
+        .from("local_admins")
         .update(editedUser)
         .eq("id", editedUser.id)
 
