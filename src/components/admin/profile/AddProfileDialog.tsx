@@ -7,11 +7,9 @@ interface AddProfileDialogProps {
   setShowAddDialog?: (show: boolean) => void
   newProfile?: any
   setNewProfile?: (profile: any) => void
-  handleAddUser?: (agencyData?: any) => void
+  handleAddUser?: () => void
   open?: boolean
   onOpenChange?: (open: boolean) => void
-  agencyId?: string
-  onProfileCreated?: () => void
 }
 
 export function AddProfileDialog({ 
@@ -22,8 +20,6 @@ export function AddProfileDialog({
   handleAddUser,
   open,
   onOpenChange,
-  agencyId,
-  onProfileCreated
 }: AddProfileDialogProps) {
   const isOpen = open ?? showAddDialog
   const handleOpenChange = onOpenChange ?? setShowAddDialog
@@ -38,7 +34,7 @@ export function AddProfileDialog({
           newProfile={newProfile} 
           setNewProfile={setNewProfile} 
         />
-        <Button onClick={() => handleAddUser?.()} className="w-full">
+        <Button onClick={handleAddUser} className="w-full">
           Ajouter
         </Button>
       </DialogContent>
