@@ -54,8 +54,13 @@ export function useProfiles() {
 
       // If not admin, only show agency's admins
       if (userProfile?.role !== 'admin') {
-        query = query.eq('agency_id', userProfile?.agency_id)
-        console.log('Filtrage par agency_id:', userProfile?.agency_id)
+        if (userProfile?.agency_id) {
+          query = query.eq('agency_id', userProfile.agency_id)
+          console.log('Filtrage par agency_id:', userProfile.agency_id)
+        } else {
+          query = query.is('agency_id', null)
+          console.log('Filtrage pour les admins sans agence')
+        }
       }
 
       const { data, error } = await query
