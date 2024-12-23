@@ -29,8 +29,9 @@ export function ProfileForm({ newProfile, setNewProfile }: ProfileFormProps) {
     enabled: !!newProfile.subscription_plan_id,
   });
 
-  // Check if the current plan allows showing phone number
+  // Check if the current plan allows showing phone number and listing properties
   const canShowPhoneNumber = subscriptionPlan?.features?.includes("show_phone_on_site");
+  const canListProperties = subscriptionPlan?.name === "Professionnel" || subscriptionPlan?.name === "Enterprise";
 
   return (
     <div className="space-y-4">
@@ -113,8 +114,11 @@ export function ProfileForm({ newProfile, setNewProfile }: ProfileFormProps) {
           onCheckedChange={(checked) => 
             setNewProfile({ ...newProfile, list_properties_on_site: checked })
           }
+          disabled={!canListProperties}
         />
-        <Label htmlFor="list_properties">Lister les propriétés sur le site</Label>
+        <Label htmlFor="list_properties" className={!canListProperties ? "text-gray-400" : ""}>
+          Lister les propriétés sur le site {!canListProperties && "(Nécessite un abonnement Professionnel ou supérieur)"}
+        </Label>
       </div>
     </div>
   );
