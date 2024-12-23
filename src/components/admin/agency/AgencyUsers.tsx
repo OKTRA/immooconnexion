@@ -28,7 +28,6 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
     queryFn: async () => {
       console.log("Fetching users for agency:", agencyId)
       
-      // Récupération des administrateurs locaux pour cette agence
       const { data, error } = await supabase
         .from("local_admins")
         .select(`
@@ -46,7 +45,6 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
       
       if (error) {
         console.error("Error fetching users:", error)
-        console.error("Error details:", error.message, error.details, error.hint)
         toast({
           title: "Erreur",
           description: "Impossible de charger les utilisateurs",
@@ -55,7 +53,6 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
         throw error
       }
 
-      console.log("Fetched users for agency:", data)
       return data || []
     },
   })
