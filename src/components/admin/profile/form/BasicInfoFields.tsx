@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
+import { useState } from "react"
 
 interface BasicInfoFieldsProps {
   newProfile: any;
@@ -12,9 +13,10 @@ interface BasicInfoFieldsProps {
 
 export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsProps) {
   const { toast } = useToast()
+  const [newAgencyName, setNewAgencyName] = useState("")
   
   // Fetch available agencies
-  const { data: agencies } = useQuery({
+  const { data: agencies, refetch: refetchAgencies } = useQuery({
     queryKey: ["agencies"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -26,6 +28,35 @@ export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsPr
       return data
     }
   })
+
+  const handleCreateAgency = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('agencies')
+        .insert([{ name: newAgencyName }])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      if (data) {
+        setNewProfile({ ...newProfile, agency_id: data.id })
+        setNewAgencyName("")
+        refetchAgencies()
+        toast({
+          title: "Agence créée",
+          description: "L'agence a été créée avec succès",
+        })
+      }
+    } catch (error) {
+      console.error('Error creating agency:', error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la création de l'agence",
+        variant: "destructive",
+      })
+    }
+  }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -121,7 +152,7 @@ export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsPr
         />
       </div>
       <div>
-        <Label htmlFor="agency">Agence</Label>
+        <Label htmlFor="agency">Agence existante</Label>
         <Select 
           value={newProfile.agency_id} 
           onValueChange={(value) => setNewProfile({ ...newProfile, agency_id: value })}
@@ -137,6 +168,24 @@ export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsPr
             ))}
           </SelectContent>
         </Select>
+      </div>
+      <div>
+        <Label htmlFor="new_agency">Ou créer une nouvelle agence</Label>
+        <div className="flex gap-2">
+          <Input
+            id="new_agency"
+            value={newAgencyName}
+            onChange={(e) => setNewAgencyName(e.target.value)}
+            placeholder="Nom de la nouvelle agence"
+          />
+          <button
+            onClick={handleCreateAgency}
+            disabled={!newAgencyName}
+            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50"
+          >
+            Créer
+          </button>
+        </div>
       </div>
       <div className="md:col-span-2">
         <Label htmlFor="logo">Logo de l'agence (optionnel)</Label>
