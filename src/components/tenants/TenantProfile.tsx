@@ -16,7 +16,7 @@ interface Contract {
   statut: string
   property: {
     bien: string
-  }
+  } | null
 }
 
 interface Tenant {
@@ -26,7 +26,7 @@ interface Tenant {
   phone_number: string | null
   birth_date: string | null
   agency_fees: number | null
-  contracts: Contract[]
+  contracts: Contract[] | null
 }
 
 export function TenantProfile({ tenantId }: TenantProfileProps) {
@@ -46,7 +46,14 @@ export function TenantProfile({ tenantId }: TenantProfileProps) {
         .maybeSingle()
 
       if (error) throw error
-      return data as Tenant
+      
+      // Ensure contracts is always an array
+      const formattedData = {
+        ...data,
+        contracts: Array.isArray(data?.contracts) ? data.contracts : []
+      } as Tenant
+
+      return formattedData
     }
   })
 
