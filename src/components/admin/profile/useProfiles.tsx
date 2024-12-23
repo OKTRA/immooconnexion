@@ -32,7 +32,7 @@ export function useProfiles() {
         .from("profiles")
         .select(`
           *,
-          agency:agencies (
+          agency:agencies!profiles_agency_id_fkey (
             name
           )
         `)
