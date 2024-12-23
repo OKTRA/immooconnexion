@@ -14,15 +14,8 @@ interface BasicInfoFieldsProps {
   setNewProfile: (profile: Profile) => void
 }
 
-export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsProps) {
-  if (typeof setNewProfile !== 'function') {
-    console.error('setNewProfile is not a function:', setNewProfile)
-    return null
-  }
-
+export function BasicInfoFields({ newProfile = {}, setNewProfile }: BasicInfoFieldsProps) {
   const handleChange = (field: keyof Profile, value: string) => {
-    console.log('Updating field:', field, 'with value:', value)
-    console.log('Current newProfile:', newProfile)
     setNewProfile({ ...newProfile, [field]: value })
   }
 
