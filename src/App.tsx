@@ -20,7 +20,14 @@ import Reports from "./pages/Reports"
 import TenantContracts from "./pages/TenantContracts"
 import AdminDashboard from "./pages/AdminDashboard"
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    },
+  },
+})
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
@@ -41,6 +48,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         setIsAuthenticated(true)
       } catch (error) {
         console.error('Auth check error:', error)
+        if (error instanceof Error && error.message === 'Failed to fetch') {
+          toast({
+            title: "Erreur de connexion",
+            description: "Impossible de se connecter au serveur. Veuillez vérifier votre connexion internet.",
+            variant: "destructive"
+          })
+        }
         const storageKey = getSupabaseSessionKey()
         localStorage.removeItem(storageKey)
         setIsAuthenticated(false)
