@@ -44,8 +44,8 @@ export type Database = {
           id: string
           logo_url: string | null
           name: string
-          owner_id: string | null
           phone: string | null
+          profile_id: string | null
           updated_at: string
         }
         Insert: {
@@ -55,8 +55,8 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name: string
-          owner_id?: string | null
           phone?: string | null
+          profile_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -66,11 +66,19 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name?: string
-          owner_id?: string | null
           phone?: string | null
+          profile_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "agencies_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contracts: {
         Row: {

@@ -14,23 +14,48 @@ import { supabase } from "@/integrations/supabase/client"
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm"
 import { Button } from "@/components/ui/button"
 import { ExternalLink } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 const Login = () => {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("user")
   const [view, setView] = useState<"sign_in" | "forgotten_password">("sign_in")
+  const { toast } = useToast()
 
   useEffect(() => {
+    // First check and clear any invalid sessions
+    const checkAndClearSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error?.message.includes('User from sub claim in JWT does not exist')) {
+          await supabase.auth.signOut()
+          toast({
+            title: "Session expirée",
+            description: "Veuillez vous reconnecter",
+            variant: "default"
+          })
+        } else if (session) {
+          navigate("/")
+        }
+      } catch (error: any) {
+        console.error('Session check error:', error)
+        // Clear the session if there's any error
+        await supabase.auth.signOut()
+      }
+    }
+    
+    checkAndClearSession()
+
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN") {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session) {
         navigate("/")
       }
     })
 
     return () => subscription.unsubscribe()
-  }, [navigate])
+  }, [navigate, toast])
 
   return (
     <div 
