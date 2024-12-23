@@ -15,43 +15,53 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   useEffect(() => {
     let mounted = true
 
-    // Nettoyage immédiat de toute session potentiellement corrompue
-    const cleanupSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        await supabase.auth.signOut()
-        if (mounted) setIsAuthenticated(false)
-        return
+    const clearLocalStorage = () => {
+      // Clear all Supabase-related items from localStorage
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('sb-')) {
+          localStorage.removeItem(key)
+        }
+      })
+    }
+
+    const handleAuthError = async () => {
+      console.log("Handling auth error - clearing state")
+      clearLocalStorage()
+      if (mounted) {
+        setIsAuthenticated(false)
+        toast({
+          title: "Session expirée",
+          description: "Veuillez vous reconnecter",
+          variant: "destructive"
+        })
       }
     }
 
-    cleanupSession()
-
     const checkAuth = async () => {
       try {
+        // First clear any potentially corrupted session
+        await supabase.auth.signOut()
+        clearLocalStorage()
+
+        // Get a fresh session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
         if (sessionError || !session) {
-          console.error("Session error or no session:", sessionError)
-          if (mounted) {
-            setIsAuthenticated(false)
-            await supabase.auth.signOut()
-          }
+          console.log("No valid session found")
+          await handleAuthError()
           return
         }
 
+        // Verify user exists
         const { data: { user }, error: userError } = await supabase.auth.getUser()
         
         if (userError || !user) {
-          console.error("User verification error:", userError)
-          if (mounted) {
-            setIsAuthenticated(false)
-            await supabase.auth.signOut()
-          }
+          console.error("User verification failed:", userError)
+          await handleAuthError()
           return
         }
 
-        // Vérification du profil
+        // Only proceed with profile check if we have a valid user
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -60,42 +70,26 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
         if (profileError) {
           console.error("Profile check error:", profileError)
-          if (mounted) {
-            setIsAuthenticated(false)
-            await supabase.auth.signOut()
-          }
+          await handleAuthError()
           return
         }
 
-        // Création du profil si nécessaire
+        // Don't try to create profile here - it should be handled by the database trigger
         if (!profile) {
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert([{ 
-              id: user.id,
-              email: user.email,
-              role: 'user'
-            }])
-
-          if (insertError) {
-            console.error("Profile creation error:", insertError)
-            if (mounted) {
-              setIsAuthenticated(false)
-              await supabase.auth.signOut()
-            }
-            return
-          }
+          console.log("No profile found for user")
+          await handleAuthError()
+          return
         }
 
         if (mounted) setIsAuthenticated(true)
       } catch (error) {
         console.error("Auth check error:", error)
-        if (mounted) {
-          setIsAuthenticated(false)
-          await supabase.auth.signOut()
-        }
+        await handleAuthError()
       }
     }
+
+    // Initial auth check
+    checkAuth()
 
     const {
       data: { subscription },
@@ -103,6 +97,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       console.log("Auth state changed:", event, session?.user?.id)
       
       if (event === 'SIGNED_OUT' || !session) {
+        clearLocalStorage()
         if (mounted) setIsAuthenticated(false)
         return
       }
