@@ -134,6 +134,7 @@ export type Database = {
           is_tenant: boolean | null
           last_name: string | null
           role: string | null
+          subscription_plan_id: string | null
           updated_at: string
         }
         Insert: {
@@ -145,6 +146,7 @@ export type Database = {
           is_tenant?: boolean | null
           last_name?: string | null
           role?: string | null
+          subscription_plan_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -156,9 +158,18 @@ export type Database = {
           is_tenant?: boolean | null
           last_name?: string | null
           role?: string | null
+          subscription_plan_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_subscription_plan_id_fkey"
+            columns: ["subscription_plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       properties: {
         Row: {
@@ -267,6 +278,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          features: string[]
+          id: string
+          max_properties: number
+          max_tenants: number
+          name: string
+          price: number
+        }
+        Insert: {
+          created_at?: string
+          features: string[]
+          id?: string
+          max_properties: number
+          max_tenants: number
+          name: string
+          price: number
+        }
+        Update: {
+          created_at?: string
+          features?: string[]
+          id?: string
+          max_properties?: number
+          max_tenants?: number
+          name?: string
+          price?: number
+        }
+        Relationships: []
       }
       tenants: {
         Row: {

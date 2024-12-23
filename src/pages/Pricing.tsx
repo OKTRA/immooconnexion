@@ -2,48 +2,23 @@ import { Button } from "@/components/ui/button"
 import { Check } from "lucide-react"
 import { PublicNavbar } from "@/components/home/PublicNavbar"
 import { Link } from "react-router-dom"
-
-const tiers = [
-  {
-    name: "Débutant",
-    price: "15 000",
-    description: "Parfait pour commencer dans l'immobilier",
-    features: [
-      "Jusqu'à 5 propriétés",
-      "Gestion des locataires",
-      "Suivi des paiements",
-      "Support email",
-    ],
-  },
-  {
-    name: "Professionnel",
-    price: "35 000",
-    description: "Pour les agences en croissance",
-    features: [
-      "Jusqu'à 20 propriétés",
-      "Gestion des locataires",
-      "Suivi des paiements",
-      "Support prioritaire",
-      "Rapports avancés",
-      "Contrats personnalisés",
-    ],
-  },
-  {
-    name: "Entreprise",
-    price: "75 000",
-    description: "Pour les grandes agences immobilières",
-    features: [
-      "Propriétés illimitées",
-      "Gestion multi-agences",
-      "Support dédié 24/7",
-      "API personnalisée",
-      "Formation sur site",
-      "Rapports personnalisés",
-    ],
-  },
-]
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
 export default function Pricing() {
+  const { data: plans = [] } = useQuery({
+    queryKey: ['subscription-plans'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('subscription_plans')
+        .select('*')
+        .order('price', { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
   return (
     <div className="min-h-screen bg-gray-50">
       <PublicNavbar />
@@ -58,19 +33,21 @@ export default function Pricing() {
             </p>
           </div>
           <div className="isolate mx-auto mt-16 grid max-w-6xl grid-cols-1 gap-8 sm:mt-20 lg:grid-cols-3">
-            {tiers.map((tier) => (
+            {plans.map((plan) => (
               <div
-                key={tier.name}
+                key={plan.id}
                 className="rounded-3xl p-8 ring-1 ring-gray-200 bg-white hover:shadow-lg transition-shadow duration-300"
               >
                 <h3 className="text-lg font-semibold leading-8 text-gray-900">
-                  {tier.name}
+                  {plan.name}
                 </h3>
                 <p className="mt-4 text-sm leading-6 text-gray-600">
-                  {tier.description}
+                  {plan.max_properties === -1 
+                    ? "Propriétés illimitées" 
+                    : `Jusqu'à ${plan.max_properties} propriétés`}
                 </p>
                 <p className="mt-6 flex items-baseline gap-x-1">
-                  <span className="text-4xl font-bold tracking-tight text-gray-900">{tier.price}</span>
+                  <span className="text-4xl font-bold tracking-tight text-gray-900">{plan.price}</span>
                   <span className="text-sm font-semibold leading-6 text-gray-600">FCFA/mois</span>
                 </p>
                 <Link to="/login">
@@ -79,12 +56,18 @@ export default function Pricing() {
                   </Button>
                 </Link>
                 <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-gray-600">
-                  {tier.features.map((feature) => (
+                  {plan.features.map((feature: string) => (
                     <li key={feature} className="flex gap-x-3">
                       <Check className="h-6 w-5 flex-none text-blue-600" />
                       {feature}
                     </li>
                   ))}
+                  <li className="flex gap-x-3">
+                    <Check className="h-6 w-5 flex-none text-blue-600" />
+                    {plan.max_tenants === -1 
+                      ? "Locataires illimités" 
+                      : `Jusqu'à ${plan.max_tenants} locataires`}
+                  </li>
                 </ul>
               </div>
             ))}
@@ -92,5 +75,5 @@ export default function Pricing() {
         </div>
       </div>
     </div>
-  )
+  );
 }
