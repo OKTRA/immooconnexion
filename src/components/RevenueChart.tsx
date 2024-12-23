@@ -28,14 +28,13 @@ export function RevenueChart() {
           montant,
           created_at,
           type,
-          agency_id,
-          user_id
+          agency_id
         `)
         .eq('type', 'loyer')
 
-      // If not admin, filter by both agency_id and user_id
+      // If not admin, filter by agency_id
       if (profile?.role !== 'admin') {
-        query = query.or(`agency_id.eq.${user.id},user_id.eq.${user.id}`)
+        query = query.eq('agency_id', user.id)
       }
 
       const { data: contracts, error } = await query
@@ -49,7 +48,7 @@ export function RevenueChart() {
       console.log('Contracts retrieved:', contracts)
 
       // Group by month and sum revenues
-      const monthlyRevenue = contracts?.reduce((acc: Record<string, number>, contract) => {
+      const monthlyRevenue = (contracts || []).reduce((acc: Record<string, number>, contract) => {
         const month = new Date(contract.created_at).toLocaleString('fr-FR', { month: 'short' })
         acc[month] = (acc[month] || 0) + contract.montant
         return acc

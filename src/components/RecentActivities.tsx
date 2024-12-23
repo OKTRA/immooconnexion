@@ -34,13 +34,12 @@ export function RecentActivities() {
           created_at,
           tenant_id,
           property_id,
-          agency_id,
-          user_id
+          agency_id
         `)
 
-      // If not admin, filter by both agency_id and user_id
+      // If not admin, filter by agency_id
       if (profile?.role !== 'admin') {
-        query = query.or(`agency_id.eq.${user.id},user_id.eq.${user.id}`)
+        query = query.or(`agency_id.eq.${user.id}`)
       }
 
       const { data: contracts, error } = await query
@@ -56,7 +55,7 @@ export function RecentActivities() {
 
       // Fetch related tenant and property information
       const contractsWithDetails = await Promise.all(
-        contracts.map(async (contract) => {
+        (contracts || []).map(async (contract) => {
           const [tenantResult, propertyResult] = await Promise.all([
             contract.tenant_id
               ? supabase
@@ -65,11 +64,13 @@ export function RecentActivities() {
                   .eq('id', contract.tenant_id)
                   .single()
               : { data: null },
-            supabase
-              .from('properties')
-              .select('bien')
-              .eq('id', contract.property_id)
-              .single()
+            contract.property_id
+              ? supabase
+                  .from('properties')
+                  .select('bien')
+                  .eq('id', contract.property_id)
+                  .single()
+              : { data: null }
           ])
 
           return {
