@@ -51,58 +51,70 @@ export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowPro
       </TableRow>
 
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Modifier le profil</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="edit-email">Email</Label>
-              <Input
-                id="edit-email"
-                value={editedProfile.email}
-                onChange={(e) => setEditedProfile({ ...editedProfile, email: e.target.value })}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-email">Email</Label>
+                <Input
+                  id="edit-email"
+                  value={editedProfile.email}
+                  onChange={(e) => setEditedProfile({ ...editedProfile, email: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-first_name">Prénom</Label>
+                <Input
+                  id="edit-first_name"
+                  value={editedProfile.first_name}
+                  onChange={(e) => setEditedProfile({ ...editedProfile, first_name: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-last_name">Nom</Label>
+                <Input
+                  id="edit-last_name"
+                  value={editedProfile.last_name}
+                  onChange={(e) => setEditedProfile({ ...editedProfile, last_name: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-agency_name">Nom de l'agence</Label>
+                <Input
+                  id="edit-agency_name"
+                  value={editedProfile.agency_name}
+                  onChange={(e) => setEditedProfile({ ...editedProfile, agency_name: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-role">Rôle</Label>
+                <Select
+                  value={editedProfile.role}
+                  onValueChange={(value) => setEditedProfile({ ...editedProfile, role: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">Utilisateur</SelectItem>
+                    <SelectItem value="admin">Administrateur</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <ProfilePlanSelect
+                value={editedProfile.subscription_plan_id}
+                onValueChange={(value) => setEditedProfile({ ...editedProfile, subscription_plan_id: value })}
               />
             </div>
-            <div>
-              <Label htmlFor="edit-first_name">Prénom</Label>
-              <Input
-                id="edit-first_name"
-                value={editedProfile.first_name}
-                onChange={(e) => setEditedProfile({ ...editedProfile, first_name: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-last_name">Nom</Label>
-              <Input
-                id="edit-last_name"
-                value={editedProfile.last_name}
-                onChange={(e) => setEditedProfile({ ...editedProfile, last_name: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-agency_name">Nom de l'agence</Label>
-              <Input
-                id="edit-agency_name"
-                value={editedProfile.agency_name}
-                onChange={(e) => setEditedProfile({ ...editedProfile, agency_name: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-role">Rôle</Label>
-              <Select
-                value={editedProfile.role}
-                onValueChange={(value) => setEditedProfile({ ...editedProfile, role: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">Utilisateur</SelectItem>
-                  <SelectItem value="admin">Administrateur</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+
+            <ProfileUsageStats 
+              userId={profile.id} 
+              planId={editedProfile.subscription_plan_id} 
+            />
+
             <Button onClick={handleSaveEdit} className="w-full">
               Enregistrer
             </Button>
