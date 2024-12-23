@@ -53,9 +53,14 @@ export function PropertyTable() {
   const { data: properties, isLoading } = useQuery({
     queryKey: ['properties'],
     queryFn: async () => {
-      // Récupérer d'abord le profil de l'utilisateur pour vérifier son rôle
+      console.log("Début de la récupération des biens...")
+      
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Non authentifié")
+      if (!user) {
+        console.error("Utilisateur non authentifié")
+        throw new Error("Non authentifié")
+      }
+      console.log("User ID:", user.id)
 
       const { data: profile } = await supabase
         .from('profiles')
@@ -65,18 +70,17 @@ export function PropertyTable() {
 
       console.log("Profil utilisateur:", profile)
 
-      // Construire la requête de base
       let query = supabase
         .from('properties')
         .select('*')
 
-      // Si l'utilisateur n'est pas admin, filtrer par agency_id
+      // Si l'utilisateur n'est pas admin, filtrer par user_id ou agency_id
       if (profile?.role !== 'admin') {
-        query = query.eq('agency_id', user.id)
+        query = query.or(`user_id.eq.${user.id},agency_id.eq.${user.id}`)
       }
 
       const { data, error } = await query
-      
+
       if (error) {
         console.error("Erreur lors de la récupération des biens:", error)
         throw error
