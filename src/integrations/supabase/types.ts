@@ -146,6 +146,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          agency_id: string | null
           agency_name: string | null
           created_at: string
           email: string | null
@@ -162,6 +163,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          agency_id?: string | null
           agency_name?: string | null
           created_at?: string
           email?: string | null
@@ -178,6 +180,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          agency_id?: string | null
           agency_name?: string | null
           created_at?: string
           email?: string | null
@@ -194,6 +197,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_subscription_plan_id_fkey"
             columns: ["subscription_plan_id"]
