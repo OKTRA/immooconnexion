@@ -34,11 +34,11 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         // Then check if profile exists
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('id')
+          .select('*')
           .eq('id', session.user.id)
           .maybeSingle();
 
-        if (profileError && profileError.code !== 'PGRST116') {
+        if (profileError) {
           console.error('Profile check error:', profileError);
           toast({
             title: "Erreur",
@@ -56,7 +56,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
             .insert([{ 
               id: session.user.id,
               email: session.user.email,
-              role: 'user'  // Set a default role
+              role: 'user'
             }]);
 
           if (insertError) {
