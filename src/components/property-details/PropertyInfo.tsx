@@ -8,11 +8,11 @@ interface PropertyInfoProps {
     type: string
     ville: string
     loyer: number
-    frais_agence: number
+    frais_agence: number | null
     caution: number
     statut: string
     photo_url: string | null
-    chambres: number
+    chambres: number | null
   }
 }
 
@@ -68,7 +68,7 @@ export function PropertyInfo({ property }: PropertyInfoProps) {
                 <Wallet className="h-5 w-5 text-primary" />
                 <div>
                   <p className="text-sm text-muted-foreground">Frais d'Agence</p>
-                  <p className="font-medium">{property?.frais_agence?.toLocaleString()} FCFA</p>
+                  <p className="font-medium">{property?.frais_agence?.toLocaleString() || 0} FCFA</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">

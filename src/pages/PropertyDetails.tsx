@@ -22,6 +22,7 @@ const PropertyDetails = () => {
   const { data: property, isLoading: isLoadingProperty, error: propertyError } = useQuery({
     queryKey: ['property', id],
     queryFn: async () => {
+      console.log("Fetching property details for ID:", id)
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
@@ -32,6 +33,7 @@ const PropertyDetails = () => {
         .maybeSingle()
       
       if (error) {
+        console.error("Error fetching property:", error)
         toast({
           title: "Erreur",
           description: "Impossible de charger les informations du bien",
@@ -39,20 +41,23 @@ const PropertyDetails = () => {
         })
         throw error
       }
+      console.log("Property data:", data)
       return data
     },
     enabled: !!id
   })
 
-  const { data: contracts, isLoading: isLoadingContracts, error: contractsError } = useQuery({
+  const { data: contracts = [], isLoading: isLoadingContracts, error: contractsError } = useQuery({
     queryKey: ['contracts', id],
     queryFn: async () => {
+      console.log("Fetching contracts for property:", id)
       const { data, error } = await supabase
         .from('payment_history_with_tenant')
         .select('*')
         .eq('property_id', id)
       
       if (error) {
+        console.error("Error fetching contracts:", error)
         toast({
           title: "Erreur",
           description: "Impossible de charger l'historique des paiements",
@@ -60,6 +65,7 @@ const PropertyDetails = () => {
         })
         throw error
       }
+      console.log("Contracts data:", data)
       return data
     },
     enabled: !!id
