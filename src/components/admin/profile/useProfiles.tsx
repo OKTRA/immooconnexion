@@ -5,21 +5,19 @@ interface Agency {
   name: string
 }
 
-interface RawProfile {
+interface LocalAdmin {
   id: string
-  first_name: string | null
-  last_name: string | null
-  email: string | null
-  role: string | null
-  phone_number: string | null
-  show_phone_on_site: boolean | null
-  list_properties_on_site: boolean | null
+  first_name: string
+  last_name: string
+  email: string
+  role: string
+  phone_number: string
   created_at: string
   agency_id: string | null
   agency: Agency | null
 }
 
-interface TransformedProfile extends RawProfile {
+interface TransformedAdmin extends LocalAdmin {
   agency_name: string
 }
 
@@ -27,23 +25,10 @@ export function useProfiles() {
   return useQuery({
     queryKey: ["admin-profiles"],
     queryFn: async () => {
-      console.log('Début de la récupération des profils...')
+      console.log('Début de la récupération des admins...')
       
-      // Récupérer d'abord tous les profils pour debug
-      const { data: allProfiles, error: allProfilesError } = await supabase
-        .from("profiles")
-        .select("*")
-      
-      console.log('Tous les profils dans la base:', allProfiles)
-      
-      if (allProfilesError) {
-        console.error("Erreur lors de la récupération de tous les profils:", allProfilesError)
-      }
-
-      // Maintenant, récupérer les profils avec les informations d'agence
-      // En utilisant la relation profiles_agency_id_fkey
       const { data, error } = await supabase
-        .from("profiles")
+        .from("local_admins")
         .select(`
           id,
           first_name,
@@ -51,31 +36,26 @@ export function useProfiles() {
           email,
           role,
           phone_number,
-          show_phone_on_site,
-          list_properties_on_site,
           created_at,
           agency_id,
-          agency:agencies!profiles_agency_id_fkey (
-            name
-          )
+          agency:agencies(name)
         `)
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Erreur lors de la récupération des profils:', error)
+        console.error('Erreur lors de la récupération des admins:', error)
         console.error('Détails de l\'erreur:', error.message, error.details, error.hint)
         throw error
       }
 
       console.log('Données brutes récupérées:', data)
 
-      // Transformer les données pour inclure le nom de l'agence
-      const transformedData = data?.map(profile => ({
-        ...profile,
-        agency_name: profile.agency?.name || '-'
-      })) as TransformedProfile[]
+      const transformedData = data?.map(admin => ({
+        ...admin,
+        agency_name: admin.agency?.name || '-'
+      })) as TransformedAdmin[]
 
-      console.log('Profils transformés:', transformedData)
+      console.log('Admins transformés:', transformedData)
       return transformedData
     },
   })

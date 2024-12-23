@@ -22,7 +22,7 @@ export function AdminProfiles() {
   const handleEditProfile = async (editedProfile: any) => {
     try {
       const { error } = await supabase
-        .from("profiles")
+        .from("local_admins")
         .update({
           first_name: editedProfile.first_name,
           last_name: editedProfile.last_name,
