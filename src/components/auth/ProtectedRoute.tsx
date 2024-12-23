@@ -13,44 +13,67 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+
     const checkAuth = async () => {
       try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        // Get current session
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         
-        if (sessionError || !session) {
-          setIsAuthenticated(false);
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          if (mounted) setIsAuthenticated(false);
           return;
         }
 
-        // Verify the user exists in the profiles table
+        if (!sessionData.session) {
+          if (mounted) setIsAuthenticated(false);
+          return;
+        }
+
+        // Check if profile exists
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('id')
-          .eq('id', session.user.id)
+          .eq('id', sessionData.session.user.id)
           .single();
 
-        if (profileError || !profile) {
-          // If profile doesn't exist, create it
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.error('Profile check error:', profileError);
+          toast({
+            title: "Erreur",
+            description: "Impossible de vérifier votre profil",
+            variant: "destructive"
+          });
+          if (mounted) setIsAuthenticated(false);
+          return;
+        }
+
+        // If profile doesn't exist, create it
+        if (!profile) {
           const { error: insertError } = await supabase
             .from('profiles')
-            .insert([{ id: session.user.id }]);
+            .insert([{ 
+              id: sessionData.session.user.id,
+              email: sessionData.session.user.email
+            }]);
 
           if (insertError) {
-            console.error('Error creating profile:', insertError);
+            console.error('Profile creation error:', insertError);
             toast({
               title: "Erreur",
               description: "Impossible de créer votre profil",
               variant: "destructive"
             });
-            setIsAuthenticated(false);
+            if (mounted) setIsAuthenticated(false);
             return;
           }
         }
 
-        setIsAuthenticated(true);
+        if (mounted) setIsAuthenticated(true);
       } catch (error) {
         console.error('Auth check error:', error);
-        setIsAuthenticated(false);
+        if (mounted) setIsAuthenticated(false);
       }
     };
 
@@ -60,14 +83,17 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
-        setIsAuthenticated(false);
+        if (mounted) setIsAuthenticated(false);
         return;
       }
       
-      setIsAuthenticated(true);
+      if (mounted) setIsAuthenticated(true);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [toast]);
 
   if (isAuthenticated === null) {
