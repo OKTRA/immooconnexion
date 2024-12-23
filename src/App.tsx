@@ -45,6 +45,31 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           return
         }
 
+        // Verify the user exists in the profiles table
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', session.user.id)
+          .single()
+
+        if (profileError || !profile) {
+          // If profile doesn't exist, create it
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert([{ id: session.user.id }])
+
+          if (insertError) {
+            console.error('Error creating profile:', insertError)
+            toast({
+              title: "Erreur",
+              description: "Impossible de créer votre profil",
+              variant: "destructive"
+            })
+            setIsAuthenticated(false)
+            return
+          }
+        }
+
         setIsAuthenticated(true)
       } catch (error) {
         console.error('Auth check error:', error)

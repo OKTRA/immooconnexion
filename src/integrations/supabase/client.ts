@@ -12,28 +12,13 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      flowType: 'pkce',
-      storage: window.localStorage,
+      storage: localStorage,
       storageKey: 'supabase.auth.token',
     },
     global: {
       headers: {
         'X-Client-Info': 'supabase-js-web',
       },
-    },
-    // Add fetch configuration to handle CORS and network issues
-    fetch: (url, options = {}) => {
-      return fetch(url, {
-        ...options,
-        credentials: 'include',
-        headers: {
-          ...options.headers,
-          'Cache-Control': 'no-cache',
-        },
-      }).catch(error => {
-        console.error('Fetch error:', error);
-        throw new Error('Network error - please check your connection');
-      });
     },
   }
 );
