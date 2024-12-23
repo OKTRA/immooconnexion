@@ -9,7 +9,7 @@ export function useAgencyUsers(agencyId: string) {
     queryKey: ["agency-users", agencyId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("local_admins")
+        .from("profiles")
         .select(`
           id,
           first_name,

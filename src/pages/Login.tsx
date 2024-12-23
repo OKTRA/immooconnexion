@@ -45,24 +45,24 @@ const Login = () => {
 
         if (session) {
           try {
-            const { data: adminData, error: adminError } = await supabase
-              .from('local_admins')
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
               .select('role')
               .eq('id', session.user.id)
               .maybeSingle()
 
-            if (adminError) {
-              console.error('Admin check error:', adminError)
-              throw adminError
+            if (profileError) {
+              console.error('Profile check error:', profileError)
+              throw profileError
             }
 
-            if (adminData?.role === 'admin') {
+            if (profileData?.role === 'admin') {
               navigate("/admin")
             } else {
               navigate("/")
             }
           } catch (error: any) {
-            console.error('Admin verification error:', error)
+            console.error('Profile verification error:', error)
             toast({
               title: "Erreur",
               description: "Une erreur est survenue lors de la vérification des droits d'accès.",
@@ -89,18 +89,18 @@ const Login = () => {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
         try {
-          const { data: adminData, error: adminError } = await supabase
-            .from('local_admins')
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
             .select('role')
             .eq('id', session.user.id)
             .maybeSingle()
 
-          if (adminError) {
-            console.error('Admin check error:', adminError)
-            throw adminError
+          if (profileError) {
+            console.error('Profile check error:', profileError)
+            throw profileError
           }
 
-          if (adminData?.role === 'admin') {
+          if (profileData?.role === 'admin') {
             navigate("/admin")
           } else {
             navigate("/")

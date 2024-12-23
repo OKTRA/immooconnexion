@@ -66,25 +66,12 @@ export function PropertyTable() {
 
       console.log("Profil utilisateur:", profile)
 
-      // Vérifier si l'utilisateur est un admin local
-      const { data: localAdmin } = await supabase
-        .from('local_admins')
-        .select('agency_id')
-        .eq('id', user.id)
-        .maybeSingle()
-
-      console.log("Local admin info:", localAdmin)
-
       let query = supabase
         .from('properties')
         .select('*')
 
-      // Si l'utilisateur est un admin local, filtrer par son agency_id
-      if (localAdmin?.agency_id) {
-        query = query.eq('agency_id', localAdmin.agency_id)
-      }
-      // Si l'utilisateur n'est pas admin et n'est pas un admin local, filtrer par agency_id du profil
-      else if (profile?.role !== 'admin') {
+      // Si l'utilisateur n'est pas admin, filtrer par agency_id
+      if (profile?.role !== 'admin') {
         if (profile?.agency_id) {
           query = query.eq('agency_id', profile.agency_id)
         } else {
