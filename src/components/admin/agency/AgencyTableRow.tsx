@@ -1,6 +1,6 @@
 import { TableCell, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Edit, Users, Building2, UserPlus } from "lucide-react"
+import { Edit, Building2, UserPlus } from "lucide-react"
 import { useState } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Agency } from "./types"
@@ -18,6 +18,7 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showOverviewDialog, setShowOverviewDialog] = useState(false)
   const [showAddProfileDialog, setShowAddProfileDialog] = useState(false)
+  const [editedAgency, setEditedAgency] = useState(agency)
 
   return (
     <>
@@ -58,9 +59,10 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-w-2xl">
           <AgencyForm 
-            agency={agency}
-            onSubmit={(editedAgency) => {
-              onEdit(editedAgency)
+            agency={editedAgency}
+            setAgency={setEditedAgency}
+            onSubmit={(updatedAgency) => {
+              onEdit(updatedAgency)
               setShowEditDialog(false)
             }}
           />
@@ -74,8 +76,8 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
       </Dialog>
 
       <AddProfileDialog
-        open={showAddProfileDialog}
-        onOpenChange={setShowAddProfileDialog}
+        showAddDialog={showAddProfileDialog}
+        setShowAddDialog={setShowAddProfileDialog}
         agencyId={agency.id}
         onProfileCreated={refetch}
       />
