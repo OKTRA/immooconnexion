@@ -1,29 +1,20 @@
-import { useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AdminProfiles } from "@/components/admin/AdminProfiles"
+import { AdminStats } from "@/components/admin/AdminStats"
 import { AdminProperties } from "@/components/admin/AdminProperties"
 import { AdminTenants } from "@/components/admin/AdminTenants"
-import { AdminStats } from "@/components/admin/AdminStats"
 import { AdminSubscriptionPlans } from "@/components/admin/subscription/AdminSubscriptionPlans"
-import { Button } from "@/components/ui/button"
-import { LogOut } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { useQuery } from "@tanstack/react-query"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const AdminDashboard = () => {
-  const navigate = useNavigate()
-  const { toast } = useToast()
-
-  // Vérifier si l'utilisateur est un super admin
-  const { data: adminData, isLoading } = useQuery({
+  const { data: adminData, isLoading, error } = useQuery({
     queryKey: ["admin-status"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser()
+      
       if (!user) {
-        navigate("/login")
-        return null
+        throw new Error("Non authentifié")
       }
 
       // First, try to get the profile
@@ -38,11 +29,15 @@ const AdminDashboard = () => {
         throw profileError
       }
 
-      // If no profile exists, create one
+      // If no profile exists, create one with minimal required fields
       if (!profile) {
         const { error: insertError } = await supabase
           .from("profiles")
-          .insert([{ id: user.id, role: 'user' }])
+          .insert([{ 
+            id: user.id, 
+            role: 'user',
+            // Ne pas inclure agency_id ici
+          }])
 
         if (insertError) {
           console.error("Error creating profile:", insertError)
@@ -80,77 +75,38 @@ const AdminDashboard = () => {
 
       return adminData
     },
-    meta: {
-      onSettled: (data, error) => {
-        if (error) {
-          toast({
-            title: "Accès refusé",
-            description: "Vous n'avez pas les droits d'accès à cette page",
-            variant: "destructive",
-          })
-          navigate("/")
-        }
-      }
-    }
   })
 
   if (isLoading) {
     return <div>Chargement...</div>
   }
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut()
-      navigate("/login")
-      toast({
-        title: "Déconnexion réussie",
-        description: "Vous avez été déconnecté avec succès",
-      })
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la déconnexion",
-        variant: "destructive",
-      })
-    }
+  if (error) {
+    return <div>Erreur: {(error as Error).message}</div>
   }
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Tableau de bord Super Admin</h1>
-        <Button 
-          variant="ghost" 
-          onClick={handleLogout}
-          className="text-red-500 hover:text-red-600 hover:bg-red-100"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Déconnexion
-        </Button>
-      </div>
-      
+      <h1 className="text-3xl font-bold mb-8">Tableau de bord administrateur</h1>
+
       <AdminStats />
 
-      <Tabs defaultValue="profiles" className="mt-6">
+      <Tabs defaultValue="profiles" className="mt-8">
         <TabsList>
           <TabsTrigger value="profiles">Profils</TabsTrigger>
           <TabsTrigger value="properties">Biens</TabsTrigger>
           <TabsTrigger value="tenants">Locataires</TabsTrigger>
           <TabsTrigger value="plans">Plans d'abonnement</TabsTrigger>
         </TabsList>
-
         <TabsContent value="profiles">
           <AdminProfiles />
         </TabsContent>
-
         <TabsContent value="properties">
           <AdminProperties />
         </TabsContent>
-
         <TabsContent value="tenants">
           <AdminTenants />
         </TabsContent>
-
         <TabsContent value="plans">
           <AdminSubscriptionPlans />
         </TabsContent>
