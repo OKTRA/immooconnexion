@@ -16,14 +16,36 @@ const Index = () => {
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
+      // Get current user's profile to check role
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      // Build base queries
+      let propertiesQuery = supabase.from("properties").select("*", { count: "exact", head: true })
+      let tenantsQuery = supabase.from("tenants").select("*", { count: "exact", head: true })
+      let contractsQuery = supabase.from("contracts").select("montant")
+
+      // If not admin, filter by agency_id
+      if (profile?.role !== 'admin') {
+        propertiesQuery = propertiesQuery.eq('agency_id', user.id)
+        tenantsQuery = tenantsQuery.eq('agency_id', user.id)
+        contractsQuery = contractsQuery.eq('agency_id', user.id)
+      }
+
       const [
         { count: propertiesCount },
         { count: tenantsCount },
         { data: contracts },
       ] = await Promise.all([
-        supabase.from("properties").select("*", { count: "exact", head: true }),
-        supabase.from("tenants").select("*", { count: "exact", head: true }),
-        supabase.from("contracts").select("montant"),
+        propertiesQuery,
+        tenantsQuery,
+        contractsQuery,
       ])
 
       const totalRevenue = contracts?.reduce((sum, contract) => sum + (contract.montant || 0), 0) || 0
@@ -34,7 +56,7 @@ const Index = () => {
         revenue: totalRevenue,
       }
     },
-    enabled: !isLoading, // Only run this query after user role check
+    enabled: !isLoading,
   })
 
   useEffect(() => {
