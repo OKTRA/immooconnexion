@@ -46,6 +46,7 @@ export type Database = {
           name: string
           phone: string | null
           profile_id: string | null
+          subscription_plan_id: string | null
           updated_at: string
         }
         Insert: {
@@ -57,6 +58,7 @@ export type Database = {
           name: string
           phone?: string | null
           profile_id?: string | null
+          subscription_plan_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -68,6 +70,7 @@ export type Database = {
           name?: string
           phone?: string | null
           profile_id?: string | null
+          subscription_plan_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -202,7 +205,6 @@ export type Database = {
           phone_number: string | null
           role: string | null
           show_phone_on_site: boolean | null
-          subscription_plan_id: string | null
           updated_at: string
         }
         Insert: {
@@ -218,7 +220,6 @@ export type Database = {
           phone_number?: string | null
           role?: string | null
           show_phone_on_site?: boolean | null
-          subscription_plan_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -234,7 +235,6 @@ export type Database = {
           phone_number?: string | null
           role?: string | null
           show_phone_on_site?: boolean | null
-          subscription_plan_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -243,13 +243,6 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_subscription_plan_id_fkey"
-            columns: ["subscription_plan_id"]
-            isOneToOne: false
-            referencedRelation: "subscription_plans"
             referencedColumns: ["id"]
           },
         ]

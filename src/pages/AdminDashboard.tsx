@@ -5,6 +5,7 @@ import { AdminStats } from "@/components/admin/AdminStats"
 import { AdminProperties } from "@/components/admin/AdminProperties"
 import { AdminTenants } from "@/components/admin/AdminTenants"
 import { AdminSubscriptionPlans } from "@/components/admin/subscription/AdminSubscriptionPlans"
+import { AdminAgencies } from "@/components/admin/AdminAgencies"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useNavigate } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
@@ -80,12 +81,16 @@ const AdminDashboard = () => {
       <Tabs defaultValue="profiles" className="mt-8">
         <TabsList>
           <TabsTrigger value="profiles">Profils</TabsTrigger>
+          <TabsTrigger value="agencies">Agences</TabsTrigger>
           <TabsTrigger value="properties">Biens</TabsTrigger>
           <TabsTrigger value="tenants">Locataires</TabsTrigger>
           <TabsTrigger value="plans">Plans d'abonnement</TabsTrigger>
         </TabsList>
         <TabsContent value="profiles">
           <AdminProfiles />
+        </TabsContent>
+        <TabsContent value="agencies">
+          <AdminAgencies />
         </TabsContent>
         <TabsContent value="properties">
           <AdminProperties />
