@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import { ProfileForm } from "./ProfileForm"
 
-interface AddProfileDialogProps {
+export interface AddProfileDialogProps {
   showAddDialog?: boolean
   setShowAddDialog?: (show: boolean) => void
   newProfile?: any
@@ -10,6 +10,8 @@ interface AddProfileDialogProps {
   handleAddUser?: () => void
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  agencyId?: string
+  onProfileCreated?: () => void
 }
 
 export function AddProfileDialog({ 
@@ -20,6 +22,8 @@ export function AddProfileDialog({
   handleAddUser,
   open,
   onOpenChange,
+  agencyId,
+  onProfileCreated
 }: AddProfileDialogProps) {
   const isOpen = open ?? showAddDialog
   const handleOpenChange = onOpenChange ?? setShowAddDialog
