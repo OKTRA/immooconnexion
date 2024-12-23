@@ -12,17 +12,15 @@ export function ProfilesTable({ profiles, onEdit, refetch }: ProfilesTableProps)
     <div className="rounded-md border">
       <Table>
         <TableHeader>
-          <tr>
-            <TableHead>ID</TableHead>
-            <TableHead>Prénom</TableHead>
-            <TableHead>Nom</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Téléphone</TableHead>
-            <TableHead>Agence</TableHead>
-            <TableHead>Rôle</TableHead>
-            <TableHead>Date de création</TableHead>
-            <TableHead>Actions</TableHead>
-          </tr>
+          <TableHead>ID</TableHead>
+          <TableHead>Prénom</TableHead>
+          <TableHead>Nom</TableHead>
+          <TableHead>Email</TableHead>
+          <TableHead>Téléphone</TableHead>
+          <TableHead>Agence</TableHead>
+          <TableHead>Rôle</TableHead>
+          <TableHead>Date de création</TableHead>
+          <TableHead>Actions</TableHead>
         </TableHeader>
         <TableBody>
           {profiles.map((profile) => (

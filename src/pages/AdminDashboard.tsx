@@ -24,38 +24,31 @@ const AdminDashboard = () => {
         .from("administrators")
         .select("is_super_admin")
         .eq("id", user.id)
-        .maybeSingle()
+        .single()
 
       if (adminError) {
-        console.error("Erreur lors de la vérification des droits admin:", adminError)
         // Si pas super admin, vérifier si admin dans profiles
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", user.id)
-          .maybeSingle()
+          .single()
 
         if (profileError) {
-          console.error("Erreur lors de la vérification du profil:", profileError)
           throw new Error("Accès non autorisé")
         }
 
-        if (!profileData || profileData.role !== "admin") {
+        if (profileData.role !== "admin") {
           throw new Error("Accès non autorisé")
         }
 
         return { is_super_admin: false }
       }
 
-      if (!adminData) {
-        throw new Error("Accès non autorisé")
-      }
-
       return adminData
     },
     meta: {
       errorHandler: (error: Error) => {
-        console.error("Erreur d'accès:", error)
         toast({
           title: "Erreur d'accès",
           description: error.message || "Vous n'avez pas les droits nécessaires pour accéder à cette page",
