@@ -7,8 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface AgencyFormProps {
   agency: Agency
-  setAgency?: (agency: Agency) => void  // Make setAgency optional since we might use onSubmit instead
-  onSubmit?: (agency: Agency) => void
+  setAgency: (agency: Agency) => void
+  onSubmit?: (agency: Agency) => void  // Add onSubmit prop
 }
 
 export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
@@ -25,16 +25,6 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
     },
   })
 
-  const handleChange = (field: keyof Agency, value: any) => {
-    const updatedAgency = { ...agency, [field]: value }
-    if (setAgency) {
-      setAgency(updatedAgency)
-    }
-    if (onSubmit) {
-      onSubmit(updatedAgency)
-    }
-  }
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
@@ -42,7 +32,7 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
         <Input
           id="name"
           value={agency.name}
-          onChange={(e) => handleChange("name", e.target.value)}
+          onChange={(e) => setAgency({ ...agency, name: e.target.value })}
           required
         />
       </div>
@@ -51,7 +41,7 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
         <Input
           id="address"
           value={agency.address || ""}
-          onChange={(e) => handleChange("address", e.target.value)}
+          onChange={(e) => setAgency({ ...agency, address: e.target.value })}
         />
       </div>
       <div>
@@ -59,7 +49,7 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
         <Input
           id="phone"
           value={agency.phone || ""}
-          onChange={(e) => handleChange("phone", e.target.value)}
+          onChange={(e) => setAgency({ ...agency, phone: e.target.value })}
         />
       </div>
       <div>
@@ -68,14 +58,14 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
           id="email"
           type="email"
           value={agency.email || ""}
-          onChange={(e) => handleChange("email", e.target.value)}
+          onChange={(e) => setAgency({ ...agency, email: e.target.value })}
         />
       </div>
       <div>
         <Label htmlFor="subscription_plan">Plan d'abonnement</Label>
         <Select 
           value={agency.subscription_plan_id || ""} 
-          onValueChange={(value) => handleChange("subscription_plan_id", value)}
+          onValueChange={(value) => setAgency({ ...agency, subscription_plan_id: value })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Sélectionner un plan" />

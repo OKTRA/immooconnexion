@@ -10,19 +10,29 @@ interface AddAgencyDialogProps {
   showDialog: boolean
   setShowDialog: (show: boolean) => void
   onAgencyCreated?: () => void
+  open?: boolean  // Add open prop
+  onOpenChange?: (open: boolean) => void  // Add onOpenChange prop
 }
 
 export function AddAgencyDialog({ 
   showDialog, 
   setShowDialog, 
   onAgencyCreated,
+  open,
+  onOpenChange 
 }: AddAgencyDialogProps) {
+  // Use either open/onOpenChange or showDialog/setShowDialog
+  const isOpen = open ?? showDialog
+  const handleOpenChange = onOpenChange ?? setShowDialog
+
   const [agencyData, setAgencyData] = useState({
     name: "",
     address: "",
     phone: "",
     email: "",
     subscription_plan_id: "",
+    show_phone_on_site: false,
+    list_properties_on_site: false,
   })
   const { toast } = useToast()
 
@@ -50,13 +60,15 @@ export function AddAgencyDialog({
         description: "L'agence a été créée avec succès",
       })
       
-      setShowDialog(false)
+      handleOpenChange(false)
       setAgencyData({
         name: "",
         address: "",
         phone: "",
         email: "",
         subscription_plan_id: "",
+        show_phone_on_site: false,
+        list_properties_on_site: false,
       })
       
       if (onAgencyCreated) {
@@ -73,7 +85,7 @@ export function AddAgencyDialog({
   }
 
   return (
-    <Dialog open={showDialog} onOpenChange={setShowDialog}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Créer une nouvelle agence</DialogTitle>
