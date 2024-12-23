@@ -75,7 +75,7 @@ export function PropertyTable() {
         if (profile?.agency_id) {
           query = query.eq('agency_id', profile.agency_id)
         } else {
-          // Si l'utilisateur n'a pas d'agency_id, retourner un tableau vide
+          console.log("Utilisateur sans agency_id, retourne un tableau vide")
           return []
         }
       }
