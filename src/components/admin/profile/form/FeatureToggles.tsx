@@ -9,7 +9,7 @@ interface FeatureTogglesProps {
 }
 
 export function FeatureToggles({ 
-  newProfile, 
+  newProfile = {}, 
   setNewProfile, 
   canShowPhoneNumber, 
   canListProperties 
@@ -22,7 +22,7 @@ export function FeatureToggles({
         </Label>
         <Switch
           id="show_phone"
-          checked={newProfile.show_phone_on_site}
+          checked={newProfile?.show_phone_on_site || false}
           onCheckedChange={(checked) => 
             setNewProfile({ ...newProfile, show_phone_on_site: checked })
           }
@@ -35,7 +35,7 @@ export function FeatureToggles({
         </Label>
         <Switch
           id="list_properties"
-          checked={newProfile.list_properties_on_site}
+          checked={newProfile?.list_properties_on_site || false}
           onCheckedChange={(checked) => 
             setNewProfile({ ...newProfile, list_properties_on_site: checked })
           }
