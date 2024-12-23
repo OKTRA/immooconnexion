@@ -33,6 +33,7 @@ interface Property {
   statut: string
   photo_url: string | null
   user_id: string
+  agency_id: string
   created_at: string
   updated_at: string
 }
@@ -58,7 +59,7 @@ export function PropertyTable() {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, agency_id')
         .eq('id', user.id)
         .maybeSingle()
 
@@ -68,8 +69,9 @@ export function PropertyTable() {
         .from('properties')
         .select('*')
 
+      // Si l'utilisateur n'est pas admin, on filtre par agency_id
       if (profile?.role !== 'admin') {
-        query = query.or(`user_id.eq.${user.id},agency_id.eq.${user.id}`)
+        query = query.eq('agency_id', profile.agency_id)
       }
 
       const { data, error } = await query
