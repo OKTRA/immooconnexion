@@ -16,6 +16,7 @@ interface RawProfile {
   list_properties_on_site: boolean | null
   created_at: string
   agency_id: string | null
+  agency: Agency | null
 }
 
 interface TransformedProfile extends RawProfile {
@@ -43,7 +44,16 @@ export function useProfiles() {
       const { data, error } = await supabase
         .from("profiles")
         .select(`
-          *,
+          id,
+          first_name,
+          last_name,
+          email,
+          role,
+          phone_number,
+          show_phone_on_site,
+          list_properties_on_site,
+          created_at,
+          agency_id,
           agency:agencies (
             name
           )
