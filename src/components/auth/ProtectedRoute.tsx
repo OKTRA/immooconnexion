@@ -15,90 +15,51 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   useEffect(() => {
     let mounted = true
 
-    const clearLocalStorage = () => {
-      // Clear all Supabase-related items from localStorage
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('sb-')) {
-          localStorage.removeItem(key)
+    const clearSession = async () => {
+      try {
+        await supabase.auth.signOut()
+        localStorage.clear() // Nettoie tout le localStorage
+        if (mounted) {
+          setIsAuthenticated(false)
         }
-      })
-    }
-
-    const handleAuthError = async () => {
-      console.log("Handling auth error - clearing state")
-      clearLocalStorage()
-      if (mounted) {
-        setIsAuthenticated(false)
-        toast({
-          title: "Session expirée",
-          description: "Veuillez vous reconnecter",
-          variant: "destructive"
-        })
+      } catch (error) {
+        console.error("Erreur lors du nettoyage de la session:", error)
       }
     }
 
     const checkAuth = async () => {
       try {
-        // First clear any potentially corrupted session
-        await supabase.auth.signOut()
-        clearLocalStorage()
-
-        // Get a fresh session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        const { data: { session } } = await supabase.auth.getSession()
         
-        if (sessionError || !session) {
-          console.log("No valid session found")
-          await handleAuthError()
+        if (!session) {
+          await clearSession()
           return
         }
 
-        // Verify user exists
-        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        const { data: { user } } = await supabase.auth.getUser()
         
-        if (userError || !user) {
-          console.error("User verification failed:", userError)
-          await handleAuthError()
+        if (!user) {
+          await clearSession()
           return
         }
 
-        // Only proceed with profile check if we have a valid user
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle()
-
-        if (profileError) {
-          console.error("Profile check error:", profileError)
-          await handleAuthError()
-          return
+        if (mounted) {
+          setIsAuthenticated(true)
         }
-
-        // Don't try to create profile here - it should be handled by the database trigger
-        if (!profile) {
-          console.log("No profile found for user")
-          await handleAuthError()
-          return
-        }
-
-        if (mounted) setIsAuthenticated(true)
       } catch (error) {
-        console.error("Auth check error:", error)
-        await handleAuthError()
+        console.error("Erreur de vérification d'authentification:", error)
+        await clearSession()
       }
     }
 
-    // Initial auth check
+    // Vérification initiale
     checkAuth()
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session?.user?.id)
-      
       if (event === 'SIGNED_OUT' || !session) {
-        clearLocalStorage()
-        if (mounted) setIsAuthenticated(false)
+        await clearSession()
         return
       }
       
