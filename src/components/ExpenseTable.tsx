@@ -37,15 +37,15 @@ export function ExpenseTable({ propertyId }: ExpenseTableProps) {
         .maybeSingle()
 
       // Build the query
-      const query = supabase
+      let query = supabase
         .from('expenses')
         .select('*')
       
       if (propertyId) {
-        query.eq('property_id', propertyId)
+        query = query.eq('property_id', propertyId)
       } else if (profile?.role !== 'admin') {
         // If not admin and no specific property, show only agency's expenses
-        query.eq('agency_id', user.id)
+        query = query.eq('agency_id', user.id)
       }
       
       const { data, error } = await query

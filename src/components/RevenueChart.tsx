@@ -38,13 +38,13 @@ export function RevenueChart() {
       }
 
       // Group by month and sum revenues
-      const monthlyRevenue = contracts.reduce((acc: Record<string, number>, contract) => {
+      const monthlyRevenue = contracts?.reduce((acc: Record<string, number>, contract) => {
         const month = new Date(contract.created_at).toLocaleString('fr-FR', { month: 'short' })
         acc[month] = (acc[month] || 0) + contract.montant
         return acc
       }, {})
 
-      return Object.entries(monthlyRevenue).map(([month, revenue]) => ({
+      return Object.entries(monthlyRevenue || {}).map(([month, revenue]) => ({
         name: month,
         revenue: revenue
       }))
