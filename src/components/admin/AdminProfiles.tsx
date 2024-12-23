@@ -30,18 +30,23 @@ export function AdminProfiles() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select('*')
+        .select(`
+          *,
+          agency:agencies(
+            name,
+            address,
+            phone,
+            email
+          )
+        `)
         .order("created_at", { ascending: false })
 
       if (error) throw error
-      return data.map((profile) => ({
-        ...profile,
-        agency_name: 'N/A' // Since we can't join with agencies directly
-      }))
+      return data
     },
   })
 
-  const handleAddUser = async () => {
+  const handleAddUser = async (agencyData?: any) => {
     try {
       if (!newProfile.password) {
         toast({
@@ -71,10 +76,8 @@ export function AdminProfiles() {
       let userId
 
       if (existingUser) {
-        // If user exists, just update their profile
         userId = existingUser.id
       } else {
-        // If user doesn't exist, create them
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: newProfile.email,
           password: newProfile.password,
@@ -86,6 +89,26 @@ export function AdminProfiles() {
         userId = authData.user.id
       }
 
+      let agencyId = null
+      
+      // Create agency if data is provided
+      if (agencyData && agencyData.name) {
+        const { data: agency, error: agencyError } = await supabase
+          .from('agencies')
+          .insert({
+            name: agencyData.name,
+            address: agencyData.address,
+            phone: agencyData.phone,
+            email: agencyData.email,
+            profile_id: userId
+          })
+          .select()
+          .single()
+
+        if (agencyError) throw agencyError
+        agencyId = agency.id
+      }
+
       // Update or create the profile
       const { error: profileError } = await supabase
         .from("profiles")
@@ -94,7 +117,7 @@ export function AdminProfiles() {
           first_name: newProfile.first_name,
           last_name: newProfile.last_name,
           role: newProfile.role,
-          agency_id: newProfile.agency_id,
+          agency_id: agencyId,
           phone_number: newProfile.phone_number,
           show_phone_on_site: newProfile.show_phone_on_site,
           list_properties_on_site: newProfile.list_properties_on_site,
@@ -134,39 +157,6 @@ export function AdminProfiles() {
     }
   }
 
-  const handleEditProfile = async (editedProfile: any) => {
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          first_name: editedProfile.first_name,
-          last_name: editedProfile.last_name,
-          role: editedProfile.role,
-          agency_id: editedProfile.agency_id,
-          phone_number: editedProfile.phone_number,
-          show_phone_on_site: editedProfile.show_phone_on_site,
-          list_properties_on_site: editedProfile.list_properties_on_site,
-          subscription_plan_id: editedProfile.subscription_plan_id,
-          email: editedProfile.email,
-        })
-        .eq("id", editedProfile.id)
-
-      if (error) throw error
-
-      toast({
-        title: "Profil modifié",
-        description: "Le profil a été modifié avec succès",
-      })
-      refetch()
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de la modification du profil",
-        variant: "destructive",
-      })
-    }
-  }
-
   const filteredProfiles = profiles.filter(
     (profile) =>
       profile.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -191,7 +181,6 @@ export function AdminProfiles() {
       
       <ProfilesTable 
         profiles={filteredProfiles}
-        onEdit={handleEditProfile}
         refetch={refetch}
       />
 
