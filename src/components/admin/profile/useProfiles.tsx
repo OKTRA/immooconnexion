@@ -11,11 +11,8 @@ export function useProfiles() {
         .from("profiles")
         .select(`
           *,
-          agencies!profiles_agency_id_fkey (
-            name,
-            address,
-            phone,
-            email
+          agency:agencies!profiles_agency_id_fkey (
+            name
           )
         `)
         .order('created_at', { ascending: false })
@@ -28,7 +25,7 @@ export function useProfiles() {
       // Transform the data to include agency_name
       const transformedData = data?.map(profile => ({
         ...profile,
-        agency_name: profile.agencies?.name || '-'
+        agency_name: profile.agency?.name || '-'
       }))
 
       console.log('Fetched profiles:', transformedData)
