@@ -30,20 +30,18 @@ export function SidebarContent() {
   const { toast } = useToast()
 
   const handleLogout = async () => {
+    const storageKey = getSupabaseSessionKey()
+    
     try {
-      const storageKey = getSupabaseSessionKey()
-      localStorage.removeItem(storageKey)
-      
       await supabase.auth.signOut()
-      
+      localStorage.removeItem(storageKey)
       navigate("/login")
       toast({
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès",
       })
-    } catch (error: any) {
+    } catch (error) {
       console.error('Logout error:', error)
-      const storageKey = getSupabaseSessionKey()
       localStorage.removeItem(storageKey)
       navigate("/login")
       toast({

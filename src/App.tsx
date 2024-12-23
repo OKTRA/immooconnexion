@@ -29,30 +29,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const storageKey = getSupabaseSessionKey()
-        const currentSession = localStorage.getItem(storageKey)
-        
-        if (currentSession) {
-          const session = JSON.parse(currentSession)
-          if (!session?.access_token) {
-            localStorage.removeItem(storageKey)
-            setIsAuthenticated(false)
-            return
-          }
-        }
-
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
         if (sessionError || !session) {
+          const storageKey = getSupabaseSessionKey()
           localStorage.removeItem(storageKey)
           setIsAuthenticated(false)
-          if (sessionError?.message.includes('User from sub claim in JWT does not exist')) {
-            toast({
-              title: "Session expirée",
-              description: "Votre session n'est plus valide. Veuillez vous reconnecter.",
-              variant: "destructive"
-            })
-          }
           return
         }
 
@@ -70,26 +52,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const storageKey = getSupabaseSessionKey()
-      
-      if (event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_OUT' || !session) {
+        const storageKey = getSupabaseSessionKey()
         localStorage.removeItem(storageKey)
         setIsAuthenticated(false)
         return
       }
       
-      try {
-        if (!session) {
-          setIsAuthenticated(false)
-          return
-        }
-
-        setIsAuthenticated(true)
-      } catch (error) {
-        console.error('Auth state change error:', error)
-        localStorage.removeItem(storageKey)
-        setIsAuthenticated(false)
-      }
+      setIsAuthenticated(true)
     })
 
     return () => subscription.unsubscribe()
