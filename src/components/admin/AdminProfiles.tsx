@@ -105,6 +105,38 @@ export function AdminProfiles() {
     }
   }
 
+  const handleEditProfile = async (editedProfile: any) => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          first_name: editedProfile.first_name,
+          last_name: editedProfile.last_name,
+          role: editedProfile.role,
+          agency_name: editedProfile.agency_name,
+          phone_number: editedProfile.phone_number,
+          show_phone_on_site: editedProfile.show_phone_on_site,
+          list_properties_on_site: editedProfile.list_properties_on_site,
+          subscription_plan_id: editedProfile.subscription_plan_id,
+        })
+        .eq("id", editedProfile.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Profil modifié",
+        description: "Le profil a été modifié avec succès",
+      })
+      refetch()
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de la modification du profil",
+        variant: "destructive",
+      })
+    }
+  }
+
   const filteredProfiles = profiles.filter(
     (profile) =>
       profile.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -146,6 +178,7 @@ export function AdminProfiles() {
               <ProfileTableRow
                 key={profile.id}
                 profile={profile}
+                onEdit={handleEditProfile}
                 refetch={refetch}
               />
             ))}

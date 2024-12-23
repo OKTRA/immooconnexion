@@ -39,14 +39,16 @@ const AdminDashboard = () => {
       return adminData
     },
     retry: false,
-    onError: () => {
-      toast({
-        title: "Accès refusé",
-        description: "Vous n'avez pas les droits d'accès à cette page",
-        variant: "destructive",
-      })
-      navigate("/")
-    },
+    meta: {
+      onError: () => {
+        toast({
+          title: "Accès refusé",
+          description: "Vous n'avez pas les droits d'accès à cette page",
+          variant: "destructive",
+        })
+        navigate("/")
+      }
+    }
   })
 
   if (isLoading) {
