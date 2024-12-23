@@ -3,10 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
-import { useEffect, useState } from "react"
-import { supabase } from "@/integrations/supabase/client"
-import { useToast } from "@/hooks/use-toast"
-import { getSupabaseSessionKey } from "@/utils/sessionUtils"
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import Index from "./pages/Index"
 import Login from "./pages/Login"
 import PublicProperties from "./pages/PublicProperties"
@@ -28,92 +25,6 @@ const queryClient = new QueryClient({
     },
   },
 })
-
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
-  const { toast } = useToast()
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        
-        if (sessionError || !session) {
-          const storageKey = getSupabaseSessionKey()
-          localStorage.removeItem(storageKey)
-          setIsAuthenticated(false)
-          return
-        }
-
-        // Verify the user exists in the profiles table
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', session.user.id)
-          .single()
-
-        if (profileError || !profile) {
-          // If profile doesn't exist, create it
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert([{ id: session.user.id }])
-
-          if (insertError) {
-            console.error('Error creating profile:', insertError)
-            toast({
-              title: "Erreur",
-              description: "Impossible de créer votre profil",
-              variant: "destructive"
-            })
-            setIsAuthenticated(false)
-            return
-          }
-        }
-
-        setIsAuthenticated(true)
-      } catch (error) {
-        console.error('Auth check error:', error)
-        if (error instanceof Error && error.message === 'Failed to fetch') {
-          toast({
-            title: "Erreur de connexion",
-            description: "Impossible de se connecter au serveur. Veuillez vérifier votre connexion internet.",
-            variant: "destructive"
-          })
-        }
-        const storageKey = getSupabaseSessionKey()
-        localStorage.removeItem(storageKey)
-        setIsAuthenticated(false)
-      }
-    }
-
-    checkAuth()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT' || !session) {
-        const storageKey = getSupabaseSessionKey()
-        localStorage.removeItem(storageKey)
-        setIsAuthenticated(false)
-        return
-      }
-      
-      setIsAuthenticated(true)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [toast])
-
-  if (isAuthenticated === null) {
-    return <div>Loading...</div>
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
-  }
-
-  return <>{children}</>
-}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

@@ -22,3 +22,10 @@ export const supabase = createClient<Database>(
     },
   }
 );
+
+// Helper function to clear auth state
+export const clearAuthState = async () => {
+  const storageKey = 'supabase.auth.token';
+  localStorage.removeItem(storageKey);
+  await supabase.auth.signOut();
+};
