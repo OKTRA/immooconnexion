@@ -44,17 +44,30 @@ const Login = () => {
         }
 
         if (session) {
-          // Vérifier si l'utilisateur est un administrateur
-          const { data: adminData } = await supabase
-            .from('local_admins')
-            .select('role')
-            .eq('id', session.user.id)
-            .single()
+          try {
+            const { data: adminData, error: adminError } = await supabase
+              .from('local_admins')
+              .select('role')
+              .eq('id', session.user.id)
+              .maybeSingle()
 
-          if (adminData?.role === 'admin') {
-            navigate("/admin")
-          } else {
-            navigate("/")
+            if (adminError) {
+              console.error('Admin check error:', adminError)
+              throw adminError
+            }
+
+            if (adminData?.role === 'admin') {
+              navigate("/admin")
+            } else {
+              navigate("/")
+            }
+          } catch (error: any) {
+            console.error('Admin verification error:', error)
+            toast({
+              title: "Erreur",
+              description: "Une erreur est survenue lors de la vérification des droits d'accès.",
+              variant: "destructive"
+            })
           }
         }
       } catch (error: any) {
@@ -76,14 +89,14 @@ const Login = () => {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
         try {
-          // Vérifier si l'utilisateur est un administrateur
           const { data: adminData, error: adminError } = await supabase
             .from('local_admins')
             .select('role')
             .eq('id', session.user.id)
-            .single()
+            .maybeSingle()
 
-          if (adminError && !adminError.message.includes('No rows found')) {
+          if (adminError) {
+            console.error('Admin check error:', adminError)
             throw adminError
           }
 
