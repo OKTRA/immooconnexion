@@ -19,24 +19,58 @@ export function AdminLoginForm() {
     setIsLoading(true)
 
     try {
-      const { data: { user }, error } = await supabase.auth.signInWithPassword({
+      // Tentative de connexion
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) throw error
+      if (signInError) {
+        console.error("Erreur de connexion:", signInError)
+        throw new Error("Email ou mot de passe incorrect")
+      }
+
+      if (!user) {
+        throw new Error("Aucun utilisateur trouvé")
+      }
 
       // Vérifier si l'utilisateur est un super admin
       const { data: adminData, error: adminError } = await supabase
         .from('administrators')
         .select('is_super_admin')
-        .eq('id', user?.id)
+        .eq('id', user.id)
         .maybeSingle()
 
-      if (adminError) throw adminError
+      if (adminError) {
+        console.error("Erreur lors de la vérification du statut admin:", adminError)
+        throw new Error("Erreur lors de la vérification des droits d'accès")
+      }
 
       if (!adminData?.is_super_admin) {
         throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent se connecter ici.")
+      }
+
+      // Ensure profile exists
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (!profileData) {
+        // Create profile if it doesn't exist
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert([
+            { 
+              id: user.id,
+              email: user.email,
+              role: 'admin'
+            }
+          ])
+        if (insertError) {
+          console.error("Erreur lors de la création du profil:", insertError)
+        }
       }
 
       toast({
@@ -46,9 +80,10 @@ export function AdminLoginForm() {
 
       navigate("/admin")
     } catch (error: any) {
+      console.error("Login error:", error)
       toast({
         title: "Erreur de connexion",
-        description: error.message,
+        description: error.message || "Une erreur est survenue lors de la connexion",
         variant: "destructive",
       })
     } finally {

@@ -35,6 +35,7 @@ export function useProfiles() {
       }
       console.log('User ID:', user.id)
 
+      // Check if user profile exists, if not create it
       const { data: userProfile, error: profileError } = await supabase
         .from('profiles')
         .select('role, agency_id')
@@ -43,7 +44,30 @@ export function useProfiles() {
 
       if (profileError) {
         console.error('Erreur lors de la récupération du profil:', profileError)
-        throw profileError
+        // Create profile if it doesn't exist
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert([
+            { 
+              id: user.id,
+              email: user.email,
+              role: 'user'
+            }
+          ])
+        if (insertError) throw insertError
+        
+        // Retry fetching the profile
+        const { data: newProfile, error: newProfileError } = await supabase
+          .from('profiles')
+          .select('role, agency_id')
+          .eq('id', user.id)
+          .maybeSingle()
+          
+        if (newProfileError) throw newProfileError
+        if (!newProfile) throw new Error("Impossible de créer le profil")
+        
+        console.log('Nouveau profil créé:', newProfile)
+        return []
       }
 
       console.log('Profil utilisateur:', userProfile)
