@@ -14,9 +14,11 @@ interface BasicInfoFieldsProps {
   setNewProfile: (profile: Profile) => void
 }
 
-export function BasicInfoFields({ newProfile = {}, setNewProfile }: BasicInfoFieldsProps) {
+export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsProps) {
   const handleChange = (field: keyof Profile, value: string) => {
-    setNewProfile({ ...newProfile, [field]: value })
+    if (setNewProfile) {
+      setNewProfile({ ...newProfile, [field]: value })
+    }
   }
 
   return (

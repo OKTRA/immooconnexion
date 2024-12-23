@@ -8,6 +8,7 @@ interface Profile {
   last_name?: string
   phone_number?: string
   agency_id?: string
+  password?: string
 }
 
 interface ProfileFormProps {
@@ -28,7 +29,10 @@ export function ProfileForm({
       e.preventDefault()
       onSubmit?.()
     }} className="space-y-4 w-full max-w-2xl mx-auto px-4 md:px-0">
-      <BasicInfoFields newProfile={newProfile} setNewProfile={setNewProfile} />
+      <BasicInfoFields 
+        newProfile={newProfile} 
+        setNewProfile={setNewProfile} 
+      />
       {!selectedAgencyId && (
         <AgencySelect 
           value={newProfile.agency_id || ''} 
