@@ -20,13 +20,17 @@ const Index = () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
+      console.log('User ID:', user.id)
+
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .maybeSingle()
+      
+      console.log('Profil utilisateur:', profile)
 
-      // Build base queries
+      // Build base queries with agency_id filter for non-admin users
       let propertiesQuery = supabase.from("properties").select("*", { count: "exact", head: true })
       let tenantsQuery = supabase.from("tenants").select("*", { count: "exact", head: true })
       let contractsQuery = supabase.from("contracts").select("montant, type, created_at")
@@ -58,9 +62,12 @@ const Index = () => {
       )
 
       const totalRevenue = contracts?.reduce((sum, contract) => {
-        const montant = contract.montant || 0
-        console.log(`Ajout du montant ${montant} au total`)
-        return sum + montant
+        if (contract.type === 'loyer') {
+          const montant = contract.montant || 0
+          console.log(`Ajout du montant ${montant} au total`)
+          return sum + montant
+        }
+        return sum
       }, 0) || 0
 
       console.log("Revenu total calculé:", totalRevenue)
