@@ -26,17 +26,17 @@ export function AdminLoginForm() {
 
       if (error) throw error
 
-      // Vérifier si l'utilisateur est un super admin
+      // Vérifier si l'utilisateur est un administrateur
       const { data: adminData, error: adminError } = await supabase
-        .from('administrators')
-        .select('is_super_admin')
+        .from('local_admins')
+        .select('role')
         .eq('id', user?.id)
         .maybeSingle()
 
       if (adminError) throw adminError
 
-      if (!adminData?.is_super_admin) {
-        throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent se connecter ici.")
+      if (!adminData || adminData.role !== 'admin') {
+        throw new Error("Accès non autorisé. Seuls les administrateurs peuvent se connecter ici.")
       }
 
       toast({
@@ -83,7 +83,7 @@ export function AdminLoginForm() {
         />
       </div>
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Connexion..." : "Se connecter en tant que Super Admin"}
+        {isLoading ? "Connexion..." : "Se connecter en tant qu'administrateur"}
       </Button>
     </form>
   )
