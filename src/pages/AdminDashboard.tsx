@@ -30,23 +30,28 @@ const AdminDashboard = () => {
         .from("administrators")
         .select("is_super_admin")
         .eq("id", user.id)
-        .single()
+        .maybeSingle()
 
-      if (error || !adminData?.is_super_admin) {
+      if (error) {
+        throw error
+      }
+
+      if (!adminData?.is_super_admin) {
         throw new Error("Accès non autorisé")
       }
 
       return adminData
     },
-    retry: false,
     meta: {
-      onError: () => {
-        toast({
-          title: "Accès refusé",
-          description: "Vous n'avez pas les droits d'accès à cette page",
-          variant: "destructive",
-        })
-        navigate("/")
+      onSettled: (data, error) => {
+        if (error) {
+          toast({
+            title: "Accès refusé",
+            description: "Vous n'avez pas les droits d'accès à cette page",
+            variant: "destructive",
+          })
+          navigate("/")
+        }
       }
     }
   })
