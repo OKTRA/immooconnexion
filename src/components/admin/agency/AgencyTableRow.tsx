@@ -18,6 +18,7 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showOverviewDialog, setShowOverviewDialog] = useState(false)
   const [showAddProfileDialog, setShowAddProfileDialog] = useState(false)
+  const [editedAgency, setEditedAgency] = useState(agency)
 
   return (
     <>
@@ -58,7 +59,8 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-w-2xl">
           <AgencyForm 
-            agency={agency}
+            agency={editedAgency}
+            setAgency={setEditedAgency}
             onSubmit={(editedAgency) => {
               onEdit(editedAgency)
               setShowEditDialog(false)

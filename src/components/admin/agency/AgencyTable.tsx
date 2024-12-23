@@ -50,8 +50,8 @@ export function AgencyTable({ agencies, onEdit, refetch }: AgencyTableProps) {
       </div>
 
       <AddAgencyDialog 
-        open={showAddDialog} 
-        onOpenChange={setShowAddDialog}
+        showDialog={showAddDialog}
+        setShowDialog={setShowAddDialog}
         onAgencyCreated={refetch}
       />
     </div>
