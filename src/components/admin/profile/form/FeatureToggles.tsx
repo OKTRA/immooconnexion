@@ -26,7 +26,7 @@ export function FeatureToggles({
           disabled={!canShowPhoneNumber}
         />
         <Label htmlFor="show_phone" className={!canShowPhoneNumber ? "text-gray-400" : ""}>
-          Afficher le numéro sur le site {!canShowPhoneNumber && "(Nécessite un abonnement supérieur)"}
+          Afficher le numéro sur le site {!canShowPhoneNumber && "(Nécessite un abonnement avec cette fonctionnalité)"}
         </Label>
       </div>
       <div className="flex items-center space-x-2">

@@ -27,7 +27,8 @@ export function ProfileForm({ newProfile, setNewProfile }: ProfileFormProps) {
     enabled: !!newProfile.subscription_plan_id,
   });
 
-  const canShowPhoneNumber = subscriptionPlan?.features?.includes("show_phone_on_site");
+  // Vérification si le plan permet d'afficher le numéro de téléphone
+  const canShowPhoneNumber = subscriptionPlan?.features?.includes("show_phone_on_site") || false;
   const canListProperties = subscriptionPlan?.name === "Professionnel" || subscriptionPlan?.name === "Enterprise";
 
   return (
