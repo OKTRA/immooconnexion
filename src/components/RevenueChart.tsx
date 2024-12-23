@@ -8,11 +8,29 @@ export function RevenueChart() {
     queryKey: ['revenue-chart'],
     queryFn: async () => {
       console.log('Fetching revenue data...')
-      const { data: contracts, error } = await supabase
+      
+      // Get current user's profile to check role
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      let query = supabase
         .from('contracts')
         .select('montant, created_at')
         .eq('type', 'loyer')
         .order('created_at', { ascending: true })
+
+      // If not admin, only show agency's contracts
+      if (profile?.role !== 'admin') {
+        query = query.eq('agency_id', user.id)
+      }
+
+      const { data: contracts, error } = await query
 
       if (error) {
         console.error('Error fetching revenue data:', error)
