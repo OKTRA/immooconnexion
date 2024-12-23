@@ -4,49 +4,55 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { useToast } from "@/components/ui/use-toast";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { TenantTableRow } from "./tenants/TenantTableRow";
+} from "@/components/ui/table"
+import { useToast } from "@/components/ui/use-toast"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
+import { TenantTableRow } from "./tenants/TenantTableRow"
+import { Loader2 } from "lucide-react"
 
 interface TenantDisplay {
-  id: string;
-  nom: string;
-  prenom: string;
-  dateNaissance: string;
-  telephone: string;
-  photoIdUrl?: string;
-  fraisAgence?: string;
+  id: string
+  nom: string
+  prenom: string
+  dateNaissance: string
+  telephone: string
+  photoIdUrl?: string
+  fraisAgence?: string
 }
 
 export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => void }) {
-  const { toast } = useToast();
+  const { toast } = useToast()
 
-  const { data: tenants = [], refetch, isError, error } = useQuery({
+  const { data: tenants = [], isLoading, error } = useQuery({
     queryKey: ['tenants'],
     queryFn: async () => {
-      console.log('Début de la requête des locataires...');
+      console.log('Début de la requête des locataires...')
       
       // Get current user's profile
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Non authentifié")
+      if (!user) {
+        console.error('Utilisateur non authentifié')
+        throw new Error("Non authentifié")
+      }
+
+      console.log('User ID:', user.id)
 
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
-        .maybeSingle();
+        .maybeSingle()
       
       if (profileError) {
-        console.error('Erreur lors de la vérification du profil:', profileError);
-        throw profileError;
+        console.error('Erreur lors de la vérification du profil:', profileError)
+        throw profileError
       }
       
-      console.log('Profil utilisateur:', profileData);
+      console.log('Profil utilisateur:', profileData)
 
       // Build the query based on user role
-      const query = supabase
+      const { data: tenantsData, error: tenantsError } = await supabase
         .from('tenants')
         .select(`
           id,
@@ -56,21 +62,15 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
           phone_number,
           photo_id_url,
           agency_fees
-        `);
-
-      // If not admin, only show tenants for this agency
-      if (profileData?.role !== 'admin') {
-        query.eq('agency_id', user.id);
-      }
-      
-      const { data: tenantsData, error: tenantsError } = await query;
+        `)
+        .order('created_at', { ascending: false })
       
       if (tenantsError) {
-        console.error('Erreur lors de la récupération des locataires:', tenantsError);
-        throw tenantsError;
+        console.error('Erreur lors de la récupération des locataires:', tenantsError)
+        throw tenantsError
       }
       
-      console.log('Données des locataires brutes:', tenantsData);
+      console.log('Données des locataires brutes:', tenantsData)
 
       return tenantsData.map((tenant: any) => ({
         id: tenant.id,
@@ -80,19 +80,35 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
         telephone: tenant.phone_number || '',
         photoIdUrl: tenant.photo_id_url,
         fraisAgence: tenant.agency_fees?.toString(),
-      }));
+      }))
     },
     meta: {
       onError: (error: any) => {
-        console.error('Erreur de requête:', error);
+        console.error('Erreur de requête:', error)
         toast({
           title: "Erreur",
           description: "Impossible de charger les locataires. Veuillez réessayer.",
           variant: "destructive",
-        });
+        })
       }
     }
-  });
+  })
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8 text-red-500">
+        Une erreur est survenue lors du chargement des locataires
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
@@ -125,22 +141,21 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
                       const { error } = await supabase
                         .from('tenants')
                         .delete()
-                        .eq('id', id);
+                        .eq('id', id)
 
-                      if (error) throw error;
+                      if (error) throw error
 
-                      refetch();
                       toast({
                         title: "Locataire supprimé",
                         description: "Le locataire a été supprimé avec succès.",
-                      });
+                      })
                     } catch (error: any) {
-                      console.error('Error in handleDelete:', error);
+                      console.error('Error in handleDelete:', error)
                       toast({
                         title: "Erreur",
                         description: "Une erreur est survenue lors de la suppression.",
                         variant: "destructive",
-                      });
+                      })
                     }
                   }}
                 />
@@ -150,5 +165,5 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
         </Table>
       </div>
     </div>
-  );
+  )
 }
