@@ -29,6 +29,9 @@ export function AdminAgencies() {
           address: editedAgency.address,
           phone: editedAgency.phone,
           email: editedAgency.email,
+          subscription_plan_id: editedAgency.subscription_plan_id,
+          show_phone_on_site: editedAgency.show_phone_on_site,
+          list_properties_on_site: editedAgency.list_properties_on_site,
         })
         .eq("id", editedAgency.id)
 

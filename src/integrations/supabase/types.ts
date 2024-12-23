@@ -42,10 +42,12 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          list_properties_on_site: boolean | null
           logo_url: string | null
           name: string
           phone: string | null
           profile_id: string | null
+          show_phone_on_site: boolean | null
           subscription_plan_id: string | null
           updated_at: string
         }
@@ -54,10 +56,12 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          list_properties_on_site?: boolean | null
           logo_url?: string | null
           name: string
           phone?: string | null
           profile_id?: string | null
+          show_phone_on_site?: boolean | null
           subscription_plan_id?: string | null
           updated_at?: string
         }
@@ -66,10 +70,12 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          list_properties_on_site?: boolean | null
           logo_url?: string | null
           name?: string
           phone?: string | null
           profile_id?: string | null
+          show_phone_on_site?: boolean | null
           subscription_plan_id?: string | null
           updated_at?: string
         }
