@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { supabase } from "@/integrations/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 import Index from "./pages/Index"
 import Login from "./pages/Login"
 import PublicProperties from "./pages/PublicProperties"
@@ -22,20 +23,57 @@ const queryClient = new QueryClient()
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const { toast } = useToast()
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session)
-    })
+    const checkAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error?.message.includes('User from sub claim in JWT does not exist')) {
+          await supabase.auth.signOut()
+          setIsAuthenticated(false)
+          toast({
+            title: "Session expirée",
+            description: "Veuillez vous reconnecter",
+            variant: "default"
+          })
+          return
+        }
+        
+        setIsAuthenticated(!!session)
+      } catch (error) {
+        console.error('Auth check error:', error)
+        setIsAuthenticated(false)
+        await supabase.auth.signOut()
+      }
+    }
+
+    checkAuth()
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session)
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        setIsAuthenticated(false)
+        return
+      }
+      
+      try {
+        const { error } = await supabase.auth.getUser()
+        if (error) {
+          throw error
+        }
+        setIsAuthenticated(!!session)
+      } catch (error) {
+        console.error('Auth state change error:', error)
+        setIsAuthenticated(false)
+        await supabase.auth.signOut()
+      }
     })
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [toast])
 
   if (isAuthenticated === null) {
     return <div>Loading...</div>
