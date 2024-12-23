@@ -35,11 +35,16 @@ export function useProfiles() {
       }
       console.log('User ID:', user.id)
 
-      const { data: userProfile } = await supabase
+      const { data: userProfile, error: profileError } = await supabase
         .from('profiles')
-        .select('*')
+        .select('role, agency_id')
         .eq('id', user.id)
         .maybeSingle()
+
+      if (profileError) {
+        console.error('Erreur lors de la récupération du profil:', profileError)
+        throw profileError
+      }
 
       console.log('Profil utilisateur:', userProfile)
 
@@ -47,7 +52,14 @@ export function useProfiles() {
       let query = supabase
         .from("profiles")
         .select(`
-          *,
+          id,
+          first_name,
+          last_name,
+          email,
+          role,
+          phone_number,
+          created_at,
+          agency_id,
           agency:agencies(name)
         `)
         .order('created_at', { ascending: false })
@@ -58,8 +70,8 @@ export function useProfiles() {
           query = query.eq('agency_id', userProfile.agency_id)
           console.log('Filtrage par agency_id:', userProfile.agency_id)
         } else {
-          query = query.is('agency_id', null)
           console.log('Filtrage pour les profils sans agence')
+          return []
         }
       }
 
@@ -72,7 +84,7 @@ export function useProfiles() {
 
       console.log('Données brutes récupérées:', data)
 
-      // Transformer les données pour inclure le nom de l'agence directement
+      // Transform data to include agency name directly
       const transformedData = (data || []).map(profile => ({
         ...profile,
         agency_name: profile.agency?.name || '-'
@@ -81,5 +93,9 @@ export function useProfiles() {
       console.log('Profils transformés:', transformedData)
       return transformedData
     },
+    retry: 1, // Only retry once on failure
+    meta: {
+      errorMessage: "Impossible de charger les profils. Veuillez réessayer."
+    }
   })
 }
