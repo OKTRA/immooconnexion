@@ -12,20 +12,20 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      storage: localStorage,
-      storageKey: 'supabase.auth.token',
     },
     global: {
-      headers: {
+      headers: { 
         'X-Client-Info': 'supabase-js-web',
       },
     },
+    db: {
+      schema: 'public'
+    }
   }
 );
 
 // Helper function to clear auth state
 export const clearAuthState = async () => {
-  const storageKey = 'supabase.auth.token';
-  localStorage.removeItem(storageKey);
   await supabase.auth.signOut();
+  localStorage.removeItem('supabase.auth.token');
 };
