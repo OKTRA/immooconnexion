@@ -2,22 +2,22 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 
 interface Profile {
-  email?: string;
-  first_name?: string;
-  last_name?: string;
-  phone_number?: string;
-  password?: string;
+  email?: string
+  first_name?: string
+  last_name?: string
+  phone_number?: string
+  password?: string
 }
 
 interface BasicInfoFieldsProps {
-  newProfile?: Profile;
-  setNewProfile: (profile: Profile) => void;
+  newProfile: Profile
+  setNewProfile: (profile: Profile) => void
 }
 
 export function BasicInfoFields({ newProfile = {}, setNewProfile }: BasicInfoFieldsProps) {
   const handleChange = (field: keyof Profile, value: string) => {
-    setNewProfile({ ...newProfile, [field]: value });
-  };
+    setNewProfile({ ...newProfile, [field]: value })
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -1,5 +1,7 @@
+import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ProfileForm } from "../../profile/ProfileForm"
+import { Button } from "@/components/ui/button"
 
 interface EditUserDialogProps {
   open: boolean
@@ -16,6 +18,13 @@ export function EditUserDialog({
   onSave,
   agencyId 
 }: EditUserDialogProps) {
+  const [editedProfile, setEditedProfile] = useState(selectedUser)
+
+  const handleSave = () => {
+    onSave(editedProfile)
+    onOpenChange(false)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -23,11 +32,16 @@ export function EditUserDialog({
           <DialogTitle>Modifier l'utilisateur</DialogTitle>
         </DialogHeader>
         {selectedUser && (
-          <ProfileForm
-            newProfile={selectedUser}
-            setNewProfile={onSave}
-            selectedAgencyId={agencyId}
-          />
+          <>
+            <ProfileForm
+              newProfile={editedProfile}
+              setNewProfile={setEditedProfile}
+              selectedAgencyId={agencyId}
+            />
+            <Button onClick={handleSave} className="w-full">
+              Enregistrer
+            </Button>
+          </>
         )}
       </DialogContent>
     </Dialog>
