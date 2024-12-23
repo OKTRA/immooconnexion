@@ -18,10 +18,12 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     const checkAuth = async () => {
       try {
         // Clear any existing session first to ensure we start fresh
-        const storageKey = 'sb-' + supabase.projectId + '-auth-token';
-        localStorage.removeItem(storageKey);
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        if (currentSession) {
+          await supabase.auth.signOut();
+        }
 
-        // Get current session
+        // Get fresh session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
