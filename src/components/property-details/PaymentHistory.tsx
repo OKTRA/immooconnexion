@@ -5,6 +5,8 @@ import { Link } from "react-router-dom"
 import { PaymentDialog } from "@/components/payment/PaymentDialog"
 import { InspectionDialog } from "@/components/inspections/InspectionDialog"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
 
 interface PaymentHistoryProps {
   propertyId: string
@@ -45,7 +47,7 @@ export function PaymentHistory({
                 {contracts?.map((contract: any) => (
                   <tr key={contract.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
                     <td className="p-3 text-sm md:text-base">
-                      {new Date(contract.created_at).toLocaleDateString()}
+                      {format(new Date(contract.created_at), 'PP', { locale: fr })}
                     </td>
                     <td className="p-3 text-sm md:text-base">
                       {contract.tenant_nom && contract.tenant_prenom 

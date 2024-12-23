@@ -60,17 +60,35 @@ const PropertyDetails = () => {
     queryFn: async () => {
       console.log("Fetching contracts for property:", id)
       const { data, error } = await supabase
-        .from('payment_history_with_tenant')
-        .select('*')
+        .from('contracts')
+        .select(`
+          *,
+          tenants (
+            nom,
+            prenom
+          ),
+          properties (
+            bien
+          )
+        `)
         .eq('property_id', id)
+        .order('created_at', { ascending: false })
       
       if (error) {
         console.error("Error fetching contracts:", error)
         throw error
       }
 
-      console.log("Contracts data:", data)
-      return data
+      // Transform the data to match the expected format
+      const transformedData = data?.map(contract => ({
+        ...contract,
+        tenant_nom: contract.tenants?.nom,
+        tenant_prenom: contract.tenants?.prenom,
+        property_name: contract.properties?.bien
+      })) || []
+
+      console.log("Contracts data:", transformedData)
+      return transformedData
     },
     enabled: !!id
   })

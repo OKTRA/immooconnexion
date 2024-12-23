@@ -21,14 +21,27 @@ export function RecentActivities() {
         .eq('id', user.id)
         .maybeSingle()
 
-      // Build the base query
-      let query = supabase
-        .from("payment_history_with_tenant")
-        .select("*")
+      console.log("User profile:", profile)
 
-      // If not admin, only show agency's payments
+      // Build the base query for contracts with tenant info
+      let query = supabase
+        .from("contracts")
+        .select(`
+          id,
+          montant,
+          type,
+          created_at,
+          tenants (
+            nom,
+            prenom
+          ),
+          properties (
+            bien
+          )
+        `)
+
+      // If not admin, only show agency's contracts
       if (profile?.role !== 'admin') {
-        // Filter by contracts where the property belongs to this agency
         query = query.eq('agency_id', user.id)
       }
 
@@ -41,7 +54,18 @@ export function RecentActivities() {
         throw error
       }
 
-      return data
+      console.log("Recent activities data:", data)
+
+      // Transform the data to match the expected format
+      return data?.map(contract => ({
+        id: contract.id,
+        montant: contract.montant,
+        type: contract.type,
+        created_at: contract.created_at,
+        tenant_nom: contract.tenants?.nom,
+        tenant_prenom: contract.tenants?.prenom,
+        property_name: contract.properties?.bien
+      })) || []
     },
   })
 
@@ -67,10 +91,13 @@ export function RecentActivities() {
             >
               <div>
                 <p className="font-medium">
-                  {contract.tenant_nom} {contract.tenant_prenom}
+                  {contract.tenant_nom && contract.tenant_prenom 
+                    ? `${contract.tenant_prenom} ${contract.tenant_nom}`
+                    : 'Non renseigné'
+                  }
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {contract.property_name} - {contract.type}
+                  {contract.property_name || 'Non renseigné'} - {contract.type}
                 </p>
               </div>
               <div className="text-right">
