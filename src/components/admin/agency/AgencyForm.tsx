@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface AgencyFormProps {
   agency: Agency
   setAgency: (agency: Agency) => void
+  onSubmit?: (agency: Agency) => void  // Add onSubmit prop
 }
 
-export function AgencyForm({ agency, setAgency }: AgencyFormProps) {
+export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
   const { data: plans = [] } = useQuery({
     queryKey: ["subscription-plans"],
     queryFn: async () => {

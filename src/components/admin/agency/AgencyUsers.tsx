@@ -11,9 +11,10 @@ import { Plus } from "lucide-react"
 
 interface AgencyUsersProps {
   agencyId: string
+  onRefetch?: () => void  // Make onRefetch optional
 }
 
-export function AgencyUsers({ agencyId }: AgencyUsersProps) {
+export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
