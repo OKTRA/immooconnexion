@@ -86,10 +86,10 @@ export function useTenants() {
           agency_id
         `)
 
-      // Si l'utilisateur n'est pas admin, on filtre par user_id
+      // Si l'utilisateur n'est pas admin, on filtre par user_id ou agency_id
       if (profileData?.role !== 'admin') {
-        query = query.eq('user_id', profileData.id)
-        console.log('Filtrage par profile id:', profileData.id)
+        query = query.or(`user_id.eq.${user.id},agency_id.eq.${user.id}`)
+        console.log('Filtrage par user_id ou agency_id:', user.id)
       }
       
       const { data: tenantsData, error: tenantsError } = await query
