@@ -24,7 +24,19 @@ const PropertyDetails = () => {
     queryFn: async () => {
       console.log("Fetching property details for ID:", id)
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Non authentifié")
+      if (!user) {
+        console.error("User not authenticated")
+        throw new Error("Non authentifié")
+      }
+      console.log("Current user ID:", user.id)
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      console.log("User profile:", profile)
 
       const { data, error } = await supabase
         .from('properties')
@@ -34,13 +46,9 @@ const PropertyDetails = () => {
       
       if (error) {
         console.error("Error fetching property:", error)
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les informations du bien",
-          variant: "destructive",
-        })
         throw error
       }
+
       console.log("Property data:", data)
       return data
     },
@@ -58,13 +66,9 @@ const PropertyDetails = () => {
       
       if (error) {
         console.error("Error fetching contracts:", error)
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger l'historique des paiements",
-          variant: "destructive",
-        })
         throw error
       }
+
       console.log("Contracts data:", data)
       return data
     },
@@ -80,6 +84,7 @@ const PropertyDetails = () => {
   }
 
   if (propertyError || contractsError || !property) {
+    console.error("Errors:", { propertyError, contractsError })
     return (
       <div className="flex items-center justify-center h-screen text-red-500">
         Une erreur est survenue lors du chargement des données
