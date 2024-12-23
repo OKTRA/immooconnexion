@@ -20,39 +20,54 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
   const handleAddUser = async () => {
     try {
-      // Vérifier si l'admin existe déjà
-      const { data: existingAdmin } = await supabase
-        .from('local_admins')
+      // Vérifier si le profil existe déjà
+      const { data: existingProfile } = await supabase
+        .from('profiles')
         .select('id')
         .eq('email', newProfile.email)
         .maybeSingle()
 
-      if (existingAdmin) {
+      if (existingProfile) {
         toast({
           title: "Erreur",
-          description: "Un administrateur avec cet email existe déjà",
+          description: "Un profil avec cet email existe déjà",
           variant: "destructive",
         })
         return
       }
 
-      // Créer le nouvel admin - le trigger handle_new_local_admin s'occupera de créer l'utilisateur auth
-      const { error: createError } = await supabase
-        .from("local_admins")
-        .insert({
-          first_name: newProfile.first_name,
-          last_name: newProfile.last_name,
-          phone_number: newProfile.phone_number,
-          email: newProfile.email,
-          agency_id: newProfile.agency_id || agencyId,
-          role: 'user'
-        })
+      // Créer le nouvel utilisateur dans auth.users
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: newProfile.email,
+        password: 'tempPassword123!', // Mot de passe temporaire
+        options: {
+          data: {
+            first_name: newProfile.first_name,
+            last_name: newProfile.last_name,
+          }
+        }
+      })
 
-      if (createError) throw createError
+      if (authError) throw authError
+
+      // Le trigger handle_new_user s'occupera de créer le profil
+      // Mais on met à jour les champs supplémentaires
+      if (authData.user) {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            phone_number: newProfile.phone_number,
+            agency_id: newProfile.agency_id,
+            role: 'user'
+          })
+          .eq('id', authData.user.id)
+
+        if (updateError) throw updateError
+      }
 
       toast({
-        title: "Administrateur ajouté",
-        description: "Le nouvel administrateur a été ajouté avec succès. Un mot de passe temporaire a été généré.",
+        title: "Profil ajouté",
+        description: "Le nouveau profil a été ajouté avec succès. Un email de confirmation a été envoyé.",
       })
       
       onClose()
@@ -68,7 +83,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       console.error('Erreur lors de la création:', error)
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'ajout de l'administrateur",
+        description: error.message || "Une erreur est survenue lors de l'ajout du profil",
         variant: "destructive",
       })
     }

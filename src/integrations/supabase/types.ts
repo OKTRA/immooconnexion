@@ -197,50 +197,6 @@ export type Database = {
           },
         ]
       }
-      local_admins: {
-        Row: {
-          agency_id: string | null
-          created_at: string
-          email: string
-          first_name: string
-          id: string
-          last_name: string
-          phone_number: string
-          role: string
-          updated_at: string
-        }
-        Insert: {
-          agency_id?: string | null
-          created_at?: string
-          email: string
-          first_name?: string
-          id?: string
-          last_name?: string
-          phone_number?: string
-          role?: string
-          updated_at?: string
-        }
-        Update: {
-          agency_id?: string | null
-          created_at?: string
-          email?: string
-          first_name?: string
-          id?: string
-          last_name?: string
-          phone_number?: string
-          role?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "local_admins_agency_id_fkey"
-            columns: ["agency_id"]
-            isOneToOne: false
-            referencedRelation: "agencies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           agency_id: string | null
