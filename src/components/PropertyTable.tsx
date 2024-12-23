@@ -71,7 +71,12 @@ export function PropertyTable() {
 
       // Si l'utilisateur n'est pas admin, on filtre par agency_id
       if (profile?.role !== 'admin') {
-        query = query.eq('agency_id', profile.agency_id)
+        if (profile?.agency_id) {
+          query = query.eq('agency_id', profile.agency_id)
+        } else {
+          // If user has no agency_id, return empty array instead of querying with null
+          return []
+        }
       }
 
       const { data, error } = await query
