@@ -22,7 +22,10 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         
         if (sessionError) {
           console.error("Session error:", sessionError)
-          if (mounted) setIsAuthenticated(false)
+          if (mounted) {
+            setIsAuthenticated(false)
+            await supabase.auth.signOut() // Clear any invalid session
+          }
           return
         }
 
@@ -37,14 +40,15 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         
         if (userError || !user) {
           console.error("User verification error:", userError)
-          // Clear invalid session
-          await supabase.auth.signOut()
-          if (mounted) setIsAuthenticated(false)
-          toast({
-            title: "Session expirée",
-            description: "Veuillez vous reconnecter",
-            variant: "destructive"
-          })
+          if (mounted) {
+            setIsAuthenticated(false)
+            await supabase.auth.signOut() // Clear invalid session
+            toast({
+              title: "Session expirée",
+              description: "Veuillez vous reconnecter",
+              variant: "destructive"
+            })
+          }
           return
         }
 
@@ -57,7 +61,10 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
         if (profileError) {
           console.error("Profile check error:", profileError)
-          if (mounted) setIsAuthenticated(false)
+          if (mounted) {
+            setIsAuthenticated(false)
+            await supabase.auth.signOut()
+          }
           return
         }
 
@@ -73,7 +80,10 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
           if (insertError) {
             console.error("Profile creation error:", insertError)
-            if (mounted) setIsAuthenticated(false)
+            if (mounted) {
+              setIsAuthenticated(false)
+              await supabase.auth.signOut()
+            }
             return
           }
         }
@@ -81,12 +91,18 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         if (mounted) setIsAuthenticated(true)
       } catch (error) {
         console.error("Auth check error:", error)
-        if (mounted) setIsAuthenticated(false)
+        if (mounted) {
+          setIsAuthenticated(false)
+          // Clear any potentially corrupted session state
+          await supabase.auth.signOut()
+        }
       }
     }
 
+    // Initial auth check
     checkAuth()
 
+    // Subscribe to auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
