@@ -26,14 +26,27 @@ export function AdminProperties() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("role")
+        .select(`
+          *,
+          agency:agencies(
+            name
+          )
+        `)
         .eq("id", user.id)
         .maybeSingle()
 
       // If admin, get all properties, otherwise get only agency's properties
       const query = supabase
         .from("properties")
-        .select("*, profiles(agency_name)")
+        .select(`
+          *,
+          agency:profiles(
+            id,
+            agency:agencies(
+              name
+            )
+          )
+        `)
         .order("created_at", { ascending: false })
 
       if (profile?.role !== 'admin') {
@@ -42,7 +55,11 @@ export function AdminProperties() {
 
       const { data, error } = await query
       if (error) throw error
-      return data
+      
+      return data.map(property => ({
+        ...property,
+        agency_name: property.agency?.agency?.name || 'N/A'
+      }))
     },
   })
 
@@ -50,7 +67,8 @@ export function AdminProperties() {
     (property) =>
       property.bien.toLowerCase().includes(searchTerm.toLowerCase()) ||
       property.ville?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      property.type.toLowerCase().includes(searchTerm.toLowerCase())
+      property.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      property.agency_name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   if (isLoading) {
@@ -93,7 +111,7 @@ export function AdminProperties() {
                       }).format(property.loyer)
                     : "-"}
                 </TableCell>
-                <TableCell>{property.profiles?.agency_name || "N/A"}</TableCell>
+                <TableCell>{property.agency_name || "N/A"}</TableCell>
                 <TableCell>
                   <Badge
                     variant={

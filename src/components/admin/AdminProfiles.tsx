@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -7,6 +6,7 @@ import { UserPlus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AddProfileDialog } from "./profile/AddProfileDialog"
 import { ProfilesTable } from "./profile/ProfilesTable"
+import { supabase } from "@/integrations/supabase/client"
 
 export function AdminProfiles() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -16,7 +16,7 @@ export function AdminProfiles() {
     first_name: "",
     last_name: "",
     role: "user",
-    agency_name: "",
+    agency_id: "",
     phone_number: "",
     show_phone_on_site: false,
     list_properties_on_site: false,
@@ -30,11 +30,19 @@ export function AdminProfiles() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("*")
+        .select(`
+          *,
+          agency:agencies(
+            name
+          )
+        `)
         .order("created_at", { ascending: false })
 
       if (error) throw error
-      return data
+      return data.map((profile) => ({
+        ...profile,
+        agency_name: profile.agency?.name || 'N/A'
+      }))
     },
   })
 
@@ -72,11 +80,11 @@ export function AdminProfiles() {
       // Mettre à jour le profil avec les informations supplémentaires
       const { error: profileError } = await supabase
         .from("profiles")
-        .update({
+        .insert({
           first_name: newProfile.first_name,
           last_name: newProfile.last_name,
           role: newProfile.role,
-          agency_name: newProfile.agency_name,
+          agency_id: newProfile.agency_id,
           phone_number: newProfile.phone_number,
           show_phone_on_site: newProfile.show_phone_on_site,
           list_properties_on_site: newProfile.list_properties_on_site,
@@ -98,7 +106,7 @@ export function AdminProfiles() {
         first_name: "",
         last_name: "",
         role: "user",
-        agency_name: "",
+        agency_id: "",
         phone_number: "",
         show_phone_on_site: false,
         list_properties_on_site: false,
@@ -123,7 +131,7 @@ export function AdminProfiles() {
           first_name: editedProfile.first_name,
           last_name: editedProfile.last_name,
           role: editedProfile.role,
-          agency_name: editedProfile.agency_name,
+          agency_id: editedProfile.agency_id,
           phone_number: editedProfile.phone_number,
           show_phone_on_site: editedProfile.show_phone_on_site,
           list_properties_on_site: editedProfile.list_properties_on_site,

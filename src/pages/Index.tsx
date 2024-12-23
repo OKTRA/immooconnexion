@@ -24,9 +24,16 @@ const Index = () => {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role, agency_name')
+        .select(`
+          *,
+          agency:agencies(
+            name
+          )
+        `)
         .eq('id', user.id)
         .maybeSingle()
+      
+      if (!profile) throw new Error("Profile not found")
       
       console.log('Profil utilisateur:', profile)
 
@@ -36,7 +43,7 @@ const Index = () => {
       let contractsQuery = supabase.from("contracts").select("montant, type, created_at, agency_id")
 
       // If not admin, filter by agency_id
-      if (profile?.role !== 'admin') {
+      if (profile.role !== 'admin') {
         propertiesQuery = propertiesQuery.eq('agency_id', user.id)
         tenantsQuery = tenantsQuery.eq('agency_id', user.id)
         contractsQuery = contractsQuery.eq('agency_id', user.id)
