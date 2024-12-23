@@ -12,6 +12,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { supabase } from "@/integrations/supabase/client"
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm"
+import { Button } from "@/components/ui/button"
+import { ExternalLink } from "lucide-react"
 
 const Login = () => {
   const navigate = useNavigate()
@@ -31,11 +33,29 @@ const Login = () => {
   }, [navigate])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-      <Card className="w-full max-w-md shadow-lg">
+    <div 
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        background: `linear-gradient(to right, #243949 0%, #517fa4 100%)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <div className="fixed top-4 right-4">
+        <Button 
+          variant="secondary" 
+          className="bg-white hover:bg-gray-100"
+          onClick={() => navigate('/public')}
+        >
+          <ExternalLink className="mr-2 h-4 w-4" />
+          Voir les biens disponibles
+        </Button>
+      </div>
+
+      <Card className="w-full max-w-md shadow-xl bg-white/95 backdrop-blur-sm">
         <CardHeader className="space-y-2">
           <CardTitle className="text-2xl font-bold text-center">Connexion</CardTitle>
-          <CardDescription className="text-center text-gray-600 dark:text-gray-400">
+          <CardDescription className="text-center text-gray-600">
             Bienvenue sur votre espace de gestion immobilière
           </CardDescription>
         </CardHeader>
@@ -61,9 +81,9 @@ const Login = () => {
                   className: {
                     container: "space-y-4",
                     button: "w-full bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded transition-colors",
-                    label: "block text-sm font-medium text-gray-700 dark:text-gray-300",
+                    label: "block text-sm font-medium text-gray-700",
                     input: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm",
-                    anchor: "text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200",
+                    anchor: "text-sm text-gray-600 hover:text-gray-900",
                   },
                 }}
                 theme="light"
@@ -95,7 +115,7 @@ const Login = () => {
                 <div className="text-center mt-4">
                   <button 
                     onClick={() => setView("forgotten_password")}
-                    className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                    className="text-sm text-gray-600 hover:text-gray-900"
                   >
                     Mot de passe oublié ?
                   </button>
@@ -105,7 +125,7 @@ const Login = () => {
                 <div className="text-center mt-4">
                   <button 
                     onClick={() => setView("sign_in")}
-                    className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                    className="text-sm text-gray-600 hover:text-gray-900"
                   >
                     Retour à la connexion
                   </button>

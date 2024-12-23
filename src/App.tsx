@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import Index from "./pages/Index"
 import Login from "./pages/Login"
+import PublicProperties from "./pages/PublicProperties"
 import Tenants from "./pages/Tenants"
 import Properties from "./pages/Properties"
 import PropertyDetails from "./pages/PropertyDetails"
@@ -54,6 +55,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/public" element={<PublicProperties />} />
           <Route
             path="/"
             element={
