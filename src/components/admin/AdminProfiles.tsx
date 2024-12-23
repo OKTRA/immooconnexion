@@ -41,11 +41,21 @@ export function AdminProfiles() {
 
   const handleAddUser = async () => {
     try {
-      // Vérifier si le mot de passe est fourni
+      // Vérifier si le mot de passe est fourni et valide
       if (!newProfile.password) {
         toast({
           title: "Erreur",
           description: "Le mot de passe est obligatoire",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Vérifier la longueur minimale du mot de passe
+      if (newProfile.password.length < 6) {
+        toast({
+          title: "Erreur",
+          description: "Le mot de passe doit contenir au moins 6 caractères",
           variant: "destructive",
         })
         return
