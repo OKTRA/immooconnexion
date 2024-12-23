@@ -39,7 +39,7 @@ export function RecentActivities() {
 
       // If not admin, filter by agency_id
       if (profile?.role !== 'admin') {
-        query = query.or(`agency_id.eq.${user.id}`)
+        query = query.eq('agency_id', user.id)
       }
 
       const { data: contracts, error } = await query
@@ -62,14 +62,14 @@ export function RecentActivities() {
                   .from('tenants')
                   .select('nom, prenom')
                   .eq('id', contract.tenant_id)
-                  .single()
+                  .maybeSingle()
               : { data: null },
             contract.property_id
               ? supabase
                   .from('properties')
                   .select('bien')
                   .eq('id', contract.property_id)
-                  .single()
+                  .maybeSingle()
               : { data: null }
           ])
 
