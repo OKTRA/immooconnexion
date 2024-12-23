@@ -9,7 +9,6 @@ export function RevenueChart() {
     queryFn: async () => {
       console.log('Fetching revenue data...')
       
-      // Get current user's profile to check role
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
@@ -29,13 +28,14 @@ export function RevenueChart() {
           montant,
           created_at,
           type,
-          agency_id
+          agency_id,
+          user_id
         `)
         .eq('type', 'loyer')
 
-      // If not admin, only show agency's contracts
+      // If not admin, filter by both agency_id and user_id
       if (profile?.role !== 'admin') {
-        query = query.eq('agency_id', user.id)
+        query = query.or(`agency_id.eq.${user.id},user_id.eq.${user.id}`)
       }
 
       const { data: contracts, error } = await query

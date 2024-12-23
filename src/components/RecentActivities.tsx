@@ -11,7 +11,6 @@ export function RecentActivities() {
     queryFn: async () => {
       console.log("Fetching recent activities...")
       
-      // First get the current user's profile to check role
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
@@ -35,12 +34,13 @@ export function RecentActivities() {
           created_at,
           tenant_id,
           property_id,
-          agency_id
+          agency_id,
+          user_id
         `)
 
-      // If not admin, only show agency's contracts
+      // If not admin, filter by both agency_id and user_id
       if (profile?.role !== 'admin') {
-        query = query.eq('agency_id', user.id)
+        query = query.or(`agency_id.eq.${user.id},user_id.eq.${user.id}`)
       }
 
       const { data: contracts, error } = await query
