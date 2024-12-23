@@ -9,14 +9,16 @@ interface TenantProfileProps {
   tenantId: string
 }
 
+interface Property {
+  bien: string
+}
+
 interface Contract {
   id: string
   montant: number
   start_date: string
   statut: string
-  property: {
-    bien: string
-  } | null
+  property: Property | null
 }
 
 interface Tenant {
@@ -26,13 +28,15 @@ interface Tenant {
   phone_number: string | null
   birth_date: string | null
   agency_fees: number | null
-  contracts: Contract[] | null
+  contracts: Contract[]
 }
 
 export function TenantProfile({ tenantId }: TenantProfileProps) {
   const { data: tenant, isLoading } = useQuery({
     queryKey: ['tenant-profile', tenantId],
     queryFn: async () => {
+      console.log("Fetching tenant profile for ID:", tenantId)
+
       const { data, error } = await supabase
         .from('tenants')
         .select(`
@@ -45,7 +49,12 @@ export function TenantProfile({ tenantId }: TenantProfileProps) {
         .eq('id', tenantId)
         .maybeSingle()
 
-      if (error) throw error
+      if (error) {
+        console.error("Error fetching tenant:", error)
+        throw error
+      }
+
+      console.log("Tenant data:", data)
       
       // Ensure contracts is always an array
       const formattedData = {
@@ -54,7 +63,8 @@ export function TenantProfile({ tenantId }: TenantProfileProps) {
       } as Tenant
 
       return formattedData
-    }
+    },
+    enabled: !!tenantId
   })
 
   if (isLoading) {

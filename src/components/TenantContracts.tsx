@@ -30,6 +30,7 @@ export function TenantContracts() {
           property:properties(*)
         `)
         .eq("tenant_id", id)
+        .order('created_at', { ascending: false })
 
       if (error) {
         console.error("Error fetching contracts:", error)
@@ -37,7 +38,7 @@ export function TenantContracts() {
       }
 
       console.log("Contracts data:", contractsData)
-      return contractsData
+      return contractsData || []
     },
     enabled: !!id,
   })
