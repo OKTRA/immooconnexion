@@ -7,76 +7,11 @@ import { RecentActivities } from "@/components/RecentActivities"
 import { AppSidebar } from "@/components/AppSidebar"
 import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { Loader2 } from "lucide-react"
 
 const Index = () => {
   const navigate = useNavigate()
-  const [userRole, setUserRole] = useState<string | null>(null)
-
-  useEffect(() => {
-    const checkUserRole = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          navigate("/login")
-          return
-        }
-
-        console.log("Checking role for user:", user.id)
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .maybeSingle()
-
-        if (profileError) {
-          console.error("Error fetching profile:", profileError)
-          toast.error("Erreur lors de la vérification du profil")
-          return
-        }
-
-        if (!profile) {
-          console.log("No profile found for user:", user.id)
-          const { error: insertError } = await supabase
-            .from("profiles")
-            .insert([{ id: user.id, role: 'user' }])
-
-          if (insertError) {
-            console.error("Error creating profile:", insertError)
-            toast.error("Erreur lors de la création du profil")
-            return
-          }
-          
-          setUserRole('user')
-          return
-        }
-
-        console.log("Profile found:", profile)
-        setUserRole(profile.role)
-
-        if (profile.role === "admin") {
-          const { data: adminData, error: adminError } = await supabase
-            .from("administrators")
-            .select("is_super_admin")
-            .eq("id", user.id)
-            .maybeSingle()
-
-          if (adminError) {
-            console.error("Error checking admin status:", adminError)
-            return
-          }
-
-          if (adminData?.is_super_admin) {
-            navigate("/admin")
-          }
-        }
-      } catch (error) {
-        console.error("Unexpected error:", error)
-        toast.error("Une erreur inattendue s'est produite")
-      }
-    }
-
-    checkUserRole()
-  }, [navigate])
+  const [isLoading, setIsLoading] = useState(true)
 
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
@@ -99,10 +34,70 @@ const Index = () => {
         revenue: totalRevenue,
       }
     },
+    enabled: !isLoading, // Only run this query after user role check
   })
 
-  if (userRole === null) {
-    return <div>Loading...</div>
+  useEffect(() => {
+    const checkUserRole = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          navigate("/login")
+          return
+        }
+
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single()
+
+        if (error) {
+          console.error("Error fetching profile:", error)
+          toast.error("Erreur lors de la vérification du profil")
+          return
+        }
+
+        if (!profile) {
+          const { error: insertError } = await supabase
+            .from("profiles")
+            .insert([{ id: user.id, role: 'user' }])
+            .single()
+
+          if (insertError) {
+            console.error("Error creating profile:", insertError)
+            toast.error("Erreur lors de la création du profil")
+            return
+          }
+        } else if (profile.role === "admin") {
+          const { data: adminData, error: adminError } = await supabase
+            .from("administrators")
+            .select("is_super_admin")
+            .eq("id", user.id)
+            .single()
+
+          if (!adminError && adminData?.is_super_admin) {
+            navigate("/admin")
+            return
+          }
+        }
+
+        setIsLoading(false)
+      } catch (error) {
+        console.error("Unexpected error:", error)
+        toast.error("Une erreur inattendue s'est produite")
+      }
+    }
+
+    checkUserRole()
+  }, [navigate])
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
   }
 
   return (
