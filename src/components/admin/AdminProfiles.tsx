@@ -1,13 +1,12 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Table, TableBody, TableHead, TableHeader } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { UserPlus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { ProfileTableRow } from "./ProfileTableRow"
 import { AddProfileDialog } from "./profile/AddProfileDialog"
+import { ProfilesTable } from "./profile/ProfilesTable"
 
 export function AdminProfiles() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -82,6 +81,7 @@ export function AdminProfiles() {
           show_phone_on_site: newProfile.show_phone_on_site,
           list_properties_on_site: newProfile.list_properties_on_site,
           subscription_plan_id: newProfile.subscription_plan_id,
+          email: newProfile.email,
           password_hash: newProfile.password,
         })
         .eq("id", authData.user.id)
@@ -128,6 +128,7 @@ export function AdminProfiles() {
           show_phone_on_site: editedProfile.show_phone_on_site,
           list_properties_on_site: editedProfile.list_properties_on_site,
           subscription_plan_id: editedProfile.subscription_plan_id,
+          email: editedProfile.email,
         })
         .eq("id", editedProfile.id)
 
@@ -170,31 +171,11 @@ export function AdminProfiles() {
         </Button>
       </div>
       
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableHead>ID</TableHead>
-            <TableHead>Prénom</TableHead>
-            <TableHead>Nom</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Téléphone</TableHead>
-            <TableHead>Agence</TableHead>
-            <TableHead>Rôle</TableHead>
-            <TableHead>Date de création</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableHeader>
-          <TableBody>
-            {filteredProfiles.map((profile) => (
-              <ProfileTableRow
-                key={profile.id}
-                profile={profile}
-                onEdit={handleEditProfile}
-                refetch={refetch}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <ProfilesTable 
+        profiles={filteredProfiles}
+        onEdit={handleEditProfile}
+        refetch={refetch}
+      />
 
       <AddProfileDialog
         showAddDialog={showAddDialog}
