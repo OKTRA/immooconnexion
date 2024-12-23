@@ -60,7 +60,7 @@ export function useProfiles() {
           phone_number,
           created_at,
           agency_id,
-          agency:agencies(name)
+          agency:agencies!profiles_agency_id_fkey(name)
         `)
         .order('created_at', { ascending: false })
 
@@ -93,7 +93,7 @@ export function useProfiles() {
       console.log('Profils transformés:', transformedData)
       return transformedData
     },
-    retry: 1, // Only retry once on failure
+    retry: 1,
     meta: {
       errorMessage: "Impossible de charger les profils. Veuillez réessayer."
     }
