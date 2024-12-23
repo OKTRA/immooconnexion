@@ -31,21 +31,12 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           return;
         }
 
-        // First verify the user exists in auth.users
-        const { data: authUser, error: authError } = await supabase.auth.getUser();
-        
-        if (authError || !authUser.user) {
-          console.error('Auth user error:', authError);
-          if (mounted) setIsAuthenticated(false);
-          return;
-        }
-
         // Then check if profile exists
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('id')
           .eq('id', session.user.id)
-          .single();
+          .maybeSingle();
 
         if (profileError && profileError.code !== 'PGRST116') {
           console.error('Profile check error:', profileError);
@@ -97,8 +88,9 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         return;
       }
       
-      // Re-run checkAuth when auth state changes
-      checkAuth();
+      if (mounted) {
+        await checkAuth();
+      }
     });
 
     return () => {
