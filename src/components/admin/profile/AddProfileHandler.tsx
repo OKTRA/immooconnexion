@@ -39,7 +39,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       // Créer le nouvel utilisateur dans auth.users
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newProfile.email,
-        password: 'tempPassword123!', // Mot de passe temporaire
+        password: 'tempPassword123!',
         options: {
           data: {
             first_name: newProfile.first_name,
@@ -50,8 +50,6 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
       if (authError) throw authError
 
-      // Le trigger handle_new_user s'occupera de créer le profil
-      // Mais on met à jour les champs supplémentaires
       if (authData.user) {
         const { error: updateError } = await supabase
           .from('profiles')
@@ -67,7 +65,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
       toast({
         title: "Profil ajouté",
-        description: "Le nouveau profil a été ajouté avec succès. Un email de confirmation a été envoyé.",
+        description: "Le nouveau profil a été ajouté avec succès",
       })
       
       onClose()
