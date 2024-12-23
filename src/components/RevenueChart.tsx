@@ -13,17 +13,25 @@ export function RevenueChart() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
+      console.log('User ID:', user.id)
+
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, agency_name')
         .eq('id', user.id)
         .maybeSingle()
 
+      console.log('User profile:', profile)
+
       let query = supabase
         .from('contracts')
-        .select('montant, created_at')
+        .select(`
+          montant,
+          created_at,
+          type,
+          agency_id
+        `)
         .eq('type', 'loyer')
-        .order('created_at', { ascending: true })
 
       // If not admin, only show agency's contracts
       if (profile?.role !== 'admin') {
@@ -31,11 +39,14 @@ export function RevenueChart() {
       }
 
       const { data: contracts, error } = await query
+        .order('created_at', { ascending: true })
 
       if (error) {
         console.error('Error fetching revenue data:', error)
         throw error
       }
+
+      console.log('Contracts retrieved:', contracts)
 
       // Group by month and sum revenues
       const monthlyRevenue = contracts?.reduce((acc: Record<string, number>, contract) => {

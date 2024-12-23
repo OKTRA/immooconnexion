@@ -15,9 +15,11 @@ export function RecentActivities() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
+      console.log('User ID:', user.id)
+
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, agency_name')
         .eq('id', user.id)
         .maybeSingle()
 
@@ -32,7 +34,8 @@ export function RecentActivities() {
           type,
           created_at,
           tenant_id,
-          property_id
+          property_id,
+          agency_id
         `)
 
       // If not admin, only show agency's contracts
@@ -48,6 +51,8 @@ export function RecentActivities() {
         console.error("Error fetching recent activities:", error)
         throw error
       }
+
+      console.log('Contracts before details:', contracts)
 
       // Fetch related tenant and property information
       const contractsWithDetails = await Promise.all(

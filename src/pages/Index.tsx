@@ -24,7 +24,7 @@ const Index = () => {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, agency_name')
         .eq('id', user.id)
         .maybeSingle()
       
@@ -33,7 +33,7 @@ const Index = () => {
       // Build base queries with agency_id filter for non-admin users
       let propertiesQuery = supabase.from("properties").select("*", { count: "exact", head: true })
       let tenantsQuery = supabase.from("tenants").select("*", { count: "exact", head: true })
-      let contractsQuery = supabase.from("contracts").select("montant, type, created_at")
+      let contractsQuery = supabase.from("contracts").select("montant, type, created_at, agency_id")
 
       // If not admin, filter by agency_id
       if (profile?.role !== 'admin') {
@@ -57,14 +57,15 @@ const Index = () => {
         contracts?.map(c => ({
           montant: c.montant,
           type: c.type,
-          date: new Date(c.created_at).toLocaleDateString()
+          date: new Date(c.created_at).toLocaleDateString(),
+          agency_id: c.agency_id
         }))
       )
 
       const totalRevenue = contracts?.reduce((sum, contract) => {
         if (contract.type === 'loyer') {
           const montant = contract.montant || 0
-          console.log(`Ajout du montant ${montant} au total`)
+          console.log(`Ajout du montant ${montant} au total pour l'agence ${contract.agency_id}`)
           return sum + montant
         }
         return sum
