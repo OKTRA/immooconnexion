@@ -6,10 +6,14 @@ import { ProfilesTable } from "./profile/ProfilesTable"
 import { ProfileSearch } from "./profile/ProfileSearch"
 import { AddProfileButton } from "./profile/AddProfileButton"
 import { useProfiles } from "./profile/useProfiles"
+import { Button } from "@/components/ui/button"
+import { Building2 } from "lucide-react"
+import { AddAgencyDialog } from "./profile/AddAgencyDialog"
 
 export function AdminProfiles() {
   const [searchTerm, setSearchTerm] = useState("")
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [showAddAgencyDialog, setShowAddAgencyDialog] = useState(false)
   const [newProfile, setNewProfile] = useState({
     email: "",
     first_name: "",
@@ -178,7 +182,16 @@ export function AdminProfiles() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <ProfileSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        <AddProfileButton onClick={() => setShowAddDialog(true)} />
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowAddAgencyDialog(true)}
+          >
+            <Building2 className="w-4 h-4 mr-2" />
+            Nouvelle agence
+          </Button>
+          <AddProfileButton onClick={() => setShowAddDialog(true)} />
+        </div>
       </div>
       
       <ProfilesTable 
@@ -193,6 +206,12 @@ export function AdminProfiles() {
         newProfile={newProfile}
         setNewProfile={setNewProfile}
         handleAddUser={handleAddUser}
+      />
+
+      <AddAgencyDialog 
+        showDialog={showAddAgencyDialog}
+        setShowDialog={setShowAddAgencyDialog}
+        onAgencyCreated={refetch}
       />
     </div>
   )
