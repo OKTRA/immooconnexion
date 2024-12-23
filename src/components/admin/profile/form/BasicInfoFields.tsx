@@ -15,6 +15,7 @@ export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsPr
           id="email"
           value={newProfile.email}
           onChange={(e) => setNewProfile({ ...newProfile, email: e.target.value })}
+          required
         />
       </div>
       <div>
@@ -23,6 +24,7 @@ export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsPr
           id="first_name"
           value={newProfile.first_name}
           onChange={(e) => setNewProfile({ ...newProfile, first_name: e.target.value })}
+          required
         />
       </div>
       <div>
@@ -31,6 +33,7 @@ export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsPr
           id="last_name"
           value={newProfile.last_name}
           onChange={(e) => setNewProfile({ ...newProfile, last_name: e.target.value })}
+          required
         />
       </div>
       <div>
@@ -46,9 +49,10 @@ export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsPr
         <Input
           id="password"
           type="password"
-          value={newProfile.password || ''}
+          value={newProfile.password}
           onChange={(e) => setNewProfile({ ...newProfile, password: e.target.value })}
-          placeholder="Laisser vide pour un mot de passe aléatoire"
+          required
+          placeholder="Entrez un mot de passe"
         />
       </div>
       <div className="md:col-span-2">

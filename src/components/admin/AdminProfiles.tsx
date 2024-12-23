@@ -8,7 +8,6 @@ import { UserPlus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { ProfileTableRow } from "./ProfileTableRow"
 import { AddProfileDialog } from "./profile/AddProfileDialog"
-import { createClient } from '@supabase/supabase-js'
 
 export function AdminProfiles() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -42,13 +41,20 @@ export function AdminProfiles() {
 
   const handleAddUser = async () => {
     try {
-      // Générer un mot de passe aléatoire si non fourni
-      const password = newProfile.password || Math.random().toString(36).slice(-8)
+      // Vérifier si le mot de passe est fourni
+      if (!newProfile.password) {
+        toast({
+          title: "Erreur",
+          description: "Le mot de passe est obligatoire",
+          variant: "destructive",
+        })
+        return
+      }
 
       // Créer l'utilisateur avec Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newProfile.email,
-        password: password,
+        password: newProfile.password,
       })
 
       if (authError) throw authError
@@ -66,7 +72,7 @@ export function AdminProfiles() {
           show_phone_on_site: newProfile.show_phone_on_site,
           list_properties_on_site: newProfile.list_properties_on_site,
           subscription_plan_id: newProfile.subscription_plan_id,
-          password_hash: password, // Stocker le mot de passe
+          password_hash: newProfile.password,
         })
         .eq("id", authData.user.id)
 
@@ -74,7 +80,7 @@ export function AdminProfiles() {
 
       toast({
         title: "Profil ajouté",
-        description: `Le nouveau profil a été ajouté avec succès. Mot de passe: ${password}`,
+        description: "Le nouveau profil a été ajouté avec succès.",
       })
       setShowAddDialog(false)
       setNewProfile({
