@@ -13,66 +13,48 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { toast } = useToast()
   
   useEffect(() => {
-    let mounted = true
-
-    const clearSession = async () => {
-      try {
-        await supabase.auth.signOut()
-        localStorage.clear() // Nettoie tout le localStorage
-        if (mounted) {
-          setIsAuthenticated(false)
-        }
-      } catch (error) {
-        console.error("Erreur lors du nettoyage de la session:", error)
-      }
-    }
-
     const checkAuth = async () => {
       try {
+        // Vérifier la session actuelle
         const { data: { session } } = await supabase.auth.getSession()
         
         if (!session) {
-          await clearSession()
+          setIsAuthenticated(false)
           return
         }
 
+        // Vérifier l'utilisateur
         const { data: { user } } = await supabase.auth.getUser()
         
         if (!user) {
-          await clearSession()
+          setIsAuthenticated(false)
           return
         }
 
-        if (mounted) {
-          setIsAuthenticated(true)
-        }
+        setIsAuthenticated(true)
       } catch (error) {
-        console.error("Erreur de vérification d'authentification:", error)
-        await clearSession()
+        console.error("Erreur d'authentification:", error)
+        setIsAuthenticated(false)
       }
     }
 
     // Vérification initiale
     checkAuth()
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // Écouter les changements d'état d'authentification
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
-        await clearSession()
+        setIsAuthenticated(false)
         return
       }
       
-      if (mounted) {
-        await checkAuth()
-      }
+      setIsAuthenticated(true)
     })
 
     return () => {
-      mounted = false
       subscription.unsubscribe()
     }
-  }, [toast])
+  }, [])
 
   if (isAuthenticated === null) {
     return (
