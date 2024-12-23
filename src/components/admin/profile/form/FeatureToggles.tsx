@@ -15,8 +15,11 @@ export function FeatureToggles({
   canListProperties 
 }: FeatureTogglesProps) {
   return (
-    <>
-      <div className="flex items-center space-x-2">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between space-x-4">
+        <Label htmlFor="show_phone" className={!canShowPhoneNumber ? "text-gray-400" : ""}>
+          Afficher le numéro sur le site {!canShowPhoneNumber && "(Nécessite un abonnement Professionnel ou Enterprise)"}
+        </Label>
         <Switch
           id="show_phone"
           checked={newProfile.show_phone_on_site}
@@ -25,11 +28,11 @@ export function FeatureToggles({
           }
           disabled={!canShowPhoneNumber}
         />
-        <Label htmlFor="show_phone" className={!canShowPhoneNumber ? "text-gray-400" : ""}>
-          Afficher le numéro sur le site {!canShowPhoneNumber && "(Nécessite un abonnement avec cette fonctionnalité)"}
-        </Label>
       </div>
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center justify-between space-x-4">
+        <Label htmlFor="list_properties" className={!canListProperties ? "text-gray-400" : ""}>
+          Lister les propriétés sur le site {!canListProperties && "(Nécessite un abonnement Professionnel ou Enterprise)"}
+        </Label>
         <Switch
           id="list_properties"
           checked={newProfile.list_properties_on_site}
@@ -38,10 +41,7 @@ export function FeatureToggles({
           }
           disabled={!canListProperties}
         />
-        <Label htmlFor="list_properties" className={!canListProperties ? "text-gray-400" : ""}>
-          Lister les propriétés sur le site {!canListProperties && "(Nécessite un abonnement Professionnel ou supérieur)"}
-        </Label>
       </div>
-    </>
+    </div>
   );
 }

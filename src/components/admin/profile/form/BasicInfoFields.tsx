@@ -8,7 +8,7 @@ interface BasicInfoFieldsProps {
 
 export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsProps) {
   return (
-    <>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <Label htmlFor="email">Email</Label>
         <Input
@@ -41,7 +41,7 @@ export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsPr
           onChange={(e) => setNewProfile({ ...newProfile, phone_number: e.target.value })}
         />
       </div>
-      <div>
+      <div className="md:col-span-2">
         <Label htmlFor="agency_name">Nom de l'agence</Label>
         <Input
           id="agency_name"
@@ -49,6 +49,6 @@ export function BasicInfoFields({ newProfile, setNewProfile }: BasicInfoFieldsPr
           onChange={(e) => setNewProfile({ ...newProfile, agency_name: e.target.value })}
         />
       </div>
-    </>
+    </div>
   );
 }

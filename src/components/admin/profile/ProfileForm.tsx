@@ -28,11 +28,11 @@ export function ProfileForm({ newProfile, setNewProfile }: ProfileFormProps) {
   });
 
   // Vérification si le plan permet d'afficher le numéro de téléphone
-  const canShowPhoneNumber = subscriptionPlan?.features?.includes("show_phone_on_site") || false;
+  const canShowPhoneNumber = subscriptionPlan?.name === "Professionnel" || subscriptionPlan?.name === "Enterprise";
   const canListProperties = subscriptionPlan?.name === "Professionnel" || subscriptionPlan?.name === "Enterprise";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full max-w-2xl mx-auto px-4 md:px-0">
       <BasicInfoFields newProfile={newProfile} setNewProfile={setNewProfile} />
       <RoleSelect 
         value={newProfile.role} 
