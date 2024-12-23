@@ -10,32 +10,48 @@ import { AdminSubscriptionPlans } from "@/components/admin/subscription/AdminSub
 import { Button } from "@/components/ui/button"
 import { LogOut } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useQuery } from "@tanstack/react-query"
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
 
-  useEffect(() => {
-    const checkSuperAdmin = async () => {
+  // Vérifier si l'utilisateur est un super admin
+  const { data: adminData, isLoading } = useQuery({
+    queryKey: ["admin-status"],
+    queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         navigate("/login")
-        return
+        return null
       }
 
-      const { data: adminData } = await supabase
+      const { data: adminData, error } = await supabase
         .from("administrators")
         .select("is_super_admin")
         .eq("id", user.id)
         .single()
 
-      if (!adminData?.is_super_admin) {
-        navigate("/")
+      if (error || !adminData?.is_super_admin) {
+        throw new Error("Accès non autorisé")
       }
-    }
 
-    checkSuperAdmin()
-  }, [navigate])
+      return adminData
+    },
+    retry: false,
+    onError: () => {
+      toast({
+        title: "Accès refusé",
+        description: "Vous n'avez pas les droits d'accès à cette page",
+        variant: "destructive",
+      })
+      navigate("/")
+    },
+  })
+
+  if (isLoading) {
+    return <div>Chargement...</div>
+  }
 
   const handleLogout = async () => {
     try {
