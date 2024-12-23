@@ -28,24 +28,40 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession()
+        // First clear any potentially invalid session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
-        if (error?.message.includes('User from sub claim in JWT does not exist')) {
+        if (sessionError || !session) {
           await supabase.auth.signOut()
           setIsAuthenticated(false)
-          toast({
-            title: "Session expirée",
-            description: "Veuillez vous reconnecter",
-            variant: "default"
-          })
+          if (sessionError?.message.includes('User from sub claim in JWT does not exist')) {
+            toast({
+              title: "Session expirée",
+              description: "Votre session n'est plus valide. Veuillez vous reconnecter.",
+              variant: "destructive"
+            })
+          }
           return
         }
         
-        setIsAuthenticated(!!session)
+        // Verify the user exists
+        const { error: userError } = await supabase.auth.getUser()
+        if (userError) {
+          await supabase.auth.signOut()
+          setIsAuthenticated(false)
+          toast({
+            title: "Erreur d'authentification",
+            description: "Une erreur est survenue. Veuillez vous reconnecter.",
+            variant: "destructive"
+          })
+          return
+        }
+
+        setIsAuthenticated(true)
       } catch (error) {
         console.error('Auth check error:', error)
-        setIsAuthenticated(false)
         await supabase.auth.signOut()
+        setIsAuthenticated(false)
       }
     }
 
@@ -60,15 +76,20 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       }
       
       try {
+        if (!session) {
+          setIsAuthenticated(false)
+          return
+        }
+
         const { error } = await supabase.auth.getUser()
         if (error) {
           throw error
         }
-        setIsAuthenticated(!!session)
+        setIsAuthenticated(true)
       } catch (error) {
         console.error('Auth state change error:', error)
-        setIsAuthenticated(false)
         await supabase.auth.signOut()
+        setIsAuthenticated(false)
       }
     })
 
