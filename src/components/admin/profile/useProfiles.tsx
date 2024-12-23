@@ -5,19 +5,21 @@ interface Agency {
   name: string
 }
 
-interface Profile {
+interface RawProfile {
   id: string
   first_name: string | null
   last_name: string | null
   email: string | null
   role: string | null
   phone_number: string | null
+  show_phone_on_site: boolean | null
+  list_properties_on_site: boolean | null
   created_at: string
   agency_id: string | null
   agency: Agency | null
 }
 
-interface TransformedProfile extends Profile {
+interface TransformedProfile extends RawProfile {
   agency_name: string
 }
 
@@ -27,53 +29,20 @@ export function useProfiles() {
     queryFn: async () => {
       console.log('Début de la récupération des profils...')
       
-      // Get current user's profile to check role and agency
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        console.error('Aucun utilisateur connecté')
-        throw new Error("Non authentifié")
-      }
-      console.log('User ID:', user.id)
-
-      // Check if user profile exists, if not create it
-      const { data: userProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('role, agency_id')
-        .eq('id', user.id)
-        .maybeSingle()
-
-      if (profileError) {
-        console.error('Erreur lors de la récupération du profil:', profileError)
-        // Create profile if it doesn't exist
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert([
-            { 
-              id: user.id,
-              email: user.email,
-              role: 'user'
-            }
-          ])
-        if (insertError) throw insertError
-        
-        // Retry fetching the profile
-        const { data: newProfile, error: newProfileError } = await supabase
-          .from('profiles')
-          .select('role, agency_id')
-          .eq('id', user.id)
-          .maybeSingle()
-          
-        if (newProfileError) throw newProfileError
-        if (!newProfile) throw new Error("Impossible de créer le profil")
-        
-        console.log('Nouveau profil créé:', newProfile)
-        return []
+      // Récupérer d'abord tous les profils pour debug
+      const { data: allProfiles, error: allProfilesError } = await supabase
+        .from("profiles")
+        .select("*")
+      
+      console.log('Tous les profils dans la base:', allProfiles)
+      
+      if (allProfilesError) {
+        console.error("Erreur lors de la récupération de tous les profils:", allProfilesError)
       }
 
-      console.log('Profil utilisateur:', userProfile)
-
-      // Build the query based on user role
-      let query = supabase
+      // Maintenant, récupérer les profils avec les informations d'agence
+      // En utilisant la relation profiles_agency_id_fkey
+      const { data, error } = await supabase
         .from("profiles")
         .select(`
           id,
@@ -82,34 +51,26 @@ export function useProfiles() {
           email,
           role,
           phone_number,
+          show_phone_on_site,
+          list_properties_on_site,
           created_at,
           agency_id,
-          agency:agencies!profiles_agency_id_fkey(name)
+          agency:agencies!profiles_agency_id_fkey (
+            name
+          )
         `)
         .order('created_at', { ascending: false })
 
-      // If not admin, only show agency's profiles
-      if (userProfile?.role !== 'admin') {
-        if (userProfile?.agency_id) {
-          query = query.eq('agency_id', userProfile.agency_id)
-          console.log('Filtrage par agency_id:', userProfile.agency_id)
-        } else {
-          console.log('Filtrage pour les profils sans agence')
-          return []
-        }
-      }
-
-      const { data, error } = await query
-
       if (error) {
         console.error('Erreur lors de la récupération des profils:', error)
+        console.error('Détails de l\'erreur:', error.message, error.details, error.hint)
         throw error
       }
 
       console.log('Données brutes récupérées:', data)
 
-      // Transform data to include agency name directly
-      const transformedData = (data || []).map(profile => ({
+      // Transformer les données pour inclure le nom de l'agence
+      const transformedData = data?.map(profile => ({
         ...profile,
         agency_name: profile.agency?.name || '-'
       })) as TransformedProfile[]
@@ -117,9 +78,5 @@ export function useProfiles() {
       console.log('Profils transformés:', transformedData)
       return transformedData
     },
-    retry: 1,
-    meta: {
-      errorMessage: "Impossible de charger les profils. Veuillez réessayer."
-    }
   })
 }

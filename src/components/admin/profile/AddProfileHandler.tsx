@@ -14,58 +14,74 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
     first_name: "",
     last_name: "",
     phone_number: "",
+    password: "",
     agency_id: agencyId || "",
   })
   const { toast } = useToast()
 
   const handleAddUser = async () => {
     try {
-      // Vérifier si le profil existe déjà
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', newProfile.email)
-        .maybeSingle()
-
-      if (existingProfile) {
+      if (!newProfile.password) {
         toast({
           title: "Erreur",
-          description: "Un profil avec cet email existe déjà",
+          description: "Le mot de passe est obligatoire",
           variant: "destructive",
         })
         return
       }
 
-      // Créer le nouvel utilisateur dans auth.users
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: newProfile.email,
-        password: 'tempPassword123!',
-        options: {
-          data: {
-            first_name: newProfile.first_name,
-            last_name: newProfile.last_name,
-          }
-        }
-      })
-
-      if (authError) throw authError
-
-      if (authData.user) {
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({
-            phone_number: newProfile.phone_number,
-            agency_id: newProfile.agency_id,
-            role: 'user'
-          })
-          .eq('id', authData.user.id)
-
-        if (updateError) throw updateError
+      if (newProfile.password.length < 6) {
+        toast({
+          title: "Erreur",
+          description: "Le mot de passe doit contenir au moins 6 caractères",
+          variant: "destructive",
+        })
+        return
       }
 
+      // First check if user exists
+      const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', newProfile.email)
+        .maybeSingle()
+
+      let userId
+
+      if (existingUser) {
+        userId = existingUser.id
+      } else {
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: newProfile.email,
+          password: newProfile.password,
+        })
+
+        if (authError) throw authError
+        if (!authData.user) throw new Error("Aucun utilisateur créé")
+        
+        userId = authData.user.id
+      }
+
+      // Update or create the profile
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert({
+          id: userId,
+          first_name: newProfile.first_name,
+          last_name: newProfile.last_name,
+          phone_number: newProfile.phone_number,
+          email: newProfile.email,
+          agency_id: newProfile.agency_id || agencyId,
+          role: 'user'
+        })
+
+      if (profileError) throw profileError
+
       toast({
-        title: "Profil ajouté",
-        description: "Le nouveau profil a été ajouté avec succès",
+        title: existingUser ? "Profil mis à jour" : "Profil ajouté",
+        description: existingUser 
+          ? "Le profil a été mis à jour avec succès."
+          : "Le nouveau profil a été ajouté avec succès.",
       })
       
       onClose()
@@ -74,11 +90,11 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         first_name: "",
         last_name: "",
         phone_number: "",
+        password: "",
         agency_id: agencyId || "",
       })
       onSuccess()
     } catch (error: any) {
-      console.error('Erreur lors de la création:', error)
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue lors de l'ajout du profil",

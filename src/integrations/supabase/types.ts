@@ -255,7 +255,7 @@ export type Database = {
       }
       properties: {
         Row: {
-          agency_id: string
+          agency_id: string | null
           bien: string
           caution: number | null
           chambres: number | null
@@ -272,7 +272,7 @@ export type Database = {
           ville: string | null
         }
         Insert: {
-          agency_id: string
+          agency_id?: string | null
           bien: string
           caution?: number | null
           chambres?: number | null
@@ -289,7 +289,7 @@ export type Database = {
           ville?: string | null
         }
         Update: {
-          agency_id?: string
+          agency_id?: string | null
           bien?: string
           caution?: number | null
           chambres?: number | null

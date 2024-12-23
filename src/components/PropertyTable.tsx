@@ -57,7 +57,6 @@ export function PropertyTable() {
       }
       console.log("User ID:", user.id)
 
-      // Récupérer le profil de l'utilisateur pour obtenir son rôle et agency_id
       const { data: profile } = await supabase
         .from('profiles')
         .select('role, agency_id')
@@ -70,12 +69,12 @@ export function PropertyTable() {
         .from('properties')
         .select('*')
 
-      // Si l'utilisateur n'est pas admin, filtrer par agency_id
+      // Si l'utilisateur n'est pas admin, on filtre par agency_id
       if (profile?.role !== 'admin') {
         if (profile?.agency_id) {
           query = query.eq('agency_id', profile.agency_id)
         } else {
-          console.log("Utilisateur sans agency_id, retourne un tableau vide")
+          // If user has no agency_id, return empty array instead of querying with null
           return []
         }
       }

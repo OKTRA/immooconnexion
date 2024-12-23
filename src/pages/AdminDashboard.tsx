@@ -9,105 +9,58 @@ import { AdminAgencies } from "@/components/admin/AdminAgencies"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useNavigate } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
-import { Button } from "@/components/ui/button"
-import { LogOut, Loader2 } from "lucide-react"
-import { useState, useEffect } from "react"
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
-  const [adminDetails, setAdminDetails] = useState<any>(null)
 
-  // Vérifier la session au chargement
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-      
-      if (sessionError || !session) {
-        console.error("Session error:", sessionError)
-        navigate("/login")
-        return
-      }
-    }
-
-    checkSession()
-
-    // Écouter les changements de session
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || !session) {
-        navigate("/login")
-      }
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [navigate])
-
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut()
-      navigate("/login")
-      toast({
-        title: "Déconnexion réussie",
-        description: "Vous avez été déconnecté avec succès",
-      })
-    } catch (error) {
-      console.error("Error during logout:", error)
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la déconnexion",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const { data: adminData, isLoading, error } = useQuery({
+  const { data: adminData, isLoading } = useQuery({
     queryKey: ["admin-status"],
     queryFn: async () => {
-      console.log("Début de la vérification du statut admin")
-      
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
-        console.error("Aucun utilisateur connecté")
         throw new Error("Non authentifié")
       }
 
-      console.log("ID utilisateur:", user.id)
-      console.log("Email utilisateur:", user.email)
-
-      // Vérification dans la table administrators
+      // Vérifier d'abord si l'utilisateur est un super admin
       const { data: adminData, error: adminError } = await supabase
         .from("administrators")
-        .select("*")
+        .select("is_super_admin")
         .eq("id", user.id)
         .maybeSingle()
 
-      console.log("Données admin récupérées:", adminData)
-      console.log("Erreur admin:", adminError)
-
       if (adminError) {
-        console.error("Erreur lors de la récupération du statut admin:", adminError)
+        console.error("Error fetching admin status:", adminError)
         throw adminError
       }
 
-      // Vérification explicite du statut de super admin
+      // Si l'utilisateur n'est pas un super admin, vérifier s'il a un profil admin
       if (!adminData?.is_super_admin) {
-        console.warn("L'utilisateur n'est pas un super admin")
-        throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent se connecter ici.")
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle()
+
+        if (profileError) {
+          console.error("Error fetching profile:", profileError)
+          throw profileError
+        }
+
+        if (!profile || profile.role !== 'admin') {
+          throw new Error("Accès non autorisé")
+        }
       }
 
-      setAdminDetails(adminData)
       return adminData
     },
     retry: false,
     meta: {
-      errorHandler: (error: any) => {
-        console.error("Erreur de gestion de l'accès:", error)
+      errorHandler: () => {
         toast({
           title: "Erreur d'accès",
-          description: error.message || "Vous n'avez pas les droits nécessaires pour accéder à cette page.",
+          description: "Vous n'avez pas les droits nécessaires pour accéder à cette page.",
           variant: "destructive"
         })
         navigate("/")
@@ -116,22 +69,12 @@ const AdminDashboard = () => {
   })
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
+    return <div>Chargement...</div>
   }
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Tableau de bord administrateur</h1>
-        <Button variant="outline" onClick={handleLogout}>
-          <LogOut className="h-4 w-4 mr-2" />
-          Déconnexion
-        </Button>
-      </div>
+      <h1 className="text-3xl font-bold mb-8">Tableau de bord administrateur</h1>
 
       <AdminStats />
 

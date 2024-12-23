@@ -1,13 +1,16 @@
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { AgencyUserTable } from "./users/AgencyUserTable"
-import { EditUserDialog } from "./users/EditUserDialog"
-import { useAgencyUsers } from "./users/useAgencyUsers"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { useState } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { ProfileForm } from "../profile/ProfileForm"
+import { AgencyUserActions } from "./AgencyUserActions"
+import { Plus } from "lucide-react"
 import { AddProfileDialog } from "../profile/AddProfileDialog"
 import { useAddProfileHandler } from "../profile/AddProfileHandler"
+import { useToast } from "@/hooks/use-toast"
 
 interface AgencyUsersProps {
   agencyId: string
@@ -20,7 +23,51 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const { toast } = useToast()
 
-  const { data: users = [], refetch, isLoading, error } = useAgencyUsers(agencyId)
+  const { data: users = [], refetch, isLoading, error } = useQuery({
+    queryKey: ["agency-users", agencyId],
+    queryFn: async () => {
+      console.log("Fetching users for agency:", agencyId)
+      
+      // Vérifions d'abord tous les profils pour debug
+      const { data: allProfiles, error: allProfilesError } = await supabase
+        .from("profiles")
+        .select("*")
+      
+      console.log("All profiles in database:", allProfiles)
+      
+      if (allProfilesError) {
+        console.error("Error fetching all profiles:", allProfilesError)
+      }
+
+      // Maintenant, récupérons les profils pour cette agence
+      const { data, error } = await supabase
+        .from("profiles")
+        .select(`
+          id,
+          first_name,
+          last_name,
+          email,
+          role,
+          agency_id
+        `)
+        .eq("agency_id", agencyId)
+        .order('created_at', { ascending: false })
+      
+      if (error) {
+        console.error("Error fetching users:", error)
+        console.error("Error details:", error.message, error.details, error.hint)
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les utilisateurs",
+          variant: "destructive",
+        })
+        throw error
+      }
+
+      console.log("Fetched users for agency:", data)
+      return data || []
+    },
+  })
 
   const { newProfile, setNewProfile, handleAddUser } = useAddProfileHandler({
     onSuccess: () => {
@@ -42,6 +89,7 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
 
   const handleSaveEdit = async (editedUser: any) => {
     try {
+      console.log("Saving edited user:", editedUser)
       const { error } = await supabase
         .from("profiles")
         .update(editedUser)
@@ -56,6 +104,7 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
       refetch()
       setShowEditDialog(false)
     } catch (error: any) {
+      console.error("Error updating user:", error)
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue lors de la mise à jour",
@@ -81,19 +130,62 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
         </Button>
       </div>
 
-      <AgencyUserTable 
-        users={users}
-        onEdit={handleEdit}
-        refetch={refetch}
-      />
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Prénom</TableHead>
+              <TableHead>Nom</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Rôle</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell>{user.first_name || "-"}</TableCell>
+                <TableCell>{user.last_name || "-"}</TableCell>
+                <TableCell>{user.email || "-"}</TableCell>
+                <TableCell>
+                  <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                    {user.role || "user"}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <AgencyUserActions
+                    userId={user.id}
+                    onEdit={() => handleEdit(user)}
+                    refetch={refetch}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+            {users.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-4">
+                  Aucun utilisateur trouvé pour cette agence
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
-      <EditUserDialog
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-        selectedUser={selectedUser}
-        onSave={handleSaveEdit}
-        agencyId={agencyId}
-      />
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier l'utilisateur</DialogTitle>
+          </DialogHeader>
+          {selectedUser && (
+            <ProfileForm
+              newProfile={selectedUser}
+              setNewProfile={handleSaveEdit}
+              selectedAgencyId={agencyId}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       <AddProfileDialog
         open={showAddDialog}
