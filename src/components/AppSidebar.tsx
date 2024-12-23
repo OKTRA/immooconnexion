@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { getSupabaseSessionKey } from "@/utils/sessionUtils"
 import {
   BarChart3,
   Building2,
@@ -30,11 +31,9 @@ export function SidebarContent() {
 
   const handleLogout = async () => {
     try {
-      // First clear the session from localStorage
-      const storageKey = `sb-${supabase.getClientConfig().supabaseUrl?.split('//')[1]}-auth-token`
+      const storageKey = getSupabaseSessionKey()
       localStorage.removeItem(storageKey)
       
-      // Then attempt to sign out from Supabase
       await supabase.auth.signOut()
       
       navigate("/login")
@@ -44,8 +43,7 @@ export function SidebarContent() {
       })
     } catch (error: any) {
       console.error('Logout error:', error)
-      // Even if the signOut fails, we still want to clear local session and redirect
-      const storageKey = `sb-${supabase.getClientConfig().supabaseUrl?.split('//')[1]}-auth-token`
+      const storageKey = getSupabaseSessionKey()
       localStorage.removeItem(storageKey)
       navigate("/login")
       toast({

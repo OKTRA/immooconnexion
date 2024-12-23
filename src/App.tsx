@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { getSupabaseSessionKey } from "@/utils/sessionUtils"
 import Index from "./pages/Index"
 import Login from "./pages/Login"
 import PublicProperties from "./pages/PublicProperties"
@@ -28,9 +29,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // First clear any potentially invalid session from localStorage
-        const storageKey = `sb-${supabase.getClientConfig().supabaseUrl?.split('//')[1]}-auth-token`
+        const storageKey = getSupabaseSessionKey()
         const currentSession = localStorage.getItem(storageKey)
+        
         if (currentSession) {
           const session = JSON.parse(currentSession)
           if (!session?.access_token) {
@@ -58,7 +59,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         setIsAuthenticated(true)
       } catch (error) {
         console.error('Auth check error:', error)
-        const storageKey = `sb-${supabase.getClientConfig().supabaseUrl?.split('//')[1]}-auth-token`
+        const storageKey = getSupabaseSessionKey()
         localStorage.removeItem(storageKey)
         setIsAuthenticated(false)
       }
@@ -69,7 +70,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const storageKey = `sb-${supabase.getClientConfig().supabaseUrl?.split('//')[1]}-auth-token`
+      const storageKey = getSupabaseSessionKey()
       
       if (event === 'SIGNED_OUT') {
         localStorage.removeItem(storageKey)
