@@ -1,12 +1,11 @@
-import { useQuery } from "@tanstack/react-query"
-import { Input } from "@/components/ui/input"
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { UserPlus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
 import { AddProfileDialog } from "./profile/AddProfileDialog"
 import { ProfilesTable } from "./profile/ProfilesTable"
-import { supabase } from "@/integrations/supabase/client"
+import { ProfileSearch } from "./profile/ProfileSearch"
+import { AddProfileButton } from "./profile/AddProfileButton"
+import { useProfiles } from "./profile/useProfiles"
 
 export function AdminProfiles() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -24,34 +23,7 @@ export function AdminProfiles() {
     password: "",
   })
   const { toast } = useToast()
-  
-  const { data: profiles = [], refetch } = useQuery({
-    queryKey: ["admin-profiles"],
-    queryFn: async () => {
-      console.log('Fetching profiles...')
-      
-      const { data, error } = await supabase
-        .from("profiles")
-        .select(`
-          *,
-          agency:agencies(
-            name,
-            address,
-            phone,
-            email
-          )
-        `)
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        console.error('Error fetching profiles:', error)
-        throw error
-      }
-
-      console.log('Fetched profiles:', data)
-      return data
-    },
-  })
+  const { data: profiles = [], refetch } = useProfiles()
 
   const handleEditProfile = async (editedProfile: any) => {
     try {
@@ -205,16 +177,8 @@ export function AdminProfiles() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <Input
-          placeholder="Rechercher par nom, prénom, email..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
-        <Button onClick={() => setShowAddDialog(true)}>
-          <UserPlus className="mr-2" />
-          Ajouter un profil
-        </Button>
+        <ProfileSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        <AddProfileButton onClick={() => setShowAddDialog(true)} />
       </div>
       
       <ProfilesTable 
