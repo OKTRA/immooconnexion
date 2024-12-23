@@ -1,4 +1,4 @@
-import { Table, TableBody, TableHead, TableHeader } from "@/components/ui/table"
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ProfileTableRow } from "../ProfileTableRow"
 
 interface ProfilesTableProps {
@@ -12,15 +12,17 @@ export function ProfilesTable({ profiles, onEdit, refetch }: ProfilesTableProps)
     <div className="rounded-md border">
       <Table>
         <TableHeader>
-          <TableHead>ID</TableHead>
-          <TableHead>Prénom</TableHead>
-          <TableHead>Nom</TableHead>
-          <TableHead>Email</TableHead>
-          <TableHead>Téléphone</TableHead>
-          <TableHead>Agence</TableHead>
-          <TableHead>Rôle</TableHead>
-          <TableHead>Date de création</TableHead>
-          <TableHead>Actions</TableHead>
+          <TableRow>
+            <TableHead>ID</TableHead>
+            <TableHead>Prénom</TableHead>
+            <TableHead>Nom</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Téléphone</TableHead>
+            <TableHead>Agence</TableHead>
+            <TableHead>Rôle</TableHead>
+            <TableHead>Date de création</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
         </TableHeader>
         <TableBody>
           {profiles.map((profile) => (

@@ -28,6 +28,8 @@ export function AdminProfiles() {
   const { data: profiles = [], refetch } = useQuery({
     queryKey: ["admin-profiles"],
     queryFn: async () => {
+      console.log('Fetching profiles...')
+      
       const { data, error } = await supabase
         .from("profiles")
         .select(`
@@ -39,9 +41,14 @@ export function AdminProfiles() {
             email
           )
         `)
-        .order("created_at", { ascending: false })
+        .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error('Error fetching profiles:', error)
+        throw error
+      }
+
+      console.log('Fetched profiles:', data)
       return data
     },
   })
