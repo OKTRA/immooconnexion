@@ -2,6 +2,8 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
 interface ProfileFormProps {
   newProfile: any;
@@ -9,6 +11,26 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ newProfile, setNewProfile }: ProfileFormProps) {
+  // Fetch subscription plans to check features
+  const { data: subscriptionPlan } = useQuery({
+    queryKey: ["subscription-plan", newProfile.subscription_plan_id],
+    queryFn: async () => {
+      if (!newProfile.subscription_plan_id) return null;
+      const { data, error } = await supabase
+        .from("subscription_plans")
+        .select("*")
+        .eq("id", newProfile.subscription_plan_id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!newProfile.subscription_plan_id,
+  });
+
+  // Check if the current plan allows showing phone number
+  const canShowPhoneNumber = subscriptionPlan?.features?.includes("show_phone_on_site");
+
   return (
     <div className="space-y-4">
       <div>
@@ -73,8 +95,11 @@ export function ProfileForm({ newProfile, setNewProfile }: ProfileFormProps) {
           onCheckedChange={(checked) => 
             setNewProfile({ ...newProfile, show_phone_on_site: checked })
           }
+          disabled={!canShowPhoneNumber}
         />
-        <Label htmlFor="show_phone">Afficher le numéro sur le site</Label>
+        <Label htmlFor="show_phone" className={!canShowPhoneNumber ? "text-gray-400" : ""}>
+          Afficher le numéro sur le site {!canShowPhoneNumber && "(Nécessite un abonnement supérieur)"}
+        </Label>
       </div>
       <div className="flex items-center space-x-2">
         <Switch

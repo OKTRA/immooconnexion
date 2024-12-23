@@ -21,6 +21,7 @@ export function AdminProfiles() {
     phone_number: "",
     show_phone_on_site: false,
     list_properties_on_site: false,
+    subscription_plan_id: null,
     password: "changeme123",
   })
   const { toast } = useToast()
@@ -59,6 +60,7 @@ export function AdminProfiles() {
           phone_number: newProfile.phone_number,
           show_phone_on_site: newProfile.show_phone_on_site,
           list_properties_on_site: newProfile.list_properties_on_site,
+          subscription_plan_id: newProfile.subscription_plan_id,
         })
         .eq("id", authData.user.id)
 
@@ -78,6 +80,7 @@ export function AdminProfiles() {
         phone_number: "",
         show_phone_on_site: false,
         list_properties_on_site: false,
+        subscription_plan_id: null,
         password: "changeme123",
       })
       refetch()
