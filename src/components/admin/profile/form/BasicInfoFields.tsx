@@ -1,7 +1,5 @@
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { AgencySelect } from "./AgencySelect"
-import { AgencyLogoUpload } from "./AgencyLogoUpload"
 
 interface Profile {
   email?: string;
@@ -9,7 +7,6 @@ interface Profile {
   last_name?: string;
   phone_number?: string;
   password?: string;
-  agency_id?: string;
 }
 
 interface BasicInfoFieldsProps {
@@ -72,13 +69,6 @@ export function BasicInfoFields({ newProfile = {}, setNewProfile }: BasicInfoFie
           placeholder="Entrez un mot de passe"
         />
       </div>
-      
-      <AgencySelect 
-        value={newProfile?.agency_id || ''} 
-        onChange={(value) => handleChange('agency_id', value)}
-      />
-      
-      <AgencyLogoUpload agencyId={newProfile?.agency_id} />
     </div>
   )
 }
