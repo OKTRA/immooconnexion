@@ -10,6 +10,8 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { TenantTableRow } from "./tenants/TenantTableRow"
 import { Loader2 } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 interface TenantDisplay {
   id: string
@@ -24,10 +26,39 @@ interface TenantDisplay {
 
 export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => void }) {
   const { toast } = useToast()
+  const navigate = useNavigate()
+  const [session, setSession] = useState(null)
+
+  // Check authentication status
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate('/login')
+        return
+      }
+      setSession(session)
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        navigate('/login')
+        return
+      }
+      setSession(session)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [navigate])
 
   const { data: tenants = [], isLoading, error } = useQuery({
     queryKey: ['tenants'],
     queryFn: async () => {
+      if (!session) {
+        throw new Error("Non authentifié")
+      }
+      
       console.log('Début de la requête des locataires...')
       
       const { data: { user } } = await supabase.auth.getUser()
@@ -94,6 +125,7 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
         user_id: tenant.user_id,
       }))
     },
+    enabled: !!session,
     meta: {
       onError: (error: any) => {
         console.error('Erreur de requête:', error)
@@ -105,6 +137,14 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
       }
     }
   })
+
+  if (!session) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (
