@@ -19,24 +19,28 @@ export function AdminLoginForm() {
     setIsLoading(true)
 
     try {
-      const { data: { user }, error } = await supabase.auth.signInWithPassword({
+      // Tentative de connexion
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) throw error
+      if (signInError) throw signInError
 
-      // Vérifier si l'utilisateur est un administrateur
+      // Vérifier si l'utilisateur est un super admin
       const { data: adminData, error: adminError } = await supabase
-        .from('local_admins')
-        .select('role')
+        .from('administrators')
+        .select('is_super_admin')
         .eq('id', user?.id)
         .maybeSingle()
 
-      if (adminError) throw adminError
+      if (adminError) {
+        console.error("Erreur lors de la vérification du statut admin:", adminError)
+        throw new Error("Erreur lors de la vérification des droits d'accès")
+      }
 
-      if (!adminData || adminData.role !== 'admin') {
-        throw new Error("Accès non autorisé. Seuls les administrateurs peuvent se connecter ici.")
+      if (!adminData?.is_super_admin) {
+        throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent se connecter ici.")
       }
 
       toast({
@@ -46,12 +50,12 @@ export function AdminLoginForm() {
 
       navigate("/admin")
     } catch (error: any) {
+      console.error("Login error:", error)
       toast({
         title: "Erreur de connexion",
-        description: error.message,
+        description: error.message || "Une erreur est survenue lors de la connexion",
         variant: "destructive",
       })
-      console.error("Login error:", error)
     } finally {
       setIsLoading(false)
     }
@@ -83,7 +87,7 @@ export function AdminLoginForm() {
         />
       </div>
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Connexion..." : "Se connecter en tant qu'administrateur"}
+        {isLoading ? "Connexion..." : "Se connecter en tant que Super Admin"}
       </Button>
     </form>
   )
