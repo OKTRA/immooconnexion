@@ -37,9 +37,10 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
 
       console.log('User ID:', user.id)
 
+      // Récupérer d'abord le profil de l'utilisateur pour vérifier son rôle
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('role')
+        .select('*')
         .eq('id', user.id)
         .maybeSingle()
       
