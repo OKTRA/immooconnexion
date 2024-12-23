@@ -67,8 +67,8 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
 
       // Si l'utilisateur n'est pas admin, filtrer par son ID comme agency_id
       if (profileData?.role !== 'admin') {
-        query = query.eq('agency_id', profileData.id)
-        console.log('Filtrage par agency_id (profile id):', profileData.id)
+        query = query.eq('agency_id', user.id)
+        console.log('Filtrage par agency_id (user id):', user.id)
       }
       
       const { data: tenantsData, error: tenantsError } = await query
