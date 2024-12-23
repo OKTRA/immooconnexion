@@ -27,6 +27,19 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
     queryKey: ["agency-users", agencyId],
     queryFn: async () => {
       console.log("Fetching users for agency:", agencyId)
+      
+      // Vérifions d'abord tous les profils pour debug
+      const { data: allProfiles, error: allProfilesError } = await supabase
+        .from("profiles")
+        .select("*")
+      
+      console.log("All profiles in database:", allProfiles)
+      
+      if (allProfilesError) {
+        console.error("Error fetching all profiles:", allProfilesError)
+      }
+
+      // Maintenant, récupérons les profils pour cette agence
       const { data, error } = await supabase
         .from("profiles")
         .select(`
@@ -42,6 +55,7 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
       
       if (error) {
         console.error("Error fetching users:", error)
+        console.error("Error details:", error.message, error.details, error.hint)
         toast({
           title: "Erreur",
           description: "Impossible de charger les utilisateurs",
@@ -50,7 +64,7 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
         throw error
       }
 
-      console.log("Fetched users:", data)
+      console.log("Fetched users for agency:", data)
       return data || []
     },
   })
@@ -75,6 +89,7 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
 
   const handleSaveEdit = async (editedUser: any) => {
     try {
+      console.log("Saving edited user:", editedUser)
       const { error } = await supabase
         .from("profiles")
         .update(editedUser)
