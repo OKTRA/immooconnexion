@@ -10,9 +10,29 @@ export function RecentActivities() {
     queryKey: ["recent-activities"],
     queryFn: async () => {
       console.log("Fetching recent activities...")
-      const { data, error } = await supabase
+      
+      // First get the current user's profile to check role
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      // Build the base query
+      let query = supabase
         .from("payment_history_with_tenant")
         .select("*")
+
+      // If not admin, only show agency's payments
+      if (profile?.role !== 'admin') {
+        // Filter by contracts where the property belongs to this agency
+        query = query.eq('agency_id', user.id)
+      }
+
+      const { data, error } = await query
         .order("created_at", { ascending: false })
         .limit(5)
 
