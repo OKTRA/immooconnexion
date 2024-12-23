@@ -26,12 +26,7 @@ export function AdminProperties() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select(`
-          *,
-          agency:agencies(
-            name
-          )
-        `)
+        .select('*')
         .eq("id", user.id)
         .maybeSingle()
 
@@ -42,9 +37,8 @@ export function AdminProperties() {
           *,
           agency:profiles(
             id,
-            agency:agencies(
-              name
-            )
+            first_name,
+            last_name
           )
         `)
         .order("created_at", { ascending: false })
@@ -58,7 +52,9 @@ export function AdminProperties() {
       
       return data.map(property => ({
         ...property,
-        agency_name: property.agency?.agency?.name || 'N/A'
+        agency_name: property.agency ? 
+          `${property.agency.first_name || ''} ${property.agency.last_name || ''}`.trim() || 'N/A' 
+          : 'N/A'
       }))
     },
   })

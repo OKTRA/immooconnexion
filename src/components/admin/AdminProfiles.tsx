@@ -30,25 +30,19 @@ export function AdminProfiles() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select(`
-          *,
-          agency:agencies(
-            name
-          )
-        `)
+        .select('*')
         .order("created_at", { ascending: false })
 
       if (error) throw error
       return data.map((profile) => ({
         ...profile,
-        agency_name: profile.agency?.name || 'N/A'
+        agency_name: 'N/A' // Since we can't join with agencies directly
       }))
     },
   })
 
   const handleAddUser = async () => {
     try {
-      // Vérifier si le mot de passe est fourni et valide
       if (!newProfile.password) {
         toast({
           title: "Erreur",
@@ -58,7 +52,6 @@ export function AdminProfiles() {
         return
       }
 
-      // Vérifier la longueur minimale du mot de passe
       if (newProfile.password.length < 6) {
         toast({
           title: "Erreur",
@@ -80,7 +73,7 @@ export function AdminProfiles() {
       // Mettre à jour le profil avec les informations supplémentaires
       const { error: profileError } = await supabase
         .from("profiles")
-        .insert({
+        .update({
           first_name: newProfile.first_name,
           last_name: newProfile.last_name,
           role: newProfile.role,
@@ -160,15 +153,14 @@ export function AdminProfiles() {
     (profile) =>
       profile.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       profile.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      profile.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      profile.agency_name?.toLowerCase().includes(searchTerm.toLowerCase())
+      profile.email?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <Input
-          placeholder="Rechercher par nom, prénom, email ou agence..."
+          placeholder="Rechercher par nom, prénom, email..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
