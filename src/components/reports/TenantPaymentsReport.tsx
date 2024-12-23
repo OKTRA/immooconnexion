@@ -13,10 +13,28 @@ export function TenantPaymentsReport() {
     queryKey: ['tenant-payments'],
     queryFn: async () => {
       console.log('Fetching tenant payments')
-      const { data, error } = await supabase
+      
+      // Get current user's profile to check role
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      let query = supabase
         .from('payment_history_with_tenant')
         .select('*')
         .order('created_at', { ascending: false })
+
+      // If not admin, only show agency's payments
+      if (profile?.role !== 'admin') {
+        query = query.eq('agency_id', user.id)
+      }
+
+      const { data, error } = await query
 
       if (error) {
         console.error('Error fetching payments:', error)
@@ -31,10 +49,26 @@ export function TenantPaymentsReport() {
   const { data: tenants = [] } = useQuery({
     queryKey: ['tenants'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Get current user's profile
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      let query = supabase
         .from('tenants')
         .select('id, nom, prenom')
 
+      // If not admin, only show agency's tenants
+      if (profile?.role !== 'admin') {
+        query = query.eq('agency_id', user.id)
+      }
+
+      const { data, error } = await query
       if (error) throw error
       return data || []
     }

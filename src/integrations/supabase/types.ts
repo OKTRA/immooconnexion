@@ -403,6 +403,7 @@ export type Database = {
     Views: {
       payment_history_with_tenant: {
         Row: {
+          agency_id: string | null
           created_at: string | null
           end_date: string | null
           id: string | null
@@ -418,6 +419,13 @@ export type Database = {
           updated_at: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "contracts_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "contracts_property_id_fkey"
             columns: ["property_id"]
