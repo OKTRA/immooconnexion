@@ -37,10 +37,20 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
   const { data: properties } = useQuery({
     queryKey: ['properties'],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifié");
+
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
       const { data, error } = await supabase
         .from('properties')
         .select('*')
-        .eq('statut', 'disponible');
+        .eq('statut', 'disponible')
+        .eq(userProfile?.role === 'admin' ? 'id' : 'agency_id', userProfile?.role === 'admin' ? 'id' : user.id);
       
       if (error) throw error;
       return data;
