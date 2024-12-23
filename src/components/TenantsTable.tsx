@@ -29,7 +29,6 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
     queryFn: async () => {
       console.log('Début de la requête des locataires...')
       
-      // Get current user's profile
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         console.error('Utilisateur non authentifié')
@@ -52,7 +51,7 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
       console.log('Profil utilisateur:', profileData)
 
       // Build the query based on user role
-      const { data: tenantsData, error: tenantsError } = await supabase
+      let query = supabase
         .from('tenants')
         .select(`
           id,
@@ -61,8 +60,16 @@ export function TenantsTable({ onEdit }: { onEdit: (tenant: TenantDisplay) => vo
           birth_date,
           phone_number,
           photo_id_url,
-          agency_fees
+          agency_fees,
+          agency_id
         `)
+
+      // If not admin, filter by both agency_id and user_id
+      if (profileData?.role !== 'admin') {
+        query = query.or(`agency_id.eq.${user.id},id.eq.${user.id}`)
+      }
+      
+      const { data: tenantsData, error: tenantsError } = await query
         .order('created_at', { ascending: false })
       
       if (tenantsError) {
