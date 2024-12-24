@@ -9,11 +9,35 @@ import { AdminAgencies } from "@/components/admin/AdminAgencies"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useNavigate } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2 } from "lucide-react"
+import { Loader2, LogOut } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { getSupabaseSessionKey } from "@/utils/sessionUtils"
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
+
+  const handleLogout = async () => {
+    const storageKey = getSupabaseSessionKey()
+    
+    try {
+      await supabase.auth.signOut()
+      localStorage.removeItem(storageKey)
+      navigate("/login")
+      toast({
+        title: "Déconnexion réussie",
+        description: "Vous avez été déconnecté avec succès",
+      })
+    } catch (error) {
+      console.error('Logout error:', error)
+      localStorage.removeItem(storageKey)
+      navigate("/login")
+      toast({
+        title: "Déconnexion",
+        description: "Vous avez été déconnecté",
+      })
+    }
+  }
 
   const { data: adminData, isLoading } = useQuery({
     queryKey: ["admin-status"],
@@ -100,7 +124,17 @@ const AdminDashboard = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Tableau de bord administrateur</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Tableau de bord administrateur</h1>
+        <Button 
+          variant="ghost" 
+          className="text-red-500 hover:text-red-600 hover:bg-red-100"
+          onClick={handleLogout}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Déconnexion
+        </Button>
+      </div>
 
       <AdminStats />
 
