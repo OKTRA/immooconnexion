@@ -122,19 +122,15 @@ const AppRoutes = () => {
   )
 }
 
-function TooltipProviderWrapper({ children }: { children: React.ReactNode }) {
-  return <TooltipProvider>{children}</TooltipProvider>
-}
-
 const App = () => {
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <TooltipProviderWrapper>
+        <TooltipProvider>
           <Toaster />
           <Sonner />
           <AppRoutes />
-        </TooltipProviderWrapper>
+        </TooltipProvider>
       </QueryClientProvider>
     </BrowserRouter>
   )
