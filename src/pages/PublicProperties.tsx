@@ -3,26 +3,16 @@ import { supabase } from "@/integrations/supabase/client"
 import { PropertiesGrid } from "@/components/home/PropertiesGrid"
 import { SearchBar } from "@/components/home/SearchBar"
 import { PublicNavbar } from "@/components/home/PublicNavbar"
-
-interface Property {
-  id: string;
-  bien: string;
-  type: string;
-  chambres: number;
-  ville: string;
-  loyer: number;
-  statut: string;
-  photo_url: string | null;
-  agencies?: {
-    name: string;
-    address: string;
-  };
-}
+import { Property } from "@/components/property/types"
 
 interface PropertyWithAgency extends Property {
   agency_name: string;
   agency_address: string;
   status: string;
+  agencies?: {
+    name: string;
+    address: string;
+  };
 }
 
 const PublicProperties = () => {
@@ -41,6 +31,7 @@ const PublicProperties = () => {
         .eq('statut', 'disponible')
 
       if (error) throw error
+
       return (data as Property[]).map(property => ({
         ...property,
         agency_name: property.agencies?.name || 'Non renseigné',

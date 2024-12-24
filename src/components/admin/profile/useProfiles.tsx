@@ -13,7 +13,8 @@ interface ProfileWithAgency {
   agency_id: string | null;
   created_at: string | null;
   updated_at: string | null;
-  agencies?: Agency | null;
+  agencies: Agency | null;
+  agency_name?: string;
 }
 
 export function useProfiles() {
@@ -58,7 +59,16 @@ export function useProfiles() {
             *,
             agencies (
               id,
-              name
+              name,
+              address,
+              phone,
+              email,
+              subscription_plan_id,
+              show_phone_on_site,
+              list_properties_on_site,
+              created_at,
+              updated_at,
+              logo_url
             )
           `)
           .order('created_at', { ascending: false })
@@ -68,8 +78,8 @@ export function useProfiles() {
           throw profilesError
         }
 
-        // Map and return the results
-        return (profiles as ProfileWithAgency[])?.map(profile => ({
+        // Map and return the results with proper type casting
+        return (profiles as unknown as ProfileWithAgency[])?.map(profile => ({
           ...profile,
           agency_name: profile.agencies?.name || '-'
         })) || []
