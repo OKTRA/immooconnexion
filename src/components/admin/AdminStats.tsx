@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { StatCard } from "@/components/StatCard"
 import { Building2, CircleDollarSign, Users } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function AdminStats() {
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
       const [
@@ -30,42 +31,36 @@ export function AdminStats() {
     },
   })
 
+  if (isLoading) {
+    return (
+      <div className="grid gap-4 md:grid-cols-3">
+        <Skeleton className="h-32" />
+        <Skeleton className="h-32" />
+        <Skeleton className="h-32" />
+      </div>
+    )
+  }
+
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Utilisateurs</CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats?.profiles || 0}</div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Biens</CardTitle>
-          <Building2 className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats?.properties || 0}</div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Revenus Totaux</CardTitle>
-          <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {new Intl.NumberFormat("fr-FR", {
-              style: "currency",
-              currency: "XOF",
-            }).format(stats?.revenue || 0)}
-          </div>
-        </CardContent>
-      </Card>
+      <StatCard
+        title="Total Utilisateurs"
+        value={stats?.profiles.toString() || "0"}
+        icon={Users}
+      />
+      <StatCard
+        title="Total Biens"
+        value={stats?.properties.toString() || "0"}
+        icon={Building2}
+      />
+      <StatCard
+        title="Revenus Totaux"
+        value={new Intl.NumberFormat("fr-FR", {
+          style: "currency",
+          currency: "XOF",
+        }).format(stats?.revenue || 0)}
+        icon={CircleDollarSign}
+      />
     </div>
   )
 }

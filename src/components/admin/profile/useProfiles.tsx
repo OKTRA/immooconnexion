@@ -10,10 +10,11 @@ export function useProfiles() {
     queryFn: async () => {
       try {
         console.log("Fetching profiles...")
-        // First get all profiles
+        
+        // Récupérer les profils
         const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
-          .select("*")
+          .select("*, agency:agencies(name)")
           .order('created_at', { ascending: false })
 
         if (profilesError) {
@@ -21,20 +22,10 @@ export function useProfiles() {
           throw profilesError
         }
 
-        // Then get all agencies in a separate query
-        const { data: agencies, error: agenciesError } = await supabase
-          .from("agencies")
-          .select("id, name")
-
-        if (agenciesError) {
-          console.error('Error fetching agencies:', agenciesError)
-          throw agenciesError
-        }
-
-        // Map agencies to profiles
+        // Transformer les données pour inclure le nom de l'agence
         const transformedData = profiles.map(profile => ({
           ...profile,
-          agency_name: agencies.find(agency => agency.id === profile.agency_id)?.name || '-'
+          agency_name: profile.agency?.name || '-'
         }))
 
         console.log("Profiles fetched successfully:", transformedData)
