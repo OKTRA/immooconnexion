@@ -45,6 +45,12 @@ export function useProfiles() {
             throw profilesError
           }
 
+          // If no profiles found, return an empty array
+          if (!profiles || profiles.length === 0) {
+            console.log("No profiles found")
+            return []
+          }
+
           return profiles.map(profile => ({
             ...profile,
             agency_name: profile.agency?.name || '-'
@@ -63,6 +69,12 @@ export function useProfiles() {
         if (profilesError) {
           console.error('Error fetching profiles:', profilesError)
           throw profilesError
+        }
+
+        // If no profiles found, return an empty array
+        if (!profiles || profiles.length === 0) {
+          console.log("No profiles found")
+          return []
         }
 
         return profiles.map(profile => ({
