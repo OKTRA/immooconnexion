@@ -35,15 +35,17 @@ export function AddAgencyDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="sm:max-w-2xl w-[95%] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Créer une nouvelle agence</DialogTitle>
         </DialogHeader>
-        <AgencyFields agencyData={agencyData} setAgencyData={setAgencyData} />
-        <AgencyLogoUpload agencyId={null} />
-        <Button onClick={handleCreateAgency} className="w-full">
-          Créer l'agence
-        </Button>
+        <div className="space-y-6">
+          <AgencyFields agencyData={agencyData} setAgencyData={setAgencyData} />
+          <AgencyLogoUpload agencyId={null} />
+          <Button onClick={handleCreateAgency} className="w-full">
+            Créer l'agence
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   )

@@ -51,14 +51,14 @@ export function AgencyLogoUpload({ agencyId }: AgencyLogoUploadProps) {
   }
 
   return (
-    <div className="md:col-span-2">
+    <div className="space-y-2 w-full">
       <Label htmlFor="logo">Logo de l'agence (optionnel)</Label>
       <Input
         id="logo"
         type="file"
         accept="image/*"
         onChange={handleFileUpload}
-        className="cursor-pointer"
+        className="cursor-pointer w-full"
       />
     </div>
   )

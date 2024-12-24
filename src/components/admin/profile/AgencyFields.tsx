@@ -32,51 +32,57 @@ export function AgencyFields({ agencyData, setAgencyData }: AgencyFieldsProps) {
     },
   })
 
-  // Vérifier si le plan permet ces fonctionnalités
   const selectedPlan = plans.find(plan => plan.id === agencyData.subscription_plan_id)
   const canShowPhoneNumber = selectedPlan?.name === "Professionnel" || selectedPlan?.name === "Enterprise"
   const canListProperties = selectedPlan?.name === "Professionnel" || selectedPlan?.name === "Enterprise"
 
   return (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="agency_name">Nom de l'agence</Label>
-        <Input
-          id="agency_name"
-          value={agencyData.name}
-          onChange={(e) => setAgencyData({ ...agencyData, name: e.target.value })}
-          placeholder="Nom de l'agence"
-        />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="agency_name">Nom de l'agence</Label>
+          <Input
+            id="agency_name"
+            value={agencyData.name}
+            onChange={(e) => setAgencyData({ ...agencyData, name: e.target.value })}
+            placeholder="Nom de l'agence"
+            className="w-full"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="agency_address">Adresse</Label>
+          <Input
+            id="agency_address"
+            value={agencyData.address}
+            onChange={(e) => setAgencyData({ ...agencyData, address: e.target.value })}
+            placeholder="Adresse de l'agence"
+            className="w-full"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="agency_phone">Téléphone</Label>
+          <Input
+            id="agency_phone"
+            value={agencyData.phone}
+            onChange={(e) => setAgencyData({ ...agencyData, phone: e.target.value })}
+            placeholder="Numéro de téléphone"
+            className="w-full"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="agency_email">Email</Label>
+          <Input
+            id="agency_email"
+            value={agencyData.email}
+            onChange={(e) => setAgencyData({ ...agencyData, email: e.target.value })}
+            placeholder="Email de l'agence"
+            type="email"
+            className="w-full"
+          />
+        </div>
       </div>
-      <div>
-        <Label htmlFor="agency_address">Adresse</Label>
-        <Input
-          id="agency_address"
-          value={agencyData.address}
-          onChange={(e) => setAgencyData({ ...agencyData, address: e.target.value })}
-          placeholder="Adresse de l'agence"
-        />
-      </div>
-      <div>
-        <Label htmlFor="agency_phone">Téléphone</Label>
-        <Input
-          id="agency_phone"
-          value={agencyData.phone}
-          onChange={(e) => setAgencyData({ ...agencyData, phone: e.target.value })}
-          placeholder="Numéro de téléphone"
-        />
-      </div>
-      <div>
-        <Label htmlFor="agency_email">Email</Label>
-        <Input
-          id="agency_email"
-          value={agencyData.email}
-          onChange={(e) => setAgencyData({ ...agencyData, email: e.target.value })}
-          placeholder="Email de l'agence"
-          type="email"
-        />
-      </div>
-      <div>
+
+      <div className="space-y-2">
         <Label htmlFor="subscription_plan">Plan d'abonnement</Label>
         <Select 
           value={agencyData.subscription_plan_id} 
@@ -89,7 +95,7 @@ export function AgencyFields({ agencyData, setAgencyData }: AgencyFieldsProps) {
             })
           }}
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Sélectionner un plan" />
           </SelectTrigger>
           <SelectContent>
@@ -103,7 +109,7 @@ export function AgencyFields({ agencyData, setAgencyData }: AgencyFieldsProps) {
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between space-x-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 sm:space-x-4">
           <Label htmlFor="show_phone" className={!canShowPhoneNumber ? "text-gray-400" : ""}>
             Afficher le numéro sur le site {!canShowPhoneNumber && "(Nécessite un abonnement Professionnel ou Enterprise)"}
           </Label>
@@ -116,7 +122,7 @@ export function AgencyFields({ agencyData, setAgencyData }: AgencyFieldsProps) {
             disabled={!canShowPhoneNumber}
           />
         </div>
-        <div className="flex items-center justify-between space-x-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 sm:space-x-4">
           <Label htmlFor="list_properties" className={!canListProperties ? "text-gray-400" : ""}>
             Lister les propriétés sur le site {!canListProperties && "(Nécessite un abonnement Professionnel ou Enterprise)"}
           </Label>
