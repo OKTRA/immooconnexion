@@ -66,7 +66,8 @@ export function AddAgencyDialog({
         return
       }
 
-      const { data, error } = await supabase
+      // Create agency with a single insert operation
+      const { error: insertError } = await supabase
         .from('agencies')
         .insert([{
           ...agencyData,
@@ -74,12 +75,10 @@ export function AddAgencyDialog({
           current_tenants_count: 0,
           current_profiles_count: 0
         }])
-        .select()
-        .single()
 
-      if (error) {
-        console.error('Error creating agency:', error)
-        throw error
+      if (insertError) {
+        console.error('Error creating agency:', insertError)
+        throw insertError
       }
 
       toast({
