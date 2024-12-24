@@ -39,7 +39,7 @@ const AdminDashboard = () => {
     }
   }
 
-  const { data: adminData, isLoading } = useQuery({
+  const { data: adminData, isLoading, error } = useQuery({
     queryKey: ["admin-status"],
     queryFn: async () => {
       try {
@@ -58,7 +58,7 @@ const AdminDashboard = () => {
 
         console.log("User found:", user.id)
 
-        // First check if user is a super admin
+        // Check if user is a super admin
         const { data: adminData, error: adminError } = await supabase
           .from("administrators")
           .select("is_super_admin")
@@ -81,7 +81,7 @@ const AdminDashboard = () => {
           .from("profiles")
           .select("role")
           .eq("id", user.id)
-          .maybeSingle()
+          .single()
 
         if (profileError) {
           console.error("Error fetching profile:", profileError)
@@ -101,25 +101,26 @@ const AdminDashboard = () => {
       }
     },
     retry: false,
-    meta: {
-      onError: (error: Error) => {
-        console.error("Admin dashboard access error:", error)
-        toast({
-          title: "Accès refusé",
-          description: "Vous n'avez pas les droits nécessaires pour accéder à cette page.",
-          variant: "destructive"
-        })
-        navigate("/")
-      }
-    }
   })
 
+  // Handle loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     )
+  }
+
+  // Handle error state
+  if (error) {
+    toast({
+      title: "Accès refusé",
+      description: "Vous n'avez pas les droits nécessaires pour accéder à cette page.",
+      variant: "destructive"
+    })
+    navigate("/")
+    return null
   }
 
   return (
