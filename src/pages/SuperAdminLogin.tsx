@@ -46,7 +46,7 @@ export default function SuperAdminLogin() {
         .from('administrators')
         .select('is_super_admin')
         .eq('id', signInData.user.id)
-        .single()
+        .maybeSingle()
 
       if (adminError) {
         console.error("Admin check error:", adminError)
@@ -55,7 +55,13 @@ export default function SuperAdminLogin() {
         throw new Error("Erreur lors de la vérification des droits d'administrateur")
       }
 
-      if (!adminData?.is_super_admin) {
+      if (!adminData) {
+        // Sign out if not an admin at all
+        await supabase.auth.signOut()
+        throw new Error("Ce compte n'a pas de droits d'administrateur.")
+      }
+
+      if (!adminData.is_super_admin) {
         // Sign out if not a super admin
         await supabase.auth.signOut()
         throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent se connecter ici.")
