@@ -92,7 +92,6 @@ export function AdminAgencies() {
         agencies={agencies}
         onEdit={handleEditAgency}
         refetch={refetch}
-        isEditing={isEditing}
       />
     </div>
   )

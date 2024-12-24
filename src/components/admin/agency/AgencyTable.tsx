@@ -6,7 +6,7 @@ import { Plus } from "lucide-react"
 import { AddAgencyDialog } from "../profile/AddAgencyDialog"
 import { useState } from "react"
 
-interface AgencyTableProps {
+export interface AgencyTableProps {
   agencies: Agency[]
   onEdit: (agency: Agency) => void
   refetch: () => void
