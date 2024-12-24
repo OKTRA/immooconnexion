@@ -9,23 +9,23 @@ export function useProfiles() {
     queryKey: ["admin-profiles"],
     queryFn: async () => {
       try {
-        // Get current user in a separate query
-        const { data: authData, error: authError } = await supabase.auth.getUser()
+        // Get current user
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
         
         if (authError) {
           console.error('Auth error:', authError)
           throw new Error("Authentication failed")
         }
 
-        if (!authData.user) {
+        if (!user) {
           throw new Error("Not authenticated")
         }
 
-        // Check admin status in a separate query
+        // Check admin status
         const { data: adminData, error: adminError } = await supabase
           .from("administrators")
           .select("is_super_admin")
-          .eq("id", authData.user.id)
+          .eq("id", user.id)
           .maybeSingle()
 
         if (adminError) {
@@ -33,7 +33,7 @@ export function useProfiles() {
           // Continue even if admin check fails - will fall back to regular permissions
         }
 
-        // Fetch profiles in a separate query with explicit field selection
+        // Fetch profiles with a single query that includes agency data
         const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
           .select(`
@@ -45,7 +45,7 @@ export function useProfiles() {
             phone_number,
             agency_id,
             created_at,
-            agency:agencies!inner (
+            agencies (
               name
             )
           `)
@@ -56,11 +56,11 @@ export function useProfiles() {
           throw profilesError
         }
 
-        // Map the results to include agency name
-        return (profiles || []).map(profile => ({
+        // Map and return the results
+        return profiles?.map(profile => ({
           ...profile,
-          agency_name: profile.agency?.name || '-'
-        }))
+          agency_name: profile.agencies?.name || '-'
+        })) || []
 
       } catch (error: any) {
         console.error('Error in useProfiles:', error)
