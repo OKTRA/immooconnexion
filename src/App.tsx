@@ -28,6 +28,90 @@ const queryClient = new QueryClient({
   },
 })
 
+const AppRoutes = () => {
+  return (
+    <TooltipProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/public" element={<PublicProperties />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Index />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/locataires"
+          element={
+            <ProtectedRoute>
+              <Tenants />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/locataires/:id/contrats"
+          element={
+            <ProtectedRoute>
+              <TenantContracts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/biens"
+          element={
+            <ProtectedRoute>
+              <Properties />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/biens/:id"
+          element={
+            <ProtectedRoute>
+              <PropertyDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/depenses"
+          element={
+            <ProtectedRoute>
+              <Expenses />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/gains"
+          element={
+            <ProtectedRoute>
+              <AgencyEarnings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/rapports"
+          element={
+            <ProtectedRoute>
+              <Reports />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </TooltipProvider>
+  )
+}
+
 const App = () => {
   // Clear any existing session on app load
   useEffect(() => {
@@ -44,87 +128,9 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/public" element={<PublicProperties />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/locataires"
-              element={
-                <ProtectedRoute>
-                  <Tenants />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/locataires/:id/contrats"
-              element={
-                <ProtectedRoute>
-                  <TenantContracts />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/biens"
-              element={
-                <ProtectedRoute>
-                  <Properties />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/biens/:id"
-              element={
-                <ProtectedRoute>
-                  <PropertyDetails />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/depenses"
-              element={
-                <ProtectedRoute>
-                  <Expenses />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/gains"
-              element={
-                <ProtectedRoute>
-                  <AgencyEarnings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/rapports"
-              element={
-                <ProtectedRoute>
-                  <Reports />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AppRoutes />
       </BrowserRouter>
     </QueryClientProvider>
   )
