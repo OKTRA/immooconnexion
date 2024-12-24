@@ -310,7 +310,7 @@ export type Database = {
             foreignKeyName: "properties_agency_id_fkey"
             columns: ["agency_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "agencies"
             referencedColumns: ["id"]
           },
         ]

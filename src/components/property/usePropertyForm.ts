@@ -50,6 +50,7 @@ export function usePropertyForm(property: Property | null | undefined, onOpenCha
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
+      // Get user's profile to get the agency_id
       const { data: profile } = await supabase
         .from('profiles')
         .select('agency_id')
@@ -70,9 +71,11 @@ export function usePropertyForm(property: Property | null | undefined, onOpenCha
         caution: parseFloat(formData.caution),
         photo_url,
         user_id: user.id,
-        agency_id: profile.agency_id,
+        agency_id: profile.agency_id, // Using the agency_id from the profile
         updated_at: new Date().toISOString(),
       }
+
+      console.log("Submitting property data:", propertyData)
 
       if (property?.id) {
         const { error } = await supabase
