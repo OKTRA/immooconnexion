@@ -21,23 +21,16 @@ export default function SuperAdminLogin() {
 
     try {
       // First, attempt to sign in
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (signInError) {
-        console.error("Sign in error:", signInError)
-        
-        // Handle specific error cases
-        if (signInError.message.includes('Invalid login credentials')) {
-          throw new Error("Email ou mot de passe incorrect. Veuillez vérifier vos identifiants.")
-        }
-        
-        throw new Error(signInError.message)
+        throw new Error("Email ou mot de passe incorrect")
       }
 
-      if (!signInData.user) {
+      if (!data.user) {
         throw new Error("Aucun utilisateur trouvé")
       }
 
@@ -45,23 +38,16 @@ export default function SuperAdminLogin() {
       const { data: adminData, error: adminError } = await supabase
         .from('administrators')
         .select('is_super_admin')
-        .eq('id', signInData.user.id)
+        .eq('id', data.user.id)
         .maybeSingle()
 
       if (adminError) {
-        console.error("Admin check error:", adminError)
         // Sign out if admin check fails
         await supabase.auth.signOut()
         throw new Error("Erreur lors de la vérification des droits d'administrateur")
       }
 
-      if (!adminData) {
-        // Sign out if not an admin at all
-        await supabase.auth.signOut()
-        throw new Error("Ce compte n'a pas de droits d'administrateur.")
-      }
-
-      if (!adminData.is_super_admin) {
+      if (!adminData?.is_super_admin) {
         // Sign out if not a super admin
         await supabase.auth.signOut()
         throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent se connecter ici.")
