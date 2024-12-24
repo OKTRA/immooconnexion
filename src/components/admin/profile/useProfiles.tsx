@@ -9,26 +9,40 @@ export function useProfiles() {
     queryKey: ["admin-profiles"],
     queryFn: async () => {
       try {
-        // First check if user is super admin
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) throw new Error("User not authenticated")
+        // Get current user
+        const userResponse = await supabase.auth.getUser()
+        const user = userResponse.data.user
+        
+        if (!user) {
+          throw new Error("Not authenticated")
+        }
 
+        // Check if user is admin
         const { data: adminData, error: adminError } = await supabase
           .from("administrators")
           .select("is_super_admin")
           .eq("id", user.id)
-          .single()
+          .maybeSingle()
 
         if (adminError) {
           console.error('Admin check error:', adminError)
         }
 
-        // Build the base query
+        // Fetch profiles with agency info
         const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
           .select(`
-            *,
-            agency:agencies(name)
+            id,
+            first_name,
+            last_name,
+            email,
+            role,
+            phone_number,
+            agency_id,
+            created_at,
+            agency:agencies (
+              name
+            )
           `)
           .order('created_at', { ascending: false })
 
@@ -37,7 +51,7 @@ export function useProfiles() {
           throw profilesError
         }
 
-        // If no profiles found, return an empty array
+        // Return empty array if no profiles found
         if (!profiles) {
           return []
         }
