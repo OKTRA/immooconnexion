@@ -9,13 +9,9 @@ export function useProfiles() {
     queryKey: ["admin-profiles"],
     queryFn: async () => {
       try {
-        console.log("Fetching profiles...")
-        
         // First check if user is super admin
         const { data: { user }, error: authError } = await supabase.auth.getUser()
         if (authError) throw authError
-
-        console.log("User found:", user?.id)
 
         const { data: adminData, error: adminError } = await supabase
           .from("administrators")
@@ -23,42 +19,10 @@ export function useProfiles() {
           .eq("id", user?.id)
           .maybeSingle()
 
-        if (adminError) {
-          console.error('Error checking admin status:', adminError)
-          throw adminError
-        }
+        if (adminError) throw adminError
 
-        console.log("User is super admin:", adminData?.is_super_admin)
-
-        // If super admin, fetch all profiles with agency names
-        if (adminData?.is_super_admin) {
-          const { data: profiles, error: profilesError } = await supabase
-            .from("profiles")
-            .select(`
-              *,
-              agency:agencies(name)
-            `)
-            .order('created_at', { ascending: false })
-
-          if (profilesError) {
-            console.error('Error fetching profiles:', profilesError)
-            throw profilesError
-          }
-
-          // If no profiles found, return an empty array
-          if (!profiles || profiles.length === 0) {
-            console.log("No profiles found")
-            return []
-          }
-
-          return profiles.map(profile => ({
-            ...profile,
-            agency_name: profile.agency?.name || '-'
-          }))
-        }
-
-        // If not super admin, fetch profiles based on agency access
-        const { data: profiles, error: profilesError } = await supabase
+        // Build the base query
+        let query = supabase
           .from("profiles")
           .select(`
             *,
@@ -66,26 +30,30 @@ export function useProfiles() {
           `)
           .order('created_at', { ascending: false })
 
+        // Execute query
+        const { data: profiles, error: profilesError } = await query
+
         if (profilesError) {
           console.error('Error fetching profiles:', profilesError)
           throw profilesError
         }
 
         // If no profiles found, return an empty array
-        if (!profiles || profiles.length === 0) {
-          console.log("No profiles found")
+        if (!profiles) {
           return []
         }
 
+        // Map the results to include agency name
         return profiles.map(profile => ({
           ...profile,
           agency_name: profile.agency?.name || '-'
         }))
+
       } catch (error: any) {
         console.error('Error in useProfiles:', error)
         toast({
           title: "Erreur",
-          description: "Impossible de charger les profils",
+          description: "Impossible de charger les profils. Veuillez réessayer.",
           variant: "destructive",
         })
         throw error
