@@ -9,7 +9,8 @@ export function useProfiles() {
     queryKey: ["admin-profiles"],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
+        // First, fetch profiles
+        const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
           .select(`
             id,
@@ -21,25 +22,34 @@ export function useProfiles() {
             show_phone_on_site,
             list_properties_on_site,
             created_at,
-            agency_id,
-            agency:agencies!profiles_agency_id_fkey(name)
+            agency_id
           `)
           .order('created_at', { ascending: false })
 
-        if (error) {
-          console.error('Error fetching profiles:', error)
+        if (profilesError) {
+          console.error('Error fetching profiles:', profilesError)
           toast({
             title: "Erreur",
             description: "Impossible de charger les profils",
             variant: "destructive",
           })
-          throw error
+          throw profilesError
         }
 
-        // Transform data to include agency_name
-        const transformedData = data?.map(profile => ({
+        // Then, fetch agencies separately
+        const { data: agencies, error: agenciesError } = await supabase
+          .from("agencies")
+          .select('id, name')
+
+        if (agenciesError) {
+          console.error('Error fetching agencies:', agenciesError)
+          throw agenciesError
+        }
+
+        // Map agencies to profiles
+        const transformedData = profiles?.map(profile => ({
           ...profile,
-          agency_name: profile.agency?.name || '-'
+          agency_name: agencies?.find(agency => agency.id === profile.agency_id)?.name || '-'
         }))
 
         return transformedData || []
