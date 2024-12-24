@@ -13,50 +13,79 @@ import { fr } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
+import { useToast } from "@/components/ui/use-toast"
+import { useNavigate } from "react-router-dom"
 
 export function AdminProperties() {
   const [searchTerm, setSearchTerm] = useState("")
+  const { toast } = useToast()
+  const navigate = useNavigate()
   
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["admin-properties"],
     queryFn: async () => {
-      // Get the current user's profile to check if they're an admin
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Non authentifié")
+      try {
+        // Get the current user's profile to check if they're an admin
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        if (authError) {
+          console.error('Auth error:', authError)
+          // If there's an auth error, clear the session and redirect to login
+          await supabase.auth.signOut()
+          navigate("/login")
+          throw new Error("Session expired. Please login again.")
+        }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select('*')
-        .eq("id", user.id)
-        .maybeSingle()
+        if (!user) throw new Error("Non authentifié")
 
-      // If admin, get all properties, otherwise get only agency's properties
-      const query = supabase
-        .from("properties")
-        .select(`
-          *,
-          agency:profiles(
-            id,
-            first_name,
-            last_name
-          )
-        `)
-        .order("created_at", { ascending: false })
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select('*')
+          .eq("id", user.id)
+          .maybeSingle()
 
-      if (profile?.role !== 'admin') {
-        query.eq('agency_id', user.id)
+        // If admin, get all properties, otherwise get only agency's properties
+        const query = supabase
+          .from("properties")
+          .select(`
+            *,
+            agency:agencies(
+              id,
+              name
+            )
+          `)
+          .order("created_at", { ascending: false })
+
+        if (profile?.role !== 'admin') {
+          query.eq('agency_id', user.id)
+        }
+
+        const { data, error } = await query
+        if (error) throw error
+        
+        return data.map(property => ({
+          ...property,
+          agency_name: property.agency?.name || 'N/A'
+        }))
+      } catch (error: any) {
+        console.error('Error fetching properties:', error)
+        toast({
+          title: "Erreur",
+          description: error.message || "Erreur lors du chargement des propriétés",
+          variant: "destructive"
+        })
+        return []
       }
-
-      const { data, error } = await query
-      if (error) throw error
-      
-      return data.map(property => ({
-        ...property,
-        agency_name: property.agency ? 
-          `${property.agency.first_name || ''} ${property.agency.last_name || ''}`.trim() || 'N/A' 
-          : 'N/A'
-      }))
     },
+    meta: {
+      onError: (error: Error) => {
+        console.error('Query error:', error)
+        toast({
+          title: "Erreur",
+          description: error.message,
+          variant: "destructive"
+        })
+      }
+    }
   })
 
   const filteredProperties = properties.filter(
@@ -107,7 +136,7 @@ export function AdminProperties() {
                       }).format(property.loyer)
                     : "-"}
                 </TableCell>
-                <TableCell>{property.agency_name || "N/A"}</TableCell>
+                <TableCell>{property.agency_name}</TableCell>
                 <TableCell>
                   <Badge
                     variant={
