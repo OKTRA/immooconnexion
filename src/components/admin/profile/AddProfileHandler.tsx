@@ -21,10 +21,20 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
   const handleAddUser = async () => {
     try {
+      // Validation
       if (!newProfile.password) {
         toast({
           title: "Erreur",
           description: "Le mot de passe est obligatoire",
+          variant: "destructive",
+        })
+        return
+      }
+
+      if (!newProfile.agency_id) {
+        toast({
+          title: "Erreur",
+          description: "L'agence est obligatoire",
           variant: "destructive",
         })
         return
@@ -62,16 +72,27 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         userId = authData.user.id
       }
 
-      // Update or create the profile
+      // Verify the agency exists
+      const { data: agency, error: agencyError } = await supabase
+        .from('agencies')
+        .select('id')
+        .eq('id', newProfile.agency_id)
+        .single()
+
+      if (agencyError || !agency) {
+        throw new Error("L'agence spécifiée n'existe pas")
+      }
+
+      // Update or create the profile with all required fields
       const { error: profileError } = await supabase
         .from("profiles")
         .upsert({
           id: userId,
-          first_name: newProfile.first_name,
-          last_name: newProfile.last_name,
-          phone_number: newProfile.phone_number,
+          first_name: newProfile.first_name || 'User',
+          last_name: newProfile.last_name || 'Name',
+          phone_number: newProfile.phone_number || '0000000000',
           email: newProfile.email,
-          agency_id: newProfile.agency_id || agencyId,
+          agency_id: newProfile.agency_id,
           role: 'user'
         })
 
@@ -95,6 +116,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       })
       onSuccess()
     } catch (error: any) {
+      console.error('Error in handleAddUser:', error)
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue lors de l'ajout du profil",
