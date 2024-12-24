@@ -54,14 +54,19 @@ export type Database = {
           current_profiles_count: number | null
           current_properties_count: number | null
           current_tenants_count: number | null
+          description: string | null
           email: string | null
           id: string
+          last_billing_date: string | null
           list_properties_on_site: boolean | null
           logo_url: string | null
           name: string
+          next_billing_date: string | null
           phone: string | null
           show_phone_on_site: boolean | null
+          status: string | null
           subscription_plan_id: string
+          subscription_status: string | null
           updated_at: string
         }
         Insert: {
@@ -70,14 +75,19 @@ export type Database = {
           current_profiles_count?: number | null
           current_properties_count?: number | null
           current_tenants_count?: number | null
+          description?: string | null
           email?: string | null
           id?: string
+          last_billing_date?: string | null
           list_properties_on_site?: boolean | null
           logo_url?: string | null
           name: string
+          next_billing_date?: string | null
           phone?: string | null
           show_phone_on_site?: boolean | null
+          status?: string | null
           subscription_plan_id: string
+          subscription_status?: string | null
           updated_at?: string
         }
         Update: {
@@ -86,14 +96,19 @@ export type Database = {
           current_profiles_count?: number | null
           current_properties_count?: number | null
           current_tenants_count?: number | null
+          description?: string | null
           email?: string | null
           id?: string
+          last_billing_date?: string | null
           list_properties_on_site?: boolean | null
           logo_url?: string | null
           name?: string
+          next_billing_date?: string | null
           phone?: string | null
           show_phone_on_site?: boolean | null
+          status?: string | null
           subscription_plan_id?: string
+          subscription_status?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -222,12 +237,16 @@ export type Database = {
           first_name: string
           id: string
           is_tenant: boolean | null
+          last_login: string | null
           last_name: string
           list_properties_on_site: boolean | null
+          metadata: Json | null
           password_hash: string | null
+          permissions: Json | null
           phone_number: string
           role: string
           show_phone_on_site: boolean | null
+          status: string | null
           updated_at: string
         }
         Insert: {
@@ -237,12 +256,16 @@ export type Database = {
           first_name: string
           id: string
           is_tenant?: boolean | null
+          last_login?: string | null
           last_name: string
           list_properties_on_site?: boolean | null
+          metadata?: Json | null
           password_hash?: string | null
+          permissions?: Json | null
           phone_number: string
           role?: string
           show_phone_on_site?: boolean | null
+          status?: string | null
           updated_at?: string
         }
         Update: {
@@ -252,12 +275,16 @@ export type Database = {
           first_name?: string
           id?: string
           is_tenant?: boolean | null
+          last_login?: string | null
           last_name?: string
           list_properties_on_site?: boolean | null
+          metadata?: Json | null
           password_hash?: string | null
+          permissions?: Json | null
           phone_number?: string
           role?: string
           show_phone_on_site?: boolean | null
+          status?: string | null
           updated_at?: string
         }
         Relationships: [
