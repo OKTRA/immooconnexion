@@ -1,6 +1,5 @@
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as Sonner } from "@/components/ui/sonner"
-import { TooltipProvider } from "@/components/ui/tooltip"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
@@ -30,7 +29,6 @@ const queryClient = new QueryClient({
 })
 
 const AppRoutes = () => {
-  // Clear any existing session on app load
   useEffect(() => {
     const clearSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
@@ -128,11 +126,9 @@ const App = () => {
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <React.StrictMode>
-          <TooltipProvider delayDuration={0}>
-            <Toaster />
-            <Sonner />
-            <AppRoutes />
-          </TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <AppRoutes />
         </React.StrictMode>
       </QueryClientProvider>
     </BrowserRouter>
