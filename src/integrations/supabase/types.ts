@@ -76,7 +76,15 @@ export type Database = {
           subscription_plan_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_subscription_plan"
+            columns: ["subscription_plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contracts: {
         Row: {
@@ -188,6 +196,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          administrator_id: string | null
           agency_id: string
           created_at: string
           email: string
@@ -203,6 +212,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          administrator_id?: string | null
           agency_id: string
           created_at?: string
           email: string
@@ -218,6 +228,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          administrator_id?: string | null
           agency_id?: string
           created_at?: string
           email?: string
@@ -233,6 +244,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_administrator_id_fkey"
+            columns: ["administrator_id"]
+            isOneToOne: false
+            referencedRelation: "administrators"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_agency_id_fkey"
             columns: ["agency_id"]
