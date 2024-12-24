@@ -5,6 +5,7 @@ import { Printer } from "lucide-react"
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import type { PaymentHistory } from "@/integrations/supabase/types/payment-history"
 
 export function TenantPaymentsReport() {
   const [selectedTenant, setSelectedTenant] = useState<string>("all")
@@ -14,7 +15,6 @@ export function TenantPaymentsReport() {
     queryFn: async () => {
       console.log('Fetching tenant payments')
       
-      // Get current user's profile to check role
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
@@ -24,56 +24,20 @@ export function TenantPaymentsReport() {
         .eq('id', user.id)
         .maybeSingle()
 
-      let query = supabase
+      const { data, error } = await supabase
         .from('payment_history_with_tenant')
         .select('*')
         .order('created_at', { ascending: false })
-
-      // If not admin, only show agency's payments
-      if (profile?.role !== 'admin') {
-        query = query.eq('agency_id', user.id)
-      }
-
-      const { data, error } = await query
 
       if (error) {
         console.error('Error fetching payments:', error)
         throw error
       }
 
-      console.log('Payments data:', data)
-      return data || []
+      return (data || []) as PaymentHistory[]
     }
   })
 
-  const { data: tenants = [] } = useQuery({
-    queryKey: ['tenants'],
-    queryFn: async () => {
-      // Get current user's profile
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Non authentifié")
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle()
-
-      let query = supabase
-        .from('tenants')
-        .select('id, nom, prenom')
-
-      // If not admin, only show agency's tenants
-      if (profile?.role !== 'admin') {
-        query = query.eq('agency_id', user.id)
-      }
-
-      const { data, error } = await query
-      if (error) throw error
-      return data || []
-    }
-  })
-  
   const handlePrint = () => {
     const style = document.createElement('style')
     style.textContent = `
@@ -117,7 +81,7 @@ export function TenantPaymentsReport() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les locataires</SelectItem>
-              {tenants.map(tenant => (
+              {payments.map(tenant => (
                 <SelectItem key={tenant.id} value={tenant.id}>
                   {tenant.prenom} {tenant.nom}
                 </SelectItem>

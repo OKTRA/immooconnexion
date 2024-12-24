@@ -37,6 +37,7 @@ export type Database = {
           email: string | null
           id: string
           list_properties_on_site: boolean | null
+          logo_url: string | null
           name: string
           phone: string | null
           show_phone_on_site: boolean | null
@@ -49,6 +50,7 @@ export type Database = {
           email?: string | null
           id?: string
           list_properties_on_site?: boolean | null
+          logo_url?: string | null
           name: string
           phone?: string | null
           show_phone_on_site?: boolean | null
@@ -61,6 +63,7 @@ export type Database = {
           email?: string | null
           id?: string
           list_properties_on_site?: boolean | null
+          logo_url?: string | null
           name?: string
           phone?: string | null
           show_phone_on_site?: boolean | null
@@ -327,6 +330,13 @@ export type Database = {
             referencedRelation: "contracts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "property_inspections_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "payment_history_with_tenant"
+            referencedColumns: ["id"]
+          },
         ]
       }
       subscription_plans: {
@@ -414,7 +424,36 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      payment_history_with_tenant: {
+        Row: {
+          agency_id: string | null
+          created_at: string | null
+          id: string | null
+          montant: number | null
+          property_name: string | null
+          statut: string | null
+          tenant_id: string | null
+          tenant_nom: string | null
+          tenant_prenom: string | null
+          type: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never

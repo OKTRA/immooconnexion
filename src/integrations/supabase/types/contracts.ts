@@ -1,41 +1,16 @@
-export type Contract = {
+export interface Contract {
   id: string;
-  property_id: string;
-  montant: number;
-  type: string;
-  statut: string;
-  created_at: string;
-  updated_at: string;
+  property_id: string | null;
   tenant_id: string | null;
-  start_date: string;
-  end_date: string | null;
-  description: string | null;
-};
-
-export type ContractInsert = {
-  id?: string;
-  property_id: string;
   montant: number;
   type: string;
-  statut?: string;
-  created_at?: string;
-  updated_at?: string;
-  tenant_id?: string | null;
-  start_date?: string;
-  end_date?: string | null;
-  description?: string | null;
-};
+  statut: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  agency_id: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
 
-export type ContractUpdate = {
-  id?: string;
-  property_id?: string;
-  montant?: number;
-  type?: string;
-  statut?: string;
-  created_at?: string;
-  updated_at?: string;
-  tenant_id?: string | null;
-  start_date?: string;
-  end_date?: string | null;
-  description?: string | null;
-};
+export type ContractInsert = Partial<Contract>;
+export type ContractUpdate = Partial<Contract>;
