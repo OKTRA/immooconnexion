@@ -9,8 +9,8 @@ export function useProfiles() {
     queryKey: ["admin-profiles"],
     queryFn: async () => {
       try {
-        // First, fetch profiles
-        const { data: profiles, error: profilesError } = await supabase
+        // First, fetch profiles in a single query
+        const { data: profilesWithAgencies, error } = await supabase
           .from("profiles")
           .select(`
             id,
@@ -22,34 +22,27 @@ export function useProfiles() {
             show_phone_on_site,
             list_properties_on_site,
             created_at,
-            agency_id
+            agency_id,
+            agencies (
+              name
+            )
           `)
           .order('created_at', { ascending: false })
 
-        if (profilesError) {
-          console.error('Error fetching profiles:', profilesError)
+        if (error) {
+          console.error('Error fetching profiles:', error)
           toast({
             title: "Erreur",
             description: "Impossible de charger les profils",
             variant: "destructive",
           })
-          throw profilesError
+          throw error
         }
 
-        // Then, fetch agencies separately
-        const { data: agencies, error: agenciesError } = await supabase
-          .from("agencies")
-          .select('id, name')
-
-        if (agenciesError) {
-          console.error('Error fetching agencies:', agenciesError)
-          throw agenciesError
-        }
-
-        // Map agencies to profiles
-        const transformedData = profiles?.map(profile => ({
+        // Transform the data to match the expected format
+        const transformedData = profilesWithAgencies?.map(profile => ({
           ...profile,
-          agency_name: agencies?.find(agency => agency.id === profile.agency_id)?.name || '-'
+          agency_name: profile.agencies?.name || '-'
         }))
 
         return transformedData || []
