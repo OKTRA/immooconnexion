@@ -11,7 +11,7 @@ interface Profile {
 
 interface BasicInfoFieldsProps {
   newProfile?: Profile
-  setNewProfile: (profile: Profile) => void
+  setNewProfile?: (profile: Profile) => void
   isEditing?: boolean
 }
 
