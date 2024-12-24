@@ -19,12 +19,14 @@ export function ProfileForm({
 }: ProfileFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    console.log("Form submitted with:", newProfile)
     if (onSubmit) {
       onSubmit()
     }
   }
 
   const handleAgencyChange = (value: string) => {
+    console.log("Agency changed to:", value)
     if (setNewProfile) {
       setNewProfile({ 
         ...newProfile, 
@@ -34,6 +36,7 @@ export function ProfileForm({
   }
 
   const handleProfileChange = (updatedProfile: any) => {
+    console.log("Profile updated:", updatedProfile)
     if (setNewProfile) {
       setNewProfile({
         ...newProfile,

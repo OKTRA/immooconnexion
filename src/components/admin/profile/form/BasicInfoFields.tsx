@@ -21,6 +21,7 @@ export function BasicInfoFields({
   isEditing = false 
 }: BasicInfoFieldsProps) {
   const handleChange = (field: keyof Profile, value: string) => {
+    console.log("Field change:", field, value)
     onProfileChange({
       ...newProfile,
       [field]: value

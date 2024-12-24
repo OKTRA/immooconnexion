@@ -24,6 +24,8 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
   const handleAddUser = async () => {
     try {
+      console.log("Starting user creation with:", newProfile)
+
       // Validation
       if (!newProfile.email || !newProfile.password) {
         toast({
@@ -63,16 +65,22 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
       if (existingUser) {
         userId = existingUser.id
+        console.log("Existing user found:", userId)
       } else {
+        console.log("Creating new user...")
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: newProfile.email,
           password: newProfile.password,
         })
 
-        if (authError) throw authError
+        if (authError) {
+          console.error("Auth error:", authError)
+          throw authError
+        }
         if (!authData.user) throw new Error("Aucun utilisateur créé")
         
         userId = authData.user.id
+        console.log("New user created:", userId)
       }
 
       // Update or create the profile
@@ -88,13 +96,16 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
           role: newProfile.role
         })
 
-      if (profileError) throw profileError
+      if (profileError) {
+        console.error("Profile error:", profileError)
+        throw profileError
+      }
+
+      console.log("Profile created/updated successfully")
 
       toast({
-        title: existingUser ? "Profil mis à jour" : "Profil ajouté",
-        description: existingUser 
-          ? "Le profil a été mis à jour avec succès."
-          : "Le nouveau profil a été ajouté avec succès.",
+        title: "Succès",
+        description: "Le profil a été créé avec succès",
       })
       
       onClose()
