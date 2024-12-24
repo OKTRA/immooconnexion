@@ -1,3 +1,4 @@
+import { StrictMode } from "react"
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as Sonner } from "@/components/ui/sonner"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
@@ -122,13 +123,15 @@ const AppRoutes = () => {
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <Toaster />
-        <Sonner />
-        <AppRoutes />
+        <BrowserRouter>
+          <Toaster />
+          <Sonner />
+          <AppRoutes />
+        </BrowserRouter>
       </QueryClientProvider>
-    </BrowserRouter>
+    </StrictMode>
   )
 }
 
