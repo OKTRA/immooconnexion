@@ -10,8 +10,8 @@ interface AddAgencyDialogProps {
   showDialog: boolean
   setShowDialog: (show: boolean) => void
   onAgencyCreated?: () => void
-  open?: boolean  // Add open prop
-  onOpenChange?: (open: boolean) => void  // Add onOpenChange prop
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 export function AddAgencyDialog({ 
@@ -21,7 +21,6 @@ export function AddAgencyDialog({
   open,
   onOpenChange 
 }: AddAgencyDialogProps) {
-  // Use either open/onOpenChange or showDialog/setShowDialog
   const isOpen = open ?? showDialog
   const handleOpenChange = onOpenChange ?? setShowDialog
 
@@ -47,13 +46,41 @@ export function AddAgencyDialog({
         return
       }
 
+      if (!agencyData.subscription_plan_id) {
+        toast({
+          title: "Erreur",
+          description: "Le plan d'abonnement est obligatoire",
+          variant: "destructive",
+        })
+        return
+      }
+
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        toast({
+          title: "Erreur",
+          description: "Vous devez être connecté pour créer une agence",
+          variant: "destructive",
+        })
+        return
+      }
+
       const { data, error } = await supabase
         .from('agencies')
-        .insert([agencyData])
+        .insert([{
+          ...agencyData,
+          current_properties_count: 0,
+          current_tenants_count: 0,
+          current_profiles_count: 0
+        }])
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Error creating agency:', error)
+        throw error
+      }
 
       toast({
         title: "Agence créée",
@@ -78,7 +105,7 @@ export function AddAgencyDialog({
       console.error('Error creating agency:', error)
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la création de l'agence",
+        description: error.message || "Une erreur est survenue lors de la création de l'agence",
         variant: "destructive",
       })
     }
