@@ -9,21 +9,11 @@ export function useProfiles() {
     queryKey: ["admin-profiles"],
     queryFn: async () => {
       try {
-        // First, fetch profiles in a single query
-        const { data: profilesWithAgencies, error } = await supabase
+        const { data, error } = await supabase
           .from("profiles")
           .select(`
-            id,
-            first_name,
-            last_name,
-            email,
-            role,
-            phone_number,
-            show_phone_on_site,
-            list_properties_on_site,
-            created_at,
-            agency_id,
-            agencies (
+            *,
+            agencies!inner (
               name
             )
           `)
@@ -39,22 +29,19 @@ export function useProfiles() {
           throw error
         }
 
-        // Transform the data to match the expected format
-        const transformedData = profilesWithAgencies?.map(profile => ({
+        // Transform the data to include agency_name directly
+        const transformedData = data?.map(profile => ({
           ...profile,
           agency_name: profile.agencies?.name || '-'
-        }))
+        })) || []
 
-        return transformedData || []
+        return transformedData
       } catch (error: any) {
         console.error('Error in useProfiles:', error)
         throw error
       }
     },
-    meta: {
-      onError: (error: Error) => {
-        console.error('Query error:', error)
-      }
-    }
+    retry: 1,
+    refetchOnWindowFocus: false
   })
 }
