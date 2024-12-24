@@ -125,17 +125,17 @@ const AppRoutes = () => {
 
 const App = () => {
   return (
-    <React.StrictMode>
-      <TooltipProvider>
-        <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <React.StrictMode>
+          <TooltipProvider delayDuration={0}>
             <Toaster />
             <Sonner />
             <AppRoutes />
-          </BrowserRouter>
-        </QueryClientProvider>
-      </TooltipProvider>
-    </React.StrictMode>
+          </TooltipProvider>
+        </React.StrictMode>
+      </QueryClientProvider>
+    </BrowserRouter>
   )
 }
 
