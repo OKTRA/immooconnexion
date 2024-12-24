@@ -12,7 +12,6 @@ import { useToast } from "@/hooks/use-toast"
 import { Loader2, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { getSupabaseSessionKey } from "@/utils/sessionUtils"
-import { TooltipProvider } from "@/components/ui/tooltip"
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
@@ -105,48 +104,46 @@ const AdminDashboard = () => {
   }
 
   return (
-    <TooltipProvider>
-      <div className="container mx-auto p-6">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Tableau de bord administrateur</h1>
-          <Button 
-            variant="ghost" 
-            className="text-red-500 hover:text-red-600 hover:bg-red-100"
-            onClick={handleLogout}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Déconnexion
-          </Button>
-        </div>
-
-        <AdminStats />
-
-        <Tabs defaultValue="profiles" className="mt-8">
-          <TabsList>
-            <TabsTrigger value="profiles">Profils</TabsTrigger>
-            <TabsTrigger value="agencies">Agences</TabsTrigger>
-            <TabsTrigger value="properties">Biens</TabsTrigger>
-            <TabsTrigger value="tenants">Locataires</TabsTrigger>
-            <TabsTrigger value="plans">Plans d'abonnement</TabsTrigger>
-          </TabsList>
-          <TabsContent value="profiles">
-            <AdminProfiles />
-          </TabsContent>
-          <TabsContent value="agencies">
-            <AdminAgencies />
-          </TabsContent>
-          <TabsContent value="properties">
-            <AdminProperties />
-          </TabsContent>
-          <TabsContent value="tenants">
-            <AdminTenants />
-          </TabsContent>
-          <TabsContent value="plans">
-            <AdminSubscriptionPlans />
-          </TabsContent>
-        </Tabs>
+    <div className="container mx-auto p-6">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Tableau de bord administrateur</h1>
+        <Button 
+          variant="ghost" 
+          className="text-red-500 hover:text-red-600 hover:bg-red-100"
+          onClick={handleLogout}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Déconnexion
+        </Button>
       </div>
-    </TooltipProvider>
+
+      <AdminStats />
+
+      <Tabs defaultValue="profiles" className="mt-8">
+        <TabsList>
+          <TabsTrigger value="profiles">Profils</TabsTrigger>
+          <TabsTrigger value="agencies">Agences</TabsTrigger>
+          <TabsTrigger value="properties">Biens</TabsTrigger>
+          <TabsTrigger value="tenants">Locataires</TabsTrigger>
+          <TabsTrigger value="plans">Plans d'abonnement</TabsTrigger>
+        </TabsList>
+        <TabsContent value="profiles">
+          <AdminProfiles />
+        </TabsContent>
+        <TabsContent value="agencies">
+          <AdminAgencies />
+        </TabsContent>
+        <TabsContent value="properties">
+          <AdminProperties />
+        </TabsContent>
+        <TabsContent value="tenants">
+          <AdminTenants />
+        </TabsContent>
+        <TabsContent value="plans">
+          <AdminSubscriptionPlans />
+        </TabsContent>
+      </Tabs>
+    </div>
   )
 }
 
