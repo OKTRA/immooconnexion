@@ -1,5 +1,6 @@
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface Profile {
   email: string;
@@ -7,6 +8,7 @@ interface Profile {
   last_name: string;
   phone_number: string;
   password?: string;
+  role?: string;
 }
 
 interface BasicInfoFieldsProps {
@@ -66,6 +68,22 @@ export function BasicInfoFields({
           onChange={(e) => handleChange('phone_number', e.target.value)}
           required
         />
+      </div>
+      <div>
+        <Label htmlFor="role">Rôle</Label>
+        <Select 
+          value={newProfile?.role || 'user'} 
+          onValueChange={(value) => handleChange('role', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Sélectionner un rôle" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="user">Utilisateur</SelectItem>
+            <SelectItem value="admin">Admin</SelectItem>
+            <SelectItem value="super_admin">Super Admin</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       {!isEditing && (
         <div>
