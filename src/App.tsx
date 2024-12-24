@@ -18,7 +18,7 @@ import TenantContracts from "./pages/TenantContracts"
 import AdminDashboard from "./pages/AdminDashboard"
 import { useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
-import { StrictMode } from "react"
+import React from "react"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -125,17 +125,17 @@ const AppRoutes = () => {
 
 const App = () => {
   return (
-    <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
+    <React.StrictMode>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
           <TooltipProvider>
             <Toaster />
             <Sonner />
             <AppRoutes />
           </TooltipProvider>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </StrictMode>
+        </QueryClientProvider>
+      </BrowserRouter>
+    </React.StrictMode>
   )
 }
 
