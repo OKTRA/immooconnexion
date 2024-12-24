@@ -1,33 +1,27 @@
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { PropertyCard } from "./PropertyCard"
+import { Property } from "@/components/property/types"
 
-export function PropertiesGrid() {
-  const { data: properties, isLoading } = useQuery({
-    queryKey: ['properties'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .order('created_at', { ascending: false })
-      
-      if (error) throw error
-      return data
-    }
-  })
+interface PropertiesGridProps {
+  properties: Array<Property & {
+    agency_name: string;
+    agency_address: string;
+    status: string;
+  }>;
+}
 
-  if (isLoading) {
-    return (
-      <div className="text-center py-12">
-        Chargement des propriétés...
-      </div>
-    )
-  }
-
+export function PropertiesGrid({ properties }: PropertiesGridProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-7xl mx-auto px-4">
-      {properties?.map((property) => (
-        <PropertyCard key={property.id} property={property} />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {properties.map(property => (
+        <div key={property.id} className="border rounded-lg p-4 bg-white shadow">
+          <h2 className="text-lg font-semibold">{property.bien}</h2>
+          <p>Type: {property.type}</p>
+          <p>Chambres: {property.chambres}</p>
+          <p>Ville: {property.ville}</p>
+          <p>Loyer: {property.loyer} FCFA</p>
+          <p>Statut: {property.status}</p>
+          <p>Agence: {property.agency_name}</p>
+          <p>Adresse de l'agence: {property.agency_address}</p>
+        </div>
       ))}
     </div>
   )

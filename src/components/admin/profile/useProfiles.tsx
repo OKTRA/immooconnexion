@@ -1,7 +1,20 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
-import { Agency } from "@/integrations/supabase/types/agencies"
+import { Agency } from "@/components/admin/agency/types"
+
+interface ProfileWithAgency {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone_number: string | null;
+  role: string | null;
+  agency_id: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  agencies?: Agency | null;
+}
 
 export function useProfiles() {
   const { toast } = useToast()
@@ -56,9 +69,9 @@ export function useProfiles() {
         }
 
         // Map and return the results
-        return profiles?.map(profile => ({
+        return (profiles as ProfileWithAgency[])?.map(profile => ({
           ...profile,
-          agency_name: (profile.agencies as Agency)?.name || '-'
+          agency_name: profile.agencies?.name || '-'
         })) || []
 
       } catch (error: any) {
