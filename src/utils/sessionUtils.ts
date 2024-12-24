@@ -1,3 +1,3 @@
 export const getSupabaseSessionKey = () => {
-  return `sb-pmgymlbyebdqfwkovwvd-auth-token`
+  return `sb-apidxwaaogboeoctlhtz-auth-token`
 }
