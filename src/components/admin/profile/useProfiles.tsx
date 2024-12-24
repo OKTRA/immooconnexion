@@ -15,6 +15,8 @@ export function useProfiles() {
         const { data: { user }, error: authError } = await supabase.auth.getUser()
         if (authError) throw authError
 
+        console.log("User found:", user?.id)
+
         const { data: adminData, error: adminError } = await supabase
           .from("administrators")
           .select("is_super_admin")
@@ -26,14 +28,22 @@ export function useProfiles() {
           throw adminError
         }
 
-        // If super admin, fetch all profiles
+        console.log("User is super admin:", adminData?.is_super_admin)
+
+        // If super admin, fetch all profiles with agency names
         if (adminData?.is_super_admin) {
           const { data: profiles, error: profilesError } = await supabase
             .from("profiles")
-            .select("*, agency:agencies(name)")
+            .select(`
+              *,
+              agency:agencies(name)
+            `)
             .order('created_at', { ascending: false })
 
-          if (profilesError) throw profilesError
+          if (profilesError) {
+            console.error('Error fetching profiles:', profilesError)
+            throw profilesError
+          }
 
           return profiles.map(profile => ({
             ...profile,
@@ -41,10 +51,13 @@ export function useProfiles() {
           }))
         }
 
-        // If not super admin, fetch based on regular admin permissions
+        // If not super admin, fetch profiles based on agency access
         const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
-          .select("*, agency:agencies(name)")
+          .select(`
+            *,
+            agency:agencies(name)
+          `)
           .order('created_at', { ascending: false })
 
         if (profilesError) {
