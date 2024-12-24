@@ -11,24 +11,10 @@ export function useProfiles() {
       try {
         console.log("Fetching profiles...")
         
-        // First check if we can access the profiles table
-        const { data: testAccess, error: testError } = await supabase
-          .from("profiles")
-          .select("id")
-          .limit(1)
-        
-        if (testError) {
-          console.error("Error testing profiles access:", testError)
-          throw new Error("Unable to access profiles")
-        }
-
-        // If we can access profiles, proceed with the full query
+        // Récupérer les profils
         const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
-          .select(`
-            *,
-            agency:agencies(name)
-          `)
+          .select("*, agency:agencies(name)")
           .order('created_at', { ascending: false })
 
         if (profilesError) {
@@ -36,7 +22,7 @@ export function useProfiles() {
           throw profilesError
         }
 
-        // Transform the data to match the expected format
+        // Transformer les données pour inclure le nom de l'agence
         const transformedData = profiles.map(profile => ({
           ...profile,
           agency_name: profile.agency?.name || '-'

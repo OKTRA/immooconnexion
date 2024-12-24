@@ -1,10 +1,8 @@
-import { StrictMode } from "react"
-import { createRoot } from "react-dom/client"
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as Sonner } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import Index from "./pages/Index"
 import Login from "./pages/Login"
@@ -28,100 +26,92 @@ const queryClient = new QueryClient({
   },
 })
 
-const AppRoutes = () => (
-  <Routes>
-    <Route path="/login" element={<Login />} />
-    <Route path="/public" element={<PublicProperties />} />
-    <Route path="/pricing" element={<Pricing />} />
-    <Route
-      path="/"
-      element={
-        <ProtectedRoute>
-          <Index />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/admin"
-      element={
-        <ProtectedRoute>
-          <AdminDashboard />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/locataires"
-      element={
-        <ProtectedRoute>
-          <Tenants />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/locataires/:id/contrats"
-      element={
-        <ProtectedRoute>
-          <TenantContracts />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/biens"
-      element={
-        <ProtectedRoute>
-          <Properties />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/biens/:id"
-      element={
-        <ProtectedRoute>
-          <PropertyDetails />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/depenses"
-      element={
-        <ProtectedRoute>
-          <Expenses />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/gains"
-      element={
-        <ProtectedRoute>
-          <AgencyEarnings />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/rapports"
-      element={
-        <ProtectedRoute>
-          <Reports />
-        </ProtectedRoute>
-      }
-    />
-  </Routes>
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/public" element={<PublicProperties />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Index />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/locataires"
+            element={
+              <ProtectedRoute>
+                <Tenants />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/locataires/:id/contrats"
+            element={
+              <ProtectedRoute>
+                <TenantContracts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/biens"
+            element={
+              <ProtectedRoute>
+                <Properties />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/biens/:id"
+            element={
+              <ProtectedRoute>
+                <PropertyDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/depenses"
+            element={
+              <ProtectedRoute>
+                <Expenses />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/gains"
+            element={
+              <ProtectedRoute>
+                <AgencyEarnings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/rapports"
+            element={
+              <ProtectedRoute>
+                <Reports />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
 )
-
-function App() {
-  return (
-    <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <AppRoutes />
-          </TooltipProvider>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </StrictMode>
-  )
-}
 
 export default App
