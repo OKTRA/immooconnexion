@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Navigate, useNavigate } from "react-router-dom"
+import { Navigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
@@ -11,23 +11,19 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const { toast } = useToast()
-  const navigate = useNavigate()
   
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Clear any existing invalid session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
         
         if (sessionError) {
           console.error("Session error:", sessionError)
-          await supabase.auth.signOut()
-          localStorage.clear()
           setIsAuthenticated(false)
           return
         }
 
-        if (!session) {
+        if (!sessionData.session) {
           setIsAuthenticated(false)
           return
         }
@@ -37,8 +33,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         
         if (userError) {
           console.error("User error:", userError)
+          // If there's an auth error, sign out and clear the session
           await supabase.auth.signOut()
-          localStorage.clear()
           setIsAuthenticated(false)
           return
         }
@@ -66,8 +62,6 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
-        await supabase.auth.signOut()
-        localStorage.clear()
         setIsAuthenticated(false)
         return
       }
@@ -78,7 +72,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return () => {
       subscription.unsubscribe()
     }
-  }, [toast, navigate])
+  }, [toast])
 
   if (isAuthenticated === null) {
     return (

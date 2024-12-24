@@ -35,7 +35,7 @@ export function BasicInfoFields({
         <Input
           id="email"
           type="email"
-          value={newProfile.email || ''}
+          value={newProfile?.email || ''}
           onChange={(e) => handleChange('email', e.target.value)}
           required
         />
@@ -44,7 +44,7 @@ export function BasicInfoFields({
         <Label htmlFor="first_name">Prénom</Label>
         <Input
           id="first_name"
-          value={newProfile.first_name || ''}
+          value={newProfile?.first_name || ''}
           onChange={(e) => handleChange('first_name', e.target.value)}
           required
         />
@@ -53,7 +53,7 @@ export function BasicInfoFields({
         <Label htmlFor="last_name">Nom</Label>
         <Input
           id="last_name"
-          value={newProfile.last_name || ''}
+          value={newProfile?.last_name || ''}
           onChange={(e) => handleChange('last_name', e.target.value)}
           required
         />
@@ -62,7 +62,7 @@ export function BasicInfoFields({
         <Label htmlFor="phone_number">Numéro de téléphone</Label>
         <Input
           id="phone_number"
-          value={newProfile.phone_number || ''}
+          value={newProfile?.phone_number || ''}
           onChange={(e) => handleChange('phone_number', e.target.value)}
           required
         />
@@ -73,7 +73,7 @@ export function BasicInfoFields({
           <Input
             id="password"
             type="password"
-            value={newProfile.password || ''}
+            value={newProfile?.password || ''}
             onChange={(e) => handleChange('password', e.target.value)}
             required
             placeholder="Entrez un mot de passe"

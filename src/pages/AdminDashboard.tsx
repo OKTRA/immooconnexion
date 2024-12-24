@@ -58,11 +58,30 @@ const AdminDashboard = () => {
 
         console.log("User found:", user.id)
 
+        // First check if user is a super admin
+        const { data: adminData, error: adminError } = await supabase
+          .from("administrators")
+          .select("is_super_admin")
+          .eq("id", user.id)
+          .maybeSingle()
+
+        if (adminError) {
+          console.error("Error fetching admin status:", adminError)
+          throw adminError
+        }
+
+        // If user is a super admin, return the data
+        if (adminData?.is_super_admin) {
+          console.log("User is super admin")
+          return adminData
+        }
+
+        // If not super admin, check if they have an admin role in profiles
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", user.id)
-          .single()
+          .maybeSingle()
 
         if (profileError) {
           console.error("Error fetching profile:", profileError)
@@ -74,8 +93,8 @@ const AdminDashboard = () => {
           throw new Error("Accès non autorisé")
         }
 
-        console.log("User is admin")
-        return profile
+        console.log("User is admin via profile")
+        return { is_super_admin: false }
       } catch (error: any) {
         console.error('Admin check error:', error)
         throw error
