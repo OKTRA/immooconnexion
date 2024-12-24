@@ -1,4 +1,5 @@
 import { StrictMode } from "react"
+import { createRoot } from "react-dom/client"
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as Sonner } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -107,19 +108,19 @@ const AppRoutes = () => (
   </Routes>
 )
 
-const App = () => {
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <StrictMode>
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
           <TooltipProvider>
             <Toaster />
             <Sonner />
             <AppRoutes />
           </TooltipProvider>
-        </StrictMode>
-      </BrowserRouter>
-    </QueryClientProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </StrictMode>
   )
 }
 
