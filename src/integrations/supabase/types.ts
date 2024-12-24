@@ -48,7 +48,7 @@ export type Database = {
           phone: string | null
           profile_id: string | null
           show_phone_on_site: boolean | null
-          subscription_plan_id: string | null
+          subscription_plan_id: string
           updated_at: string
         }
         Insert: {
@@ -62,7 +62,7 @@ export type Database = {
           phone?: string | null
           profile_id?: string | null
           show_phone_on_site?: boolean | null
-          subscription_plan_id?: string | null
+          subscription_plan_id: string
           updated_at?: string
         }
         Update: {
@@ -76,7 +76,7 @@ export type Database = {
           phone?: string | null
           profile_id?: string | null
           show_phone_on_site?: boolean | null
-          subscription_plan_id?: string | null
+          subscription_plan_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -199,7 +199,7 @@ export type Database = {
       }
       profiles: {
         Row: {
-          agency_id: string | null
+          agency_id: string
           created_at: string
           email: string | null
           first_name: string | null
@@ -214,7 +214,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          agency_id?: string | null
+          agency_id: string
           created_at?: string
           email?: string | null
           first_name?: string | null
@@ -229,7 +229,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          agency_id?: string | null
+          agency_id?: string
           created_at?: string
           email?: string | null
           first_name?: string | null
