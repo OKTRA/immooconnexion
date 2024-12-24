@@ -33,7 +33,10 @@ export function ProfileForm({
 
   const handleProfileChange = (updatedProfile: any) => {
     if (setNewProfile) {
-      setNewProfile(updatedProfile)
+      setNewProfile({
+        ...newProfile,
+        ...updatedProfile
+      })
     }
   }
 
