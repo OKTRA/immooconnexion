@@ -9,26 +9,31 @@ export function useProfiles() {
     queryKey: ["admin-profiles"],
     queryFn: async () => {
       try {
-        // Get current user
-        const userResponse = await supabase.auth.getUser()
-        const user = userResponse.data.user
+        // Get current user in a separate query
+        const { data: authData, error: authError } = await supabase.auth.getUser()
         
-        if (!user) {
+        if (authError) {
+          console.error('Auth error:', authError)
+          throw new Error("Authentication failed")
+        }
+
+        if (!authData.user) {
           throw new Error("Not authenticated")
         }
 
-        // Check if user is admin
+        // Check admin status in a separate query
         const { data: adminData, error: adminError } = await supabase
           .from("administrators")
           .select("is_super_admin")
-          .eq("id", user.id)
+          .eq("id", authData.user.id)
           .maybeSingle()
 
         if (adminError) {
           console.error('Admin check error:', adminError)
+          // Continue even if admin check fails - will fall back to regular permissions
         }
 
-        // Fetch profiles with agency info
+        // Fetch profiles in a separate query with explicit field selection
         const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
           .select(`
@@ -40,7 +45,7 @@ export function useProfiles() {
             phone_number,
             agency_id,
             created_at,
-            agency:agencies (
+            agency:agencies!inner (
               name
             )
           `)
@@ -51,13 +56,8 @@ export function useProfiles() {
           throw profilesError
         }
 
-        // Return empty array if no profiles found
-        if (!profiles) {
-          return []
-        }
-
         // Map the results to include agency name
-        return profiles.map(profile => ({
+        return (profiles || []).map(profile => ({
           ...profile,
           agency_name: profile.agency?.name || '-'
         }))
@@ -73,6 +73,16 @@ export function useProfiles() {
       }
     },
     retry: 1,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    meta: {
+      onError: (error: Error) => {
+        console.error('Query error:', error)
+        toast({
+          title: "Erreur",
+          description: error.message || "Une erreur est survenue",
+          variant: "destructive",
+        })
+      }
+    }
   })
 }
