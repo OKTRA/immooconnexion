@@ -15,17 +15,30 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Vérifier la session actuelle
-        const { data: { session } } = await supabase.auth.getSession()
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
         
-        if (!session) {
+        if (sessionError) {
+          console.error("Session error:", sessionError)
           setIsAuthenticated(false)
           return
         }
 
-        // Vérifier l'utilisateur
-        const { data: { user } } = await supabase.auth.getUser()
+        if (!sessionData.session) {
+          setIsAuthenticated(false)
+          return
+        }
+
+        // Verify the user exists
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
         
+        if (userError) {
+          console.error("User error:", userError)
+          // If there's an auth error, sign out and clear the session
+          await supabase.auth.signOut()
+          setIsAuthenticated(false)
+          return
+        }
+
         if (!user) {
           setIsAuthenticated(false)
           return
@@ -33,16 +46,21 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
         setIsAuthenticated(true)
       } catch (error) {
-        console.error("Erreur d'authentification:", error)
+        console.error("Auth check error:", error)
         setIsAuthenticated(false)
+        toast({
+          title: "Erreur d'authentification",
+          description: "Veuillez vous reconnecter",
+          variant: "destructive"
+        })
       }
     }
 
-    // Vérification initiale
+    // Initial check
     checkAuth()
 
-    // Écouter les changements d'état d'authentification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
         setIsAuthenticated(false)
         return
@@ -54,7 +72,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return () => {
       subscription.unsubscribe()
     }
-  }, [])
+  }, [toast])
 
   if (isAuthenticated === null) {
     return (
