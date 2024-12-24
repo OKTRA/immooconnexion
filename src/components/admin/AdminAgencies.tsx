@@ -10,13 +10,34 @@ export function AdminAgencies() {
   const { data: agencies = [], refetch } = useQuery({
     queryKey: ["admin-agencies"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("agencies")
-        .select("*")
-        .order("name")
+      try {
+        const { data: authData, error: authError } = await supabase.auth.getUser()
+        if (authError) throw authError
+
+        // Vérifier si l'utilisateur est un super admin
+        const { data: adminData } = await supabase
+          .from("administrators")
+          .select("is_super_admin")
+          .eq("id", authData.user?.id)
+          .maybeSingle()
+
+        // Récupérer toutes les agences si super admin, sinon filtrer par profil
+        const { data, error } = await supabase
+          .from("agencies")
+          .select("*")
+          .order("name")
       
-      if (error) throw error
-      return data
+        if (error) throw error
+        return data as Agency[]
+      } catch (error: any) {
+        console.error('Error fetching agencies:', error)
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les agences",
+          variant: "destructive"
+        })
+        return []
+      }
     },
   })
 

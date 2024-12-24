@@ -10,14 +10,14 @@ export function useProfiles() {
     queryFn: async () => {
       try {
         // Get current user
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        const { data: authData, error: authError } = await supabase.auth.getUser()
         
         if (authError) {
           console.error('Auth error:', authError)
           throw new Error("Authentication failed")
         }
 
-        if (!user) {
+        if (!authData.user) {
           throw new Error("Not authenticated")
         }
 
@@ -25,7 +25,7 @@ export function useProfiles() {
         const { data: adminData, error: adminError } = await supabase
           .from("administrators")
           .select("is_super_admin")
-          .eq("id", user.id)
+          .eq("id", authData.user.id)
           .maybeSingle()
 
         if (adminError) {
@@ -33,18 +33,15 @@ export function useProfiles() {
           // Continue even if admin check fails - will fall back to regular permissions
         }
 
+        if (adminData?.is_super_admin) {
+          console.log("User is super admin")
+        }
+
         // Fetch profiles with a single query that includes agency data
         const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
           .select(`
-            id,
-            first_name,
-            last_name,
-            email,
-            role,
-            phone_number,
-            agency_id,
-            created_at,
+            *,
             agencies (
               name
             )
@@ -74,15 +71,5 @@ export function useProfiles() {
     },
     retry: 1,
     refetchOnWindowFocus: false,
-    meta: {
-      onError: (error: Error) => {
-        console.error('Query error:', error)
-        toast({
-          title: "Erreur",
-          description: error.message || "Une erreur est survenue",
-          variant: "destructive",
-        })
-      }
-    }
   })
 }
