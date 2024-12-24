@@ -11,22 +11,20 @@ interface Profile {
 
 interface BasicInfoFieldsProps {
   newProfile?: Profile
-  setNewProfile?: (profile: Profile) => void
+  onProfileChange: (profile: Profile) => void
   isEditing?: boolean
 }
 
 export function BasicInfoFields({ 
   newProfile = {}, 
-  setNewProfile,
+  onProfileChange,
   isEditing = false 
 }: BasicInfoFieldsProps) {
   const handleChange = (field: keyof Profile, value: string) => {
-    if (setNewProfile) {
-      setNewProfile({
-        ...newProfile,
-        [field]: value
-      })
-    }
+    onProfileChange({
+      ...newProfile,
+      [field]: value
+    })
   }
 
   return (

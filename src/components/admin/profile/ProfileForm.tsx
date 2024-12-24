@@ -31,11 +31,17 @@ export function ProfileForm({
     }
   }
 
+  const handleProfileChange = (updatedProfile: any) => {
+    if (setNewProfile) {
+      setNewProfile(updatedProfile)
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-2xl mx-auto px-4 md:px-0">
       <BasicInfoFields 
         newProfile={newProfile} 
-        setNewProfile={setNewProfile}
+        onProfileChange={handleProfileChange}
         isEditing={isEditing}
       />
       <AgencySelect 
