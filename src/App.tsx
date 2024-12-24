@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import Index from "./pages/Index"
 import Login from "./pages/Login"
+import SuperAdminLogin from "./pages/SuperAdminLogin"
 import PublicProperties from "./pages/PublicProperties"
 import Pricing from "./pages/Pricing"
 import Tenants from "./pages/Tenants"
@@ -31,6 +32,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/super-admin/login" element={<SuperAdminLogin />} />
       <Route path="/public" element={<PublicProperties />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route
