@@ -46,7 +46,6 @@ export type Database = {
           logo_url: string | null
           name: string
           phone: string | null
-          profile_id: string | null
           show_phone_on_site: boolean | null
           subscription_plan_id: string
           updated_at: string
@@ -60,7 +59,6 @@ export type Database = {
           logo_url?: string | null
           name: string
           phone?: string | null
-          profile_id?: string | null
           show_phone_on_site?: boolean | null
           subscription_plan_id: string
           updated_at?: string
@@ -74,20 +72,11 @@ export type Database = {
           logo_url?: string | null
           name?: string
           phone?: string | null
-          profile_id?: string | null
           show_phone_on_site?: boolean | null
           subscription_plan_id?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "agencies_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       contracts: {
         Row: {
