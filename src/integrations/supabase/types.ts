@@ -51,6 +51,9 @@ export type Database = {
         Row: {
           address: string | null
           created_at: string
+          current_profiles_count: number | null
+          current_properties_count: number | null
+          current_tenants_count: number | null
           email: string | null
           id: string
           list_properties_on_site: boolean | null
@@ -64,6 +67,9 @@ export type Database = {
         Insert: {
           address?: string | null
           created_at?: string
+          current_profiles_count?: number | null
+          current_properties_count?: number | null
+          current_tenants_count?: number | null
           email?: string | null
           id?: string
           list_properties_on_site?: boolean | null
@@ -77,6 +83,9 @@ export type Database = {
         Update: {
           address?: string | null
           created_at?: string
+          current_profiles_count?: number | null
+          current_properties_count?: number | null
+          current_tenants_count?: number | null
           email?: string | null
           id?: string
           list_properties_on_site?: boolean | null
