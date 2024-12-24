@@ -17,7 +17,7 @@ import TenantContracts from "./pages/TenantContracts"
 import AdminDashboard from "./pages/AdminDashboard"
 import { useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
-import { TooltipProvider } from "@/components/ui/tooltip"
+import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -125,11 +125,11 @@ const App = () => {
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
+        <TooltipPrimitive.Provider>
           <Toaster />
           <Sonner />
           <AppRoutes />
-        </TooltipProvider>
+        </TooltipPrimitive.Provider>
       </QueryClientProvider>
     </BrowserRouter>
   )
