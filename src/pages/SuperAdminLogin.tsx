@@ -20,23 +20,38 @@ export default function SuperAdminLogin() {
     setIsLoading(true)
 
     try {
-      const { data: { user }, error } = await supabase.auth.signInWithPassword({
+      // First, attempt to sign in
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) throw error
+      if (signInError) {
+        console.error("Sign in error:", signInError)
+        throw new Error("Email ou mot de passe incorrect")
+      }
 
-      // Check super admin status in a separate query
+      if (!signInData.user) {
+        throw new Error("Aucun utilisateur trouvé")
+      }
+
+      // Then check if the user is a super admin
       const { data: adminData, error: adminError } = await supabase
         .from('administrators')
         .select('is_super_admin')
-        .eq('id', user?.id)
-        .maybeSingle()
+        .eq('id', signInData.user.id)
+        .single()
 
-      if (adminError) throw adminError
+      if (adminError) {
+        console.error("Admin check error:", adminError)
+        // Sign out if admin check fails
+        await supabase.auth.signOut()
+        throw new Error("Erreur lors de la vérification des droits d'administrateur")
+      }
 
       if (!adminData?.is_super_admin) {
+        // Sign out if not a super admin
+        await supabase.auth.signOut()
         throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent se connecter ici.")
       }
 
@@ -49,9 +64,11 @@ export default function SuperAdminLogin() {
     } catch (error: any) {
       toast({
         title: "Erreur de connexion",
-        description: error.message,
+        description: error.message || "Une erreur est survenue lors de la connexion",
         variant: "destructive",
       })
+      // Make sure we're signed out if there was an error
+      await supabase.auth.signOut()
     } finally {
       setIsLoading(false)
     }
@@ -84,6 +101,7 @@ export default function SuperAdminLogin() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -94,6 +112,7 @@ export default function SuperAdminLogin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
