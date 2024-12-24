@@ -245,6 +245,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_administrator_profile"
+            columns: ["administrator_id"]
+            isOneToOne: false
+            referencedRelation: "administrators"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "profiles_administrator_id_fkey"
             columns: ["administrator_id"]
             isOneToOne: false

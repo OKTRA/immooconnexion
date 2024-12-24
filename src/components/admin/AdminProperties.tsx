@@ -29,7 +29,6 @@ export function AdminProperties() {
         const { data: { user }, error: authError } = await supabase.auth.getUser()
         if (authError) {
           console.error('Auth error:', authError)
-          // If there's an auth error, clear the session and redirect to login
           await supabase.auth.signOut()
           navigate("/login")
           throw new Error("Session expired. Please login again.")
@@ -37,13 +36,41 @@ export function AdminProperties() {
 
         if (!user) throw new Error("Non authentifié")
 
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select('*')
+        // First check if user is a super admin
+        const { data: adminData } = await supabase
+          .from("administrators")
+          .select("is_super_admin")
           .eq("id", user.id)
           .maybeSingle()
 
-        // If admin, get all properties, otherwise get only agency's properties
+        // If super admin, get all properties
+        if (adminData?.is_super_admin) {
+          const { data, error } = await supabase
+            .from("properties")
+            .select(`
+              *,
+              agency:agencies(
+                id,
+                name
+              )
+            `)
+            .order("created_at", { ascending: false })
+
+          if (error) throw error
+          return data.map(property => ({
+            ...property,
+            agency_name: property.agency?.name || 'N/A'
+          }))
+        }
+
+        // If not super admin, check regular profile permissions
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select('role, agency_id')
+          .eq("id", user.id)
+          .maybeSingle()
+
+        // Get properties based on regular admin permissions
         const query = supabase
           .from("properties")
           .select(`
@@ -56,7 +83,11 @@ export function AdminProperties() {
           .order("created_at", { ascending: false })
 
         if (profile?.role !== 'admin') {
-          query.eq('agency_id', user.id)
+          if (profile?.agency_id) {
+            query.eq('agency_id', profile.agency_id)
+          } else {
+            return []
+          }
         }
 
         const { data, error } = await query
