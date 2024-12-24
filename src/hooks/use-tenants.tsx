@@ -58,11 +58,9 @@ export function useTenants() {
         throw new Error("Non authentifié")
       }
 
-      console.log('User ID:', user.id)
-
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('*')
+        .select('role, agency_id')
         .eq('id', user.id)
         .maybeSingle()
       
@@ -70,8 +68,6 @@ export function useTenants() {
         console.error('Erreur lors de la vérification du profil:', profileError)
         throw profileError
       }
-      
-      console.log('Profil utilisateur:', profileData)
 
       let query = supabase
         .from('tenants')
@@ -87,10 +83,9 @@ export function useTenants() {
           agency_id
         `)
 
-      // Si l'utilisateur n'est pas admin, on filtre par user_id, agency_id ou profileData.id
+      // Si l'utilisateur n'est pas admin, on filtre par agency_id
       if (profileData?.role !== 'admin') {
-        query = query.or(`user_id.eq.${user.id},agency_id.eq.${user.id},agency_id.eq.${profileData.id}`)
-        console.log('Filtrage par user_id, agency_id ou profileData.id:', user.id, profileData.id)
+        query = query.eq('agency_id', profileData.agency_id)
       }
       
       const { data: tenantsData, error: tenantsError } = await query
@@ -100,8 +95,6 @@ export function useTenants() {
         console.error('Erreur lors de la récupération des locataires:', tenantsError)
         throw tenantsError
       }
-      
-      console.log('Données des locataires brutes:', tenantsData)
 
       return tenantsData.map((tenant: any) => ({
         id: tenant.id,

@@ -3,12 +3,14 @@ import { Loader2 } from "lucide-react"
 import { TenantsTableHeader } from "./tenants/TenantsTableHeader"
 import { TenantsTableContent } from "./tenants/TenantsTableContent"
 import { TenantDisplay, useTenants } from "@/hooks/use-tenants"
+import { useToast } from "./ui/use-toast"
 
 interface TenantsTableProps {
   onEdit: (tenant: TenantDisplay) => void
 }
 
 export function TenantsTable({ onEdit }: TenantsTableProps) {
+  const { toast } = useToast()
   const { tenants, isLoading, error, session } = useTenants()
 
   if (!session) {
@@ -28,9 +30,22 @@ export function TenantsTable({ onEdit }: TenantsTableProps) {
   }
 
   if (error) {
+    toast({
+      title: "Erreur",
+      description: "Une erreur est survenue lors du chargement des locataires. Veuillez réessayer.",
+      variant: "destructive",
+    })
     return (
       <div className="text-center py-8 text-red-500">
         Une erreur est survenue lors du chargement des locataires
+      </div>
+    )
+  }
+
+  if (!tenants || tenants.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        Aucun locataire trouvé
       </div>
     )
   }
