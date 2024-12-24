@@ -28,7 +28,13 @@ export default function SuperAdminLogin() {
 
       if (signInError) {
         console.error("Sign in error:", signInError)
-        throw new Error("Email ou mot de passe incorrect")
+        
+        // Handle specific error cases
+        if (signInError.message.includes('Invalid login credentials')) {
+          throw new Error("Email ou mot de passe incorrect. Veuillez vérifier vos identifiants.")
+        }
+        
+        throw new Error(signInError.message)
       }
 
       if (!signInData.user) {
@@ -102,6 +108,7 @@ export default function SuperAdminLogin() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
+                placeholder="admin@example.com"
               />
             </div>
             <div className="space-y-2">
@@ -113,6 +120,7 @@ export default function SuperAdminLogin() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
+                placeholder="••••••••"
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
