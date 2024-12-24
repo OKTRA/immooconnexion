@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Loader2, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { getSupabaseSessionKey } from "@/utils/sessionUtils"
+import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
@@ -58,30 +59,11 @@ const AdminDashboard = () => {
 
         console.log("User found:", user.id)
 
-        // First check if user is a super admin
-        const { data: adminData, error: adminError } = await supabase
-          .from("administrators")
-          .select("is_super_admin")
-          .eq("id", user.id)
-          .maybeSingle()
-
-        if (adminError) {
-          console.error("Error fetching admin status:", adminError)
-          throw adminError
-        }
-
-        // If user is a super admin, return the data
-        if (adminData?.is_super_admin) {
-          console.log("User is super admin")
-          return adminData
-        }
-
-        // If not super admin, check if they have an admin role in profiles
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", user.id)
-          .maybeSingle()
+          .single()
 
         if (profileError) {
           console.error("Error fetching profile:", profileError)
@@ -93,8 +75,8 @@ const AdminDashboard = () => {
           throw new Error("Accès non autorisé")
         }
 
-        console.log("User is admin via profile")
-        return { is_super_admin: false }
+        console.log("User is admin")
+        return profile
       } catch (error: any) {
         console.error('Admin check error:', error)
         throw error
@@ -123,46 +105,48 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Tableau de bord administrateur</h1>
-        <Button 
-          variant="ghost" 
-          className="text-red-500 hover:text-red-600 hover:bg-red-100"
-          onClick={handleLogout}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Déconnexion
-        </Button>
+    <TooltipPrimitive.Provider>
+      <div className="container mx-auto p-6">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Tableau de bord administrateur</h1>
+          <Button 
+            variant="ghost" 
+            className="text-red-500 hover:text-red-600 hover:bg-red-100"
+            onClick={handleLogout}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Déconnexion
+          </Button>
+        </div>
+
+        <AdminStats />
+
+        <Tabs defaultValue="profiles" className="mt-8">
+          <TabsList>
+            <TabsTrigger value="profiles">Profils</TabsTrigger>
+            <TabsTrigger value="agencies">Agences</TabsTrigger>
+            <TabsTrigger value="properties">Biens</TabsTrigger>
+            <TabsTrigger value="tenants">Locataires</TabsTrigger>
+            <TabsTrigger value="plans">Plans d'abonnement</TabsTrigger>
+          </TabsList>
+          <TabsContent value="profiles">
+            <AdminProfiles />
+          </TabsContent>
+          <TabsContent value="agencies">
+            <AdminAgencies />
+          </TabsContent>
+          <TabsContent value="properties">
+            <AdminProperties />
+          </TabsContent>
+          <TabsContent value="tenants">
+            <AdminTenants />
+          </TabsContent>
+          <TabsContent value="plans">
+            <AdminSubscriptionPlans />
+          </TabsContent>
+        </Tabs>
       </div>
-
-      <AdminStats />
-
-      <Tabs defaultValue="profiles" className="mt-8">
-        <TabsList>
-          <TabsTrigger value="profiles">Profils</TabsTrigger>
-          <TabsTrigger value="agencies">Agences</TabsTrigger>
-          <TabsTrigger value="properties">Biens</TabsTrigger>
-          <TabsTrigger value="tenants">Locataires</TabsTrigger>
-          <TabsTrigger value="plans">Plans d'abonnement</TabsTrigger>
-        </TabsList>
-        <TabsContent value="profiles">
-          <AdminProfiles />
-        </TabsContent>
-        <TabsContent value="agencies">
-          <AdminAgencies />
-        </TabsContent>
-        <TabsContent value="properties">
-          <AdminProperties />
-        </TabsContent>
-        <TabsContent value="tenants">
-          <AdminTenants />
-        </TabsContent>
-        <TabsContent value="plans">
-          <AdminSubscriptionPlans />
-        </TabsContent>
-      </Tabs>
-    </div>
+    </TooltipPrimitive.Provider>
   )
 }
 
