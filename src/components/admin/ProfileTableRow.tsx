@@ -56,11 +56,10 @@ export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowPro
           </DialogHeader>
           <ProfileForm 
             newProfile={editedProfile} 
-            setNewProfile={setEditedProfile} 
+            setNewProfile={setEditedProfile}
+            onSubmit={handleSaveEdit}
+            isEditing={true}
           />
-          <Button onClick={handleSaveEdit} className="w-full">
-            Enregistrer
-          </Button>
         </DialogContent>
       </Dialog>
     </>

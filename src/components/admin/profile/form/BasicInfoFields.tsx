@@ -2,22 +2,32 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 
 interface Profile {
-  email?: string;
-  first_name?: string;
-  last_name?: string;
-  phone_number?: string;
-  password?: string;
+  email?: string
+  first_name?: string
+  last_name?: string
+  phone_number?: string
+  password?: string
 }
 
 interface BasicInfoFieldsProps {
-  newProfile?: Profile;
-  setNewProfile: (profile: Profile) => void;
+  newProfile?: Profile
+  setNewProfile: (profile: Profile) => void
+  isEditing?: boolean
 }
 
-export function BasicInfoFields({ newProfile = {}, setNewProfile }: BasicInfoFieldsProps) {
+export function BasicInfoFields({ 
+  newProfile = {}, 
+  setNewProfile,
+  isEditing = false 
+}: BasicInfoFieldsProps) {
   const handleChange = (field: keyof Profile, value: string) => {
-    setNewProfile({ ...newProfile, [field]: value });
-  };
+    if (setNewProfile) {
+      setNewProfile({
+        ...newProfile,
+        [field]: value
+      })
+    }
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -57,17 +67,19 @@ export function BasicInfoFields({ newProfile = {}, setNewProfile }: BasicInfoFie
           onChange={(e) => handleChange('phone_number', e.target.value)}
         />
       </div>
-      <div>
-        <Label htmlFor="password">Mot de passe</Label>
-        <Input
-          id="password"
-          type="password"
-          value={newProfile?.password || ''}
-          onChange={(e) => handleChange('password', e.target.value)}
-          required
-          placeholder="Entrez un mot de passe"
-        />
-      </div>
+      {!isEditing && (
+        <div>
+          <Label htmlFor="password">Mot de passe</Label>
+          <Input
+            id="password"
+            type="password"
+            value={newProfile?.password || ''}
+            onChange={(e) => handleChange('password', e.target.value)}
+            required
+            placeholder="Entrez un mot de passe"
+          />
+        </div>
+      )}
     </div>
   )
 }
