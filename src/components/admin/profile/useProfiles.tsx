@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 
 export function useProfiles() {
+  const { toast } = useToast()
+
   return useQuery({
     queryKey: ["admin-profiles"],
     queryFn: async () => {
-      console.log("Début de la récupération des profils...")
-      
       try {
         const { data, error } = await supabase
           .from("profiles")
@@ -26,26 +27,30 @@ export function useProfiles() {
           .order('created_at', { ascending: false })
 
         if (error) {
-          console.error('Erreur lors de la récupération des profils:', error)
+          console.error('Error fetching profiles:', error)
+          toast({
+            title: "Erreur",
+            description: "Impossible de charger les profils",
+            variant: "destructive",
+          })
           throw error
         }
 
-        // Transformer les données pour inclure le nom de l'agence
+        // Transform data to include agency_name
         const transformedData = data?.map(profile => ({
           ...profile,
           agency_name: profile.agency?.name || '-'
         }))
 
-        console.log("Profils récupérés avec succès:", transformedData)
-        return transformedData
+        return transformedData || []
       } catch (error: any) {
-        console.error('Erreur dans useProfiles:', error)
+        console.error('Error in useProfiles:', error)
         throw error
       }
     },
     meta: {
       onError: (error: Error) => {
-        console.error('Erreur de requête:', error)
+        console.error('Query error:', error)
       }
     }
   })
