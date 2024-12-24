@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { AddAgencyDialog } from "../profile/AddAgencyDialog"
 import { useState } from "react"
+import { useToast } from "@/hooks/use-toast"
 
 interface AgencyTableProps {
   agencies: Agency[]
@@ -14,6 +15,24 @@ interface AgencyTableProps {
 
 export function AgencyTable({ agencies, onEdit, refetch }: AgencyTableProps) {
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const { toast } = useToast()
+
+  const handleAgencyCreated = async () => {
+    try {
+      await refetch()
+      toast({
+        title: "Succès",
+        description: "Les données ont été mises à jour",
+      })
+    } catch (error) {
+      console.error('Error refreshing data:', error)
+      toast({
+        title: "Erreur",
+        description: "Impossible de rafraîchir les données",
+        variant: "destructive"
+      })
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -42,9 +61,16 @@ export function AgencyTable({ agencies, onEdit, refetch }: AgencyTableProps) {
                 key={agency.id}
                 agency={agency}
                 onEdit={onEdit}
-                refetch={refetch}
+                refetch={handleAgencyCreated}
               />
             ))}
+            {agencies.length === 0 && (
+              <TableRow>
+                <TableHead colSpan={5} className="text-center py-4">
+                  Aucune agence trouvée
+                </TableHead>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
@@ -52,7 +78,7 @@ export function AgencyTable({ agencies, onEdit, refetch }: AgencyTableProps) {
       <AddAgencyDialog 
         showDialog={showAddDialog}
         setShowDialog={setShowAddDialog}
-        onAgencyCreated={refetch}
+        onAgencyCreated={handleAgencyCreated}
       />
     </div>
   )
