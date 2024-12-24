@@ -22,7 +22,7 @@ export function useProfiles() {
             list_properties_on_site,
             created_at,
             agency_id,
-            agency:agencies(name)
+            agency:agencies!profiles_agency_id_fkey(name)
           `)
           .order('created_at', { ascending: false })
 
