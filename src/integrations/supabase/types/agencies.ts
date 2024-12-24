@@ -10,6 +10,9 @@ export interface Agency {
   created_at: string | null;
   updated_at: string | null;
   logo_url: string | null;
+  current_properties_count?: number;
+  current_tenants_count?: number;
+  current_profiles_count?: number;
 }
 
 export type AgencyInsert = Partial<Agency>;
