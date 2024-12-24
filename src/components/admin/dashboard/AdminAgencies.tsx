@@ -2,13 +2,12 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { AgencyTable } from "./agency/AgencyTable"
-import { Agency } from "./agency/types"
+import { AgencyTable } from "../agency/AgencyTable"
+import { Agency } from "../agency/types"
 import { Loader2 } from "lucide-react"
 
 export function AdminAgencies() {
   const { toast } = useToast()
-  const [isEditing, setIsEditing] = useState(false)
 
   const { data: agencies = [], isLoading, error, refetch } = useQuery({
     queryKey: ["admin-agencies"],
@@ -16,6 +15,16 @@ export function AdminAgencies() {
       try {
         const { data: { user }, error: authError } = await supabase.auth.getUser()
         if (authError) throw authError
+
+        const { data: adminData } = await supabase
+          .from("administrators")
+          .select("is_super_admin")
+          .eq("id", user.id)
+          .maybeSingle()
+
+        if (!adminData?.is_super_admin) {
+          throw new Error("Accès non autorisé")
+        }
 
         const { data, error } = await supabase
           .from("agencies")
@@ -37,7 +46,6 @@ export function AdminAgencies() {
 
   const handleEditAgency = async (editedAgency: Agency) => {
     try {
-      setIsEditing(true)
       const { error } = await supabase
         .from("agencies")
         .update({
@@ -65,8 +73,6 @@ export function AdminAgencies() {
         description: error.message || "Une erreur est survenue lors de la mise à jour de l'agence",
         variant: "destructive",
       })
-    } finally {
-      setIsEditing(false)
     }
   }
 

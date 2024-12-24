@@ -8,25 +8,30 @@ export function AdminStats() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
-      const [
-        { count: profilesCount },
-        { count: propertiesCount },
-        { count: tenantsCount },
-        { data: contracts },
-      ] = await Promise.all([
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
-        supabase.from("properties").select("*", { count: "exact", head: true }),
-        supabase.from("tenants").select("*", { count: "exact", head: true }),
-        supabase.from("contracts").select("montant"),
-      ])
+      try {
+        const [
+          { count: profilesCount },
+          { count: propertiesCount },
+          { count: tenantsCount },
+          { data: contracts },
+        ] = await Promise.all([
+          supabase.from("profiles").select("*", { count: "exact", head: true }),
+          supabase.from("properties").select("*", { count: "exact", head: true }),
+          supabase.from("tenants").select("*", { count: "exact", head: true }),
+          supabase.from("contracts").select("montant"),
+        ])
 
-      const totalRevenue = contracts?.reduce((sum, contract) => sum + (contract.montant || 0), 0) || 0
+        const totalRevenue = contracts?.reduce((sum, contract) => sum + (contract.montant || 0), 0) || 0
 
-      return {
-        profiles: profilesCount || 0,
-        properties: propertiesCount || 0,
-        tenants: tenantsCount || 0,
-        revenue: totalRevenue,
+        return {
+          profiles: profilesCount || 0,
+          properties: propertiesCount || 0,
+          tenants: tenantsCount || 0,
+          revenue: totalRevenue,
+        }
+      } catch (error) {
+        console.error('Error fetching stats:', error)
+        throw error
       }
     },
   })

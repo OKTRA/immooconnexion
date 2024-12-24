@@ -13,65 +13,32 @@ import { fr } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
-import { useToast } from "@/components/ui/use-toast"
-import { useNavigate } from "react-router-dom"
+import { useToast } from "@/hooks/use-toast"
+import { Loader2 } from "lucide-react"
 
 export function AdminProperties() {
   const [searchTerm, setSearchTerm] = useState("")
   const { toast } = useToast()
-  const navigate = useNavigate()
   
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["admin-properties"],
     queryFn: async () => {
       try {
-        // Get the current user's profile to check if they're an admin
         const { data: { user }, error: authError } = await supabase.auth.getUser()
-        if (authError) {
-          console.error('Auth error:', authError)
-          await supabase.auth.signOut()
-          navigate("/login")
-          throw new Error("Session expired. Please login again.")
-        }
-
+        if (authError) throw authError
         if (!user) throw new Error("Non authentifié")
 
-        // First check if user is a super admin
         const { data: adminData } = await supabase
           .from("administrators")
           .select("is_super_admin")
           .eq("id", user.id)
           .maybeSingle()
 
-        // If super admin, get all properties
-        if (adminData?.is_super_admin) {
-          const { data, error } = await supabase
-            .from("properties")
-            .select(`
-              *,
-              agency:agencies(
-                id,
-                name
-              )
-            `)
-            .order("created_at", { ascending: false })
-
-          if (error) throw error
-          return data.map(property => ({
-            ...property,
-            agency_name: property.agency?.name || 'N/A'
-          }))
+        if (!adminData?.is_super_admin) {
+          throw new Error("Accès non autorisé")
         }
 
-        // If not super admin, check regular profile permissions
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select('role, agency_id')
-          .eq("id", user.id)
-          .maybeSingle()
-
-        // Get properties based on regular admin permissions
-        const query = supabase
+        const { data, error } = await supabase
           .from("properties")
           .select(`
             *,
@@ -82,15 +49,6 @@ export function AdminProperties() {
           `)
           .order("created_at", { ascending: false })
 
-        if (profile?.role !== 'admin') {
-          if (profile?.agency_id) {
-            query.eq('agency_id', profile.agency_id)
-          } else {
-            return []
-          }
-        }
-
-        const { data, error } = await query
         if (error) throw error
         
         return data.map(property => ({
@@ -107,16 +65,6 @@ export function AdminProperties() {
         return []
       }
     },
-    meta: {
-      onError: (error: Error) => {
-        console.error('Query error:', error)
-        toast({
-          title: "Erreur",
-          description: error.message,
-          variant: "destructive"
-        })
-      }
-    }
   })
 
   const filteredProperties = properties.filter(
@@ -128,7 +76,11 @@ export function AdminProperties() {
   )
 
   if (isLoading) {
-    return <div>Chargement...</div>
+    return (
+      <div className="flex justify-center items-center h-48">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
   }
 
   return (
