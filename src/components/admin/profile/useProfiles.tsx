@@ -9,35 +9,43 @@ export function useProfiles() {
     queryKey: ["admin-profiles"],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
+        console.log("Fetching profiles...")
+        // First get all profiles
+        const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
-          .select(`
-            *,
-            agencies!profiles_agency_id_fkey (
-              name
-            )
-          `)
+          .select("*")
           .order('created_at', { ascending: false })
 
-        if (error) {
-          console.error('Error fetching profiles:', error)
-          toast({
-            title: "Erreur",
-            description: "Impossible de charger les profils",
-            variant: "destructive",
-          })
-          throw error
+        if (profilesError) {
+          console.error('Error fetching profiles:', profilesError)
+          throw profilesError
         }
 
-        // Transform the data to include agency_name directly
-        const transformedData = data?.map(profile => ({
-          ...profile,
-          agency_name: profile.agencies?.name || '-'
-        })) || []
+        // Then get all agencies in a separate query
+        const { data: agencies, error: agenciesError } = await supabase
+          .from("agencies")
+          .select("id, name")
 
+        if (agenciesError) {
+          console.error('Error fetching agencies:', agenciesError)
+          throw agenciesError
+        }
+
+        // Map agencies to profiles
+        const transformedData = profiles.map(profile => ({
+          ...profile,
+          agency_name: agencies.find(agency => agency.id === profile.agency_id)?.name || '-'
+        }))
+
+        console.log("Profiles fetched successfully:", transformedData)
         return transformedData
       } catch (error: any) {
         console.error('Error in useProfiles:', error)
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les profils",
+          variant: "destructive",
+        })
         throw error
       }
     },
