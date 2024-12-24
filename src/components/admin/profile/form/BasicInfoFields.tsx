@@ -10,13 +10,13 @@ interface Profile {
 }
 
 interface BasicInfoFieldsProps {
-  newProfile?: Profile
+  newProfile: Profile
   onProfileChange: (profile: Profile) => void
   isEditing?: boolean
 }
 
 export function BasicInfoFields({ 
-  newProfile = {}, 
+  newProfile, 
   onProfileChange,
   isEditing = false 
 }: BasicInfoFieldsProps) {
