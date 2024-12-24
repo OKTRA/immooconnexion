@@ -43,26 +43,20 @@ const AdminDashboard = () => {
     queryKey: ["admin-status"],
     queryFn: async () => {
       try {
-        console.log("Checking admin status...")
-        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        // Get current user session first
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
         
-        if (userError) {
-          console.error('User fetch error:', userError)
-          throw userError
-        }
-        
-        if (!user) {
-          console.error('No user found')
-          throw new Error("Non authentifié")
-        }
+        if (sessionError) throw sessionError
+        if (!sessionData.session?.user) throw new Error("Non authentifié")
 
-        console.log("User found:", user.id)
+        const userId = sessionData.session.user.id
+        console.log("User found:", userId)
 
         // Check if user is a super admin
         const { data: adminData, error: adminError } = await supabase
           .from("administrators")
           .select("is_super_admin")
-          .eq("id", user.id)
+          .eq("id", userId)
           .maybeSingle()
 
         if (adminError) {
@@ -80,8 +74,8 @@ const AdminDashboard = () => {
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
-          .eq("id", user.id)
-          .single()
+          .eq("id", userId)
+          .maybeSingle()
 
         if (profileError) {
           console.error("Error fetching profile:", profileError)
