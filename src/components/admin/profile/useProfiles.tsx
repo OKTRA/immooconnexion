@@ -13,7 +13,7 @@ export function useProfiles() {
           .from("profiles")
           .select(`
             *,
-            agencies!inner (
+            agencies!profiles_agency_id_fkey (
               name
             )
           `)
