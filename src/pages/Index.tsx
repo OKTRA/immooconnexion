@@ -105,11 +105,25 @@ const Index = () => {
           return
         }
 
+        // Get the default agency
+        const { data: defaultAgency } = await supabase
+          .from('agencies')
+          .select('id')
+          .eq('name', 'Default Agency')
+          .single();
+
         if (!profile) {
           const { error: insertError } = await supabase
             .from("profiles")
-            .insert([{ id: user.id, role: 'user' }])
-            .single()
+            .upsert({
+              id: user.id,
+              role: 'user',
+              first_name: 'User',
+              last_name: 'Name',
+              email: user.email || 'user@example.com',
+              phone_number: '0000000000',
+              agency_id: defaultAgency.id
+            })
 
           if (insertError) {
             console.error("Error creating profile:", insertError)

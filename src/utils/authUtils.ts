@@ -23,12 +23,28 @@ export const getOrCreateUser = async (email: string) => {
 
   const userId = authData.user.id;
 
-  // Create or update the profile
+  // Get the default agency
+  const { data: defaultAgency } = await supabase
+    .from('agencies')
+    .select('id')
+    .eq('name', 'Default Agency')
+    .single();
+
+  if (!defaultAgency) {
+    throw new Error("Default agency not found");
+  }
+
+  // Create or update the profile with all required fields
   const { error: profileError } = await supabase
     .from('profiles')
     .upsert({
       id: userId,
-      email: email
+      email: email,
+      first_name: 'User',
+      last_name: 'Name',
+      role: 'user',
+      phone_number: '0000000000',
+      agency_id: defaultAgency.id
     });
 
   if (profileError) throw profileError;

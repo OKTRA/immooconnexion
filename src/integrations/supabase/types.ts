@@ -201,45 +201,45 @@ export type Database = {
         Row: {
           agency_id: string
           created_at: string
-          email: string | null
-          first_name: string | null
+          email: string
+          first_name: string
           id: string
           is_tenant: boolean | null
-          last_name: string | null
+          last_name: string
           list_properties_on_site: boolean | null
           password_hash: string | null
-          phone_number: string | null
-          role: string | null
+          phone_number: string
+          role: string
           show_phone_on_site: boolean | null
           updated_at: string
         }
         Insert: {
           agency_id: string
           created_at?: string
-          email?: string | null
-          first_name?: string | null
+          email: string
+          first_name: string
           id: string
           is_tenant?: boolean | null
-          last_name?: string | null
+          last_name: string
           list_properties_on_site?: boolean | null
           password_hash?: string | null
-          phone_number?: string | null
-          role?: string | null
+          phone_number: string
+          role?: string
           show_phone_on_site?: boolean | null
           updated_at?: string
         }
         Update: {
           agency_id?: string
           created_at?: string
-          email?: string | null
-          first_name?: string | null
+          email?: string
+          first_name?: string
           id?: string
           is_tenant?: boolean | null
-          last_name?: string | null
+          last_name?: string
           list_properties_on_site?: boolean | null
           password_hash?: string | null
-          phone_number?: string | null
-          role?: string | null
+          phone_number?: string
+          role?: string
           show_phone_on_site?: boolean | null
           updated_at?: string
         }
