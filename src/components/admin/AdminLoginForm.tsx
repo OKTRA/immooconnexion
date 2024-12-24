@@ -19,23 +19,27 @@ export function AdminLoginForm() {
     setIsLoading(true)
 
     try {
-      const { data: { user }, error } = await supabase.auth.signInWithPassword({
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) throw error
+      if (signInError) throw signInError
 
-      // Vérifier si l'utilisateur est un super admin
+      // Vérifier directement dans la table administrators
       const { data: adminData, error: adminError } = await supabase
         .from('administrators')
         .select('is_super_admin')
         .eq('id', user?.id)
         .maybeSingle()
 
-      if (adminError) throw adminError
+      if (adminError) {
+        await supabase.auth.signOut()
+        throw new Error("Erreur lors de la vérification des droits d'administrateur")
+      }
 
       if (!adminData?.is_super_admin) {
+        await supabase.auth.signOut()
         throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent se connecter ici.")
       }
 
@@ -46,6 +50,7 @@ export function AdminLoginForm() {
 
       navigate("/admin")
     } catch (error: any) {
+      console.error('Login error:', error)
       toast({
         title: "Erreur de connexion",
         description: error.message,
