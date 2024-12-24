@@ -15,10 +15,11 @@ const AdminDashboard = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
 
-  const { data: adminData, isLoading, error } = useQuery({
+  const { data: adminData, isLoading } = useQuery({
     queryKey: ["admin-status"],
     queryFn: async () => {
       try {
+        console.log("Checking admin status...")
         const { data: { user }, error: userError } = await supabase.auth.getUser()
         
         if (userError) {
@@ -27,10 +28,13 @@ const AdminDashboard = () => {
         }
         
         if (!user) {
+          console.error('No user found')
           throw new Error("Non authentifié")
         }
 
-        // Vérifier d'abord si l'utilisateur est un super admin
+        console.log("User found:", user.id)
+
+        // First check if user is a super admin
         const { data: adminData, error: adminError } = await supabase
           .from("administrators")
           .select("is_super_admin")
@@ -42,25 +46,31 @@ const AdminDashboard = () => {
           throw adminError
         }
 
-        // Si l'utilisateur n'est pas un super admin, vérifier s'il a un profil admin
-        if (!adminData?.is_super_admin) {
-          const { data: profile, error: profileError } = await supabase
-            .from("profiles")
-            .select("role")
-            .eq("id", user.id)
-            .maybeSingle()
-
-          if (profileError) {
-            console.error("Error fetching profile:", profileError)
-            throw profileError
-          }
-
-          if (!profile || profile.role !== 'admin') {
-            throw new Error("Accès non autorisé")
-          }
+        // If user is a super admin, return the data
+        if (adminData?.is_super_admin) {
+          console.log("User is super admin")
+          return adminData
         }
 
-        return adminData
+        // If not super admin, check if they have an admin role in profiles
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle()
+
+        if (profileError) {
+          console.error("Error fetching profile:", profileError)
+          throw profileError
+        }
+
+        if (!profile || profile.role !== 'admin') {
+          console.error("User is not an admin:", profile)
+          throw new Error("Accès non autorisé")
+        }
+
+        console.log("User is admin via profile")
+        return { is_super_admin: false }
       } catch (error: any) {
         console.error('Admin check error:', error)
         throw error
@@ -68,9 +78,10 @@ const AdminDashboard = () => {
     },
     retry: false,
     meta: {
-      onError: () => {
+      onError: (error: Error) => {
+        console.error("Admin dashboard access error:", error)
         toast({
-          title: "Erreur d'accès",
+          title: "Accès refusé",
           description: "Vous n'avez pas les droits nécessaires pour accéder à cette page.",
           variant: "destructive"
         })
@@ -85,10 +96,6 @@ const AdminDashboard = () => {
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     )
-  }
-
-  if (error) {
-    return null // L'erreur est déjà gérée par le meta.onError
   }
 
   return (
