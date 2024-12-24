@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { UserRole } from "@/types/profile"
 
 interface AddProfileHandlerProps {
   onSuccess: () => void;
@@ -8,8 +9,18 @@ interface AddProfileHandlerProps {
   agencyId?: string;
 }
 
+interface NewProfile {
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  password: string;
+  agency_id: string;
+  role: UserRole;
+}
+
 export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfileHandlerProps) {
-  const initialProfile = {
+  const initialProfile: NewProfile = {
     email: "",
     first_name: "",
     last_name: "",
@@ -19,7 +30,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
     role: "user"
   }
   
-  const [newProfile, setNewProfile] = useState(initialProfile)
+  const [newProfile, setNewProfile] = useState<NewProfile>(initialProfile)
   const { toast } = useToast()
 
   const handleAddUser = async () => {
@@ -61,7 +72,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         .eq('email', newProfile.email)
         .maybeSingle()
 
-      let userId
+      let userId: string
 
       if (existingUser) {
         userId = existingUser.id

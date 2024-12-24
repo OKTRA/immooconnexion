@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client"
 interface ProfileActionsProps {
   profile: {
     id: string
-    role: string
+    role: string | null
   }
   onEdit: () => void
   refetch: () => void
@@ -15,8 +15,11 @@ interface ProfileActionsProps {
 export function ProfileActions({ profile, onEdit, refetch }: ProfileActionsProps) {
   const { toast } = useToast()
 
-  const handleToggleBlockUser = async (userId: string, currentRole: string) => {
-    const newRole = currentRole === "blocked" ? "user" : "blocked"
+  const handleToggleBlockUser = async (userId: string, currentRole: string | null) => {
+    // Si l'utilisateur est bloqué, on le remet en tant qu'utilisateur normal
+    // Sinon, on le met en tant qu'utilisateur normal (cas où il était admin)
+    const newRole = currentRole === "admin" ? "user" : "admin"
+    
     try {
       const { error } = await supabase
         .from("profiles")
@@ -26,10 +29,10 @@ export function ProfileActions({ profile, onEdit, refetch }: ProfileActionsProps
       if (error) throw error
 
       toast({
-        title: currentRole === "blocked" ? "Utilisateur débloqué" : "Utilisateur bloqué",
-        description: currentRole === "blocked" 
-          ? "L'utilisateur a été débloqué avec succès"
-          : "L'utilisateur a été bloqué avec succès",
+        title: currentRole === "admin" ? "Utilisateur rétrogradé" : "Utilisateur promu admin",
+        description: currentRole === "admin" 
+          ? "L'utilisateur a été rétrogradé avec succès"
+          : "L'utilisateur a été promu admin avec succès",
       })
       refetch()
     } catch (error) {
@@ -69,13 +72,13 @@ export function ProfileActions({ profile, onEdit, refetch }: ProfileActionsProps
       <Button
         variant="outline"
         size="icon"
-        onClick={() => handleToggleBlockUser(profile.id, profile.role || "user")}
-        title={profile.role === "blocked" ? "Débloquer" : "Bloquer"}
+        onClick={() => handleToggleBlockUser(profile.id, profile.role)}
+        title={profile.role === "admin" ? "Rétrograder" : "Promouvoir admin"}
       >
-        {profile.role === "blocked" ? (
-          <UserCheck className="h-4 w-4" />
-        ) : (
+        {profile.role === "admin" ? (
           <UserMinus className="h-4 w-4" />
+        ) : (
+          <UserCheck className="h-4 w-4" />
         )}
       </Button>
       <Button
