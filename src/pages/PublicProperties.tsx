@@ -5,14 +5,14 @@ import { SearchBar } from "@/components/home/SearchBar"
 import { PublicNavbar } from "@/components/home/PublicNavbar"
 import { Property } from "@/components/property/types"
 
-interface PropertyWithAgency extends Property {
-  agency_name: string;
-  agency_address: string;
-  status: string;
+interface PropertyWithAgency extends Omit<Property, 'agencies'> {
   agencies?: {
     name: string;
     address: string;
-  };
+  } | null;
+  agency_name: string;
+  agency_address: string;
+  status: string;
 }
 
 const PublicProperties = () => {
@@ -32,7 +32,7 @@ const PublicProperties = () => {
 
       if (error) throw error
 
-      return (data as Property[]).map(property => ({
+      return (data as Array<Property & { agencies: { name: string; address: string; } | null }>).map(property => ({
         ...property,
         agency_name: property.agencies?.name || 'Non renseigné',
         agency_address: property.agencies?.address || 'Non renseigné',
