@@ -107,18 +107,20 @@ const AppRoutes = () => (
   </Routes>
 )
 
-const App = () => (
-  <StrictMode>
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <AppRoutes />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
-  </StrictMode>
-)
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <StrictMode>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <AppRoutes />
+          </TooltipProvider>
+        </StrictMode>
+      </BrowserRouter>
+    </QueryClientProvider>
+  )
+}
 
 export default App
