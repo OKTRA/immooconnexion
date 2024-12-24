@@ -5,7 +5,7 @@ import { Printer } from "lucide-react"
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import type { PaymentHistory } from "@/integrations/supabase/types/payment-history"
+import { PaymentHistory } from "@/integrations/supabase/types/payment-history"
 
 export function TenantPaymentsReport() {
   const [selectedTenant, setSelectedTenant] = useState<string>("all")
@@ -81,9 +81,9 @@ export function TenantPaymentsReport() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les locataires</SelectItem>
-              {payments.map(tenant => (
-                <SelectItem key={tenant.id} value={tenant.id}>
-                  {tenant.prenom} {tenant.nom}
+              {payments.map(payment => (
+                <SelectItem key={payment.id} value={payment.tenant_id}>
+                  {payment.tenant_prenom} {payment.tenant_nom}
                 </SelectItem>
               ))}
             </SelectContent>

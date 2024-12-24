@@ -4,6 +4,27 @@ import { PropertiesGrid } from "@/components/home/PropertiesGrid"
 import { SearchBar } from "@/components/home/SearchBar"
 import { PublicNavbar } from "@/components/home/PublicNavbar"
 
+interface Property {
+  id: string;
+  bien: string;
+  type: string;
+  chambres: number;
+  ville: string;
+  loyer: number;
+  statut: string;
+  photo_url: string | null;
+  agencies?: {
+    name: string;
+    address: string;
+  };
+}
+
+interface PropertyWithAgency extends Property {
+  agency_name: string;
+  agency_address: string;
+  status: string;
+}
+
 const PublicProperties = () => {
   const { data: properties = [] } = useQuery({
     queryKey: ['public-properties'],
@@ -20,12 +41,12 @@ const PublicProperties = () => {
         .eq('statut', 'disponible')
 
       if (error) throw error
-      return data.map(property => ({
+      return (data as Property[]).map(property => ({
         ...property,
         agency_name: property.agencies?.name || 'Non renseigné',
         agency_address: property.agencies?.address || 'Non renseigné',
         status: property.statut
-      }))
+      })) as PropertyWithAgency[]
     }
   })
 
