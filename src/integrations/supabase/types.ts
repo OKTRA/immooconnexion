@@ -9,111 +9,40 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      administrators: {
-        Row: {
-          agency_id: string | null
-          created_at: string
-          full_name: string
-          id: string
-          is_super_admin: boolean | null
-          phone_number: string | null
-          updated_at: string
-        }
-        Insert: {
-          agency_id?: string | null
-          created_at?: string
-          full_name: string
-          id: string
-          is_super_admin?: boolean | null
-          phone_number?: string | null
-          updated_at?: string
-        }
-        Update: {
-          agency_id?: string | null
-          created_at?: string
-          full_name?: string
-          id?: string
-          is_super_admin?: boolean | null
-          phone_number?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "administrators_agency_id_fkey"
-            columns: ["agency_id"]
-            isOneToOne: false
-            referencedRelation: "agencies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       agencies: {
         Row: {
-          address: string | null
           created_at: string
           current_profiles_count: number | null
           current_properties_count: number | null
           current_tenants_count: number | null
-          description: string | null
-          email: string | null
           id: string
-          last_billing_date: string | null
-          list_properties_on_site: boolean | null
-          logo_url: string | null
           name: string
-          next_billing_date: string | null
-          phone: string | null
-          show_phone_on_site: boolean | null
-          status: string | null
-          subscription_plan_id: string
-          subscription_status: string | null
+          subscription_plan_id: string | null
           updated_at: string
         }
         Insert: {
-          address?: string | null
           created_at?: string
           current_profiles_count?: number | null
           current_properties_count?: number | null
           current_tenants_count?: number | null
-          description?: string | null
-          email?: string | null
           id?: string
-          last_billing_date?: string | null
-          list_properties_on_site?: boolean | null
-          logo_url?: string | null
           name: string
-          next_billing_date?: string | null
-          phone?: string | null
-          show_phone_on_site?: boolean | null
-          status?: string | null
-          subscription_plan_id: string
-          subscription_status?: string | null
+          subscription_plan_id?: string | null
           updated_at?: string
         }
         Update: {
-          address?: string | null
           created_at?: string
           current_profiles_count?: number | null
           current_properties_count?: number | null
           current_tenants_count?: number | null
-          description?: string | null
-          email?: string | null
           id?: string
-          last_billing_date?: string | null
-          list_properties_on_site?: boolean | null
-          logo_url?: string | null
           name?: string
-          next_billing_date?: string | null
-          phone?: string | null
-          show_phone_on_site?: boolean | null
-          status?: string | null
-          subscription_plan_id?: string
-          subscription_status?: string | null
+          subscription_plan_id?: string | null
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "fk_subscription_plan"
+            foreignKeyName: "agencies_subscription_plan_id_fkey"
             columns: ["subscription_plan_id"]
             isOneToOne: false
             referencedRelation: "subscription_plans"
@@ -123,45 +52,42 @@ export type Database = {
       }
       contracts: {
         Row: {
-          agency_id: string | null
+          agency_id: string
           created_at: string
-          description: string | null
-          end_date: string | null
+          deposit_amount: number
+          end_date: string
           id: string
-          montant: number
+          monthly_rent: number
           property_id: string
           start_date: string
-          statut: string
-          tenant_id: string | null
-          type: string
+          status: string
+          tenant_id: string
           updated_at: string
         }
         Insert: {
-          agency_id?: string | null
+          agency_id: string
           created_at?: string
-          description?: string | null
-          end_date?: string | null
+          deposit_amount: number
+          end_date: string
           id?: string
-          montant: number
+          monthly_rent: number
           property_id: string
-          start_date?: string
-          statut?: string
-          tenant_id?: string | null
-          type: string
+          start_date: string
+          status?: string
+          tenant_id: string
           updated_at?: string
         }
         Update: {
-          agency_id?: string | null
+          agency_id?: string
           created_at?: string
-          description?: string | null
-          end_date?: string | null
+          deposit_amount?: number
+          end_date?: string
           id?: string
-          montant?: number
+          monthly_rent?: number
           property_id?: string
           start_date?: string
-          statut?: string
-          tenant_id?: string | null
-          type?: string
+          status?: string
+          tenant_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -169,7 +95,7 @@ export type Database = {
             foreignKeyName: "contracts_agency_id_fkey"
             columns: ["agency_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "agencies"
             referencedColumns: ["id"]
           },
           {
@@ -179,52 +105,170 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "contracts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
-      expenses: {
+      maintenance_requests: {
         Row: {
-          agency_id: string | null
+          agency_id: string
           created_at: string
-          date: string
-          description: string | null
+          description: string
           id: string
-          montant: number
-          property_id: string | null
+          priority: string
+          property_id: string
+          resolved_at: string | null
+          status: string
+          tenant_id: string | null
+          title: string
           updated_at: string
         }
         Insert: {
-          agency_id?: string | null
+          agency_id: string
           created_at?: string
-          date?: string
-          description?: string | null
+          description: string
           id?: string
-          montant: number
-          property_id?: string | null
+          priority?: string
+          property_id: string
+          resolved_at?: string | null
+          status?: string
+          tenant_id?: string | null
+          title: string
           updated_at?: string
         }
         Update: {
-          agency_id?: string | null
+          agency_id?: string
           created_at?: string
-          date?: string
-          description?: string | null
+          description?: string
           id?: string
-          montant?: number
-          property_id?: string | null
+          priority?: string
+          property_id?: string
+          resolved_at?: string | null
+          status?: string
+          tenant_id?: string | null
+          title?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "expenses_agency_id_fkey"
+            foreignKeyName: "maintenance_requests_agency_id_fkey"
             columns: ["agency_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "agencies"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "expenses_property_id_fkey"
+            foreignKeyName: "maintenance_requests_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          agency_id: string
+          created_at: string
+          id: string
+          message: string
+          status: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          id?: string
+          message: string
+          status?: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          agency_id: string
+          amount: number
+          contract_id: string
+          created_at: string
+          id: string
+          payment_date: string
+          payment_method: string | null
+          reference_number: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          amount: number
+          contract_id: string
+          created_at?: string
+          id?: string
+          payment_date: string
+          payment_method?: string | null
+          reference_number?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          amount?: number
+          contract_id?: string
+          created_at?: string
+          id?: string
+          payment_date?: string
+          payment_method?: string | null
+          reference_number?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
             referencedColumns: ["id"]
           },
         ]
@@ -234,57 +278,36 @@ export type Database = {
           agency_id: string
           created_at: string
           email: string
+          employee_role: Database["public"]["Enums"]["employee_role"] | null
           first_name: string
           id: string
-          is_tenant: boolean | null
-          last_login: string | null
           last_name: string
-          list_properties_on_site: boolean | null
-          metadata: Json | null
-          password_hash: string | null
-          permissions: Json | null
           phone_number: string
-          role: string
-          show_phone_on_site: boolean | null
-          status: string | null
+          role: Database["public"]["Enums"]["user_role"]
           updated_at: string
         }
         Insert: {
           agency_id: string
           created_at?: string
           email: string
+          employee_role?: Database["public"]["Enums"]["employee_role"] | null
           first_name: string
           id: string
-          is_tenant?: boolean | null
-          last_login?: string | null
           last_name: string
-          list_properties_on_site?: boolean | null
-          metadata?: Json | null
-          password_hash?: string | null
-          permissions?: Json | null
           phone_number: string
-          role?: string
-          show_phone_on_site?: boolean | null
-          status?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
         Update: {
           agency_id?: string
           created_at?: string
           email?: string
+          employee_role?: Database["public"]["Enums"]["employee_role"] | null
           first_name?: string
           id?: string
-          is_tenant?: boolean | null
-          last_login?: string | null
           last_name?: string
-          list_properties_on_site?: boolean | null
-          metadata?: Json | null
-          password_hash?: string | null
-          permissions?: Json | null
           phone_number?: string
-          role?: string
-          show_phone_on_site?: boolean | null
-          status?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
         Relationships: [
@@ -299,55 +322,40 @@ export type Database = {
       }
       properties: {
         Row: {
+          address: string
           agency_id: string
-          bien: string
-          caution: number | null
-          chambres: number | null
           created_at: string
-          frais_agence: number | null
+          deposit: number
           id: string
-          loyer: number | null
+          name: string
           photo_url: string | null
-          statut: string | null
-          taux_commission: number | null
-          type: string
+          rent: number
+          status: string
           updated_at: string
-          user_id: string | null
-          ville: string | null
         }
         Insert: {
+          address: string
           agency_id: string
-          bien: string
-          caution?: number | null
-          chambres?: number | null
           created_at?: string
-          frais_agence?: number | null
+          deposit?: number
           id?: string
-          loyer?: number | null
+          name: string
           photo_url?: string | null
-          statut?: string | null
-          taux_commission?: number | null
-          type: string
+          rent?: number
+          status?: string
           updated_at?: string
-          user_id?: string | null
-          ville?: string | null
         }
         Update: {
+          address?: string
           agency_id?: string
-          bien?: string
-          caution?: number | null
-          chambres?: number | null
           created_at?: string
-          frais_agence?: number | null
+          deposit?: number
           id?: string
-          loyer?: number | null
+          name?: string
           photo_url?: string | null
-          statut?: string | null
-          taux_commission?: number | null
-          type?: string
+          rent?: number
+          status?: string
           updated_at?: string
-          user_id?: string | null
-          ville?: string | null
         }
         Relationships: [
           {
@@ -359,180 +367,123 @@ export type Database = {
           },
         ]
       }
-      property_inspections: {
-        Row: {
-          contract_id: string
-          created_at: string
-          damage_description: string | null
-          deposit_returned: number | null
-          has_damages: boolean | null
-          id: string
-          inspection_date: string
-          photo_urls: string[] | null
-          repair_costs: number | null
-          status: string | null
-          updated_at: string
-        }
-        Insert: {
-          contract_id: string
-          created_at?: string
-          damage_description?: string | null
-          deposit_returned?: number | null
-          has_damages?: boolean | null
-          id?: string
-          inspection_date?: string
-          photo_urls?: string[] | null
-          repair_costs?: number | null
-          status?: string | null
-          updated_at?: string
-        }
-        Update: {
-          contract_id?: string
-          created_at?: string
-          damage_description?: string | null
-          deposit_returned?: number | null
-          has_damages?: boolean | null
-          id?: string
-          inspection_date?: string
-          photo_urls?: string[] | null
-          repair_costs?: number | null
-          status?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_inspections_contract_id_fkey"
-            columns: ["contract_id"]
-            isOneToOne: false
-            referencedRelation: "contracts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_inspections_contract_id_fkey"
-            columns: ["contract_id"]
-            isOneToOne: false
-            referencedRelation: "payment_history_with_tenant"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       subscription_plans: {
         Row: {
           created_at: string
-          features: string[]
+          description: string | null
           id: string
-          max_properties: number
-          max_tenants: number
+          max_profiles: number | null
+          max_properties: number | null
+          max_tenants: number | null
           name: string
           price: number
+          updated_at: string
         }
         Insert: {
           created_at?: string
-          features: string[]
+          description?: string | null
           id?: string
-          max_properties: number
-          max_tenants: number
+          max_profiles?: number | null
+          max_properties?: number | null
+          max_tenants?: number | null
           name: string
           price: number
+          updated_at?: string
         }
         Update: {
           created_at?: string
-          features?: string[]
+          description?: string | null
           id?: string
-          max_properties?: number
-          max_tenants?: number
+          max_profiles?: number | null
+          max_properties?: number | null
+          max_tenants?: number | null
           name?: string
           price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      super_admins: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          updated_at?: string
         }
         Relationships: []
       }
       tenants: {
         Row: {
-          agency_fees: number | null
-          agency_id: string | null
-          birth_date: string | null
+          agency_fees: number
+          agency_id: string
           created_at: string
+          deposit: number
+          email: string
+          first_name: string
           id: string
-          nom: string | null
-          phone_number: string | null
-          photo_id_url: string | null
-          prenom: string | null
+          last_name: string
+          phone_number: string
+          photo_url: string | null
+          rent: number
+          selected_property_id: string | null
+          status: string
           updated_at: string
-          user_id: string | null
         }
         Insert: {
-          agency_fees?: number | null
-          agency_id?: string | null
-          birth_date?: string | null
+          agency_fees?: number
+          agency_id: string
           created_at?: string
-          id: string
-          nom?: string | null
-          phone_number?: string | null
-          photo_id_url?: string | null
-          prenom?: string | null
+          deposit?: number
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          phone_number: string
+          photo_url?: string | null
+          rent?: number
+          selected_property_id?: string | null
+          status?: string
           updated_at?: string
-          user_id?: string | null
         }
         Update: {
-          agency_fees?: number | null
-          agency_id?: string | null
-          birth_date?: string | null
+          agency_fees?: number
+          agency_id?: string
           created_at?: string
+          deposit?: number
+          email?: string
+          first_name?: string
           id?: string
-          nom?: string | null
-          phone_number?: string | null
-          photo_id_url?: string | null
-          prenom?: string | null
+          last_name?: string
+          phone_number?: string
+          photo_url?: string | null
+          rent?: number
+          selected_property_id?: string | null
+          status?: string
           updated_at?: string
-          user_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "tenants_agency_id_fkey"
             columns: ["agency_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "agencies"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "tenants_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-    }
-    Views: {
-      payment_history_with_tenant: {
-        Row: {
-          agency_id: string | null
-          created_at: string | null
-          end_date: string | null
-          id: string | null
-          montant: number | null
-          property_id: string | null
-          property_name: string | null
-          start_date: string | null
-          statut: string | null
-          tenant_id: string | null
-          tenant_nom: string | null
-          tenant_prenom: string | null
-          type: string | null
-          updated_at: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contracts_agency_id_fkey"
-            columns: ["agency_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contracts_property_id_fkey"
-            columns: ["property_id"]
+            foreignKeyName: "tenants_selected_property_id_fkey"
+            columns: ["selected_property_id"]
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
@@ -540,11 +491,16 @@ export type Database = {
         ]
       }
     }
+    Views: {
+      [_ in never]: never
+    }
     Functions: {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      employee_role: "manager" | "staff"
+      payment_status_type: "pending" | "completed" | "failed" | "refunded"
+      user_role: "super_admin" | "admin" | "staff"
     }
     CompositeTypes: {
       [_ in never]: never

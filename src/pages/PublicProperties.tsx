@@ -16,7 +16,7 @@ const PublicProperties = () => {
       const { data, error } = await supabase
         .from('properties')
         .select('*')
-        .eq('statut', 'disponible')
+        .eq('status', 'available')  // Changed from 'statut' to 'status'
         .order('created_at', { ascending: false })
       
       if (error) throw error
@@ -25,9 +25,9 @@ const PublicProperties = () => {
   })
 
   const filteredProperties = properties?.filter(property => 
-    property.bien.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    property.ville?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    property.type.toLowerCase().includes(searchTerm.toLowerCase())
+    property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    property.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    property.status.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
@@ -40,7 +40,7 @@ const PublicProperties = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
           <Input
             type="text"
-            placeholder="Rechercher par nom, ville ou type de bien..."
+            placeholder="Rechercher par nom, adresse ou statut..."
             className="pl-10 w-full max-w-xl"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
