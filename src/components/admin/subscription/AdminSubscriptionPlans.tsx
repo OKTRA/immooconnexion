@@ -95,7 +95,7 @@ export function AdminSubscriptionPlans() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 p-4 md:p-6">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         <h2 className="text-2xl font-bold">Plans d'abonnement</h2>
         <Button onClick={() => setShowAddDialog(true)}>
@@ -111,7 +111,7 @@ export function AdminSubscriptionPlans() {
       />
 
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="w-[95%] max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Ajouter un nouveau plan</DialogTitle>
           </DialogHeader>

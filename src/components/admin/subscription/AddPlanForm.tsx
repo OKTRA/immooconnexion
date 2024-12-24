@@ -26,9 +26,9 @@ export function AddPlanForm({ onSubmit }: AddPlanFormProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
           <Label htmlFor="name">Nom du plan</Label>
           <Input
             id="name"
@@ -36,7 +36,7 @@ export function AddPlanForm({ onSubmit }: AddPlanFormProps) {
             onChange={(e) => setNewPlan({ ...newPlan, name: e.target.value })}
           />
         </div>
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="price">Prix (FCFA)</Label>
           <Input
             id="price"
@@ -45,7 +45,7 @@ export function AddPlanForm({ onSubmit }: AddPlanFormProps) {
             onChange={(e) => setNewPlan({ ...newPlan, price: parseFloat(e.target.value) })}
           />
         </div>
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="max_properties">Nombre maximum de propriétés (-1 pour illimité)</Label>
           <Input
             id="max_properties"
@@ -54,7 +54,7 @@ export function AddPlanForm({ onSubmit }: AddPlanFormProps) {
             onChange={(e) => setNewPlan({ ...newPlan, max_properties: parseInt(e.target.value) })}
           />
         </div>
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="max_tenants">Nombre maximum de locataires (-1 pour illimité)</Label>
           <Input
             id="max_tenants"
@@ -64,14 +64,14 @@ export function AddPlanForm({ onSubmit }: AddPlanFormProps) {
           />
         </div>
       </div>
-      <div>
+      <div className="space-y-2">
         <Label htmlFor="features">Fonctionnalités (une par ligne)</Label>
         <Textarea
           id="features"
           value={featuresInput}
           onChange={(e) => setFeaturesInput(e.target.value)}
           rows={5}
-          className="mt-1"
+          className="resize-none"
         />
       </div>
       <Button onClick={handleSubmit} className="w-full">

@@ -1,4 +1,4 @@
-import { Table, TableBody, TableHead, TableHeader } from "@/components/ui/table"
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { SubscriptionPlanRow } from "./SubscriptionPlanRow"
 
 interface PlansTableProps {
@@ -12,12 +12,14 @@ export function PlansTable({ plans, onEdit, onDelete }: PlansTableProps) {
     <div className="rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
-          <TableHead>Nom</TableHead>
-          <TableHead>Prix</TableHead>
-          <TableHead>Max Propriétés</TableHead>
-          <TableHead>Max Locataires</TableHead>
-          <TableHead>Fonctionnalités</TableHead>
-          <TableHead>Actions</TableHead>
+          <TableRow>
+            <TableHead>Nom</TableHead>
+            <TableHead>Prix</TableHead>
+            <TableHead className="hidden md:table-cell">Max Propriétés</TableHead>
+            <TableHead className="hidden md:table-cell">Max Locataires</TableHead>
+            <TableHead className="hidden lg:table-cell">Fonctionnalités</TableHead>
+            <TableHead className="w-[100px]">Actions</TableHead>
+          </TableRow>
         </TableHeader>
         <TableBody>
           {plans.map((plan) => (
