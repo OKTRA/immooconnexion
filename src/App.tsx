@@ -16,6 +16,8 @@ import AgencyEarnings from "./pages/AgencyEarnings"
 import Reports from "./pages/Reports"
 import TenantContracts from "./pages/TenantContracts"
 import AdminDashboard from "./pages/AdminDashboard"
+import { useEffect } from "react"
+import { supabase } from "@/integrations/supabase/client"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,92 +28,106 @@ const queryClient = new QueryClient({
   },
 })
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
+const App = () => {
+  // Clear any existing session on app load
+  useEffect(() => {
+    const clearSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        await supabase.auth.signOut()
+        localStorage.clear()
+      }
+    }
+    clearSession()
+  }, [])
+
+  return (
+    <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/public" element={<PublicProperties />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Index />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/locataires"
-            element={
-              <ProtectedRoute>
-                <Tenants />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/locataires/:id/contrats"
-            element={
-              <ProtectedRoute>
-                <TenantContracts />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/biens"
-            element={
-              <ProtectedRoute>
-                <Properties />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/biens/:id"
-            element={
-              <ProtectedRoute>
-                <PropertyDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/depenses"
-            element={
-              <ProtectedRoute>
-                <Expenses />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/gains"
-            element={
-              <ProtectedRoute>
-                <AgencyEarnings />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/rapports"
-            element={
-              <ProtectedRoute>
-                <Reports />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/public" element={<PublicProperties />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/locataires"
+              element={
+                <ProtectedRoute>
+                  <Tenants />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/locataires/:id/contrats"
+              element={
+                <ProtectedRoute>
+                  <TenantContracts />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/biens"
+              element={
+                <ProtectedRoute>
+                  <Properties />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/biens/:id"
+              element={
+                <ProtectedRoute>
+                  <PropertyDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/depenses"
+              element={
+                <ProtectedRoute>
+                  <Expenses />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gains"
+              element={
+                <ProtectedRoute>
+                  <AgencyEarnings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/rapports"
+              element={
+                <ProtectedRoute>
+                  <Reports />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </TooltipProvider>
       </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-)
+    </QueryClientProvider>
+  )
+}
 
 export default App
