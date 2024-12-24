@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { TenantFormFields } from "./TenantFormFields";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { useSubscriptionLimits } from "@/utils/subscriptionLimits";
 
 interface TenantCreationFormProps {
   userProfile: any;
@@ -24,6 +25,7 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { checkAndNotifyLimits } = useSubscriptionLimits();
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -39,10 +41,16 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
     setIsSubmitting(true);
     
     try {
+      // Check subscription limits before adding new tenant
+      if (userProfile?.agency_id && !(await checkAndNotifyLimits(userProfile.agency_id, 'tenant'))) {
+        setIsSubmitting(false);
+        return;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
-      // Créer l'utilisateur dans auth.users
+      // Create auth user for tenant
       const email = `${formData.nom.toLowerCase()}.${formData.prenom.toLowerCase()}@tenant.local`;
       const password = Math.random().toString(36).slice(-8);
       
@@ -60,7 +68,7 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
       if (authError) throw authError;
       if (!authData.user) throw new Error("Failed to create user");
 
-      // Mettre à jour le profil
+      // Update profile
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
@@ -73,7 +81,7 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
 
       if (profileError) throw profileError;
 
-      // Créer l'entrée dans la table tenants
+      // Create tenant record
       const { error: tenantError } = await supabase
         .from('tenants')
         .insert({
