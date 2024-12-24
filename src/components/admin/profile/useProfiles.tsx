@@ -10,28 +10,27 @@ export function useProfiles() {
     queryFn: async () => {
       try {
         // First check if user is super admin
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-        if (authError) throw authError
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) throw new Error("User not authenticated")
 
         const { data: adminData, error: adminError } = await supabase
           .from("administrators")
           .select("is_super_admin")
-          .eq("id", user?.id)
-          .maybeSingle()
+          .eq("id", user.id)
+          .single()
 
-        if (adminError) throw adminError
+        if (adminError) {
+          console.error('Admin check error:', adminError)
+        }
 
         // Build the base query
-        let query = supabase
+        const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
           .select(`
             *,
             agency:agencies(name)
           `)
           .order('created_at', { ascending: false })
-
-        // Execute query
-        const { data: profiles, error: profilesError } = await query
 
         if (profilesError) {
           console.error('Error fetching profiles:', profilesError)

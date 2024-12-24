@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       administrators: {
         Row: {
+          agency_id: string | null
           created_at: string
           full_name: string
           id: string
@@ -19,6 +20,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          agency_id?: string | null
           created_at?: string
           full_name: string
           id: string
@@ -27,6 +29,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          agency_id?: string | null
           created_at?: string
           full_name?: string
           id?: string
@@ -34,7 +37,15 @@ export type Database = {
           phone_number?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "administrators_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agencies: {
         Row: {
@@ -196,7 +207,6 @@ export type Database = {
       }
       profiles: {
         Row: {
-          administrator_id: string | null
           agency_id: string
           created_at: string
           email: string
@@ -212,7 +222,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          administrator_id?: string | null
           agency_id: string
           created_at?: string
           email: string
@@ -228,7 +237,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          administrator_id?: string | null
           agency_id?: string
           created_at?: string
           email?: string
@@ -244,20 +252,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "fk_administrator_profile"
-            columns: ["administrator_id"]
-            isOneToOne: false
-            referencedRelation: "administrators"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_administrator_id_fkey"
-            columns: ["administrator_id"]
-            isOneToOne: false
-            referencedRelation: "administrators"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "profiles_agency_id_fkey"
             columns: ["agency_id"]
