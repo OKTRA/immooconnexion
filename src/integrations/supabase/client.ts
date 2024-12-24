@@ -12,7 +12,8 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      storage: localStorage // Changed from window.localStorage for better compatibility
+      flowType: 'pkce',
+      storage: localStorage
     },
     global: {
       headers: { 
@@ -28,5 +29,5 @@ export const supabase = createClient<Database>(
 // Helper function to clear auth state
 export const clearAuthState = async () => {
   await supabase.auth.signOut();
-  localStorage.removeItem(`sb-${SUPABASE_URL.split('//')[1]}-auth-token`); // Updated to use dynamic key
+  localStorage.removeItem(`sb-${SUPABASE_URL.split('//')[1]}-auth-token`);
 };
