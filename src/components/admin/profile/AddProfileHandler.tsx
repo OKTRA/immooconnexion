@@ -9,23 +9,26 @@ interface AddProfileHandlerProps {
 }
 
 export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfileHandlerProps) {
-  const [newProfile, setNewProfile] = useState({
+  const initialProfile = {
     email: "",
     first_name: "",
     last_name: "",
     phone_number: "",
     password: "",
     agency_id: agencyId || "",
-  })
+    role: "user"
+  }
+  
+  const [newProfile, setNewProfile] = useState(initialProfile)
   const { toast } = useToast()
 
   const handleAddUser = async () => {
     try {
       // Validation
-      if (!newProfile.password) {
+      if (!newProfile.email || !newProfile.password) {
         toast({
           title: "Erreur",
-          description: "Le mot de passe est obligatoire",
+          description: "L'email et le mot de passe sont obligatoires",
           variant: "destructive",
         })
         return
@@ -72,18 +75,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         userId = authData.user.id
       }
 
-      // Verify the agency exists
-      const { data: agency, error: agencyError } = await supabase
-        .from('agencies')
-        .select('id')
-        .eq('id', newProfile.agency_id)
-        .single()
-
-      if (agencyError || !agency) {
-        throw new Error("L'agence spécifiée n'existe pas")
-      }
-
-      // Update or create the profile with all required fields
+      // Update or create the profile
       const { error: profileError } = await supabase
         .from("profiles")
         .upsert({
@@ -93,7 +85,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
           phone_number: newProfile.phone_number || '0000000000',
           email: newProfile.email,
           agency_id: newProfile.agency_id,
-          role: 'user'
+          role: newProfile.role
         })
 
       if (profileError) throw profileError
@@ -106,14 +98,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       })
       
       onClose()
-      setNewProfile({
-        email: "",
-        first_name: "",
-        last_name: "",
-        phone_number: "",
-        password: "",
-        agency_id: agencyId || "",
-      })
+      setNewProfile(initialProfile)
       onSuccess()
     } catch (error: any) {
       console.error('Error in handleAddUser:', error)

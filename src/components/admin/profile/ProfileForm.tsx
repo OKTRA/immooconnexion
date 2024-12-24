@@ -3,11 +3,11 @@ import { AgencySelect } from "./form/AgencySelect"
 import { Button } from "@/components/ui/button"
 
 interface ProfileFormProps {
-  newProfile: any
-  setNewProfile?: (profile: any) => void
-  onSubmit?: () => void
-  selectedAgencyId?: string
-  isEditing?: boolean
+  newProfile: any;
+  setNewProfile?: (profile: any) => void;
+  onSubmit?: () => void;
+  selectedAgencyId?: string;
+  isEditing?: boolean;
 }
 
 export function ProfileForm({ 
@@ -19,7 +19,9 @@ export function ProfileForm({
 }: ProfileFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit?.()
+    if (onSubmit) {
+      onSubmit()
+    }
   }
 
   const handleAgencyChange = (value: string) => {
@@ -48,7 +50,7 @@ export function ProfileForm({
         isEditing={isEditing}
       />
       <AgencySelect 
-        value={selectedAgencyId || newProfile.agency_id || ''} 
+        value={selectedAgencyId || newProfile?.agency_id || ''} 
         onChange={handleAgencyChange}
       />
       <Button type="submit" className="w-full">

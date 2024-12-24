@@ -2,27 +2,21 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 
 interface Profile {
-  email: string
-  first_name: string
-  last_name: string
-  phone_number: string
-  password?: string
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  password?: string;
 }
 
 interface BasicInfoFieldsProps {
-  newProfile: Profile
-  onProfileChange: (profile: Partial<Profile>) => void
-  isEditing?: boolean
+  newProfile: Partial<Profile>;
+  onProfileChange: (profile: Partial<Profile>) => void;
+  isEditing?: boolean;
 }
 
 export function BasicInfoFields({ 
-  newProfile = {
-    email: '',
-    first_name: '',
-    last_name: '',
-    phone_number: '',
-    password: ''
-  }, 
+  newProfile = {},
   onProfileChange,
   isEditing = false 
 }: BasicInfoFieldsProps) {
