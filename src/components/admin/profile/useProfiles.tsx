@@ -11,7 +11,37 @@ export function useProfiles() {
       try {
         console.log("Fetching profiles...")
         
-        // Récupérer les profils
+        // First check if user is super admin
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        if (authError) throw authError
+
+        const { data: adminData, error: adminError } = await supabase
+          .from("administrators")
+          .select("is_super_admin")
+          .eq("id", user?.id)
+          .maybeSingle()
+
+        if (adminError) {
+          console.error('Error checking admin status:', adminError)
+          throw adminError
+        }
+
+        // If super admin, fetch all profiles
+        if (adminData?.is_super_admin) {
+          const { data: profiles, error: profilesError } = await supabase
+            .from("profiles")
+            .select("*, agency:agencies(name)")
+            .order('created_at', { ascending: false })
+
+          if (profilesError) throw profilesError
+
+          return profiles.map(profile => ({
+            ...profile,
+            agency_name: profile.agency?.name || '-'
+          }))
+        }
+
+        // If not super admin, fetch based on regular admin permissions
         const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
           .select("*, agency:agencies(name)")
@@ -22,14 +52,10 @@ export function useProfiles() {
           throw profilesError
         }
 
-        // Transformer les données pour inclure le nom de l'agence
-        const transformedData = profiles.map(profile => ({
+        return profiles.map(profile => ({
           ...profile,
           agency_name: profile.agency?.name || '-'
         }))
-
-        console.log("Profiles fetched successfully:", transformedData)
-        return transformedData
       } catch (error: any) {
         console.error('Error in useProfiles:', error)
         toast({

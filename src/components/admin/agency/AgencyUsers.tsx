@@ -26,46 +26,58 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
   const { data: users = [], refetch, isLoading, error } = useQuery({
     queryKey: ["agency-users", agencyId],
     queryFn: async () => {
-      console.log("Fetching users for agency:", agencyId)
-      
-      // Vérifions d'abord tous les profils pour debug
-      const { data: allProfiles, error: allProfilesError } = await supabase
-        .from("profiles")
-        .select("*")
-      
-      console.log("All profiles in database:", allProfiles)
-      
-      if (allProfilesError) {
-        console.error("Error fetching all profiles:", allProfilesError)
-      }
+      try {
+        // Check if user is super admin first
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        if (authError) throw authError
 
-      // Maintenant, récupérons les profils pour cette agence
-      const { data, error } = await supabase
-        .from("profiles")
-        .select(`
-          id,
-          first_name,
-          last_name,
-          email,
-          role,
-          agency_id
-        `)
-        .eq("agency_id", agencyId)
-        .order('created_at', { ascending: false })
-      
-      if (error) {
+        const { data: adminData, error: adminError } = await supabase
+          .from("administrators")
+          .select("is_super_admin")
+          .eq("id", user?.id)
+          .maybeSingle()
+
+        if (adminError) throw adminError
+
+        // If super admin, can fetch all users
+        if (adminData?.is_super_admin) {
+          const { data, error } = await supabase
+            .from("profiles")
+            .select(`
+              id,
+              first_name,
+              last_name,
+              email,
+              role,
+              agency_id
+            `)
+            .eq("agency_id", agencyId)
+            .order('created_at', { ascending: false })
+
+          if (error) throw error
+          return data || []
+        }
+
+        // For regular users, fetch based on permissions
+        const { data, error } = await supabase
+          .from("profiles")
+          .select(`
+            id,
+            first_name,
+            last_name,
+            email,
+            role,
+            agency_id
+          `)
+          .eq("agency_id", agencyId)
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+        return data || []
+      } catch (error: any) {
         console.error("Error fetching users:", error)
-        console.error("Error details:", error.message, error.details, error.hint)
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les utilisateurs",
-          variant: "destructive",
-        })
         throw error
       }
-
-      console.log("Fetched users for agency:", data)
-      return data || []
     },
   })
 
