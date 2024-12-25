@@ -13,33 +13,34 @@ export function AdminAgencies() {
     queryKey: ["admin-agencies"],
     queryFn: async () => {
       try {
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-        if (authError) throw authError
+        // First check if user is authenticated
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError) throw sessionError
+        if (!session) throw new Error("Veuillez vous connecter")
 
-        const { data: adminData } = await supabase
+        // Then verify super admin status
+        const { data: adminData, error: adminError } = await supabase
           .from("administrators")
           .select("is_super_admin")
-          .eq("id", user.id)
+          .eq("id", session.user.id)
           .maybeSingle()
 
+        if (adminError) throw adminError
         if (!adminData?.is_super_admin) {
-          throw new Error("Accès non autorisé")
+          throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent accéder à cette page.")
         }
 
+        // Finally fetch agencies data
         const { data, error } = await supabase
           .from("agencies")
           .select("*, subscription_plans(*)")
           .order("name")
 
-        if (error) {
-          console.error("Error fetching agencies:", error)
-          throw error
-        }
-
+        if (error) throw error
         return data as Agency[]
       } catch (error: any) {
-        console.error("Error:", error)
-        throw error
+        console.error("Error fetching agencies:", error)
+        throw new Error(error.message || "Une erreur est survenue lors du chargement des agences")
       }
     },
   })
@@ -87,7 +88,7 @@ export function AdminAgencies() {
   if (error) {
     return (
       <div className="text-center text-red-500 p-4">
-        Une erreur est survenue lors du chargement des agences
+        {error instanceof Error ? error.message : "Une erreur est survenue lors du chargement des agences"}
       </div>
     )
   }
