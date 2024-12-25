@@ -95,9 +95,17 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         console.log("Existing user found:", userId)
       } else {
         console.log("Creating new user...")
+        // Create the user with email and password
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: newProfile.email,
           password: newProfile.password,
+          options: {
+            data: {
+              first_name: newProfile.first_name,
+              last_name: newProfile.last_name,
+              role: newProfile.role
+            }
+          }
         })
 
         if (authError) {
