@@ -150,27 +150,28 @@ const Index = () => {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <div className="hidden lg:block w-64 border-r">
+    <div className="flex min-h-screen bg-background">
+      <div className="fixed left-0 top-0 z-30 h-screen w-64 border-r border-border bg-background">
         <AppSidebar />
       </div>
       
-      <div className="flex-1 p-8">
+      <div className="ml-64 flex-1 p-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">Tableau de bord</h1>
-          <div className="lg:hidden">
-            <AppSidebar />
-          </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Tableau de bord
+          </h1>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3 mb-8">
+        <div className="grid gap-6 md:grid-cols-3 mb-8">
           <StatCard
             title="Total Biens"
             value={stats?.properties.toString() || "0"}
+            className="hover:shadow-lg transition-shadow"
           />
           <StatCard
             title="Total Locataires"
             value={stats?.tenants.toString() || "0"}
+            className="hover:shadow-lg transition-shadow"
           />
           <StatCard
             title="Revenus Totaux"
@@ -178,12 +179,17 @@ const Index = () => {
               style: "currency",
               currency: "XOF",
             }).format(stats?.revenue || 0)}
+            className="hover:shadow-lg transition-shadow"
           />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 mb-8">
-          <RevenueChart />
-          <RecentActivities />
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="rounded-lg border bg-card p-6 hover:shadow-lg transition-shadow">
+            <RevenueChart />
+          </div>
+          <div className="rounded-lg border bg-card p-6 hover:shadow-lg transition-shadow">
+            <RecentActivities />
+          </div>
         </div>
       </div>
     </div>

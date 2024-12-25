@@ -1,30 +1,20 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { getSupabaseSessionKey } from "@/utils/sessionUtils"
-import {
-  BarChart3,
-  Building2,
-  CircleDollarSign,
-  FileText,
-  LogOut,
-  Menu,
-  Moon,
-  Sun,
-  Users,
-  Wallet,
-} from "lucide-react"
-import { Link, useLocation, useNavigate } from "react-router-dom"
-import { supabase } from "@/integrations/supabase/client"
+import { useNavigate } from "react-router-dom"
+import { LogOut, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
+import { supabase } from "@/integrations/supabase/client"
+import { getSupabaseSessionKey } from "@/utils/sessionUtils"
 import { useToast } from "@/hooks/use-toast"
+import { Button } from "@/components/ui/button"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+} from "@/components/ui/sidebar"
+import { SidebarNavItems } from "./sidebar/SidebarNavItems"
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-export function SidebarContent() {
-  const location = useLocation()
+export function AppSidebar() {
   const navigate = useNavigate()
   const { theme, setTheme } = useTheme()
   const { toast } = useToast()
@@ -56,112 +46,36 @@ export function SidebarContent() {
   }
 
   return (
-    <div className="pb-12">
-      <div className="space-y-4 py-4">
-        <div className="px-3 py-2">
-          <div className="space-y-1">
-            <Link to="/">
-              <Button
-                variant={location.pathname === "/" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-              >
-                <BarChart3 className="mr-2 h-4 w-4" />
-                Dashboard
-              </Button>
-            </Link>
-            <Link to="/locataires">
-              <Button
-                variant={
-                  location.pathname === "/locataires" ? "secondary" : "ghost"
-                }
-                className="w-full justify-start"
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Locataires
-              </Button>
-            </Link>
-            <Link to="/biens">
-              <Button
-                variant={location.pathname === "/biens" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-              >
-                <Building2 className="mr-2 h-4 w-4" />
-                Biens
-              </Button>
-            </Link>
-            <Link to="/depenses">
-              <Button
-                variant={location.pathname === "/depenses" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-              >
-                <Wallet className="mr-2 h-4 w-4" />
-                Dépenses
-              </Button>
-            </Link>
-            <Link to="/gains">
-              <Button
-                variant={location.pathname === "/gains" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-              >
-                <CircleDollarSign className="mr-2 h-4 w-4" />
-                Gains
-              </Button>
-            </Link>
-            <Link to="/rapports">
-              <Button
-                variant={location.pathname === "/rapports" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-              >
-                <FileText className="mr-2 h-4 w-4" />
-                Rapports
-              </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={toggleTheme}
-            >
-              {theme === "dark" ? (
-                <Sun className="mr-2 h-4 w-4" />
-              ) : (
-                <Moon className="mr-2 h-4 w-4" />
-              )}
-              {theme === "dark" ? "Mode clair" : "Mode sombre"}
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-100"
-              onClick={handleLogout}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Déconnexion
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Sidebar>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarNavItems />
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter className="border-t p-4 space-y-2">
+        <Button
+          variant="ghost"
+          className="w-full justify-start"
+          onClick={toggleTheme}
+        >
+          {theme === "dark" ? (
+            <Sun className="mr-2 h-4 w-4" />
+          ) : (
+            <Moon className="mr-2 h-4 w-4" />
+          )}
+          {theme === "dark" ? "Mode clair" : "Mode sombre"}
+        </Button>
+        <Button
+          variant="ghost"
+          className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-100"
+          onClick={handleLogout}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Déconnexion
+        </Button>
+      </SidebarFooter>
+    </Sidebar>
   )
-}
-
-export function AppSidebar({ className }: SidebarProps) {
-  const isMobile = useIsMobile()
-
-  if (isMobile) {
-    return (
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="shrink-0">
-            <Menu className="h-5 w-5" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="p-0 w-72">
-          <ScrollArea className="h-full">
-            <SidebarContent />
-          </ScrollArea>
-        </SheetContent>
-      </Sheet>
-    )
-  }
-
-  return <SidebarContent />
 }
