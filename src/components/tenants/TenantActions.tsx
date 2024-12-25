@@ -18,9 +18,17 @@ interface TenantActionsProps {
   };
   onEdit: (tenant: any) => void;
   onDelete: (id: string) => void;
+  onPrintReceipt: () => void;
+  onInspection: () => void;
 }
 
-export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) {
+export function TenantActions({ 
+  tenant, 
+  onEdit, 
+  onDelete,
+  onPrintReceipt,
+  onInspection 
+}: TenantActionsProps) {
   const navigate = useNavigate();
   const [showReceipt, setShowReceipt] = useState(false);
   const [showInspection, setShowInspection] = useState(false);
@@ -77,14 +85,14 @@ export function TenantActions({ tenant, onEdit, onDelete }: TenantActionsProps) 
         <Button
           variant="outline"
           size="icon"
-          onClick={() => setShowReceipt(true)}
+          onClick={onPrintReceipt}
         >
           <Receipt className="h-4 w-4" />
         </Button>
         {contract && (
           <Button
             variant="outline"
-            onClick={() => setShowInspection(true)}
+            onClick={onInspection}
           >
             Mettre fin au contrat
           </Button>
