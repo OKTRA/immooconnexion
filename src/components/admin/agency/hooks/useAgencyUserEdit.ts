@@ -11,6 +11,7 @@ export function useAgencyUserEdit({ onSuccess }: { onSuccess: () => void }) {
   const handleUpdateAuth = async (editedUser: any) => {
     try {
       if (editedUser.email !== selectedUser.email) {
+        // Check for existing email
         const { data: existingUser } = await supabase
           .from('profiles')
           .select('email')
@@ -25,22 +26,31 @@ export function useAgencyUserEdit({ onSuccess }: { onSuccess: () => void }) {
           })
           return
         }
+
+        // Update email using standard auth API
+        const { error: updateError } = await supabase.auth.updateUser({
+          email: editedUser.email,
+        })
+
+        if (updateError) throw updateError
       }
 
-      if (editedUser.password || editedUser.email !== selectedUser.email) {
-        const updateData: any = {}
-        if (editedUser.password) updateData.password = editedUser.password
-        if (editedUser.email !== selectedUser.email) updateData.email = editedUser.email
+      // If password is provided, update it
+      if (editedUser.password) {
+        const { error: passwordError } = await supabase.auth.updateUser({
+          password: editedUser.password
+        })
 
-        const { error: authError } = await supabase.auth.admin.updateUserById(
-          editedUser.id,
-          updateData
-        )
-        if (authError) throw authError
+        if (passwordError) throw passwordError
       }
 
       setSelectedUser(editedUser)
       setEditStep(2)
+
+      toast({
+        title: "Succès",
+        description: "Les informations d'authentification ont été mises à jour",
+      })
     } catch (error: any) {
       console.error("Error updating auth user:", error)
       toast({
