@@ -1,17 +1,14 @@
 import { TableBody } from "@/components/ui/table"
 import { TenantTableRow } from "./TenantTableRow"
 import { TenantDisplay } from "@/hooks/use-tenants"
-import { useToast } from "@/components/ui/use-toast"
-import { supabase } from "@/integrations/supabase/client"
 
 interface TenantsTableContentProps {
   tenants: TenantDisplay[]
   onEdit: (tenant: TenantDisplay) => void
+  onDelete: (id: string) => void
 }
 
-export function TenantsTableContent({ tenants, onEdit }: TenantsTableContentProps) {
-  const { toast } = useToast()
-
+export function TenantsTableContent({ tenants, onEdit, onDelete }: TenantsTableContentProps) {
   if (tenants.length === 0) {
     return (
       <TableBody>
@@ -31,28 +28,7 @@ export function TenantsTableContent({ tenants, onEdit }: TenantsTableContentProp
           key={tenant.id}
           tenant={tenant}
           onEdit={onEdit}
-          onDelete={async (id) => {
-            try {
-              const { error } = await supabase
-                .from('tenants')
-                .delete()
-                .eq('id', id)
-
-              if (error) throw error
-
-              toast({
-                title: "Locataire supprimé",
-                description: "Le locataire a été supprimé avec succès.",
-              })
-            } catch (error: any) {
-              console.error('Error in handleDelete:', error)
-              toast({
-                title: "Erreur",
-                description: "Une erreur est survenue lors de la suppression.",
-                variant: "destructive",
-              })
-            }
-          }}
+          onDelete={onDelete}
         />
       ))}
     </TableBody>

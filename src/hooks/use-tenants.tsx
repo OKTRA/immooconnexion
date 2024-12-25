@@ -42,7 +42,7 @@ export function useTenants() {
     return () => subscription.unsubscribe()
   }, [navigate])
 
-  const { data: tenants = [], isLoading, error } = useQuery({
+  const { data: tenants = [], isLoading, error, refetch } = useQuery({
     queryKey: ['tenants'],
     queryFn: async () => {
       if (!session) {
@@ -58,7 +58,6 @@ export function useTenants() {
         throw new Error("Non authentifié")
       }
 
-      // First get the user's profile to check their role and agency
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('role, agency_id')
@@ -91,7 +90,6 @@ export function useTenants() {
           agency_id
         `)
 
-      // Only query if we have an agency_id
       query = query.eq('agency_id', profileData.agency_id)
       
       const { data: tenantsData, error: tenantsError } = await query
@@ -118,5 +116,5 @@ export function useTenants() {
     enabled: !!session
   })
 
-  return { tenants, isLoading, error, session }
+  return { tenants, isLoading, error, session, refetch }
 }

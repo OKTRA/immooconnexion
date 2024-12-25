@@ -5,6 +5,7 @@ import { TenantsTableContent } from "./tenants/TenantsTableContent"
 import { TenantDisplay, useTenants } from "@/hooks/use-tenants"
 import { useToast } from "./ui/use-toast"
 import { useEffect } from "react"
+import { supabase } from "@/integrations/supabase/client"
 
 interface TenantsTableProps {
   onEdit: (tenant: TenantDisplay) => void
@@ -12,7 +13,7 @@ interface TenantsTableProps {
 
 export function TenantsTable({ onEdit }: TenantsTableProps) {
   const { toast } = useToast()
-  const { tenants, isLoading, error, session } = useTenants()
+  const { tenants, isLoading, error, session, refetch } = useTenants()
 
   useEffect(() => {
     if (error) {
@@ -23,6 +24,31 @@ export function TenantsTable({ onEdit }: TenantsTableProps) {
       })
     }
   }, [error, toast])
+
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('tenants')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      toast({
+        title: "Succès",
+        description: "Le locataire a été supprimé avec succès.",
+      })
+      
+      refetch()
+    } catch (error: any) {
+      console.error('Error deleting tenant:', error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suppression du locataire.",
+        variant: "destructive",
+      })
+    }
+  }
 
   if (!session) {
     return (
@@ -53,7 +79,11 @@ export function TenantsTable({ onEdit }: TenantsTableProps) {
       <div className="rounded-md border">
         <Table>
           <TenantsTableHeader />
-          <TenantsTableContent tenants={tenants} onEdit={onEdit} />
+          <TenantsTableContent 
+            tenants={tenants} 
+            onEdit={onEdit}
+            onDelete={handleDelete}
+          />
         </Table>
       </div>
     </div>
