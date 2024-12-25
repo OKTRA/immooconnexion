@@ -10,13 +10,13 @@ interface AddProfileHandlerProps {
 }
 
 interface NewProfile {
-  email: string
-  first_name: string
-  last_name: string
-  phone_number: string
-  password: string
-  agency_id: string
-  role: UserRole
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  password: string;
+  agency_id: string;
+  role: UserRole;
 }
 
 export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfileHandlerProps) {
@@ -38,8 +38,9 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       throw new Error("Email et mot de passe sont obligatoires")
     }
 
+    // Improved email validation regex
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-    if (!emailRegex.test(newProfile.email)) {
+    if (!emailRegex.test(newProfile.email.trim())) {
       throw new Error("Format d'email invalide")
     }
 
@@ -64,11 +65,14 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
     try {
       validateAuthData()
 
+      // Trim email to remove any whitespace
+      const cleanEmail = newProfile.email.trim().toLowerCase()
+
       // Check if user already exists
       const { data: existingUser } = await supabase
         .from('profiles')
         .select('id')
-        .eq('email', newProfile.email)
+        .eq('email', cleanEmail)
         .maybeSingle()
 
       if (existingUser) {
@@ -78,8 +82,13 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       // Create auth user with just email and password
       console.log("Creating auth user...")
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: newProfile.email,
-        password: newProfile.password
+        email: cleanEmail,
+        password: newProfile.password,
+        options: {
+          data: {
+            email: cleanEmail
+          }
+        }
       })
 
       if (authError) {
@@ -106,7 +115,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         .from("profiles")
         .upsert({
           id: userId,
-          email: newProfile.email,
+          email: newProfile.email.trim().toLowerCase(),
           first_name: newProfile.first_name,
           last_name: newProfile.last_name,
           phone_number: newProfile.phone_number,
