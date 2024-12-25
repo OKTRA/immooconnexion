@@ -30,9 +30,6 @@ export function ProfileForm({
     setIsLoading(true)
 
     try {
-      if (setNewProfile) {
-        await setNewProfile(newProfile)
-      }
       if (onSubmit) {
         onSubmit()
       }
@@ -53,6 +50,18 @@ export function ProfileForm({
     }
   }
 
+  const handleUpdateAuth = async () => {
+    if (onCreateAuthUser) {
+      await onCreateAuthUser()
+    }
+  }
+
+  const handleUpdateProfile = async () => {
+    if (onUpdateProfile && newProfile.id) {
+      await onUpdateProfile(newProfile.id)
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-2xl mx-auto px-4 md:px-0">
       <BasicInfoFields 
@@ -61,17 +70,19 @@ export function ProfileForm({
         isEditing={isEditing}
         step={step}
         selectedAgencyId={selectedAgencyId}
+        onUpdateAuth={handleUpdateAuth}
+        onUpdateProfile={handleUpdateProfile}
       />
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading 
-          ? "Chargement..." 
-          : step === 1 
-            ? 'Suivant' 
-            : isEditing 
-              ? 'Enregistrer les modifications' 
+      {!isEditing && (
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading 
+            ? "Chargement..." 
+            : step === 1 
+              ? 'Suivant' 
               : 'Créer le profil'
-        }
-      </Button>
+          }
+        </Button>
+      )}
     </form>
   )
 }
