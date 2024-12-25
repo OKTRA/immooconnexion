@@ -2,6 +2,8 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { UserRole } from "@/types/profile"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
 interface Profile {
   email: string;
@@ -28,6 +30,22 @@ export function BasicInfoFields({
   step,
   selectedAgencyId
 }: BasicInfoFieldsProps) {
+  const { data: agencies = [] } = useQuery({
+    queryKey: ["agencies"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("agencies")
+        .select("id, name")
+      
+      if (error) {
+        console.error("Error fetching agencies:", error)
+        return []
+      }
+      
+      return data || []
+    }
+  })
+
   const handleChange = (field: keyof Profile, value: string) => {
     console.log("Field change:", field, value)
     onProfileChange({
@@ -35,6 +53,10 @@ export function BasicInfoFields({
       [field]: value
     })
   }
+
+  const selectedAgency = selectedAgencyId 
+    ? agencies.find(agency => agency.id === selectedAgencyId)
+    : null
 
   if (step === 1) {
     return (
@@ -113,6 +135,17 @@ export function BasicInfoFields({
           </SelectContent>
         </Select>
       </div>
+      {selectedAgency && (
+        <div className="col-span-2">
+          <Label htmlFor="agency">Agence</Label>
+          <Input
+            id="agency"
+            value={selectedAgency.name}
+            readOnly
+            className="bg-gray-100 cursor-not-allowed"
+          />
+        </div>
+      )}
     </div>
   )
 }
