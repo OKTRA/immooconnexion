@@ -57,6 +57,7 @@ export function PropertyTable() {
       }
       console.log("User ID:", user.id)
 
+      // Get user profile and check admin status
       const { data: profile } = await supabase
         .from('profiles')
         .select('role, agency_id')
@@ -65,16 +66,23 @@ export function PropertyTable() {
 
       console.log("Profil utilisateur:", profile)
 
+      // Check administrator status
+      const { data: adminData } = await supabase
+        .from('administrators')
+        .select('is_super_admin')
+        .eq('id', user.id)
+        .maybeSingle()
+
       let query = supabase
         .from('properties')
         .select('*')
 
-      // Si l'utilisateur n'est pas admin, on filtre par agency_id
-      if (profile?.role !== 'admin') {
+      // If user is not admin or super admin, filter by agency_id
+      if (!adminData?.is_super_admin && profile?.role !== 'admin') {
         if (profile?.agency_id) {
           query = query.eq('agency_id', profile.agency_id)
         } else {
-          // If user has no agency_id, return empty array instead of querying with null
+          // If user has no agency_id, return empty array
           return []
         }
       }
