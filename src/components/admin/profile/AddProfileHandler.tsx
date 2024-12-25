@@ -33,53 +33,35 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
   const [newProfile, setNewProfile] = useState<NewProfile>(initialProfile)
   const { toast } = useToast()
 
-  // Email validation function
   const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
   }
 
+  const validateProfile = () => {
+    if (!newProfile.email || !newProfile.password || !newProfile.first_name || 
+        !newProfile.last_name || !newProfile.phone_number || !newProfile.agency_id) {
+      throw new Error("Tous les champs sont obligatoires")
+    }
+
+    if (!isValidEmail(newProfile.email)) {
+      throw new Error("L'adresse email n'est pas valide")
+    }
+
+    if (newProfile.password.length < 6) {
+      throw new Error("Le mot de passe doit contenir au moins 6 caractères")
+    }
+
+    if (!newProfile.phone_number.match(/^\+?[0-9\s-]{10,}$/)) {
+      throw new Error("Le numéro de téléphone n'est pas valide")
+    }
+  }
+
   const handleAddUser = async () => {
     try {
       console.log("Starting user creation with:", newProfile)
-
-      // Comprehensive validation
-      if (!newProfile.email || !newProfile.password) {
-        toast({
-          title: "Erreur",
-          description: "L'email et le mot de passe sont obligatoires",
-          variant: "destructive",
-        })
-        return
-      }
-
-      // Email validation
-      if (!isValidEmail(newProfile.email)) {
-        toast({
-          title: "Email invalide",
-          description: "Veuillez entrer une adresse email valide",
-          variant: "destructive",
-        })
-        return
-      }
-
-      if (!newProfile.agency_id) {
-        toast({
-          title: "Erreur",
-          description: "L'agence est obligatoire",
-          variant: "destructive",
-        })
-        return
-      }
-
-      if (newProfile.password.length < 6) {
-        toast({
-          title: "Erreur",
-          description: "Le mot de passe doit contenir au moins 6 caractères",
-          variant: "destructive",
-        })
-        return
-      }
+      
+      validateProfile()
 
       // First check if user exists
       const { data: existingUser } = await supabase
@@ -95,7 +77,6 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         console.log("Existing user found:", userId)
       } else {
         console.log("Creating new user...")
-        // Create the user with email and password
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: newProfile.email,
           password: newProfile.password,
@@ -142,7 +123,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
       toast({
         title: "Succès",
-        description: "Le profil a été créé avec succès",
+        description: "Le profil a été créé avec succès. Un email de confirmation a été envoyé.",
       })
       
       onClose()

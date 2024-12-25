@@ -34,44 +34,48 @@ export function BasicInfoFields({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">Email*</Label>
         <Input
           id="email"
           type="email"
           value={newProfile?.email || ''}
           onChange={(e) => handleChange('email', e.target.value)}
           required
+          placeholder="email@example.com"
         />
       </div>
       <div>
-        <Label htmlFor="first_name">Prénom</Label>
+        <Label htmlFor="first_name">Prénom*</Label>
         <Input
           id="first_name"
           value={newProfile?.first_name || ''}
           onChange={(e) => handleChange('first_name', e.target.value)}
           required
+          placeholder="Jean"
         />
       </div>
       <div>
-        <Label htmlFor="last_name">Nom</Label>
+        <Label htmlFor="last_name">Nom*</Label>
         <Input
           id="last_name"
           value={newProfile?.last_name || ''}
           onChange={(e) => handleChange('last_name', e.target.value)}
           required
+          placeholder="Dupont"
         />
       </div>
       <div>
-        <Label htmlFor="phone_number">Numéro de téléphone</Label>
+        <Label htmlFor="phone_number">Numéro de téléphone*</Label>
         <Input
           id="phone_number"
           value={newProfile?.phone_number || ''}
           onChange={(e) => handleChange('phone_number', e.target.value)}
           required
+          placeholder="+33 6 12 34 56 78"
         />
       </div>
       <div>
-        <Label htmlFor="role">Rôle</Label>
+        <Label htmlFor="role">Rôle*</Label>
         <Select 
           value={newProfile?.role || 'user'} 
           onValueChange={(value: UserRole) => handleChange('role', value)}
@@ -80,22 +84,22 @@ export function BasicInfoFields({
             <SelectValue placeholder="Sélectionner un rôle" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="user">Utilisateur</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
-            <SelectItem value="super_admin">Super Admin</SelectItem>
+            <SelectItem value="user">Agent immobilier</SelectItem>
+            <SelectItem value="admin">Administrateur d'agence</SelectItem>
           </SelectContent>
         </Select>
       </div>
       {!isEditing && (
         <div>
-          <Label htmlFor="password">Mot de passe</Label>
+          <Label htmlFor="password">Mot de passe*</Label>
           <Input
             id="password"
             type="password"
             value={newProfile?.password || ''}
             onChange={(e) => handleChange('password', e.target.value)}
             required
-            placeholder="Entrez un mot de passe"
+            placeholder="Minimum 6 caractères"
+            minLength={6}
           />
         </div>
       )}
