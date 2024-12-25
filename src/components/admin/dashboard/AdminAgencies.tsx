@@ -15,19 +15,26 @@ export function AdminAgencies() {
       try {
         // First check if user is authenticated
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        if (sessionError) throw sessionError
+        if (sessionError) {
+          console.error("Session error:", sessionError)
+          throw new Error("Erreur d'authentification")
+        }
         if (!session) throw new Error("Veuillez vous connecter")
 
-        // Then verify super admin status
+        // Then verify administrator status
         const { data: adminData, error: adminError } = await supabase
           .from("administrators")
-          .select("is_super_admin")
+          .select("*")
           .eq("id", session.user.id)
           .maybeSingle()
 
-        if (adminError) throw adminError
-        if (!adminData?.is_super_admin) {
-          throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent accéder à cette page.")
+        if (adminError) {
+          console.error("Admin verification error:", adminError)
+          throw new Error("Erreur lors de la vérification des droits administrateur")
+        }
+        
+        if (!adminData) {
+          throw new Error("Accès non autorisé. Vous devez être administrateur pour accéder à cette page.")
         }
 
         // Finally fetch agencies data
@@ -36,10 +43,13 @@ export function AdminAgencies() {
           .select("*, subscription_plans(*)")
           .order("name")
 
-        if (error) throw error
+        if (error) {
+          console.error("Agencies fetch error:", error)
+          throw error
+        }
         return data as Agency[]
       } catch (error: any) {
-        console.error("Error fetching agencies:", error)
+        console.error("Error in AdminAgencies:", error)
         throw new Error(error.message || "Une erreur est survenue lors du chargement des agences")
       }
     },
