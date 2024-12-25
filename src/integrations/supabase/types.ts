@@ -419,6 +419,7 @@ export type Database = {
           phone_number: string | null
           photo_id_url: string | null
           prenom: string
+          profession: string | null
           updated_at: string | null
           user_id: string | null
         }
@@ -432,6 +433,7 @@ export type Database = {
           phone_number?: string | null
           photo_id_url?: string | null
           prenom: string
+          profession?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
@@ -445,6 +447,7 @@ export type Database = {
           phone_number?: string | null
           photo_id_url?: string | null
           prenom?: string
+          profession?: string | null
           updated_at?: string | null
           user_id?: string | null
         }

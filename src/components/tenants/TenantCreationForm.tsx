@@ -4,6 +4,7 @@ import { TenantFormFields } from "./TenantFormFields";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useSubscriptionLimits } from "@/utils/subscriptionLimits";
+import { TenantReceipt } from "./TenantReceipt";
 
 interface TenantCreationFormProps {
   userProfile: any;
@@ -21,9 +22,11 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
     photoId: null as File | null,
     fraisAgence: "",
     propertyId: "",
+    profession: "",
   });
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
   const { toast } = useToast();
   const { checkAndNotifyLimits } = useSubscriptionLimits();
 
@@ -41,7 +44,6 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
     setIsSubmitting(true);
     
     try {
-      // Check subscription limits before adding new tenant
       if (userProfile?.agency_id && !(await checkAndNotifyLimits(userProfile.agency_id, 'tenant'))) {
         setIsSubmitting(false);
         return;
@@ -50,7 +52,6 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
-      // Create auth user for tenant
       const email = `${formData.nom.toLowerCase()}.${formData.prenom.toLowerCase()}@tenant.local`;
       const password = Math.random().toString(36).slice(-8);
       
@@ -68,7 +69,6 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
       if (authError) throw authError;
       if (!authData.user) throw new Error("Failed to create user");
 
-      // Update profile
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
@@ -81,7 +81,6 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
 
       if (profileError) throw profileError;
 
-      // Create tenant record
       const { error: tenantError } = await supabase
         .from('tenants')
         .insert({
@@ -92,6 +91,7 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
           phone_number: formData.telephone,
           agency_fees: parseFloat(formData.fraisAgence),
           photo_id_url: previewUrl || null,
+          profession: formData.profession,
           user_id: user.id,
           agency_id: userProfile?.agency_id
         });
@@ -103,7 +103,7 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
         description: "Le locataire a été ajouté avec succès.",
       });
       
-      onSuccess();
+      setShowReceipt(true);
     } catch (error: any) {
       console.error('Erreur détaillée:', error);
       toast({
@@ -111,10 +111,34 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
         description: error.message || "Une erreur est survenue lors de l'opération.",
         variant: "destructive",
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (showReceipt) {
+    return (
+      <div className="space-y-4">
+        <TenantReceipt 
+          tenant={{
+            nom: formData.nom,
+            prenom: formData.prenom,
+            telephone: formData.telephone,
+            fraisAgence: formData.fraisAgence,
+            propertyId: formData.propertyId,
+            profession: formData.profession
+          }}
+        />
+        <div className="flex justify-end gap-2">
+          <Button onClick={() => {
+            setShowReceipt(false);
+            onSuccess();
+          }}>
+            Fermer
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

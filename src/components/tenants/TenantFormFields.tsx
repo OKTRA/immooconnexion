@@ -7,6 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TenantFormFieldsProps {
   formData: {
@@ -17,6 +19,7 @@ interface TenantFormFieldsProps {
     photoId: File | null;
     fraisAgence: string;
     propertyId: string;
+    profession: string;
   };
   setFormData: (data: any) => void;
   properties: any[];
@@ -31,6 +34,22 @@ export function TenantFormFields({
   handlePhotoChange,
   previewUrl,
 }: TenantFormFieldsProps) {
+  const { data: selectedProperty } = useQuery({
+    queryKey: ['property', formData.propertyId],
+    queryFn: async () => {
+      if (!formData.propertyId) return null;
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*, agencies(name)')
+        .eq('id', formData.propertyId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!formData.propertyId
+  });
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
@@ -75,6 +94,17 @@ export function TenantFormFields({
         />
       </div>
       <div className="space-y-2">
+        <Label htmlFor="profession">Profession</Label>
+        <Input
+          id="profession"
+          value={formData.profession}
+          onChange={(e) =>
+            setFormData({ ...formData, profession: e.target.value })
+          }
+          required
+        />
+      </div>
+      <div className="space-y-2">
         <Label htmlFor="propertyId">Propriété</Label>
         <Select
           value={formData.propertyId}
@@ -92,6 +122,34 @@ export function TenantFormFields({
           </SelectContent>
         </Select>
       </div>
+      {selectedProperty && (
+        <>
+          <div className="space-y-2">
+            <Label>Loyer mensuel</Label>
+            <Input
+              value={`${selectedProperty.loyer?.toLocaleString()} FCFA`}
+              readOnly
+              className="bg-gray-50"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Caution</Label>
+            <Input
+              value={`${selectedProperty.caution?.toLocaleString()} FCFA`}
+              readOnly
+              className="bg-gray-50"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Agence</Label>
+            <Input
+              value={selectedProperty.agencies?.name || ''}
+              readOnly
+              className="bg-gray-50"
+            />
+          </div>
+        </>
+      )}
       <div className="space-y-2">
         <Label htmlFor="fraisAgence">Frais d'Agence (FCFA)</Label>
         <Input
