@@ -69,26 +69,31 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       const cleanEmail = validateAuthData()
       console.log("Creating auth user with email:", cleanEmail)
 
-      // First, check if the user exists in auth.users (this is done through the API)
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: cleanEmail,
-        password: newProfile.password,
-      })
+      // Check if user exists in profiles table first
+      const { data: existingProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', cleanEmail)
+        .maybeSingle()
 
-      if (!signInError) {
-        // If sign in succeeds, it means user exists
+      if (profileError) {
+        console.error("Profile check error:", profileError)
+        throw new Error("Erreur lors de la vérification du profil")
+      }
+
+      if (existingProfile) {
         throw new Error("Un utilisateur avec cet email existe déjà")
       }
 
-      // Create the auth user with minimal data first
+      // Create the auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: cleanEmail,
         password: newProfile.password,
         options: {
+          emailRedirectTo: window.location.origin,
           data: {
             email: cleanEmail,
-          },
-          emailRedirectTo: window.location.origin
+          }
         }
       })
 
@@ -105,7 +110,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         throw new Error("Erreur lors de la création de l'utilisateur")
       }
 
-      // Sign out the newly created user to avoid session conflicts
+      // Sign out immediately to prevent session conflicts
       await supabase.auth.signOut()
 
       console.log("Auth user created successfully:", authData.user.id)
