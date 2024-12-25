@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { UserRole } from "@/types/profile"
@@ -31,8 +31,22 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
   }
   
   const [newProfile, setNewProfile] = useState<NewProfile>(initialProfile)
-  const [isRateLimited, setIsRateLimited] = useState(false)
   const { toast } = useToast()
+
+  // Check if we're currently rate limited
+  const isRateLimited = () => {
+    const limitExpiry = localStorage.getItem('signupRateLimitExpiry')
+    if (!limitExpiry) return false
+    
+    const expiryTime = parseInt(limitExpiry)
+    return Date.now() < expiryTime
+  }
+
+  // Set rate limit for 10 minutes
+  const setRateLimit = () => {
+    const expiryTime = Date.now() + 600000 // 10 minutes
+    localStorage.setItem('signupRateLimitExpiry', expiryTime.toString())
+  }
 
   const validateAuthData = () => {
     if (!newProfile.email || !newProfile.password) {
@@ -65,8 +79,8 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
     try {
       validateAuthData()
 
-      if (isRateLimited) {
-        throw new Error("Veuillez patienter quelques minutes avant de réessayer")
+      if (isRateLimited()) {
+        throw new Error("Trop de tentatives. Veuillez réessayer dans 10 minutes.")
       }
 
       // Trim email to remove any whitespace
@@ -96,11 +110,11 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       })
 
       if (authError) {
-        if (authError.message.includes('rate_limit') || authError.message.includes('email rate limit')) {
-          setIsRateLimited(true)
-          // Reset rate limit after 5 minutes
-          setTimeout(() => setIsRateLimited(false), 300000)
-          throw new Error("Trop de tentatives. Veuillez réessayer dans 5 minutes.")
+        if (authError.message.includes('rate_limit') || 
+            authError.message.includes('email rate limit') ||
+            authError.status === 429) {
+          setRateLimit()
+          throw new Error("Trop de tentatives. Veuillez réessayer dans 10 minutes.")
         }
         console.error("Auth error:", authError)
         throw authError
@@ -151,6 +165,15 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       throw error
     }
   }
+
+  // Cleanup rate limit on unmount
+  useEffect(() => {
+    return () => {
+      if (!isRateLimited()) {
+        localStorage.removeItem('signupRateLimitExpiry')
+      }
+    }
+  }, [])
 
   return {
     newProfile,
