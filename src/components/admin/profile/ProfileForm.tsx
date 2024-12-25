@@ -1,6 +1,7 @@
 import { BasicInfoFields } from "./form/BasicInfoFields"
 import { AgencySelect } from "./form/AgencySelect"
 import { Button } from "@/components/ui/button"
+import { useState } from "react"
 
 interface ProfileFormProps {
   newProfile: any;
@@ -17,11 +18,21 @@ export function ProfileForm({
   selectedAgencyId,
   isEditing = false 
 }: ProfileFormProps) {
+  const [step, setStep] = useState<1 | 2>(1)
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Form submitted with:", newProfile)
-    if (onSubmit) {
-      onSubmit()
+    if (step === 1) {
+      // Validate email and password
+      if (!newProfile.email || !newProfile.password) {
+        return
+      }
+      setStep(2)
+    } else {
+      console.log("Form submitted with:", newProfile)
+      if (onSubmit) {
+        onSubmit()
+      }
     }
   }
 
@@ -51,13 +62,16 @@ export function ProfileForm({
         newProfile={newProfile} 
         onProfileChange={handleProfileChange}
         isEditing={isEditing}
+        step={step}
       />
-      <AgencySelect 
-        value={selectedAgencyId || newProfile?.agency_id || ''} 
-        onChange={handleAgencyChange}
-      />
+      {step === 2 && (
+        <AgencySelect 
+          value={selectedAgencyId || newProfile?.agency_id || ''} 
+          onChange={handleAgencyChange}
+        />
+      )}
       <Button type="submit" className="w-full">
-        {isEditing ? 'Enregistrer les modifications' : 'Créer le profil'}
+        {step === 1 ? 'Suivant' : isEditing ? 'Enregistrer les modifications' : 'Créer le profil'}
       </Button>
     </form>
   )

@@ -34,9 +34,8 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
   const { toast } = useToast()
 
   const validateProfile = () => {
-    if (!newProfile.email || !newProfile.password || !newProfile.first_name || 
-        !newProfile.last_name || !newProfile.phone_number || !newProfile.agency_id) {
-      throw new Error("Tous les champs sont obligatoires")
+    if (!newProfile.email || !newProfile.password) {
+      throw new Error("Email et mot de passe sont obligatoires")
     }
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
@@ -46,6 +45,13 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
     if (newProfile.password.length < 6) {
       throw new Error("Le mot de passe doit contenir au moins 6 caractères")
+    }
+  }
+
+  const validateAdditionalInfo = () => {
+    if (!newProfile.first_name || !newProfile.last_name || 
+        !newProfile.phone_number || !newProfile.agency_id) {
+      throw new Error("Tous les champs sont obligatoires")
     }
 
     const phoneRegex = /^\+?[0-9\s-]{10,}$/
@@ -58,6 +64,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
     try {
       console.log("Starting user creation with:", newProfile)
       validateProfile()
+      validateAdditionalInfo()
 
       // Check if user already exists
       const { data: existingUser } = await supabase

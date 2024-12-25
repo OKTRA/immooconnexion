@@ -16,12 +16,14 @@ interface BasicInfoFieldsProps {
   newProfile: Partial<Profile>;
   onProfileChange: (profile: Partial<Profile>) => void;
   isEditing?: boolean;
+  step: 1 | 2;
 }
 
 export function BasicInfoFields({ 
   newProfile = {},
   onProfileChange,
-  isEditing = false 
+  isEditing = false,
+  step
 }: BasicInfoFieldsProps) {
   const handleChange = (field: keyof Profile, value: string) => {
     console.log("Field change:", field, value)
@@ -31,19 +33,38 @@ export function BasicInfoFields({
     })
   }
 
+  if (step === 1) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="email">Email*</Label>
+          <Input
+            id="email"
+            type="email"
+            value={newProfile?.email || ''}
+            onChange={(e) => handleChange('email', e.target.value)}
+            required
+            placeholder="email@example.com"
+          />
+        </div>
+        <div>
+          <Label htmlFor="password">Mot de passe*</Label>
+          <Input
+            id="password"
+            type="password"
+            value={newProfile?.password || ''}
+            onChange={(e) => handleChange('password', e.target.value)}
+            required
+            placeholder="Minimum 6 caractères"
+            minLength={6}
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <Label htmlFor="email">Email*</Label>
-        <Input
-          id="email"
-          type="email"
-          value={newProfile?.email || ''}
-          onChange={(e) => handleChange('email', e.target.value)}
-          required
-          placeholder="email@example.com"
-        />
-      </div>
       <div>
         <Label htmlFor="first_name">Prénom*</Label>
         <Input
@@ -89,20 +110,6 @@ export function BasicInfoFields({
           </SelectContent>
         </Select>
       </div>
-      {!isEditing && (
-        <div>
-          <Label htmlFor="password">Mot de passe*</Label>
-          <Input
-            id="password"
-            type="password"
-            value={newProfile?.password || ''}
-            onChange={(e) => handleChange('password', e.target.value)}
-            required
-            placeholder="Minimum 6 caractères"
-            minLength={6}
-          />
-        </div>
-      )}
     </div>
   )
 }
