@@ -31,7 +31,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
   }
   
   const [newProfile, setNewProfile] = useState<NewProfile>(initialProfile)
-  const [lastSignupAttempt, setLastSignupAttempt] = useState<number>(0)
+  const [isRateLimited, setIsRateLimited] = useState(false)
   const { toast } = useToast()
 
   const validateAuthData = () => {
@@ -39,7 +39,6 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       throw new Error("Email et mot de passe sont obligatoires")
     }
 
-    // Improved email validation regex
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
     if (!emailRegex.test(newProfile.email.trim())) {
       throw new Error("Format d'email invalide")
@@ -66,12 +65,9 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
     try {
       validateAuthData()
 
-      // Check rate limiting
-      const now = Date.now()
-      if (now - lastSignupAttempt < 60000) { // 1 minute delay
-        throw new Error("Veuillez patienter une minute avant de réessayer")
+      if (isRateLimited) {
+        throw new Error("Veuillez patienter quelques minutes avant de réessayer")
       }
-      setLastSignupAttempt(now)
 
       // Trim email to remove any whitespace
       const cleanEmail = newProfile.email.trim().toLowerCase()
@@ -100,8 +96,11 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       })
 
       if (authError) {
-        if (authError.message.includes('rate_limit')) {
-          throw new Error("Trop de tentatives. Veuillez réessayer dans quelques minutes.")
+        if (authError.message.includes('rate_limit') || authError.message.includes('email rate limit')) {
+          setIsRateLimited(true)
+          // Reset rate limit after 5 minutes
+          setTimeout(() => setIsRateLimited(false), 300000)
+          throw new Error("Trop de tentatives. Veuillez réessayer dans 5 minutes.")
         }
         console.error("Auth error:", authError)
         throw authError
