@@ -12,7 +12,6 @@ export function PropertyActions({ propertyId, onEdit, onDelete }: PropertyAction
   const navigate = useNavigate()
 
   const handleViewProperty = () => {
-    console.log("Navigation vers le bien:", propertyId)
     navigate(`/biens/${propertyId}`)
   }
 
