@@ -12,11 +12,16 @@ export function PropertyActions({ propertyId, onEdit, onDelete }: PropertyAction
   const navigate = useNavigate()
 
   const handleViewProperty = () => {
-    console.log("Navigating to property:", propertyId)
-    if (propertyId) {
+    console.log("Attempting to navigate to property:", propertyId)
+    if (!propertyId) {
+      console.error("Property ID is missing")
+      return
+    }
+    
+    try {
       navigate(`/biens/${propertyId}`)
-    } else {
-      console.error("Property ID is undefined")
+    } catch (error) {
+      console.error("Navigation error:", error)
     }
   }
 
