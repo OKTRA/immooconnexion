@@ -4,6 +4,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button"; // Add this import
 import { useState } from "react";
 import { TenantCreationForm } from "./tenants/TenantCreationForm";
 import { TenantReceipt } from "./tenants/TenantReceipt";
