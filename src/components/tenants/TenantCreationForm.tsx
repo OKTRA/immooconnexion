@@ -54,7 +54,7 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
         .select('agency_id')
         .eq('id', user.id)
         .single();
-
+      
       if (profileError) throw profileError;
       if (!profile?.agency_id) throw new Error("Aucune agence associée à ce profil");
 
@@ -64,7 +64,19 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
         return;
       }
 
-      // Create tenant record
+      let photo_id_url = null;
+      if (formData.photoId) {
+        const fileExt = formData.photoId.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const { error: uploadError, data } = await supabase.storage
+          .from('tenant_photos')
+          .upload(fileName, formData.photoId);
+
+        if (uploadError) throw uploadError;
+        photo_id_url = data.path;
+      }
+
+      // Create tenant record directly without auth or profile
       const { error: tenantError } = await supabase
         .from('tenants')
         .insert({
@@ -72,7 +84,7 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
           prenom: formData.prenom,
           birth_date: formData.dateNaissance,
           phone_number: formData.telephone,
-          photo_id_url: previewUrl || null,
+          photo_id_url,
           agency_fees: parseFloat(formData.fraisAgence),
           profession: formData.profession,
           agency_id: profile.agency_id
@@ -93,6 +105,7 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
         description: error.message || "Une erreur est survenue lors de l'opération.",
         variant: "destructive",
       });
+    } finally {
       setIsSubmitting(false);
     }
   };
