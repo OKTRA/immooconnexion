@@ -27,11 +27,15 @@ export function AdminLoginForm() {
 
       if (signInError) throw signInError
 
-      // Using maybeSingle() instead of single() to handle non-existent records
+      if (!user) {
+        throw new Error("Aucun utilisateur trouvé")
+      }
+
+      // Vérifier si l'utilisateur est un super admin
       const { data: adminData, error: adminError } = await supabase
         .from('administrators')
         .select('is_super_admin')
-        .eq('id', user?.id)
+        .eq('id', user.id)
         .maybeSingle()
 
       if (adminError) {
@@ -39,7 +43,7 @@ export function AdminLoginForm() {
         throw new Error("Erreur lors de la vérification des droits d'administrateur")
       }
 
-      // Check if admin data exists and is super admin
+      // Vérifier si l'utilisateur est un super admin
       if (!adminData?.is_super_admin) {
         await supabase.auth.signOut()
         throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent se connecter ici.")
@@ -54,7 +58,6 @@ export function AdminLoginForm() {
     } catch (error: any) {
       console.error('Login error:', error)
       
-      // Handle specific error cases
       let errorMessage = "Une erreur est survenue lors de la connexion"
       
       if (error.message?.includes("Invalid login credentials")) {
@@ -71,7 +74,7 @@ export function AdminLoginForm() {
         variant: "destructive",
       })
 
-      // Make sure we're signed out if there was an error
+      // S'assurer que l'utilisateur est déconnecté en cas d'erreur
       await supabase.auth.signOut()
     } finally {
       setIsLoading(false)
