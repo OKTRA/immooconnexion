@@ -10,4 +10,5 @@ export interface Profile {
   agency_id: string | null;
   created_at: string;
   updated_at: string;
+  is_tenant: boolean | null;
 }

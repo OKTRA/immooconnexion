@@ -27,6 +27,7 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     photoId: null as File | null,
     fraisAgence: "",
     propertyId: "",
+    profession: "",
   });
 
   const { data: userProfile } = useUserProfile();
@@ -56,6 +57,7 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
                 telephone: formData.telephone,
                 fraisAgence: formData.fraisAgence,
                 propertyId: formData.propertyId,
+                profession: formData.profession,
               }}
             />
             <div className="flex justify-end">

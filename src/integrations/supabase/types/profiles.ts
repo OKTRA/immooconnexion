@@ -4,6 +4,7 @@ export type Profile = {
   last_name: string | null
   created_at: string
   updated_at: string
+  is_tenant: boolean | null
 }
 
 export type ProfileInsert = {
@@ -12,6 +13,7 @@ export type ProfileInsert = {
   last_name?: string | null
   created_at?: string
   updated_at?: string
+  is_tenant?: boolean | null
 }
 
 export type ProfileUpdate = {
@@ -20,4 +22,5 @@ export type ProfileUpdate = {
   last_name?: string | null
   created_at?: string
   updated_at?: string
+  is_tenant?: boolean | null
 }
