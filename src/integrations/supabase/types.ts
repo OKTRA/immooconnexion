@@ -11,24 +11,35 @@ export type Database = {
     Tables: {
       administrators: {
         Row: {
+          agency_id: string | null
           created_at: string | null
           id: string
           is_super_admin: boolean | null
           updated_at: string | null
         }
         Insert: {
+          agency_id?: string | null
           created_at?: string | null
           id: string
           is_super_admin?: boolean | null
           updated_at?: string | null
         }
         Update: {
+          agency_id?: string | null
           created_at?: string | null
           id?: string
           is_super_admin?: boolean | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "administrators_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agencies: {
         Row: {
@@ -235,7 +246,15 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       properties: {
         Row: {

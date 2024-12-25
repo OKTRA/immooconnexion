@@ -83,12 +83,26 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
 
   const handleSaveEdit = async (editedUser: any) => {
     try {
+      console.log("Profile updated:", editedUser)
+      
+      // Only update profile data, not auth data
+      const { password, ...profileData } = editedUser
+      
       const { error } = await supabase
         .from("profiles")
-        .update(editedUser)
+        .update(profileData)
         .eq("id", editedUser.id)
 
       if (error) throw error
+
+      // If password was provided, update it separately through auth API
+      if (password) {
+        const { error: authError } = await supabase.auth.admin.updateUserById(
+          editedUser.id,
+          { password: password }
+        )
+        if (authError) throw authError
+      }
 
       toast({
         title: "Succès",
@@ -139,6 +153,7 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
               newProfile={selectedUser}
               setNewProfile={handleSaveEdit}
               selectedAgencyId={agencyId}
+              isEditing={true}
             />
           )}
         </DialogContent>
