@@ -4,6 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useSubscriptionLimits } from "@/utils/subscriptionLimits";
 import { useTenantPhoto } from "./useTenantPhoto";
 import { useInitialPayments } from "./useInitialPayments";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface TenantFormData {
   nom: string;
@@ -16,22 +17,27 @@ export interface TenantFormData {
   profession: string;
 }
 
-export const useTenantCreation = (onSuccess: () => void) => {
+export const useTenantCreation = (
+  onSuccess: () => void, 
+  initialData?: any,
+  isEditing?: boolean
+) => {
   const [formData, setFormData] = useState<TenantFormData>({
-    nom: "",
-    prenom: "",
-    dateNaissance: "",
-    telephone: "",
+    nom: initialData?.nom || "",
+    prenom: initialData?.prenom || "",
+    dateNaissance: initialData?.birth_date || "",
+    telephone: initialData?.phone_number || "",
     photoId: null,
-    fraisAgence: "",
-    propertyId: "",
-    profession: "",
+    fraisAgence: initialData?.agency_fees?.toString() || "",
+    propertyId: initialData?.property_id || "",
+    profession: initialData?.profession || "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { checkAndNotifyLimits } = useSubscriptionLimits();
   const { uploadTenantPhoto } = useTenantPhoto();
   const { createInitialPayments } = useInitialPayments();
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,40 +56,66 @@ export const useTenantCreation = (onSuccess: () => void) => {
       if (profileError) throw profileError;
       if (!profile?.agency_id) throw new Error("Aucune agence associée à ce profil");
 
-      if (!(await checkAndNotifyLimits(profile.agency_id, 'tenant'))) {
-        setIsSubmitting(false);
-        return;
+      // Only check limits for new tenants
+      if (!isEditing) {
+        if (!(await checkAndNotifyLimits(profile.agency_id, 'tenant'))) {
+          setIsSubmitting(false);
+          return;
+        }
       }
 
-      const photo_id_url = await uploadTenantPhoto(formData.photoId);
+      let photo_id_url = initialData?.photo_id_url;
+      if (formData.photoId) {
+        photo_id_url = await uploadTenantPhoto(formData.photoId);
+      }
 
-      const { data: newTenant, error: tenantError } = await supabase
-        .from('tenants')
-        .insert({
-          nom: formData.nom,
-          prenom: formData.prenom,
-          birth_date: formData.dateNaissance,
-          phone_number: formData.telephone,
-          photo_id_url,
-          agency_fees: parseFloat(formData.fraisAgence),
-          profession: formData.profession,
-          agency_id: profile.agency_id
-        })
-        .select()
-        .single();
+      const tenantData = {
+        nom: formData.nom,
+        prenom: formData.prenom,
+        birth_date: formData.dateNaissance,
+        phone_number: formData.telephone,
+        photo_id_url,
+        agency_fees: parseFloat(formData.fraisAgence),
+        profession: formData.profession,
+        agency_id: profile.agency_id
+      };
 
-      if (tenantError) throw tenantError;
+      let result;
+      if (isEditing && initialData?.id) {
+        // Update existing tenant
+        result = await supabase
+          .from('tenants')
+          .update(tenantData)
+          .eq('id', initialData.id)
+          .select()
+          .single();
+      } else {
+        // Create new tenant
+        result = await supabase
+          .from('tenants')
+          .insert(tenantData)
+          .select()
+          .single();
+      }
 
-      await createInitialPayments(
-        newTenant.id,
-        profile.agency_id,
-        formData.propertyId,
-        formData.fraisAgence
-      );
+      if (result.error) throw result.error;
+
+      if (!isEditing) {
+        await createInitialPayments(
+          result.data.id,
+          profile.agency_id,
+          formData.propertyId,
+          formData.fraisAgence
+        );
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['tenants'] });
 
       toast({
-        title: "Locataire ajouté",
-        description: "Le locataire et ses paiements initiaux ont été enregistrés avec succès.",
+        title: isEditing ? "Locataire modifié" : "Locataire ajouté",
+        description: isEditing 
+          ? "Le locataire a été modifié avec succès."
+          : "Le locataire et ses paiements initiaux ont été enregistrés avec succès.",
       });
       
       onSuccess();

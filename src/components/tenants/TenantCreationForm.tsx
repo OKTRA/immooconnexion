@@ -1,6 +1,5 @@
 import { TenantFormFields } from "./TenantFormFields";
 import { Button } from "@/components/ui/button";
-import { TenantReceipt } from "./TenantReceipt";
 import { useState } from "react";
 import { useTenantCreation } from "./form/useTenantCreation";
 
@@ -9,23 +8,26 @@ interface TenantCreationFormProps {
   properties: any[];
   onSuccess: () => void;
   onCancel: () => void;
+  initialData?: any;
+  isEditing?: boolean;
 }
 
 export function TenantCreationForm({ 
   userProfile, 
   properties, 
   onSuccess, 
-  onCancel 
+  onCancel,
+  initialData,
+  isEditing
 }: TenantCreationFormProps) {
-  const [showReceipt, setShowReceipt] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [previewUrl, setPreviewUrl] = useState<string>(initialData?.photo_id_url || "");
   
   const { 
     formData, 
     setFormData, 
     isSubmitting, 
     handleSubmit 
-  } = useTenantCreation(() => setShowReceipt(true));
+  } = useTenantCreation(onSuccess, initialData, isEditing);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -35,31 +37,6 @@ export function TenantCreationForm({
       setPreviewUrl(url);
     }
   };
-
-  if (showReceipt) {
-    return (
-      <div className="space-y-4">
-        <TenantReceipt 
-          tenant={{
-            nom: formData.nom,
-            prenom: formData.prenom,
-            telephone: formData.telephone,
-            fraisAgence: formData.fraisAgence,
-            propertyId: formData.propertyId,
-            profession: formData.profession
-          }}
-        />
-        <div className="flex justify-end gap-2">
-          <Button onClick={() => {
-            setShowReceipt(false);
-            onSuccess();
-          }}>
-            Fermer
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -80,7 +57,7 @@ export function TenantCreationForm({
           Annuler
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Chargement..." : "Ajouter"}
+          {isSubmitting ? "Chargement..." : isEditing ? "Modifier" : "Ajouter"}
         </Button>
       </div>
     </form>

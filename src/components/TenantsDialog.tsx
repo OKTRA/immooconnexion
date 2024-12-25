@@ -4,7 +4,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { TenantCreationForm } from "./tenants/TenantCreationForm";
 import { TenantReceipt } from "./tenants/TenantReceipt";
@@ -20,14 +19,14 @@ interface TenantsDialogProps {
 export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps) {
   const [showReceipt, setShowReceipt] = useState(false);
   const [formData, setFormData] = useState({
-    nom: "",
-    prenom: "",
-    dateNaissance: "",
-    telephone: "",
+    nom: tenant?.nom || "",
+    prenom: tenant?.prenom || "",
+    dateNaissance: tenant?.birth_date || "",
+    telephone: tenant?.phone_number || "",
     photoId: null as File | null,
-    fraisAgence: "",
+    fraisAgence: tenant?.agency_fees?.toString() || "",
     propertyId: "",
-    profession: "",
+    profession: tenant?.profession || "",
   });
 
   const { data: userProfile } = useUserProfile();
@@ -47,6 +46,8 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
             properties={properties}
             onSuccess={() => setShowReceipt(true)}
             onCancel={() => onOpenChange(false)}
+            initialData={tenant}
+            isEditing={!!tenant}
           />
         ) : (
           <div className="space-y-4">
