@@ -10,6 +10,7 @@ interface ProfileFormProps {
   onUpdateProfile?: (userId: string) => Promise<void>
   selectedAgencyId?: string
   isEditing?: boolean
+  step?: 1 | 2
 }
 
 export function ProfileForm({ 
@@ -19,9 +20,9 @@ export function ProfileForm({
   onCreateAuthUser,
   onUpdateProfile,
   selectedAgencyId,
-  isEditing = false 
+  isEditing = false,
+  step = 1
 }: ProfileFormProps) {
-  const [step, setStep] = useState<1 | 2>(1)
   const [isLoading, setIsLoading] = useState(false)
   const [userId, setUserId] = useState<string>("")
 
@@ -30,19 +31,8 @@ export function ProfileForm({
     setIsLoading(true)
 
     try {
-      if (step === 1) {
-        if (onCreateAuthUser) {
-          const newUserId = await onCreateAuthUser()
-          setUserId(newUserId)
-          setStep(2)
-        }
-      } else {
-        if (onUpdateProfile) {
-          await onUpdateProfile(userId)
-        }
-        if (onSubmit) {
-          onSubmit()
-        }
+      if (setNewProfile) {
+        await setNewProfile(newProfile)
       }
     } catch (error: any) {
       console.error('Form submission error:', error)
@@ -57,7 +47,7 @@ export function ProfileForm({
       setNewProfile({
         ...newProfile,
         ...updatedProfile,
-        agency_id: selectedAgencyId // Always keep the selected agency ID
+        agency_id: selectedAgencyId
       })
     }
   }
