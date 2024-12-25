@@ -14,15 +14,50 @@ export const PropertyDetailsContent = () => {
 
   const { 
     data: property, 
-    isLoading: isLoadingProperty, 
+    isLoading: isLoadingProperty,
     error: propertyError 
   } = usePropertyData(id)
 
   const { 
     data: contracts = [], 
-    isLoading: isLoadingContracts, 
+    isLoading: isLoadingContracts,
     error: contractsError 
   } = useContractsData(id)
+
+  // Add console logs for debugging
+  console.log("Property data:", property)
+  console.log("Contracts data:", contracts)
+  console.log("Loading states:", { isLoadingProperty, isLoadingContracts })
+  console.log("Errors:", { propertyError, contractsError })
+
+  if (isLoadingProperty || isLoadingContracts) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (propertyError || contractsError) {
+    toast({
+      title: "Erreur",
+      description: "Une erreur est survenue lors du chargement des données",
+      variant: "destructive",
+    })
+    return (
+      <div className="flex items-center justify-center min-h-[400px] text-red-500">
+        Une erreur est survenue lors du chargement des données
+      </div>
+    )
+  }
+
+  if (!property) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px] text-gray-500">
+        Bien non trouvé
+      </div>
+    )
+  }
 
   const handlePrintReceipt = (contract: any) => {
     console.log("Printing receipt for contract:", contract)
@@ -38,23 +73,6 @@ export const PropertyDetailsContent = () => {
       title: "Impression du contrat",
       description: "Le contrat est en cours d'impression..."
     })
-  }
-
-  if (isLoadingProperty || isLoadingContracts) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
-
-  if (propertyError || contractsError || !property) {
-    console.error("Errors:", { propertyError, contractsError })
-    return (
-      <div className="flex items-center justify-center h-screen text-red-500">
-        Une erreur est survenue lors du chargement des données
-      </div>
-    )
   }
 
   return (
