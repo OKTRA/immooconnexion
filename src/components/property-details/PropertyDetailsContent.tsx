@@ -104,6 +104,24 @@ export const PropertyDetailsContent = () => {
     enabled: !!id
   })
 
+  const handlePrintReceipt = (contract: any) => {
+    // Implement receipt printing logic
+    console.log("Printing receipt for contract:", contract)
+    toast({
+      title: "Impression du reçu",
+      description: "Le reçu est en cours d'impression..."
+    })
+  }
+
+  const handlePrintContract = (contract: any) => {
+    // Implement contract printing logic
+    console.log("Printing contract:", contract)
+    toast({
+      title: "Impression du contrat",
+      description: "Le contrat est en cours d'impression..."
+    })
+  }
+
   if (isLoadingProperty || isLoadingContracts) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -128,6 +146,8 @@ export const PropertyDetailsContent = () => {
       <PaymentHistory 
         propertyId={id || ''} 
         contracts={contracts}
+        onPrintReceipt={handlePrintReceipt}
+        onPrintContract={handlePrintContract}
       />
       <InspectionsList contracts={contracts} />
     </div>
