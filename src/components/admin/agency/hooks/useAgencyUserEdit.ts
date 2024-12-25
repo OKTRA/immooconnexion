@@ -42,6 +42,7 @@ export function useAgencyUserEdit({ onSuccess }: UseAgencyUserEditProps = {}) {
       if (onSuccess) {
         onSuccess()
       }
+      setShowEditDialog(false)
     } catch (error: any) {
       console.error("Error updating auth user:", error)
       toast({
@@ -79,6 +80,7 @@ export function useAgencyUserEdit({ onSuccess }: UseAgencyUserEditProps = {}) {
       if (onSuccess) {
         onSuccess()
       }
+      setShowEditDialog(false)
     } catch (error: any) {
       console.error("Error updating profile:", error)
       toast({

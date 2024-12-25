@@ -2,8 +2,6 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { UserRole } from "@/types/profile"
-import { Button } from "@/components/ui/button"
-import { Lock, UserCog } from "lucide-react"
 
 interface Profile {
   email: string;
@@ -21,8 +19,6 @@ interface BasicInfoFieldsProps {
   isEditing?: boolean;
   step?: 1 | 2;
   selectedAgencyId?: string;
-  onUpdateAuth?: () => void;
-  onUpdateProfile?: () => void;
 }
 
 export function BasicInfoFields({ 
@@ -30,9 +26,7 @@ export function BasicInfoFields({
   onProfileChange,
   isEditing = false,
   step = 1,
-  selectedAgencyId,
-  onUpdateAuth,
-  onUpdateProfile
+  selectedAgencyId
 }: BasicInfoFieldsProps) {
   const handleChange = (field: keyof Profile, value: string) => {
     onProfileChange({ [field]: value })
@@ -64,16 +58,6 @@ export function BasicInfoFields({
             minLength={6}
           />
         </div>
-        {isEditing && (
-          <Button 
-            type="button" 
-            className="w-full bg-blue-500 hover:bg-blue-600"
-            onClick={onUpdateAuth}
-          >
-            <Lock className="w-4 h-4 mr-2" />
-            Mettre à jour les informations d'authentification
-          </Button>
-        )}
       </div>
     )
   }
@@ -127,16 +111,6 @@ export function BasicInfoFields({
           </Select>
         </div>
       </div>
-      {isEditing && (
-        <Button 
-          type="button" 
-          className="w-full bg-green-500 hover:bg-green-600"
-          onClick={onUpdateProfile}
-        >
-          <UserCog className="w-4 h-4 mr-2" />
-          Mettre à jour les informations du profil
-        </Button>
-      )}
     </div>
   )
 }
