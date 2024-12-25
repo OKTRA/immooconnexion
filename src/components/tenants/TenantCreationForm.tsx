@@ -39,6 +39,54 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
     }
   };
 
+  const createInitialPayments = async (tenantId: string, agencyId: string) => {
+    try {
+      // Créer le paiement des frais d'agence
+      const { error: agencyFeesError } = await supabase
+        .from('contracts')
+        .insert({
+          tenant_id: tenantId,
+          property_id: formData.propertyId,
+          montant: parseFloat(formData.fraisAgence),
+          type: 'frais_agence',
+          statut: 'payé',
+          agency_id: agencyId,
+          start_date: new Date().toISOString(),
+          end_date: new Date().toISOString(),
+        });
+
+      if (agencyFeesError) throw agencyFeesError;
+
+      // Récupérer le montant de la caution pour la propriété
+      const { data: property } = await supabase
+        .from('properties')
+        .select('caution')
+        .eq('id', formData.propertyId)
+        .single();
+
+      if (property?.caution) {
+        // Créer le paiement de la caution
+        const { error: cautionError } = await supabase
+          .from('contracts')
+          .insert({
+            tenant_id: tenantId,
+            property_id: formData.propertyId,
+            montant: property.caution,
+            type: 'caution',
+            statut: 'payé',
+            agency_id: agencyId,
+            start_date: new Date().toISOString(),
+            end_date: new Date().toISOString(),
+          });
+
+        if (cautionError) throw cautionError;
+      }
+    } catch (error) {
+      console.error('Erreur lors de la création des paiements initiaux:', error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -76,8 +124,8 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
         photo_id_url = data.path;
       }
 
-      // Create tenant record directly without auth or profile
-      const { error: tenantError } = await supabase
+      // Create tenant record
+      const { data: newTenant, error: tenantError } = await supabase
         .from('tenants')
         .insert({
           nom: formData.nom,
@@ -88,13 +136,18 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
           agency_fees: parseFloat(formData.fraisAgence),
           profession: formData.profession,
           agency_id: profile.agency_id
-        });
+        })
+        .select()
+        .single();
 
       if (tenantError) throw tenantError;
 
+      // Créer les paiements initiaux
+      await createInitialPayments(newTenant.id, profile.agency_id);
+
       toast({
         title: "Locataire ajouté",
-        description: "Le locataire a été ajouté avec succès.",
+        description: "Le locataire et ses paiements initiaux ont été enregistrés avec succès.",
       });
       
       setShowReceipt(true);
