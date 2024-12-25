@@ -16,69 +16,77 @@ const Index = () => {
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
-      // Get current user's profile to check role
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Non authentifié")
+      try {
+        // Get current user's profile to check role
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) throw new Error("Non authentifié")
 
-      console.log('User ID:', user.id)
+        console.log('User ID:', user.id)
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle()
-      
-      if (!profile) throw new Error("Profile not found")
-      
-      console.log('Profil utilisateur:', profile)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle()
+        
+        if (!profile) throw new Error("Profile not found")
+        
+        console.log('Profil utilisateur:', profile)
 
-      // Build base queries with agency_id filter for non-admin users
-      let propertiesQuery = supabase.from("properties").select("*", { count: "exact", head: true })
-      let tenantsQuery = supabase.from("tenants").select("*", { count: "exact", head: true })
-      let contractsQuery = supabase.from("contracts").select("montant, type, created_at, agency_id")
+        // Build base queries with agency_id filter
+        let propertiesQuery = supabase.from("properties").select("*", { count: "exact", head: true })
+        let tenantsQuery = supabase.from("tenants").select("*", { count: "exact", head: true })
+        let contractsQuery = supabase.from("contracts").select("montant, type, created_at, agency_id")
 
-      // If not admin, filter by agency_id
-      if (profile.role !== 'admin') {
-        propertiesQuery = propertiesQuery.eq('agency_id', user.id)
-        tenantsQuery = tenantsQuery.eq('agency_id', user.id)
-        contractsQuery = contractsQuery.eq('agency_id', user.id)
-      }
+        // Filter by agency_id from the user's profile
+        propertiesQuery = propertiesQuery.eq('agency_id', profile.agency_id)
+        tenantsQuery = tenantsQuery.eq('agency_id', profile.agency_id)
+        contractsQuery = contractsQuery.eq('agency_id', profile.agency_id)
 
-      const [
-        { count: propertiesCount },
-        { count: tenantsCount },
-        { data: contracts },
-      ] = await Promise.all([
-        propertiesQuery,
-        tenantsQuery,
-        contractsQuery,
-      ])
+        const [
+          { count: propertiesCount },
+          { count: tenantsCount },
+          { data: contracts },
+        ] = await Promise.all([
+          propertiesQuery,
+          tenantsQuery,
+          contractsQuery,
+        ])
 
-      // Log détaillé des contrats pour comprendre le calcul
-      console.log("Détail des contrats pour le calcul des revenus:", 
-        contracts?.map(c => ({
-          montant: c.montant,
-          type: c.type,
-          date: new Date(c.created_at).toLocaleDateString(),
-          agency_id: c.agency_id
-        }))
-      )
+        // Log détaillé des contrats pour comprendre le calcul
+        console.log("Détail des contrats pour le calcul des revenus:", 
+          contracts?.map(c => ({
+            montant: c.montant,
+            type: c.type,
+            date: new Date(c.created_at).toLocaleDateString(),
+            agency_id: c.agency_id
+          }))
+        )
 
-      const totalRevenue = contracts?.reduce((sum, contract) => {
-        if (contract.type === 'loyer') {
-          const montant = contract.montant || 0
-          console.log(`Ajout du montant ${montant} au total pour l'agence ${contract.agency_id}`)
-          return sum + montant
+        const totalRevenue = contracts?.reduce((sum, contract) => {
+          if (contract.type === 'loyer') {
+            const montant = contract.montant || 0
+            console.log(`Ajout du montant ${montant} au total pour l'agence ${contract.agency_id}`)
+            return sum + montant
+          }
+          return sum
+        }, 0) || 0
+
+        console.log("Revenu total calculé:", totalRevenue)
+
+        return {
+          properties: propertiesCount || 0,
+          tenants: tenantsCount || 0,
+          revenue: totalRevenue,
         }
-        return sum
-      }, 0) || 0
-
-      console.log("Revenu total calculé:", totalRevenue)
-
-      return {
-        properties: propertiesCount || 0,
-        tenants: tenantsCount || 0,
-        revenue: totalRevenue,
+      } catch (error: any) {
+        console.error("Error in dashboard stats:", error)
+        toast.error(error.message || "Une erreur est survenue lors du chargement des statistiques")
+        return {
+          properties: 0,
+          tenants: 0,
+          revenue: 0,
+        }
       }
     },
     enabled: !isLoading,
@@ -95,9 +103,9 @@ const Index = () => {
 
         const { data: profile, error } = await supabase
           .from("profiles")
-          .select("role")
+          .select("role, agency_id")
           .eq("id", user.id)
-          .single()
+          .maybeSingle()
 
         if (error) {
           console.error("Error fetching profile:", error)
@@ -105,37 +113,17 @@ const Index = () => {
           return
         }
 
-        // Get the default agency
-        const { data: defaultAgency } = await supabase
-          .from('agencies')
-          .select('id')
-          .eq('name', 'Default Agency')
-          .single();
+        if (!profile?.agency_id) {
+          toast.error("Aucune agence associée à ce profil")
+          return
+        }
 
-        if (!profile) {
-          const { error: insertError } = await supabase
-            .from("profiles")
-            .upsert({
-              id: user.id,
-              role: 'user',
-              first_name: 'User',
-              last_name: 'Name',
-              email: user.email || 'user@example.com',
-              phone_number: '0000000000',
-              agency_id: defaultAgency.id
-            })
-
-          if (insertError) {
-            console.error("Error creating profile:", insertError)
-            toast.error("Erreur lors de la création du profil")
-            return
-          }
-        } else if (profile.role === "admin") {
+        if (profile.role === "admin") {
           const { data: adminData, error: adminError } = await supabase
             .from("administrators")
             .select("is_super_admin")
             .eq("id", user.id)
-            .single()
+            .maybeSingle()
 
           if (!adminError && adminData?.is_super_admin) {
             navigate("/admin")
