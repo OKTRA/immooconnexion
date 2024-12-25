@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { ExternalLink, Shield } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { getSupabaseSessionKey } from "@/utils/sessionUtils"
 
 const Login = () => {
   const navigate = useNavigate()
@@ -16,16 +15,12 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const checkAndClearSession = async () => {
+    const checkSession = async () => {
       try {
         setIsLoading(true)
-        const storageKey = getSupabaseSessionKey()
-        localStorage.removeItem(storageKey)
-
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
-          console.error('Session check error:', error)
           if (error.message.includes('Failed to fetch')) {
             toast({
               title: "Erreur de connexion",
@@ -46,7 +41,7 @@ const Login = () => {
       }
     }
     
-    checkAndClearSession()
+    checkSession()
 
     const {
       data: { subscription },
