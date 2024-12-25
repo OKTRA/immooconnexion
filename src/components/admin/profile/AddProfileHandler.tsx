@@ -69,40 +69,22 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       const cleanEmail = validateAuthData()
       console.log("Creating auth user with email:", cleanEmail)
 
-      // Check if user exists in profiles table first
-      const { data: existingProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', cleanEmail)
-        .maybeSingle()
-
-      if (profileError) {
-        console.error("Profile check error:", profileError)
-        throw new Error("Erreur lors de la vérification du profil")
-      }
-
-      if (existingProfile) {
-        throw new Error("Un utilisateur avec cet email existe déjà")
-      }
-
-      // Create the auth user
+      // Create the auth user - Step 1
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: cleanEmail,
         password: newProfile.password,
         options: {
           emailRedirectTo: window.location.origin,
-          data: {
-            email: cleanEmail,
-          }
         }
       })
 
       if (authError) {
         console.error("Auth error:", authError)
         
-        if (authError.message.includes('rate limit') || authError.status === 429) {
-          throw new Error("Le service est temporairement indisponible. Veuillez réessayer dans quelques instants.")
+        if (authError.message.includes('User already registered')) {
+          throw new Error("Un utilisateur avec cet email existe déjà")
         }
+        
         throw new Error(authError.message || "Erreur lors de la création de l'utilisateur")
       }
 
@@ -125,17 +107,17 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
     try {
       validateProfileData()
 
+      // Update profile with additional info - Step 2
       const { error: profileError } = await supabase
         .from("profiles")
-        .upsert({
-          id: userId,
-          email: newProfile.email.trim().toLowerCase(),
+        .update({
           first_name: newProfile.first_name,
           last_name: newProfile.last_name,
           phone_number: newProfile.phone_number,
           role: newProfile.role,
           agency_id: newProfile.agency_id
         })
+        .eq('id', userId)
 
       if (profileError) {
         console.error("Profile error:", profileError)
