@@ -2,7 +2,6 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { UserRole } from "@/types/profile"
-import { AgencySelect } from "./AgencySelect"
 
 interface Profile {
   email: string;
@@ -113,12 +112,6 @@ export function BasicInfoFields({
             <SelectItem value="admin">Administrateur d'agence</SelectItem>
           </SelectContent>
         </Select>
-      </div>
-      <div className="col-span-2">
-        <AgencySelect 
-          value={selectedAgencyId || newProfile?.agency_id || ''} 
-          onChange={(value) => handleChange('agency_id', value)}
-        />
       </div>
     </div>
   )

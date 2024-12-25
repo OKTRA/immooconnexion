@@ -1,5 +1,4 @@
 import { BasicInfoFields } from "./form/BasicInfoFields"
-import { AgencySelect } from "./form/AgencySelect"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
@@ -52,22 +51,13 @@ export function ProfileForm({
     }
   }
 
-  const handleAgencyChange = (value: string) => {
-    console.log("Agency changed to:", value)
-    if (setNewProfile) {
-      setNewProfile({ 
-        ...newProfile, 
-        agency_id: value 
-      })
-    }
-  }
-
   const handleProfileChange = (updatedProfile: any) => {
     console.log("Profile updated:", updatedProfile)
     if (setNewProfile) {
       setNewProfile({
         ...newProfile,
-        ...updatedProfile
+        ...updatedProfile,
+        agency_id: selectedAgencyId // Always keep the selected agency ID
       })
     }
   }
@@ -79,13 +69,8 @@ export function ProfileForm({
         onProfileChange={handleProfileChange}
         isEditing={isEditing}
         step={step}
+        selectedAgencyId={selectedAgencyId}
       />
-      {step === 2 && (
-        <AgencySelect 
-          value={selectedAgencyId || newProfile?.agency_id || ''} 
-          onChange={handleAgencyChange}
-        />
-      )}
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading 
           ? "Chargement..." 
