@@ -2,6 +2,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { UserRole } from "@/types/profile"
+import { AgencySelect } from "./AgencySelect"
 
 interface Profile {
   email: string;
@@ -10,6 +11,7 @@ interface Profile {
   phone_number: string;
   password?: string;
   role?: UserRole;
+  agency_id?: string;
 }
 
 interface BasicInfoFieldsProps {
@@ -17,13 +19,15 @@ interface BasicInfoFieldsProps {
   onProfileChange: (profile: Partial<Profile>) => void;
   isEditing?: boolean;
   step: 1 | 2;
+  selectedAgencyId?: string;
 }
 
 export function BasicInfoFields({ 
   newProfile = {},
   onProfileChange,
   isEditing = false,
-  step
+  step,
+  selectedAgencyId
 }: BasicInfoFieldsProps) {
   const handleChange = (field: keyof Profile, value: string) => {
     console.log("Field change:", field, value)
@@ -109,6 +113,12 @@ export function BasicInfoFields({
             <SelectItem value="admin">Administrateur d'agence</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+      <div className="col-span-2">
+        <AgencySelect 
+          value={selectedAgencyId || newProfile?.agency_id || ''} 
+          onChange={(value) => handleChange('agency_id', value)}
+        />
       </div>
     </div>
   )

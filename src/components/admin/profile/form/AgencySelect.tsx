@@ -6,28 +6,36 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface AgencySelectProps {
   value: string
   onChange: (value: string) => void
+  required?: boolean
 }
 
-export function AgencySelect({ value, onChange }: AgencySelectProps) {
-  const { data: agencies = [] } = useQuery({
+export function AgencySelect({ value, onChange, required = true }: AgencySelectProps) {
+  const { data: agencies = [], isLoading } = useQuery({
     queryKey: ["agencies"],
     queryFn: async () => {
+      console.log("Fetching agencies...")
       const { data, error } = await supabase
         .from("agencies")
         .select("*")
         .order("name")
       
-      if (error) throw error
-      return data
+      if (error) {
+        console.error("Error fetching agencies:", error)
+        throw error
+      }
+      
+      console.log("Fetched agencies:", data)
+      return data || []
     }
   })
 
   return (
-    <div>
-      <Label htmlFor="agency">Agence</Label>
+    <div className="space-y-2">
+      <Label htmlFor="agency">Agence{required && '*'}</Label>
       <Select 
         value={value} 
         onValueChange={onChange}
+        required={required}
       >
         <SelectTrigger>
           <SelectValue placeholder="Sélectionner une agence" />
