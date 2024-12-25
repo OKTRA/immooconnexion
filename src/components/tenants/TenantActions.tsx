@@ -15,6 +15,9 @@ interface TenantActionsProps {
     prenom: string;
     telephone: string;
     fraisAgence?: string;
+    birth_date?: string;
+    photo_id_url?: string;
+    profession?: string;
   };
   onEdit: (tenant: any) => void;
   onDelete: (id: string) => void;
@@ -47,6 +50,20 @@ export function TenantActions({
     }
   });
 
+  const handleEdit = () => {
+    const tenantData = {
+      id: tenant.id,
+      nom: tenant.nom,
+      prenom: tenant.prenom,
+      telephone: tenant.telephone,
+      birth_date: tenant.birth_date,
+      photo_id_url: tenant.photo_id_url,
+      fraisAgence: tenant.fraisAgence,
+      profession: tenant.profession
+    };
+    onEdit(tenantData);
+  };
+
   const handleViewContracts = (tenantId: string) => {
     navigate(`/locataires/${tenantId}/contrats`);
   };
@@ -57,7 +74,7 @@ export function TenantActions({
         <Button
           variant="outline"
           size="icon"
-          onClick={() => onEdit(tenant)}
+          onClick={handleEdit}
         >
           <Pencil className="h-4 w-4" />
         </Button>
