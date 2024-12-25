@@ -35,8 +35,17 @@ export function useAgencyUserEdit({ onSuccess }: { onSuccess: () => void }) {
         if (updateError) throw updateError
       }
 
-      // If password is provided, update it
+      // If password is provided, validate and update it
       if (editedUser.password) {
+        if (editedUser.password.length < 6) {
+          toast({
+            title: "Erreur",
+            description: "Le mot de passe doit contenir au moins 6 caractères",
+            variant: "destructive",
+          })
+          return
+        }
+
         const { error: passwordError } = await supabase.auth.updateUser({
           password: editedUser.password
         })
