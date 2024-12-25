@@ -34,6 +34,9 @@ export function ProfileForm({
       if (setNewProfile) {
         await setNewProfile(newProfile)
       }
+      if (onSubmit) {
+        onSubmit()
+      }
     } catch (error: any) {
       console.error('Form submission error:', error)
     } finally {

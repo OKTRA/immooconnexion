@@ -2,8 +2,6 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { UserRole } from "@/types/profile"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
 
 interface Profile {
   email: string;
@@ -30,43 +28,9 @@ export function BasicInfoFields({
   step,
   selectedAgencyId
 }: BasicInfoFieldsProps) {
-  const { data: agencies = [], isError } = useQuery({
-    queryKey: ["agencies", selectedAgencyId],
-    queryFn: async () => {
-      try {
-        // First check if we have a valid session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        if (sessionError) throw sessionError
-        if (!session) throw new Error("No active session")
-
-        // Then fetch the agency data
-        const { data, error } = await supabase
-          .from("agencies")
-          .select("id, name")
-          .eq('id', selectedAgencyId)
-          .single()
-        
-        if (error) throw error
-        if (!data) return []
-        
-        return [data]
-      } catch (error) {
-        console.error("Error fetching agency:", error)
-        return []
-      }
-    },
-    enabled: !!selectedAgencyId // Only run query if we have an agencyId
-  })
-
   const handleChange = (field: keyof Profile, value: string) => {
-    onProfileChange({
-      ...newProfile,
-      [field]: value,
-      agency_id: selectedAgencyId // Always keep the selected agency ID
-    })
+    onProfileChange({ ...newProfile, [field]: value })
   }
-
-  const selectedAgency = agencies[0] // Since we're fetching a single agency
 
   if (step === 1) {
     return (
@@ -89,7 +53,7 @@ export function BasicInfoFields({
             type="password"
             value={newProfile?.password || ''}
             onChange={(e) => handleChange('password', e.target.value)}
-            required
+            required={!isEditing}
             placeholder="Minimum 6 caractères"
             minLength={6}
           />
@@ -145,17 +109,6 @@ export function BasicInfoFields({
           </SelectContent>
         </Select>
       </div>
-      {selectedAgency && (
-        <div className="col-span-2">
-          <Label htmlFor="agency">Agence</Label>
-          <Input
-            id="agency"
-            value={selectedAgency.name}
-            readOnly
-            className="bg-gray-100 cursor-not-allowed"
-          />
-        </div>
-      )}
     </div>
   )
 }
