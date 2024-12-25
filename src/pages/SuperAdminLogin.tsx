@@ -20,34 +20,14 @@ export default function SuperAdminLogin() {
     setIsLoading(true)
 
     try {
-      // First, attempt to sign in
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (signInError) {
-        throw new Error("Email ou mot de passe incorrect")
-      }
-
-      if (!data.user) {
-        throw new Error("Aucun utilisateur trouvé")
-      }
-
-      // Then check if the user is a super admin
+      // First check if the user exists and is a super admin
       const { data: adminData, error: adminError } = await supabase
         .from('administrators')
         .select('is_super_admin')
-        .eq('id', data.user.id)
+        .eq('id', (await supabase.auth.signInWithPassword({ email, password })).data.user?.id)
         .maybeSingle()
 
-      if (adminError) {
-        // Sign out if admin check fails
-        await supabase.auth.signOut()
-        throw new Error("Erreur lors de la vérification des droits d'administrateur")
-      }
-
-      if (!adminData?.is_super_admin) {
+      if (adminError || !adminData?.is_super_admin) {
         // Sign out if not a super admin
         await supabase.auth.signOut()
         throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent se connecter ici.")
@@ -60,11 +40,25 @@ export default function SuperAdminLogin() {
 
       navigate("/admin")
     } catch (error: any) {
+      console.error('Login error:', error)
+      
+      // Handle specific error cases
+      let errorMessage = "Une erreur est survenue lors de la connexion"
+      
+      if (error.message?.includes("Invalid login credentials")) {
+        errorMessage = "Email ou mot de passe incorrect"
+      } else if (error.message?.includes("User not found")) {
+        errorMessage = "Cet utilisateur n'existe pas"
+      } else if (error.message?.includes("Accès non autorisé")) {
+        errorMessage = error.message
+      }
+
       toast({
         title: "Erreur de connexion",
-        description: error.message || "Une erreur est survenue lors de la connexion",
+        description: errorMessage,
         variant: "destructive",
       })
+
       // Make sure we're signed out if there was an error
       await supabase.auth.signOut()
     } finally {
