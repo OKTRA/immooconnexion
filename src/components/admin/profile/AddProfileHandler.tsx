@@ -4,19 +4,19 @@ import { supabase } from "@/integrations/supabase/client"
 import { UserRole } from "@/types/profile"
 
 interface AddProfileHandlerProps {
-  onSuccess: () => void;
-  onClose: () => void;
-  agencyId?: string;
+  onSuccess: () => void
+  onClose: () => void
+  agencyId?: string
 }
 
 interface NewProfile {
-  email: string;
-  first_name: string;
-  last_name: string;
-  phone_number: string;
-  password: string;
-  agency_id: string;
-  role: UserRole;
+  email: string
+  first_name: string
+  last_name: string
+  phone_number: string
+  password: string
+  agency_id: string
+  role: UserRole
 }
 
 export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfileHandlerProps) {
@@ -34,24 +34,20 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
   const { toast } = useToast()
 
   const validateProfile = () => {
-    // Check required fields
     if (!newProfile.email || !newProfile.password || !newProfile.first_name || 
         !newProfile.last_name || !newProfile.phone_number || !newProfile.agency_id) {
       throw new Error("Tous les champs sont obligatoires")
     }
 
-    // Validate email format
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
     if (!emailRegex.test(newProfile.email)) {
       throw new Error("Format d'email invalide")
     }
 
-    // Validate password length
     if (newProfile.password.length < 6) {
       throw new Error("Le mot de passe doit contenir au moins 6 caractères")
     }
 
-    // Validate phone number format (basic validation)
     const phoneRegex = /^\+?[0-9\s-]{10,}$/
     if (!phoneRegex.test(newProfile.phone_number)) {
       throw new Error("Format de numéro de téléphone invalide")
@@ -61,11 +57,8 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
   const handleAddUser = async () => {
     try {
       console.log("Starting user creation with:", newProfile)
-      
-      // Validate all required fields and formats
       validateProfile()
 
-      // First check if user exists
       const { data: existingUser } = await supabase
         .from('profiles')
         .select('id')
@@ -76,7 +69,6 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         throw new Error("Un utilisateur avec cet email existe déjà")
       }
 
-      // Create new user with auth
       console.log("Creating new user...")
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newProfile.email,
@@ -86,9 +78,9 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
             first_name: newProfile.first_name,
             last_name: newProfile.last_name,
             role: newProfile.role,
-            agency_id: newProfile.agency_id
-          },
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+            agency_id: newProfile.agency_id,
+            phone_number: newProfile.phone_number
+          }
         }
       })
 
@@ -101,7 +93,6 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         throw new Error("Erreur lors de la création de l'utilisateur")
       }
 
-      // Create or update profile
       const { error: profileError } = await supabase
         .from("profiles")
         .upsert({
