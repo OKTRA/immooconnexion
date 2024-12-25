@@ -46,18 +46,20 @@ export function BasicInfoFields({
             placeholder="email@example.com"
           />
         </div>
-        <div>
-          <Label htmlFor="password">Mot de passe*</Label>
-          <Input
-            id="password"
-            type="password"
-            value={newProfile?.password || ''}
-            onChange={(e) => handleChange('password', e.target.value)}
-            required={!isEditing}
-            placeholder="Minimum 6 caractères"
-            minLength={6}
-          />
-        </div>
+        {!isEditing && (
+          <div>
+            <Label htmlFor="password">Mot de passe*</Label>
+            <Input
+              id="password"
+              type="password"
+              value={newProfile?.password || ''}
+              onChange={(e) => handleChange('password', e.target.value)}
+              required={!isEditing}
+              placeholder="Minimum 6 caractères"
+              minLength={6}
+            />
+          </div>
+        )}
       </div>
     )
   }

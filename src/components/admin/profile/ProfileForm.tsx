@@ -27,6 +27,8 @@ export function ProfileForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!setNewProfile) return // Don't proceed if we can't update the profile
+    
     setIsLoading(true)
 
     try {
