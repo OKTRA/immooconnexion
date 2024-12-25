@@ -103,14 +103,15 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
             data: {
               first_name: newProfile.first_name,
               last_name: newProfile.last_name,
-              role: newProfile.role
+              role: newProfile.role,
+              agency_id: newProfile.agency_id
             }
           }
         })
 
         if (authError) {
           console.error("Auth error:", authError)
-          throw authError
+          throw new Error(authError.message)
         }
         if (!authData.user) throw new Error("Aucun utilisateur créé")
         
@@ -123,9 +124,9 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         .from("profiles")
         .upsert({
           id: userId,
-          first_name: newProfile.first_name || 'User',
-          last_name: newProfile.last_name || 'Name',
-          phone_number: newProfile.phone_number || '0000000000',
+          first_name: newProfile.first_name,
+          last_name: newProfile.last_name,
+          phone_number: newProfile.phone_number,
           email: newProfile.email,
           agency_id: newProfile.agency_id,
           role: newProfile.role
