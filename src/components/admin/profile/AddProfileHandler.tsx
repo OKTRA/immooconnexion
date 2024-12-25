@@ -38,14 +38,18 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       throw new Error("Email et mot de passe sont obligatoires")
     }
 
+    // Enhanced email validation using a more comprehensive regex
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-    if (!emailRegex.test(newProfile.email.trim())) {
+    const cleanEmail = newProfile.email.trim().toLowerCase()
+    if (!emailRegex.test(cleanEmail)) {
       throw new Error("Format d'email invalide")
     }
 
     if (newProfile.password.length < 6) {
       throw new Error("Le mot de passe doit contenir au moins 6 caractères")
     }
+
+    return cleanEmail
   }
 
   const validateProfileData = () => {
@@ -62,10 +66,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
   const handleCreateAuthUser = async () => {
     try {
-      validateAuthData()
-
-      // Trim email to remove any whitespace
-      const cleanEmail = newProfile.email.trim().toLowerCase()
+      const cleanEmail = validateAuthData()
 
       // Check if user already exists
       const { data: existingUser } = await supabase
@@ -92,9 +93,12 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
       if (authError) {
         console.error("Auth error:", authError)
-        // Handle rate limit error specifically
+        // Handle specific error cases
         if (authError.message.includes('rate limit') || authError.status === 429) {
           throw new Error("Le service est temporairement indisponible. Veuillez réessayer dans quelques instants.")
+        }
+        if (authError.message.includes('invalid')) {
+          throw new Error("L'adresse email fournie n'est pas valide")
         }
         throw new Error(authError.message)
       }
