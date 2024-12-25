@@ -39,7 +39,6 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       throw new Error("Tous les champs sont obligatoires")
     }
 
-    // Strict email validation
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
     if (!emailRegex.test(newProfile.email)) {
       throw new Error("Format d'email invalide")
@@ -60,6 +59,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       console.log("Starting user creation with:", newProfile)
       validateProfile()
 
+      // Check if user already exists
       const { data: existingUser } = await supabase
         .from('profiles')
         .select('id')
@@ -70,20 +70,11 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         throw new Error("Un utilisateur avec cet email existe déjà")
       }
 
-      console.log("Creating new user...")
+      // First, create the auth user with just email and password
+      console.log("Creating auth user...")
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newProfile.email,
-        password: newProfile.password,
-        options: {
-          data: {
-            first_name: newProfile.first_name,
-            last_name: newProfile.last_name,
-            role: newProfile.role,
-            agency_id: newProfile.agency_id,
-            phone_number: newProfile.phone_number
-          },
-          emailRedirectTo: undefined // Remove redirect URL
-        }
+        password: newProfile.password
       })
 
       if (authError) {
@@ -95,6 +86,8 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         throw new Error("Erreur lors de la création de l'utilisateur")
       }
 
+      // Then, create/update the profile with additional data
+      console.log("Creating profile for user:", authData.user.id)
       const { error: profileError } = await supabase
         .from("profiles")
         .upsert({
