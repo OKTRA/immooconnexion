@@ -33,26 +33,30 @@ export function AdminLoginForm() {
         throw new Error("Aucun utilisateur trouvé")
       }
 
-      // Vérifier si l'utilisateur est un super admin
-      const { data: adminData, error: adminError } = await supabase
-        .from('administrators')
-        .select('is_super_admin')
+      // Vérifier si l'utilisateur est un admin dans la table profiles
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('role, agency_id')
         .eq('id', user.id)
         .maybeSingle()
 
-      if (adminError) {
-        await supabase.auth.signOut()
+      if (profileError) {
         throw new Error("Erreur lors de la vérification des droits d'administrateur")
       }
 
-      if (!adminData?.is_super_admin) {
+      if (!profileData || profileData.role !== 'admin') {
         await supabase.auth.signOut()
-        throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent se connecter ici.")
+        throw new Error("Accès non autorisé. Seuls les administrateurs peuvent se connecter ici.")
+      }
+
+      if (!profileData.agency_id) {
+        await supabase.auth.signOut()
+        throw new Error("Aucune agence associée à ce compte administrateur.")
       }
 
       toast({
         title: "Connexion réussie",
-        description: "Bienvenue dans l'interface super administrateur",
+        description: "Bienvenue dans l'interface administrateur",
       })
 
       navigate("/admin")
@@ -93,9 +97,9 @@ export function AdminLoginForm() {
           <div className="flex items-center justify-center text-primary mb-4">
             <Shield className="h-12 w-12" />
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Super Admin</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Admin</CardTitle>
           <CardDescription className="text-center">
-            Accès réservé aux super administrateurs
+            Accès réservé aux administrateurs
           </CardDescription>
         </CardHeader>
         <CardContent>
