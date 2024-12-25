@@ -24,7 +24,7 @@ export function AdminAgencies() {
         // Then verify administrator status
         const { data: adminData, error: adminError } = await supabase
           .from("administrators")
-          .select("*")
+          .select("is_super_admin")
           .eq("id", session.user.id)
           .maybeSingle()
 
@@ -33,8 +33,8 @@ export function AdminAgencies() {
           throw new Error("Erreur lors de la vérification des droits administrateur")
         }
         
-        if (!adminData) {
-          throw new Error("Accès non autorisé. Vous devez être administrateur pour accéder à cette page.")
+        if (!adminData?.is_super_admin) {
+          throw new Error("Accès non autorisé. Vous devez être super administrateur pour accéder à cette page.")
         }
 
         // Finally fetch agencies data
