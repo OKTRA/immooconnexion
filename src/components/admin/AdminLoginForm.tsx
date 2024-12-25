@@ -25,7 +25,9 @@ export function AdminLoginForm() {
         password,
       })
 
-      if (signInError) throw signInError
+      if (signInError) {
+        throw signInError
+      }
 
       if (!user) {
         throw new Error("Aucun utilisateur trouvé")
@@ -43,7 +45,6 @@ export function AdminLoginForm() {
         throw new Error("Erreur lors de la vérification des droits d'administrateur")
       }
 
-      // Vérifier si l'utilisateur est un super admin
       if (!adminData?.is_super_admin) {
         await supabase.auth.signOut()
         throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent se connecter ici.")
@@ -74,7 +75,6 @@ export function AdminLoginForm() {
         variant: "destructive",
       })
 
-      // S'assurer que l'utilisateur est déconnecté en cas d'erreur
       await supabase.auth.signOut()
     } finally {
       setIsLoading(false)
