@@ -33,15 +33,31 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
   const [newProfile, setNewProfile] = useState<NewProfile>(initialProfile)
   const { toast } = useToast()
 
+  // Email validation function
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
   const handleAddUser = async () => {
     try {
       console.log("Starting user creation with:", newProfile)
 
-      // Validation
+      // Comprehensive validation
       if (!newProfile.email || !newProfile.password) {
         toast({
           title: "Erreur",
           description: "L'email et le mot de passe sont obligatoires",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Email validation
+      if (!isValidEmail(newProfile.email)) {
+        toast({
+          title: "Email invalide",
+          description: "Veuillez entrer une adresse email valide",
           variant: "destructive",
         })
         return
