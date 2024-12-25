@@ -69,6 +69,11 @@ export function useTenants() {
         throw profileError
       }
 
+      if (!profileData?.agency_id) {
+        // Return empty array if no agency_id is found
+        return []
+      }
+
       let query = supabase
         .from('tenants')
         .select(`
@@ -83,10 +88,8 @@ export function useTenants() {
           agency_id
         `)
 
-      // Si l'utilisateur n'est pas admin, on filtre par agency_id
-      if (profileData?.role !== 'admin') {
-        query = query.eq('agency_id', profileData.agency_id)
-      }
+      // Only query if we have an agency_id
+      query = query.eq('agency_id', profileData.agency_id)
       
       const { data: tenantsData, error: tenantsError } = await query
         .order('created_at', { ascending: false })
@@ -107,17 +110,7 @@ export function useTenants() {
         user_id: tenant.user_id,
       }))
     },
-    enabled: !!session,
-    meta: {
-      onError: (error: any) => {
-        console.error('Erreur de requête:', error)
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les locataires. Veuillez réessayer.",
-          variant: "destructive",
-        })
-      }
-    }
+    enabled: !!session
   })
 
   return { tenants, isLoading, error, session }
