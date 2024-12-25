@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/components/ui/use-toast"
 import { Agency } from "@/components/admin/agency/types"
 
 interface ProfileWithAgency {
@@ -36,7 +36,7 @@ export function useProfiles() {
           throw new Error("Not authenticated")
         }
 
-        // Check admin status
+        // Check admin status using maybeSingle() instead of single()
         const { data: adminData, error: adminError } = await supabase
           .from("administrators")
           .select("is_super_admin")
@@ -48,9 +48,8 @@ export function useProfiles() {
           // Continue even if admin check fails - will fall back to regular permissions
         }
 
-        if (adminData?.is_super_admin) {
-          console.log("User is super admin")
-        }
+        // Log admin status for debugging
+        console.log("Admin status:", adminData?.is_super_admin)
 
         // Fetch profiles with a single query that includes agency data
         const { data: profiles, error: profilesError } = await supabase
