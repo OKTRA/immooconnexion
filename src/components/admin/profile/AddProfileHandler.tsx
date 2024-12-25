@@ -75,7 +75,6 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         email: cleanEmail,
         password: newProfile.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/admin`,
           data: {
             email: cleanEmail
           }
@@ -95,9 +94,6 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       if (!authData.user) {
         throw new Error("Erreur lors de la création de l'utilisateur")
       }
-
-      // Sign out immediately to prevent session conflicts
-      await supabase.auth.signOut()
 
       console.log("Auth user created successfully:", authData.user.id)
       return authData.user.id
