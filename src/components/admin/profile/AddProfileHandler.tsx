@@ -31,6 +31,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
   }
   
   const [newProfile, setNewProfile] = useState<NewProfile>(initialProfile)
+  const [lastSignupAttempt, setLastSignupAttempt] = useState<number>(0)
   const { toast } = useToast()
 
   const validateAuthData = () => {
@@ -65,6 +66,13 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
     try {
       validateAuthData()
 
+      // Check rate limiting
+      const now = Date.now()
+      if (now - lastSignupAttempt < 60000) { // 1 minute delay
+        throw new Error("Veuillez patienter une minute avant de réessayer")
+      }
+      setLastSignupAttempt(now)
+
       // Trim email to remove any whitespace
       const cleanEmail = newProfile.email.trim().toLowerCase()
 
@@ -92,6 +100,9 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       })
 
       if (authError) {
+        if (authError.message.includes('rate_limit')) {
+          throw new Error("Trop de tentatives. Veuillez réessayer dans quelques minutes.")
+        }
         console.error("Auth error:", authError)
         throw authError
       }
