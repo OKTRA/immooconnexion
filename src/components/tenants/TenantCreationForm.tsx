@@ -44,7 +44,7 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
     setIsSubmitting(true);
     
     try {
-      // Get the current user
+      // Get the current user's profile to get the agency_id
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
@@ -64,51 +64,18 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
         return;
       }
 
-      // Create tenant auth user
-      const email = `${formData.nom.toLowerCase()}.${formData.prenom.toLowerCase()}@tenant.local`;
-      const password = Math.random().toString(36).slice(-8);
-      
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            first_name: formData.prenom,
-            last_name: formData.nom,
-          }
-        }
-      });
-
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("Failed to create user");
-
-      // Update the profile with tenant info
-      const { error: profileUpdateError } = await supabase
-        .from('profiles')
-        .update({ 
-          is_tenant: true,
-          first_name: formData.prenom,
-          last_name: formData.nom,
-          agency_id: profile.agency_id
-        })
-        .eq('id', authData.user.id);
-
-      if (profileUpdateError) throw profileUpdateError;
-
       // Create tenant record
       const { error: tenantError } = await supabase
         .from('tenants')
         .insert({
-          id: authData.user.id,
           nom: formData.nom,
           prenom: formData.prenom,
           birth_date: formData.dateNaissance,
           phone_number: formData.telephone,
-          agency_fees: parseFloat(formData.fraisAgence),
           photo_id_url: previewUrl || null,
+          agency_fees: parseFloat(formData.fraisAgence),
           profession: formData.profession,
-          user_id: user.id,
-          agency_id: profile.agency_id  // Use the agency_id from the user's profile
+          agency_id: profile.agency_id
         });
 
       if (tenantError) throw tenantError;
