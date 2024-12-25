@@ -33,7 +33,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
   const [newProfile, setNewProfile] = useState<NewProfile>(initialProfile)
   const { toast } = useToast()
 
-  const validateProfile = () => {
+  const validateAuthData = () => {
     if (!newProfile.email || !newProfile.password) {
       throw new Error("Email et mot de passe sont obligatoires")
     }
@@ -48,7 +48,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
     }
   }
 
-  const validateAdditionalInfo = () => {
+  const validateProfileData = () => {
     if (!newProfile.first_name || !newProfile.last_name || 
         !newProfile.phone_number || !newProfile.agency_id) {
       throw new Error("Tous les champs sont obligatoires")
@@ -60,11 +60,9 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
     }
   }
 
-  const handleAddUser = async () => {
+  const handleCreateAuthUser = async () => {
     try {
-      console.log("Starting user creation with:", newProfile)
-      validateProfile()
-      validateAdditionalInfo()
+      validateAuthData()
 
       // Check if user already exists
       const { data: existingUser } = await supabase
@@ -77,7 +75,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         throw new Error("Un utilisateur avec cet email existe déjà")
       }
 
-      // First, create the auth user with just email and password
+      // Create auth user with just email and password
       console.log("Creating auth user...")
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newProfile.email,
@@ -86,19 +84,28 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
       if (authError) {
         console.error("Auth error:", authError)
-        throw new Error(authError.message)
+        throw authError
       }
 
       if (!authData.user) {
         throw new Error("Erreur lors de la création de l'utilisateur")
       }
 
-      // Then, create/update the profile with additional data
-      console.log("Creating profile for user:", authData.user.id)
+      return authData.user.id
+    } catch (error: any) {
+      console.error('Error in handleCreateAuthUser:', error)
+      throw error
+    }
+  }
+
+  const handleUpdateProfile = async (userId: string) => {
+    try {
+      validateProfileData()
+
       const { error: profileError } = await supabase
         .from("profiles")
         .upsert({
-          id: authData.user.id,
+          id: userId,
           email: newProfile.email,
           first_name: newProfile.first_name,
           last_name: newProfile.last_name,
@@ -121,18 +128,15 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       setNewProfile(initialProfile)
       onSuccess()
     } catch (error: any) {
-      console.error('Error in handleAddUser:', error)
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'ajout du profil",
-        variant: "destructive",
-      })
+      console.error('Error in handleUpdateProfile:', error)
+      throw error
     }
   }
 
   return {
     newProfile,
     setNewProfile,
-    handleAddUser
+    handleCreateAuthUser,
+    handleUpdateProfile
   }
 }

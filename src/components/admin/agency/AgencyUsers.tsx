@@ -58,7 +58,12 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
     },
   })
 
-  const { newProfile, setNewProfile, handleAddUser } = useAddProfileHandler({
+  const { 
+    newProfile, 
+    setNewProfile, 
+    handleCreateAuthUser,
+    handleUpdateProfile 
+  } = useAddProfileHandler({
     onSuccess: () => {
       refetch()
       setShowAddDialog(false)
@@ -146,7 +151,8 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
         onProfileCreated={refetch}
         newProfile={newProfile}
         setNewProfile={setNewProfile}
-        handleAddUser={handleAddUser}
+        handleCreateAuthUser={handleCreateAuthUser}
+        handleUpdateProfile={handleUpdateProfile}
       />
     </div>
   )
