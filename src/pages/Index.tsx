@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { StatCard } from "@/components/StatCard"
 import { RevenueChart } from "@/components/RevenueChart"
 import { RecentActivities } from "@/components/RecentActivities"
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
+import { AppSidebar } from "@/components/AppSidebar"
 import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
@@ -150,43 +150,43 @@ const Index = () => {
   }
 
   return (
-    <DashboardLayout>
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-          Tableau de bord
-        </h1>
+    <div className="flex min-h-screen">
+      <div className="hidden lg:block w-64 border-r">
+        <AppSidebar />
       </div>
-
-      <div className="grid gap-6 md:grid-cols-3 mb-8">
-        <StatCard
-          title="Total Biens"
-          value={stats?.properties.toString() || "0"}
-          className="hover:shadow-lg transition-shadow"
-        />
-        <StatCard
-          title="Total Locataires"
-          value={stats?.tenants.toString() || "0"}
-          className="hover:shadow-lg transition-shadow"
-        />
-        <StatCard
-          title="Revenus Totaux"
-          value={new Intl.NumberFormat("fr-FR", {
-            style: "currency",
-            currency: "XOF",
-          }).format(stats?.revenue || 0)}
-          className="hover:shadow-lg transition-shadow"
-        />
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-lg border bg-card p-6 hover:shadow-lg transition-shadow">
-          <RevenueChart />
+      
+      <div className="flex-1 p-8">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold">Tableau de bord</h1>
+          <div className="lg:hidden">
+            <AppSidebar />
+          </div>
         </div>
-        <div className="rounded-lg border bg-card p-6 hover:shadow-lg transition-shadow">
+
+        <div className="grid gap-4 md:grid-cols-3 mb-8">
+          <StatCard
+            title="Total Biens"
+            value={stats?.properties.toString() || "0"}
+          />
+          <StatCard
+            title="Total Locataires"
+            value={stats?.tenants.toString() || "0"}
+          />
+          <StatCard
+            title="Revenus Totaux"
+            value={new Intl.NumberFormat("fr-FR", {
+              style: "currency",
+              currency: "XOF",
+            }).format(stats?.revenue || 0)}
+          />
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 mb-8">
+          <RevenueChart />
           <RecentActivities />
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   )
 }
 

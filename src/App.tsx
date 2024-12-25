@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { Header } from "@/components/header/Header"
-import { SidebarProvider } from "@/components/ui/sidebar"
 import Index from "./pages/Index"
 import Login from "./pages/Login"
 import SuperAdminLogin from "./pages/SuperAdminLogin"
@@ -32,89 +31,87 @@ const queryClient = new QueryClient({
 
 function AppRoutes() {
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <Header />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/super-admin/login" element={<SuperAdminLogin />} />
-          <Route path="/public" element={<PublicProperties />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Index />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/locataires"
-            element={
-              <ProtectedRoute>
-                <Tenants />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/locataires/:id/contrats"
-            element={
-              <ProtectedRoute>
-                <TenantContracts />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/biens"
-            element={
-              <ProtectedRoute>
-                <Properties />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/biens/:id"
-            element={
-              <ProtectedRoute>
-                <PropertyDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/depenses"
-            element={
-              <ProtectedRoute>
-                <Expenses />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/gains"
-            element={
-              <ProtectedRoute>
-                <AgencyEarnings />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/rapports"
-            element={
-              <ProtectedRoute>
-                <Reports />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </div>
-    </SidebarProvider>
+    <>
+      <Header />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/super-admin/login" element={<SuperAdminLogin />} />
+        <Route path="/public" element={<PublicProperties />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Index />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/locataires"
+          element={
+            <ProtectedRoute>
+              <Tenants />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/locataires/:id/contrats"
+          element={
+            <ProtectedRoute>
+              <TenantContracts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/biens"
+          element={
+            <ProtectedRoute>
+              <Properties />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/biens/:id"
+          element={
+            <ProtectedRoute>
+              <PropertyDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/depenses"
+          element={
+            <ProtectedRoute>
+              <Expenses />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/gains"
+          element={
+            <ProtectedRoute>
+              <AgencyEarnings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/rapports"
+          element={
+            <ProtectedRoute>
+              <Reports />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </>
   )
 }
 
