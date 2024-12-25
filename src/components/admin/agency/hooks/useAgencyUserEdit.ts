@@ -2,59 +2,31 @@ import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 
-export function useAgencyUserEdit({ onSuccess }: { onSuccess: () => void }) {
-  const [showEditDialog, setShowEditDialog] = useState(false)
-  const [editStep, setEditStep] = useState<1 | 2>(1)
-  const [selectedUser, setSelectedUser] = useState<any>(null)
+export function useAgencyUserEdit() {
   const { toast } = useToast()
+  const [editStep, setEditStep] = useState<1 | 2>(1)
 
-  const handleUpdateAuth = async (editedUser: any) => {
+  const handleUpdateAuth = async (user: any) => {
     try {
-      if (editedUser.email !== selectedUser.email) {
-        // Check for existing email
-        const { data: existingUser } = await supabase
-          .from('profiles')
-          .select('email')
-          .eq('email', editedUser.email)
-          .maybeSingle()
-
-        if (existingUser) {
-          toast({
-            title: "Erreur",
-            description: "Cet email est déjà utilisé",
-            variant: "destructive",
-          })
-          return
-        }
-
-        // Update email using standard auth API
-        const { error: updateError } = await supabase.auth.updateUser({
-          email: editedUser.email,
-        })
-
-        if (updateError) throw updateError
+      console.log("Updating auth user:", user)
+      
+      // Email validation
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+      const cleanEmail = user.email.trim().toLowerCase()
+      
+      if (!emailRegex.test(cleanEmail)) {
+        throw new Error("Format d'email invalide")
       }
 
-      // If password is provided, validate and update it
-      if (editedUser.password) {
-        if (editedUser.password.length < 6) {
-          toast({
-            title: "Erreur",
-            description: "Le mot de passe doit contenir au moins 6 caractères",
-            variant: "destructive",
-          })
-          return
-        }
+      const { error: updateError } = await supabase.auth.updateUser({
+        email: cleanEmail,
+        password: user.password || undefined,
+      })
 
-        const { error: passwordError } = await supabase.auth.updateUser({
-          password: editedUser.password
-        })
-
-        if (passwordError) throw passwordError
+      if (updateError) {
+        console.error("Error updating auth user:", updateError)
+        throw updateError
       }
-
-      setSelectedUser(editedUser)
-      setEditStep(2)
 
       toast({
         title: "Succès",
@@ -64,54 +36,50 @@ export function useAgencyUserEdit({ onSuccess }: { onSuccess: () => void }) {
       console.error("Error updating auth user:", error)
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de la mise à jour",
+        description: error.message || "Erreur lors de la mise à jour des informations d'authentification",
         variant: "destructive",
       })
+      throw error
     }
   }
 
-  const handleUpdateProfile = async (editedUser: any) => {
+  const handleUpdateProfile = async (user: any) => {
     try {
-      const { password, ...profileData } = editedUser
-      
-      const { error } = await supabase
+      console.log("Updating profile:", user)
+      const { error: profileError } = await supabase
         .from("profiles")
-        .update(profileData)
-        .eq("id", editedUser.id)
+        .update({
+          first_name: user.first_name,
+          last_name: user.last_name,
+          phone_number: user.phone_number,
+          role: user.role,
+        })
+        .eq('id', user.id)
 
-      if (error) throw error
+      if (profileError) {
+        console.error("Error updating profile:", profileError)
+        throw profileError
+      }
 
       toast({
         title: "Succès",
-        description: "Le profil a été mis à jour avec succès",
+        description: "Le profil a été mis à jour",
       })
-      onSuccess()
-      setShowEditDialog(false)
-      setEditStep(1)
     } catch (error: any) {
       console.error("Error updating profile:", error)
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de la mise à jour",
+        description: error.message || "Erreur lors de la mise à jour du profil",
         variant: "destructive",
       })
+      throw error
     }
   }
 
-  const handleEdit = (user: any) => {
-    setSelectedUser(user)
-    setEditStep(1)
-    setShowEditDialog(true)
-  }
-
   return {
-    showEditDialog,
-    setShowEditDialog,
     editStep,
     setEditStep,
-    selectedUser,
     handleUpdateAuth,
     handleUpdateProfile,
-    handleEdit
   }
 }

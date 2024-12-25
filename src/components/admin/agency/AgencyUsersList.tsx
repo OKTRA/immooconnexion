@@ -1,29 +1,32 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { AgencyUserActions } from "./AgencyUserActions"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useState } from "react"
-import { ProfileForm } from "../profile/ProfileForm"
+import { useAgencyUserEdit } from "./hooks/useAgencyUserEdit"
+import { AgencyUserEditDialog } from "./AgencyUserEditDialog"
 
 interface AgencyUsersListProps {
   users: any[]
   onEdit: (user: any) => void
   refetch: () => void
+  agencyId: string
 }
 
-export function AgencyUsersList({ users, onEdit, refetch }: AgencyUsersListProps) {
-  const [showAuthDialog, setShowAuthDialog] = useState(false)
-  const [showProfileDialog, setShowProfileDialog] = useState(false)
+export function AgencyUsersList({ users, refetch, agencyId }: AgencyUsersListProps) {
+  const [showEditDialog, setShowEditDialog] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
+  const { editStep, setEditStep, handleUpdateAuth, handleUpdateProfile } = useAgencyUserEdit()
 
   const handleEditAuth = (user: any) => {
     setSelectedUser(user)
-    setShowAuthDialog(true)
+    setEditStep(1)
+    setShowEditDialog(true)
   }
 
   const handleEditProfile = (user: any) => {
     setSelectedUser(user)
-    setShowProfileDialog(true)
+    setEditStep(2)
+    setShowEditDialog(true)
   }
 
   return (
@@ -62,37 +65,16 @@ export function AgencyUsersList({ users, onEdit, refetch }: AgencyUsersListProps
         </TableBody>
       </Table>
 
-      <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Modifier les informations d'authentification</DialogTitle>
-          </DialogHeader>
-          {selectedUser && (
-            <ProfileForm
-              newProfile={selectedUser}
-              setNewProfile={onEdit}
-              isEditing={true}
-              step={1}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Modifier le profil</DialogTitle>
-          </DialogHeader>
-          {selectedUser && (
-            <ProfileForm
-              newProfile={selectedUser}
-              setNewProfile={onEdit}
-              isEditing={true}
-              step={2}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <AgencyUserEditDialog
+        showEditDialog={showEditDialog}
+        setShowEditDialog={setShowEditDialog}
+        selectedUser={selectedUser}
+        editStep={editStep}
+        setEditStep={setEditStep}
+        handleUpdateAuth={handleUpdateAuth}
+        handleUpdateProfile={handleUpdateProfile}
+        agencyId={agencyId}
+      />
     </div>
   )
 }
