@@ -2,9 +2,15 @@ import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 
-export function useAgencyUserEdit() {
+interface UseAgencyUserEditProps {
+  onSuccess?: () => void
+}
+
+export function useAgencyUserEdit({ onSuccess }: UseAgencyUserEditProps = {}) {
   const { toast } = useToast()
   const [editStep, setEditStep] = useState<1 | 2>(1)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<any>(null)
 
   const handleUpdateAuth = async (user: any) => {
     try {
@@ -32,6 +38,10 @@ export function useAgencyUserEdit() {
         title: "Succès",
         description: "Les informations d'authentification ont été mises à jour",
       })
+
+      if (onSuccess) {
+        onSuccess()
+      }
     } catch (error: any) {
       console.error("Error updating auth user:", error)
       toast({
@@ -65,6 +75,10 @@ export function useAgencyUserEdit() {
         title: "Succès",
         description: "Le profil a été mis à jour",
       })
+
+      if (onSuccess) {
+        onSuccess()
+      }
     } catch (error: any) {
       console.error("Error updating profile:", error)
       toast({
@@ -76,10 +90,20 @@ export function useAgencyUserEdit() {
     }
   }
 
+  const handleEdit = (user: any) => {
+    setSelectedUser(user)
+    setShowEditDialog(true)
+  }
+
   return {
     editStep,
     setEditStep,
+    showEditDialog,
+    setShowEditDialog,
+    selectedUser,
+    setSelectedUser,
     handleUpdateAuth,
     handleUpdateProfile,
+    handleEdit
   }
 }

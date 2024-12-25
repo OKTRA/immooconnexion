@@ -97,6 +97,7 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
         users={users}
         onEdit={handleEdit}
         refetch={refetch}
+        agencyId={agencyId}
       />
 
       <AgencyUserEditDialog
