@@ -51,7 +51,7 @@ export function TenantFormFields({
   });
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl mx-auto">
       <div className="space-y-2">
         <Label htmlFor="nom">Nom</Label>
         <Input
@@ -163,7 +163,7 @@ export function TenantFormFields({
           required
         />
       </div>
-      <div className="space-y-2">
+      <div className="space-y-2 col-span-1 md:col-span-2">
         <Label htmlFor="photoId">Photo d'identité</Label>
         <Input
           id="photoId"
