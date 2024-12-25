@@ -70,7 +70,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       const cleanEmail = validateAuthData()
       console.log("Creating auth user with email:", cleanEmail)
 
-      // Create the auth user - Step 1
+      // Create the auth user with auto-confirmation enabled
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: cleanEmail,
         password: newProfile.password,
@@ -78,7 +78,9 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
           emailRedirectTo: `${window.location.origin}/admin`,
           data: {
             email: cleanEmail
-          }
+          },
+          // Enable auto-confirmation
+          emailConfirm: true
         }
       })
 
