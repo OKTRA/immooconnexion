@@ -39,7 +39,8 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       throw new Error("Tous les champs sont obligatoires")
     }
 
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    // Strict email validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
     if (!emailRegex.test(newProfile.email)) {
       throw new Error("Format d'email invalide")
     }
@@ -80,7 +81,8 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
             role: newProfile.role,
             agency_id: newProfile.agency_id,
             phone_number: newProfile.phone_number
-          }
+          },
+          emailRedirectTo: undefined // Remove redirect URL
         }
       })
 
