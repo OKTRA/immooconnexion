@@ -38,10 +38,11 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       throw new Error("Email et mot de passe sont obligatoires")
     }
 
+    // Strict email validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
     const cleanEmail = newProfile.email.trim().toLowerCase()
-    console.log("Validating email:", cleanEmail)
     
-    if (!cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+    if (!emailRegex.test(cleanEmail)) {
       throw new Error("Format d'email invalide")
     }
 
@@ -74,7 +75,10 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         email: cleanEmail,
         password: newProfile.password,
         options: {
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: `${window.location.origin}/admin`,
+          data: {
+            email: cleanEmail
+          }
         }
       })
 
