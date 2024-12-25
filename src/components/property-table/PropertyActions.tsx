@@ -12,7 +12,12 @@ export function PropertyActions({ propertyId, onEdit, onDelete }: PropertyAction
   const navigate = useNavigate()
 
   const handleViewProperty = () => {
-    navigate(`/biens/${propertyId}`)
+    console.log("Navigating to property:", propertyId)
+    if (propertyId) {
+      navigate(`/biens/${propertyId}`)
+    } else {
+      console.error("Property ID is undefined")
+    }
   }
 
   return (
@@ -21,6 +26,7 @@ export function PropertyActions({ propertyId, onEdit, onDelete }: PropertyAction
         variant="ghost"
         size="icon"
         onClick={handleViewProperty}
+        title="Voir les détails"
       >
         <Eye className="h-4 w-4" />
       </Button>
@@ -28,6 +34,7 @@ export function PropertyActions({ propertyId, onEdit, onDelete }: PropertyAction
         variant="ghost"
         size="icon"
         onClick={onEdit}
+        title="Modifier"
       >
         <Pencil className="h-4 w-4" />
       </Button>
@@ -35,6 +42,7 @@ export function PropertyActions({ propertyId, onEdit, onDelete }: PropertyAction
         variant="ghost"
         size="icon"
         onClick={onDelete}
+        title="Supprimer"
       >
         <Trash2 className="h-4 w-4" />
       </Button>
