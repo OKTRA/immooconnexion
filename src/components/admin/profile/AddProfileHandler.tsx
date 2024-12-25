@@ -33,27 +33,28 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
   const [newProfile, setNewProfile] = useState<NewProfile>(initialProfile)
   const { toast } = useToast()
 
-  const isValidEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
-
   const validateProfile = () => {
+    // Check required fields
     if (!newProfile.email || !newProfile.password || !newProfile.first_name || 
         !newProfile.last_name || !newProfile.phone_number || !newProfile.agency_id) {
       throw new Error("Tous les champs sont obligatoires")
     }
 
-    if (!isValidEmail(newProfile.email)) {
-      throw new Error("L'adresse email n'est pas valide")
+    // Validate email format
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    if (!emailRegex.test(newProfile.email)) {
+      throw new Error("Format d'email invalide")
     }
 
+    // Validate password length
     if (newProfile.password.length < 6) {
       throw new Error("Le mot de passe doit contenir au moins 6 caractères")
     }
 
-    if (!newProfile.phone_number.match(/^\+?[0-9\s-]{10,}$/)) {
-      throw new Error("Le numéro de téléphone n'est pas valide")
+    // Validate phone number format (basic validation)
+    const phoneRegex = /^\+?[0-9\s-]{10,}$/
+    if (!phoneRegex.test(newProfile.phone_number)) {
+      throw new Error("Format de numéro de téléphone invalide")
     }
   }
 
@@ -61,6 +62,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
     try {
       console.log("Starting user creation with:", newProfile)
       
+      // Validate all required fields and formats
       validateProfile()
 
       // First check if user exists
@@ -70,56 +72,52 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         .eq('email', newProfile.email)
         .maybeSingle()
 
-      let userId: string
-
       if (existingUser) {
-        userId = existingUser.id
-        console.log("Existing user found:", userId)
-      } else {
-        console.log("Creating new user...")
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: newProfile.email,
-          password: newProfile.password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-            data: {
-              first_name: newProfile.first_name,
-              last_name: newProfile.last_name,
-              role: newProfile.role,
-              agency_id: newProfile.agency_id
-            }
-          }
-        })
-
-        if (authError) {
-          console.error("Auth error:", authError)
-          throw new Error(authError.message)
-        }
-        if (!authData.user) throw new Error("Aucun utilisateur créé")
-        
-        userId = authData.user.id
-        console.log("New user created:", userId)
+        throw new Error("Un utilisateur avec cet email existe déjà")
       }
 
-      // Update or create the profile
+      // Create new user with auth
+      console.log("Creating new user...")
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: newProfile.email,
+        password: newProfile.password,
+        options: {
+          data: {
+            first_name: newProfile.first_name,
+            last_name: newProfile.last_name,
+            role: newProfile.role,
+            agency_id: newProfile.agency_id
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`
+        }
+      })
+
+      if (authError) {
+        console.error("Auth error:", authError)
+        throw new Error(authError.message)
+      }
+
+      if (!authData.user) {
+        throw new Error("Erreur lors de la création de l'utilisateur")
+      }
+
+      // Create or update profile
       const { error: profileError } = await supabase
         .from("profiles")
         .upsert({
-          id: userId,
+          id: authData.user.id,
+          email: newProfile.email,
           first_name: newProfile.first_name,
           last_name: newProfile.last_name,
           phone_number: newProfile.phone_number,
-          email: newProfile.email,
-          agency_id: newProfile.agency_id,
-          role: newProfile.role
+          role: newProfile.role,
+          agency_id: newProfile.agency_id
         })
 
       if (profileError) {
         console.error("Profile error:", profileError)
         throw profileError
       }
-
-      console.log("Profile created/updated successfully")
 
       toast({
         title: "Succès",

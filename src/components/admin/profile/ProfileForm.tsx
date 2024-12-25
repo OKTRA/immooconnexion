@@ -13,7 +13,7 @@ interface ProfileFormProps {
 export function ProfileForm({ 
   newProfile, 
   setNewProfile, 
-  onSubmit, 
+  onSubmit,
   selectedAgencyId,
   isEditing = false 
 }: ProfileFormProps) {
@@ -57,7 +57,7 @@ export function ProfileForm({
         onChange={handleAgencyChange}
       />
       <Button type="submit" className="w-full">
-        {isEditing ? 'Enregistrer' : 'Ajouter'}
+        {isEditing ? 'Enregistrer les modifications' : 'Créer le profil'}
       </Button>
     </form>
   )
