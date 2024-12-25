@@ -7,12 +7,25 @@ import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import {
   Sidebar,
-  SidebarContent,
+  SidebarContent as BaseSidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
 } from "@/components/ui/sidebar"
 import { SidebarNavItems } from "./sidebar/SidebarNavItems"
+
+// Export the SidebarContent component for reuse
+export function SidebarContent() {
+  return (
+    <BaseSidebarContent>
+      <SidebarGroup>
+        <SidebarGroupContent>
+          <SidebarNavItems />
+        </SidebarGroupContent>
+      </SidebarGroup>
+    </BaseSidebarContent>
+  )
+}
 
 export function AppSidebar() {
   const navigate = useNavigate()
@@ -47,13 +60,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarNavItems />
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+      <SidebarContent />
       <SidebarFooter className="border-t p-4 space-y-2">
         <Button
           variant="ghost"

@@ -132,7 +132,7 @@ const PropertyDetails = () => {
   return (
     <SidebarProvider>
       <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
-        {!isMobile && <AppSidebar className="w-64 flex-shrink-0" />}
+        {!isMobile && <AppSidebar />}
         <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto p-4 space-y-6 pb-16">
             {isMobile && <MobileMenu />}
