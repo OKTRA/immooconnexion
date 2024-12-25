@@ -156,8 +156,7 @@ const Index = () => {
       </div>
       
       <div className="flex-1 p-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">Tableau de bord</h1>
+        <div className="flex items-center justify-end mb-8">
           <div className="lg:hidden">
             <AppSidebar />
           </div>
