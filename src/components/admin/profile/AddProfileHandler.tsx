@@ -42,9 +42,9 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
     return Date.now() < expiryTime
   }
 
-  // Set rate limit for 10 minutes
+  // Set rate limit for 1 minute
   const setRateLimit = () => {
-    const expiryTime = Date.now() + 600000 // 10 minutes
+    const expiryTime = Date.now() + 60000 // 1 minute
     localStorage.setItem('signupRateLimitExpiry', expiryTime.toString())
   }
 
@@ -80,7 +80,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       validateAuthData()
 
       if (isRateLimited()) {
-        throw new Error("Trop de tentatives. Veuillez réessayer dans 10 minutes.")
+        throw new Error("Trop de tentatives. Veuillez patienter 1 minute avant d'ajouter un nouveau profil.")
       }
 
       // Trim email to remove any whitespace
@@ -114,7 +114,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
             authError.message.includes('email rate limit') ||
             authError.status === 429) {
           setRateLimit()
-          throw new Error("Trop de tentatives. Veuillez réessayer dans 10 minutes.")
+          throw new Error("Trop de tentatives. Veuillez patienter 1 minute avant d'ajouter un nouveau profil.")
         }
         console.error("Auth error:", authError)
         throw authError
