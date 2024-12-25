@@ -14,7 +14,7 @@ export function AdminProfiles() {
   const { data: profiles = [], refetch } = useProfiles()
   const { toast } = useToast()
   
-  const { newProfile, setNewProfile, handleAddUser } = useAddProfileHandler({
+  const { newProfile, setNewProfile, handleCreateAuthUser, handleUpdateProfile } = useAddProfileHandler({
     onSuccess: refetch,
     onClose: () => setShowAddDialog(false)
   })
@@ -72,7 +72,8 @@ export function AdminProfiles() {
         setShowAddDialog={setShowAddDialog}
         newProfile={newProfile}
         setNewProfile={setNewProfile}
-        handleAddUser={handleAddUser}
+        handleCreateAuthUser={handleCreateAuthUser}
+        handleUpdateProfile={handleUpdateProfile}
       />
     </div>
   )
