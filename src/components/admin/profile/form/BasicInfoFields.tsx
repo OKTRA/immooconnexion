@@ -30,33 +30,43 @@ export function BasicInfoFields({
   step,
   selectedAgencyId
 }: BasicInfoFieldsProps) {
-  const { data: agencies = [] } = useQuery({
-    queryKey: ["agencies"],
+  const { data: agencies = [], isError } = useQuery({
+    queryKey: ["agencies", selectedAgencyId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("agencies")
-        .select("id, name")
-      
-      if (error) {
-        console.error("Error fetching agencies:", error)
+      try {
+        // First check if we have a valid session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError) throw sessionError
+        if (!session) throw new Error("No active session")
+
+        // Then fetch the agency data
+        const { data, error } = await supabase
+          .from("agencies")
+          .select("id, name")
+          .eq('id', selectedAgencyId)
+          .single()
+        
+        if (error) throw error
+        if (!data) return []
+        
+        return [data]
+      } catch (error) {
+        console.error("Error fetching agency:", error)
         return []
       }
-      
-      return data || []
-    }
+    },
+    enabled: !!selectedAgencyId // Only run query if we have an agencyId
   })
 
   const handleChange = (field: keyof Profile, value: string) => {
-    console.log("Field change:", field, value)
     onProfileChange({
       ...newProfile,
-      [field]: value
+      [field]: value,
+      agency_id: selectedAgencyId // Always keep the selected agency ID
     })
   }
 
-  const selectedAgency = selectedAgencyId 
-    ? agencies.find(agency => agency.id === selectedAgencyId)
-    : null
+  const selectedAgency = agencies[0] // Since we're fetching a single agency
 
   if (step === 1) {
     return (
