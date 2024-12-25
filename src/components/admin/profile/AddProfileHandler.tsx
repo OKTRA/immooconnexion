@@ -38,13 +38,11 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       throw new Error("Email et mot de passe sont obligatoires")
     }
 
-    // Strict email validation regex
-    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+    // Basic email validation
     const cleanEmail = newProfile.email.trim().toLowerCase()
+    console.log("Validating email:", cleanEmail)
     
-    console.log("Validating email:", cleanEmail) // Debug log
-    
-    if (!emailRegex.test(cleanEmail)) {
+    if (!cleanEmail.includes('@') || !cleanEmail.includes('.')) {
       throw new Error("Format d'email invalide")
     }
 
@@ -70,7 +68,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
   const handleCreateAuthUser = async () => {
     try {
       const cleanEmail = validateAuthData()
-      console.log("Creating auth user with email:", cleanEmail) // Debug log
+      console.log("Creating auth user with email:", cleanEmail)
 
       // Check if user already exists
       const { data: existingUser } = await supabase
@@ -84,7 +82,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       }
 
       // Create auth user
-      console.log("Sending signup request to Supabase...") // Debug log
+      console.log("Sending signup request to Supabase...")
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: cleanEmail,
         password: newProfile.password,
@@ -96,25 +94,22 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       })
 
       if (authError) {
-        console.error("Detailed auth error:", JSON.stringify(authError, null, 2)) // Enhanced error logging
+        console.error("Auth error:", authError)
         
         if (authError.message.includes('rate limit') || authError.status === 429) {
           throw new Error("Le service est temporairement indisponible. Veuillez réessayer dans quelques instants.")
         }
-        if (authError.message.includes('invalid')) {
-          throw new Error("L'adresse email fournie n'est pas valide. Veuillez vérifier le format.")
-        }
-        throw new Error(authError.message)
+        throw new Error(authError.message || "Erreur lors de la création de l'utilisateur")
       }
 
       if (!authData.user) {
         throw new Error("Erreur lors de la création de l'utilisateur")
       }
 
-      console.log("Auth user created successfully:", authData.user.id) // Debug log
+      console.log("Auth user created successfully:", authData.user.id)
       return authData.user.id
     } catch (error: any) {
-      console.error('Detailed error in handleCreateAuthUser:', error)
+      console.error('Error in handleCreateAuthUser:', error)
       throw error
     }
   }
