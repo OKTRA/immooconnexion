@@ -79,8 +79,8 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
           data: {
             email: cleanEmail
           },
-          // Enable auto-confirmation
-          emailConfirm: true
+          // Auto-confirm user without email verification
+          shouldCreateUser: true
         }
       })
 
