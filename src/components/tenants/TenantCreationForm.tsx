@@ -53,7 +53,7 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
         .from('profiles')
         .select('agency_id')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       
       if (profileError) throw profileError;
       if (!profile?.agency_id) throw new Error("Aucune agence associée à ce profil");
