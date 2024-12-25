@@ -57,7 +57,7 @@ export const PropertyDetailsContent = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-6 pb-16">
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
       <PropertyInfo property={property} />
       <PropertyActions propertyId={id || ''} contracts={contracts} />
       <PaymentHistory 
