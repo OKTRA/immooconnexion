@@ -100,6 +100,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
           email: newProfile.email,
           password: newProfile.password,
           options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
             data: {
               first_name: newProfile.first_name,
               last_name: newProfile.last_name,
