@@ -24,29 +24,10 @@ export const PropertyDetailsContent = () => {
     error: contractsError 
   } = useContractsData(id)
 
-  // Add console logs for debugging
-  console.log("Property data:", property)
-  console.log("Contracts data:", contracts)
-  console.log("Loading states:", { isLoadingProperty, isLoadingContracts })
-  console.log("Errors:", { propertyError, contractsError })
-
   if (isLoadingProperty || isLoadingContracts) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
-
-  if (propertyError || contractsError) {
-    toast({
-      title: "Erreur",
-      description: "Une erreur est survenue lors du chargement des données",
-      variant: "destructive",
-    })
-    return (
-      <div className="flex items-center justify-center min-h-[400px] text-red-500">
-        Une erreur est survenue lors du chargement des données
       </div>
     )
   }
