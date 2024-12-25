@@ -22,7 +22,7 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
     photoId: null as File | null,
     fraisAgence: "",
     propertyId: "",
-    profession: "",
+    profession: "",  // Ensure this is included in the initial state
   });
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -125,7 +125,7 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
             telephone: formData.telephone,
             fraisAgence: formData.fraisAgence,
             propertyId: formData.propertyId,
-            profession: formData.profession
+            profession: formData.profession  // Include profession here
           }}
         />
         <div className="flex justify-end gap-2">
