@@ -67,7 +67,7 @@ export function BasicInfoFields({
         {isEditing && (
           <Button 
             type="button" 
-            className="w-full"
+            className="w-full bg-blue-500 hover:bg-blue-600"
             onClick={onUpdateAuth}
           >
             <Lock className="w-4 h-4 mr-2" />
@@ -130,7 +130,7 @@ export function BasicInfoFields({
       {isEditing && (
         <Button 
           type="button" 
-          className="w-full"
+          className="w-full bg-green-500 hover:bg-green-600"
           onClick={onUpdateProfile}
         >
           <UserCog className="w-4 h-4 mr-2" />
