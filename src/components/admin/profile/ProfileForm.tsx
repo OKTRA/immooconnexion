@@ -24,7 +24,6 @@ export function ProfileForm({
   step = 1
 }: ProfileFormProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [userId, setUserId] = useState<string>("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,7 +44,6 @@ export function ProfileForm({
   }
 
   const handleProfileChange = (updatedProfile: any) => {
-    console.log("Profile updated:", updatedProfile)
     if (setNewProfile) {
       setNewProfile({
         ...newProfile,

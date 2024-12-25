@@ -29,7 +29,7 @@ export function BasicInfoFields({
   selectedAgencyId
 }: BasicInfoFieldsProps) {
   const handleChange = (field: keyof Profile, value: string) => {
-    onProfileChange({ ...newProfile, [field]: value })
+    onProfileChange({ [field]: value })
   }
 
   if (step === 1) {
