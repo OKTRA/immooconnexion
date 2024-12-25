@@ -84,7 +84,6 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         email: cleanEmail,
         password: newProfile.password,
         options: {
-          emailRedirectTo: window.location.origin,
           data: {
             email: cleanEmail
           }
@@ -93,6 +92,10 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
       if (authError) {
         console.error("Auth error:", authError)
+        // Handle rate limit error specifically
+        if (authError.message.includes('rate limit') || authError.status === 429) {
+          throw new Error("Le service est temporairement indisponible. Veuillez réessayer dans quelques instants.")
+        }
         throw new Error(authError.message)
       }
 
@@ -130,7 +133,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
       toast({
         title: "Succès",
-        description: "Le profil a été créé avec succès. Un email de confirmation a été envoyé.",
+        description: "Le profil a été créé avec succès.",
       })
       
       onClose()
