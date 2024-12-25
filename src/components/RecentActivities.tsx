@@ -24,6 +24,10 @@ export function RecentActivities() {
         throw error
       }
 
+      if (!profile) {
+        throw new Error("Profil non trouvé")
+      }
+
       console.log("Profil complet:", profile)
       return profile
     },
@@ -52,7 +56,7 @@ export function RecentActivities() {
 
       // Si l'utilisateur n'est pas admin, on filtre par agency_id
       if (userProfile.role !== 'admin') {
-        query = query.eq('agency_id', userProfile.id)
+        query = query.eq('agency_id', userProfile.agency_id)
       }
 
       const { data: contracts, error } = await query

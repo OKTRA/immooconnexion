@@ -26,7 +26,7 @@ export function AdminLoginForm() {
 
       if (signInError) throw signInError
 
-      // Vérifier directement dans la table administrators
+      // Using maybeSingle() instead of single() to handle non-existent records
       const { data: adminData, error: adminError } = await supabase
         .from('administrators')
         .select('is_super_admin')
@@ -38,6 +38,7 @@ export function AdminLoginForm() {
         throw new Error("Erreur lors de la vérification des droits d'administrateur")
       }
 
+      // Check if admin data exists and is super admin
       if (!adminData?.is_super_admin) {
         await supabase.auth.signOut()
         throw new Error("Accès non autorisé. Seuls les super administrateurs peuvent se connecter ici.")
