@@ -1,15 +1,16 @@
 import { Button } from "@/components/ui/button"
-import { Edit, Trash2 } from "lucide-react"
+import { Edit, Trash2, Lock, UserCog } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 
 interface AgencyUserActionsProps {
   userId: string
-  onEdit: () => void
+  onEditAuth: () => void
+  onEditProfile: () => void
   refetch: () => void
 }
 
-export function AgencyUserActions({ userId, onEdit, refetch }: AgencyUserActionsProps) {
+export function AgencyUserActions({ userId, onEditAuth, onEditProfile, refetch }: AgencyUserActionsProps) {
   const { toast } = useToast()
 
   const handleDelete = async () => {
@@ -40,9 +41,18 @@ export function AgencyUserActions({ userId, onEdit, refetch }: AgencyUserActions
       <Button
         variant="ghost"
         size="sm"
-        onClick={onEdit}
+        onClick={onEditAuth}
+        className="text-blue-500 hover:text-blue-600"
       >
-        <Edit className="h-4 w-4" />
+        <Lock className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onEditProfile}
+        className="text-green-500 hover:text-green-600"
+      >
+        <UserCog className="h-4 w-4" />
       </Button>
       <Button
         variant="ghost"
