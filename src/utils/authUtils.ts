@@ -44,7 +44,8 @@ export const getOrCreateUser = async (email: string) => {
       last_name: 'Name',
       role: 'user',
       phone_number: '0000000000',
-      agency_id: defaultAgency.id
+      agency_id: defaultAgency.id,
+      is_tenant: false
     });
 
   if (profileError) throw profileError;

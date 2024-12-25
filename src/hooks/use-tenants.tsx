@@ -58,6 +58,7 @@ export function useTenants() {
         throw new Error("Non authentifié")
       }
 
+      // First get the user's profile to check their role and agency
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('role, agency_id')
@@ -69,8 +70,10 @@ export function useTenants() {
         throw profileError
       }
 
+      console.log('Profile data:', profileData)
+
       if (!profileData?.agency_id) {
-        // Return empty array if no agency_id is found
+        console.log('No agency_id found for user')
         return []
       }
 
@@ -98,6 +101,8 @@ export function useTenants() {
         console.error('Erreur lors de la récupération des locataires:', tenantsError)
         throw tenantsError
       }
+
+      console.log('Tenants data:', tenantsData)
 
       return tenantsData.map((tenant: any) => ({
         id: tenant.id,
