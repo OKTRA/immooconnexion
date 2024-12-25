@@ -77,8 +77,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         options: {
           emailRedirectTo: `${window.location.origin}/admin`,
           data: {
-            email: cleanEmail,
-            email_confirmed: true
+            email: cleanEmail
           }
         }
       })
