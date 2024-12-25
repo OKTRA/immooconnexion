@@ -16,7 +16,7 @@ export function useAgencyUserEdit({ onSuccess }: { onSuccess: () => void }) {
           .from('profiles')
           .select('email')
           .eq('email', editedUser.email)
-          .single()
+          .maybeSingle()
 
         if (existingUser) {
           toast({
