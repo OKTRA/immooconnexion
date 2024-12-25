@@ -33,21 +33,6 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
   const [newProfile, setNewProfile] = useState<NewProfile>(initialProfile)
   const { toast } = useToast()
 
-  // Check if we're currently rate limited
-  const isRateLimited = () => {
-    const limitExpiry = localStorage.getItem('signupRateLimitExpiry')
-    if (!limitExpiry) return false
-    
-    const expiryTime = parseInt(limitExpiry)
-    return Date.now() < expiryTime
-  }
-
-  // Set rate limit for 1 minute
-  const setRateLimit = () => {
-    const expiryTime = Date.now() + 60000 // 1 minute
-    localStorage.setItem('signupRateLimitExpiry', expiryTime.toString())
-  }
-
   const validateAuthData = () => {
     if (!newProfile.email || !newProfile.password) {
       throw new Error("Email et mot de passe sont obligatoires")
@@ -79,10 +64,6 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
     try {
       validateAuthData()
 
-      if (isRateLimited()) {
-        throw new Error("Trop de tentatives. Veuillez patienter 1 minute avant d'ajouter un nouveau profil.")
-      }
-
       // Trim email to remove any whitespace
       const cleanEmail = newProfile.email.trim().toLowerCase()
 
@@ -103,6 +84,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
         email: cleanEmail,
         password: newProfile.password,
         options: {
+          emailRedirectTo: window.location.origin,
           data: {
             email: cleanEmail
           }
@@ -110,14 +92,8 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       })
 
       if (authError) {
-        if (authError.message.includes('rate_limit') || 
-            authError.message.includes('email rate limit') ||
-            authError.status === 429) {
-          setRateLimit()
-          throw new Error("Trop de tentatives. Veuillez patienter 1 minute avant d'ajouter un nouveau profil.")
-        }
         console.error("Auth error:", authError)
-        throw authError
+        throw new Error(authError.message)
       }
 
       if (!authData.user) {
@@ -165,15 +141,6 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       throw error
     }
   }
-
-  // Cleanup rate limit on unmount
-  useEffect(() => {
-    return () => {
-      if (!isRateLimited()) {
-        localStorage.removeItem('signupRateLimitExpiry')
-      }
-    }
-  }, [])
 
   return {
     newProfile,
