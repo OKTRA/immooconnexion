@@ -22,7 +22,7 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
     photoId: null as File | null,
     fraisAgence: "",
     propertyId: "",
-    profession: "",  // Ensure this is included in the initial state
+    profession: "",
   });
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,14 +44,27 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
     setIsSubmitting(true);
     
     try {
-      if (userProfile?.agency_id && !(await checkAndNotifyLimits(userProfile.agency_id, 'tenant'))) {
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifié");
+
+      // Get the user's profile to get the agency_id
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('agency_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+      if (!profile?.agency_id) throw new Error("Aucune agence associée à ce profil");
+
+      // Check subscription limits
+      if (!(await checkAndNotifyLimits(profile.agency_id, 'tenant'))) {
         setIsSubmitting(false);
         return;
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
-
+      // Create tenant auth user
       const email = `${formData.nom.toLowerCase()}.${formData.prenom.toLowerCase()}@tenant.local`;
       const password = Math.random().toString(36).slice(-8);
       
@@ -69,18 +82,20 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
       if (authError) throw authError;
       if (!authData.user) throw new Error("Failed to create user");
 
-      const { error: profileError } = await supabase
+      // Update the profile with tenant info
+      const { error: profileUpdateError } = await supabase
         .from('profiles')
         .update({ 
           is_tenant: true,
           first_name: formData.prenom,
           last_name: formData.nom,
-          agency_id: userProfile?.agency_id
+          agency_id: profile.agency_id
         })
         .eq('id', authData.user.id);
 
-      if (profileError) throw profileError;
+      if (profileUpdateError) throw profileUpdateError;
 
+      // Create tenant record
       const { error: tenantError } = await supabase
         .from('tenants')
         .insert({
@@ -93,7 +108,7 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
           photo_id_url: previewUrl || null,
           profession: formData.profession,
           user_id: user.id,
-          agency_id: userProfile?.agency_id
+          agency_id: profile.agency_id  // Use the agency_id from the user's profile
         });
 
       if (tenantError) throw tenantError;
@@ -125,7 +140,7 @@ export function TenantCreationForm({ userProfile, properties, onSuccess, onCance
             telephone: formData.telephone,
             fraisAgence: formData.fraisAgence,
             propertyId: formData.propertyId,
-            profession: formData.profession  // Include profession here
+            profession: formData.profession
           }}
         />
         <div className="flex justify-end gap-2">
