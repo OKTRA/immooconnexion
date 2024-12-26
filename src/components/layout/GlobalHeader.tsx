@@ -23,6 +23,18 @@ export function GlobalHeader() {
   const { toast } = useToast()
   const { theme, setTheme } = useTheme()
 
+  // N'afficher le header que sur les routes authentifiées
+  const isAuthenticatedRoute = location.pathname.includes('/admin')
+  if (!isAuthenticatedRoute) {
+    return null
+  }
+
+  // N'afficher le header que sur la route du dashboard
+  const isDashboardRoute = location.pathname === '/agence/admin' || location.pathname === '/super-admin/admin'
+  if (!isDashboardRoute) {
+    return null
+  }
+
   const { data: profile } = useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
@@ -61,12 +73,6 @@ export function GlobalHeader() {
         variant: "destructive"
       })
     }
-  }
-
-  // Only render if we're on an admin/dashboard route
-  const isAdminOrDashboardRoute = location.pathname.includes('/admin') || location.pathname === '/'
-  if (!profile || !isAdminOrDashboardRoute) {
-    return null
   }
 
   const HeaderContent = () => (
