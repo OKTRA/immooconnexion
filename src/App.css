@@ -57,19 +57,21 @@
   color: hsl(var(--foreground));
 }
 
-/* Optimisations de performance */
+/* Performance optimizations */
 * {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Optimisations pour le chargement des images */
+/* Image loading optimizations */
 img {
   content-visibility: auto;
+  loading: lazy;
+  decoding: async;
 }
 
-/* Optimisations pour les animations */
+/* Animation optimizations */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
@@ -85,4 +87,22 @@ img {
     padding-left: 1rem;
     padding-right: 1rem;
   }
+  
+  /* Reduce animations on mobile */
+  * {
+    transition-duration: 150ms;
+  }
+  
+  /* Optimize image sizes on mobile */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* Optimize paint performance */
+.optimize-gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
