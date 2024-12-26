@@ -9,7 +9,6 @@ import { supabase } from "@/integrations/supabase/client"
 import { getSupabaseSessionKey } from "@/utils/sessionUtils"
 import { Loader2 } from "lucide-react"
 
-// Composant de chargement léger
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center p-4">
     <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -44,7 +43,18 @@ const Login = () => {
         }
 
         if (session) {
-          navigate("/")
+          // Vérifier si l'utilisateur est un admin
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .single()
+
+          if (profileData?.role === 'admin') {
+            navigate("/agence/admin")
+          } else {
+            navigate("/")
+          }
         }
       } catch (error: any) {
         console.error('Session check error:', error)
@@ -59,7 +69,18 @@ const Login = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-        navigate("/")
+        // Vérifier si l'utilisateur est un admin
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single()
+
+        if (profileData?.role === 'admin') {
+          navigate("/agence/admin")
+        } else {
+          navigate("/")
+        }
       }
     })
 
