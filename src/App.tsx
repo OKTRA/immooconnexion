@@ -14,6 +14,7 @@ import Pricing from "./pages/Pricing"
 import Tenants from "./pages/Tenants"
 import Properties from "./pages/Properties"
 import PropertyDetails from "./pages/PropertyDetails"
+import PropertySales from "./pages/PropertySales"
 import Expenses from "./pages/Expenses"
 import AgencyEarnings from "./pages/AgencyEarnings"
 import Reports from "./pages/Reports"
@@ -83,6 +84,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <PropertyDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ventes"
+          element={
+            <ProtectedRoute>
+              <PropertySales />
             </ProtectedRoute>
           }
         />
