@@ -43,6 +43,7 @@ export function useAddProfileHandler({ onSuccess, onError, onClose, agencyId }: 
 
   const handleCreateAuthUser = async (): Promise<string> => {
     try {
+      setIsLoading(true)
       const cleanEmail = validateAuthData(newProfile)
       console.log("Creating auth user with email:", cleanEmail)
 
@@ -70,6 +71,11 @@ export function useAddProfileHandler({ onSuccess, onError, onClose, agencyId }: 
       return authData.user.id
     } catch (error: any) {
       console.error("Error in handleCreateAuthUser:", error)
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de la création de l'utilisateur",
+        variant: "destructive",
+      })
       throw error
     }
   }
