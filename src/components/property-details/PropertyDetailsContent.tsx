@@ -26,6 +26,22 @@ export const PropertyDetailsContent = () => {
     error: contractsError 
   } = useContractsData(id)
 
+  const handlePrintReceipt = (contract: Contract) => {
+    // TODO: Implement receipt printing logic
+    toast({
+      title: "Printing Receipt",
+      description: `Printing receipt for contract ${contract.id}`,
+    })
+  }
+
+  const handlePrintContract = (contract: Contract) => {
+    // TODO: Implement contract printing logic
+    toast({
+      title: "Printing Contract",
+      description: `Printing contract ${contract.id}`,
+    })
+  }
+
   if (isLoadingProperty || isLoadingContracts) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -49,6 +65,8 @@ export const PropertyDetailsContent = () => {
       <PaymentHistory 
         propertyId={id || ''} 
         contracts={contracts}
+        onPrintReceipt={handlePrintReceipt}
+        onPrintContract={handlePrintContract}
       />
       <InspectionsList contracts={contracts} />
       {property.is_for_sale && <PropertySalesSection propertyId={id || ''} />}
