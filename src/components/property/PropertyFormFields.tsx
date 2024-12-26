@@ -10,7 +10,7 @@ interface PropertyFormFieldsProps {
   formData: PropertyFormData
   setFormData: (data: PropertyFormData) => void
   handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  imagePreviewUrl?: string
+  imagePreviewUrl?: string | string[]
 }
 
 export function PropertyFormFields({ 
@@ -23,6 +23,12 @@ export function PropertyFormFields({
     const { id, value } = e.target
     setFormData({ ...formData, [id]: value })
   }
+
+  const previewUrls = imagePreviewUrl 
+    ? Array.isArray(imagePreviewUrl) 
+      ? imagePreviewUrl 
+      : [imagePreviewUrl]
+    : []
 
   return (
     <div className="grid gap-4 py-4">
@@ -110,28 +116,18 @@ export function PropertyFormFields({
           onChange={handleImageChange}
           className="cursor-pointer"
         />
-        {imagePreviewUrl && (
+        {previewUrls.length > 0 && (
           <ScrollArea className="h-[200px] w-full rounded-md border p-4">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {Array.isArray(imagePreviewUrl) ? (
-                imagePreviewUrl.map((url, index) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={url}
-                      alt={`Aperçu ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-md"
-                    />
-                  </div>
-                ))
-              ) : (
-                <div className="relative group">
+              {previewUrls.map((url, index) => (
+                <div key={index} className="relative group">
                   <img
-                    src={imagePreviewUrl}
-                    alt="Aperçu"
+                    src={url}
+                    alt={`Aperçu ${index + 1}`}
                     className="w-full h-32 object-cover rounded-md"
                   />
                 </div>
-              )}
+              ))}
             </div>
           </ScrollArea>
         )}
