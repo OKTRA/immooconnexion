@@ -4,6 +4,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useQuery } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { Shield, Building2 } from "lucide-react"
+import { AnimatedLogo } from "./AnimatedLogo"
 
 export function Header() {
   const location = useLocation()
@@ -48,13 +50,34 @@ export function Header() {
     }
   }
 
-  // Mobile buttons
-  const MobileButtons = () => null
-
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 ${isLoginPage ? 'bg-transparent' : 'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {isLoginPage && <MobileButtons />}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div className="flex-shrink-0">
+          <AnimatedLogo />
+        </div>
+        {isLoginPage && (
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary hover:text-primary/80"
+              onClick={() => navigate("/public")}
+            >
+              <Building2 className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Biens disponibles</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary hover:text-primary/80"
+              onClick={() => navigate("/super-admin/login")}
+            >
+              <Shield className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Super Admin</span>
+            </Button>
+          </div>
+        )}
       </div>
     </header>
   )
