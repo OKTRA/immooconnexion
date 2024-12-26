@@ -20,7 +20,7 @@ export function AdminLoginForm() {
     setIsLoading(true)
 
     try {
-      console.log("Attempting to sign in with:", { email })
+      console.log("Tentative de connexion avec:", { email })
       
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
@@ -28,16 +28,35 @@ export function AdminLoginForm() {
       })
 
       if (signInError) {
-        console.error('Sign in error:', signInError)
-        throw signInError
+        console.error('Erreur de connexion:', signInError)
+        let errorMessage = "Email ou mot de passe incorrect"
+        
+        if (signInError.message.includes("Invalid login credentials")) {
+          errorMessage = "Email ou mot de passe incorrect"
+        } else if (signInError.message.includes("Email not confirmed")) {
+          errorMessage = "Veuillez confirmer votre email avant de vous connecter"
+        } else {
+          errorMessage = "Une erreur est survenue lors de la connexion"
+        }
+
+        toast({
+          title: "Échec de la connexion",
+          description: errorMessage,
+          variant: "destructive",
+        })
+        return
       }
 
       if (!data.user) {
-        console.error('No user data returned')
-        throw new Error("Aucun utilisateur trouvé")
+        toast({
+          title: "Échec de la connexion",
+          description: "Aucun utilisateur trouvé",
+          variant: "destructive",
+        })
+        return
       }
 
-      console.log("User signed in successfully:", data.user.id)
+      console.log("Utilisateur connecté avec succès:", data.user.id)
 
       // Vérifier si l'utilisateur est un admin dans la table profiles
       const { data: profileData, error: profileError } = await supabase
@@ -46,51 +65,54 @@ export function AdminLoginForm() {
         .eq('id', data.user.id)
         .maybeSingle()
 
-      console.log("Profile data:", profileData)
+      console.log("Données du profil:", profileData)
 
       if (profileError) {
-        console.error('Profile check error:', profileError)
-        throw new Error("Erreur lors de la vérification des droits d'administrateur")
+        console.error('Erreur de vérification du profil:', profileError)
+        toast({
+          title: "Erreur de vérification",
+          description: "Impossible de vérifier vos droits d'accès",
+          variant: "destructive",
+        })
+        await supabase.auth.signOut()
+        return
       }
 
       if (!profileData || profileData.role !== 'admin') {
-        console.error('User is not an admin:', profileData?.role)
+        console.error('Utilisateur non admin:', profileData?.role)
+        toast({
+          title: "Accès refusé",
+          description: "Seuls les administrateurs peuvent se connecter ici",
+          variant: "destructive",
+        })
         await supabase.auth.signOut()
-        throw new Error("Accès non autorisé. Seuls les administrateurs peuvent se connecter ici.")
+        return
       }
 
       if (!profileData.agency_id) {
-        console.error('No agency associated with admin')
+        console.error('Aucune agence associée')
+        toast({
+          title: "Erreur de configuration",
+          description: "Aucune agence n'est associée à votre compte",
+          variant: "destructive",
+        })
         await supabase.auth.signOut()
-        throw new Error("Aucune agence associée à ce compte administrateur.")
+        return
       }
 
       toast({
         title: "Connexion réussie",
-        description: "Bienvenue dans l'interface administrateur",
+        description: "Bienvenue dans votre espace administrateur",
       })
 
-      navigate("/admin")
+      navigate("/agence/admin")
     } catch (error: any) {
-      console.error('Login error:', error)
-      
-      let errorMessage = "Une erreur est survenue lors de la connexion"
-      
-      if (error.message?.includes("Invalid login credentials")) {
-        errorMessage = "Email ou mot de passe incorrect"
-      } else if (error.message?.includes("User not found")) {
-        errorMessage = "Cet utilisateur n'existe pas"
-      } else if (error.message?.includes("Accès non autorisé")) {
-        errorMessage = error.message
-      }
-
+      console.error('Erreur générale:', error)
       toast({
         title: "Erreur de connexion",
-        description: errorMessage,
+        description: "Une erreur inattendue est survenue",
         variant: "destructive",
       })
-
-      await supabase.auth.signOut()
     } finally {
       setIsLoading(false)
     }
