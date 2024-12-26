@@ -68,7 +68,9 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-background">
       <DashboardHeader />
       <AdminLayout>
-        <DashboardTabs />
+        <div className="w-full overflow-x-hidden">
+          <DashboardTabs />
+        </div>
       </AdminLayout>
     </div>
   )

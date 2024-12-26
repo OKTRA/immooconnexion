@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/AppSidebar"
 import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
+import { SidebarProvider } from "@/components/ui/sidebar"
 
 const Index = () => {
   const navigate = useNavigate()
@@ -17,7 +18,6 @@ const Index = () => {
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
       try {
-        // Get current user's profile to check role
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) throw new Error("Non authentifié")
 
@@ -33,12 +33,10 @@ const Index = () => {
         
         console.log('Profil utilisateur:', profile)
 
-        // Build base queries with agency_id filter
         let propertiesQuery = supabase.from("properties").select("*", { count: "exact", head: true })
         let tenantsQuery = supabase.from("tenants").select("*", { count: "exact", head: true })
         let contractsQuery = supabase.from("contracts").select("montant, type, created_at, agency_id")
 
-        // Filter by agency_id from the user's profile
         propertiesQuery = propertiesQuery.eq('agency_id', profile.agency_id)
         tenantsQuery = tenantsQuery.eq('agency_id', profile.agency_id)
         contractsQuery = contractsQuery.eq('agency_id', profile.agency_id)
@@ -53,7 +51,6 @@ const Index = () => {
           contractsQuery,
         ])
 
-        // Log détaillé des contrats pour comprendre le calcul
         console.log("Détail des contrats pour le calcul des revenus:", 
           contracts?.map(c => ({
             montant: c.montant,
@@ -150,42 +147,42 @@ const Index = () => {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <div className="hidden lg:block w-64 border-r">
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
         <AppSidebar />
-      </div>
-      
-      <div className="flex-1 p-8">
-        <div className="flex items-center justify-end mb-8">
-          <div className="lg:hidden">
-            <AppSidebar />
+        <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
+          <div className="grid gap-4 md:grid-cols-3 mb-8">
+            <StatCard
+              title="Total Biens"
+              value={stats?.properties.toString() || "0"}
+              className="w-full"
+            />
+            <StatCard
+              title="Total Locataires"
+              value={stats?.tenants.toString() || "0"}
+              className="w-full"
+            />
+            <StatCard
+              title="Revenus Totaux"
+              value={new Intl.NumberFormat("fr-FR", {
+                style: "currency",
+                currency: "XOF",
+              }).format(stats?.revenue || 0)}
+              className="w-full"
+            />
           </div>
-        </div>
 
-        <div className="grid gap-4 md:grid-cols-3 mb-8">
-          <StatCard
-            title="Total Biens"
-            value={stats?.properties.toString() || "0"}
-          />
-          <StatCard
-            title="Total Locataires"
-            value={stats?.tenants.toString() || "0"}
-          />
-          <StatCard
-            title="Revenus Totaux"
-            value={new Intl.NumberFormat("fr-FR", {
-              style: "currency",
-              currency: "XOF",
-            }).format(stats?.revenue || 0)}
-          />
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 mb-8">
-          <RevenueChart />
-          <RecentActivities />
-        </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="w-full min-h-[400px]">
+              <RevenueChart />
+            </div>
+            <div className="w-full min-h-[400px]">
+              <RecentActivities />
+            </div>
+          </div>
+        </main>
       </div>
-    </div>
+    </SidebarProvider>
   )
 }
 
