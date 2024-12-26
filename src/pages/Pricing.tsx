@@ -1,6 +1,6 @@
+import { PublicHeader } from "@/components/layout/PublicHeader"
 import { Button } from "@/components/ui/button"
 import { Check } from "lucide-react"
-import { PublicNavbar } from "@/components/home/PublicNavbar"
 import { Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
@@ -21,7 +21,7 @@ export default function Pricing() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <PublicNavbar />
+      <PublicHeader />
       <div className="py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-4xl text-center">
@@ -80,5 +80,5 @@ export default function Pricing() {
         </div>
       </div>
     </div>
-  );
+  )
 }
