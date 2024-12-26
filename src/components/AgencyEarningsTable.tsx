@@ -1,14 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { AgencyFeesTable } from "./earnings/AgencyFeesTable"
+import { RentalCommissionsTable } from "./earnings/RentalCommissionsTable"
 
 interface ContractWithProperties {
   id: string
@@ -108,63 +101,8 @@ export function AgencyEarningsTable() {
 
   return (
     <div className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Frais d'Agence</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Bien</TableHead>
-                <TableHead>Montant</TableHead>
-                <TableHead>Date Perception</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(earnings?.agencyFees || []).map((fee) => (
-                <TableRow key={fee.id}>
-                  <TableCell>{fee.bien}</TableCell>
-                  <TableCell>{fee.montant.toLocaleString()} FCFA</TableCell>
-                  <TableCell>{fee.datePerception}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Commissions sur Loyers</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Bien</TableHead>
-                <TableHead>Loyer</TableHead>
-                <TableHead>Taux Commission (%)</TableHead>
-                <TableHead>Commission Mensuelle</TableHead>
-                <TableHead>Gain Propriétaire</TableHead>
-                <TableHead>Date Perception</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(earnings?.rentals || []).map((rental) => (
-                <TableRow key={rental.id}>
-                  <TableCell>{rental.bien}</TableCell>
-                  <TableCell>{rental.loyer.toLocaleString()} FCFA</TableCell>
-                  <TableCell>{rental.tauxCommission}%</TableCell>
-                  <TableCell>{rental.commissionMensuelle.toLocaleString()} FCFA</TableCell>
-                  <TableCell>{rental.gainProprietaire.toLocaleString()} FCFA</TableCell>
-                  <TableCell>{rental.datePerception}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <AgencyFeesTable fees={earnings?.agencyFees || []} />
+      <RentalCommissionsTable rentals={earnings?.rentals || []} />
     </div>
   )
 }
