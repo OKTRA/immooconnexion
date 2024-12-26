@@ -20,6 +20,24 @@ export function PaymentFormFields({ propertyId, onSuccess }: PaymentFormFieldsPr
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
+  // Fetch user's agency_id
+  const { data: userProfile } = useQuery({
+    queryKey: ['userProfile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('agency_id')
+        .eq('id', user.id)
+        .single()
+
+      if (error) throw error
+      return profile
+    }
+  })
+
   // Fetch tenants
   const { data: tenants } = useQuery({
     queryKey: ['tenants'],
@@ -47,6 +65,10 @@ export function PaymentFormFields({ propertyId, onSuccess }: PaymentFormFieldsPr
 
   const onSubmit = async (data: PaymentFormData) => {
     try {
+      if (!userProfile?.agency_id) {
+        throw new Error('No agency associated with user')
+      }
+
       const { error } = await supabase
         .from('contracts')
         .insert({
@@ -57,6 +79,7 @@ export function PaymentFormFields({ propertyId, onSuccess }: PaymentFormFieldsPr
           statut: "payé",
           start_date: data.start_date,
           end_date: data.end_date,
+          agency_id: userProfile.agency_id // Add the agency_id here
         })
 
       if (error) throw error
