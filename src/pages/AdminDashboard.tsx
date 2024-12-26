@@ -28,7 +28,6 @@ const AdminDashboard = () => {
 
         if (adminError) throw adminError
         
-        // If no admin record found or not super admin, throw error
         if (!adminData?.is_super_admin) {
           throw new Error("Accès non autorisé")
         }
@@ -66,10 +65,12 @@ const AdminDashboard = () => {
   }
 
   return (
-    <AdminLayout>
+    <div className="min-h-screen bg-background">
       <DashboardHeader />
-      <DashboardTabs />
-    </AdminLayout>
+      <AdminLayout>
+        <DashboardTabs />
+      </AdminLayout>
+    </div>
   )
 }
 
