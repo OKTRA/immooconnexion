@@ -11,6 +11,7 @@ interface ProfileFormProps {
   onUpdateProfile?: (userId: string) => Promise<void>
   selectedAgencyId?: string
   isEditing?: boolean
+  step?: 1 | 2  // Add the step prop back
 }
 
 export function ProfileForm({ 
@@ -21,6 +22,7 @@ export function ProfileForm({
   onUpdateProfile,
   selectedAgencyId,
   isEditing = false,
+  step: initialStep = 1  // Rename to initialStep to avoid conflict with useSteppedForm
 }: ProfileFormProps) {
   const {
     step,
@@ -28,7 +30,8 @@ export function ProfileForm({
     handleAuthStep,
     handleProfileStep
   } = useSteppedForm({
-    onSuccess: onSubmit
+    onSuccess: onSubmit,
+    initialStep
   })
 
   const handleSubmit = async (e: React.FormEvent) => {

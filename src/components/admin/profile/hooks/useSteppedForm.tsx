@@ -5,10 +5,11 @@ import { ProfileFormData } from "../types"
 interface UseSteppedFormProps {
   onSuccess?: () => void
   onClose?: () => void
+  initialStep?: 1 | 2
 }
 
-export function useSteppedForm({ onSuccess, onClose }: UseSteppedFormProps) {
-  const [step, setStep] = useState<1 | 2>(1)
+export function useSteppedForm({ onSuccess, onClose, initialStep = 1 }: UseSteppedFormProps) {
+  const [step, setStep] = useState<1 | 2>(initialStep)
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState<ProfileFormData>({})
   const { toast } = useToast()
