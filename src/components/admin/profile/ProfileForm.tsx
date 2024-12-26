@@ -23,23 +23,26 @@ export function ProfileForm({
   isEditing = false,
   step = 1
 }: ProfileFormProps) {
+  const [currentStep, setCurrentStep] = useState(step)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!setNewProfile) return // Don't proceed if we can't update the profile
+    if (!setNewProfile) return
     
     setIsLoading(true)
 
     try {
-      if (step === 1 && onCreateAuthUser) {
-        await onCreateAuthUser()
-      } else if (step === 2 && onUpdateProfile && newProfile.id) {
+      if (currentStep === 1) {
+        if (onCreateAuthUser) {
+          await onCreateAuthUser()
+          setCurrentStep(2)
+        }
+      } else if (currentStep === 2 && onUpdateProfile && newProfile.id) {
         await onUpdateProfile(newProfile.id)
-      }
-
-      if (onSubmit) {
-        onSubmit()
+        if (onSubmit) {
+          onSubmit()
+        }
       }
     } catch (error: any) {
       console.error('Form submission error:', error)
@@ -64,17 +67,17 @@ export function ProfileForm({
         newProfile={newProfile} 
         onProfileChange={handleProfileChange}
         isEditing={isEditing}
-        step={step}
+        step={currentStep}
         selectedAgencyId={selectedAgencyId}
       />
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading 
           ? "Chargement..." 
           : isEditing
-            ? step === 1
+            ? currentStep === 1
               ? "Mettre à jour l'authentification"
               : "Mettre à jour le profil"
-            : step === 1 
+            : currentStep === 1 
               ? 'Suivant' 
               : 'Créer le profil'
         }
