@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { useQuery } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
-import { ExternalLink, Shield } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 export function Header() {
@@ -50,26 +49,7 @@ export function Header() {
   }
 
   // Mobile buttons
-  const MobileButtons = () => (
-    <nav className="flex flex-col gap-2">
-      <Button 
-        variant="secondary" 
-        className="bg-white/80 hover:bg-white/90 backdrop-blur-sm w-full px-3"
-        onClick={() => navigate('/super-admin/login')}
-      >
-        <Shield className="mr-2 h-4 w-4" />
-        <span className="text-sm">Admin</span>
-      </Button>
-      <Button 
-        variant="secondary" 
-        className="bg-white/80 hover:bg-white/90 backdrop-blur-sm w-full px-3"
-        onClick={() => navigate('/public')}
-      >
-        <ExternalLink className="mr-2 h-4 w-4" />
-        <span className="text-sm">Voir les biens</span>
-      </Button>
-    </nav>
-  )
+  const MobileButtons = () => null
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 ${isLoginPage ? 'bg-transparent' : 'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'}`}>
