@@ -15,6 +15,7 @@ import {
   Sun,
   Users,
   Wallet,
+  Store,
 } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
@@ -87,6 +88,15 @@ export function SidebarContent() {
               >
                 <Building2 className="mr-2 h-4 w-4" />
                 Biens
+              </Button>
+            </Link>
+            <Link to="/ventes">
+              <Button
+                variant={location.pathname === "/ventes" ? "secondary" : "ghost"}
+                className="w-full justify-start"
+              >
+                <Store className="mr-2 h-4 w-4" />
+                Ventes
               </Button>
             </Link>
             <Link to="/depenses">
