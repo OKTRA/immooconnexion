@@ -1,177 +1,118 @@
+import { useLocation, Link } from "react-router-dom"
 import { cn } from "@/lib/utils"
+import {
+  LayoutDashboard,
+  Users,
+  Home,
+  Receipt,
+  Wallet,
+  TrendingUp,
+  FileText,
+  Menu,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { getSupabaseSessionKey } from "@/utils/sessionUtils"
 import {
-  BarChart3,
-  Building2,
-  CircleDollarSign,
-  FileText,
-  LogOut,
-  Menu,
-  Moon,
-  Sun,
-  Users,
-  Wallet,
-  Store,
-} from "lucide-react"
-import { Link, useLocation, useNavigate } from "react-router-dom"
-import { supabase } from "@/integrations/supabase/client"
-import { useTheme } from "next-themes"
-import { useToast } from "@/hooks/use-toast"
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { useSidebarContext } from "@/components/ui/sidebar"
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
+const menuItems = [
+  {
+    title: "Tableau de bord",
+    href: "/agence/admin",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Locataires",
+    href: "/agence/locataires",
+    icon: Users,
+  },
+  {
+    title: "Biens",
+    href: "/agence/biens",
+    icon: Home,
+  },
+  {
+    title: "Ventes",
+    href: "/agence/ventes",
+    icon: Receipt,
+  },
+  {
+    title: "Dépenses",
+    href: "/agence/depenses",
+    icon: Wallet,
+  },
+  {
+    title: "Gains",
+    href: "/agence/gains",
+    icon: TrendingUp,
+  },
+  {
+    title: "Rapports",
+    href: "/agence/rapports",
+    icon: FileText,
+  },
+]
 
-export function SidebarContent() {
+export function AppSidebar() {
   const location = useLocation()
-  const navigate = useNavigate()
-  const { theme, setTheme } = useTheme()
-  const { toast } = useToast()
+  const { collapsed } = useSidebarContext()
 
-  const handleLogout = async () => {
-    const storageKey = getSupabaseSessionKey()
-    
-    try {
-      await supabase.auth.signOut()
-      localStorage.removeItem(storageKey)
-      navigate("/login")
-      toast({
-        title: "Déconnexion réussie",
-        description: "Vous avez été déconnecté avec succès",
-      })
-    } catch (error) {
-      console.error('Logout error:', error)
-      localStorage.removeItem(storageKey)
-      navigate("/login")
-      toast({
-        title: "Déconnexion",
-        description: "Vous avez été déconnecté",
-      })
-    }
-  }
+  const MenuContent = () => (
+    <ScrollArea className="h-[calc(100vh-4rem)] pb-8">
+      <div className="space-y-1 p-2">
+        {menuItems.map((item) => {
+          const isActive = location.pathname === item.href
+          const Icon = item.icon
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark")
-  }
+          return (
+            <Link key={item.href} to={item.href}>
+              <Button
+                variant={isActive ? "secondary" : "ghost"}
+                className={cn("w-full justify-start", {
+                  "justify-center": collapsed,
+                })}
+              >
+                <Icon className="h-5 w-5" />
+                {!collapsed && <span className="ml-2">{item.title}</span>}
+              </Button>
+            </Link>
+          )
+        })}
+      </div>
+    </ScrollArea>
+  )
 
   return (
-    <div className="pb-12">
-      <div className="space-y-4 py-4">
-        <div className="px-3 py-2">
-          <div className="space-y-1">
-            <Link to="/agence/admin">
-              <Button
-                variant={location.pathname === "/agence/admin" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-              >
-                <BarChart3 className="mr-2 h-4 w-4" />
-                Dashboard
-              </Button>
-            </Link>
-            <Link to="/agence/locataires">
-              <Button
-                variant={
-                  location.pathname === "/agence/locataires" ? "secondary" : "ghost"
-                }
-                className="w-full justify-start"
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Locataires
-              </Button>
-            </Link>
-            <Link to="/agence/biens">
-              <Button
-                variant={location.pathname === "/agence/biens" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-              >
-                <Building2 className="mr-2 h-4 w-4" />
-                Biens
-              </Button>
-            </Link>
-            <Link to="/agence/ventes">
-              <Button
-                variant={location.pathname === "/agence/ventes" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-              >
-                <Store className="mr-2 h-4 w-4" />
-                Ventes
-              </Button>
-            </Link>
-            <Link to="/agence/depenses">
-              <Button
-                variant={location.pathname === "/agence/depenses" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-              >
-                <Wallet className="mr-2 h-4 w-4" />
-                Dépenses
-              </Button>
-            </Link>
-            <Link to="/agence/gains">
-              <Button
-                variant={location.pathname === "/agence/gains" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-              >
-                <CircleDollarSign className="mr-2 h-4 w-4" />
-                Gains
-              </Button>
-            </Link>
-            <Link to="/agence/rapports">
-              <Button
-                variant={location.pathname === "/agence/rapports" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-              >
-                <FileText className="mr-2 h-4 w-4" />
-                Rapports
-              </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={toggleTheme}
-            >
-              {theme === "dark" ? (
-                <Sun className="mr-2 h-4 w-4" />
-              ) : (
-                <Moon className="mr-2 h-4 w-4" />
-              )}
-              {theme === "dark" ? "Mode clair" : "Mode sombre"}
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-100"
-              onClick={handleLogout}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Déconnexion
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="fixed top-14 left-0 z-30 hidden h-screen w-[15%] min-w-[200px] border-r bg-background md:block">
+        <MenuContent />
+      </aside>
 
-export function AppSidebar({ className }: SidebarProps) {
-  const isMobile = useIsMobile()
-
-  if (isMobile) {
-    return (
+      {/* Mobile Sidebar */}
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="shrink-0">
-            <Menu className="h-5 w-5" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 md:hidden"
+          >
+            <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="p-0 w-72">
-          <ScrollArea className="h-full">
-            <SidebarContent />
-          </ScrollArea>
+        <SheetContent side="left" className="w-72">
+          <SheetHeader className="border-b pb-4">
+            <SheetTitle>Menu</SheetTitle>
+          </SheetHeader>
+          <MenuContent />
         </SheetContent>
       </Sheet>
-    )
-  }
-
-  return <SidebarContent />
+    </>
+  )
 }
