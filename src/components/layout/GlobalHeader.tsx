@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { LogOut, Moon, Sun } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
@@ -11,8 +11,12 @@ import { Separator } from "@/components/ui/separator"
 
 export function GlobalHeader() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { toast } = useToast()
   const { theme, setTheme } = useTheme()
+
+  // Check if we're on an admin or dashboard route
+  const isAdminOrDashboardRoute = location.pathname.includes('/admin') || location.pathname === '/'
 
   const { data: profile } = useQuery({
     queryKey: ["user-profile"],
@@ -48,6 +52,11 @@ export function GlobalHeader() {
     }
   }
 
+  // Only render if we have a profile and we're on an admin/dashboard route
+  if (!profile || !isAdminOrDashboardRoute) {
+    return null
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between py-4">
@@ -60,23 +69,21 @@ export function GlobalHeader() {
         </div>
         
         <div className="flex items-center gap-4">
-          {profile && (
-            <div className="flex items-center gap-2 mr-4">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback>
-                  {profile?.first_name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="hidden md:block">
-                <p className="text-sm font-medium">
-                  {profile?.first_name || profile?.email || 'Utilisateur'}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {profile?.role === 'admin' ? 'Administrateur' : 'Utilisateur'}
-                </p>
-              </div>
+          <div className="flex items-center gap-2 mr-4">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback>
+                {profile?.first_name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="hidden md:block">
+              <p className="text-sm font-medium">
+                {profile?.first_name || profile?.email || 'Utilisateur'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {profile?.role === 'admin' ? 'Administrateur' : 'Utilisateur'}
+              </p>
             </div>
-          )}
+          </div>
 
           <Button
             variant="ghost"
@@ -91,16 +98,14 @@ export function GlobalHeader() {
             )}
           </Button>
 
-          {profile && (
-            <Button
-              variant="ghost"
-              className="text-red-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              <span className="hidden md:inline">Déconnexion</span>
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            className="text-red-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            <span className="hidden md:inline">Déconnexion</span>
+          </Button>
         </div>
       </div>
     </header>
