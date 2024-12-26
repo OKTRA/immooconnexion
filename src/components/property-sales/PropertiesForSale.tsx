@@ -4,11 +4,15 @@ import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Loader2, Home, DollarSign } from "lucide-react"
+import { Loader2, Home, DollarSign, Store } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { useState } from "react"
+import { PropertySaleDialog } from "./PropertySaleDialog"
 
 export function PropertiesForSale() {
   const navigate = useNavigate()
+  const [selectedProperty, setSelectedProperty] = useState<string | null>(null)
+  const [showSaleDialog, setShowSaleDialog] = useState(false)
   
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ['properties-for-sale'],
@@ -23,6 +27,11 @@ export function PropertiesForSale() {
       return data
     }
   })
+
+  const handleSale = (propertyId: string) => {
+    setSelectedProperty(propertyId)
+    setShowSaleDialog(true)
+  }
 
   if (isLoading) {
     return (
@@ -66,13 +75,22 @@ export function PropertiesForSale() {
                 <Badge>{property.statut}</Badge>
               </TableCell>
               <TableCell>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => navigate(`/biens/${property.id}`)}
-                >
-                  Détails
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate(`/biens/${property.id}`)}
+                  >
+                    Détails
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => handleSale(property.id)}
+                  >
+                    <Store className="h-4 w-4 mr-2" />
+                    Vendre
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}
@@ -85,6 +103,14 @@ export function PropertiesForSale() {
           )}
         </TableBody>
       </Table>
+
+      {selectedProperty && (
+        <PropertySaleDialog
+          propertyId={selectedProperty}
+          open={showSaleDialog}
+          onOpenChange={setShowSaleDialog}
+        />
+      )}
     </Card>
   )
 }
