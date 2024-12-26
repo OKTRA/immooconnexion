@@ -3,13 +3,13 @@
   margin: 0 auto;
   padding: 1rem;
   text-align: center;
-  padding-top: 3.5rem; /* Adjusted for the new header height */
+  padding-top: 3.5rem;
 }
 
 @media (min-width: 640px) {
   #root {
     padding: 2rem;
-    padding-top: 4rem; /* Slightly more padding on larger screens */
+    padding-top: 4rem;
   }
 }
 
@@ -57,25 +57,26 @@
   color: hsl(var(--foreground));
 }
 
-.dark .recharts-cartesian-grid line {
-  stroke: hsl(var(--border));
+/* Optimisations de performance */
+* {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.dark .recharts-cartesian-axis-line {
-  stroke: hsl(var(--border));
+/* Optimisations pour le chargement des images */
+img {
+  content-visibility: auto;
 }
 
-.dark .recharts-cartesian-axis-tick-line {
-  stroke: hsl(var(--border));
-}
-
-.dark .recharts-cartesian-axis-tick-value {
-  fill: hsl(var(--foreground));
-}
-
-.dark .recharts-tooltip-wrapper {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+/* Optimisations pour les animations */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Mobile optimizations */

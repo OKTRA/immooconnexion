@@ -3,10 +3,18 @@ import { Auth } from "@supabase/auth-ui-react"
 import { ThemeSupa } from "@supabase/auth-ui-shared"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { useNavigate } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { useEffect, useState, lazy, Suspense } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { getSupabaseSessionKey } from "@/utils/sessionUtils"
+import { Loader2 } from "lucide-react"
+
+// Composant de chargement léger
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center p-4">
+    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+  </div>
+)
 
 const Login = () => {
   const navigate = useNavigate()
@@ -66,7 +74,7 @@ const Login = () => {
           background: `linear-gradient(to right, #243949 0%, #517fa4 100%)`,
         }}
       >
-        <div className="text-white">Chargement...</div>
+        <LoadingSpinner />
       </div>
     )
   }
