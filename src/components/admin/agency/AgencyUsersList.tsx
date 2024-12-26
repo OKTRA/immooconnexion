@@ -4,8 +4,6 @@ import { AgencyUserActions } from "./AgencyUserActions"
 import { useState } from "react"
 import { useAgencyUserEdit } from "./hooks/useAgencyUserEdit"
 import { AgencyUserEditDialog } from "./AgencyUserEditDialog"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
 
 interface AgencyUsersListProps {
   users: any[]
@@ -40,7 +38,6 @@ export function AgencyUsersList({ users, refetch, agencyId }: AgencyUsersListPro
             <TableHead>Nom</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Rôle</TableHead>
-            <TableHead>Date de création</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -54,9 +51,6 @@ export function AgencyUsersList({ users, refetch, agencyId }: AgencyUsersListPro
                 <Badge variant={user.role === "admin" ? "default" : "secondary"}>
                   {user.role}
                 </Badge>
-              </TableCell>
-              <TableCell>
-                {format(new Date(user.created_at), "Pp", { locale: fr })}
               </TableCell>
               <TableCell>
                 <AgencyUserActions

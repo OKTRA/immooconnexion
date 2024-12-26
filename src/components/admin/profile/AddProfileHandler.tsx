@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { ProfileFormData } from "./types"
 import { UserRole } from "@/types/profile"
-import { useSubscriptionLimits } from "@/utils/subscriptionLimits"
 
 interface UseAddProfileHandlerProps {
   onSuccess?: () => void
@@ -16,7 +15,6 @@ export function useAddProfileHandler({ onSuccess, onError, onClose, agencyId }: 
   const [isLoading, setIsLoading] = useState(false)
   const [newProfile, setNewProfile] = useState<ProfileFormData>({})
   const { toast } = useToast()
-  const { checkAndNotifyLimits } = useSubscriptionLimits()
 
   const validateAuthData = (profile: ProfileFormData) => {
     if (!profile.email?.trim()) {
@@ -60,11 +58,6 @@ export function useAddProfileHandler({ onSuccess, onError, onClose, agencyId }: 
         throw new Error("Un utilisateur avec cet email existe déjà")
       }
 
-      // Check user limits before creating new user
-      if (agencyId && !(await checkAndNotifyLimits(agencyId, 'user'))) {
-        throw new Error("Limite d'utilisateurs atteinte pour votre forfait")
-      }
-
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: cleanEmail,
         password: newProfile.password!,
@@ -104,9 +97,6 @@ export function useAddProfileHandler({ onSuccess, onError, onClose, agencyId }: 
     try {
       validateProfileData(newProfile)
       
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Non authentifié")
-
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
