@@ -14,6 +14,7 @@ export function AddPlanForm({ onSubmit }: AddPlanFormProps) {
     price: 0,
     max_properties: 0,
     max_tenants: 0,
+    max_users: 0,
     features: [] as string[],
   })
   const [featuresInput, setFeaturesInput] = useState("")
@@ -61,6 +62,15 @@ export function AddPlanForm({ onSubmit }: AddPlanFormProps) {
             type="number"
             value={newPlan.max_tenants}
             onChange={(e) => setNewPlan({ ...newPlan, max_tenants: parseInt(e.target.value) })}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="max_users">Nombre maximum d'utilisateurs (-1 pour illimité)</Label>
+          <Input
+            id="max_users"
+            type="number"
+            value={newPlan.max_users}
+            onChange={(e) => setNewPlan({ ...newPlan, max_users: parseInt(e.target.value) })}
           />
         </div>
       </div>
