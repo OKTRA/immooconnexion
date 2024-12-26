@@ -39,7 +39,7 @@ function AppRoutes() {
         <Route path="/" element={<PublicProperties />} />
         <Route path="/public" element={<Navigate to="/" replace />} />
         <Route path="/pricing" element={<Pricing />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/agence/login" element={<Login />} />
         <Route path="/super-admin/login" element={<SuperAdminLogin />} />
 
         {/* Protected agency routes */}
