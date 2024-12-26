@@ -2,6 +2,8 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { UserRole } from "@/types/profile"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
 interface Profile {
   email: string;
@@ -31,6 +33,22 @@ export function BasicInfoFields({
   const handleChange = (field: keyof Profile, value: string) => {
     onProfileChange({ [field]: value })
   }
+
+  const { data: agency } = useQuery({
+    queryKey: ["agency", selectedAgencyId],
+    queryFn: async () => {
+      if (!selectedAgencyId) return null
+      const { data, error } = await supabase
+        .from("agencies")
+        .select("name")
+        .eq("id", selectedAgencyId)
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    enabled: !!selectedAgencyId
+  })
 
   if (step === 1) {
     return (
@@ -66,6 +84,17 @@ export function BasicInfoFields({
 
   return (
     <div className="space-y-4">
+      {selectedAgencyId && (
+        <div>
+          <Label htmlFor="agency_name">Agence</Label>
+          <Input
+            id="agency_name"
+            value={agency?.name || ''}
+            readOnly
+            className="bg-gray-100"
+          />
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="first_name">Prénom*</Label>
