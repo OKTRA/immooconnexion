@@ -61,19 +61,19 @@ export function SidebarContent() {
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">
           <div className="space-y-1">
-            <Link to="/">
+            <Link to="/agence/admin">
               <Button
-                variant={location.pathname === "/" ? "secondary" : "ghost"}
+                variant={location.pathname === "/agence/admin" ? "secondary" : "ghost"}
                 className="w-full justify-start"
               >
                 <BarChart3 className="mr-2 h-4 w-4" />
                 Dashboard
               </Button>
             </Link>
-            <Link to="/locataires">
+            <Link to="/agence/locataires">
               <Button
                 variant={
-                  location.pathname === "/locataires" ? "secondary" : "ghost"
+                  location.pathname === "/agence/locataires" ? "secondary" : "ghost"
                 }
                 className="w-full justify-start"
               >
@@ -81,45 +81,45 @@ export function SidebarContent() {
                 Locataires
               </Button>
             </Link>
-            <Link to="/biens">
+            <Link to="/agence/biens">
               <Button
-                variant={location.pathname === "/biens" ? "secondary" : "ghost"}
+                variant={location.pathname === "/agence/biens" ? "secondary" : "ghost"}
                 className="w-full justify-start"
               >
                 <Building2 className="mr-2 h-4 w-4" />
                 Biens
               </Button>
             </Link>
-            <Link to="/ventes">
+            <Link to="/agence/ventes">
               <Button
-                variant={location.pathname === "/ventes" ? "secondary" : "ghost"}
+                variant={location.pathname === "/agence/ventes" ? "secondary" : "ghost"}
                 className="w-full justify-start"
               >
                 <Store className="mr-2 h-4 w-4" />
                 Ventes
               </Button>
             </Link>
-            <Link to="/depenses">
+            <Link to="/agence/depenses">
               <Button
-                variant={location.pathname === "/depenses" ? "secondary" : "ghost"}
+                variant={location.pathname === "/agence/depenses" ? "secondary" : "ghost"}
                 className="w-full justify-start"
               >
                 <Wallet className="mr-2 h-4 w-4" />
                 Dépenses
               </Button>
             </Link>
-            <Link to="/gains">
+            <Link to="/agence/gains">
               <Button
-                variant={location.pathname === "/gains" ? "secondary" : "ghost"}
+                variant={location.pathname === "/agence/gains" ? "secondary" : "ghost"}
                 className="w-full justify-start"
               >
                 <CircleDollarSign className="mr-2 h-4 w-4" />
                 Gains
               </Button>
             </Link>
-            <Link to="/rapports">
+            <Link to="/agence/rapports">
               <Button
-                variant={location.pathname === "/rapports" ? "secondary" : "ghost"}
+                variant={location.pathname === "/agence/rapports" ? "secondary" : "ghost"}
                 className="w-full justify-start"
               >
                 <FileText className="mr-2 h-4 w-4" />

@@ -35,12 +35,15 @@ function AppRoutes() {
     <>
       <GlobalHeader />
       <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<PublicProperties />} />
+        <Route path="/pricing" element={<Pricing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/super-admin/login" element={<SuperAdminLogin />} />
-        <Route path="/public" element={<PublicProperties />} />
-        <Route path="/pricing" element={<Pricing />} />
+
+        {/* Protected agency routes */}
         <Route
-          path="/"
+          path="/agence/admin"
           element={
             <ProtectedRoute>
               <Index />
@@ -56,7 +59,7 @@ function AppRoutes() {
           }
         />
         <Route
-          path="/locataires"
+          path="/agence/locataires"
           element={
             <ProtectedRoute>
               <Tenants />
@@ -64,7 +67,7 @@ function AppRoutes() {
           }
         />
         <Route
-          path="/locataires/:id/contrats"
+          path="/agence/locataires/:id/contrats"
           element={
             <ProtectedRoute>
               <TenantContracts />
@@ -72,7 +75,7 @@ function AppRoutes() {
           }
         />
         <Route
-          path="/biens"
+          path="/agence/biens"
           element={
             <ProtectedRoute>
               <Properties />
@@ -80,7 +83,7 @@ function AppRoutes() {
           }
         />
         <Route
-          path="/biens/:id"
+          path="/agence/biens/:id"
           element={
             <ProtectedRoute>
               <PropertyDetails />
@@ -88,7 +91,7 @@ function AppRoutes() {
           }
         />
         <Route
-          path="/ventes"
+          path="/agence/ventes"
           element={
             <ProtectedRoute>
               <PropertySales />
@@ -96,7 +99,7 @@ function AppRoutes() {
           }
         />
         <Route
-          path="/depenses"
+          path="/agence/depenses"
           element={
             <ProtectedRoute>
               <Expenses />
@@ -104,7 +107,7 @@ function AppRoutes() {
           }
         />
         <Route
-          path="/gains"
+          path="/agence/gains"
           element={
             <ProtectedRoute>
               <AgencyEarnings />
@@ -112,7 +115,7 @@ function AppRoutes() {
           }
         />
         <Route
-          path="/rapports"
+          path="/agence/rapports"
           element={
             <ProtectedRoute>
               <Reports />
