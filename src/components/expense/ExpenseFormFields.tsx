@@ -30,6 +30,24 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
     }
   })
 
+  // Fetch user's profile to get agency_id
+  const { data: profile } = useQuery({
+    queryKey: ['profile', session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id) throw new Error("User not authenticated")
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('agency_id')
+        .eq('id', session.user.id)
+        .single()
+      
+      if (error) throw error
+      return data
+    },
+    enabled: !!session?.user?.id
+  })
+
   // Fetch user's properties
   const { data: properties } = useQuery({
     queryKey: ['properties'],
@@ -46,7 +64,7 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
       if (error) throw error
       return data
     },
-    enabled: !!session?.user?.id && !propertyId // Only fetch if user is authenticated and propertyId is not provided
+    enabled: !!session?.user?.id && !propertyId
   })
 
   const form = useForm<ExpenseFormData>({
@@ -59,7 +77,6 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
     },
   })
 
-  // Set propertyId when it's provided as a prop
   useEffect(() => {
     if (propertyId) {
       form.setValue('propertyId', propertyId)
@@ -77,11 +94,21 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
         return
       }
 
+      if (!profile?.agency_id) {
+        toast({
+          title: "Erreur",
+          description: "Vous devez être associé à une agence pour enregistrer une dépense",
+          variant: "destructive",
+        })
+        return
+      }
+
       console.log("Submitting expense with data:", {
         property_id: data.propertyId,
         montant: parseFloat(data.montant),
         description: data.description,
-        date: data.date
+        date: data.date,
+        agency_id: profile.agency_id
       });
 
       const { error } = await supabase
@@ -90,7 +117,8 @@ export function ExpenseFormFields({ propertyId, onSuccess }: ExpenseFormFieldsPr
           property_id: data.propertyId,
           montant: parseFloat(data.montant),
           description: data.description,
-          date: data.date
+          date: data.date,
+          agency_id: profile.agency_id
         })
 
       if (error) {
