@@ -1,6 +1,7 @@
 import { BasicInfoFields } from "./form/BasicInfoFields"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import { Loader2 } from "lucide-react"
 
 interface ProfileFormProps {
   newProfile: any
@@ -27,10 +28,10 @@ export function ProfileForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!setNewProfile) return // Don't proceed if we can't update the profile
+    if (!setNewProfile) return
     
     setIsLoading(true)
-
+    
     try {
       if (step === 1 && onCreateAuthUser) {
         await onCreateAuthUser()
@@ -67,17 +68,25 @@ export function ProfileForm({
         step={step}
         selectedAgencyId={selectedAgencyId}
       />
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading 
-          ? "Chargement..." 
-          : isEditing
+      <Button 
+        type="submit" 
+        className="w-full" 
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Chargement...
+          </>
+        ) : (
+          isEditing
             ? step === 1
               ? "Mettre à jour l'authentification"
               : "Mettre à jour le profil"
             : step === 1 
               ? 'Suivant' 
               : 'Créer le profil'
-        }
+        )}
       </Button>
     </form>
   )
