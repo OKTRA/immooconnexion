@@ -85,15 +85,18 @@ export function AgencyEarningsTable() {
         }
         
         // Si c'est un loyer
+        const commissionMensuelle = (contract.montant * (contract.properties?.taux_commission || 0)) / 100
+        const fraisAgence = contract.properties?.frais_agence || 0
+        
         return {
           id: contract.id,
           bien: contract.properties?.bien || '',
           loyer: contract.montant,
-          fraisAgence: contract.properties?.frais_agence || 0,
+          fraisAgence: fraisAgence,
           tauxCommission: contract.properties?.taux_commission || 0,
-          commissionMensuelle: (contract.montant * (contract.properties?.taux_commission || 0)) / 100,
-          gainProprietaire: contract.montant - ((contract.montant * (contract.properties?.taux_commission || 0)) / 100),
-          gainAgence: ((contract.montant * (contract.properties?.taux_commission || 0)) / 100) + (contract.properties?.frais_agence || 0),
+          commissionMensuelle: commissionMensuelle,
+          gainProprietaire: contract.montant - commissionMensuelle,
+          gainAgence: commissionMensuelle + fraisAgence,
           datePerception: new Date(contract.created_at).toISOString().split('T')[0],
         }
       })
@@ -123,12 +126,12 @@ export function AgencyEarningsTable() {
           {(earnings || []).map((earning) => (
             <TableRow key={earning.id}>
               <TableCell>{earning.bien}</TableCell>
-              <TableCell>{earning.loyer} FCFA</TableCell>
-              <TableCell>{earning.fraisAgence} FCFA</TableCell>
+              <TableCell>{earning.loyer.toLocaleString()} FCFA</TableCell>
+              <TableCell>{earning.fraisAgence.toLocaleString()} FCFA</TableCell>
               <TableCell>{earning.tauxCommission}%</TableCell>
-              <TableCell>{earning.commissionMensuelle} FCFA</TableCell>
-              <TableCell>{earning.gainProprietaire} FCFA</TableCell>
-              <TableCell>{earning.gainAgence} FCFA</TableCell>
+              <TableCell>{earning.commissionMensuelle.toLocaleString()} FCFA</TableCell>
+              <TableCell>{earning.gainProprietaire.toLocaleString()} FCFA</TableCell>
+              <TableCell>{earning.gainAgence.toLocaleString()} FCFA</TableCell>
               <TableCell>{earning.datePerception}</TableCell>
             </TableRow>
           ))}
