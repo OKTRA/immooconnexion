@@ -38,7 +38,6 @@ export function AgencyUsersList({ users, refetch, agencyId }: AgencyUsersListPro
             <TableHead>Nom</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Rôle</TableHead>
-            <TableHead>Créé le</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -52,9 +51,6 @@ export function AgencyUsersList({ users, refetch, agencyId }: AgencyUsersListPro
                 <Badge variant={user.role === "admin" ? "default" : "secondary"}>
                   {user.role}
                 </Badge>
-              </TableCell>
-              <TableCell>
-                {format(new Date(user.created_at), "Pp", { locale: fr })}
               </TableCell>
               <TableCell>
                 <AgencyUserActions
