@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { LogOut, User } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
