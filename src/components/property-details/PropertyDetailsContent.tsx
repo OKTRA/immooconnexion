@@ -7,6 +7,7 @@ import { InspectionsList } from "./InspectionsList"
 import { PropertyActions } from "./PropertyActions"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
+import { Contract } from "@/integrations/supabase/types/contracts"
 
 export const PropertyDetailsContent = () => {
   const { id } = useParams()
@@ -40,7 +41,7 @@ export const PropertyDetailsContent = () => {
     )
   }
 
-  const handlePrintReceipt = (contract: any) => {
+  const handlePrintReceipt = (contract: Contract) => {
     console.log("Printing receipt for contract:", contract)
     toast({
       title: "Impression du reçu",
@@ -48,7 +49,7 @@ export const PropertyDetailsContent = () => {
     })
   }
 
-  const handlePrintContract = (contract: any) => {
+  const handlePrintContract = (contract: Contract) => {
     console.log("Printing contract:", contract)
     toast({
       title: "Impression du contrat",

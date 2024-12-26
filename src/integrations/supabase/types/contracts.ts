@@ -10,6 +10,10 @@ export interface Contract {
   agency_id: string | null;
   created_at: string | null;
   updated_at: string | null;
+  // Additional fields from the join
+  tenant_nom?: string;
+  tenant_prenom?: string;
+  property_name?: string;
 }
 
 export type ContractInsert = Partial<Contract>;
