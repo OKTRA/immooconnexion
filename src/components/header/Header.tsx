@@ -78,8 +78,8 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           <AnimatedLogo />
           {isLoginPage && (
-            <div className="block sm:hidden">
-              {isMobile && <MobileButtons />}
+            <div className="block">
+              <MobileButtons />
             </div>
           )}
         </div>
