@@ -1,51 +1,53 @@
 import { useState } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
-import { ProfileFormData } from "./ProfileForm"
+import { ProfileFormData } from "./types"
 
-interface AddProfileHandlerProps {
+interface UseAddProfileHandlerProps {
   onSuccess?: () => void
   onError?: (error: Error) => void
+  onClose?: () => void
+  agencyId?: string
 }
 
-export const AddProfileHandler = ({ onSuccess, onError }: AddProfileHandlerProps) => {
+export function useAddProfileHandler({ onSuccess, onError, onClose, agencyId }: UseAddProfileHandlerProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const [newProfile, setNewProfile] = useState<ProfileFormData>({})
   const { toast } = useToast()
 
-  const validateAuthData = (newProfile: ProfileFormData) => {
-    if (!newProfile.email?.trim()) {
+  const validateAuthData = (profile: ProfileFormData) => {
+    if (!profile.email?.trim()) {
       throw new Error("L'email est requis")
     }
-    if (!newProfile.password?.trim()) {
+    if (!profile.password?.trim()) {
       throw new Error("Le mot de passe est requis")
     }
-    return newProfile.email.trim()
+    return profile.email.trim()
   }
 
-  const validateProfileData = (newProfile: ProfileFormData) => {
-    if (!newProfile.first_name?.trim()) {
+  const validateProfileData = (profile: ProfileFormData) => {
+    if (!profile.first_name?.trim()) {
       throw new Error("Le prénom est requis")
     }
-    if (!newProfile.last_name?.trim()) {
+    if (!profile.last_name?.trim()) {
       throw new Error("Le nom est requis")
     }
-    if (!newProfile.role) {
+    if (!profile.role) {
       throw new Error("Le rôle est requis")
     }
-    if (newProfile.role === "admin" && !newProfile.agency_id) {
+    if (profile.role === "admin" && !profile.agency_id) {
       throw new Error("L'agence est requise pour un administrateur")
     }
   }
 
-  const handleCreateAuthUser = async (newProfile: ProfileFormData): Promise<string> => {
+  const handleCreateAuthUser = async (): Promise<string> => {
     try {
       const cleanEmail = validateAuthData(newProfile)
       console.log("Creating auth user with email:", cleanEmail)
 
-      // Create new user directly without checking existing
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: cleanEmail,
-        password: newProfile.password,
+        password: newProfile.password!,
         options: {
           data: {
             role: newProfile.role,
@@ -71,22 +73,17 @@ export const AddProfileHandler = ({ onSuccess, onError }: AddProfileHandlerProps
     }
   }
 
-  const handleSubmit = async (newProfile: ProfileFormData) => {
-    setIsLoading(true)
-
+  const handleUpdateProfile = async (userId: string) => {
     try {
       validateProfileData(newProfile)
       
-      const userId = await handleCreateAuthUser(newProfile)
-
-      // Update profile with additional info
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
           first_name: newProfile.first_name?.trim(),
           last_name: newProfile.last_name?.trim(),
           role: newProfile.role,
-          agency_id: newProfile.agency_id,
+          agency_id: agencyId || newProfile.agency_id,
           phone_number: newProfile.phone_number?.trim(),
         })
         .eq("id", userId)
@@ -96,13 +93,12 @@ export const AddProfileHandler = ({ onSuccess, onError }: AddProfileHandlerProps
         throw new Error(profileError.message || "Erreur lors de la mise à jour du profil")
       }
 
-      // If user is admin, create administrator record
       if (newProfile.role === "admin") {
         const { error: adminError } = await supabase
           .from("administrators")
           .insert({
             id: userId,
-            agency_id: newProfile.agency_id,
+            agency_id: agencyId || newProfile.agency_id,
             is_super_admin: false,
           })
 
@@ -118,6 +114,7 @@ export const AddProfileHandler = ({ onSuccess, onError }: AddProfileHandlerProps
       })
 
       onSuccess?.()
+      onClose?.()
     } catch (error: any) {
       console.error("Form submission error:", error)
       
@@ -134,7 +131,10 @@ export const AddProfileHandler = ({ onSuccess, onError }: AddProfileHandlerProps
   }
 
   return {
-    handleSubmit,
     isLoading,
+    newProfile,
+    setNewProfile,
+    handleCreateAuthUser,
+    handleUpdateProfile
   }
 }
