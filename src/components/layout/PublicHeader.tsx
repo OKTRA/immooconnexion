@@ -6,7 +6,7 @@ import { AnimatedLogo } from "@/components/header/AnimatedLogo"
 
 export function PublicHeader() {
   const location = useLocation()
-  const isLoginPage = ['/login', '/super-admin/login'].includes(location.pathname)
+  const isLoginPage = ['/agence/login', '/super-admin/login'].includes(location.pathname)
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b dark:bg-background/95 dark:backdrop-blur dark:supports-[backdrop-filter]:bg-background/60">
@@ -41,7 +41,7 @@ export function PublicHeader() {
               Tarifs
             </Link>
             {!isLoginPage && (
-              <Link to="/login">
+              <Link to="/agence/login">
                 <Button>Espace propriétaire</Button>
               </Link>
             )}
@@ -49,7 +49,7 @@ export function PublicHeader() {
 
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <Link to="/login">
+            <Link to="/agence/login">
               <Button>Connexion</Button>
             </Link>
           </div>
