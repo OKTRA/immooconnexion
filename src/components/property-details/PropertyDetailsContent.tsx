@@ -5,7 +5,8 @@ import { PropertyInfo } from "./PropertyInfo"
 import { PaymentHistory } from "./PaymentHistory"
 import { InspectionsList } from "./InspectionsList"
 import { PropertyActions } from "./PropertyActions"
-import { useToast } from "@/components/ui/use-toast"
+import { PropertySalesSection } from "./PropertySalesSection"
+import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 import { Contract } from "@/integrations/supabase/types/contracts"
 
@@ -41,22 +42,6 @@ export const PropertyDetailsContent = () => {
     )
   }
 
-  const handlePrintReceipt = (contract: Contract) => {
-    console.log("Printing receipt for contract:", contract)
-    toast({
-      title: "Impression du reçu",
-      description: "Le reçu est en cours d'impression..."
-    })
-  }
-
-  const handlePrintContract = (contract: Contract) => {
-    console.log("Printing contract:", contract)
-    toast({
-      title: "Impression du contrat",
-      description: "Le contrat est en cours d'impression..."
-    })
-  }
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
       <PropertyInfo property={property} />
@@ -64,10 +49,9 @@ export const PropertyDetailsContent = () => {
       <PaymentHistory 
         propertyId={id || ''} 
         contracts={contracts}
-        onPrintReceipt={handlePrintReceipt}
-        onPrintContract={handlePrintContract}
       />
       <InspectionsList contracts={contracts} />
+      {property.is_for_sale && <PropertySalesSection propertyId={id || ''} />}
     </div>
   )
 }

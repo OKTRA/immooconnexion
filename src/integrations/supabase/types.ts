@@ -100,6 +100,80 @@ export type Database = {
           },
         ]
       }
+      bookings: {
+        Row: {
+          agency_id: string | null
+          check_in_date: string
+          check_out_date: string
+          created_at: string | null
+          id: string
+          payment_status: string | null
+          property_id: string
+          status: string | null
+          tenant_id: string | null
+          total_price: number
+          unit_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          agency_id?: string | null
+          check_in_date: string
+          check_out_date: string
+          created_at?: string | null
+          id?: string
+          payment_status?: string | null
+          property_id: string
+          status?: string | null
+          tenant_id?: string | null
+          total_price: number
+          unit_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          agency_id?: string | null
+          check_in_date?: string
+          check_out_date?: string
+          created_at?: string | null
+          id?: string
+          payment_status?: string | null
+          property_id?: string
+          status?: string | null
+          tenant_id?: string | null
+          total_price?: number
+          unit_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "property_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           agency_id: string | null
@@ -289,10 +363,20 @@ export type Database = {
           created_by_user_id: string | null
           frais_agence: number | null
           id: string
+          is_for_sale: boolean | null
           loyer: number | null
+          maximum_stay: number | null
+          minimum_stay: number | null
+          parent_property_id: string | null
           photo_url: string | null
+          price_per_night: number | null
+          price_per_week: number | null
+          property_category: string
+          rental_type: string | null
+          sale_price: number | null
           statut: string | null
           taux_commission: number | null
+          total_units: number | null
           type: string
           updated_at: string | null
           user_id: string | null
@@ -307,10 +391,20 @@ export type Database = {
           created_by_user_id?: string | null
           frais_agence?: number | null
           id?: string
+          is_for_sale?: boolean | null
           loyer?: number | null
+          maximum_stay?: number | null
+          minimum_stay?: number | null
+          parent_property_id?: string | null
           photo_url?: string | null
+          price_per_night?: number | null
+          price_per_week?: number | null
+          property_category?: string
+          rental_type?: string | null
+          sale_price?: number | null
           statut?: string | null
           taux_commission?: number | null
+          total_units?: number | null
           type: string
           updated_at?: string | null
           user_id?: string | null
@@ -325,10 +419,20 @@ export type Database = {
           created_by_user_id?: string | null
           frais_agence?: number | null
           id?: string
+          is_for_sale?: boolean | null
           loyer?: number | null
+          maximum_stay?: number | null
+          minimum_stay?: number | null
+          parent_property_id?: string | null
           photo_url?: string | null
+          price_per_night?: number | null
+          price_per_week?: number | null
+          property_category?: string
+          rental_type?: string | null
+          sale_price?: number | null
           statut?: string | null
           taux_commission?: number | null
+          total_units?: number | null
           type?: string
           updated_at?: string | null
           user_id?: string | null
@@ -347,6 +451,13 @@ export type Database = {
             columns: ["created_by_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_parent_property_id_fkey"
+            columns: ["parent_property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
             referencedColumns: ["id"]
           },
         ]
@@ -404,6 +515,104 @@ export type Database = {
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "payment_history_with_tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_sales: {
+        Row: {
+          agency_id: string | null
+          buyer_contact: string | null
+          buyer_name: string
+          commission_amount: number | null
+          created_at: string | null
+          id: string
+          payment_status: string | null
+          property_id: string
+          sale_date: string
+          sale_price: number
+          updated_at: string | null
+        }
+        Insert: {
+          agency_id?: string | null
+          buyer_contact?: string | null
+          buyer_name: string
+          commission_amount?: number | null
+          created_at?: string | null
+          id?: string
+          payment_status?: string | null
+          property_id: string
+          sale_date: string
+          sale_price: number
+          updated_at?: string | null
+        }
+        Update: {
+          agency_id?: string | null
+          buyer_contact?: string | null
+          buyer_name?: string
+          commission_amount?: number | null
+          created_at?: string | null
+          id?: string
+          payment_status?: string | null
+          property_id?: string
+          sale_date?: string
+          sale_price?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_sales_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_sales_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_units: {
+        Row: {
+          area: number | null
+          created_at: string | null
+          floor_number: number | null
+          id: string
+          property_id: string
+          status: string | null
+          unit_number: string
+          updated_at: string | null
+        }
+        Insert: {
+          area?: number | null
+          created_at?: string | null
+          floor_number?: number | null
+          id?: string
+          property_id: string
+          status?: string | null
+          unit_number: string
+          updated_at?: string | null
+        }
+        Update: {
+          area?: number | null
+          created_at?: string | null
+          floor_number?: number | null
+          id?: string
+          property_id?: string
+          status?: string | null
+          unit_number?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
             referencedColumns: ["id"]
           },
         ]
