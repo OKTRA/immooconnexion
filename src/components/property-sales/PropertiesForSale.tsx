@@ -88,7 +88,7 @@ export function PropertiesForSale() {
                     onClick={() => handleSale(property.id)}
                   >
                     <Store className="h-4 w-4 mr-2" />
-                    Vendre
+                    Enregistrer la vente
                   </Button>
                 </div>
               </TableCell>
