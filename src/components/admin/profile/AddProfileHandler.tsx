@@ -2,6 +2,7 @@ import { useState } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { ProfileFormData } from "./types"
+import { UserRole } from "@/types/profile"
 
 interface UseAddProfileHandlerProps {
   onSuccess?: () => void
@@ -10,7 +11,7 @@ interface UseAddProfileHandlerProps {
   agencyId?: string
 }
 
-export function useAddProfileHandler({ onSuccess, onError, onClose, agencyId }: UseAddProfileHandlerProps) {
+export function useAddProfileHandler({ onSuccess, onError, onClose, agencyId }: UseAddProfileHandlerProps = {}) {
   const [isLoading, setIsLoading] = useState(false)
   const [newProfile, setNewProfile] = useState<ProfileFormData>({})
   const { toast } = useToast()
@@ -82,7 +83,7 @@ export function useAddProfileHandler({ onSuccess, onError, onClose, agencyId }: 
         .update({
           first_name: newProfile.first_name?.trim(),
           last_name: newProfile.last_name?.trim(),
-          role: newProfile.role,
+          role: newProfile.role as UserRole,
           agency_id: agencyId || newProfile.agency_id,
           phone_number: newProfile.phone_number?.trim(),
         })
