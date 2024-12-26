@@ -83,13 +83,13 @@ const Reports = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
-        <main className="flex-1 p-8">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">Rapports</h1>
-            <div className="flex gap-4">
+        <main className="flex-1 p-4 sm:p-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold">Rapports</h1>
+            <div className="flex flex-col sm:flex-row gap-4">
               <DatePickerWithRange date={date} setDate={setDate} />
               <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-                <SelectTrigger className="w-[240px]">
+                <SelectTrigger className="w-full sm:w-[240px]">
                   <SelectValue placeholder="Sélectionner un bien" />
                 </SelectTrigger>
                 <SelectContent>
@@ -101,16 +101,18 @@ const Reports = () => {
           </div>
 
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="mb-8">
-              <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-              <TabsTrigger value="tenants">Paiements Locataires</TabsTrigger>
-              <TabsTrigger value="properties">Analyse des Biens</TabsTrigger>
-              <TabsTrigger value="expenses">Dépenses</TabsTrigger>
-            </TabsList>
+            <div className="mb-6 overflow-x-auto">
+              <TabsList className="inline-flex w-auto min-w-full sm:w-full">
+                <TabsTrigger value="overview" className="flex-1 min-w-[120px]">Vue d'ensemble</TabsTrigger>
+                <TabsTrigger value="tenants" className="flex-1 min-w-[120px]">Paiements Locataires</TabsTrigger>
+                <TabsTrigger value="properties" className="flex-1 min-w-[120px]">Analyse des Biens</TabsTrigger>
+                <TabsTrigger value="expenses" className="flex-1 min-w-[120px]">Dépenses</TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="overview">
               <OverviewStats />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <RevenueEvolution />
                 <OccupancyStatus />
               </div>
@@ -131,7 +133,7 @@ const Reports = () => {
                     <CardTitle>Répartition des Dépenses</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-[400px]">
+                    <div className="h-[300px] sm:h-[400px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
@@ -140,7 +142,7 @@ const Reports = () => {
                             cy="50%"
                             labelLine={false}
                             label={({ name, value }) => `${name}: ${value.toLocaleString()} FCFA`}
-                            outerRadius={150}
+                            outerRadius="90%"
                             fill="#8884d8"
                             dataKey="value"
                           >
@@ -162,19 +164,19 @@ const Reports = () => {
                   <CardContent className="space-y-4">
                     <div>
                       <h3 className="font-medium mb-2">Dépense Moyenne par Bien</h3>
-                      <p className="text-2xl font-bold">
+                      <p className="text-xl sm:text-2xl font-bold">
                         {expensesData?.averageExpense.toLocaleString()} FCFA
                       </p>
                     </div>
                     <div>
                       <h3 className="font-medium mb-2">Total Dépenses Période</h3>
-                      <p className="text-2xl font-bold">
+                      <p className="text-xl sm:text-2xl font-bold">
                         {expensesData?.totalExpenses.toLocaleString()} FCFA
                       </p>
                     </div>
                     <div>
                       <h3 className="font-medium mb-2">Nombre d'Interventions</h3>
-                      <p className="text-2xl font-bold">
+                      <p className="text-xl sm:text-2xl font-bold">
                         {expensesData?.interventionsCount}
                       </p>
                     </div>

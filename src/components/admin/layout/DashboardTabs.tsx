@@ -7,12 +7,14 @@ import { AdminSubscriptionPlans } from "../subscription/AdminSubscriptionPlans"
 export function DashboardTabs() {
   return (
     <Tabs defaultValue="overview" className="mt-8">
-      <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-flex">
-        <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-        <TabsTrigger value="agencies">Agences</TabsTrigger>
-        <TabsTrigger value="properties">Biens</TabsTrigger>
-        <TabsTrigger value="plans">Abonnements</TabsTrigger>
-      </TabsList>
+      <div className="mb-6 overflow-x-auto">
+        <TabsList className="inline-flex w-auto min-w-full sm:w-full">
+          <TabsTrigger value="overview" className="flex-1 min-w-[120px]">Vue d'ensemble</TabsTrigger>
+          <TabsTrigger value="agencies" className="flex-1 min-w-[120px]">Agences</TabsTrigger>
+          <TabsTrigger value="properties" className="flex-1 min-w-[120px]">Biens</TabsTrigger>
+          <TabsTrigger value="plans" className="flex-1 min-w-[120px]">Abonnements</TabsTrigger>
+        </TabsList>
+      </div>
       
       <div className="mt-6">
         <TabsContent value="overview">
