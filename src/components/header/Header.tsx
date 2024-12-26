@@ -54,24 +54,24 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <AnimatedLogo />
         {isLoginPage && (
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <nav className="flex items-center gap-2 sm:gap-4">
             <Button 
               variant="secondary" 
-              className="bg-white/80 hover:bg-white/90 backdrop-blur-sm text-sm whitespace-nowrap"
+              className="bg-white/80 hover:bg-white/90 backdrop-blur-sm whitespace-nowrap px-3 sm:px-4"
               onClick={() => navigate('/super-admin/login')}
             >
               <Shield className="mr-2 h-4 w-4" />
-              <span className="sm:text-base text-sm">Admin</span>
+              <span className="text-sm sm:text-base">Admin</span>
             </Button>
             <Button 
               variant="secondary" 
-              className="bg-white/80 hover:bg-white/90 backdrop-blur-sm text-sm whitespace-nowrap"
+              className="bg-white/80 hover:bg-white/90 backdrop-blur-sm whitespace-nowrap px-3 sm:px-4"
               onClick={() => navigate('/public')}
             >
               <ExternalLink className="mr-2 h-4 w-4" />
-              <span className="sm:text-base text-sm">Voir les biens</span>
+              <span className="text-sm sm:text-base">Voir les biens</span>
             </Button>
-          </div>
+          </nav>
         )}
       </div>
     </header>
