@@ -70,7 +70,22 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
       const cleanEmail = validateAuthData()
       console.log("Creating auth user with email:", cleanEmail)
 
-      // Create the auth user
+      // First check if user exists
+      const { data: existingUser, error: existingUserError } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password: newProfile.password
+      })
+
+      if (existingUser?.user) {
+        console.log("User already exists, using existing ID:", existingUser.user.id)
+        return existingUser.user.id
+      }
+
+      if (existingUserError && !existingUserError.message.includes('Invalid login credentials')) {
+        throw existingUserError
+      }
+
+      // If user doesn't exist, create new one
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: cleanEmail,
         password: newProfile.password,
@@ -83,11 +98,6 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
 
       if (authError) {
         console.error("Auth error:", authError)
-        
-        if (authError.message.includes('User already registered')) {
-          throw new Error("Un utilisateur avec cet email existe déjà")
-        }
-        
         throw new Error(authError.message || "Erreur lors de la création de l'utilisateur")
       }
 
@@ -107,7 +117,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: AddProfil
     try {
       validateProfileData()
 
-      // Update profile with additional info - Step 2
+      // Update profile with additional info
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
