@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { Toaster as Sonner } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { GlobalHeader } from "@/components/layout/GlobalHeader"
 import Index from "./pages/Index"
@@ -37,6 +37,7 @@ function AppRoutes() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<PublicProperties />} />
+        <Route path="/public" element={<Navigate to="/" replace />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/super-admin/login" element={<SuperAdminLogin />} />
