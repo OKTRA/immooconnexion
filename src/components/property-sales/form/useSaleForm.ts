@@ -4,11 +4,14 @@ import { supabase } from "@/integrations/supabase/client"
 import { useSubscriptionLimits } from "@/utils/subscriptionLimits"
 
 interface SaleFormData {
-  buyer_name: string
-  buyer_contact: string
+  property_name: string
+  neighborhood: string
+  country: string
+  city: string
+  listing_date: string
+  document_type: string
   sale_price: string
-  commission_amount: string
-  sale_date: string
+  commission_percentage: string
 }
 
 export function useSaleForm(propertyId: string, initialData?: any, onSuccess?: () => void) {
@@ -17,11 +20,14 @@ export function useSaleForm(propertyId: string, initialData?: any, onSuccess?: (
   const { toast } = useToast()
   const { checkAndNotifyLimits } = useSubscriptionLimits()
   const [formData, setFormData] = useState<SaleFormData>({
-    buyer_name: initialData?.buyer_name || "",
-    buyer_contact: initialData?.buyer_contact || "",
-    sale_price: initialData?.sale_price || "",
-    commission_amount: initialData?.commission_amount || "",
-    sale_date: initialData?.sale_date || new Date().toISOString().split('T')[0]
+    property_name: initialData?.property_name || "",
+    neighborhood: initialData?.neighborhood || "",
+    country: initialData?.country || "",
+    city: initialData?.city || "",
+    listing_date: initialData?.listing_date || new Date().toISOString().split('T')[0],
+    document_type: initialData?.document_type || "",
+    sale_price: initialData?.sale_price?.toString() || "",
+    commission_percentage: initialData?.commission_percentage?.toString() || ""
   })
 
   const uploadPhotos = async (agencyId: string) => {
@@ -80,45 +86,41 @@ export function useSaleForm(propertyId: string, initialData?: any, onSuccess?: (
         photoUrls = await uploadPhotos(profile.agency_id)
       }
 
-      const saleData = {
-        property_id: propertyId,
-        buyer_name: formData.buyer_name,
-        buyer_contact: formData.buyer_contact,
+      const commission_amount = Math.round(
+        (parseFloat(formData.sale_price) * parseFloat(formData.commission_percentage)) / 100
+      )
+
+      const propertyData = {
+        bien: formData.property_name,
+        type: formData.document_type,
+        ville: formData.city,
         sale_price: parseInt(formData.sale_price),
-        commission_amount: parseInt(formData.commission_amount),
-        sale_date: formData.sale_date,
+        taux_commission: parseFloat(formData.commission_percentage),
+        is_for_sale: true,
         agency_id: profile.agency_id,
-        photo_urls: photoUrls
+        user_id: user.id,
+        photo_url: photoUrls[0],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
 
-      if (initialData?.id) {
-        const { error } = await supabase
-          .from('property_sales')
-          .update(saleData)
-          .eq('id', initialData.id)
+      const { error } = await supabase
+        .from('properties')
+        .insert([propertyData])
 
-        if (error) throw error
-      } else {
-        const { error } = await supabase
-          .from('property_sales')
-          .insert([saleData])
-
-        if (error) throw error
-      }
+      if (error) throw error
 
       toast({
-        title: initialData ? "Vente mise à jour" : "Vente enregistrée",
-        description: initialData ? 
-          "La vente a été mise à jour avec succès" : 
-          "La vente a été enregistrée avec succès"
+        title: "Bien ajouté avec succès",
+        description: "Le bien a été ajouté à la liste des biens à vendre"
       })
 
       if (onSuccess) onSuccess()
     } catch (error: any) {
-      console.error('Error recording sale:', error)
+      console.error('Error adding property:', error)
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'enregistrement de la vente",
+        description: error.message || "Une erreur est survenue lors de l'ajout du bien",
         variant: "destructive"
       })
     } finally {

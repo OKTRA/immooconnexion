@@ -1,13 +1,17 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface SaleFormFieldsProps {
   formData: {
-    buyer_name: string
-    buyer_contact: string
+    property_name: string
+    neighborhood: string
+    country: string
+    city: string
+    listing_date: string
+    document_type: string
     sale_price: string
-    commission_amount: string
-    sale_date: string
+    commission_percentage: string
   }
   onChange: (field: string, value: string) => void
 }
@@ -16,20 +20,62 @@ export function SaleFormFields({ formData, onChange }: SaleFormFieldsProps) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="buyer_name">Nom de l'acheteur</Label>
+        <Label htmlFor="property_name">Nom du bien</Label>
         <Input
-          id="buyer_name"
-          value={formData.buyer_name}
-          onChange={(e) => onChange('buyer_name', e.target.value)}
+          id="property_name"
+          value={formData.property_name}
+          onChange={(e) => onChange('property_name', e.target.value)}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="buyer_contact">Contact de l'acheteur</Label>
+        <Label htmlFor="neighborhood">Quartier</Label>
         <Input
-          id="buyer_contact"
-          value={formData.buyer_contact}
-          onChange={(e) => onChange('buyer_contact', e.target.value)}
+          id="neighborhood"
+          value={formData.neighborhood}
+          onChange={(e) => onChange('neighborhood', e.target.value)}
         />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="country">Pays</Label>
+        <Input
+          id="country"
+          value={formData.country}
+          onChange={(e) => onChange('country', e.target.value)}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="city">Ville</Label>
+        <Input
+          id="city"
+          value={formData.city}
+          onChange={(e) => onChange('city', e.target.value)}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="listing_date">Date de mise en vente</Label>
+        <Input
+          id="listing_date"
+          type="date"
+          value={formData.listing_date}
+          onChange={(e) => onChange('listing_date', e.target.value)}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="document_type">Type de document</Label>
+        <Select 
+          value={formData.document_type} 
+          onValueChange={(value) => onChange('document_type', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Sélectionner le type de document" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="titre_foncier">Titre Foncier</SelectItem>
+            <SelectItem value="attestation_villageoise">Attestation Villageoise</SelectItem>
+            <SelectItem value="lettre_attribution">Lettre d'Attribution</SelectItem>
+            <SelectItem value="autre">Autre</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div className="space-y-2">
         <Label htmlFor="sale_price">Prix de vente (FCFA)</Label>
@@ -41,21 +87,14 @@ export function SaleFormFields({ formData, onChange }: SaleFormFieldsProps) {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="commission_amount">Commission (FCFA)</Label>
+        <Label htmlFor="commission_percentage">Commission (%)</Label>
         <Input
-          id="commission_amount"
+          id="commission_percentage"
           type="number"
-          value={formData.commission_amount}
-          onChange={(e) => onChange('commission_amount', e.target.value)}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="sale_date">Date de vente</Label>
-        <Input
-          id="sale_date"
-          type="date"
-          value={formData.sale_date}
-          onChange={(e) => onChange('sale_date', e.target.value)}
+          min="0"
+          max="100"
+          value={formData.commission_percentage}
+          onChange={(e) => onChange('commission_percentage', e.target.value)}
         />
       </div>
     </div>
