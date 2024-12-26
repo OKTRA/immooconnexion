@@ -23,19 +23,37 @@ export function GlobalHeader() {
   const { toast } = useToast()
   const { theme, setTheme } = useTheme()
 
+  // N'afficher le header que sur les routes authentifiées
+  const isAuthenticatedRoute = location.pathname.includes('/admin')
+  if (!isAuthenticatedRoute) {
+    return null
+  }
+
+  // N'afficher le header que sur la route du dashboard
+  const isDashboardRoute = location.pathname === '/agence/admin' || location.pathname === '/super-admin/admin'
+  if (!isDashboardRoute) {
+    return null
+  }
+
   const { data: profile } = useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return null
+      try {
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        if (authError) throw authError
+        if (!user) throw new Error("Non authentifié")
 
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle()
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle()
 
-      return data
+        return data
+      } catch (error: any) {
+        console.error('Profile fetch error:', error)
+        throw error
+      }
     },
   })
 
@@ -57,22 +75,16 @@ export function GlobalHeader() {
     }
   }
 
-  // Only render if we're on an admin/dashboard route
-  const isAdminOrDashboardRoute = location.pathname.includes('/admin') || location.pathname === '/'
-  if (!profile || !isAdminOrDashboardRoute) {
-    return null
-  }
-
   const HeaderContent = () => (
     <>
       <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarFallback>
+        <Avatar className="h-8 w-8 ring-2 ring-primary/10">
+          <AvatarFallback className="bg-primary/5 text-primary">
             {profile?.first_name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
           </AvatarFallback>
         </Avatar>
         <div className="hidden sm:block">
-          <p className="text-sm font-medium">
+          <p className="text-sm font-medium text-foreground">
             {profile?.first_name || profile?.email || 'Utilisateur'}
           </p>
           <p className="text-xs text-muted-foreground">
@@ -86,7 +98,7 @@ export function GlobalHeader() {
           variant="ghost"
           size="icon"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="h-8 w-8"
+          className="h-8 w-8 hover:bg-primary/5"
         >
           {theme === "dark" ? (
             <Sun className="h-4 w-4" />
@@ -99,7 +111,7 @@ export function GlobalHeader() {
           variant="ghost"
           size="sm"
           onClick={handleLogout}
-          className="text-red-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900"
+          className="text-destructive hover:bg-destructive/5 hover:text-destructive"
         >
           <LogOut className="h-4 w-4 sm:mr-2" />
           <span className="hidden sm:inline">Déconnexion</span>
@@ -109,12 +121,12 @@ export function GlobalHeader() {
   )
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
+      <div className="container flex h-14 max-w-screen-2xl items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <AnimatedLogo />
           <Separator orientation="vertical" className="h-6" />
-          <h1 className="text-lg font-semibold hidden sm:block">
+          <h1 className="text-lg font-semibold hidden sm:block text-foreground/90">
             {profile?.role === 'admin' ? 'Administration' : 'Gestion Immobilière'}
           </h1>
         </div>
