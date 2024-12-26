@@ -6,12 +6,10 @@ interface SaleFormFieldsProps {
   formData: {
     property_name: string
     neighborhood: string
-    country: string
     city: string
     listing_date: string
     document_type: string
     sale_price: string
-    commission_percentage: string
   }
   onChange: (field: string, value: string) => void
 }
@@ -36,18 +34,11 @@ export function SaleFormFields({ formData, onChange }: SaleFormFieldsProps) {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="country">Pays</Label>
-        <Input
-          id="country"
-          value={formData.country}
-          onChange={(e) => onChange('country', e.target.value)}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="city">Ville</Label>
+        <Label htmlFor="city">Ville / Pays</Label>
         <Input
           id="city"
           value={formData.city}
+          placeholder="Ex: Abidjan, Côte d'Ivoire"
           onChange={(e) => onChange('city', e.target.value)}
         />
       </div>
@@ -84,17 +75,6 @@ export function SaleFormFields({ formData, onChange }: SaleFormFieldsProps) {
           type="number"
           value={formData.sale_price}
           onChange={(e) => onChange('sale_price', e.target.value)}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="commission_percentage">Commission (%)</Label>
-        <Input
-          id="commission_percentage"
-          type="number"
-          min="0"
-          max="100"
-          value={formData.commission_percentage}
-          onChange={(e) => onChange('commission_percentage', e.target.value)}
         />
       </div>
     </div>

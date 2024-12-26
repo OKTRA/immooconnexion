@@ -6,12 +6,10 @@ import { useSubscriptionLimits } from "@/utils/subscriptionLimits"
 interface SaleFormData {
   property_name: string
   neighborhood: string
-  country: string
   city: string
   listing_date: string
   document_type: string
   sale_price: string
-  commission_percentage: string
 }
 
 export function useSaleForm(propertyId: string, initialData?: any, onSuccess?: () => void) {
@@ -22,39 +20,11 @@ export function useSaleForm(propertyId: string, initialData?: any, onSuccess?: (
   const [formData, setFormData] = useState<SaleFormData>({
     property_name: initialData?.property_name || "",
     neighborhood: initialData?.neighborhood || "",
-    country: initialData?.country || "",
     city: initialData?.city || "",
     listing_date: initialData?.listing_date || new Date().toISOString().split('T')[0],
     document_type: initialData?.document_type || "",
-    sale_price: initialData?.sale_price?.toString() || "",
-    commission_percentage: initialData?.commission_percentage?.toString() || ""
+    sale_price: initialData?.sale_price?.toString() || ""
   })
-
-  const uploadPhotos = async (agencyId: string) => {
-    if (!selectedFiles) return []
-
-    const photoUrls = []
-    for (let i = 0; i < selectedFiles.length; i++) {
-      const file = selectedFiles[i]
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${crypto.randomUUID()}.${fileExt}`
-      const filePath = `${agencyId}/${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('property_sale_photos')
-        .upload(filePath, file)
-
-      if (uploadError) throw uploadError
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('property_sale_photos')
-        .getPublicUrl(filePath)
-
-      photoUrls.push(publicUrl)
-    }
-
-    return photoUrls
-  }
 
   const handleSubmit = async () => {
     try {
@@ -69,7 +39,9 @@ export function useSaleForm(propertyId: string, initialData?: any, onSuccess?: (
         .eq('id', user.id)
         .single()
 
-      if (!profile?.agency_id) throw new Error("Aucune agence associée")
+      if (!profile?.agency_id) {
+        throw new Error("Aucune agence associée à ce profil")
+      }
 
       const canManageSales = await checkAndNotifyLimits(profile.agency_id, 'property')
       if (!canManageSales) {
@@ -83,19 +55,31 @@ export function useSaleForm(propertyId: string, initialData?: any, onSuccess?: (
 
       let photoUrls: string[] = []
       if (selectedFiles) {
-        photoUrls = await uploadPhotos(profile.agency_id)
-      }
+        for (let i = 0; i < selectedFiles.length; i++) {
+          const file = selectedFiles[i]
+          const fileExt = file.name.split('.').pop()
+          const fileName = `${Math.random()}.${fileExt}`
+          const filePath = `${profile.agency_id}/${fileName}`
 
-      const commission_amount = Math.round(
-        (parseFloat(formData.sale_price) * parseFloat(formData.commission_percentage)) / 100
-      )
+          const { error: uploadError } = await supabase.storage
+            .from('property_sale_photos')
+            .upload(filePath, file)
+
+          if (uploadError) throw uploadError
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('property_sale_photos')
+            .getPublicUrl(filePath)
+
+          photoUrls.push(publicUrl)
+        }
+      }
 
       const propertyData = {
         bien: formData.property_name,
         type: formData.document_type,
         ville: formData.city,
         sale_price: parseInt(formData.sale_price),
-        taux_commission: parseFloat(formData.commission_percentage),
         is_for_sale: true,
         agency_id: profile.agency_id,
         user_id: user.id,
