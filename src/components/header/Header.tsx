@@ -3,15 +3,20 @@ import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { useQuery } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { Shield, Building2 } from "lucide-react"
+import { Shield, Building2, Menu } from "lucide-react"
 import { AnimatedLogo } from "./AnimatedLogo"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 
 export function Header() {
   const location = useLocation()
   const navigate = useNavigate()
   const { toast } = useToast()
-  const isMobile = useIsMobile()
 
   const isLoginPage = ['/login', '/super-admin/login'].includes(location.pathname)
 
@@ -50,34 +55,65 @@ export function Header() {
     }
   }
 
+  const NavLinks = () => (
+    <div className="flex flex-col md:flex-row gap-4">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="text-primary hover:text-primary/80 w-full md:w-auto justify-start md:justify-center"
+        onClick={() => navigate("/public")}
+      >
+        <Building2 className="h-4 w-4 mr-2" />
+        <span>Biens disponibles</span>
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="text-primary hover:text-primary/80 w-full md:w-auto justify-start md:justify-center"
+        onClick={() => navigate("/super-admin/login")}
+      >
+        <Shield className="h-4 w-4 mr-2" />
+        <span>Super Admin</span>
+      </Button>
+    </div>
+  )
+
   return (
     <header className={`fixed top-0 left-0 right-0 z-10 ${isLoginPage ? 'bg-transparent' : 'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-        <div className="flex-shrink-0">
-          <AnimatedLogo />
-        </div>
-        {isLoginPage && (
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-primary hover:text-primary/80"
-              onClick={() => navigate("/public")}
-            >
-              <Building2 className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">Biens disponibles</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-primary hover:text-primary/80"
-              onClick={() => navigate("/super-admin/login")}
-            >
-              <Shield className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">Super Admin</span>
-            </Button>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex justify-between items-center">
+          <div className="flex-shrink-0">
+            <AnimatedLogo />
           </div>
-        )}
+          
+          {isLoginPage && (
+            <>
+              {/* Desktop Navigation */}
+              <div className="hidden md:flex">
+                <NavLinks />
+              </div>
+
+              {/* Mobile Navigation */}
+              <div className="md:hidden">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Menu className="h-5 w-5" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>Menu</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-4">
+                      <NavLinks />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </header>
   )
