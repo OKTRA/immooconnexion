@@ -59,11 +59,13 @@ const menuItems = [
   },
 ]
 
-export function AppSidebar() {
+// Define MenuContent before using it
+const MenuContent = () => {
   const location = useLocation()
-  const { collapsed } = useSidebar()
+  const { state } = useSidebar()
+  const isCollapsed = state === "collapsed"
 
-  const MenuContent = () => (
+  return (
     <ScrollArea className="h-[calc(100vh-4rem)] pb-8">
       <div className="space-y-1 p-2">
         {menuItems.map((item) => {
@@ -75,11 +77,11 @@ export function AppSidebar() {
               <Button
                 variant={isActive ? "secondary" : "ghost"}
                 className={cn("w-full justify-start", {
-                  "justify-center": collapsed,
+                  "justify-center": isCollapsed,
                 })}
               >
                 <Icon className="h-5 w-5" />
-                {!collapsed && <span className="ml-2">{item.title}</span>}
+                {!isCollapsed && <span className="ml-2">{item.title}</span>}
               </Button>
             </Link>
           )
@@ -87,7 +89,9 @@ export function AppSidebar() {
       </div>
     </ScrollArea>
   )
+}
 
+export function AppSidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
