@@ -51,7 +51,7 @@ function AppRoutes() {
           }
         />
         <Route
-          path="/admin"
+          path="/super-admin/admin"
           element={
             <ProtectedRoute>
               <AdminDashboard />
