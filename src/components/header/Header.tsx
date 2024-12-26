@@ -11,7 +11,6 @@ export function Header() {
   const navigate = useNavigate()
   const { toast } = useToast()
 
-  // Check if we're on a login page
   const isLoginPage = ['/login', '/super-admin/login'].includes(location.pathname)
 
   const { data: profile } = useQuery({
@@ -28,7 +27,7 @@ export function Header() {
 
       return data
     },
-    enabled: !isLoginPage // Only fetch profile if not on login page
+    enabled: !isLoginPage
   })
 
   const handleLogout = async () => {
@@ -51,28 +50,30 @@ export function Header() {
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 ${isLoginPage ? 'bg-transparent' : 'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'}`}>
-      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-        <AnimatedLogo />
-        {isLoginPage && (
-          <nav className="flex items-center gap-2 sm:gap-4">
-            <Button 
-              variant="secondary" 
-              className="bg-white/80 hover:bg-white/90 backdrop-blur-sm whitespace-nowrap px-3 sm:px-4"
-              onClick={() => navigate('/super-admin/login')}
-            >
-              <Shield className="mr-2 h-4 w-4" />
-              <span className="text-sm sm:text-base">Admin</span>
-            </Button>
-            <Button 
-              variant="secondary" 
-              className="bg-white/80 hover:bg-white/90 backdrop-blur-sm whitespace-nowrap px-3 sm:px-4"
-              onClick={() => navigate('/public')}
-            >
-              <ExternalLink className="mr-2 h-4 w-4" />
-              <span className="text-sm sm:text-base">Voir les biens</span>
-            </Button>
-          </nav>
-        )}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <AnimatedLogo />
+          {isLoginPage && (
+            <nav className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4">
+              <Button 
+                variant="secondary" 
+                className="bg-white/80 hover:bg-white/90 backdrop-blur-sm w-auto sm:w-auto px-3 sm:px-4"
+                onClick={() => navigate('/super-admin/login')}
+              >
+                <Shield className="mr-2 h-4 w-4" />
+                <span className="text-sm sm:text-base">Admin</span>
+              </Button>
+              <Button 
+                variant="secondary" 
+                className="bg-white/80 hover:bg-white/90 backdrop-blur-sm w-auto sm:w-auto px-3 sm:px-4"
+                onClick={() => navigate('/public')}
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                <span className="text-sm sm:text-base">Voir les biens</span>
+              </Button>
+            </nav>
+          )}
+        </div>
       </div>
     </header>
   )
