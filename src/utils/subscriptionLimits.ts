@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 
 export interface SubscriptionLimits {
   max_properties: number
@@ -21,15 +21,20 @@ export async function checkSubscriptionLimits(agencyId: string, type: 'property'
       return false
     }
 
-    // Get subscription plan limits
+    // Get subscription plan limits and features
     const { data: plan } = await supabase
       .from('subscription_plans')
-      .select('max_properties, max_tenants, max_users')
+      .select('max_properties, max_tenants, max_users, features, name')
       .eq('id', agency.subscription_plan_id)
       .single()
 
     if (!plan) {
       console.error('Subscription plan not found')
+      return false
+    }
+
+    // Check if plan allows sales management
+    if (type === 'property' && !plan.features.includes('Gestion des ventes de biens')) {
       return false
     }
 
@@ -77,8 +82,8 @@ export function useSubscriptionLimits() {
     if (!canAdd) {
       const typeLabel = type === 'property' ? 'biens' : type === 'tenant' ? 'locataires' : 'utilisateurs'
       toast({
-        title: "Limite atteinte",
-        description: `Vous avez atteint la limite de ${typeLabel} de votre forfait. Veuillez mettre à niveau votre abonnement.`,
+        title: "Limite atteinte ou fonctionnalité non disponible",
+        description: `Cette fonctionnalité nécessite un abonnement supérieur. Veuillez mettre à niveau votre abonnement.`,
         variant: "destructive",
       })
     }
