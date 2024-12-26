@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
+import { AnimatedLogo } from "@/components/header/AnimatedLogo"
 
 export function PublicNavbar() {
   return (
@@ -7,7 +8,9 @@ export function PublicNavbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center">
-            <Link to="/public" className="text-2xl font-bold text-blue-600">PropZilla</Link>
+            <Link to="/public" className="text-2xl font-bold">
+              <AnimatedLogo />
+            </Link>
           </div>
           <nav className="flex items-center gap-6">
             <Link to="/public" className="text-sm font-medium text-gray-700 hover:text-blue-600">
