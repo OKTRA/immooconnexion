@@ -20,6 +20,9 @@ export function AdminLoginForm() {
     setIsLoading(true)
 
     try {
+      // First clear any existing session
+      await supabase.auth.signOut()
+      
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,

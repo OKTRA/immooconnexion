@@ -26,33 +26,53 @@ export function GlobalHeader() {
   const { data: profile } = useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return null
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return null
 
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle()
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle()
 
-      return data
+        return data
+      } catch (error) {
+        console.error("Error fetching profile:", error)
+        return null
+      }
     },
   })
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut()
-      navigate("/login")
+      // Clear any stored session data first
+      localStorage.removeItem('sb-' + process.env.VITE_SUPABASE_PROJECT_ID + '-auth-token')
+      
+      // Then sign out from Supabase
+      const { error } = await supabase.auth.signOut()
+      
+      if (error) {
+        console.error('Logout error:', error)
+        throw error
+      }
+
+      // Always navigate to login regardless of error
+      navigate("/agence/login")
+      
       toast({
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès",
       })
     } catch (error) {
       console.error('Logout error:', error)
+      // Still navigate to login even if there's an error
+      navigate("/agence/login")
+      
       toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la déconnexion",
-        variant: "destructive"
+        title: "Attention",
+        description: "La session a été terminée",
+        variant: "default"
       })
     }
   }
