@@ -54,7 +54,6 @@ export function AgencyEarningsTable() {
             taux_commission
           )
         `)
-        .eq('type', 'loyer')
         .order('created_at', { ascending: false })
 
       // If not admin, only show agency's contracts
@@ -69,17 +68,35 @@ export function AgencyEarningsTable() {
         throw error
       }
 
-      return (contracts as ContractWithProperties[]).map(contract => ({
-        id: contract.id,
-        bien: contract.properties?.bien || '',
-        loyer: contract.montant,
-        fraisAgence: contract.properties?.frais_agence || 0,
-        tauxCommission: contract.properties?.taux_commission || 0,
-        commissionMensuelle: (contract.montant * (contract.properties?.taux_commission || 0)) / 100,
-        gainProprietaire: contract.montant - ((contract.montant * (contract.properties?.taux_commission || 0)) / 100),
-        gainAgence: ((contract.montant * (contract.properties?.taux_commission || 0)) / 100) + (contract.properties?.frais_agence || 0),
-        datePerception: new Date(contract.created_at).toISOString().split('T')[0],
-      }))
+      return (contracts as ContractWithProperties[]).map(contract => {
+        // Si c'est un frais d'agence direct
+        if (contract.type === 'frais_agence') {
+          return {
+            id: contract.id,
+            bien: contract.properties?.bien || 'Frais direct',
+            loyer: 0,
+            fraisAgence: contract.montant,
+            tauxCommission: 0,
+            commissionMensuelle: 0,
+            gainProprietaire: 0,
+            gainAgence: contract.montant,
+            datePerception: new Date(contract.created_at).toISOString().split('T')[0],
+          }
+        }
+        
+        // Si c'est un loyer
+        return {
+          id: contract.id,
+          bien: contract.properties?.bien || '',
+          loyer: contract.montant,
+          fraisAgence: contract.properties?.frais_agence || 0,
+          tauxCommission: contract.properties?.taux_commission || 0,
+          commissionMensuelle: (contract.montant * (contract.properties?.taux_commission || 0)) / 100,
+          gainProprietaire: contract.montant - ((contract.montant * (contract.properties?.taux_commission || 0)) / 100),
+          gainAgence: ((contract.montant * (contract.properties?.taux_commission || 0)) / 100) + (contract.properties?.frais_agence || 0),
+          datePerception: new Date(contract.created_at).toISOString().split('T')[0],
+        }
+      })
     }
   })
 
