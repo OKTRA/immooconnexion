@@ -93,7 +93,9 @@ export function PaymentHistory({
                             >
                               <FileText className="h-4 w-4" />
                             </Button>
-                            <InspectionDialog contract={contract} className="inline-flex" />
+                            {contract.type === 'caution' && (
+                              <InspectionDialog contract={contract} className="inline-flex" />
+                            )}
                           </>
                         ) : (
                           <Ban className="h-4 w-4 text-muted-foreground" />
