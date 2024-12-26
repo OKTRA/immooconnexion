@@ -4,7 +4,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button"; // Add this import
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { TenantCreationForm } from "./tenants/TenantCreationForm";
 import { TenantReceipt } from "./tenants/TenantReceipt";
@@ -33,6 +33,15 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
   const { data: userProfile } = useUserProfile();
   const { data: properties = [] } = useAvailableProperties(userProfile);
 
+  const handleFormSuccess = () => {
+    setShowReceipt(true);
+  };
+
+  const handleClose = () => {
+    setShowReceipt(false);
+    onOpenChange(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -45,7 +54,7 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
           <TenantCreationForm
             userProfile={userProfile}
             properties={properties}
-            onSuccess={() => setShowReceipt(true)}
+            onSuccess={handleFormSuccess}
             onCancel={() => onOpenChange(false)}
             initialData={tenant}
             isEditing={!!tenant}
@@ -66,10 +75,7 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => {
-                  setShowReceipt(false);
-                  onOpenChange(false);
-                }}
+                onClick={handleClose}
               >
                 Fermer
               </Button>
