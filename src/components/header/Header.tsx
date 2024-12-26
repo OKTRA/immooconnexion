@@ -51,25 +51,27 @@ export function Header() {
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 ${isLoginPage ? 'bg-transparent' : 'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'}`}>
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <AnimatedLogo />
         {isLoginPage && (
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Button 
               variant="secondary" 
-              className="bg-white/80 hover:bg-white/90 backdrop-blur-sm"
+              className="bg-white/80 hover:bg-white/90 backdrop-blur-sm text-sm whitespace-nowrap"
               onClick={() => navigate('/super-admin/login')}
             >
               <Shield className="mr-2 h-4 w-4" />
-              Super Admin
+              <span className="hidden sm:inline">Super Admin</span>
+              <span className="sm:hidden">Admin</span>
             </Button>
             <Button 
               variant="secondary" 
-              className="bg-white/80 hover:bg-white/90 backdrop-blur-sm"
+              className="bg-white/80 hover:bg-white/90 backdrop-blur-sm text-sm whitespace-nowrap"
               onClick={() => navigate('/public')}
             >
               <ExternalLink className="mr-2 h-4 w-4" />
-              Voir les biens disponibles
+              <span className="hidden sm:inline">Voir les biens disponibles</span>
+              <span className="sm:hidden">Voir les biens</span>
             </Button>
           </div>
         )}
