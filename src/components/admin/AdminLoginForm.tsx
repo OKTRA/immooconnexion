@@ -30,18 +30,9 @@ export function AdminLoginForm() {
       if (signInError) {
         console.error('Erreur de connexion:', signInError)
         
-        // Parse the error message from the response body if available
-        let errorBody
-        try {
-          errorBody = JSON.parse(signInError.message)
-        } catch {
-          errorBody = null
-        }
-
         let errorMessage = "Email ou mot de passe incorrect"
         
-        if (errorBody?.message === "Invalid login credentials" || 
-            signInError.message.includes("Invalid login credentials")) {
+        if (signInError.message.includes("Invalid login credentials")) {
           errorMessage = "Email ou mot de passe incorrect"
         } else if (signInError.message.includes("Email not confirmed")) {
           errorMessage = "Veuillez confirmer votre email avant de vous connecter"
@@ -121,6 +112,7 @@ export function AdminLoginForm() {
         description: "Bienvenue dans votre espace administrateur",
       })
 
+      // Explicitly navigate to /agence/admin after successful login
       navigate("/agence/admin")
     } catch (error: any) {
       console.error('Erreur générale:', error)
@@ -129,7 +121,6 @@ export function AdminLoginForm() {
         description: "Une erreur inattendue est survenue",
         variant: "destructive",
       })
-    } finally {
       setIsLoading(false)
     }
   }
