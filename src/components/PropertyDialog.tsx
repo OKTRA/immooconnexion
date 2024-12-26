@@ -12,24 +12,19 @@ import { PropertyDialogProps } from "./property/types"
 
 export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogProps) {
   const {
-    image,
-    setImage,
+    images,
+    setImages,
     formData,
     setFormData,
-    handleSubmit
+    handleSubmit,
+    previewUrls
   } = usePropertyForm(property, onOpenChange)
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0])
+    if (e.target.files) {
+      setImages(Array.from(e.target.files))
     }
   }
-
-  const imagePreviewUrl = image 
-    ? URL.createObjectURL(image) 
-    : property?.photo_url 
-      ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/product_photos/${property.photo_url}`
-      : undefined
 
   const dialogContent = (
     <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
@@ -41,7 +36,7 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
         formData={formData}
         setFormData={setFormData}
         handleImageChange={handleImageChange}
-        imagePreviewUrl={imagePreviewUrl}
+        imagePreviewUrl={previewUrls}
       />
 
       <div className="flex justify-end gap-2">

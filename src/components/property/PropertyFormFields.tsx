@@ -2,6 +2,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PropertyFormData } from "./types"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { X } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface PropertyFormFieldsProps {
   formData: PropertyFormData
@@ -98,21 +101,39 @@ export function PropertyFormFields({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="photo">Photo du bien</Label>
+        <Label htmlFor="photo">Photos du bien</Label>
         <Input 
           id="photo" 
           type="file" 
-          accept="image/*" 
+          accept="image/*"
+          multiple
           onChange={handleImageChange}
+          className="cursor-pointer"
         />
         {imagePreviewUrl && (
-          <div className="mt-2">
-            <img
-              src={imagePreviewUrl}
-              alt="Aperçu"
-              className="max-w-full h-auto rounded-md"
-            />
-          </div>
+          <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {Array.isArray(imagePreviewUrl) ? (
+                imagePreviewUrl.map((url, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={url}
+                      alt={`Aperçu ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-md"
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="relative group">
+                  <img
+                    src={imagePreviewUrl}
+                    alt="Aperçu"
+                    className="w-full h-32 object-cover rounded-md"
+                  />
+                </div>
+              )}
+            </div>
+          </ScrollArea>
         )}
       </div>
     </div>

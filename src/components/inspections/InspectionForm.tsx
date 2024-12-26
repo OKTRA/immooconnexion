@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useQueryClient } from "@tanstack/react-query"
@@ -20,9 +20,18 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
   const [hasDamages, setHasDamages] = useState(false)
   const [description, setDescription] = useState("")
   const [repairCosts, setRepairCosts] = useState("")
-  const [photos, setPhotos] = useState<FileList | null>(null)
+  const [photos, setPhotos] = useState<File[]>([])
+  const [previewUrls, setPreviewUrls] = useState<string[]>([])
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  useEffect(() => {
+    if (photos.length > 0) {
+      const urls = photos.map(file => URL.createObjectURL(file))
+      setPreviewUrls(urls)
+      return () => urls.forEach(url => URL.revokeObjectURL(url))
+    }
+  }, [photos])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,9 +44,8 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
 
       // Upload photos if any
       const photoUrls: string[] = []
-      if (photos) {
-        for (let i = 0; i < photos.length; i++) {
-          const photo = photos[i]
+      if (photos.length > 0) {
+        for (const photo of photos) {
           const fileExt = photo.name.split('.').pop()
           const fileName = `${crypto.randomUUID()}.${fileExt}`
           
@@ -145,9 +153,24 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
             type="file"
             accept="image/*"
             multiple
-            onChange={(e) => setPhotos(e.target.files)}
+            onChange={(e) => setPhotos(e.target.files ? Array.from(e.target.files) : [])}
             className="cursor-pointer"
           />
+          {previewUrls.length > 0 && (
+            <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {previewUrls.map((url, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={url}
+                      alt={`Photo ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-md"
+                    />
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
         </div>
 
         <div className="pt-4 flex justify-end space-x-2">

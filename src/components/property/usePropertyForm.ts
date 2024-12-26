@@ -6,7 +6,8 @@ import { Property, PropertyFormData } from "./types"
 import { useSubscriptionLimits } from "@/utils/subscriptionLimits"
 
 export function usePropertyForm(property: Property | null | undefined, onOpenChange?: (open: boolean) => void) {
-  const [image, setImage] = useState<File | null>(null)
+  const [images, setImages] = useState<File[]>([])
+  const [previewUrls, setPreviewUrls] = useState<string[]>([])
   const [formData, setFormData] = useState<PropertyFormData>({
     bien: "",
     type: "",
@@ -31,24 +32,23 @@ export function usePropertyForm(property: Property | null | undefined, onOpenCha
         taux_commission: property.taux_commission?.toString() || "",
         caution: property.caution?.toString() || "",
       })
+
+      if (property.photo_url) {
+        setPreviewUrls([`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/product_photos/${property.photo_url}`])
+      }
     }
   }, [property])
 
+  useEffect(() => {
+    if (images.length > 0) {
+      const urls = images.map(file => URL.createObjectURL(file))
+      setPreviewUrls(urls)
+      return () => urls.forEach(url => URL.revokeObjectURL(url))
+    }
+  }, [images])
+
   const handleSubmit = async () => {
     try {
-      let photo_url = property?.photo_url
-
-      if (image) {
-        const fileExt = image.name.split('.').pop()
-        const fileName = `${Math.random()}.${fileExt}`
-        const { error: uploadError, data } = await supabase.storage
-          .from('product_photos')
-          .upload(fileName, image)
-
-        if (uploadError) throw uploadError
-        photo_url = data.path
-      }
-
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
@@ -62,9 +62,22 @@ export function usePropertyForm(property: Property | null | undefined, onOpenCha
         throw new Error("Aucune agence associée à ce profil")
       }
 
-      // Check subscription limits before adding new property
       if (!property && !(await checkAndNotifyLimits(profile.agency_id, 'property'))) {
         return
+      }
+
+      let photo_urls: string[] = []
+      if (images.length > 0) {
+        for (const image of images) {
+          const fileExt = image.name.split('.').pop()
+          const fileName = `${Math.random()}.${fileExt}`
+          const { error: uploadError, data } = await supabase.storage
+            .from('product_photos')
+            .upload(fileName, image)
+
+          if (uploadError) throw uploadError
+          if (data) photo_urls.push(data.path)
+        }
       }
 
       const propertyData = {
@@ -75,7 +88,7 @@ export function usePropertyForm(property: Property | null | undefined, onOpenCha
         loyer: parseFloat(formData.loyer),
         taux_commission: parseFloat(formData.taux_commission),
         caution: parseFloat(formData.caution),
-        photo_url,
+        photo_url: photo_urls[0], // Keep backward compatibility by using the first image
         user_id: user.id,
         agency_id: profile.agency_id,
         updated_at: new Date().toISOString(),
@@ -117,10 +130,11 @@ export function usePropertyForm(property: Property | null | undefined, onOpenCha
   }
 
   return {
-    image,
-    setImage,
+    images,
+    setImages,
     formData,
     setFormData,
-    handleSubmit
+    handleSubmit,
+    previewUrls
   }
 }
