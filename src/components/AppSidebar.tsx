@@ -19,7 +19,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { useSidebarContext } from "@/components/ui/sidebar"
+import { useSidebar } from "@/components/ui/sidebar"
 
 const menuItems = [
   {
@@ -61,7 +61,7 @@ const menuItems = [
 
 export function AppSidebar() {
   const location = useLocation()
-  const { collapsed } = useSidebarContext()
+  const { collapsed } = useSidebar()
 
   const MenuContent = () => (
     <ScrollArea className="h-[calc(100vh-4rem)] pb-8">
@@ -116,3 +116,5 @@ export function AppSidebar() {
     </>
   )
 }
+
+export const SidebarContent = MenuContent

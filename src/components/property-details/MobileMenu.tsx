@@ -2,7 +2,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Menu } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { SidebarContent } from "@/components/AppSidebar"
+import { AppSidebar } from "@/components/AppSidebar"
 
 export function MobileMenu() {
   return (
@@ -14,7 +14,7 @@ export function MobileMenu() {
       </SheetTrigger>
       <SheetContent side="left" className="p-0 w-72">
         <ScrollArea className="h-full">
-          <SidebarContent />
+          <AppSidebar />
         </ScrollArea>
       </SheetContent>
     </Sheet>
