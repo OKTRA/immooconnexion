@@ -14,20 +14,30 @@ const AgencyEarnings = () => {
         .from('contracts')
         .select(`
           montant,
+          type,
           properties (
             frais_agence,
             taux_commission
           )
         `)
-        .eq('type', 'loyer')
 
       if (error) throw error
 
-      const totalFraisAgence = contracts.reduce((sum, contract) => 
-        sum + (contract.properties?.frais_agence || 0), 0)
+      // Calculate total agency fees
+      const totalFraisAgence = contracts.reduce((sum, contract) => {
+        if (contract.type === 'frais_agence') {
+          return sum + contract.montant
+        }
+        return sum + (contract.properties?.frais_agence || 0)
+      }, 0)
 
-      const totalCommissions = contracts.reduce((sum, contract) => 
-        sum + ((contract.montant * (contract.properties?.taux_commission || 0)) / 100), 0)
+      // Calculate total commissions from rent
+      const totalCommissions = contracts.reduce((sum, contract) => {
+        if (contract.type === 'loyer') {
+          return sum + ((contract.montant * (contract.properties?.taux_commission || 0)) / 100)
+        }
+        return sum
+      }, 0)
 
       const totalGains = totalFraisAgence + totalCommissions
 
@@ -52,14 +62,17 @@ const AgencyEarnings = () => {
             <StatCard 
               title="Total Frais d'Agence" 
               value={`${stats?.totalFraisAgence?.toLocaleString() || 0} FCFA`}
+              description="Inclut tous les frais d'agence perçus"
             />
             <StatCard 
-              title="Commission sur Loyers (Mensuel)" 
+              title="Commission sur Loyers" 
               value={`${stats?.totalCommissions?.toLocaleString() || 0} FCFA`}
+              description="Commission mensuelle sur les loyers"
             />
             <StatCard 
               title="Total Gains" 
               value={`${stats?.totalGains?.toLocaleString() || 0} FCFA`}
+              description="Total des frais et commissions"
             />
           </div>
 
