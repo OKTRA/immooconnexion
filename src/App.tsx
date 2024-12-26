@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { GlobalHeader } from "@/components/layout/GlobalHeader"
 import { Loader2 } from "lucide-react"
-import { AppSidebar } from "@/components/AppSidebar"
 
 // Lazy load all pages
 const Index = lazy(() => import("./pages/Index"))
@@ -43,135 +42,102 @@ const queryClient = new QueryClient({
   },
 })
 
-function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen">
-      <GlobalHeader />
-      <div className="flex">
-        <div className="hidden md:block w-64 min-h-screen border-r">
-          <AppSidebar />
-        </div>
-        <main className="flex-1 min-h-screen pt-16">
-          {children}
-        </main>
-      </div>
-    </div>
-  )
-}
-
 function AppRoutes() {
   return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        {/* Public routes */}
-        <Route path="/index" element={<PublicProperties />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/agence/login" element={<Login />} />
-        <Route path="/super-admin/login" element={<SuperAdminLogin />} />
+    <>
+      <GlobalHeader />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/index" element={<PublicProperties />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/agence/login" element={<Login />} />
+          <Route path="/super-admin/login" element={<SuperAdminLogin />} />
 
-        {/* Protected agency routes */}
-        <Route
-          path="/agence/admin"
-          element={
-            <ProtectedRoute>
-              <AuthenticatedLayout>
+          {/* Protected agency routes */}
+          <Route
+            path="/agence/admin"
+            element={
+              <ProtectedRoute>
                 <Index />
-              </AuthenticatedLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/super-admin/admin"
-          element={
-            <ProtectedRoute>
-              <AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/super-admin/admin"
+            element={
+              <ProtectedRoute>
                 <AdminDashboard />
-              </AuthenticatedLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/agence/locataires"
-          element={
-            <ProtectedRoute>
-              <AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agence/locataires"
+            element={
+              <ProtectedRoute>
                 <Tenants />
-              </AuthenticatedLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/agence/locataires/:id/contrats"
-          element={
-            <ProtectedRoute>
-              <AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agence/locataires/:id/contrats"
+            element={
+              <ProtectedRoute>
                 <TenantContracts />
-              </AuthenticatedLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/agence/biens"
-          element={
-            <ProtectedRoute>
-              <AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agence/biens"
+            element={
+              <ProtectedRoute>
                 <Properties />
-              </AuthenticatedLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/agence/biens/:id"
-          element={
-            <ProtectedRoute>
-              <AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agence/biens/:id"
+            element={
+              <ProtectedRoute>
                 <PropertyDetails />
-              </AuthenticatedLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/agence/ventes"
-          element={
-            <ProtectedRoute>
-              <AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agence/ventes"
+            element={
+              <ProtectedRoute>
                 <PropertySales />
-              </AuthenticatedLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/agence/depenses"
-          element={
-            <ProtectedRoute>
-              <AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agence/depenses"
+            element={
+              <ProtectedRoute>
                 <Expenses />
-              </AuthenticatedLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/agence/gains"
-          element={
-            <ProtectedRoute>
-              <AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agence/gains"
+            element={
+              <ProtectedRoute>
                 <AgencyEarnings />
-              </AuthenticatedLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/agence/rapports"
-          element={
-            <ProtectedRoute>
-              <AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agence/rapports"
+            element={
+              <ProtectedRoute>
                 <Reports />
-              </AuthenticatedLayout>
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </Suspense>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Suspense>
+    </>
   )
 }
 
