@@ -36,7 +36,7 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
         formData={formData}
         setFormData={setFormData}
         handleImageChange={handleImageChange}
-        imagePreviewUrl={previewUrls}
+        imagePreviewUrl={previewUrls} // This is now correctly typed as string[]
       />
 
       <div className="flex justify-end gap-2">
