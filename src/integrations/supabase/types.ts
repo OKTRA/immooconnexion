@@ -528,6 +528,7 @@ export type Database = {
           created_at: string | null
           id: string
           payment_status: string | null
+          photo_urls: string[] | null
           property_id: string
           sale_date: string
           sale_price: number
@@ -541,6 +542,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           payment_status?: string | null
+          photo_urls?: string[] | null
           property_id: string
           sale_date: string
           sale_price: number
@@ -554,6 +556,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           payment_status?: string | null
+          photo_urls?: string[] | null
           property_id?: string
           sale_date?: string
           sale_price?: number
