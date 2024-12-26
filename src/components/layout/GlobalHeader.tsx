@@ -8,15 +8,20 @@ import { AnimatedLogo } from "@/components/header/AnimatedLogo"
 import { useQuery } from "@tanstack/react-query"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { Menu } from "lucide-react"
 
 export function GlobalHeader() {
   const navigate = useNavigate()
   const location = useLocation()
   const { toast } = useToast()
   const { theme, setTheme } = useTheme()
-
-  // Check if we're on an admin or dashboard route
-  const isAdminOrDashboardRoute = location.pathname.includes('/admin') || location.pathname === '/'
 
   const { data: profile } = useQuery({
     queryKey: ["user-profile"],
@@ -52,60 +57,90 @@ export function GlobalHeader() {
     }
   }
 
-  // Only render if we have a profile and we're on an admin/dashboard route
+  // Only render if we're on an admin/dashboard route
+  const isAdminOrDashboardRoute = location.pathname.includes('/admin') || location.pathname === '/'
   if (!profile || !isAdminOrDashboardRoute) {
     return null
   }
 
+  const HeaderContent = () => (
+    <>
+      <div className="flex items-center gap-2">
+        <Avatar className="h-8 w-8">
+          <AvatarFallback>
+            {profile?.first_name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
+          </AvatarFallback>
+        </Avatar>
+        <div className="hidden sm:block">
+          <p className="text-sm font-medium">
+            {profile?.first_name || profile?.email || 'Utilisateur'}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {profile?.role === 'admin' ? 'Administrateur' : 'Utilisateur'}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="h-8 w-8"
+        >
+          {theme === "dark" ? (
+            <Sun className="h-4 w-4" />
+          ) : (
+            <Moon className="h-4 w-4" />
+          )}
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleLogout}
+          className="text-red-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900"
+        >
+          <LogOut className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Déconnexion</span>
+        </Button>
+      </div>
+    </>
+  )
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between py-4">
+      <div className="container flex h-14 items-center justify-between">
         <div className="flex items-center gap-4">
           <AnimatedLogo />
           <Separator orientation="vertical" className="h-6" />
-          <h1 className="text-xl font-semibold hidden md:block">
+          <h1 className="text-lg font-semibold hidden sm:block">
             {profile?.role === 'admin' ? 'Administration' : 'Gestion Immobilière'}
           </h1>
         </div>
-        
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 mr-4">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback>
-                {profile?.first_name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="hidden md:block">
-              <p className="text-sm font-medium">
-                {profile?.first_name || profile?.email || 'Utilisateur'}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {profile?.role === 'admin' ? 'Administrateur' : 'Utilisateur'}
-              </p>
-            </div>
-          </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="mr-2"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
-          </Button>
+        {/* Desktop view */}
+        <div className="hidden md:flex items-center gap-4">
+          <HeaderContent />
+        </div>
 
-          <Button
-            variant="ghost"
-            className="text-red-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            <span className="hidden md:inline">Déconnexion</span>
-          </Button>
+        {/* Mobile view */}
+        <div className="md:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Menu</SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col gap-4 mt-4">
+                <HeaderContent />
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>
