@@ -32,3 +32,10 @@ export interface PropertyDialogProps {
   open?: boolean
   className?: string
 }
+
+export interface PropertyFormFieldsProps {
+  formData: PropertyFormData
+  setFormData: (data: PropertyFormData) => void
+  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  imagePreviewUrl?: string | string[]
+}
