@@ -29,7 +29,7 @@ export function AdminLoginForm() {
       })
 
       if (signInError) {
-        console.error('Erreur de connexion:', signInError)
+        console.error('Login error:', signInError)
         
         let errorMessage = "Identifiants incorrects. Veuillez vérifier votre email et mot de passe."
         
@@ -58,30 +58,18 @@ export function AdminLoginForm() {
         return
       }
 
-      // Vérifier si l'utilisateur est un admin dans la table profiles
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('role, agency_id')
+      // Check if the user is a super admin in the administrators table
+      const { data: adminData, error: adminError } = await supabase
+        .from('administrators')
+        .select('is_super_admin')
         .eq('id', data.user.id)
         .single()
 
-      if (profileError) {
-        console.error('Erreur de vérification du profil:', profileError)
-        toast({
-          title: "Erreur de vérification",
-          description: "Impossible de vérifier vos droits d'accès",
-          variant: "destructive",
-        })
-        await supabase.auth.signOut()
-        setIsLoading(false)
-        return
-      }
-
-      if (!profileData || profileData.role !== 'admin') {
-        console.error('Utilisateur non admin:', profileData?.role)
+      if (adminError || !adminData) {
+        console.error('Admin verification error:', adminError)
         toast({
           title: "Accès refusé",
-          description: "Seuls les administrateurs peuvent se connecter ici",
+          description: "Vous n'avez pas les droits d'accès nécessaires",
           variant: "destructive",
         })
         await supabase.auth.signOut()
@@ -89,11 +77,11 @@ export function AdminLoginForm() {
         return
       }
 
-      if (!profileData.agency_id) {
-        console.error('Aucune agence associée')
+      if (!adminData.is_super_admin) {
+        console.error('User is not a super admin')
         toast({
-          title: "Erreur de configuration",
-          description: "Aucune agence n'est associée à votre compte",
+          title: "Accès refusé",
+          description: "Seuls les super administrateurs peuvent se connecter ici",
           variant: "destructive",
         })
         await supabase.auth.signOut()
@@ -103,12 +91,12 @@ export function AdminLoginForm() {
 
       toast({
         title: "Connexion réussie",
-        description: "Bienvenue dans votre espace administrateur",
+        description: "Bienvenue dans votre espace super administrateur",
       })
 
-      navigate("/agence/admin")
+      navigate("/super-admin/admin")
     } catch (error: any) {
-      console.error('Erreur générale:', error)
+      console.error('General error:', error)
       toast({
         title: "Erreur de connexion",
         description: "Une erreur est survenue lors de la connexion",
@@ -131,9 +119,9 @@ export function AdminLoginForm() {
           <div className="flex items-center justify-center text-primary mb-4">
             <Shield className="h-12 w-12" />
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Admin</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Super Admin</CardTitle>
           <CardDescription className="text-center">
-            Accès réservé aux administrateurs
+            Accès réservé aux super administrateurs
           </CardDescription>
         </CardHeader>
         <CardContent>
