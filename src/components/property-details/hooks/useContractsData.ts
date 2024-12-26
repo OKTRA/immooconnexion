@@ -13,10 +13,13 @@ export const useContractsData = (id: string | undefined) => {
           montant,
           type,
           created_at,
+          updated_at,
           tenant_id,
           property_id,
           start_date,
-          end_date
+          end_date,
+          statut,
+          agency_id
         `)
         .eq('property_id', id)
         .order('created_at', { ascending: false })
