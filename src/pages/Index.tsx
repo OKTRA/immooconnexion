@@ -149,8 +149,10 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
+        <div className="hidden md:block md:w-[15%] min-w-[200px]">
+          <AppSidebar />
+        </div>
+        <main className="w-full md:w-[85%] p-4 md:p-8 overflow-x-hidden">
           <div className="grid gap-4 md:grid-cols-3 mb-8">
             <StatCard
               title="Total Biens"

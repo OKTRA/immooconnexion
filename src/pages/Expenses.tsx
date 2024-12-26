@@ -1,66 +1,22 @@
-import { useState } from "react"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/AppSidebar"
-import { ExpenseDialog } from "@/components/ExpenseDialog"
 import { ExpenseTable } from "@/components/ExpenseTable"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { ExpenseDialog } from "@/components/ExpenseDialog"
 
 const Expenses = () => {
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string>("")
-
-  const { data: properties } = useQuery({
-    queryKey: ['properties'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-      
-      if (error) throw error
-      return data
-    }
-  })
-
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <main className="flex-1 p-8">
-          <div className="flex flex-col gap-4 mb-8">
-            <div className="flex justify-between items-center">
-              <h1 className="text-3xl font-bold">Gestion des Dépenses</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="w-64">
-                <Select 
-                  onValueChange={setSelectedPropertyId} 
-                  value={selectedPropertyId}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner une propriété" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous les biens</SelectItem>
-                    {properties?.map((property) => (
-                      <SelectItem key={property.id} value={property.id}>
-                        {property.bien}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <ExpenseDialog propertyId={selectedPropertyId === "all" ? "" : selectedPropertyId} />
-            </div>
+        <div className="hidden md:block md:w-[15%] min-w-[200px]">
+          <AppSidebar />
+        </div>
+        <main className="w-full md:w-[85%] p-4 md:p-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold">Dépenses</h1>
+            <ExpenseDialog />
           </div>
 
-          <ExpenseTable propertyId={selectedPropertyId === "all" ? undefined : selectedPropertyId} />
+          <ExpenseTable />
         </main>
       </div>
     </SidebarProvider>
