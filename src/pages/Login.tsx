@@ -82,7 +82,7 @@ const Login = () => {
       <div className="absolute top-4 right-4 flex gap-2 z-10">
         <Button 
           variant="secondary" 
-          className="bg-white hover:bg-gray-100"
+          className="bg-white/80 hover:bg-white/90 backdrop-blur-sm"
           onClick={() => navigate('/super-admin/login')}
         >
           <Shield className="mr-2 h-4 w-4" />
@@ -90,7 +90,7 @@ const Login = () => {
         </Button>
         <Button 
           variant="secondary" 
-          className="bg-white hover:bg-gray-100"
+          className="bg-white/80 hover:bg-white/90 backdrop-blur-sm"
           onClick={() => navigate('/public')}
         >
           <ExternalLink className="mr-2 h-4 w-4" />
@@ -99,11 +99,11 @@ const Login = () => {
       </div>
 
       <div className="flex-grow flex items-center justify-center">
-        <Card className="w-full max-w-md shadow-xl bg-white/95 backdrop-blur-sm">
-          <CardHeader className="space-y-2">
-            <CardTitle className="text-2xl font-bold text-center">Connexion</CardTitle>
-            <CardDescription className="text-center">
-              Bienvenue sur votre espace de gestion immobilière
+        <Card className="w-full max-w-sm shadow-lg bg-white/90 backdrop-blur-sm border-0 rounded-lg overflow-hidden">
+          <CardHeader className="space-y-1 pb-4">
+            <CardTitle className="text-xl font-semibold text-center">Connexion</CardTitle>
+            <CardDescription className="text-center text-sm">
+              Bienvenue sur votre espace
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -114,17 +114,17 @@ const Login = () => {
                 variables: {
                   default: {
                     colors: {
-                      brand: "#000000",
-                      brandAccent: "#333333",
+                      brand: "#517fa4",
+                      brandAccent: "#243949",
                     },
                   },
                 },
                 className: {
-                  container: "space-y-4",
-                  button: "w-full bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded transition-colors",
+                  container: "space-y-3",
+                  button: "w-full bg-gradient-to-r from-[#243949] to-[#517fa4] hover:from-[#2c4456] hover:to-[#5c8fb8] text-white font-medium py-2 px-4 rounded-md transition-all duration-200",
                   label: "block text-sm font-medium text-gray-700",
-                  input: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm",
-                  anchor: "text-sm text-gray-600 hover:text-gray-900",
+                  input: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#517fa4] focus:ring-[#517fa4] sm:text-sm",
+                  anchor: "text-sm text-[#517fa4] hover:text-[#243949] transition-colors",
                 },
               }}
               theme="light"
@@ -135,14 +135,14 @@ const Login = () => {
                     email_label: "Email",
                     password_label: "Mot de passe",
                     button_label: "Se connecter",
-                    loading_button_label: "Connexion en cours...",
+                    loading_button_label: "Connexion...",
                   },
                   forgotten_password: {
                     link_text: "Mot de passe oublié ?",
-                    button_label: "Réinitialiser le mot de passe",
+                    button_label: "Réinitialiser",
                     email_label: "Email",
                     password_label: "Nouveau mot de passe",
-                    confirmation_text: "Vérifiez vos emails pour réinitialiser votre mot de passe",
+                    confirmation_text: "Vérifiez vos emails",
                   },
                 },
               }}
@@ -153,20 +153,20 @@ const Login = () => {
               magicLink={false}
             />
             {view === "sign_in" && (
-              <div className="text-center mt-4">
+              <div className="text-center mt-3">
                 <button 
                   onClick={() => setView("forgotten_password")}
-                  className="text-sm text-gray-600 hover:text-gray-900"
+                  className="text-sm text-[#517fa4] hover:text-[#243949] transition-colors"
                 >
                   Mot de passe oublié ?
                 </button>
               </div>
             )}
             {view === "forgotten_password" && (
-              <div className="text-center mt-4">
+              <div className="text-center mt-3">
                 <button 
                   onClick={() => setView("sign_in")}
-                  className="text-sm text-gray-600 hover:text-gray-900"
+                  className="text-sm text-[#517fa4] hover:text-[#243949] transition-colors"
                 >
                   Retour à la connexion
                 </button>
