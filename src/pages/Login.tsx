@@ -74,12 +74,12 @@ const Login = () => {
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center p-4"
+      className="relative min-h-screen flex flex-col p-4"
       style={{
         background: `linear-gradient(to right, #243949 0%, #517fa4 100%)`,
       }}
     >
-      <div className="fixed top-4 right-4 flex gap-2">
+      <div className="absolute top-4 right-4 flex gap-2 z-10">
         <Button 
           variant="secondary" 
           className="bg-white hover:bg-gray-100"
@@ -98,81 +98,83 @@ const Login = () => {
         </Button>
       </div>
 
-      <Card className="w-full max-w-md shadow-xl bg-white/95 backdrop-blur-sm">
-        <CardHeader className="space-y-2">
-          <CardTitle className="text-2xl font-bold text-center">Connexion</CardTitle>
-          <CardDescription className="text-center">
-            Bienvenue sur votre espace de gestion immobilière
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Auth
-            supabaseClient={supabase}
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: "#000000",
-                    brandAccent: "#333333",
+      <div className="flex-grow flex items-center justify-center">
+        <Card className="w-full max-w-md shadow-xl bg-white/95 backdrop-blur-sm">
+          <CardHeader className="space-y-2">
+            <CardTitle className="text-2xl font-bold text-center">Connexion</CardTitle>
+            <CardDescription className="text-center">
+              Bienvenue sur votre espace de gestion immobilière
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Auth
+              supabaseClient={supabase}
+              appearance={{
+                theme: ThemeSupa,
+                variables: {
+                  default: {
+                    colors: {
+                      brand: "#000000",
+                      brandAccent: "#333333",
+                    },
                   },
                 },
-              },
-              className: {
-                container: "space-y-4",
-                button: "w-full bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded transition-colors",
-                label: "block text-sm font-medium text-gray-700",
-                input: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm",
-                anchor: "text-sm text-gray-600 hover:text-gray-900",
-              },
-            }}
-            theme="light"
-            providers={[]}
-            localization={{
-              variables: {
-                sign_in: {
-                  email_label: "Email",
-                  password_label: "Mot de passe",
-                  button_label: "Se connecter",
-                  loading_button_label: "Connexion en cours...",
+                className: {
+                  container: "space-y-4",
+                  button: "w-full bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded transition-colors",
+                  label: "block text-sm font-medium text-gray-700",
+                  input: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm",
+                  anchor: "text-sm text-gray-600 hover:text-gray-900",
                 },
-                forgotten_password: {
-                  link_text: "Mot de passe oublié ?",
-                  button_label: "Réinitialiser le mot de passe",
-                  email_label: "Email",
-                  password_label: "Nouveau mot de passe",
-                  confirmation_text: "Vérifiez vos emails pour réinitialiser votre mot de passe",
+              }}
+              theme="light"
+              providers={[]}
+              localization={{
+                variables: {
+                  sign_in: {
+                    email_label: "Email",
+                    password_label: "Mot de passe",
+                    button_label: "Se connecter",
+                    loading_button_label: "Connexion en cours...",
+                  },
+                  forgotten_password: {
+                    link_text: "Mot de passe oublié ?",
+                    button_label: "Réinitialiser le mot de passe",
+                    email_label: "Email",
+                    password_label: "Nouveau mot de passe",
+                    confirmation_text: "Vérifiez vos emails pour réinitialiser votre mot de passe",
+                  },
                 },
-              },
-            }}
-            view={view}
-            showLinks={false}
-            redirectTo={window.location.origin}
-            onlyThirdPartyProviders={false}
-            magicLink={false}
-          />
-          {view === "sign_in" && (
-            <div className="text-center mt-4">
-              <button 
-                onClick={() => setView("forgotten_password")}
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                Mot de passe oublié ?
-              </button>
-            </div>
-          )}
-          {view === "forgotten_password" && (
-            <div className="text-center mt-4">
-              <button 
-                onClick={() => setView("sign_in")}
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                Retour à la connexion
-              </button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              }}
+              view={view}
+              showLinks={false}
+              redirectTo={window.location.origin}
+              onlyThirdPartyProviders={false}
+              magicLink={false}
+            />
+            {view === "sign_in" && (
+              <div className="text-center mt-4">
+                <button 
+                  onClick={() => setView("forgotten_password")}
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  Mot de passe oublié ?
+                </button>
+              </div>
+            )}
+            {view === "forgotten_password" && (
+              <div className="text-center mt-4">
+                <button 
+                  onClick={() => setView("sign_in")}
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  Retour à la connexion
+                </button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
