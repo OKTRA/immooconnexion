@@ -98,7 +98,7 @@ export function AnimatedLogo() {
         />
         <span 
           ref={firstPupilRef}
-          className="absolute w-2 h-2 rounded-full transition-transform duration-300 dark:bg-white bg-black"
+          className="absolute w-2 h-2 bg-black rounded-full transition-transform duration-300"
           style={{ 
             left: '50%', 
             top: '50%', 
@@ -117,7 +117,7 @@ export function AnimatedLogo() {
         />
         <span 
           ref={secondPupilRef}
-          className="absolute w-2 h-2 rounded-full transition-transform duration-300 dark:bg-white bg-black"
+          className="absolute w-2 h-2 bg-black rounded-full transition-transform duration-300"
           style={{ 
             left: '50%', 
             top: '50%', 
