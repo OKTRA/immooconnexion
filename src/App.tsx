@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
-import { Header } from "@/components/header/Header"
+import { GlobalHeader } from "@/components/layout/GlobalHeader"
 import Index from "./pages/Index"
 import Login from "./pages/Login"
 import SuperAdminLogin from "./pages/SuperAdminLogin"
@@ -33,7 +33,7 @@ const queryClient = new QueryClient({
 function AppRoutes() {
   return (
     <>
-      <Header />
+      <GlobalHeader />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/super-admin/login" element={<SuperAdminLogin />} />
