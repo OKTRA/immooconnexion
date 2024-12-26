@@ -31,7 +31,9 @@ export function AdminLoginForm() {
         let errorMessage = "Identifiants incorrects. Veuillez vérifier votre email et mot de passe."
         
         if (signInError.message.includes("Email not confirmed")) {
-          errorMessage = "Veuillez confirmer votre email avant de vous connecter"
+          errorMessage = "Veuillez confirmer votre email avant de vous connecter."
+        } else if (signInError.message.includes("Invalid login credentials")) {
+          errorMessage = "Email ou mot de passe incorrect."
         }
 
         toast({
@@ -58,7 +60,7 @@ export function AdminLoginForm() {
         .from('profiles')
         .select('role, agency_id')
         .eq('id', data.user.id)
-        .maybeSingle()
+        .single()
 
       if (profileError) {
         console.error('Erreur de vérification du profil:', profileError)
@@ -109,6 +111,7 @@ export function AdminLoginForm() {
         description: "Une erreur est survenue lors de la connexion",
         variant: "destructive",
       })
+    } finally {
       setIsLoading(false)
     }
   }
