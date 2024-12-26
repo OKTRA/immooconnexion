@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface ContractWithProperties {
   id: string
@@ -68,38 +69,36 @@ export function AgencyEarningsTable() {
         throw error
       }
 
-      return (contracts as ContractWithProperties[]).map(contract => {
-        // Si c'est un frais d'agence direct
-        if (contract.type === 'frais_agence') {
+      // Séparer les frais d'agence et les loyers
+      const agencyFees = (contracts as ContractWithProperties[])
+        .filter(contract => contract.type === 'frais_agence')
+        .map(contract => ({
+          id: contract.id,
+          bien: contract.properties?.bien || 'Frais direct',
+          montant: contract.montant,
+          datePerception: new Date(contract.created_at).toISOString().split('T')[0],
+        }))
+
+      const rentals = (contracts as ContractWithProperties[])
+        .filter(contract => contract.type === 'loyer')
+        .map(contract => {
+          const commissionMensuelle = (contract.montant * (contract.properties?.taux_commission || 0)) / 100
+          
           return {
             id: contract.id,
-            bien: contract.properties?.bien || 'Frais direct',
-            loyer: 0,
-            fraisAgence: contract.montant,
-            tauxCommission: 0,
-            commissionMensuelle: 0,
-            gainProprietaire: 0,
-            gainAgence: contract.montant,
+            bien: contract.properties?.bien || '',
+            loyer: contract.montant,
+            tauxCommission: contract.properties?.taux_commission || 0,
+            commissionMensuelle: commissionMensuelle,
+            gainProprietaire: contract.montant - commissionMensuelle,
             datePerception: new Date(contract.created_at).toISOString().split('T')[0],
           }
-        }
-        
-        // Si c'est un loyer
-        const commissionMensuelle = (contract.montant * (contract.properties?.taux_commission || 0)) / 100
-        const fraisAgence = contract.properties?.frais_agence || 0
-        
-        return {
-          id: contract.id,
-          bien: contract.properties?.bien || '',
-          loyer: contract.montant,
-          fraisAgence: fraisAgence,
-          tauxCommission: contract.properties?.taux_commission || 0,
-          commissionMensuelle: commissionMensuelle,
-          gainProprietaire: contract.montant - commissionMensuelle,
-          gainAgence: commissionMensuelle + fraisAgence,
-          datePerception: new Date(contract.created_at).toISOString().split('T')[0],
-        }
-      })
+        })
+
+      return {
+        agencyFees,
+        rentals
+      }
     }
   })
 
@@ -108,35 +107,64 @@ export function AgencyEarningsTable() {
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Bien</TableHead>
-            <TableHead>Loyer</TableHead>
-            <TableHead>Frais d'Agence</TableHead>
-            <TableHead>Taux Commission (%)</TableHead>
-            <TableHead>Commission Mensuelle</TableHead>
-            <TableHead>Gain Propriétaire</TableHead>
-            <TableHead>Gain Agence</TableHead>
-            <TableHead>Date Perception</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {(earnings || []).map((earning) => (
-            <TableRow key={earning.id}>
-              <TableCell>{earning.bien}</TableCell>
-              <TableCell>{earning.loyer.toLocaleString()} FCFA</TableCell>
-              <TableCell>{earning.fraisAgence.toLocaleString()} FCFA</TableCell>
-              <TableCell>{earning.tauxCommission}%</TableCell>
-              <TableCell>{earning.commissionMensuelle.toLocaleString()} FCFA</TableCell>
-              <TableCell>{earning.gainProprietaire.toLocaleString()} FCFA</TableCell>
-              <TableCell>{earning.gainAgence.toLocaleString()} FCFA</TableCell>
-              <TableCell>{earning.datePerception}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <div className="space-y-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Frais d'Agence</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Bien</TableHead>
+                <TableHead>Montant</TableHead>
+                <TableHead>Date Perception</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(earnings?.agencyFees || []).map((fee) => (
+                <TableRow key={fee.id}>
+                  <TableCell>{fee.bien}</TableCell>
+                  <TableCell>{fee.montant.toLocaleString()} FCFA</TableCell>
+                  <TableCell>{fee.datePerception}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Commissions sur Loyers</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Bien</TableHead>
+                <TableHead>Loyer</TableHead>
+                <TableHead>Taux Commission (%)</TableHead>
+                <TableHead>Commission Mensuelle</TableHead>
+                <TableHead>Gain Propriétaire</TableHead>
+                <TableHead>Date Perception</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(earnings?.rentals || []).map((rental) => (
+                <TableRow key={rental.id}>
+                  <TableCell>{rental.bien}</TableCell>
+                  <TableCell>{rental.loyer.toLocaleString()} FCFA</TableCell>
+                  <TableCell>{rental.tauxCommission}%</TableCell>
+                  <TableCell>{rental.commissionMensuelle.toLocaleString()} FCFA</TableCell>
+                  <TableCell>{rental.gainProprietaire.toLocaleString()} FCFA</TableCell>
+                  <TableCell>{rental.datePerception}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   )
 }
