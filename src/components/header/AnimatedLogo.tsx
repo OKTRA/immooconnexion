@@ -93,7 +93,7 @@ export function AnimatedLogo() {
         </span>
         <div 
           ref={firstEyelidRef}
-          className="absolute inset-0 bg-inherit transition-all duration-150 origin-top"
+          className="absolute inset-0 bg-inherit/90 dark:bg-inherit/80 backdrop-blur-[1px] transition-all duration-150 origin-top"
           style={{ height: '0%' }}
         />
         <span 
@@ -112,7 +112,7 @@ export function AnimatedLogo() {
         </span>
         <div 
           ref={secondEyelidRef}
-          className="absolute inset-0 bg-inherit transition-all duration-150 origin-top"
+          className="absolute inset-0 bg-inherit/90 dark:bg-inherit/80 backdrop-blur-[1px] transition-all duration-150 origin-top"
           style={{ height: '0%' }}
         />
         <span 
