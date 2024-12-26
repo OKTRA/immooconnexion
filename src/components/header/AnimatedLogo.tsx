@@ -93,12 +93,12 @@ export function AnimatedLogo() {
         </span>
         <div 
           ref={firstEyelidRef}
-          className="absolute inset-0 bg-background transition-all duration-150 origin-top"
+          className="absolute inset-0 bg-inherit transition-all duration-150 origin-top"
           style={{ height: '0%' }}
         />
         <span 
           ref={firstPupilRef}
-          className="absolute w-2 h-2 bg-black rounded-full transition-transform duration-300"
+          className="absolute w-2 h-2 dark:bg-white bg-black rounded-full transition-transform duration-300"
           style={{ 
             left: '50%', 
             top: '50%', 
@@ -112,12 +112,12 @@ export function AnimatedLogo() {
         </span>
         <div 
           ref={secondEyelidRef}
-          className="absolute inset-0 bg-background transition-all duration-150 origin-top"
+          className="absolute inset-0 bg-inherit transition-all duration-150 origin-top"
           style={{ height: '0%' }}
         />
         <span 
           ref={secondPupilRef}
-          className="absolute w-2 h-2 bg-black rounded-full transition-transform duration-300"
+          className="absolute w-2 h-2 dark:bg-white bg-black rounded-full transition-transform duration-300"
           style={{ 
             left: '50%', 
             top: '50%', 
