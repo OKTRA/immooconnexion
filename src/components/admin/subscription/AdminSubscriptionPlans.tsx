@@ -20,7 +20,10 @@ export function AdminSubscriptionPlans() {
         .select("*")
         .order("price", { ascending: true })
 
-      if (error) throw error
+      if (error) {
+        console.error("Error fetching plans:", error)
+        throw error
+      }
       return data
     },
   })
@@ -40,6 +43,7 @@ export function AdminSubscriptionPlans() {
       setShowAddDialog(false)
       refetch()
     } catch (error: any) {
+      console.error("Error adding plan:", error)
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue lors de l'ajout du plan",
@@ -52,7 +56,14 @@ export function AdminSubscriptionPlans() {
     try {
       const { error } = await supabase
         .from("subscription_plans")
-        .update(plan)
+        .update({
+          name: plan.name,
+          price: plan.price,
+          max_properties: plan.max_properties,
+          max_tenants: plan.max_tenants,
+          max_users: plan.max_users,
+          features: plan.features
+        })
         .eq("id", plan.id)
 
       if (error) throw error
@@ -63,11 +74,13 @@ export function AdminSubscriptionPlans() {
       })
       refetch()
     } catch (error: any) {
+      console.error("Error updating plan:", error)
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue lors de la mise à jour du plan",
         variant: "destructive",
       })
+      throw error
     }
   }
 
@@ -86,6 +99,7 @@ export function AdminSubscriptionPlans() {
       })
       refetch()
     } catch (error: any) {
+      console.error("Error deleting plan:", error)
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue lors de la suppression du plan",

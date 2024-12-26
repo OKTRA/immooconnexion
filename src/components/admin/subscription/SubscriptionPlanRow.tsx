@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { useToast } from "@/components/ui/use-toast"
 
 interface SubscriptionPlanRowProps {
   plan: any
@@ -17,14 +18,28 @@ export function SubscriptionPlanRow({ plan, onEdit, onDelete }: SubscriptionPlan
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [editedPlan, setEditedPlan] = useState(plan)
   const [featuresInput, setFeaturesInput] = useState(plan.features.join('\n'))
+  const { toast } = useToast()
 
-  const handleSaveEdit = () => {
-    const updatedPlan = {
-      ...editedPlan,
-      features: featuresInput.split('\n').filter(Boolean)
+  const handleSaveEdit = async () => {
+    try {
+      const updatedPlan = {
+        ...editedPlan,
+        features: featuresInput.split('\n').filter(Boolean)
+      }
+      await onEdit(updatedPlan)
+      setShowEditDialog(false)
+      toast({
+        title: "Plan mis à jour",
+        description: "Le plan d'abonnement a été mis à jour avec succès",
+      })
+    } catch (error: any) {
+      console.error("Erreur lors de la mise à jour du plan:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la mise à jour du plan",
+        variant: "destructive",
+      })
     }
-    onEdit(updatedPlan)
-    setShowEditDialog(false)
   }
 
   return (
