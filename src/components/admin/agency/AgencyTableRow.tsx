@@ -1,12 +1,14 @@
 import { TableCell, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Edit, Users, Building2, UserPlus } from "lucide-react"
-import { useState } from "react"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Edit, Trash2, Eye } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
 import { Agency } from "./types"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
+import { useState } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { AgencyOverview } from "./AgencyOverview"
-import { AgencyForm } from "./AgencyForm"
-import { AddProfileDialog } from "../profile/AddProfileDialog"
 
 interface AgencyTableRowProps {
   agency: Agency
@@ -15,10 +17,31 @@ interface AgencyTableRowProps {
 }
 
 export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps) {
-  const [showEditDialog, setShowEditDialog] = useState(false)
-  const [showOverviewDialog, setShowOverviewDialog] = useState(false)
-  const [showAddProfileDialog, setShowAddProfileDialog] = useState(false)
-  const [editedAgency, setEditedAgency] = useState(agency)
+  const { toast } = useToast()
+  const [showOverview, setShowOverview] = useState(false)
+
+  const handleDeleteAgency = async () => {
+    try {
+      const { error } = await supabase
+        .from("agencies")
+        .delete()
+        .eq("id", agency.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Agence supprimée",
+        description: "L'agence a été supprimée avec succès",
+      })
+      refetch()
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de la suppression de l'agence",
+        variant: "destructive",
+      })
+    }
+  }
 
   return (
     <>
@@ -27,60 +50,44 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         <TableCell>{agency.address || "-"}</TableCell>
         <TableCell>{agency.phone || "-"}</TableCell>
         <TableCell>{agency.email || "-"}</TableCell>
+        <TableCell className="text-sm text-muted-foreground">
+          {format(new Date(agency.created_at), "Pp", { locale: fr })}
+        </TableCell>
         <TableCell>
           <div className="flex gap-2">
             <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowOverviewDialog(true)}
+              variant="outline"
+              size="icon"
+              onClick={() => setShowOverview(true)}
             >
-              <Building2 className="h-4 w-4 mr-2" />
-              Vue d'ensemble
+              <Eye className="h-4 w-4" />
             </Button>
             <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowAddProfileDialog(true)}
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Ajouter un profil
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowEditDialog(true)}
+              variant="outline"
+              size="icon"
+              onClick={() => onEdit(agency)}
             >
               <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="icon"
+              onClick={handleDeleteAgency}
+            >
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </TableCell>
       </TableRow>
 
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-2xl">
-          <AgencyForm 
-            agency={editedAgency}
-            setAgency={setEditedAgency}
-            onSubmit={(editedAgency) => {
-              onEdit(editedAgency)
-              setShowEditDialog(false)
-            }}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showOverviewDialog} onOpenChange={setShowOverviewDialog}>
+      <Dialog open={showOverview} onOpenChange={setShowOverview}>
         <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Vue d'ensemble de l'agence</DialogTitle>
+          </DialogHeader>
           <AgencyOverview agency={agency} onRefetch={refetch} />
         </DialogContent>
       </Dialog>
-
-      <AddProfileDialog
-        open={showAddProfileDialog}
-        onOpenChange={setShowAddProfileDialog}
-        agencyId={agency.id}
-        onProfileCreated={refetch}
-      />
     </>
   )
 }
