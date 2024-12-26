@@ -38,6 +38,9 @@ export function SubscriptionPlanRow({ plan, onEdit, onDelete }: SubscriptionPlan
         <TableCell className="hidden md:table-cell">
           {plan.max_tenants === -1 ? "Illimité" : plan.max_tenants}
         </TableCell>
+        <TableCell className="hidden md:table-cell">
+          {plan.max_users === -1 ? "Illimité" : plan.max_users}
+        </TableCell>
         <TableCell className="hidden lg:table-cell">
           <ul className="list-disc list-inside">
             {plan.features.map((feature: string, index: number) => (
@@ -105,6 +108,15 @@ export function SubscriptionPlanRow({ plan, onEdit, onDelete }: SubscriptionPlan
                   type="number"
                   value={editedPlan.max_tenants}
                   onChange={(e) => setEditedPlan({ ...editedPlan, max_tenants: parseInt(e.target.value) })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="max_users">Nombre maximum d'utilisateurs (-1 pour illimité)</Label>
+                <Input
+                  id="max_users"
+                  type="number"
+                  value={editedPlan.max_users}
+                  onChange={(e) => setEditedPlan({ ...editedPlan, max_users: parseInt(e.target.value) })}
                 />
               </div>
             </div>

@@ -4,9 +4,10 @@ import { useToast } from "@/components/ui/use-toast"
 export interface SubscriptionLimits {
   max_properties: number
   max_tenants: number
+  max_users: number
 }
 
-export async function checkSubscriptionLimits(agencyId: string, type: 'property' | 'tenant'): Promise<boolean> {
+export async function checkSubscriptionLimits(agencyId: string, type: 'property' | 'tenant' | 'user'): Promise<boolean> {
   try {
     // Get agency's subscription plan
     const { data: agency } = await supabase
@@ -23,7 +24,7 @@ export async function checkSubscriptionLimits(agencyId: string, type: 'property'
     // Get subscription plan limits
     const { data: plan } = await supabase
       .from('subscription_plans')
-      .select('max_properties, max_tenants')
+      .select('max_properties, max_tenants, max_users')
       .eq('id', agency.subscription_plan_id)
       .single()
 
@@ -43,12 +44,21 @@ export async function checkSubscriptionLimits(agencyId: string, type: 'property'
       .select('*', { count: 'exact', head: true })
       .eq('agency_id', agencyId)
 
+    const { count: usersCount } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('agency_id', agencyId)
+
     if (type === 'property' && plan.max_properties !== -1) {
       return (propertiesCount || 0) < plan.max_properties
     }
 
     if (type === 'tenant' && plan.max_tenants !== -1) {
       return (tenantsCount || 0) < plan.max_tenants
+    }
+
+    if (type === 'user' && plan.max_users !== -1) {
+      return (usersCount || 0) < plan.max_users
     }
 
     return true
@@ -61,13 +71,14 @@ export async function checkSubscriptionLimits(agencyId: string, type: 'property'
 export function useSubscriptionLimits() {
   const { toast } = useToast()
 
-  const checkAndNotifyLimits = async (agencyId: string, type: 'property' | 'tenant'): Promise<boolean> => {
+  const checkAndNotifyLimits = async (agencyId: string, type: 'property' | 'tenant' | 'user'): Promise<boolean> => {
     const canAdd = await checkSubscriptionLimits(agencyId, type)
     
     if (!canAdd) {
+      const typeLabel = type === 'property' ? 'biens' : type === 'tenant' ? 'locataires' : 'utilisateurs'
       toast({
         title: "Limite atteinte",
-        description: `Vous avez atteint la limite de ${type === 'property' ? 'biens' : 'locataires'} de votre forfait. Veuillez mettre à niveau votre abonnement.`,
+        description: `Vous avez atteint la limite de ${typeLabel} de votre forfait. Veuillez mettre à niveau votre abonnement.`,
         variant: "destructive",
       })
     }

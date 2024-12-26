@@ -17,6 +17,7 @@ export function PlansTable({ plans, onEdit, onDelete }: PlansTableProps) {
             <TableHead>Prix</TableHead>
             <TableHead className="hidden md:table-cell">Max Propriétés</TableHead>
             <TableHead className="hidden md:table-cell">Max Locataires</TableHead>
+            <TableHead className="hidden md:table-cell">Max Utilisateurs</TableHead>
             <TableHead className="hidden lg:table-cell">Fonctionnalités</TableHead>
             <TableHead className="w-[100px]">Actions</TableHead>
           </TableRow>
