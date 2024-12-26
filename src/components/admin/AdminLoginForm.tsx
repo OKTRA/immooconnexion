@@ -20,36 +20,47 @@ export function AdminLoginForm() {
     setIsLoading(true)
 
     try {
-      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+      console.log("Attempting to sign in with:", { email })
+      
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (signInError) {
+        console.error('Sign in error:', signInError)
         throw signInError
       }
 
-      if (!user) {
+      if (!data.user) {
+        console.error('No user data returned')
         throw new Error("Aucun utilisateur trouvé")
       }
+
+      console.log("User signed in successfully:", data.user.id)
 
       // Vérifier si l'utilisateur est un admin dans la table profiles
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('role, agency_id')
-        .eq('id', user.id)
+        .eq('id', data.user.id)
         .maybeSingle()
 
+      console.log("Profile data:", profileData)
+
       if (profileError) {
+        console.error('Profile check error:', profileError)
         throw new Error("Erreur lors de la vérification des droits d'administrateur")
       }
 
       if (!profileData || profileData.role !== 'admin') {
+        console.error('User is not an admin:', profileData?.role)
         await supabase.auth.signOut()
         throw new Error("Accès non autorisé. Seuls les administrateurs peuvent se connecter ici.")
       }
 
       if (!profileData.agency_id) {
+        console.error('No agency associated with admin')
         await supabase.auth.signOut()
         throw new Error("Aucune agence associée à ce compte administrateur.")
       }
