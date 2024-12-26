@@ -1,7 +1,8 @@
 import { Link, useLocation } from "react-router-dom"
-import { Building2, Home } from "lucide-react"
+import { Building2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { AnimatedLogo } from "@/components/header/AnimatedLogo"
 
 export function PublicHeader() {
   const location = useLocation()
@@ -13,8 +14,7 @@ export function PublicHeader() {
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center">
             <Link to="/public" className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold text-gray-900">ImmoGest</span>
+              <AnimatedLogo />
             </Link>
           </div>
 
@@ -27,7 +27,7 @@ export function PublicHeader() {
               )}
             >
               <div className="flex items-center space-x-1">
-                <Home className="h-4 w-4" />
+                <Building2 className="h-4 w-4" />
                 <span>Propriétés</span>
               </div>
             </Link>
