@@ -20,8 +20,6 @@ export function AdminLoginForm() {
     setIsLoading(true)
 
     try {
-      console.log("Tentative de connexion avec:", { email })
-      
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -30,15 +28,10 @@ export function AdminLoginForm() {
       if (signInError) {
         console.error('Erreur de connexion:', signInError)
         
-        let errorMessage = "Email ou mot de passe incorrect"
+        let errorMessage = "Identifiants incorrects. Veuillez vérifier votre email et mot de passe."
         
-        if (signInError.message.includes("Invalid login credentials")) {
-          errorMessage = "Email ou mot de passe incorrect"
-        } else if (signInError.message.includes("Email not confirmed")) {
+        if (signInError.message.includes("Email not confirmed")) {
           errorMessage = "Veuillez confirmer votre email avant de vous connecter"
-        } else {
-          console.error('Détails de l\'erreur:', signInError)
-          errorMessage = "Une erreur est survenue lors de la connexion"
         }
 
         toast({
@@ -60,16 +53,12 @@ export function AdminLoginForm() {
         return
       }
 
-      console.log("Utilisateur connecté avec succès:", data.user.id)
-
       // Vérifier si l'utilisateur est un admin dans la table profiles
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('role, agency_id')
         .eq('id', data.user.id)
         .maybeSingle()
-
-      console.log("Données du profil:", profileData)
 
       if (profileError) {
         console.error('Erreur de vérification du profil:', profileError)
@@ -112,13 +101,12 @@ export function AdminLoginForm() {
         description: "Bienvenue dans votre espace administrateur",
       })
 
-      // Explicitly navigate to /agence/admin after successful login
       navigate("/agence/admin")
     } catch (error: any) {
       console.error('Erreur générale:', error)
       toast({
         title: "Erreur de connexion",
-        description: "Une erreur inattendue est survenue",
+        description: "Une erreur est survenue lors de la connexion",
         variant: "destructive",
       })
       setIsLoading(false)
