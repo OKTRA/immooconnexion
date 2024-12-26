@@ -57,6 +57,9 @@ export function useAgencyUserEdit({ onSuccess }: UseAgencyUserEditProps = {}) {
   const handleUpdateProfile = async (user: any) => {
     try {
       console.log("Updating profile:", user)
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      if (!currentUser) throw new Error("Non authentifié")
+
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
@@ -64,6 +67,7 @@ export function useAgencyUserEdit({ onSuccess }: UseAgencyUserEditProps = {}) {
           last_name: user.last_name,
           phone_number: user.phone_number,
           role: user.role,
+          updated_at: new Date().toISOString(),
         })
         .eq('id', user.id)
 
