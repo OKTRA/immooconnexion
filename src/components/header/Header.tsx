@@ -61,8 +61,7 @@ export function Header() {
               onClick={() => navigate('/super-admin/login')}
             >
               <Shield className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Super Admin</span>
-              <span className="sm:hidden">Admin</span>
+              <span className="sm:text-base text-sm">Admin</span>
             </Button>
             <Button 
               variant="secondary" 
@@ -70,8 +69,7 @@ export function Header() {
               onClick={() => navigate('/public')}
             >
               <ExternalLink className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Voir les biens disponibles</span>
-              <span className="sm:hidden">Voir les biens</span>
+              <span className="sm:text-base text-sm">Voir les biens</span>
             </Button>
           </div>
         )}
