@@ -29,13 +29,24 @@ export function AdminLoginForm() {
 
       if (signInError) {
         console.error('Erreur de connexion:', signInError)
+        
+        // Parse the error message from the response body if available
+        let errorBody
+        try {
+          errorBody = JSON.parse(signInError.message)
+        } catch {
+          errorBody = null
+        }
+
         let errorMessage = "Email ou mot de passe incorrect"
         
-        if (signInError.message.includes("Invalid login credentials")) {
+        if (errorBody?.message === "Invalid login credentials" || 
+            signInError.message.includes("Invalid login credentials")) {
           errorMessage = "Email ou mot de passe incorrect"
         } else if (signInError.message.includes("Email not confirmed")) {
           errorMessage = "Veuillez confirmer votre email avant de vous connecter"
         } else {
+          console.error('Détails de l\'erreur:', signInError)
           errorMessage = "Une erreur est survenue lors de la connexion"
         }
 
@@ -44,6 +55,7 @@ export function AdminLoginForm() {
           description: errorMessage,
           variant: "destructive",
         })
+        setIsLoading(false)
         return
       }
 
@@ -53,6 +65,7 @@ export function AdminLoginForm() {
           description: "Aucun utilisateur trouvé",
           variant: "destructive",
         })
+        setIsLoading(false)
         return
       }
 
@@ -75,6 +88,7 @@ export function AdminLoginForm() {
           variant: "destructive",
         })
         await supabase.auth.signOut()
+        setIsLoading(false)
         return
       }
 
@@ -86,6 +100,7 @@ export function AdminLoginForm() {
           variant: "destructive",
         })
         await supabase.auth.signOut()
+        setIsLoading(false)
         return
       }
 
@@ -97,6 +112,7 @@ export function AdminLoginForm() {
           variant: "destructive",
         })
         await supabase.auth.signOut()
+        setIsLoading(false)
         return
       }
 
