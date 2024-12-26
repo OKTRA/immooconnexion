@@ -34,13 +34,19 @@ export function ProfileForm({
     
     try {
       if (step === 1 && onCreateAuthUser) {
-        await onCreateAuthUser()
+        const userId = await onCreateAuthUser()
+        console.log("Auth user created with ID:", userId)
+        if (userId) {
+          setNewProfile({ ...newProfile, id: userId })
+          if (onSubmit) {
+            onSubmit()
+          }
+        }
       } else if (step === 2 && onUpdateProfile && newProfile.id) {
         await onUpdateProfile(newProfile.id)
-      }
-
-      if (onSubmit) {
-        onSubmit()
+        if (onSubmit) {
+          onSubmit()
+        }
       }
     } catch (error: any) {
       console.error('Form submission error:', error)
