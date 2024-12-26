@@ -24,14 +24,6 @@ export function useProfiles() {
     queryKey: ["admin-profiles"],
     queryFn: async () => {
       try {
-        // First check if user is authenticated
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        
-        if (sessionError || !session) {
-          console.error('Session error:', sessionError)
-          throw new Error("Authentication required")
-        }
-
         // Get current user
         const { data: authData, error: authError } = await supabase.auth.getUser()
         
@@ -85,10 +77,6 @@ export function useProfiles() {
           throw profilesError
         }
 
-        if (!profiles) {
-          return []
-        }
-
         // Map and return the results with proper type casting
         return (profiles as unknown as ProfileWithAgency[])?.map(profile => ({
           ...profile,
@@ -99,7 +87,7 @@ export function useProfiles() {
         console.error('Error in useProfiles:', error)
         toast({
           title: "Erreur",
-          description: error.message || "Impossible de charger les profils. Veuillez réessayer.",
+          description: "Impossible de charger les profils. Veuillez réessayer.",
           variant: "destructive",
         })
         throw error

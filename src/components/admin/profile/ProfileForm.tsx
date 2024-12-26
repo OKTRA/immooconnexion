@@ -1,7 +1,7 @@
 import { BasicInfoFields } from "./form/BasicInfoFields"
 import { Button } from "@/components/ui/button"
+import { useState } from "react"
 import { Loader2 } from "lucide-react"
-import { useSteppedForm } from "./hooks/useSteppedForm"
 
 interface ProfileFormProps {
   newProfile: any
@@ -11,7 +11,7 @@ interface ProfileFormProps {
   onUpdateProfile?: (userId: string) => Promise<void>
   selectedAgencyId?: string
   isEditing?: boolean
-  step?: 1 | 2  // Add the step prop back
+  step?: 1 | 2
 }
 
 export function ProfileForm({ 
@@ -22,26 +22,30 @@ export function ProfileForm({
   onUpdateProfile,
   selectedAgencyId,
   isEditing = false,
-  step: initialStep = 1  // Rename to initialStep to avoid conflict with useSteppedForm
+  step = 1
 }: ProfileFormProps) {
-  const {
-    step,
-    isLoading,
-    handleAuthStep,
-    handleProfileStep
-  } = useSteppedForm({
-    onSuccess: onSubmit,
-    initialStep
-  })
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!setNewProfile) return
     
-    if (step === 1 && onCreateAuthUser) {
-      await handleAuthStep(onCreateAuthUser)
-    } else if (step === 2 && onUpdateProfile) {
-      await handleProfileStep(onUpdateProfile)
+    setIsLoading(true)
+    
+    try {
+      if (step === 1 && onCreateAuthUser) {
+        await onCreateAuthUser()
+      } else if (step === 2 && onUpdateProfile && newProfile.id) {
+        await onUpdateProfile(newProfile.id)
+      }
+
+      if (onSubmit) {
+        onSubmit()
+      }
+    } catch (error: any) {
+      console.error('Form submission error:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 

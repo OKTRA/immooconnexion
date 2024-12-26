@@ -6,6 +6,7 @@ export interface AddProfileDialogProps {
   setShowAddDialog?: (show: boolean) => void
   newProfile?: any
   setNewProfile?: (profile: any) => void
+  handleAddUser?: () => void
   handleCreateAuthUser?: () => Promise<string>
   handleUpdateProfile?: (userId: string) => Promise<void>
   open?: boolean
@@ -29,6 +30,12 @@ export function AddProfileDialog({
   const isOpen = open ?? showAddDialog
   const handleOpenChange = onOpenChange ?? setShowAddDialog
 
+  const handleSubmit = () => {
+    if (onProfileCreated) {
+      onProfileCreated()
+    }
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -38,7 +45,7 @@ export function AddProfileDialog({
         <ProfileForm 
           newProfile={newProfile} 
           setNewProfile={setNewProfile}
-          onSubmit={onProfileCreated}
+          onSubmit={handleSubmit}
           onCreateAuthUser={handleCreateAuthUser}
           onUpdateProfile={handleUpdateProfile}
           selectedAgencyId={agencyId}
