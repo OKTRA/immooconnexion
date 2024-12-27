@@ -114,7 +114,21 @@ export function AppSidebar() {
             <SheetHeader className="p-4 border-b">
               <SheetTitle>Menu</SheetTitle>
             </SheetHeader>
-            <MenuContent />
+            <nav className="flex flex-col">
+              {menuItems.map((item) => {
+                const Icon = item.icon
+                return (
+                  <Link 
+                    key={item.href} 
+                    to={item.href} 
+                    className="flex items-center px-4 py-2 text-sm hover:bg-accent"
+                  >
+                    <Icon className="h-5 w-5 mr-2" />
+                    <span>{item.title}</span>
+                  </Link>
+                )
+              })}
+            </nav>
           </SheetContent>
         </Sheet>
       </div>
