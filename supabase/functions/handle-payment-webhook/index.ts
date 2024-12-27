@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
       throw new Error('Payment not successful')
     }
 
-    // Créer le client Supabase
+    // Créer le client Supabase avec le rôle de service pour bypass RLS
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
     if (agencyError) throw agencyError
     console.log('Agency created:', agency)
 
-    // 2. Créer l'utilisateur auth
+    // 2. Créer l'utilisateur auth avec un mot de passe temporaire
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: payload.user_email,
       password: crypto.randomUUID(), // Mot de passe temporaire
