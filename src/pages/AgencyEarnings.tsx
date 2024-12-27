@@ -9,7 +9,7 @@ const AgencyEarnings = () => {
         <div className="hidden md:block md:w-[15%] min-w-[200px]">
           <AppSidebar />
         </div>
-        <main className="w-full md:w-[85%] p-4 md:p-8">
+        <main className="w-full md:w-[85%] p-4 md:p-8 min-w-0">
           <h1 className="text-2xl md:text-3xl font-bold mb-8">Gains</h1>
           <AgencyEarningsTable />
         </main>
