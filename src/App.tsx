@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { Toaster as Sonner } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { GlobalHeader } from "@/components/layout/GlobalHeader"
 import { Loader2 } from "lucide-react"
@@ -48,6 +48,9 @@ function AppRoutes() {
       <GlobalHeader />
       <Suspense fallback={<PageLoader />}>
         <Routes>
+          {/* Root redirect */}
+          <Route path="/" element={<Navigate to="/index" replace />} />
+          
           {/* Public routes */}
           <Route path="/index" element={<PublicProperties />} />
           <Route path="/pricing" element={<Pricing />} />
@@ -135,6 +138,9 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
+
+          {/* Catch all route - redirect to index */}
+          <Route path="*" element={<Navigate to="/index" replace />} />
         </Routes>
       </Suspense>
     </>
