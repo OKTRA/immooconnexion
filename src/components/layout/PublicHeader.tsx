@@ -7,9 +7,11 @@ export function PublicHeader() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="flex items-center gap-4 flex-1">
-          <Link to="/">
+          <Link to="/" className="flex items-center gap-2">
             <AnimatedLogo />
+            <span className="font-semibold text-lg hidden sm:inline">IMMOO</span>
           </Link>
+          <span className="text-sm text-muted-foreground hidden lg:inline">by OKTRA</span>
         </div>
         <nav className="flex items-center gap-4">
           <Link to="/terms">
@@ -19,7 +21,7 @@ export function PublicHeader() {
             <Button variant="ghost" size="sm">Tarifs</Button>
           </Link>
           <Link to="/agence/login">
-            <Button>Connexion</Button>
+            <Button>Espace Agence</Button>
           </Link>
         </nav>
       </div>
