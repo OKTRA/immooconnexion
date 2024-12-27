@@ -59,7 +59,6 @@ const menuItems = [
   },
 ]
 
-// Define MenuContent before using it
 const MenuContent = () => {
   const location = useLocation()
   const { state } = useSidebar()
@@ -99,24 +98,26 @@ export function AppSidebar() {
         <MenuContent />
       </aside>
 
-      {/* Mobile Sidebar */}
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-10 w-10 md:hidden"
-          >
-            <Menu className="h-6 w-6" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-72">
-          <SheetHeader className="border-b pb-4">
-            <SheetTitle>Menu</SheetTitle>
-          </SheetHeader>
-          <MenuContent />
-        </SheetContent>
-      </Sheet>
+      {/* Mobile Menu Button - Always visible on mobile */}
+      <div className="fixed top-3 left-2 z-50 md:hidden">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10"
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-72 p-0">
+            <SheetHeader className="p-4 border-b">
+              <SheetTitle>Menu</SheetTitle>
+            </SheetHeader>
+            <MenuContent />
+          </SheetContent>
+        </Sheet>
+      </div>
     </>
   )
 }
