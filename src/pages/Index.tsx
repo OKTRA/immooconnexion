@@ -152,7 +152,7 @@ const Index = () => {
         <div className="hidden md:block md:w-[15%] min-w-[200px]">
           <AppSidebar />
         </div>
-        <main className="w-full md:w-[85%] p-4 md:p-8 md:ml-[15%] min-w-0">
+        <main className="w-full md:w-[85%] p-4 md:p-8 min-w-0">
           <div className="grid gap-4 md:grid-cols-3 mb-8">
             <StatCard
               title="Total Biens"
