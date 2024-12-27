@@ -1,19 +1,22 @@
 import { PublicHeader } from "@/components/layout/PublicHeader"
+import { Link } from "react-router-dom"
 
 export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeader />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-8">Conditions Générales d'Utilisation</h1>
+        <h1 className="text-3xl font-bold mb-8">Conditions Générales d'Utilisation - IMMOO</h1>
         
         <div className="prose prose-slate dark:prose-invert max-w-none">
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. Présentation de la Plateforme</h2>
             <p>
-              Notre plateforme de gestion immobilière offre une solution complète pour la gestion de biens immobiliers,
-              incluant la gestion des locataires, des paiements, des contrats et des propriétés. Cette application est
-              destinée aux agences immobilières et aux professionnels du secteur.
+              IMMOO, développé par OKTRA, est une plateforme de gestion immobilière offrant une solution complète pour la gestion 
+              de biens immobiliers, incluant la gestion des locataires, des paiements, des contrats et des propriétés. 
+              Cette application est destinée aux agences immobilières et aux professionnels du secteur. Pour accéder à 
+              votre espace professionnel, connectez-vous via notre <Link to="/agence/login" className="text-primary hover:underline">
+              portail agence</Link>.
             </p>
           </section>
 
@@ -60,7 +63,7 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">5. Responsabilités des Utilisateurs</h2>
             <p>
-              En tant qu'utilisateur de la plateforme, vous vous engagez à :
+              En tant qu'utilisateur de la plateforme IMMOO, vous vous engagez à :
             </p>
             <ul className="list-disc pl-6 mb-4">
               <li>Fournir des informations exactes et à jour</li>
@@ -74,7 +77,7 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">6. Abonnements et Tarification</h2>
             <p>
-              Notre plateforme propose différents plans d'abonnement adaptés aux besoins des agences :
+              IMMOO propose différents plans d'abonnement adaptés aux besoins des agences :
             </p>
             <ul className="list-disc pl-6 mb-4">
               <li>Les tarifs sont clairement indiqués sur la page de tarification</li>
@@ -100,13 +103,16 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">8. Contact</h2>
             <p>
-              Pour toute question concernant ces CGU ou nos services, vous pouvez nous contacter :
+              Pour toute question concernant ces CGU ou nos services, vous pouvez contacter OKTRA :
             </p>
             <ul className="list-none pl-6 mb-4">
-              <li>Email : support@votreplateforme.com</li>
+              <li>Email : support@oktra.com</li>
               <li>Téléphone : +XXX XX XX XX XX</li>
-              <li>Adresse : [Votre adresse]</li>
+              <li>Adresse : [Adresse OKTRA]</li>
             </ul>
+            <p className="text-sm text-muted-foreground mt-4">
+              IMMOO est un produit développé et maintenu par OKTRA. Tous droits réservés.
+            </p>
           </section>
         </div>
       </div>
