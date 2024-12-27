@@ -2,6 +2,7 @@ import { BasicInfoFields } from "./form/BasicInfoFields"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
+import { Loader2 } from "lucide-react"
 
 interface ProfileFormProps {
   newProfile: any
@@ -48,7 +49,7 @@ export function ProfileForm({
         await onUpdateProfile(newProfile.id)
         toast({
           title: "Succès",
-          description: "Le profil a été créé avec succès",
+          description: isEditing ? "Le profil a été mis à jour" : "Le profil a été créé avec succès",
         })
         if (onSubmit) {
           onSubmit()
@@ -86,16 +87,20 @@ export function ProfileForm({
         selectedAgencyId={selectedAgencyId}
       />
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading 
-          ? "Chargement..." 
-          : isEditing
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Chargement...
+          </>
+        ) : (
+          isEditing
             ? currentStep === 1
               ? "Mettre à jour l'authentification"
               : "Mettre à jour le profil"
             : currentStep === 1 
               ? 'Suivant' 
               : 'Créer le profil'
-        }
+        )}
       </Button>
     </form>
   )
