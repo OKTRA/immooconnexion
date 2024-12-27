@@ -3,17 +3,10 @@ import { Auth } from "@supabase/auth-ui-react"
 import { ThemeSupa } from "@supabase/auth-ui-shared"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { useNavigate } from "react-router-dom"
-import { useEffect, useState, lazy, Suspense } from "react"
+import { useEffect, useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { getSupabaseSessionKey } from "@/utils/sessionUtils"
 import { Loader2 } from "lucide-react"
-
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center p-4">
-    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-  </div>
-)
 
 const Login = () => {
   const navigate = useNavigate()
@@ -25,8 +18,12 @@ const Login = () => {
     const checkAndClearSession = async () => {
       try {
         setIsLoading(true)
-        const storageKey = getSupabaseSessionKey()
-        localStorage.removeItem(storageKey)
+        
+        // First, clear any existing session
+        await supabase.auth.signOut()
+        
+        // Clear any stored session data
+        localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token')
 
         const { data: { session }, error } = await supabase.auth.getSession()
         
@@ -58,6 +55,11 @@ const Login = () => {
         }
       } catch (error: any) {
         console.error('Session check error:', error)
+        toast({
+          title: "Erreur d'authentification",
+          description: "Une erreur est survenue. Veuillez vous reconnecter.",
+          variant: "destructive"
+        })
       } finally {
         setIsLoading(false)
       }
@@ -95,7 +97,7 @@ const Login = () => {
           background: `linear-gradient(to right, #243949 0%, #517fa4 100%)`,
         }}
       >
-        <LoadingSpinner />
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     )
   }
