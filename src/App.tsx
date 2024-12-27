@@ -23,8 +23,8 @@ const AgencyEarnings = lazy(() => import("./pages/AgencyEarnings"))
 const Reports = lazy(() => import("./pages/Reports"))
 const TenantContracts = lazy(() => import("./pages/TenantContracts"))
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"))
+const TermsOfService = lazy(() => import("./pages/TermsOfService"))
 
-// Loading component
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
     <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -54,6 +54,7 @@ function AppRoutes() {
           {/* Public routes */}
           <Route path="/index" element={<PublicProperties />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/terms" element={<TermsOfService />} />
           <Route path="/agence/login" element={<Login />} />
           <Route path="/super-admin/login" element={<SuperAdminLogin />} />
 
