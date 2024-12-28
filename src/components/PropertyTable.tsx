@@ -1,7 +1,8 @@
 import {
-  Table,
-  TableBody,
+  TableCell,
+  TableRow,
 } from "@/components/ui/table"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { useState } from "react"
 import {
   AlertDialog,
@@ -134,10 +135,10 @@ export function PropertyTable() {
   }
 
   return (
-    <div className="rounded-md border overflow-x-auto">
-      <Table>
+    <div className="space-y-4">
+      <ResponsiveTable>
         <PropertyTableHeader />
-        <TableBody>
+        <ResponsiveTable.Body>
           {properties && properties.map((property) => (
             <PropertyTableRow
               key={property.id}
@@ -152,8 +153,8 @@ export function PropertyTable() {
               }}
             />
           ))}
-        </TableBody>
-      </Table>
+        </ResponsiveTable.Body>
+      </ResponsiveTable>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

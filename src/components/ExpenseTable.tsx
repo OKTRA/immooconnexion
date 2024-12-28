@@ -1,11 +1,9 @@
 import {
-  Table,
-  TableBody,
   TableCell,
   TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { Button } from "@/components/ui/button"
 import { Trash2 } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
@@ -89,45 +87,43 @@ export function ExpenseTable({ propertyId }: ExpenseTableProps) {
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
+    <ResponsiveTable>
+      <ResponsiveTable.Header>
+        <TableRow>
+          <TableHead>Montant</TableHead>
+          <TableHead>Description</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </ResponsiveTable.Header>
+      <ResponsiveTable.Body>
+        {expenses.length === 0 ? (
           <TableRow>
-            <TableHead>Montant</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableCell colSpan={4} className="text-center text-muted-foreground">
+              Aucune dépense enregistrée
+            </TableCell>
           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {expenses.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={4} className="text-center text-muted-foreground">
-                Aucune dépense enregistrée
+        ) : (
+          expenses.map((expense) => (
+            <TableRow key={expense.id}>
+              <TableCell>{Math.abs(expense.montant)} FCFA</TableCell>
+              <TableCell>{expense.description || 'N/A'}</TableCell>
+              <TableCell>
+                {format(new Date(expense.date), "PP", { locale: fr })}
+              </TableCell>
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDelete(expense.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </TableCell>
             </TableRow>
-          ) : (
-            expenses.map((expense) => (
-              <TableRow key={expense.id}>
-                <TableCell>{Math.abs(expense.montant)} FCFA</TableCell>
-                <TableCell>{expense.description || 'N/A'}</TableCell>
-                <TableCell>
-                  {format(new Date(expense.date), "PP", { locale: fr })}
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(expense.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </div>
+          ))
+        )}
+      </ResponsiveTable.Body>
+    </ResponsiveTable>
   )
 }
