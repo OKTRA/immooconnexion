@@ -3,7 +3,9 @@
     "command": "npm ci && npm run build",
     "environment": {
       "NODE_VERSION": "18",
-      "NPM_VERSION": "9"
+      "NPM_VERSION": "9",
+      "CI": "true",
+      "CLOUDFLARE_BUILD": "true"
     },
     "output": "dist",
     "baseDirectory": ".",

@@ -16,6 +16,8 @@ export default defineConfig(({ mode }) => ({
         manualChunks: undefined,
       },
     },
+    target: "esnext",
+    minify: "terser",
   },
   plugins: [
     react(),
