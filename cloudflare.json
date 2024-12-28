@@ -1,9 +1,12 @@
 {
   "build": {
-    "command": "npm install && npm run build",
+    "command": "npm ci && npm run build",
     "environment": {
-      "NODE_VERSION": "18"
+      "NODE_VERSION": "18",
+      "NPM_VERSION": "9"
     },
-    "output": "dist"
+    "output": "dist",
+    "baseDirectory": ".",
+    "buildCache": true
   }
 }
