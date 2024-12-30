@@ -45,7 +45,7 @@ export const SidebarBody = (props: React.ComponentProps<typeof motion.div>) => {
   return (
     <>
       <DesktopSidebar {...props} />
-      <MobileSidebar {...(props as React.ComponentProps<"div">)} />
+      <MobileSidebar {...props} />
     </>
   )
 }
@@ -80,51 +80,52 @@ export const MobileSidebar = ({
   className,
   children,
   ...props
-}: React.ComponentProps<"div">) => {
+}: {
+  className?: string
+  children: React.ReactNode
+}) => {
   const { state, setState } = useSidebar()
   const isExpanded = state === "expanded"
 
   return (
-    <>
-      <div
-        className={cn(
-          "h-14 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-background w-full border-b",
-        )}
-        {...props}
-      >
-        <div className="flex justify-end z-20 w-full">
-          <IconMenu2
-            className="text-foreground"
-            onClick={() => setState(isExpanded ? "collapsed" : "expanded")}
-          />
-        </div>
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ x: "-100%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "-100%", opacity: 0 }}
-              transition={{
-                duration: 0.3,
-                ease: "easeInOut",
-              }}
-              className={cn(
-                "fixed h-full w-full inset-0 bg-background p-10 z-[100] flex flex-col justify-between",
-                className
-              )}
-            >
-              <div
-                className="absolute right-10 top-10 z-50 text-foreground cursor-pointer"
-                onClick={() => setState("collapsed")}
-              >
-                <IconX />
-              </div>
-              {children}
-            </motion.div>
-          )}
-        </AnimatePresence>
+    <div
+      className={cn(
+        "h-14 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-background w-full border-b",
+      )}
+      {...props}
+    >
+      <div className="flex justify-end z-20 w-full">
+        <IconMenu2
+          className="text-foreground"
+          onClick={() => setState(isExpanded ? "collapsed" : "expanded")}
+        />
       </div>
-    </>
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ x: "-100%", opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: "-100%", opacity: 0 }}
+            transition={{
+              duration: 0.3,
+              ease: "easeInOut",
+            }}
+            className={cn(
+              "fixed h-full w-full inset-0 bg-background p-10 z-[100] flex flex-col justify-between",
+              className
+            )}
+          >
+            <div
+              className="absolute right-10 top-10 z-50 text-foreground cursor-pointer"
+              onClick={() => setState("collapsed")}
+            >
+              <IconX />
+            </div>
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
 
