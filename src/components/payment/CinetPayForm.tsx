@@ -6,6 +6,8 @@ import { initializeCinetPay } from "@/utils/cinetpay"
 import { useFormContext } from "react-hook-form"
 import { PaymentFormData, CinetPayFormProps } from "./types"
 import { Loader2 } from "lucide-react"
+import { PaymentFormFields } from "./PaymentFormFields"
+import { Form } from "@/components/ui/form"
 
 export function CinetPayForm({ amount, description, onSuccess, onError, agencyId }: CinetPayFormProps) {
   const [isLoading, setIsLoading] = useState(false)
@@ -120,19 +122,22 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
   }
 
   return (
-    <Button 
-      onClick={handlePayment}
-      className="w-full" 
-      disabled={isLoading}
-    >
-      {isLoading ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Chargement...
-        </>
-      ) : (
-        `Payer ${amount.toLocaleString()} FCFA`
-      )}
-    </Button>
+    <div className="space-y-4">
+      <PaymentFormFields form={form} />
+      <Button 
+        onClick={handlePayment}
+        className="w-full" 
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Chargement...
+          </>
+        ) : (
+          `Payer ${amount.toLocaleString()} FCFA`
+        )}
+      </Button>
+    </div>
   )
 }
