@@ -13,6 +13,10 @@ const paymentFormSchema = z.object({
   name: z.string().min(2, "Le nom est requis"),
   email: z.string().email("Email invalide"),
   phone: z.string().min(8, "Numéro de téléphone invalide"),
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  address: z.string().min(5, "L'adresse est requise"),
+  country: z.string().min(2, "Le pays est requis"),
+  city: z.string().min(2, "La ville est requise"),
 })
 
 type PaymentFormData = z.infer<typeof paymentFormSchema>
@@ -50,7 +54,11 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
           description: description.trim(),
           customer_name: formData.name,
           customer_email: formData.email,
-          customer_phone: formData.phone
+          customer_phone: formData.phone,
+          customer_address: formData.address,
+          customer_city: formData.city,
+          customer_country: formData.country,
+          password: formData.password
         }
       })
 
@@ -75,6 +83,9 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
           customer_name: formData.name,
           customer_email: formData.email,
           customer_phone_number: formData.phone,
+          customer_address: formData.address,
+          customer_city: formData.city,
+          customer_country: formData.country,
           mode: 'PRODUCTION' as const,
           lang: 'fr',
           metadata: 'user1',
@@ -154,12 +165,64 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
 
         <FormField
           control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Mot de passe</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Votre mot de passe" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="phone"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Téléphone</FormLabel>
               <FormControl>
                 <Input placeholder="Votre numéro de téléphone" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Adresse</FormLabel>
+              <FormControl>
+                <Input placeholder="Votre adresse" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="country"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Pays</FormLabel>
+              <FormControl>
+                <Input placeholder="Votre pays" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ville</FormLabel>
+              <FormControl>
+                <Input placeholder="Votre ville" {...field} />
               </FormControl>
             </FormItem>
           )}
