@@ -1,7 +1,7 @@
 export interface CustomerInfo {
-  name: string
-  surname: string
-  email: string
+  name?: string
+  surname?: string
+  email?: string
   phone: string
 }
 
@@ -15,17 +15,18 @@ export interface CinetPayConfig {
   currency: string
   channels: string
   description: string
-  customer_name: string
-  customer_surname: string
-  customer_email: string
   customer_phone_number: string
-  customer_address: string
-  customer_city: string
   customer_country: string
   customer_state: string
-  customer_zip_code: string
   lang: string
   metadata: string
+  mode?: 'POPUP' | 'EMBEDDED'
+  style?: {
+    backgroundColor: string
+    color: string
+    buttonColor: string
+    buttonTextColor: string
+  }
 }
 
 export interface CinetPayCallbacks {
@@ -36,7 +37,5 @@ export interface CinetPayCallbacks {
 
 export const initializeCinetPay = (config: CinetPayConfig, callbacks: CinetPayCallbacks) => {
   // @ts-ignore - CinetPay est chargé via CDN
-  new window.CinetPay({
-    ...config,
-  }).getCheckout(callbacks)
+  new window.CinetPay(config).getCheckout(callbacks)
 }
