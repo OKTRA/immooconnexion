@@ -79,6 +79,8 @@ export type Database = {
       agencies: {
         Row: {
           address: string | null
+          city: string | null
+          country: string | null
           created_at: string | null
           current_profiles_count: number | null
           current_properties_count: number | null
@@ -96,6 +98,8 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           current_profiles_count?: number | null
           current_properties_count?: number | null
@@ -113,6 +117,8 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           current_profiles_count?: number | null
           current_properties_count?: number | null

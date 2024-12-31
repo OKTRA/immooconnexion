@@ -4,6 +4,8 @@ export const signupFormSchema = z.object({
   agency_name: z.string().min(2, "Le nom de l'agence doit contenir au moins 2 caractères"),
   agency_address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
   agency_phone: z.string().min(8, "Numéro de téléphone invalide"),
+  country: z.string().min(2, "Le pays est requis"),
+  city: z.string().min(2, "La ville est requise"),
   email: z.string().email("Email invalide"),
   password: z.string()
     .min(8, "Le mot de passe doit contenir au moins 8 caractères")

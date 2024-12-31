@@ -36,12 +36,42 @@ export function AgencyInfoFields({ form }: AgencyInfoFieldsProps) {
           <FormItem>
             <FormLabel>Adresse</FormLabel>
             <FormControl>
-              <Input placeholder="123 Rue Principale, Ville" {...field} />
+              <Input placeholder="123 Rue Principale" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="country"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Pays</FormLabel>
+              <FormControl>
+                <Input placeholder="Côte d'Ivoire" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ville</FormLabel>
+              <FormControl>
+                <Input placeholder="Abidjan" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
       <FormField
         control={form.control}

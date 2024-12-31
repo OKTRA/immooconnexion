@@ -10,6 +10,9 @@ interface WebhookPayload {
   status: string
   subscription_plan_id: string
   agency_name: string
+  agency_address: string
+  country: string
+  city: string
   user_email: string
   user_first_name: string
   user_last_name: string
@@ -45,6 +48,9 @@ Deno.serve(async (req) => {
       .from('agencies')
       .insert({
         name: payload.agency_name,
+        address: payload.agency_address,
+        country: payload.country,
+        city: payload.city,
         subscription_plan_id: payload.subscription_plan_id,
         phone: payload.user_phone,
         email: payload.user_email,
