@@ -20,6 +20,13 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
   const handlePayment = async () => {
     try {
       const values = methods.getValues()
+      
+      // Validate form
+      const result = await methods.trigger()
+      if (!result) {
+        return // Form validation failed
+      }
+
       setIsLoading(true)
       console.log("Initializing payment with:", { amount, description, values })
 
@@ -35,7 +42,10 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
         },
       })
 
-      if (authError) throw authError
+      if (authError) {
+        console.error('Auth error:', authError)
+        throw new Error(authError.message)
+      }
       if (!authData.user) throw new Error("No user data returned")
 
       // Mettre à jour le profil avec l'ID de l'agence et statut temporaire
@@ -120,6 +130,11 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
     } catch (error: any) {
       setIsLoading(false)
       console.error('Erreur de paiement:', error)
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors du paiement",
+        variant: "destructive"
+      })
       onError?.(error)
     }
   }
