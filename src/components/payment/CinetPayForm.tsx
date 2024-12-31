@@ -49,7 +49,7 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
       if (error) throw error
 
       if (data.code === '201') {
-        // Initialiser CinetPay Seamless
+        // Initialiser CinetPay selon la documentation officielle
         // @ts-ignore - CinetPay est chargé via CDN
         new window.CinetPay({
           apikey: data.apikey,
@@ -58,22 +58,31 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
           return_url: data.return_url,
           trans_id: data.trans_id,
           amount: data.amount,
-          currency: data.currency,
+          currency: 'XOF',
           channels: 'ALL',
           description: data.description,
-          customer_name: data.customer_name,
-          customer_surname: data.customer_surname,
-          customer_email: data.customer_email,
-          customer_phone_number: data.customer_phone_number,
+          customer_name: customerInfo.name,
+          customer_surname: customerInfo.surname,
+          customer_email: customerInfo.email,
+          customer_phone_number: customerInfo.phone,
+          customer_address: '',
+          customer_city: '',
+          customer_country: 'CI',
+          customer_state: 'CI',
+          customer_zip_code: '000',
           lang: 'fr',
+          metadata: 'user1', // Identifiant supplémentaire facultatif
         }).getCheckout({
           onClose: () => {
+            setIsLoading(false)
             toast({
               title: "Paiement annulé",
               description: "Vous avez fermé la fenêtre de paiement",
             })
           },
-          onSuccess: () => {
+          onSuccess: (data: any) => {
+            setIsLoading(false)
+            console.log("Succès du paiement:", data)
             toast({
               title: "Paiement réussi",
               description: "Votre paiement a été effectué avec succès",
@@ -81,7 +90,8 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
             onSuccess?.()
           },
           onError: (error: any) => {
-            console.error('CinetPay error:', error)
+            setIsLoading(false)
+            console.error('Erreur CinetPay:', error)
             toast({
               title: "Erreur de paiement",
               description: "Une erreur est survenue lors du paiement",
@@ -94,15 +104,14 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
         throw new Error(data.message || 'Erreur lors de l\'initialisation du paiement')
       }
     } catch (error: any) {
-      console.error('Payment error:', error)
+      setIsLoading(false)
+      console.error('Erreur de paiement:', error)
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue",
         variant: "destructive",
       })
       onError?.(error)
-    } finally {
-      setIsLoading(false)
     }
   }
 

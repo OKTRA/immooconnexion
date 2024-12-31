@@ -1,13 +1,11 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import "https://deno.land/x/xhr@0.1.0/mod.ts"
-
-const CINETPAY_API_KEY = Deno.env.get('CINETPAY_API_KEY')
-const CINETPAY_SITE_ID = Deno.env.get('CINETPAY_SITE_ID')
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+console.log("Initialize Payment Function starting...")
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -18,13 +16,38 @@ serve(async (req) => {
   try {
     const { amount, description, customer } = await req.json()
 
-    // Générer un ID de transaction unique
-    const transactionId = `TR${Date.now()}`
+    // Validation des données requises
+    if (!amount || !description || !customer) {
+      throw new Error('Données manquantes')
+    }
 
-    const payload = {
-      apikey: CINETPAY_API_KEY,
-      site_id: CINETPAY_SITE_ID,
-      transaction_id: transactionId,
+    // Récupération des clés d'API depuis les variables d'environnement
+    const apiKey = Deno.env.get('CINETPAY_API_KEY')
+    const siteId = Deno.env.get('CINETPAY_SITE_ID')
+
+    if (!apiKey || !siteId) {
+      throw new Error('Configuration CinetPay manquante')
+    }
+
+    // Génération d'un ID de transaction unique
+    const transId = `TRANS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+    console.log("Initializing payment with:", {
+      amount,
+      description,
+      transId,
+      customerName: customer.name
+    })
+
+    // Construction de la réponse selon la documentation CinetPay
+    const response = {
+      code: '201',
+      message: 'Paiement initialisé',
+      apikey: apiKey,
+      site_id: siteId,
+      notify_url: `${req.headers.get('origin')}/api/payment-webhook`,
+      return_url: `${req.headers.get('origin')}/payment-return`,
+      trans_id: transId,
       amount: amount,
       currency: 'XOF',
       description: description,
@@ -32,33 +55,34 @@ serve(async (req) => {
       customer_surname: customer.surname,
       customer_email: customer.email,
       customer_phone_number: customer.phone,
-      channels: 'ALL',
-      notify_url: `${req.headers.get('origin')}/api/payment-webhook`,
-      return_url: `${req.headers.get('origin')}/payment-success`,
-      lang: 'fr',
     }
 
-    console.log('Initializing CinetPay payment with payload:', payload)
+    console.log("Payment initialized successfully")
 
-    const response = await fetch('https://api-checkout.cinetpay.com/v2/payment', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    return new Response(
+      JSON.stringify(response),
+      { 
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
       },
-      body: JSON.stringify(payload),
-    })
-
-    const data = await response.json()
-    console.log('CinetPay response:', data)
-
-    return new Response(JSON.stringify(data), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    )
   } catch (error) {
-    console.error('Error initializing payment:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    console.error("Error in initialize-payment function:", error)
+
+    return new Response(
+      JSON.stringify({
+        code: '400',
+        message: error.message
+      }),
+      { 
+        status: 400,
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+      },
+    )
   }
 })
