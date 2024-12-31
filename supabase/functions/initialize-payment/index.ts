@@ -18,12 +18,12 @@ serve(async (req) => {
     console.log("Received request with:", { amount, description, metadata })
 
     // Validation des données requises
-    if (!amount || !description) {
-      console.error("Missing required fields:", { amount, description })
+    if (!amount || !description || !metadata) {
+      console.error("Missing required fields:", { amount, description, metadata })
       return new Response(
         JSON.stringify({
           code: '400',
-          message: 'Montant et description requis'
+          message: 'Amount, description and metadata are required'
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
