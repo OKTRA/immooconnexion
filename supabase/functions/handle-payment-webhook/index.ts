@@ -17,6 +17,7 @@ interface WebhookPayload {
   user_first_name: string
   user_last_name: string
   user_phone: string
+  password: string
 }
 
 Deno.serve(async (req) => {
@@ -43,7 +44,17 @@ Deno.serve(async (req) => {
       }
     )
 
-    // 1. Create agency with pending status
+    // 1. Créer l'utilisateur auth
+    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: payload.user_email,
+      password: payload.password,
+      email_confirm: true
+    })
+
+    if (authError) throw authError
+    console.log('Auth user created:', authUser)
+
+    // 2. Créer l'agence
     const { data: agency, error: agencyError } = await supabaseAdmin
       .from('agencies')
       .insert({
@@ -54,7 +65,7 @@ Deno.serve(async (req) => {
         subscription_plan_id: payload.subscription_plan_id,
         phone: payload.user_phone,
         email: payload.user_email,
-        status: 'pending'
+        status: 'active'
       })
       .select()
       .single()
@@ -62,17 +73,7 @@ Deno.serve(async (req) => {
     if (agencyError) throw agencyError
     console.log('Agency created:', agency)
 
-    // 2. Create auth user with temporary password
-    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email: payload.user_email,
-      password: crypto.randomUUID(),
-      email_confirm: true
-    })
-
-    if (authError) throw authError
-    console.log('Auth user created:', authUser)
-
-    // 3. Update profile
+    // 3. Mettre à jour le profil
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .update({
@@ -80,13 +81,14 @@ Deno.serve(async (req) => {
         last_name: payload.user_last_name,
         phone_number: payload.user_phone,
         role: 'admin',
-        agency_id: agency.id
+        agency_id: agency.id,
+        status: 'active'
       })
       .eq('id', authUser.user.id)
 
     if (profileError) throw profileError
 
-    // 4. Create administrator entry
+    // 4. Créer l'entrée administrateur
     const { error: adminError } = await supabaseAdmin
       .from('administrators')
       .insert({
@@ -97,7 +99,7 @@ Deno.serve(async (req) => {
 
     if (adminError) throw adminError
 
-    // 5. Notify super admins
+    // 5. Notifier les super admins
     const { data: superAdmins } = await supabaseAdmin
       .from('administrators')
       .select('id')
@@ -108,20 +110,12 @@ Deno.serve(async (req) => {
         .from('admin_notifications')
         .insert({
           admin_id: admin.id,
-          type: 'new_agency_pending'
+          type: 'new_agency_created'
         })
     }
 
-    // 6. Send password reset email
-    const { error: resetError } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'recovery',
-      email: payload.user_email
-    })
-
-    if (resetError) throw resetError
-
     return new Response(
-      JSON.stringify({ success: true, message: 'Agency created and pending approval' }),
+      JSON.stringify({ success: true, message: 'Agency and user created successfully' }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 

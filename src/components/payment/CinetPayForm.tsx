@@ -30,56 +30,21 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
       setIsLoading(true)
       console.log("Initializing payment with:", { amount, description, values })
 
-      // Créer l'utilisateur auth avec statut temporaire
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-        options: {
-          data: {
-            role: 'admin',
-            status: 'pending'
-          },
-        },
-      })
-
-      if (authError) {
-        console.error('Auth error:', authError)
-        throw new Error(authError.message)
-      }
-      if (!authData.user) throw new Error("No user data returned")
-
-      // Mettre à jour le profil avec l'ID de l'agence et statut temporaire
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          email: values.email,
-          role: 'admin',
-          agency_id: agencyId,
-          status: 'pending'
-        })
-        .eq('id', authData.user.id)
-
-      if (profileError) throw profileError
-
-      // Créer l'entrée administrateur
-      const { error: adminError } = await supabase
-        .from('administrators')
-        .insert({
-          id: authData.user.id,
-          agency_id: agencyId,
-          is_super_admin: false
-        })
-
-      if (adminError) throw adminError
-
       // Initialiser le paiement
       const { data, error } = await supabase.functions.invoke('initialize-payment', {
         body: {
           amount: Number(amount),
           description: description.trim(),
-          customer_email: values.email,
-          agency_id: agencyId,
-          user_id: authData.user.id
+          subscription_plan_id: agencyId,
+          agency_name: values.agency_name,
+          agency_address: values.agency_address,
+          country: values.country,
+          city: values.city,
+          user_email: values.email,
+          user_first_name: values.first_name,
+          user_last_name: values.last_name,
+          user_phone: values.phone_number,
+          password: values.password
         }
       })
 
@@ -101,7 +66,7 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
           lang: 'fr',
           metadata: JSON.stringify({
             agency_id: agencyId,
-            user_id: authData.user.id
+            subscription_plan_id: agencyId
           }),
         }
 
