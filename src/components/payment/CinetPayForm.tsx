@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { CustomerForm } from "./CustomerForm"
+import { CustomerInfo, initializeCinetPay } from "@/utils/cinetpay"
 
 interface CinetPayFormProps {
   amount: number
@@ -15,25 +15,29 @@ interface CinetPayFormProps {
 export function CinetPayForm({ amount, description, onSuccess, onError }: CinetPayFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
-  const [customerInfo, setCustomerInfo] = useState({
+  const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
     surname: '',
     email: '',
     phone: ''
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    // Validation des champs requis
+  const validateForm = () => {
     if (!customerInfo.name || !customerInfo.surname || !customerInfo.email || !customerInfo.phone) {
       toast({
         title: "Erreur de validation",
         description: "Veuillez remplir tous les champs obligatoires",
         variant: "destructive",
       })
-      return
+      return false
     }
+    return true
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!validateForm()) return
 
     setIsLoading(true)
 
@@ -49,9 +53,7 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
       if (error) throw error
 
       if (data.code === '201') {
-        // Initialiser CinetPay selon la documentation officielle
-        // @ts-ignore - CinetPay est chargé via CDN
-        new window.CinetPay({
+        const config = {
           apikey: data.apikey,
           site_id: data.site_id,
           notify_url: data.notify_url,
@@ -71,8 +73,10 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
           customer_state: 'CI',
           customer_zip_code: '000',
           lang: 'fr',
-          metadata: 'user1', // Identifiant supplémentaire facultatif
-        }).getCheckout({
+          metadata: 'user1',
+        }
+
+        initializeCinetPay(config, {
           onClose: () => {
             setIsLoading(false)
             toast({
@@ -117,52 +121,10 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid gap-2">
-        <Label htmlFor="name">Nom <span className="text-red-500">*</span></Label>
-        <Input
-          id="name"
-          placeholder="Entrez votre nom"
-          value={customerInfo.name}
-          onChange={(e) => setCustomerInfo(prev => ({ ...prev, name: e.target.value }))}
-          required
-        />
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="surname">Prénom <span className="text-red-500">*</span></Label>
-        <Input
-          id="surname"
-          placeholder="Entrez votre prénom"
-          value={customerInfo.surname}
-          onChange={(e) => setCustomerInfo(prev => ({ ...prev, surname: e.target.value }))}
-          required
-        />
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="exemple@email.com"
-          value={customerInfo.email}
-          onChange={(e) => setCustomerInfo(prev => ({ ...prev, email: e.target.value }))}
-          required
-        />
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="phone">Téléphone <span className="text-red-500">*</span></Label>
-        <Input
-          id="phone"
-          type="tel"
-          placeholder="+225 XX XX XX XX XX"
-          value={customerInfo.phone}
-          onChange={(e) => setCustomerInfo(prev => ({ ...prev, phone: e.target.value }))}
-          required
-        />
-      </div>
-
+      <CustomerForm 
+        customerInfo={customerInfo}
+        onChange={setCustomerInfo}
+      />
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? "Chargement..." : `Payer ${amount.toLocaleString()} FCFA`}
       </Button>
