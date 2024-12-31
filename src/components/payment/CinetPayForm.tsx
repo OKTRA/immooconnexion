@@ -12,7 +12,7 @@ import { paymentFormSchema, type PaymentFormData } from "./types"
 interface CinetPayFormProps {
   amount: number
   description: string
-  agencyData: {
+  agencyData?: {
     name: string
     address?: string
     phone?: string
@@ -39,63 +39,70 @@ export function CinetPayForm({ amount, description, agencyData, onSuccess, onErr
     console.log("Initializing payment with:", { amount, description, formData })
 
     try {
-      // First create the agency
-      const { data: agency, error: agencyError } = await supabase
-        .from('agencies')
-        .insert({
-          ...agencyData,
-          status: 'pending'
-        })
-        .select()
-        .single()
+      let agency_id: string | undefined
+      let user_id: string | undefined
 
-      if (agencyError) throw agencyError
-
-      // Then create the auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            role: 'admin',
-          },
-        },
-      })
-
-      if (authError) {
-        // If auth user creation fails, delete the agency
-        await supabase
+      if (agencyData) {
+        // Create the agency if agencyData is provided
+        const { data: agency, error: agencyError } = await supabase
           .from('agencies')
-          .delete()
-          .eq('id', agency.id)
-        throw authError
-      }
+          .insert({
+            ...agencyData,
+            status: 'pending'
+          })
+          .select()
+          .single()
 
-      if (!authData.user) throw new Error("No user data returned")
+        if (agencyError) throw agencyError
+        agency_id = agency.id
 
-      // Update the profile with agency_id and role
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
+        // Create the auth user
+        const { data: authData, error: authError } = await supabase.auth.signUp({
           email: formData.email,
-          role: 'admin',
-          agency_id: agency.id,
-          status: 'pending'
-        })
-        .eq('id', authData.user.id)
-
-      if (profileError) throw profileError
-
-      // Create administrator record
-      const { error: adminError } = await supabase
-        .from('administrators')
-        .insert({
-          id: authData.user.id,
-          agency_id: agency.id,
-          is_super_admin: false
+          password: formData.password,
+          options: {
+            data: {
+              role: 'admin',
+            },
+          },
         })
 
-      if (adminError) throw adminError
+        if (authError) {
+          // If auth user creation fails, delete the agency
+          await supabase
+            .from('agencies')
+            .delete()
+            .eq('id', agency.id)
+          throw authError
+        }
+
+        if (!authData.user) throw new Error("No user data returned")
+        user_id = authData.user.id
+
+        // Update the profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            email: formData.email,
+            role: 'admin',
+            agency_id: agency.id,
+            status: 'pending'
+          })
+          .eq('id', authData.user.id)
+
+        if (profileError) throw profileError
+
+        // Create administrator record
+        const { error: adminError } = await supabase
+          .from('administrators')
+          .insert({
+            id: authData.user.id,
+            agency_id: agency.id,
+            is_super_admin: false
+          })
+
+        if (adminError) throw adminError
+      }
 
       // Initialize payment
       const { data, error } = await supabase.functions.invoke('initialize-payment', {
@@ -103,8 +110,8 @@ export function CinetPayForm({ amount, description, agencyData, onSuccess, onErr
           amount: Number(amount),
           description: description.trim(),
           customer_email: formData.email,
-          agency_id: agency.id,
-          user_id: authData.user.id
+          agency_id,
+          user_id
         }
       })
 
@@ -125,8 +132,8 @@ export function CinetPayForm({ amount, description, agencyData, onSuccess, onErr
           mode: 'PRODUCTION' as const,
           lang: 'fr',
           metadata: JSON.stringify({
-            agency_id: agency.id,
-            user_id: authData.user.id
+            agency_id,
+            user_id
           }),
         }
 
