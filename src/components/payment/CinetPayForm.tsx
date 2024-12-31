@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { initializeCinetPay } from "@/utils/cinetpay"
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form"
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 
 const paymentFormSchema = z.object({
   name: z.string().min(2, "Le nom est requis"),
@@ -124,55 +125,75 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handlePayment)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom complet</FormLabel>
-              <FormControl>
-                <Input placeholder="Votre nom" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle>Informations de paiement</CardTitle>
+        <CardDescription>
+          Montant à payer: {amount.toLocaleString()} FCFA
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handlePayment)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom complet</FormLabel>
+                  <FormControl>
+                    <Input placeholder="John Doe" {...field} className="w-full" />
+                  </FormControl>
+                  <FormDescription>
+                    Tel qu'il apparaît sur votre pièce d'identité
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" placeholder="votre@email.com" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="john@example.com" {...field} className="w-full" />
+                  </FormControl>
+                  <FormDescription>
+                    Pour recevoir votre reçu de paiement
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Téléphone</FormLabel>
-              <FormControl>
-                <Input placeholder="Votre numéro de téléphone" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Téléphone</FormLabel>
+                  <FormControl>
+                    <Input placeholder="+225 XX XX XX XX XX" {...field} className="w-full" />
+                  </FormControl>
+                  <FormDescription>
+                    Pour vous contacter en cas de besoin
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
 
-        <Button 
-          type="submit"
-          className="w-full" 
-          disabled={isLoading}
-        >
-          {isLoading ? "Chargement..." : `Payer ${amount.toLocaleString()} FCFA`}
-        </Button>
-      </form>
-    </Form>
+            <Button 
+              type="submit"
+              className="w-full" 
+              disabled={isLoading}
+              size="lg"
+            >
+              {isLoading ? "Chargement..." : `Payer ${amount.toLocaleString()} FCFA`}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   )
 }
