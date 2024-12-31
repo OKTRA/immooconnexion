@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
 import { CinetPayForm } from "../payment/CinetPayForm"
 import { SignupFormData } from "./types"
+import { Card } from "@/components/ui/card"
 
 interface PricingDialogProps {
   open: boolean
@@ -79,17 +80,19 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
           </DialogDescription>
         </DialogHeader>
         {showPayment ? (
-          <div className="space-y-4">
-            <p className="text-sm text-gray-500">
-              Après validation du paiement, votre demande sera examinée par notre équipe.
-            </p>
-            <CinetPayForm 
-              amount={1000} // Remplacer par le montant réel du plan
-              description={`Abonnement au plan ${planName}`}
-              onSuccess={handlePaymentSuccess}
-              onError={handlePaymentError}
-            />
-          </div>
+          <Card className="p-6">
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">
+                Après validation du paiement, votre demande sera examinée par notre équipe.
+              </p>
+              <CinetPayForm 
+                amount={1000} // Remplacer par le montant réel du plan
+                description={`Abonnement au plan ${planName}`}
+                onSuccess={handlePaymentSuccess}
+                onError={handlePaymentError}
+              />
+            </div>
+          </Card>
         ) : (
           <AgencySignupForm 
             subscriptionPlanId={planId} 
