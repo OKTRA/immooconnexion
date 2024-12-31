@@ -1,12 +1,13 @@
 import { TableCell, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Edit, Trash2 } from "lucide-react"
+import { Edit, Trash2, CreditCard } from "lucide-react"
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
+import { CinetPayForm } from "@/components/payment/CinetPayForm"
 
 interface SubscriptionPlanRowProps {
   plan: any
@@ -16,6 +17,7 @@ interface SubscriptionPlanRowProps {
 
 export function SubscriptionPlanRow({ plan, onEdit, onDelete }: SubscriptionPlanRowProps) {
   const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   const [editedPlan, setEditedPlan] = useState(plan)
   const [featuresInput, setFeaturesInput] = useState(plan.features.join('\n'))
   const { toast } = useToast()
@@ -40,6 +42,14 @@ export function SubscriptionPlanRow({ plan, onEdit, onDelete }: SubscriptionPlan
         variant: "destructive",
       })
     }
+  }
+
+  const handlePaymentSuccess = () => {
+    toast({
+      title: "Paiement réussi",
+      description: "Votre abonnement a été activé avec succès",
+    })
+    setShowPaymentDialog(false)
   }
 
   return (
@@ -78,6 +88,13 @@ export function SubscriptionPlanRow({ plan, onEdit, onDelete }: SubscriptionPlan
               onClick={() => onDelete(plan.id)}
             >
               <Trash2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="default"
+              size="icon"
+              onClick={() => setShowPaymentDialog(true)}
+            >
+              <CreditCard className="h-4 w-4" />
             </Button>
           </div>
         </TableCell>
@@ -149,6 +166,19 @@ export function SubscriptionPlanRow({ plan, onEdit, onDelete }: SubscriptionPlan
               Enregistrer
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Paiement du plan {plan.name}</DialogTitle>
+          </DialogHeader>
+          <CinetPayForm
+            amount={plan.price}
+            description={`Abonnement au plan ${plan.name}`}
+            onSuccess={handlePaymentSuccess}
+          />
         </DialogContent>
       </Dialog>
     </>
