@@ -42,38 +42,54 @@ declare global {
 }
 
 const waitForCinetPay = (): Promise<void> => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     if (window.CinetPay) {
       resolve();
       return;
     }
 
+    let attempts = 0;
+    const maxAttempts = 50; // 5 secondes maximum
+
     const checkInterval = setInterval(() => {
+      attempts++;
+      console.log("Tentative de chargement de CinetPay:", attempts);
+
       if (window.CinetPay) {
         clearInterval(checkInterval);
+        console.log("CinetPay SDK chargé avec succès");
         resolve();
+      } else if (attempts >= maxAttempts) {
+        clearInterval(checkInterval);
+        reject(new Error("Le service de paiement n'est pas disponible. Veuillez vérifier votre connexion et réessayer."));
       }
     }, 100);
-
-    // Timeout after 10 seconds
-    setTimeout(() => {
-      clearInterval(checkInterval);
-      throw new Error("CinetPay SDK failed to load");
-    }, 10000);
   });
 };
 
 export const initializeCinetPay = async (config: CinetPayConfig, callbacks: CinetPayCallbacks) => {
   try {
-    // Wait for CinetPay SDK to be loaded
+    console.log("Initialisation de CinetPay...");
     await waitForCinetPay();
+
+    console.log("Configuration de CinetPay avec:", {
+      apikey: config.apikey,
+      site_id: config.site_id,
+      mode: config.mode
+    });
 
     // Configuration initiale
     window.CinetPay.setConfig({
       apikey: config.apikey,
       site_id: config.site_id,
       notify_url: config.notify_url,
-      mode: config.mode || 'PRODUCTION'
+      mode: config.mode
+    });
+
+    console.log("Démarrage du checkout avec:", {
+      amount: config.amount,
+      currency: config.currency,
+      description: config.description
     });
 
     // Démarrage du checkout
@@ -81,7 +97,7 @@ export const initializeCinetPay = async (config: CinetPayConfig, callbacks: Cine
       transaction_id: config.trans_id,
       amount: config.amount,
       currency: config.currency,
-      channels: config.channels,
+      channels: 'ALL',
       description: config.description,
       customer_name: config.customer_name,
       customer_surname: config.customer_surname,
@@ -96,6 +112,7 @@ export const initializeCinetPay = async (config: CinetPayConfig, callbacks: Cine
 
     // Gestion des réponses
     window.CinetPay.waitResponse((data: any) => {
+      console.log("Réponse reçue de CinetPay:", data);
       if (data.status === "REFUSED") {
         callbacks.onError(data);
       } else if (data.status === "ACCEPTED") {
@@ -104,13 +121,16 @@ export const initializeCinetPay = async (config: CinetPayConfig, callbacks: Cine
     });
 
     window.CinetPay.onError((error: any) => {
+      console.error("Erreur CinetPay:", error);
       callbacks.onError(error);
     });
 
     window.CinetPay.onClose(() => {
+      console.log("Fenêtre de paiement fermée");
       callbacks.onClose();
     });
   } catch (error) {
+    console.error("Erreur lors de l'initialisation de CinetPay:", error);
     callbacks.onError(error);
   }
 }
