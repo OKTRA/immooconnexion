@@ -65,6 +65,14 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
 
       if (updateError) throw updateError
 
+      // Activer le profil utilisateur
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ status: 'active' })
+        .eq('agency_id', tempAgencyId)
+
+      if (profileError) throw profileError
+
       // Déconnexion pour que l'utilisateur puisse se connecter proprement
       await supabase.auth.signOut()
 
@@ -86,7 +94,7 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
   const handlePaymentError = async (error: any) => {
     console.error('Error during payment:', error)
     
-    // En cas d'erreur, supprimer l'agence temporaire
+    // En cas d'erreur, supprimer l'agence temporaire et le profil utilisateur
     if (tempAgencyId) {
       await supabase
         .from('agencies')
@@ -150,7 +158,7 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
                 Après validation du paiement, vous pourrez vous connecter à votre compte.
               </p>
               <CinetPayForm 
-                amount={1000} // Remplacer par le montant réel du plan
+                amount={1000}
                 description={`Abonnement au plan ${planName}`}
                 onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}

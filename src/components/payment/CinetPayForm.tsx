@@ -29,13 +29,14 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
     console.log("Initializing payment with:", { amount, description, formData })
 
     try {
-      // Créer l'utilisateur auth
+      // Créer l'utilisateur auth avec statut temporaire
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           data: {
             role: 'admin',
+            status: 'pending'
           },
         },
       })
@@ -43,7 +44,7 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
       if (authError) throw authError
       if (!authData.user) throw new Error("No user data returned")
 
-      // Mettre à jour le profil avec l'ID de l'agence
+      // Mettre à jour le profil avec l'ID de l'agence et statut temporaire
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
