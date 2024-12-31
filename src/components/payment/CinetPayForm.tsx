@@ -57,7 +57,7 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
         body: {
           amount: Number(amount),
           description: description.trim(),
-          metadata: JSON.stringify(metadata) // Stringify metadata to ensure proper transmission
+          metadata: JSON.stringify(metadata)
         }
       })
 
