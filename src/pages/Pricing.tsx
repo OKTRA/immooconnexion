@@ -5,9 +5,13 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
+import { CinetPayForm } from "@/components/payment/CinetPayForm"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 export default function Pricing() {
   const { toast } = useToast()
+  const [selectedPlan, setSelectedPlan] = useState<any>(null)
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   
   const { data: plans = [] } = useQuery({
     queryKey: ['subscription-plans'],
@@ -22,62 +26,9 @@ export default function Pricing() {
     }
   });
 
-  const handleStartSubscription = async (plan: any) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('initialize-payment', {
-        body: {
-          amount: plan.price,
-          description: `Abonnement au plan ${plan.name}`
-        }
-      })
-
-      if (error) throw error
-
-      if (data.code === '201') {
-        // @ts-ignore - CinetPay est chargé via CDN
-        new window.CinetPay({
-          apikey: data.apikey,
-          site_id: data.site_id,
-          notify_url: data.notify_url,
-          return_url: data.return_url,
-          trans_id: data.trans_id,
-          amount: data.amount,
-          currency: 'XOF',
-          channels: 'ALL',
-          description: data.description,
-          lang: 'fr',
-        }).getCheckout({
-          onClose: () => {
-            toast({
-              title: "Paiement annulé",
-              description: "Vous avez fermé la fenêtre de paiement",
-            })
-          },
-          onSuccess: (data: any) => {
-            console.log("Succès du paiement:", data)
-            toast({
-              title: "Paiement réussi",
-              description: "Votre paiement a été effectué avec succès",
-            })
-          },
-          onError: (error: any) => {
-            console.error('Erreur CinetPay:', error)
-            toast({
-              title: "Erreur de paiement",
-              description: "Une erreur est survenue lors du paiement",
-              variant: "destructive",
-            })
-          },
-        })
-      }
-    } catch (error: any) {
-      console.error('Error initializing payment:', error)
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'initialisation du paiement",
-        variant: "destructive",
-      })
-    }
+  const handleStartSubscription = (plan: any) => {
+    setSelectedPlan(plan)
+    setShowPaymentDialog(true)
   }
 
   return (
@@ -120,7 +71,7 @@ export default function Pricing() {
                   Commencer
                 </Button>
                 <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-gray-600">
-                  {plan.features.map((feature: string) => (
+                  {plan.features?.map((feature: string) => (
                     <li key={feature} className="flex gap-x-3">
                       <Check className="h-6 w-5 flex-none text-blue-600" />
                       {feature}
@@ -138,6 +89,35 @@ export default function Pricing() {
           </div>
         </div>
       </div>
+
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Paiement - {selectedPlan?.name}</DialogTitle>
+          </DialogHeader>
+          {selectedPlan && (
+            <CinetPayForm 
+              amount={selectedPlan.price}
+              description={`Abonnement au plan ${selectedPlan.name}`}
+              onSuccess={() => {
+                toast({
+                  title: "Paiement réussi",
+                  description: "Votre abonnement a été activé avec succès",
+                })
+                setShowPaymentDialog(false)
+              }}
+              onError={(error) => {
+                console.error("Erreur de paiement:", error)
+                toast({
+                  title: "Erreur de paiement",
+                  description: error.message || "Une erreur est survenue lors du paiement",
+                  variant: "destructive",
+                })
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
