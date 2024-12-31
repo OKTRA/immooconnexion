@@ -22,8 +22,6 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
         subscription_plan_id: planId
       })
 
-      // TODO: Integrate with Orange Money API here
-      // For now, we'll simulate the API call
       const response = await fetch('/api/initiate-payment', {
         method: 'POST',
         headers: {
@@ -32,7 +30,7 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
         body: JSON.stringify({
           ...formData,
           subscription_plan_id: planId,
-          phone: formData.user_phone // Orange Money requires the phone number
+          phone: formData.user_phone
         })
       })
 
@@ -42,13 +40,12 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
 
       const data = await response.json()
       
-      // Redirect to Orange Money payment page or handle the response
-      console.log("Payment initiated:", data)
-      
       toast({
-        title: "Redirection vers Orange Money",
-        description: "Vous allez être redirigé vers la page de paiement",
+        title: "Demande envoyée",
+        description: "Votre demande a été envoyée avec succès. Un administrateur examinera votre dossier après le paiement.",
       })
+
+      onOpenChange(false)
 
     } catch (error: any) {
       console.error('Error initiating payment:', error)

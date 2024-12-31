@@ -9,6 +9,41 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_notifications: {
+        Row: {
+          admin_id: string | null
+          created_at: string | null
+          email_notifications: boolean | null
+          id: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          admin_id?: string | null
+          created_at?: string | null
+          email_notifications?: boolean | null
+          id?: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          admin_id?: string | null
+          created_at?: string | null
+          email_notifications?: boolean | null
+          id?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_notifications_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "administrators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       administrators: {
         Row: {
           agency_id: string | null
@@ -55,6 +90,7 @@ export type Database = {
           name: string
           phone: string | null
           show_phone_on_site: boolean | null
+          status: string
           subscription_plan_id: string | null
           updated_at: string | null
         }
@@ -71,6 +107,7 @@ export type Database = {
           name: string
           phone?: string | null
           show_phone_on_site?: boolean | null
+          status?: string
           subscription_plan_id?: string | null
           updated_at?: string | null
         }
@@ -87,6 +124,7 @@ export type Database = {
           name?: string
           phone?: string | null
           show_phone_on_site?: boolean | null
+          status?: string
           subscription_plan_id?: string | null
           updated_at?: string | null
         }

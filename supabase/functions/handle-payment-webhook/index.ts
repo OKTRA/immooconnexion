@@ -17,24 +17,18 @@ interface WebhookPayload {
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    // Vérifier la signature du webhook Orange Money ici
-    // TODO: Ajouter la vérification de la signature
-
     const payload: WebhookPayload = await req.json()
     console.log('Received webhook payload:', payload)
 
-    // Vérifier que le paiement est réussi
     if (payload.status !== 'success') {
       throw new Error('Payment not successful')
     }
 
-    // Créer le client Supabase avec le rôle de service pour bypass RLS
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -46,14 +40,15 @@ Deno.serve(async (req) => {
       }
     )
 
-    // 1. Créer l'agence
+    // 1. Create agency with pending status
     const { data: agency, error: agencyError } = await supabaseAdmin
       .from('agencies')
       .insert({
         name: payload.agency_name,
         subscription_plan_id: payload.subscription_plan_id,
         phone: payload.user_phone,
-        email: payload.user_email
+        email: payload.user_email,
+        status: 'pending'
       })
       .select()
       .single()
@@ -61,17 +56,17 @@ Deno.serve(async (req) => {
     if (agencyError) throw agencyError
     console.log('Agency created:', agency)
 
-    // 2. Créer l'utilisateur auth avec un mot de passe temporaire
+    // 2. Create auth user with temporary password
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: payload.user_email,
-      password: crypto.randomUUID(), // Mot de passe temporaire
+      password: crypto.randomUUID(),
       email_confirm: true
     })
 
     if (authError) throw authError
     console.log('Auth user created:', authUser)
 
-    // 3. Mettre à jour le profil
+    // 3. Update profile
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .update({
@@ -85,7 +80,7 @@ Deno.serve(async (req) => {
 
     if (profileError) throw profileError
 
-    // 4. Créer l'entrée dans la table administrators
+    // 4. Create administrator entry
     const { error: adminError } = await supabaseAdmin
       .from('administrators')
       .insert({
@@ -96,7 +91,22 @@ Deno.serve(async (req) => {
 
     if (adminError) throw adminError
 
-    // 5. Envoyer un email avec le lien de réinitialisation du mot de passe
+    // 5. Notify super admins
+    const { data: superAdmins } = await supabaseAdmin
+      .from('administrators')
+      .select('id')
+      .eq('is_super_admin', true)
+
+    for (const admin of superAdmins || []) {
+      await supabaseAdmin
+        .from('admin_notifications')
+        .insert({
+          admin_id: admin.id,
+          type: 'new_agency_pending'
+        })
+    }
+
+    // 6. Send password reset email
     const { error: resetError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'recovery',
       email: payload.user_email
@@ -105,7 +115,7 @@ Deno.serve(async (req) => {
     if (resetError) throw resetError
 
     return new Response(
-      JSON.stringify({ success: true, message: 'Agency and user created successfully' }),
+      JSON.stringify({ success: true, message: 'Agency created and pending approval' }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 
