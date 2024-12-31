@@ -9,12 +9,31 @@ import {
 } from "@/components/ui/dialog"
 import { Plus } from "lucide-react"
 import { PaymentFormFields } from "./PaymentFormFields"
+import { useForm } from "react-hook-form"
+import { PaymentFormData } from "./types"
 
 interface PaymentDialogProps {
   propertyId: string
 }
 
 export function PaymentDialog({ propertyId }: PaymentDialogProps) {
+  const form = useForm<PaymentFormData>({
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      phone: "",
+      address: "",
+      country: "",
+      city: "",
+    },
+  })
+
+  const onSubmit = async (data: PaymentFormData) => {
+    console.log("Payment form submitted:", data)
+    // Handle payment submission logic here
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -29,7 +48,12 @@ export function PaymentDialog({ propertyId }: PaymentDialogProps) {
             Enregistrez un paiement pour ce bien
           </DialogDescription>
         </DialogHeader>
-        <PaymentFormFields propertyId={propertyId} />
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <PaymentFormFields form={form} />
+          <Button type="submit" className="mt-4 w-full">
+            Enregistrer
+          </Button>
+        </form>
       </DialogContent>
     </Dialog>
   )
