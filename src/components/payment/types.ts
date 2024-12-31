@@ -18,3 +18,12 @@ export interface CinetPayFormProps {
   onError?: (error: any) => void
   agencyId?: string | null
 }
+
+export interface PaymentDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  planId: string
+  planName: string
+  amount: number
+  tempAgencyId: string | null
+}

@@ -1,55 +1,48 @@
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Plus } from "lucide-react"
-import { PaymentFormFields } from "./PaymentFormFields"
+import { Form } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
-import { PaymentFormData } from "./types"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { PaymentFormFields } from "./PaymentFormFields"
+import { paymentFormSchema, type PaymentFormData, type PaymentDialogProps } from "./types"
+import { CinetPayForm } from "./CinetPayForm"
+import { Card } from "@/components/ui/card"
 
-interface PaymentDialogProps {
-  propertyId: string
-}
-
-export function PaymentDialog({ propertyId }: PaymentDialogProps) {
+export function PaymentDialog({ 
+  open, 
+  onOpenChange, 
+  planId, 
+  planName, 
+  amount,
+  tempAgencyId 
+}: PaymentDialogProps) {
   const form = useForm<PaymentFormData>({
-    defaultValues: {
-      email: "",
-      password: "",
-      confirm_password: "",
-    },
+    resolver: zodResolver(paymentFormSchema),
   })
 
-  const onSubmit = async (data: PaymentFormData) => {
-    console.log("Payment form submitted:", data)
-    // Handle payment submission logic here
-  }
-
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" /> Enregistrer un paiement
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Enregistrer un paiement</DialogTitle>
-          <DialogDescription>
-            Enregistrez un paiement pour ce bien
-          </DialogDescription>
+          <DialogTitle>Finaliser l'inscription - Plan {planName}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <PaymentFormFields form={form} />
-          <Button type="submit" className="mt-4 w-full">
-            Enregistrer
-          </Button>
-        </form>
+        <Card className="p-6">
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">
+              Pour finaliser votre inscription, veuillez créer votre compte et procéder au paiement.
+            </p>
+            <Form {...form}>
+              <form className="space-y-4">
+                <PaymentFormFields form={form} />
+                <CinetPayForm 
+                  amount={amount}
+                  description={`Abonnement au plan ${planName}`}
+                  agencyId={tempAgencyId}
+                />
+              </form>
+            </Form>
+          </div>
+        </Card>
       </DialogContent>
     </Dialog>
   )

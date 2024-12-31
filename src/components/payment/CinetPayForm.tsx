@@ -3,36 +3,25 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { initializeCinetPay } from "@/utils/cinetpay"
-import { Form } from "@/components/ui/form"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { PaymentFormFields } from "./PaymentFormFields"
-import { paymentFormSchema, type PaymentFormData } from "./types"
-
-interface CinetPayFormProps {
-  amount: number
-  description: string
-  onSuccess?: () => void
-  onError?: (error: any) => void
-  agencyId?: string | null
-}
+import { useFormContext } from "react-hook-form"
+import { PaymentFormData, CinetPayFormProps } from "./types"
+import { Loader2 } from "lucide-react"
 
 export function CinetPayForm({ amount, description, onSuccess, onError, agencyId }: CinetPayFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
-  const form = useForm<PaymentFormData>({
-    resolver: zodResolver(paymentFormSchema),
-  })
+  const form = useFormContext<PaymentFormData>()
 
-  const handlePayment = async (formData: PaymentFormData) => {
-    setIsLoading(true)
-    console.log("Initializing payment with:", { amount, description, formData })
-
+  const handlePayment = async () => {
     try {
+      const values = form.getValues()
+      setIsLoading(true)
+      console.log("Initializing payment with:", { amount, description, values })
+
       // Créer l'utilisateur auth avec statut temporaire
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
+        email: values.email,
+        password: values.password,
         options: {
           data: {
             role: 'admin',
@@ -48,7 +37,7 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
-          email: formData.email,
+          email: values.email,
           role: 'admin',
           agency_id: agencyId,
           status: 'pending'
@@ -73,7 +62,7 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
         body: {
           amount: Number(amount),
           description: description.trim(),
-          customer_email: formData.email,
+          customer_email: values.email,
           agency_id: agencyId,
           user_id: authData.user.id
         }
@@ -92,7 +81,7 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
           currency: 'XOF',
           channels: 'ALL',
           description: data.description,
-          customer_email: formData.email,
+          customer_email: values.email,
           mode: 'PRODUCTION' as const,
           lang: 'fr',
           metadata: JSON.stringify({
@@ -131,18 +120,19 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handlePayment)} className="space-y-4">
-        <PaymentFormFields form={form} />
-        
-        <Button 
-          type="submit"
-          className="w-full" 
-          disabled={isLoading}
-        >
-          {isLoading ? "Chargement..." : `Payer ${amount.toLocaleString()} FCFA`}
-        </Button>
-      </form>
-    </Form>
+    <Button 
+      onClick={handlePayment}
+      className="w-full" 
+      disabled={isLoading}
+    >
+      {isLoading ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Chargement...
+        </>
+      ) : (
+        `Payer ${amount.toLocaleString()} FCFA`
+      )}
+    </Button>
   )
 }

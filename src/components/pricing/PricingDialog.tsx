@@ -1,11 +1,11 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
-import { CinetPayForm } from "../payment/CinetPayForm"
 import { Card } from "@/components/ui/card"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/integrations/supabase/client"
+import { PaymentDialog } from "../payment/PaymentDialog"
 
 interface PricingDialogProps {
   open: boolean
@@ -21,6 +21,7 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
   const [showPayment, setShowPayment] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [tempAgencyId, setTempAgencyId] = useState<string | null>(null)
+  const [amount, setAmount] = useState(0)
 
   const handleStartSubscription = async () => {
     try {
@@ -39,7 +40,17 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
 
       if (agencyError) throw agencyError
 
+      // Récupérer le montant du plan
+      const { data: plan, error: planError } = await supabase
+        .from('subscription_plans')
+        .select('price')
+        .eq('id', planId)
+        .single()
+
+      if (planError) throw planError
+
       setTempAgencyId(agency.id)
+      setAmount(plan.price)
       setShowPayment(true)
     } catch (error: any) {
       console.error('Error creating temporary agency:', error)
@@ -54,47 +65,17 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
   }
 
   const handlePaymentSuccess = async () => {
-    try {
-      if (!tempAgencyId) return
-
-      // Activer l'agence après le paiement réussi
-      const { error: updateError } = await supabase
-        .from('agencies')
-        .update({ status: 'active' })
-        .eq('id', tempAgencyId)
-
-      if (updateError) throw updateError
-
-      // Activer le profil utilisateur
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ status: 'active' })
-        .eq('agency_id', tempAgencyId)
-
-      if (profileError) throw profileError
-
-      // Déconnexion pour que l'utilisateur puisse se connecter proprement
-      await supabase.auth.signOut()
-
-      setPaymentSuccess(true)
-      toast({
-        title: "Paiement réussi",
-        description: "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.",
-      })
-    } catch (error: any) {
-      console.error('Error finalizing account:', error)
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de la finalisation du compte",
-        variant: "destructive",
-      })
-    }
+    setPaymentSuccess(true)
+    toast({
+      title: "Paiement réussi",
+      description: "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.",
+    })
   }
 
   const handlePaymentError = async (error: any) => {
     console.error('Error during payment:', error)
     
-    // En cas d'erreur, supprimer l'agence temporaire et le profil utilisateur
+    // En cas d'erreur, supprimer l'agence temporaire
     if (tempAgencyId) {
       await supabase
         .from('agencies')
@@ -111,7 +92,7 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
 
   const handleClose = () => {
     if (paymentSuccess) {
-      navigate('/login')
+      navigate('/agence/login')
     }
     onOpenChange(false)
     setShowPayment(false)
@@ -152,20 +133,14 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
             </div>
           </div>
         ) : showPayment ? (
-          <Card className="p-6">
-            <div className="space-y-4">
-              <p className="text-sm text-gray-500">
-                Après validation du paiement, vous pourrez vous connecter à votre compte.
-              </p>
-              <CinetPayForm 
-                amount={1000}
-                description={`Abonnement au plan ${planName}`}
-                onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
-                agencyId={tempAgencyId}
-              />
-            </div>
-          </Card>
+          <PaymentDialog 
+            open={showPayment}
+            onOpenChange={setShowPayment}
+            planId={planId}
+            planName={planName}
+            amount={amount}
+            tempAgencyId={tempAgencyId}
+          />
         ) : (
           <div className="space-y-4">
             <p className="text-sm text-gray-500">
