@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { CustomerForm } from "./CustomerForm"
-import { CustomerInfo, initializeCinetPay } from "@/utils/cinetpay"
+import { initializeCinetPay } from "@/utils/cinetpay"
 
 interface CinetPayFormProps {
   amount: number
@@ -15,38 +14,15 @@ interface CinetPayFormProps {
 export function CinetPayForm({ amount, description, onSuccess, onError }: CinetPayFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
-  const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
-    name: '',
-    surname: '',
-    email: '',
-    phone: ''
-  })
 
-  const validateForm = () => {
-    if (!customerInfo.name || !customerInfo.surname || !customerInfo.email || !customerInfo.phone) {
-      toast({
-        title: "Erreur de validation",
-        description: "Veuillez remplir tous les champs obligatoires",
-        variant: "destructive",
-      })
-      return false
-    }
-    return true
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!validateForm()) return
-
+  const handlePayment = async () => {
     setIsLoading(true)
 
     try {
       const { data, error } = await supabase.functions.invoke('initialize-payment', {
         body: {
           amount,
-          description,
-          customer: customerInfo
+          description
         }
       })
 
@@ -63,15 +39,6 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
           currency: 'XOF',
           channels: 'ALL',
           description: data.description,
-          customer_name: customerInfo.name,
-          customer_surname: customerInfo.surname,
-          customer_email: customerInfo.email,
-          customer_phone_number: customerInfo.phone,
-          customer_address: '',
-          customer_city: '',
-          customer_country: 'CI',
-          customer_state: 'CI',
-          customer_zip_code: '000',
           lang: 'fr',
           metadata: 'user1',
         }
@@ -120,14 +87,12 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <CustomerForm 
-        customerInfo={customerInfo}
-        onChange={setCustomerInfo}
-      />
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Chargement..." : `Payer ${amount.toLocaleString()} FCFA`}
-      </Button>
-    </form>
+    <Button 
+      onClick={handlePayment} 
+      className="w-full" 
+      disabled={isLoading}
+    >
+      {isLoading ? "Chargement..." : `Payer ${amount.toLocaleString()} FCFA`}
+    </Button>
   )
 }
