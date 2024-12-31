@@ -26,6 +26,7 @@ export interface CinetPayConfig {
   customer_zip_code?: string
   lang: string
   metadata: string
+  mode: 'PRODUCTION' | 'TEST'
 }
 
 export interface CinetPayCallbacks {
@@ -34,9 +35,49 @@ export interface CinetPayCallbacks {
   onError: (error: any) => void
 }
 
+declare global {
+  interface Window {
+    CinetPay: any
+  }
+}
+
 export const initializeCinetPay = (config: CinetPayConfig, callbacks: CinetPayCallbacks) => {
-  // @ts-ignore - CinetPay est chargé via CDN
-  new window.CinetPay({
-    ...config,
-  }).getCheckout(callbacks)
+  // Configuration initiale
+  window.CinetPay.setConfig({
+    apikey: config.apikey,
+    site_id: config.site_id,
+    notify_url: config.notify_url,
+    mode: config.mode || 'PRODUCTION'
+  });
+
+  // Démarrage du checkout
+  window.CinetPay.getCheckout({
+    transaction_id: config.trans_id,
+    amount: config.amount,
+    currency: config.currency,
+    channels: config.channels,
+    description: config.description,
+    customer_name: config.customer_name,
+    customer_surname: config.customer_surname,
+    customer_email: config.customer_email,
+    customer_phone_number: config.customer_phone_number,
+    customer_address: config.customer_address,
+    customer_city: config.customer_city,
+    customer_country: config.customer_country,
+    customer_state: config.customer_state,
+    customer_zip_code: config.customer_zip_code,
+  });
+
+  // Gestion des réponses
+  window.CinetPay.waitResponse((data: any) => {
+    if (data.status === "REFUSED") {
+      callbacks.onError(data);
+    } else if (data.status === "ACCEPTED") {
+      callbacks.onSuccess(data);
+    }
+  });
+
+  window.CinetPay.onError((error: any) => {
+    callbacks.onError(error);
+  });
 }

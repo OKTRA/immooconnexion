@@ -39,6 +39,7 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
           currency: 'XOF',
           channels: 'ALL',
           description: data.description,
+          mode: 'PRODUCTION',
           lang: 'fr',
           metadata: 'user1',
         }
