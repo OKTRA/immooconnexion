@@ -9,6 +9,7 @@ import { CinetPayForm } from "./CinetPayForm"
 import { Card } from "@/components/ui/card"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
+import { useNavigate } from "react-router-dom"
 
 export function PaymentDialog({ 
   open, 
@@ -24,18 +25,19 @@ export function PaymentDialog({
   })
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const { toast } = useToast()
+  const navigate = useNavigate()
 
   const handlePaymentSuccess = () => {
     setPaymentSuccess(true)
     toast({
       title: "Success",
-      description: "Your account has been created. You can now log in.",
+      description: "Your payment has been processed. You can now log in to access your dashboard.",
     })
   }
 
   const handleClose = () => {
     if (paymentSuccess) {
-      window.location.href = '/login'
+      navigate('/login')
     }
     onOpenChange(false)
   }
@@ -67,7 +69,6 @@ export function PaymentDialog({
             ) : (
               <Form {...form}>
                 <form className="space-y-4">
-                  {planName && <PaymentFormFields form={form} />}
                   <CinetPayForm 
                     amount={amount || 0}
                     description={planName ? `Subscription to ${planName} plan` : 'Payment'}

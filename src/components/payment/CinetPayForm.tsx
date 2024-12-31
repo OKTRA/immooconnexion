@@ -36,15 +36,19 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
           amount: Number(amount),
           description: description.trim(),
           subscription_plan_id: agencyId,
-          agency_name: values.agency_name,
-          agency_address: values.agency_address,
-          country: values.country,
-          city: values.city,
-          user_email: values.email,
-          user_first_name: values.first_name,
-          user_last_name: values.last_name,
-          user_phone: values.phone_number,
-          password: values.password
+          user_data: {
+            email: values.email,
+            first_name: values.first_name,
+            last_name: values.last_name,
+            phone: values.phone_number,
+            password: values.password
+          },
+          agency_data: {
+            name: values.agency_name,
+            address: values.agency_address,
+            country: values.country,
+            city: values.city
+          }
         }
       })
 
@@ -74,7 +78,6 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
           mode: 'PRODUCTION' as const,
           lang: 'fr',
           metadata: JSON.stringify({
-            agency_id: agencyId,
             subscription_plan_id: agencyId,
             user_data: {
               email: values.email,
@@ -100,9 +103,9 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
               description: "Vous avez fermé la fenêtre de paiement",
             })
           },
-          onSuccess: async (data: any) => {
+          onSuccess: async () => {
             setIsLoading(false)
-            console.log("Payment success:", data)
+            console.log("Payment success")
             onSuccess?.()
           },
           onError: (error: any) => {
