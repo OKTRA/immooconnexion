@@ -19,13 +19,9 @@ interface PaymentDialogProps {
 export function PaymentDialog({ propertyId }: PaymentDialogProps) {
   const form = useForm<PaymentFormData>({
     defaultValues: {
-      name: "",
       email: "",
       password: "",
-      phone: "",
-      address: "",
-      country: "",
-      city: "",
+      confirm_password: "",
     },
   })
 

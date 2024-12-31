@@ -10,3 +10,11 @@ export const paymentFormSchema = z.object({
 })
 
 export type PaymentFormData = z.infer<typeof paymentFormSchema>
+
+export interface CinetPayFormProps {
+  amount: number
+  description: string
+  onSuccess?: () => void
+  onError?: (error: any) => void
+  agencyId?: string | null
+}
