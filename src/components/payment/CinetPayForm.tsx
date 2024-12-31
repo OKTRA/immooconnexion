@@ -3,23 +3,11 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { initializeCinetPay } from "@/utils/cinetpay"
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+import { Form } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-
-const paymentFormSchema = z.object({
-  name: z.string().min(2, "Le nom est requis"),
-  email: z.string().email("Email invalide"),
-  phone: z.string().min(8, "Numéro de téléphone invalide"),
-  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-  address: z.string().min(5, "L'adresse est requise"),
-  country: z.string().min(2, "Le pays est requis"),
-  city: z.string().min(2, "La ville est requise"),
-})
-
-type PaymentFormData = z.infer<typeof paymentFormSchema>
+import { PaymentFormFields } from "./PaymentFormFields"
+import { paymentFormSchema, type PaymentFormData } from "./types"
 
 interface CinetPayFormProps {
   amount: number
@@ -37,7 +25,7 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
 
   const handlePayment = async (formData: PaymentFormData) => {
     setIsLoading(true)
-    console.log("Initializing payment with:", { amount, description, formData }) // Debug log
+    console.log("Initializing payment with:", { amount, description, formData })
 
     try {
       if (!amount || amount <= 0) {
@@ -57,15 +45,15 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
           customer_phone: formData.phone,
           customer_address: formData.address,
           customer_city: formData.city,
-          customer_country: formData.country,
+          customer_country: formData.country, // Now using ISO country code
           password: formData.password
         }
       })
 
-      console.log("Response from initialize-payment:", data) // Debug log
+      console.log("Response from initialize-payment:", data)
 
       if (error) {
-        console.error("Supabase function error:", error) // Debug log
+        console.error("Supabase function error:", error)
         throw error
       }
 
@@ -85,7 +73,7 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
           customer_phone_number: formData.phone,
           customer_address: formData.address,
           customer_city: formData.city,
-          customer_country: formData.country,
+          customer_country: formData.country, // Now using ISO country code
           mode: 'PRODUCTION' as const,
           lang: 'fr',
           metadata: 'user1',
@@ -137,97 +125,8 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handlePayment)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom complet</FormLabel>
-              <FormControl>
-                <Input placeholder="Votre nom" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" placeholder="votre@email.com" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Mot de passe</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="Votre mot de passe" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Téléphone</FormLabel>
-              <FormControl>
-                <Input placeholder="Votre numéro de téléphone" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Adresse</FormLabel>
-              <FormControl>
-                <Input placeholder="Votre adresse" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="country"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Pays</FormLabel>
-              <FormControl>
-                <Input placeholder="Votre pays" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="city"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ville</FormLabel>
-              <FormControl>
-                <Input placeholder="Votre ville" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
+        <PaymentFormFields form={form} />
+        
         <Button 
           type="submit"
           className="w-full" 
