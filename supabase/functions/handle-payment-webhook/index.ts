@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
     console.log('Received webhook payload:', payload)
 
     // Extract metadata from the custom field
-    const metadata = payload.metadata || {}
+    const metadata = typeof payload.metadata === 'string' ? JSON.parse(payload.metadata) : payload.metadata
     console.log('Extracted metadata:', metadata)
 
     if (payload.cpm_result !== 'success') {
@@ -65,10 +65,15 @@ Deno.serve(async (req) => {
     const { user_data, agency_data, subscription_plan_id } = metadata
 
     // Create auth user first
+    console.log('Creating auth user with data:', user_data)
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: user_data.email,
       password: user_data.password,
-      email_confirm: true
+      email_confirm: true,
+      user_metadata: {
+        first_name: user_data.first_name,
+        last_name: user_data.last_name
+      }
     })
 
     if (authError) {
@@ -78,6 +83,7 @@ Deno.serve(async (req) => {
     console.log('Auth user created:', authUser)
 
     // Create agency
+    console.log('Creating agency with data:', agency_data)
     const { data: agency, error: agencyError } = await supabaseAdmin
       .from('agencies')
       .insert({
@@ -100,6 +106,7 @@ Deno.serve(async (req) => {
     console.log('Agency created:', agency)
 
     // Update profile
+    console.log('Updating profile for user:', authUser.user.id)
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .update({
@@ -118,6 +125,7 @@ Deno.serve(async (req) => {
     }
 
     // Create administrator entry
+    console.log('Creating administrator entry')
     const { error: adminError } = await supabaseAdmin
       .from('administrators')
       .insert({
