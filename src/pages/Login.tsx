@@ -7,12 +7,14 @@ import { useEffect, useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { Loader2 } from "lucide-react"
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 
 const Login = () => {
   const navigate = useNavigate()
   const [view, setView] = useState<"sign_in" | "forgotten_password">("sign_in")
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(true)
+  const [showWarning, setShowWarning] = useState(false)
 
   useEffect(() => {
     const checkAndClearSession = async () => {
@@ -43,12 +45,21 @@ const Login = () => {
           // Vérifier si l'utilisateur est un admin
           const { data: profileData } = await supabase
             .from('profiles')
-            .select('role')
+            .select('role, has_seen_warning')
             .eq('id', session.user.id)
             .single()
 
           if (profileData?.role === 'admin') {
-            navigate("/agence/admin")
+            if (!profileData.has_seen_warning) {
+              setShowWarning(true)
+              // Update has_seen_warning to true
+              await supabase
+                .from('profiles')
+                .update({ has_seen_warning: true })
+                .eq('id', session.user.id)
+            } else {
+              navigate("/agence/admin")
+            }
           } else {
             navigate("/")
           }
@@ -74,12 +85,21 @@ const Login = () => {
         // Vérifier si l'utilisateur est un admin
         const { data: profileData } = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, has_seen_warning')
           .eq('id', session.user.id)
           .single()
 
         if (profileData?.role === 'admin') {
-          navigate("/agence/admin")
+          if (!profileData.has_seen_warning) {
+            setShowWarning(true)
+            // Update has_seen_warning to true
+            await supabase
+              .from('profiles')
+              .update({ has_seen_warning: true })
+              .eq('id', session.user.id)
+          } else {
+            navigate("/agence/admin")
+          }
         } else {
           navigate("/")
         }
@@ -88,6 +108,11 @@ const Login = () => {
 
     return () => subscription.unsubscribe()
   }, [navigate, toast])
+
+  const handleWarningClose = () => {
+    setShowWarning(false)
+    navigate("/agence/admin")
+  }
 
   if (isLoading) {
     return (
@@ -186,6 +211,32 @@ const Login = () => {
             )}
           </CardContent>
         </Card>
+
+        <AlertDialog open={showWarning} onOpenChange={handleWarningClose}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Avertissement Important</AlertDialogTitle>
+              <AlertDialogDescription className="space-y-2">
+                <p>
+                  Bienvenue sur notre plateforme. Avant de continuer, veuillez prendre note des points suivants :
+                </p>
+                <ul className="list-disc pl-6 space-y-1">
+                  <li>Toute utilisation malveillante de la plateforme entraînera la suspension immédiate de votre compte</li>
+                  <li>En cas de non-respect des conditions d'utilisation, votre compte sera bloqué sans possibilité de remboursement</li>
+                  <li>Vous êtes responsable de toutes les actions effectuées depuis votre compte</li>
+                </ul>
+                <p className="font-semibold mt-4">
+                  En continuant, vous acceptez ces conditions.
+                </p>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={handleWarningClose}>
+                J'ai compris et j'accepte
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   )

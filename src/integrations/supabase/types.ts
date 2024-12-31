@@ -356,11 +356,13 @@ export type Database = {
           created_at: string | null
           email: string | null
           first_name: string | null
+          has_seen_warning: boolean | null
           id: string
           is_tenant: boolean | null
           last_name: string | null
           phone_number: string | null
           role: Database["public"]["Enums"]["user_role"] | null
+          status: string | null
           updated_at: string | null
         }
         Insert: {
@@ -368,11 +370,13 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           first_name?: string | null
+          has_seen_warning?: boolean | null
           id: string
           is_tenant?: boolean | null
           last_name?: string | null
           phone_number?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          status?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -380,11 +384,13 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           first_name?: string | null
+          has_seen_warning?: boolean | null
           id?: string
           is_tenant?: boolean | null
           last_name?: string | null
           phone_number?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          status?: string | null
           updated_at?: string | null
         }
         Relationships: [
