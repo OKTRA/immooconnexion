@@ -30,27 +30,29 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
       setIsLoading(true)
       console.log("Initializing payment with:", { amount, description, values })
 
+      const metadata = {
+        subscription_plan_id: agencyId,
+        user_data: {
+          email: values.email,
+          first_name: values.first_name,
+          last_name: values.last_name,
+          phone: values.phone_number,
+          password: values.password
+        },
+        agency_data: {
+          name: values.agency_name,
+          address: values.agency_address,
+          country: values.country,
+          city: values.city
+        }
+      }
+
       // Initialize payment
       const { data, error } = await supabase.functions.invoke('initialize-payment', {
         body: {
           amount: Number(amount),
           description: description.trim(),
-          metadata: {
-            subscription_plan_id: agencyId,
-            user_data: {
-              email: values.email,
-              first_name: values.first_name,
-              last_name: values.last_name,
-              phone: values.phone_number,
-              password: values.password
-            },
-            agency_data: {
-              name: values.agency_name,
-              address: values.agency_address,
-              country: values.country,
-              city: values.city
-            }
-          }
+          metadata
         }
       })
 
