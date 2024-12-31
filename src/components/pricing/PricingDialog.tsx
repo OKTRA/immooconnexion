@@ -1,8 +1,9 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { AgencySignupForm } from "./AgencySignupForm"
 import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
 import { CinetPayForm } from "../payment/CinetPayForm"
+import { SignupFormData } from "./types"
 
 interface PricingDialogProps {
   open: boolean
@@ -15,14 +16,26 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [showPayment, setShowPayment] = useState(false)
-  const [formData, setFormData] = useState<any>(null)
+  const [formData, setFormData] = useState<SignupFormData | null>(null)
 
-  const handleSubmit = async (data: any) => {
-    setFormData({
-      ...data,
-      subscription_plan_id: planId
-    })
-    setShowPayment(true)
+  const handleSubmit = async (data: SignupFormData) => {
+    try {
+      setIsLoading(true)
+      // Store form data with plan information
+      setFormData({
+        ...data,
+        subscription_plan_id: planId
+      })
+      setShowPayment(true)
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de la soumission du formulaire",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handlePaymentSuccess = () => {
@@ -49,11 +62,15 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
           <DialogTitle>
             {showPayment ? "Paiement" : `Inscription - Plan ${planName}`}
           </DialogTitle>
+          <DialogDescription>
+            {showPayment 
+              ? "Pour finaliser votre inscription, veuillez procéder au paiement."
+              : "Remplissez le formulaire ci-dessous pour créer votre compte."}
+          </DialogDescription>
         </DialogHeader>
         {showPayment ? (
           <div className="space-y-4">
             <p className="text-sm text-gray-500">
-              Pour finaliser votre inscription, veuillez procéder au paiement.
               Après validation du paiement, votre demande sera examinée par notre équipe.
             </p>
             <CinetPayForm 
