@@ -30,7 +30,7 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
       setIsLoading(true)
       console.log("Initializing payment with:", { amount, description, values })
 
-      // Initialiser le paiement
+      // Initialize payment without creating user yet
       const { data, error } = await supabase.functions.invoke('initialize-payment', {
         body: {
           amount: Number(amount),
@@ -84,9 +84,10 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
               description: "Vous avez fermé la fenêtre de paiement",
             })
           },
-          onSuccess: (data: any) => {
+          onSuccess: async (data: any) => {
             setIsLoading(false)
             console.log("Succès du paiement:", data)
+            // Let the webhook handle user creation
             onSuccess?.()
           },
           onError: (error: any) => {
