@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
       }
     )
 
-    // 1. Create the auth user
+    // Create auth user
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: payload.user_email,
       password: payload.password,
@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
     if (authError) throw authError
     console.log('Auth user created:', authUser)
 
-    // 2. Create the agency
+    // Create agency
     const { data: agency, error: agencyError } = await supabaseAdmin
       .from('agencies')
       .insert({
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
     if (agencyError) throw agencyError
     console.log('Agency created:', agency)
 
-    // 3. Update the profile
+    // Update profile
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .update({
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
 
     if (profileError) throw profileError
 
-    // 4. Create the administrator entry
+    // Create administrator entry
     const { error: adminError } = await supabaseAdmin
       .from('administrators')
       .insert({
@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
 
     if (adminError) throw adminError
 
-    // 5. Notify super admins
+    // Notify super admins
     const { data: superAdmins } = await supabaseAdmin
       .from('administrators')
       .select('id')
