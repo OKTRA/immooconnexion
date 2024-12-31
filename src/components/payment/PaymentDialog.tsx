@@ -14,7 +14,8 @@ export function PaymentDialog({
   planId, 
   planName, 
   amount,
-  tempAgencyId 
+  tempAgencyId,
+  propertyId 
 }: PaymentDialogProps) {
   const form = useForm<PaymentFormData>({
     resolver: zodResolver(paymentFormSchema),
@@ -24,19 +25,24 @@ export function PaymentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Finaliser l'inscription - Plan {planName}</DialogTitle>
+          <DialogTitle>
+            {planName ? `Finaliser l'inscription - Plan ${planName}` : 'Paiement'}
+          </DialogTitle>
         </DialogHeader>
         <Card className="p-6">
           <div className="space-y-4">
             <p className="text-sm text-gray-500">
-              Pour finaliser votre inscription, veuillez créer votre compte et procéder au paiement.
+              {planName 
+                ? "Pour finaliser votre inscription, veuillez créer votre compte et procéder au paiement."
+                : "Veuillez procéder au paiement."
+              }
             </p>
             <Form {...form}>
               <form className="space-y-4">
-                <PaymentFormFields form={form} />
+                {planName && <PaymentFormFields form={form} />}
                 <CinetPayForm 
-                  amount={amount}
-                  description={`Abonnement au plan ${planName}`}
+                  amount={amount || 0}
+                  description={planName ? `Abonnement au plan ${planName}` : 'Paiement'}
                   agencyId={tempAgencyId}
                 />
               </form>
