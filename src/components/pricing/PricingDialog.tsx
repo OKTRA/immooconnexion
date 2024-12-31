@@ -44,6 +44,9 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
       description: "Votre demande a été envoyée avec succès. Un administrateur examinera votre dossier.",
     })
     onOpenChange(false)
+    // Reset states
+    setShowPayment(false)
+    setFormData(null)
   }
 
   const handlePaymentError = (error: any) => {
@@ -55,8 +58,15 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
     })
   }
 
+  const handleClose = () => {
+    onOpenChange(false)
+    // Reset states when dialog is closed
+    setShowPayment(false)
+    setFormData(null)
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
