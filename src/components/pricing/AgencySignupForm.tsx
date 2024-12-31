@@ -9,6 +9,9 @@ import { Loader2 } from "lucide-react"
 
 const signupFormSchema = z.object({
   agency_name: z.string().min(2, "Le nom de l'agence doit contenir au moins 2 caractères"),
+  agency_address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
+  agency_phone: z.string().min(8, "Numéro de téléphone invalide"),
+  agency_email: z.string().email("Email de l'agence invalide"),
   user_first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
   user_last_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   user_email: z.string().email("Email invalide"),
@@ -44,29 +47,17 @@ export function AgencySignupForm({ subscriptionPlanId, onSubmit, isLoading }: Ag
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="agency_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom de l'agence</FormLabel>
-              <FormControl>
-                <Input placeholder="Mon Agence Immobilière" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
+          <h3 className="font-medium text-lg">Informations de l'agence</h3>
+          
           <FormField
             control={form.control}
-            name="user_first_name"
+            name="agency_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Prénom</FormLabel>
+                <FormLabel>Nom de l'agence</FormLabel>
                 <FormControl>
-                  <Input placeholder="Jean" {...field} />
+                  <Input placeholder="Mon Agence Immobilière" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -75,46 +66,112 @@ export function AgencySignupForm({ subscriptionPlanId, onSubmit, isLoading }: Ag
 
           <FormField
             control={form.control}
-            name="user_last_name"
+            name="agency_address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nom</FormLabel>
+                <FormLabel>Adresse</FormLabel>
                 <FormControl>
-                  <Input placeholder="Dupont" {...field} />
+                  <Input placeholder="123 Rue Principale, Ville" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="agency_phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Téléphone de l'agence</FormLabel>
+                  <FormControl>
+                    <Input placeholder="+225 XX XX XX XX XX" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="agency_email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email de l'agence</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="contact@monagence.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
-        <FormField
-          control={form.control}
-          name="user_email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" placeholder="jean.dupont@example.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="space-y-4">
+          <h3 className="font-medium text-lg">Informations de l'administrateur</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="user_first_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Prénom</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Jean" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="user_phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Téléphone</FormLabel>
-              <FormControl>
-                <Input placeholder="+225 XX XX XX XX XX" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="user_last_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Dupont" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="user_email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="jean.dupont@example.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="user_phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Téléphone</FormLabel>
+                  <FormControl>
+                    <Input placeholder="+225 XX XX XX XX XX" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
