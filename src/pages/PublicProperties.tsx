@@ -29,9 +29,11 @@ const PublicProperties = () => {
       console.log("Properties fetched:", data)
       return data || []
     },
-    onError: (error: Error) => {
-      console.error("Query error:", error)
-      toast.error("Une erreur est survenue lors du chargement des propriétés")
+    meta: {
+      onError: (error: Error) => {
+        console.error("Query error:", error)
+        toast.error("Une erreur est survenue lors du chargement des propriétés")
+      }
     }
   })
 
