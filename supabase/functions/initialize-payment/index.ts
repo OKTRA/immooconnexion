@@ -14,10 +14,10 @@ serve(async (req) => {
   }
 
   try {
-    const { amount, description, customer } = await req.json()
+    const { amount, description } = await req.json()
 
     // Validation des données requises
-    if (!amount || !description || !customer) {
+    if (!amount || !description) {
       throw new Error('Données manquantes')
     }
 
@@ -35,8 +35,7 @@ serve(async (req) => {
     console.log("Initializing payment with:", {
       amount,
       description,
-      transId,
-      customerName: customer.name
+      transId
     })
 
     // Construction de la réponse selon la documentation CinetPay
@@ -50,11 +49,7 @@ serve(async (req) => {
       trans_id: transId,
       amount: amount,
       currency: 'XOF',
-      description: description,
-      customer_name: customer.name,
-      customer_surname: customer.surname,
-      customer_email: customer.email,
-      customer_phone_number: customer.phone,
+      description: description
     }
 
     console.log("Payment initialized successfully")

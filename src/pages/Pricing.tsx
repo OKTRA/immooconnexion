@@ -4,13 +4,9 @@ import { Check } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { CinetPayForm } from "@/components/payment/CinetPayForm"
 import { useToast } from "@/hooks/use-toast"
 
 export default function Pricing() {
-  const [selectedPlan, setSelectedPlan] = useState<any>(null)
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   const { toast } = useToast()
   
   const { data: plans = [] } = useQuery({
@@ -26,17 +22,62 @@ export default function Pricing() {
     }
   });
 
-  const handlePaymentSuccess = () => {
-    toast({
-      title: "Paiement réussi",
-      description: "Votre abonnement a été activé avec succès",
-    })
-    setShowPaymentDialog(false)
-  }
+  const handleStartSubscription = async (plan: any) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('initialize-payment', {
+        body: {
+          amount: plan.price,
+          description: `Abonnement au plan ${plan.name}`
+        }
+      })
 
-  const handleStartSubscription = (plan: any) => {
-    setSelectedPlan(plan)
-    setShowPaymentDialog(true)
+      if (error) throw error
+
+      if (data.code === '201') {
+        // @ts-ignore - CinetPay est chargé via CDN
+        new window.CinetPay({
+          apikey: data.apikey,
+          site_id: data.site_id,
+          notify_url: data.notify_url,
+          return_url: data.return_url,
+          trans_id: data.trans_id,
+          amount: data.amount,
+          currency: 'XOF',
+          channels: 'ALL',
+          description: data.description,
+          lang: 'fr',
+        }).getCheckout({
+          onClose: () => {
+            toast({
+              title: "Paiement annulé",
+              description: "Vous avez fermé la fenêtre de paiement",
+            })
+          },
+          onSuccess: (data: any) => {
+            console.log("Succès du paiement:", data)
+            toast({
+              title: "Paiement réussi",
+              description: "Votre paiement a été effectué avec succès",
+            })
+          },
+          onError: (error: any) => {
+            console.error('Erreur CinetPay:', error)
+            toast({
+              title: "Erreur de paiement",
+              description: "Une erreur est survenue lors du paiement",
+              variant: "destructive",
+            })
+          },
+        })
+      }
+    } catch (error: any) {
+      console.error('Error initializing payment:', error)
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de l'initialisation du paiement",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
@@ -97,23 +138,6 @@ export default function Pricing() {
           </div>
         </div>
       </div>
-
-      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              Paiement du plan {selectedPlan?.name}
-            </DialogTitle>
-          </DialogHeader>
-          {selectedPlan && (
-            <CinetPayForm
-              amount={selectedPlan.price}
-              description={`Abonnement au plan ${selectedPlan.name}`}
-              onSuccess={handlePaymentSuccess}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
