@@ -3,6 +3,19 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { initializeCinetPay } from "@/utils/cinetpay"
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+
+const paymentFormSchema = z.object({
+  name: z.string().min(2, "Le nom est requis"),
+  email: z.string().email("Email invalide"),
+  phone: z.string().min(8, "Numéro de téléphone invalide"),
+})
+
+type PaymentFormData = z.infer<typeof paymentFormSchema>
 
 interface CinetPayFormProps {
   amount: number
@@ -14,10 +27,13 @@ interface CinetPayFormProps {
 export function CinetPayForm({ amount, description, onSuccess, onError }: CinetPayFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
+  const form = useForm<PaymentFormData>({
+    resolver: zodResolver(paymentFormSchema),
+  })
 
-  const handlePayment = async () => {
+  const handlePayment = async (formData: PaymentFormData) => {
     setIsLoading(true)
-    console.log("Initializing payment with:", { amount, description }) // Debug log
+    console.log("Initializing payment with:", { amount, description, formData }) // Debug log
 
     try {
       if (!amount || amount <= 0) {
@@ -31,7 +47,10 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
       const { data, error } = await supabase.functions.invoke('initialize-payment', {
         body: {
           amount: Number(amount),
-          description: description.trim()
+          description: description.trim(),
+          customer_name: formData.name,
+          customer_email: formData.email,
+          customer_phone: formData.phone
         }
       })
 
@@ -53,6 +72,9 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
           currency: 'XOF',
           channels: 'ALL',
           description: data.description,
+          customer_name: formData.name,
+          customer_email: formData.email,
+          customer_phone_number: formData.phone,
           mode: 'PRODUCTION' as const,
           lang: 'fr',
           metadata: 'user1',
@@ -102,12 +124,55 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
   }
 
   return (
-    <Button 
-      onClick={handlePayment} 
-      className="w-full" 
-      disabled={isLoading}
-    >
-      {isLoading ? "Chargement..." : `Payer ${amount.toLocaleString()} FCFA`}
-    </Button>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handlePayment)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nom complet</FormLabel>
+              <FormControl>
+                <Input placeholder="Votre nom" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="votre@email.com" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Téléphone</FormLabel>
+              <FormControl>
+                <Input placeholder="Votre numéro de téléphone" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <Button 
+          type="submit"
+          className="w-full" 
+          disabled={isLoading}
+        >
+          {isLoading ? "Chargement..." : `Payer ${amount.toLocaleString()} FCFA`}
+        </Button>
+      </form>
+    </Form>
   )
 }
