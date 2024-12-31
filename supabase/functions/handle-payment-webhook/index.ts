@@ -6,18 +6,31 @@ const corsHeaders = {
 }
 
 interface WebhookPayload {
-  payment_id: string
-  status: string
-  subscription_plan_id: string
-  agency_name: string
-  agency_address: string
-  country: string
-  city: string
-  user_email: string
-  user_first_name: string
-  user_last_name: string
-  user_phone: string
-  password: string
+  cpm_trans_id: string
+  payment_method: string
+  cel_phone_num: string
+  cpm_phone_prefixe: string
+  signature: string
+  payment_date: string
+  cpm_amount: string
+  cpm_currency: string
+  cpm_payid: string
+  cpm_custom: string
+  cpm_result: string
+  cpm_trans_status: string
+  cpm_error_message: string
+  cpm_processing_date: string
+  cpm_platform_name: string
+  cpm_verification_code: string
+  created_at: string
+  updated_at: string
+  cpm_designation: string
+  cpm_site_id: string
+  cpm_version: string
+  cpm_payment_config: string
+  cpm_page_action: string
+  cpm_language: string
+  cpm_operation_date: string
 }
 
 Deno.serve(async (req) => {
@@ -26,10 +39,14 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const payload: WebhookPayload = await req.json()
+    const payload = await req.json()
     console.log('Received webhook payload:', payload)
 
-    if (payload.status !== 'success') {
+    // Extract metadata from the custom field
+    const metadata = JSON.parse(payload.cpm_custom || '{}')
+    console.log('Extracted metadata:', metadata)
+
+    if (payload.cpm_result !== 'success') {
       throw new Error('Payment not successful')
     }
 
@@ -44,49 +61,60 @@ Deno.serve(async (req) => {
       }
     )
 
-    // Create auth user
+    const { user_data, agency_data, subscription_plan_id } = metadata
+
+    // Create auth user first
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email: payload.user_email,
-      password: payload.password,
+      email: user_data.email,
+      password: user_data.password,
       email_confirm: true
     })
 
-    if (authError) throw authError
+    if (authError) {
+      console.error('Error creating auth user:', authError)
+      throw authError
+    }
     console.log('Auth user created:', authUser)
 
     // Create agency
     const { data: agency, error: agencyError } = await supabaseAdmin
       .from('agencies')
       .insert({
-        name: payload.agency_name,
-        address: payload.agency_address,
-        country: payload.country,
-        city: payload.city,
-        subscription_plan_id: payload.subscription_plan_id,
-        phone: payload.user_phone,
-        email: payload.user_email,
+        name: agency_data.name,
+        address: agency_data.address,
+        country: agency_data.country,
+        city: agency_data.city,
+        subscription_plan_id: subscription_plan_id,
+        phone: user_data.phone,
+        email: user_data.email,
         status: 'active'
       })
       .select()
       .single()
 
-    if (agencyError) throw agencyError
+    if (agencyError) {
+      console.error('Error creating agency:', agencyError)
+      throw agencyError
+    }
     console.log('Agency created:', agency)
 
     // Update profile
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .update({
-        first_name: payload.user_first_name,
-        last_name: payload.user_last_name,
-        phone_number: payload.user_phone,
+        first_name: user_data.first_name,
+        last_name: user_data.last_name,
+        phone_number: user_data.phone,
         role: 'admin',
         agency_id: agency.id,
         status: 'active'
       })
       .eq('id', authUser.user.id)
 
-    if (profileError) throw profileError
+    if (profileError) {
+      console.error('Error updating profile:', profileError)
+      throw profileError
+    }
 
     // Create administrator entry
     const { error: adminError } = await supabaseAdmin
@@ -97,21 +125,9 @@ Deno.serve(async (req) => {
         is_super_admin: false
       })
 
-    if (adminError) throw adminError
-
-    // Notify super admins
-    const { data: superAdmins } = await supabaseAdmin
-      .from('administrators')
-      .select('id')
-      .eq('is_super_admin', true)
-
-    for (const admin of superAdmins || []) {
-      await supabaseAdmin
-        .from('admin_notifications')
-        .insert({
-          admin_id: admin.id,
-          type: 'new_agency_created'
-        })
+    if (adminError) {
+      console.error('Error creating administrator:', adminError)
+      throw adminError
     }
 
     return new Response(
