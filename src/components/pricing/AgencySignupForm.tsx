@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
+import { Loader2 } from "lucide-react"
 
 const signupFormSchema = z.object({
   agency_name: z.string().min(2, "Le nom de l'agence doit contenir au moins 2 caractères"),
@@ -116,7 +117,14 @@ export function AgencySignupForm({ subscriptionPlanId, onSubmit, isLoading }: Ag
         />
 
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Chargement..." : "Continuer vers le paiement"}
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Chargement...
+            </>
+          ) : (
+            "Continuer vers le paiement"
+          )}
         </Button>
       </form>
     </Form>

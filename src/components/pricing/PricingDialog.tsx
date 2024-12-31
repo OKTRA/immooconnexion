@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { AgencySignupForm } from "./AgencySignupForm"
 import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
+import { CinetPayForm } from "../payment/CinetPayForm"
 
 interface PricingDialogProps {
   open: boolean
@@ -13,63 +14,62 @@ interface PricingDialogProps {
 export function PricingDialog({ open, onOpenChange, planId, planName }: PricingDialogProps) {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [showPayment, setShowPayment] = useState(false)
+  const [formData, setFormData] = useState<any>(null)
 
-  const handleSubmit = async (formData: any) => {
-    try {
-      setIsLoading(true)
-      console.log("Form data to send to Orange Money:", {
-        ...formData,
-        subscription_plan_id: planId
-      })
+  const handleSubmit = async (data: any) => {
+    setFormData({
+      ...data,
+      subscription_plan_id: planId
+    })
+    setShowPayment(true)
+  }
 
-      const response = await fetch('/api/initiate-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          subscription_plan_id: planId,
-          phone: formData.user_phone
-        })
-      })
+  const handlePaymentSuccess = () => {
+    toast({
+      title: "Demande envoyée",
+      description: "Votre demande a été envoyée avec succès. Un administrateur examinera votre dossier.",
+    })
+    onOpenChange(false)
+  }
 
-      if (!response.ok) {
-        throw new Error('Failed to initiate payment')
-      }
-
-      const data = await response.json()
-      
-      toast({
-        title: "Demande envoyée",
-        description: "Votre demande a été envoyée avec succès. Un administrateur examinera votre dossier après le paiement.",
-      })
-
-      onOpenChange(false)
-
-    } catch (error: any) {
-      console.error('Error initiating payment:', error)
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'initiation du paiement",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
+  const handlePaymentError = (error: any) => {
+    console.error('Error during payment:', error)
+    toast({
+      title: "Erreur",
+      description: error.message || "Une erreur est survenue lors du paiement",
+      variant: "destructive",
+    })
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Inscription - Plan {planName}</DialogTitle>
+          <DialogTitle>
+            {showPayment ? "Paiement" : `Inscription - Plan ${planName}`}
+          </DialogTitle>
         </DialogHeader>
-        <AgencySignupForm 
-          subscriptionPlanId={planId} 
-          onSubmit={handleSubmit}
-          isLoading={isLoading}
-        />
+        {showPayment ? (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">
+              Pour finaliser votre inscription, veuillez procéder au paiement.
+              Après validation du paiement, votre demande sera examinée par notre équipe.
+            </p>
+            <CinetPayForm 
+              amount={1000} // Remplacer par le montant réel du plan
+              description={`Abonnement au plan ${planName}`}
+              onSuccess={handlePaymentSuccess}
+              onError={handlePaymentError}
+            />
+          </div>
+        ) : (
+          <AgencySignupForm 
+            subscriptionPlanId={planId} 
+            onSubmit={handleSubmit}
+            isLoading={isLoading}
+          />
+        )}
       </DialogContent>
     </Dialog>
   )
