@@ -13,8 +13,8 @@ export function TestPayment() {
           <DialogTitle>Test de paiement CinetPay</DialogTitle>
         </DialogHeader>
         <CinetPayForm 
-          amount={100} 
-          description="Test de paiement"
+          amount={1000} // Setting a valid amount (1000 FCFA)
+          description="Test de paiement CinetPay" // Setting a clear description
           onSuccess={() => {
             console.log("Paiement réussi")
           }}

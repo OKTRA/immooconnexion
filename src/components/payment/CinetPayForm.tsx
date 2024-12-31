@@ -17,16 +17,30 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
 
   const handlePayment = async () => {
     setIsLoading(true)
+    console.log("Initializing payment with:", { amount, description }) // Debug log
 
     try {
+      if (!amount || amount <= 0) {
+        throw new Error("Le montant doit être supérieur à 0")
+      }
+
+      if (!description) {
+        throw new Error("La description est requise")
+      }
+
       const { data, error } = await supabase.functions.invoke('initialize-payment', {
         body: {
-          amount,
-          description
+          amount: Number(amount),
+          description: description.trim()
         }
       })
 
-      if (error) throw error
+      console.log("Response from initialize-payment:", data) // Debug log
+
+      if (error) {
+        console.error("Supabase function error:", error) // Debug log
+        throw error
+      }
 
       if (data.code === '201') {
         const config = {
