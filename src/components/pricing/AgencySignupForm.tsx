@@ -53,6 +53,9 @@ export function AgencySignupForm({ subscriptionPlanId, onSubmit, isLoading }: Ag
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <div className="space-y-4">
           <h3 className="font-medium text-lg">Informations de l'agence</h3>
+          <p className="text-sm text-gray-500">
+            Ces informations seront utilisées pour créer votre agence.
+          </p>
           
           <FormField
             control={form.control}
@@ -98,7 +101,11 @@ export function AgencySignupForm({ subscriptionPlanId, onSubmit, isLoading }: Ag
         </div>
 
         <div className="space-y-4">
-          <h3 className="font-medium text-lg">Informations de connexion</h3>
+          <h3 className="font-medium text-lg">Compte administrateur</h3>
+          <p className="text-sm text-gray-500">
+            Ces informations seront utilisées pour créer votre compte administrateur.
+            Vous pourrez vous connecter avec cet email et ce mot de passe.
+          </p>
           
           <FormField
             control={form.control}
