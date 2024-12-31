@@ -11,11 +11,15 @@ const signupFormSchema = z.object({
   agency_name: z.string().min(2, "Le nom de l'agence doit contenir au moins 2 caractères"),
   agency_address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
   agency_phone: z.string().min(8, "Numéro de téléphone invalide"),
-  agency_email: z.string().email("Email de l'agence invalide"),
-  user_first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
-  user_last_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  user_email: z.string().email("Email invalide"),
-  user_phone: z.string().min(8, "Numéro de téléphone invalide"),
+  email: z.string().email("Email invalide"),
+  password: z.string()
+    .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+    .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
+    .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre"),
+  confirm_password: z.string()
+}).refine((data) => data.password === data.confirm_password, {
+  message: "Les mots de passe ne correspondent pas",
+  path: ["confirm_password"],
 })
 
 type SignupFormData = z.infer<typeof signupFormSchema>
@@ -78,99 +82,65 @@ export function AgencySignupForm({ subscriptionPlanId, onSubmit, isLoading }: Ag
             )}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="agency_phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Téléphone de l'agence</FormLabel>
-                  <FormControl>
-                    <Input placeholder="+225 XX XX XX XX XX" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="agency_email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email de l'agence</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="contact@monagence.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="agency_phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Téléphone de l'agence</FormLabel>
+                <FormControl>
+                  <Input placeholder="+225 XX XX XX XX XX" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         <div className="space-y-4">
-          <h3 className="font-medium text-lg">Informations de l'administrateur</h3>
+          <h3 className="font-medium text-lg">Informations de connexion</h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="user_first_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Prénom</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Jean" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input type="email" placeholder="contact@monagence.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="user_last_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nom</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Dupont" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Mot de passe</FormLabel>
+                <FormControl>
+                  <Input type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="user_email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="jean.dupont@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="user_phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Téléphone</FormLabel>
-                  <FormControl>
-                    <Input placeholder="+225 XX XX XX XX XX" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="confirm_password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirmer le mot de passe</FormLabel>
+                <FormControl>
+                  <Input type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         <Button type="submit" className="w-full" disabled={isLoading}>
