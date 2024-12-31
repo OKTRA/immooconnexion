@@ -30,7 +30,7 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
       setIsLoading(true)
       console.log("Initializing payment with:", { amount, description, values })
 
-      // Initialize payment without creating user yet
+      // Initialize payment
       const { data, error } = await supabase.functions.invoke('initialize-payment', {
         body: {
           amount: Number(amount),
@@ -48,7 +48,10 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
         }
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Payment initialization error:', error)
+        throw error
+      }
 
       if (data.code === '201') {
         const config = {
@@ -72,7 +75,20 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
           lang: 'fr',
           metadata: JSON.stringify({
             agency_id: agencyId,
-            subscription_plan_id: agencyId
+            subscription_plan_id: agencyId,
+            user_data: {
+              email: values.email,
+              first_name: values.first_name,
+              last_name: values.last_name,
+              phone: values.phone_number,
+              password: values.password
+            },
+            agency_data: {
+              name: values.agency_name,
+              address: values.agency_address,
+              country: values.country,
+              city: values.city
+            }
           }),
         }
 
@@ -86,25 +102,24 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
           },
           onSuccess: async (data: any) => {
             setIsLoading(false)
-            console.log("Succès du paiement:", data)
-            // Let the webhook handle user creation
+            console.log("Payment success:", data)
             onSuccess?.()
           },
           onError: (error: any) => {
             setIsLoading(false)
-            console.error('Erreur CinetPay:', error)
+            console.error('CinetPay error:', error)
             onError?.(error)
           },
         })
       } else {
-        throw new Error(data.message || 'Erreur lors de l\'initialisation du paiement')
+        throw new Error(data.message || 'Error initializing payment')
       }
     } catch (error: any) {
       setIsLoading(false)
-      console.error('Erreur de paiement:', error)
+      console.error('Payment error:', error)
       toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors du paiement",
+        title: "Error",
+        description: error.message || "An error occurred during payment",
         variant: "destructive"
       })
       onError?.(error)
@@ -123,10 +138,10 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Chargement...
+              Loading...
             </>
           ) : (
-            `Payer ${amount.toLocaleString()} FCFA`
+            `Pay ${amount.toLocaleString()} FCFA`
           )}
         </Button>
       </div>

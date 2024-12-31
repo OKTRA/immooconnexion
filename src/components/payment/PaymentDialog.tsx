@@ -7,6 +7,8 @@ import { PaymentFormFields } from "./PaymentFormFields"
 import { paymentFormSchema, type PaymentFormData, type PaymentDialogProps } from "./types"
 import { CinetPayForm } from "./CinetPayForm"
 import { Card } from "@/components/ui/card"
+import { useState } from "react"
+import { useToast } from "@/hooks/use-toast"
 
 export function PaymentDialog({ 
   open, 
@@ -20,33 +22,61 @@ export function PaymentDialog({
   const form = useForm<PaymentFormData>({
     resolver: zodResolver(paymentFormSchema),
   })
+  const [paymentSuccess, setPaymentSuccess] = useState(false)
+  const { toast } = useToast()
+
+  const handlePaymentSuccess = () => {
+    setPaymentSuccess(true)
+    toast({
+      title: "Success",
+      description: "Your account has been created. You can now log in.",
+    })
+  }
+
+  const handleClose = () => {
+    if (paymentSuccess) {
+      window.location.href = '/login'
+    }
+    onOpenChange(false)
+  }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {planName ? `Finaliser l'inscription - Plan ${planName}` : 'Paiement'}
+            {paymentSuccess 
+              ? "Registration Successful" 
+              : planName 
+                ? `Complete Registration - ${planName} Plan` 
+                : 'Payment'}
           </DialogTitle>
         </DialogHeader>
         <Card className="p-6">
           <div className="space-y-4">
-            <p className="text-sm text-gray-500">
-              {planName 
-                ? "Pour finaliser votre inscription, veuillez créer votre compte et procéder au paiement."
-                : "Veuillez procéder au paiement."
-              }
-            </p>
-            <Form {...form}>
-              <form className="space-y-4">
-                {planName && <PaymentFormFields form={form} />}
-                <CinetPayForm 
-                  amount={amount || 0}
-                  description={planName ? `Abonnement au plan ${planName}` : 'Paiement'}
-                  agencyId={tempAgencyId}
-                />
-              </form>
-            </Form>
+            {paymentSuccess ? (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-500">
+                  Your payment has been processed and your account has been created. 
+                  You can now log in to access your dashboard.
+                </p>
+                <Button onClick={handleClose} className="w-full">
+                  Go to Login
+                </Button>
+              </div>
+            ) : (
+              <Form {...form}>
+                <form className="space-y-4">
+                  {planName && <PaymentFormFields form={form} />}
+                  <CinetPayForm 
+                    amount={amount || 0}
+                    description={planName ? `Subscription to ${planName} plan` : 'Payment'}
+                    agencyId={tempAgencyId}
+                    onSuccess={handlePaymentSuccess}
+                  />
+                </form>
+              </Form>
+            )}
           </div>
         </Card>
       </DialogContent>
