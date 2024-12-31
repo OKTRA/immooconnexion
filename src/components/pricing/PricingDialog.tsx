@@ -1,9 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { AgencySignupForm } from "./AgencySignupForm"
 import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
 import { CinetPayForm } from "../payment/CinetPayForm"
-import { SignupFormData } from "./types"
 import { Card } from "@/components/ui/card"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -22,54 +20,32 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
   const [isLoading, setIsLoading] = useState(false)
   const [showPayment, setShowPayment] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
-  const [formData, setFormData] = useState<SignupFormData | null>(null)
-  const [userId, setUserId] = useState<string | null>(null)
+  const [tempAgencyId, setTempAgencyId] = useState<string | null>(null)
 
-  const handleSubmit = async (data: SignupFormData) => {
+  const handleStartSubscription = async () => {
     try {
       setIsLoading(true)
       
-      // Create auth user first
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            role: 'admin',
-          },
-        },
-      })
-
-      if (authError) throw authError
-
-      if (!authData.user) throw new Error("No user data returned")
-
-      // Store user ID for later use
-      setUserId(authData.user.id)
-
-      // Create initial profile with pending status
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          first_name: data.agency_name,
-          email: data.email,
-          role: 'admin',
+      // Créer une agence temporaire
+      const { data: agency, error: agencyError } = await supabase
+        .from('agencies')
+        .insert({
+          name: `Nouvelle Agence - ${new Date().toISOString()}`,
+          subscription_plan_id: planId,
           status: 'pending'
         })
-        .eq('id', authData.user.id)
+        .select()
+        .single()
 
-      if (profileError) throw profileError
+      if (agencyError) throw agencyError
 
-      setFormData({
-        ...data,
-        subscription_plan_id: planId
-      })
+      setTempAgencyId(agency.id)
       setShowPayment(true)
     } catch (error: any) {
-      console.error('Error creating user:', error)
+      console.error('Error creating temporary agency:', error)
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de la création du compte",
+        description: error.message || "Une erreur est survenue lors de la création de l'agence",
         variant: "destructive",
       })
     } finally {
@@ -78,25 +54,18 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
   }
 
   const handlePaymentSuccess = async () => {
-    if (!userId || !formData) return
-
     try {
-      // Update profile and create agency after successful payment
-      const { error: agencyError } = await supabase
+      if (!tempAgencyId) return
+
+      // Activer l'agence après le paiement réussi
+      const { error: updateError } = await supabase
         .from('agencies')
-        .insert({
-          name: formData.agency_name,
-          address: formData.agency_address,
-          phone: formData.agency_phone,
-          country: formData.country,
-          city: formData.city,
-          subscription_plan_id: planId,
-          status: 'pending'
-        })
+        .update({ status: 'active' })
+        .eq('id', tempAgencyId)
 
-      if (agencyError) throw agencyError
+      if (updateError) throw updateError
 
-      // Sign out the user so they can log in properly
+      // Déconnexion pour que l'utilisateur puisse se connecter proprement
       await supabase.auth.signOut()
 
       setPaymentSuccess(true)
@@ -114,8 +83,17 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
     }
   }
 
-  const handlePaymentError = (error: any) => {
+  const handlePaymentError = async (error: any) => {
     console.error('Error during payment:', error)
+    
+    // En cas d'erreur, supprimer l'agence temporaire
+    if (tempAgencyId) {
+      await supabase
+        .from('agencies')
+        .delete()
+        .eq('id', tempAgencyId)
+    }
+
     toast({
       title: "Erreur",
       description: error.message || "Une erreur est survenue lors du paiement",
@@ -130,8 +108,7 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
     onOpenChange(false)
     setShowPayment(false)
     setPaymentSuccess(false)
-    setFormData(null)
-    setUserId(null)
+    setTempAgencyId(null)
   }
 
   return (
@@ -142,15 +119,15 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
             {paymentSuccess 
               ? "Inscription réussie" 
               : showPayment 
-                ? "Paiement" 
+                ? "Finaliser l'inscription" 
                 : `Inscription - Plan ${planName}`}
           </DialogTitle>
           <DialogDescription>
             {paymentSuccess 
               ? "Votre compte est en cours d'examen par notre équipe."
               : showPayment 
-                ? "Pour finaliser votre inscription, veuillez procéder au paiement."
-                : "Remplissez le formulaire ci-dessous pour créer votre compte."}
+                ? "Pour finaliser votre inscription, veuillez créer votre compte et procéder au paiement."
+                : "Cliquez sur Commencer pour créer votre compte."}
           </DialogDescription>
         </DialogHeader>
 
@@ -159,9 +136,6 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
             <p className="text-sm text-gray-600">
               Nous avons bien reçu votre paiement et votre demande d'inscription. 
               Vous pouvez maintenant vous connecter à votre compte.
-            </p>
-            <p className="text-sm text-gray-600">
-              À votre première connexion, vous devrez compléter les informations de votre agence.
             </p>
             <div className="flex justify-end">
               <Button onClick={handleClose}>
@@ -180,15 +154,23 @@ export function PricingDialog({ open, onOpenChange, planId, planName }: PricingD
                 description={`Abonnement au plan ${planName}`}
                 onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}
+                agencyId={tempAgencyId}
               />
             </div>
           </Card>
         ) : (
-          <AgencySignupForm 
-            subscriptionPlanId={planId} 
-            onSubmit={handleSubmit}
-            isLoading={isLoading}
-          />
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">
+              En cliquant sur Commencer, vous allez créer votre compte et choisir votre abonnement.
+            </p>
+            <Button 
+              onClick={handleStartSubscription} 
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? "Chargement..." : "Commencer"}
+            </Button>
+          </div>
         )}
       </DialogContent>
     </Dialog>
