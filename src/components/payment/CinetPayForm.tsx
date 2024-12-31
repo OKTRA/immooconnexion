@@ -3,20 +3,23 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { initializeCinetPay } from "@/utils/cinetpay"
-import { useFormContext } from "react-hook-form"
+import { useForm, FormProvider } from "react-hook-form"
 import { PaymentFormData, CinetPayFormProps } from "./types"
 import { Loader2 } from "lucide-react"
 import { PaymentFormFields } from "./PaymentFormFields"
-import { Form } from "@/components/ui/form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { paymentFormSchema } from "./types"
 
 export function CinetPayForm({ amount, description, onSuccess, onError, agencyId }: CinetPayFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
-  const form = useFormContext<PaymentFormData>()
+  const methods = useForm<PaymentFormData>({
+    resolver: zodResolver(paymentFormSchema),
+  })
 
   const handlePayment = async () => {
     try {
-      const values = form.getValues()
+      const values = methods.getValues()
       setIsLoading(true)
       console.log("Initializing payment with:", { amount, description, values })
 
@@ -122,22 +125,24 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
   }
 
   return (
-    <div className="space-y-4">
-      <PaymentFormFields form={form} />
-      <Button 
-        onClick={handlePayment}
-        className="w-full" 
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Chargement...
-          </>
-        ) : (
-          `Payer ${amount.toLocaleString()} FCFA`
-        )}
-      </Button>
-    </div>
+    <FormProvider {...methods}>
+      <div className="space-y-4">
+        <PaymentFormFields form={methods} />
+        <Button 
+          onClick={handlePayment}
+          className="w-full" 
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Chargement...
+            </>
+          ) : (
+            `Payer ${amount.toLocaleString()} FCFA`
+          )}
+        </Button>
+      </div>
+    </FormProvider>
   )
 }
