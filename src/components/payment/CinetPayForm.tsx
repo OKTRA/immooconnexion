@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { initializeCinetPay } from "@/utils/cinetpay"
 import { Form } from "@/components/ui/form"
@@ -12,11 +12,22 @@ import { paymentFormSchema, type PaymentFormData } from "./types"
 interface CinetPayFormProps {
   amount: number
   description: string
+  agencyData: {
+    name: string
+    address?: string
+    phone?: string
+    email?: string
+    subscription_plan_id: string
+    show_phone_on_site?: boolean
+    list_properties_on_site?: boolean
+    country?: string
+    city?: string
+  }
   onSuccess?: () => void
   onError?: (error: any) => void
 }
 
-export function CinetPayForm({ amount, description, onSuccess, onError }: CinetPayFormProps) {
+export function CinetPayForm({ amount, description, agencyData, onSuccess, onError }: CinetPayFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
   const form = useForm<PaymentFormData>({
@@ -28,34 +39,76 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
     console.log("Initializing payment with:", { amount, description, formData })
 
     try {
-      if (!amount || amount <= 0) {
-        throw new Error("Le montant doit être supérieur à 0")
+      // First create the agency
+      const { data: agency, error: agencyError } = await supabase
+        .from('agencies')
+        .insert({
+          ...agencyData,
+          status: 'pending'
+        })
+        .select()
+        .single()
+
+      if (agencyError) throw agencyError
+
+      // Then create the auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            role: 'admin',
+          },
+        },
+      })
+
+      if (authError) {
+        // If auth user creation fails, delete the agency
+        await supabase
+          .from('agencies')
+          .delete()
+          .eq('id', agency.id)
+        throw authError
       }
 
-      if (!description) {
-        throw new Error("La description est requise")
-      }
+      if (!authData.user) throw new Error("No user data returned")
 
+      // Update the profile with agency_id and role
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          email: formData.email,
+          role: 'admin',
+          agency_id: agency.id,
+          status: 'pending'
+        })
+        .eq('id', authData.user.id)
+
+      if (profileError) throw profileError
+
+      // Create administrator record
+      const { error: adminError } = await supabase
+        .from('administrators')
+        .insert({
+          id: authData.user.id,
+          agency_id: agency.id,
+          is_super_admin: false
+        })
+
+      if (adminError) throw adminError
+
+      // Initialize payment
       const { data, error } = await supabase.functions.invoke('initialize-payment', {
         body: {
           amount: Number(amount),
           description: description.trim(),
-          customer_name: formData.name,
           customer_email: formData.email,
-          customer_phone: formData.phone,
-          customer_address: formData.address,
-          customer_city: formData.city,
-          customer_country: formData.country, // Now using ISO country code
-          password: formData.password
+          agency_id: agency.id,
+          user_id: authData.user.id
         }
       })
 
-      console.log("Response from initialize-payment:", data)
-
-      if (error) {
-        console.error("Supabase function error:", error)
-        throw error
-      }
+      if (error) throw error
 
       if (data.code === '201') {
         const config = {
@@ -68,15 +121,13 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
           currency: 'XOF',
           channels: 'ALL',
           description: data.description,
-          customer_name: formData.name,
           customer_email: formData.email,
-          customer_phone_number: formData.phone,
-          customer_address: formData.address,
-          customer_city: formData.city,
-          customer_country: formData.country, // Now using ISO country code
           mode: 'PRODUCTION' as const,
           lang: 'fr',
-          metadata: 'user1',
+          metadata: JSON.stringify({
+            agency_id: agency.id,
+            user_id: authData.user.id
+          }),
         }
 
         initializeCinetPay(config, {
@@ -92,7 +143,7 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
             console.log("Succès du paiement:", data)
             toast({
               title: "Paiement réussi",
-              description: "Votre paiement a été effectué avec succès",
+              description: "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.",
             })
             onSuccess?.()
           },
