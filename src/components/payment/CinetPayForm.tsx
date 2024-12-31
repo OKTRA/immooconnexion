@@ -62,6 +62,12 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
           channels: 'ALL',
           description: data.description,
           customer_email: values.email,
+          customer_name: values.first_name,
+          customer_surname: values.last_name,
+          customer_phone_number: values.phone_number,
+          customer_address: values.agency_address,
+          customer_city: values.city,
+          customer_country: values.country,
           mode: 'PRODUCTION' as const,
           lang: 'fr',
           metadata: JSON.stringify({
