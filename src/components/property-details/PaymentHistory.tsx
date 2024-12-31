@@ -7,6 +7,7 @@ import { InspectionDialog } from "@/components/inspections/InspectionDialog"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import { useState } from "react"
 
 interface PaymentHistoryProps {
   propertyId: string
@@ -21,12 +22,18 @@ export function PaymentHistory({
   onPrintReceipt, 
   onPrintContract 
 }: PaymentHistoryProps) {
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false)
+
   return (
     <Card className="w-full bg-white dark:bg-gray-800">
       <CardHeader className="border-b dark:border-gray-700">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <CardTitle className="text-xl md:text-2xl">Historique des paiements</CardTitle>
-          <PaymentDialog propertyId={propertyId} />
+          <PaymentDialog 
+            open={isPaymentDialogOpen}
+            onOpenChange={setIsPaymentDialogOpen}
+            propertyId={propertyId}
+          />
         </div>
       </CardHeader>
       <CardContent className="p-4">
