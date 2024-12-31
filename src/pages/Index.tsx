@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import { SidebarProvider } from "@/components/ui/sidebar"
+import { TestPayment } from "@/components/payment/TestPayment"
 
 const Index = () => {
   const navigate = useNavigate()
@@ -153,6 +154,11 @@ const Index = () => {
           <AppSidebar />
         </div>
         <main className="w-full md:w-[85%] p-4 md:p-8 min-w-0">
+          {/* Ajout du bouton de test */}
+          <div className="mb-8">
+            <TestPayment />
+          </div>
+          
           <div className="grid gap-4 md:grid-cols-3 mb-8">
             <StatCard
               title="Total Biens"
