@@ -10,6 +10,8 @@ import { Loader2 } from "lucide-react"
 const signupFormSchema = z.object({
   agency_name: z.string().min(2, "Le nom de l'agence doit contenir au moins 2 caractères"),
   agency_address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
+  agency_phone: z.string().min(8, "Numéro de téléphone invalide"),
+  agency_email: z.string().email("Email de l'agence invalide"),
   user_first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
   user_last_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   user_email: z.string().email("Email invalide"),
@@ -32,12 +34,7 @@ export function AgencySignupForm({ subscriptionPlanId, onSubmit, isLoading }: Ag
 
   const handleSubmit = async (data: SignupFormData) => {
     try {
-      await onSubmit({
-        ...data,
-        // Utiliser les informations de l'administrateur pour l'agence
-        agency_email: data.user_email,
-        agency_phone: data.user_phone,
-      })
+      await onSubmit(data)
     } catch (error: any) {
       toast({
         title: "Erreur",
@@ -52,10 +49,6 @@ export function AgencySignupForm({ subscriptionPlanId, onSubmit, isLoading }: Ag
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <div className="space-y-4">
           <h3 className="font-medium text-lg">Informations de l'agence</h3>
-          <p className="text-sm text-gray-500">
-            Ces informations seront utilisées pour créer votre agence. 
-            Vos coordonnées personnelles seront utilisées comme contact principal de l'agence.
-          </p>
           
           <FormField
             control={form.control}
@@ -84,13 +77,40 @@ export function AgencySignupForm({ subscriptionPlanId, onSubmit, isLoading }: Ag
               </FormItem>
             )}
           />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="agency_phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Téléphone de l'agence</FormLabel>
+                  <FormControl>
+                    <Input placeholder="+225 XX XX XX XX XX" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="agency_email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email de l'agence</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="contact@monagence.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
         <div className="space-y-4">
-          <h3 className="font-medium text-lg">Informations du propriétaire</h3>
-          <p className="text-sm text-gray-500">
-            En tant que créateur de l'agence, vous serez automatiquement désigné comme administrateur principal.
-          </p>
+          <h3 className="font-medium text-lg">Informations de l'administrateur</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
