@@ -20,7 +20,16 @@ serve(async (req) => {
     // Validation des données requises
     if (!amount || !description) {
       console.error("Missing required fields:", { amount, description })
-      throw new Error('Montant et description requis')
+      return new Response(
+        JSON.stringify({
+          code: '400',
+          message: 'Montant et description requis'
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400
+        }
+      )
     }
 
     // Récupération des clés d'API depuis les variables d'environnement
@@ -29,7 +38,16 @@ serve(async (req) => {
 
     if (!apiKey || !siteId) {
       console.error("Missing CinetPay configuration")
-      throw new Error('Configuration CinetPay manquante')
+      return new Response(
+        JSON.stringify({
+          code: '500',
+          message: 'Configuration CinetPay manquante'
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500
+        }
+      )
     }
 
     console.log("CinetPay configuration found")
@@ -61,23 +79,23 @@ serve(async (req) => {
           ...corsHeaders,
           'Content-Type': 'application/json',
         },
-        status: 200
+        status: 201
       },
     )
   } catch (error) {
     console.error("Error in initialize-payment function:", error)
-
+    
     return new Response(
       JSON.stringify({
-        code: '400',
+        code: '500',
         message: error.message || 'Une erreur est survenue'
       }),
       { 
-        status: 400,
         headers: { 
           ...corsHeaders,
           'Content-Type': 'application/json',
         },
+        status: 500
       },
     )
   }
