@@ -79,22 +79,7 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
           customer_country: values.country,
           mode: 'PRODUCTION' as const,
           lang: 'fr',
-          metadata: JSON.stringify({
-            subscription_plan_id: agencyId,
-            user_data: {
-              email: values.email,
-              first_name: values.first_name,
-              last_name: values.last_name,
-              phone: values.phone_number,
-              password: values.password
-            },
-            agency_data: {
-              name: values.agency_name,
-              address: values.agency_address,
-              country: values.country,
-              city: values.city
-            }
-          }),
+          metadata: data.metadata
         }
 
         initializeCinetPay(config, {

@@ -14,8 +14,8 @@ serve(async (req) => {
   }
 
   try {
-    const { amount, description } = await req.json()
-    console.log("Received request with:", { amount, description })
+    const { amount, description, metadata } = await req.json()
+    console.log("Received request with:", { amount, description, metadata })
 
     // Validation des données requises
     if (!amount || !description) {
@@ -67,7 +67,8 @@ serve(async (req) => {
       trans_id: transId,
       amount: amount,
       currency: 'XOF',
-      description: description
+      description: description,
+      metadata: metadata
     }
 
     console.log("Payment initialization successful:", { transId, amount })

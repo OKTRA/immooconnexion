@@ -31,6 +31,7 @@ interface WebhookPayload {
   cpm_page_action: string
   cpm_language: string
   cpm_operation_date: string
+  metadata: any
 }
 
 Deno.serve(async (req) => {
@@ -43,7 +44,7 @@ Deno.serve(async (req) => {
     console.log('Received webhook payload:', payload)
 
     // Extract metadata from the custom field
-    const metadata = JSON.parse(payload.cpm_custom || '{}')
+    const metadata = payload.metadata || {}
     console.log('Extracted metadata:', metadata)
 
     if (payload.cpm_result !== 'success') {
