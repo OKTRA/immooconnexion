@@ -18,6 +18,108 @@ export function PaymentFormFields({ form }: PaymentFormFieldsProps) {
     <div className="space-y-4">
       <FormField
         control={form.control}
+        name="agency_name"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Nom de l'agence</FormLabel>
+            <FormControl>
+              <Input placeholder="Nom de votre agence" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="agency_address"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Adresse de l'agence</FormLabel>
+            <FormControl>
+              <Input placeholder="Adresse de l'agence" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="country"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Pays</FormLabel>
+              <FormControl>
+                <Input placeholder="Pays" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ville</FormLabel>
+              <FormControl>
+                <Input placeholder="Ville" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="first_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Prénom</FormLabel>
+              <FormControl>
+                <Input placeholder="Votre prénom" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="last_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nom</FormLabel>
+              <FormControl>
+                <Input placeholder="Votre nom" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <FormField
+        control={form.control}
+        name="phone_number"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Téléphone</FormLabel>
+            <FormControl>
+              <Input type="tel" placeholder="+225 XX XX XX XX XX" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
         name="email"
         render={({ field }) => (
           <FormItem>
