@@ -24,6 +24,17 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validation des champs requis
+    if (!customerInfo.name || !customerInfo.surname || !customerInfo.email || !customerInfo.phone) {
+      toast({
+        title: "Erreur de validation",
+        description: "Veuillez remplir tous les champs obligatoires",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -98,9 +109,10 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-2">
-        <Label htmlFor="name">Nom</Label>
+        <Label htmlFor="name">Nom <span className="text-red-500">*</span></Label>
         <Input
           id="name"
+          placeholder="Entrez votre nom"
           value={customerInfo.name}
           onChange={(e) => setCustomerInfo(prev => ({ ...prev, name: e.target.value }))}
           required
@@ -108,9 +120,10 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="surname">Prénom</Label>
+        <Label htmlFor="surname">Prénom <span className="text-red-500">*</span></Label>
         <Input
           id="surname"
+          placeholder="Entrez votre prénom"
           value={customerInfo.surname}
           onChange={(e) => setCustomerInfo(prev => ({ ...prev, surname: e.target.value }))}
           required
@@ -118,10 +131,11 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
         <Input
           id="email"
           type="email"
+          placeholder="exemple@email.com"
           value={customerInfo.email}
           onChange={(e) => setCustomerInfo(prev => ({ ...prev, email: e.target.value }))}
           required
@@ -129,10 +143,11 @@ export function CinetPayForm({ amount, description, onSuccess, onError }: CinetP
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="phone">Téléphone</Label>
+        <Label htmlFor="phone">Téléphone <span className="text-red-500">*</span></Label>
         <Input
           id="phone"
           type="tel"
+          placeholder="+225 XX XX XX XX XX"
           value={customerInfo.phone}
           onChange={(e) => setCustomerInfo(prev => ({ ...prev, phone: e.target.value }))}
           required
