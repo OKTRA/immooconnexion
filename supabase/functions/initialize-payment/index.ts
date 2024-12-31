@@ -15,10 +15,12 @@ serve(async (req) => {
 
   try {
     const { amount, description } = await req.json()
+    console.log("Received request with:", { amount, description })
 
     // Validation des données requises
     if (!amount || !description) {
-      throw new Error('Données manquantes')
+      console.error("Missing required fields:", { amount, description })
+      throw new Error('Montant et description requis')
     }
 
     // Récupération des clés d'API depuis les variables d'environnement
@@ -26,19 +28,17 @@ serve(async (req) => {
     const siteId = Deno.env.get('CINETPAY_SITE_ID')
 
     if (!apiKey || !siteId) {
+      console.error("Missing CinetPay configuration")
       throw new Error('Configuration CinetPay manquante')
     }
 
+    console.log("CinetPay configuration found")
+
     // Génération d'un ID de transaction unique
     const transId = `TRANS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    console.log("Generated transaction ID:", transId)
 
-    console.log("Initializing payment with:", {
-      amount,
-      description,
-      transId
-    })
-
-    // Construction de la réponse selon la documentation CinetPay
+    // Construction de la réponse
     const response = {
       code: '201',
       message: 'Paiement initialisé',
@@ -52,7 +52,7 @@ serve(async (req) => {
       description: description
     }
 
-    console.log("Payment initialized successfully")
+    console.log("Payment initialization successful:", { transId, amount })
 
     return new Response(
       JSON.stringify(response),
@@ -61,6 +61,7 @@ serve(async (req) => {
           ...corsHeaders,
           'Content-Type': 'application/json',
         },
+        status: 200
       },
     )
   } catch (error) {
@@ -69,7 +70,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         code: '400',
-        message: error.message
+        message: error.message || 'Une erreur est survenue'
       }),
       { 
         status: 400,
