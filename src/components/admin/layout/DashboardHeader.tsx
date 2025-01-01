@@ -49,26 +49,28 @@ export function DashboardHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-10 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-10 w-full backdrop-blur-md bg-white/5 border-b border-white/10">
       <div className="container flex h-16 items-center justify-between py-4">
         <div className="flex items-center gap-4">
           <AnimatedLogo />
-          <Separator orientation="vertical" className="h-6" />
-          <h1 className="text-xl font-semibold">Tableau de bord Super Admin</h1>
+          <Separator orientation="vertical" className="h-6 bg-white/20" />
+          <h1 className="text-xl font-semibold text-white">
+            Tableau de bord {profile?.role === 'admin' ? 'Super Admin' : 'Administrateur'}
+          </h1>
         </div>
         
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 mr-4">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback>
+            <Avatar className="h-8 w-8 border border-white/20">
+              <AvatarFallback className="bg-white/10 text-white">
                 {profile?.first_name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="hidden md:block">
-              <p className="text-sm font-medium">
+              <p className="text-sm font-medium text-white">
                 {profile?.first_name || profile?.email || 'Utilisateur'}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-white/70">
                 {profile?.role === 'admin' ? 'Administrateur' : 'Utilisateur'}
               </p>
             </div>
@@ -78,6 +80,7 @@ export function DashboardHeader() {
             variant="ghost"
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="text-white hover:bg-white/10"
           >
             {theme === "dark" ? (
               <Sun className="h-5 w-5" />
@@ -88,7 +91,7 @@ export function DashboardHeader() {
 
           <Button
             variant="ghost"
-            className="text-red-500 hover:text-red-600 hover:bg-red-100"
+            className="text-white hover:bg-white/10 hover:text-white"
             onClick={handleLogout}
           >
             <LogOut className="h-4 w-4 mr-2" />
