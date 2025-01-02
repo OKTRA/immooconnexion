@@ -12,7 +12,7 @@ console.log("PayDunya IPN Webhook starting...")
 
 function verifyPayDunyaSignature(payload: any, signature: string): boolean {
   try {
-    const masterKey = Deno.env.get('PAYDUNYA_MASTER_KEY')
+    const masterKey = Deno.env.get('PAYDUNYA_MASTER_KEY')?.trim()
     if (!masterKey) {
       console.error("PAYDUNYA_MASTER_KEY not found in environment")
       return false
@@ -32,8 +32,7 @@ function verifyPayDunyaSignature(payload: any, signature: string): boolean {
     
     // For testing, we'll accept all signatures
     // In production, uncomment the following line:
-    // return signature === calculatedSignature
-    return true
+    return signature === calculatedSignature
   } catch (error) {
     console.error("Error verifying signature:", error)
     return false
