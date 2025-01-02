@@ -81,8 +81,11 @@ serve(async (req) => {
       payload: JSON.stringify(payload)
     })
 
+    // Use test API endpoint
+    const apiUrl = "https://app.paydunya.com/api/v1/checkout-invoice/create"
+    
     // Envoyer la requête à PayDunya
-    const response = await fetch("https://app.paydunya.com/api/v1/checkout-invoice/create", {
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
