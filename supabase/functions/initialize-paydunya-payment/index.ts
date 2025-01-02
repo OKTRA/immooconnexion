@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { amount, description, agency_id } = await req.json()
+    const { amount, description, agency_id, metadata } = await req.json()
 
     console.log("Initializing PayDunya payment:", { amount, description, agency_id })
 
@@ -27,8 +27,11 @@ serve(async (req) => {
     const token = Deno.env.get('PAYDUNYA_TOKEN')
 
     if (!masterKey || !privateKey || !publicKey || !token) {
+      console.error("Missing PayDunya configuration")
       throw new Error("PayDunya configuration manquante")
     }
+
+    console.log("PayDunya configuration loaded, preparing request...")
 
     // Construire la requête PayDunya
     const payload = {
@@ -49,13 +52,16 @@ serve(async (req) => {
       },
       custom_data: {
         agency_id,
+        metadata
       },
       actions: {
-        cancel_url: "https://votre-site.com/cancel",
-        return_url: "https://votre-site.com/success",
-        callback_url: `https://apidxwaaogboeoctlhtz.supabase.co/functions/v1/handle-paydunya-webhook`,
+        cancel_url: `${req.headers.get('origin')}/pricing`,
+        return_url: `${req.headers.get('origin')}/pricing`,
+        callback_url: `${req.headers.get('origin')}/api/handle-paydunya-webhook`,
       },
     }
+
+    console.log("Sending request to PayDunya API...")
 
     // Envoyer la requête à PayDunya
     const response = await fetch("https://app.paydunya.com/api/v1/checkout-invoice/create", {
@@ -88,6 +94,7 @@ serve(async (req) => {
         }
       )
     } else {
+      console.error("PayDunya error:", paydunyaResponse)
       throw new Error(paydunyaResponse.response_text || "Erreur lors de l'initialisation du paiement")
     }
   } catch (error) {
