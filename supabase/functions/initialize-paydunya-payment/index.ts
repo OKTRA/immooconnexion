@@ -19,19 +19,27 @@ serve(async (req) => {
   try {
     const { amount, description, agency_id, metadata } = await req.json()
 
-    console.log("Initializing PayDunya payment:", { amount, description, agency_id })
+    console.log("Received payment request:", { amount, description, agency_id })
 
     const masterKey = Deno.env.get('PAYDUNYA_MASTER_KEY')
     const privateKey = Deno.env.get('PAYDUNYA_PRIVATE_KEY')
     const publicKey = Deno.env.get('PAYDUNYA_PUBLIC_KEY')
     const token = Deno.env.get('PAYDUNYA_TOKEN')
 
+    // Log keys presence (not the actual values)
+    console.log("PayDunya keys status:", {
+      hasMasterKey: !!masterKey,
+      hasPrivateKey: !!privateKey,
+      hasPublicKey: !!publicKey,
+      hasToken: !!token
+    })
+
     if (!masterKey || !privateKey || !publicKey || !token) {
       console.error("Missing PayDunya configuration")
       throw new Error("PayDunya configuration manquante")
     }
 
-    console.log("PayDunya configuration loaded, preparing request...")
+    console.log("Building PayDunya request payload...")
 
     // Construire la requête PayDunya
     const payload = {
@@ -77,7 +85,7 @@ serve(async (req) => {
     })
 
     const paydunyaResponse = await response.json()
-    console.log("PayDunya response:", paydunyaResponse)
+    console.log("PayDunya API response:", paydunyaResponse)
 
     if (paydunyaResponse.response_code === "00") {
       return new Response(
