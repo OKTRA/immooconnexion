@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
 import { CinetPayForm } from "@/components/payment/CinetPayForm"
+import { PaymentFormData } from "@/components/payment/types"
 
 interface SubscriptionPlanRowProps {
   plan: any
@@ -21,6 +22,20 @@ export function SubscriptionPlanRow({ plan, onEdit, onDelete }: SubscriptionPlan
   const [editedPlan, setEditedPlan] = useState(plan)
   const [featuresInput, setFeaturesInput] = useState(plan.features.join('\n'))
   const { toast } = useToast()
+
+  // Ajout des données de formulaire par défaut
+  const defaultFormData: PaymentFormData = {
+    email: "",
+    password: "",
+    confirm_password: "",
+    agency_name: "",
+    agency_address: "",
+    country: "",
+    city: "",
+    first_name: "",
+    last_name: "",
+    phone_number: "",
+  }
 
   const handleSaveEdit = async () => {
     try {
@@ -178,6 +193,7 @@ export function SubscriptionPlanRow({ plan, onEdit, onDelete }: SubscriptionPlan
             amount={plan.price}
             description={`Abonnement au plan ${plan.name}`}
             onSuccess={handlePaymentSuccess}
+            formData={defaultFormData}
           />
         </DialogContent>
       </Dialog>

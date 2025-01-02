@@ -1,8 +1,22 @@
 import { CinetPayForm } from "./CinetPayForm"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { PaymentFormData } from "./types"
 
 export function TestPayment() {
+  const defaultFormData: PaymentFormData = {
+    email: "",
+    password: "",
+    confirm_password: "",
+    agency_name: "",
+    agency_address: "",
+    country: "",
+    city: "",
+    first_name: "",
+    last_name: "",
+    phone_number: "",
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -21,6 +35,7 @@ export function TestPayment() {
           onError={(error) => {
             console.error("Erreur de paiement:", error)
           }}
+          formData={defaultFormData}
         />
       </DialogContent>
     </Dialog>

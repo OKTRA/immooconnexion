@@ -7,12 +7,26 @@ import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { CinetPayForm } from "@/components/payment/CinetPayForm"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { PaymentFormData } from "@/components/payment/types"
 
 export default function Pricing() {
   const { toast } = useToast()
   const [selectedPlan, setSelectedPlan] = useState<any>(null)
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   
+  const defaultFormData: PaymentFormData = {
+    email: "",
+    password: "",
+    confirm_password: "",
+    agency_name: "",
+    agency_address: "",
+    country: "",
+    city: "",
+    first_name: "",
+    last_name: "",
+    phone_number: "",
+  }
+
   const { data: plans = [] } = useQuery({
     queryKey: ['subscription-plans'],
     queryFn: async () => {
@@ -114,6 +128,7 @@ export default function Pricing() {
                   variant: "destructive",
                 })
               }}
+              formData={defaultFormData}
             />
           )}
         </DialogContent>
