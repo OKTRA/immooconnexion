@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { PaymentFormData } from "./types"
+import { useToast } from "@/hooks/use-toast"
 
 interface PaydunyaFormProps {
   amount: number
@@ -22,12 +23,14 @@ export function PaydunyaForm({
   formData
 }: PaydunyaFormProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
 
   const handlePayment = async () => {
     try {
       setIsLoading(true)
+      console.log("Initializing PayDunya payment with:", { amount, description, agencyId })
       
-      // Initialiser le paiement avec PayDunya
+      // Initialize payment with PayDunya
       const { data, error } = await supabase.functions.invoke('initialize-paydunya-payment', {
         body: {
           amount,
@@ -54,10 +57,15 @@ export function PaydunyaForm({
         }
       })
 
-      if (error) throw error
+      console.log("PayDunya response:", { data, error })
+
+      if (error) {
+        console.error("PayDunya initialization error:", error)
+        throw error
+      }
 
       if (data?.payment_url) {
-        // Rediriger vers la page de paiement PayDunya
+        console.log("Redirecting to PayDunya payment URL:", data.payment_url)
         window.location.href = data.payment_url
       } else {
         throw new Error("URL de paiement non reçue")
@@ -66,8 +74,14 @@ export function PaydunyaForm({
       if (onSuccess) {
         onSuccess()
       }
-    } catch (error) {
-      console.error("Erreur lors de l'initialisation du paiement PayDunya:", error)
+    } catch (error: any) {
+      console.error("Detailed PayDunya error:", error)
+      const errorMessage = error.message || "Une erreur est survenue lors de l'initialisation du paiement"
+      toast({
+        title: "Erreur de paiement",
+        description: errorMessage,
+        variant: "destructive",
+      })
       if (onError) {
         onError(error)
       }
@@ -89,7 +103,7 @@ export function PaydunyaForm({
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Chargement...
+            Initialisation du paiement...
           </>
         ) : (
           "Payer avec PayDunya"
