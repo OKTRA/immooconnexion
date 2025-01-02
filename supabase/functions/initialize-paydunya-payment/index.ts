@@ -22,12 +22,10 @@ serve(async (req) => {
     const PAYDUNYA_TOKEN = Deno.env.get('PAYDUNYA_TOKEN')
 
     if (!PAYDUNYA_MASTER_KEY || !PAYDUNYA_PRIVATE_KEY || !PAYDUNYA_TOKEN) {
-      throw new Error("Missing PayDunya API keys")
+      throw new Error("PayDunya API keys are not configured")
     }
 
-    // Use a fixed domain for development/testing
-    const baseUrl = "https://apidxwaaogboeoctlhtz.supabase.co"
-    console.log("Base URL for callbacks:", baseUrl)
+    console.log("Initializing PayDunya payment with:", { amount, description })
 
     const payload = {
       store: {
@@ -36,14 +34,15 @@ serve(async (req) => {
       invoice: {
         total_amount: amount,
         description: description,
-        callback_url: `${baseUrl}/functions/v1/handle-paydunya-webhook`,
-        cancel_url: `${baseUrl}/payment-cancelled`,
-        return_url: `${baseUrl}/payment-success`,
+        callback_url: `${req.url.split('/functions/')[0]}/functions/v1/handle-paydunya-webhook`,
+        cancel_url: `${new URL(req.url).origin}/payment-cancelled`,
+        return_url: `${new URL(req.url).origin}/payment-success`,
       },
       custom_data: metadata,
     }
 
-    console.log("PayDunya payload:", payload)
+    console.log("PayDunya request payload:", payload)
+    console.log("Using PayDunya API URL:", 'https://app.paydunya.com/api/v1/checkout-invoice/create')
 
     const response = await fetch('https://app.paydunya.com/api/v1/checkout-invoice/create', {
       method: 'POST',
@@ -60,6 +59,7 @@ serve(async (req) => {
     console.log("PayDunya API response:", data)
 
     if (data.response_code !== "00") {
+      console.error("PayDunya error:", data)
       throw new Error(data.response_text || "PayDunya API error")
     }
 
