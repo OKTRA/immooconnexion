@@ -21,11 +21,11 @@ serve(async (req) => {
 
     console.log("Received payment request:", { amount, description, agency_id })
 
-    // Get API keys from environment
-    const masterKey = Deno.env.get('PAYDUNYA_MASTER_KEY')
-    const privateKey = Deno.env.get('PAYDUNYA_PRIVATE_KEY')
-    const publicKey = Deno.env.get('PAYDUNYA_PUBLIC_KEY')
-    const token = Deno.env.get('PAYDUNYA_TOKEN')
+    // Get API keys from environment and trim them
+    const masterKey = Deno.env.get('PAYDUNYA_MASTER_KEY')?.trim()
+    const privateKey = Deno.env.get('PAYDUNYA_PRIVATE_KEY')?.trim()
+    const publicKey = Deno.env.get('PAYDUNYA_PUBLIC_KEY')?.trim()
+    const token = Deno.env.get('PAYDUNYA_TOKEN')?.trim()
 
     // Validate API keys
     if (!masterKey || !privateKey || !publicKey || !token) {
@@ -33,7 +33,7 @@ serve(async (req) => {
       throw new Error("Configuration PayDunya manquante")
     }
 
-    // Log API keys presence (not the actual values)
+    // Log API keys presence and format
     console.log("PayDunya API keys validation:", {
       hasMasterKey: !!masterKey,
       hasPrivateKey: !!privateKey,
@@ -42,8 +42,18 @@ serve(async (req) => {
       masterKeyLength: masterKey.length,
       privateKeyLength: privateKey.length,
       publicKeyLength: publicKey.length,
-      tokenLength: token.length
+      tokenLength: token.length,
+      // Log first and last character to help debug formatting issues
+      masterKeyFormat: `${masterKey.charAt(0)}...${masterKey.charAt(masterKey.length - 1)}`,
+      privateKeyFormat: `${privateKey.charAt(0)}...${privateKey.charAt(privateKey.length - 1)}`,
+      publicKeyFormat: `${publicKey.charAt(0)}...${publicKey.charAt(publicKey.length - 1)}`,
+      tokenFormat: `${token.charAt(0)}...${token.charAt(token.length - 1)}`
     })
+
+    const baseUrl = req.headers.get('origin') || 'http://localhost:3000'
+    const webhookUrl = `${baseUrl}/api/handle-paydunya-webhook`
+
+    console.log("Using webhook URL:", webhookUrl)
 
     // Build PayDunya request payload
     const payload = {
@@ -67,9 +77,9 @@ serve(async (req) => {
         metadata
       },
       actions: {
-        cancel_url: `${req.headers.get('origin')}/pricing`,
-        return_url: `${req.headers.get('origin')}/pricing`,
-        callback_url: `${req.headers.get('origin')}/api/handle-paydunya-webhook`,
+        cancel_url: `${baseUrl}/pricing`,
+        return_url: `${baseUrl}/pricing`,
+        callback_url: webhookUrl,
       },
     }
 
@@ -83,10 +93,10 @@ serve(async (req) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "PAYDUNYA-MASTER-KEY": masterKey.trim(),
-        "PAYDUNYA-PRIVATE-KEY": privateKey.trim(),
-        "PAYDUNYA-PUBLIC-KEY": publicKey.trim(),
-        "PAYDUNYA-TOKEN": token.trim(),
+        "PAYDUNYA-MASTER-KEY": masterKey,
+        "PAYDUNYA-PRIVATE-KEY": privateKey,
+        "PAYDUNYA-PUBLIC-KEY": publicKey,
+        "PAYDUNYA-TOKEN": token,
       },
       body: JSON.stringify(payload),
     })
