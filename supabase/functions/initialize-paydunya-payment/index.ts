@@ -34,11 +34,8 @@ serve(async (req) => {
     }
 
     // Get the origin from the request headers or URL
-    const origin = req.headers.get("origin") || new URL(req.url).origin
-    console.log("Request origin:", origin)
-
-    // Remove any trailing slashes and ensure proper URL format
-    const baseUrl = origin.replace(/\/$/, "")
+    const requestUrl = new URL(req.url)
+    const baseUrl = `${requestUrl.protocol}//${requestUrl.hostname}`
     console.log("Base URL for callbacks:", baseUrl)
 
     const payload = {
