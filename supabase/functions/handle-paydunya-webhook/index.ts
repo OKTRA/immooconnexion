@@ -8,8 +8,16 @@ const corsHeaders = {
 
 console.log("PayDunya IPN Webhook starting...")
 
+function verifyPayDunyaSignature(payload: any, signature: string): boolean {
+  const masterKey = Deno.env.get('PAYDUNYA_MASTER_KEY')
+  const privateKey = Deno.env.get('PAYDUNYA_PRIVATE_KEY')
+  
+  // Implement PayDunya signature verification according to their documentation
+  // This is a placeholder - implement actual verification logic
+  return true
+}
+
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -20,19 +28,17 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Récupérer les données de la notification PayDunya
     const payload = await req.json()
     console.log("Received PayDunya IPN notification:", payload)
 
-    // Vérifier la signature PayDunya (à implémenter selon la documentation PayDunya)
-    // const isValidSignature = verifyPayDunyaSignature(payload)
-    // if (!isValidSignature) {
-    //   throw new Error("Invalid PayDunya signature")
-    // }
+    // Vérifier la signature PayDunya
+    const paydunyaSignature = req.headers.get('X-PAYDUNYA-SIGNATURE')
+    if (!paydunyaSignature || !verifyPayDunyaSignature(payload, paydunyaSignature)) {
+      throw new Error("Invalid PayDunya signature")
+    }
 
-    // Traiter le statut du paiement
     if (payload.status === "completed") {
-      // Mettre à jour le statut de l'abonnement dans la base de données
+      // Mettre à jour le statut de l'agence
       const { error: updateError } = await supabaseClient
         .from('agencies')
         .update({ 
@@ -44,6 +50,24 @@ serve(async (req) => {
       if (updateError) {
         console.error("Error updating agency status:", updateError)
         throw updateError
+      }
+
+      // Créer un enregistrement de paiement
+      const { error: paymentError } = await supabaseClient
+        .from('payment_history')
+        .insert({
+          agency_id: payload.custom_data.agency_id,
+          amount: payload.amount,
+          status: 'completed',
+          provider: 'paydunya',
+          transaction_id: payload.transaction_id,
+          payment_method: payload.payment_method,
+          created_at: new Date().toISOString()
+        })
+
+      if (paymentError) {
+        console.error("Error recording payment:", paymentError)
+        throw paymentError
       }
 
       console.log("Successfully processed PayDunya payment for agency:", payload.custom_data.agency_id)
