@@ -64,12 +64,23 @@ export function PaydunyaForm({
         throw error
       }
 
-      if (data?.payment_url) {
-        console.log("Redirecting to PayDunya payment URL:", data.payment_url)
-        window.location.href = data.payment_url
-      } else {
-        throw new Error("URL de paiement non reçue")
+      if (!data?.token) {
+        throw new Error("Token de paiement non reçu")
       }
+
+      // Create PayDunya payment form
+      const paydunyaForm = document.createElement('form')
+      paydunyaForm.method = 'POST'
+      paydunyaForm.action = 'https://app.paydunya.com/checkout/receipt'
+      
+      const tokenInput = document.createElement('input')
+      tokenInput.type = 'hidden'
+      tokenInput.name = 'token'
+      tokenInput.value = data.token
+      
+      paydunyaForm.appendChild(tokenInput)
+      document.body.appendChild(paydunyaForm)
+      paydunyaForm.submit()
 
       if (onSuccess) {
         onSuccess()

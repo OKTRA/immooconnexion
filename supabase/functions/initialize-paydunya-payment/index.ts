@@ -5,31 +5,23 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-console.log("Initialize PayDunya Payment Function Started")
-
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { amount, description, agency_id, metadata } = await req.json()
-    
-    // Get PayDunya API keys from environment variables
-    const masterKey = Deno.env.get("PAYDUNYA_MASTER_KEY")?.trim()
-    const privateKey = Deno.env.get("PAYDUNYA_PRIVATE_KEY")?.trim()
-    const publicKey = Deno.env.get("PAYDUNYA_PUBLIC_KEY")?.trim()
-    const token = Deno.env.get("PAYDUNYA_TOKEN")?.trim()
+    const {
+      amount,
+      description,
+      metadata
+    } = await req.json()
 
-    console.log("PayDunya Keys loaded:", {
-      masterKeyLength: masterKey?.length,
-      privateKeyLength: privateKey?.length,
-      publicKeyLength: publicKey?.length,
-      tokenLength: token?.length
-    })
+    const PAYDUNYA_MASTER_KEY = Deno.env.get('PAYDUNYA_MASTER_KEY')
+    const PAYDUNYA_PRIVATE_KEY = Deno.env.get('PAYDUNYA_PRIVATE_KEY')
+    const PAYDUNYA_TOKEN = Deno.env.get('PAYDUNYA_TOKEN')
 
-    if (!masterKey || !privateKey || !publicKey || !token) {
+    if (!PAYDUNYA_MASTER_KEY || !PAYDUNYA_PRIVATE_KEY || !PAYDUNYA_TOKEN) {
       throw new Error("Missing PayDunya API keys")
     }
 
@@ -38,10 +30,9 @@ serve(async (req) => {
     console.log("Base URL for callbacks:", baseUrl)
 
     const payload = {
-      master_key: masterKey,
-      private_key: privateKey,
-      public_key: publicKey,
-      token: token,
+      store: {
+        name: "Gestion Immobilière",
+      },
       invoice: {
         total_amount: amount,
         description: description,
@@ -49,57 +40,50 @@ serve(async (req) => {
         cancel_url: `${baseUrl}/payment-cancelled`,
         return_url: `${baseUrl}/payment-success`,
       },
-      store: {
-        name: "Gestion Immobilière",
-        tagline: "Location et gestion immobilière",
-        phone: metadata?.agency_data?.phone || "",
-        postal_address: metadata?.agency_data?.address || "",
-        logo_url: "https://your-logo-url.com/logo.png",
-      },
-      custom_data: {
-        agency_id,
-        metadata
-      },
+      custom_data: metadata,
     }
 
-    console.log("Sending request to PayDunya with payload:", {
-      ...payload,
-      master_key: "***",
-      private_key: "***",
-      public_key: "***",
-      token: "***"
-    })
+    console.log("PayDunya payload:", payload)
 
-    const response = await fetch("https://app.paydunya.com/api/v1/checkout-invoice/create", {
-      method: "POST",
+    const response = await fetch('https://app.paydunya.com/api/v1/checkout-invoice/create', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
+        'PAYDUNYA-MASTER-KEY': PAYDUNYA_MASTER_KEY,
+        'PAYDUNYA-PRIVATE-KEY': PAYDUNYA_PRIVATE_KEY,
+        'PAYDUNYA-TOKEN': PAYDUNYA_TOKEN,
       },
       body: JSON.stringify(payload),
     })
 
     const data = await response.json()
-    console.log("PayDunya API Response:", data)
+    console.log("PayDunya API response:", data)
 
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to create PayDunya invoice")
+    if (data.response_code !== "00") {
+      throw new Error(data.response_text || "PayDunya API error")
     }
 
-    return new Response(JSON.stringify(data), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    })
-
-  } catch (error) {
-    console.error("Error in PayDunya payment initialization:", error)
     return new Response(
-      JSON.stringify({
-        success: false,
-        message: error.message
+      JSON.stringify({ 
+        token: data.token
       }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
+      { 
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        } 
+      }
+    )
+  } catch (error) {
+    console.error("PayDunya error:", error)
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        },
+        status: 400
       }
     )
   }
