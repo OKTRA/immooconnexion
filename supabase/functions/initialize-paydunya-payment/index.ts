@@ -21,31 +21,31 @@ serve(async (req) => {
 
     console.log("Received payment request:", { amount, description, agency_id })
 
-    const masterKey = Deno.env.get('PAYDUNYA_MASTER_KEY')?.trim()
-    const privateKey = Deno.env.get('PAYDUNYA_PRIVATE_KEY')?.trim()
-    const publicKey = Deno.env.get('PAYDUNYA_PUBLIC_KEY')?.trim()
-    const token = Deno.env.get('PAYDUNYA_TOKEN')?.trim()
+    // Get API keys from environment
+    const masterKey = Deno.env.get('PAYDUNYA_MASTER_KEY')
+    const privateKey = Deno.env.get('PAYDUNYA_PRIVATE_KEY')
+    const publicKey = Deno.env.get('PAYDUNYA_PUBLIC_KEY')
+    const token = Deno.env.get('PAYDUNYA_TOKEN')
 
-    // Log keys presence (not the actual values)
-    console.log("PayDunya keys status:", {
+    // Validate API keys
+    if (!masterKey || !privateKey || !publicKey || !token) {
+      console.error("Missing PayDunya API keys")
+      throw new Error("Configuration PayDunya manquante")
+    }
+
+    // Log API keys presence (not the actual values)
+    console.log("PayDunya API keys validation:", {
       hasMasterKey: !!masterKey,
       hasPrivateKey: !!privateKey,
       hasPublicKey: !!publicKey,
       hasToken: !!token,
-      masterKeyLength: masterKey?.length,
-      privateKeyLength: privateKey?.length,
-      publicKeyLength: publicKey?.length,
-      tokenLength: token?.length
+      masterKeyLength: masterKey.length,
+      privateKeyLength: privateKey.length,
+      publicKeyLength: publicKey.length,
+      tokenLength: token.length
     })
 
-    if (!masterKey || !privateKey || !publicKey || !token) {
-      console.error("Missing PayDunya configuration")
-      throw new Error("PayDunya configuration manquante")
-    }
-
-    console.log("Building PayDunya request payload...")
-
-    // Construire la requête PayDunya
+    // Build PayDunya request payload
     const payload = {
       invoice: {
         total_amount: amount,
@@ -69,30 +69,24 @@ serve(async (req) => {
       actions: {
         cancel_url: `${req.headers.get('origin')}/pricing`,
         return_url: `${req.headers.get('origin')}/pricing`,
-        callback_url: `https://apidxwaaogboeoctlhtz.supabase.co/functions/v1/handle-paydunya-webhook`,
+        callback_url: `${req.headers.get('origin')}/api/handle-paydunya-webhook`,
       },
     }
 
-    console.log("Sending request to PayDunya API with headers:", {
-      masterKeyLength: masterKey.length,
-      privateKeyLength: privateKey.length,
-      publicKeyLength: publicKey.length,
-      tokenLength: token.length,
+    console.log("Sending request to PayDunya API:", {
+      url: "https://app.paydunya.com/api/v1/checkout-invoice/create",
       payload: JSON.stringify(payload)
     })
 
-    // Use test API endpoint
-    const apiUrl = "https://app.paydunya.com/api/v1/checkout-invoice/create"
-    
-    // Envoyer la requête à PayDunya
-    const response = await fetch(apiUrl, {
+    // Send request to PayDunya
+    const response = await fetch("https://app.paydunya.com/api/v1/checkout-invoice/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "PAYDUNYA-MASTER-KEY": masterKey,
-        "PAYDUNYA-PRIVATE-KEY": privateKey,
-        "PAYDUNYA-PUBLIC-KEY": publicKey,
-        "PAYDUNYA-TOKEN": token,
+        "PAYDUNYA-MASTER-KEY": masterKey.trim(),
+        "PAYDUNYA-PRIVATE-KEY": privateKey.trim(),
+        "PAYDUNYA-PUBLIC-KEY": publicKey.trim(),
+        "PAYDUNYA-TOKEN": token.trim(),
       },
       body: JSON.stringify(payload),
     })
