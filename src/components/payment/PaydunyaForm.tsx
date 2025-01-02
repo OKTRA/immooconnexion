@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
+import { PaymentFormData } from "./types"
 
 interface PaydunyaFormProps {
   amount: number
@@ -9,6 +10,7 @@ interface PaydunyaFormProps {
   agencyId?: string | null
   onSuccess?: () => void
   onError?: (error: any) => void
+  formData: PaymentFormData
 }
 
 export function PaydunyaForm({ 
@@ -16,7 +18,8 @@ export function PaydunyaForm({
   description, 
   agencyId,
   onSuccess,
-  onError 
+  onError,
+  formData
 }: PaydunyaFormProps) {
   const [isLoading, setIsLoading] = useState(false)
 
@@ -30,6 +33,24 @@ export function PaydunyaForm({
           amount,
           description,
           agency_id: agencyId,
+          metadata: {
+            user_data: {
+              email: formData.email,
+              password: formData.password,
+              first_name: formData.first_name,
+              last_name: formData.last_name,
+              phone: formData.phone_number
+            },
+            agency_data: {
+              name: formData.agency_name,
+              address: formData.agency_address,
+              country: formData.country,
+              city: formData.city,
+              phone: formData.phone_number,
+              email: formData.email
+            },
+            subscription_plan_id: agencyId
+          }
         }
       })
 

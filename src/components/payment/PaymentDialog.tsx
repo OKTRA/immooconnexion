@@ -26,7 +26,9 @@ export function PaymentDialog({
     resolver: zodResolver(paymentFormSchema),
   })
   const [paymentSuccess, setPaymentSuccess] = useState(false)
+  const [showPaymentMethods, setShowPaymentMethods] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState("cinetpay")
+  const [formData, setFormData] = useState<PaymentFormData | null>(null)
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -40,12 +42,31 @@ export function PaymentDialog({
 
   const handleClose = () => {
     if (paymentSuccess) {
-      navigate('/login')
+      navigate('/agence/login')
     }
+    setShowPaymentMethods(false)
+    setFormData(null)
     onOpenChange(false)
   }
 
+  const handleFormSubmit = async (data: PaymentFormData) => {
+    const result = await form.trigger()
+    if (!result) {
+      // Show error toast if form validation fails
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      })
+      return
+    }
+    setFormData(data)
+    setShowPaymentMethods(true)
+  }
+
   const renderPaymentForm = () => {
+    if (!formData) return null
+
     switch (paymentMethod) {
       case "cinetpay":
         return (
@@ -54,6 +75,7 @@ export function PaymentDialog({
             description={planName ? `Subscription to ${planName} plan` : 'Payment'}
             agencyId={tempAgencyId}
             onSuccess={handlePaymentSuccess}
+            formData={formData}
           />
         )
       case "paydunya":
@@ -63,6 +85,7 @@ export function PaymentDialog({
             description={planName ? `Subscription to ${planName} plan` : 'Payment'}
             agencyId={tempAgencyId}
             onSuccess={handlePaymentSuccess}
+            formData={formData}
           />
         )
       case "orange-money":
@@ -102,14 +125,21 @@ export function PaymentDialog({
                   Go to Login
                 </Button>
               </div>
+            ) : showPaymentMethods ? (
+              <div className="space-y-4">
+                <PaymentMethodSelector 
+                  selectedMethod={paymentMethod}
+                  onMethodChange={setPaymentMethod}
+                />
+                {renderPaymentForm()}
+              </div>
             ) : (
               <Form {...form}>
-                <form className="space-y-4">
-                  <PaymentMethodSelector 
-                    selectedMethod={paymentMethod}
-                    onMethodChange={setPaymentMethod}
-                  />
-                  {renderPaymentForm()}
+                <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+                  <PaymentFormFields form={form} />
+                  <Button type="submit" className="w-full">
+                    Continue
+                  </Button>
                 </form>
               </Form>
             )}

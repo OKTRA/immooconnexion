@@ -3,49 +3,45 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { initializeCinetPay } from "@/utils/cinetpay"
-import { useForm, FormProvider } from "react-hook-form"
-import { PaymentFormData, CinetPayFormProps } from "./types"
 import { Loader2 } from "lucide-react"
-import { PaymentFormFields } from "./PaymentFormFields"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { paymentFormSchema } from "./types"
+import { PaymentFormData, CinetPayFormProps } from "./types"
 
-export function CinetPayForm({ amount, description, onSuccess, onError, agencyId }: CinetPayFormProps) {
+interface ExtendedCinetPayFormProps extends CinetPayFormProps {
+  formData: PaymentFormData
+}
+
+export function CinetPayForm({ 
+  amount, 
+  description, 
+  onSuccess, 
+  onError, 
+  agencyId,
+  formData 
+}: ExtendedCinetPayFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
-  const methods = useForm<PaymentFormData>({
-    resolver: zodResolver(paymentFormSchema),
-  })
 
   const handlePayment = async () => {
     try {
-      const values = methods.getValues()
-      
-      // Validate form
-      const result = await methods.trigger()
-      if (!result) {
-        return // Form validation failed
-      }
-
       setIsLoading(true)
-      console.log("Initializing payment with:", { amount, description, values })
+      console.log("Initializing payment with:", { amount, description, formData })
 
       // Structure the metadata
       const metadata = {
         user_data: {
-          email: values.email,
-          password: values.password,
-          first_name: values.first_name,
-          last_name: values.last_name,
-          phone: values.phone_number
+          email: formData.email,
+          password: formData.password,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          phone: formData.phone_number
         },
         agency_data: {
-          name: values.agency_name,
-          address: values.agency_address,
-          country: values.country,
-          city: values.city,
-          phone: values.phone_number,
-          email: values.email
+          name: formData.agency_name,
+          address: formData.agency_address,
+          country: formData.country,
+          city: formData.city,
+          phone: formData.phone_number,
+          email: formData.email
         },
         subscription_plan_id: agencyId
       }
@@ -77,13 +73,13 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
           currency: 'XOF',
           channels: 'ALL',
           description: data.description,
-          customer_email: values.email,
-          customer_name: values.first_name,
-          customer_surname: values.last_name,
-          customer_phone_number: values.phone_number,
-          customer_address: values.agency_address,
-          customer_city: values.city,
-          customer_country: values.country,
+          customer_email: formData.email,
+          customer_name: formData.first_name,
+          customer_surname: formData.last_name,
+          customer_phone_number: formData.phone_number,
+          customer_address: formData.agency_address,
+          customer_city: formData.city,
+          customer_country: formData.country,
           mode: 'PRODUCTION' as const,
           lang: 'fr',
           metadata: data.metadata
@@ -124,24 +120,21 @@ export function CinetPayForm({ amount, description, onSuccess, onError, agencyId
   }
 
   return (
-    <FormProvider {...methods}>
-      <div className="space-y-4">
-        <PaymentFormFields form={methods} />
-        <Button 
-          onClick={handlePayment}
-          className="w-full" 
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Loading...
-            </>
-          ) : (
-            `Pay ${amount.toLocaleString()} FCFA`
-          )}
-        </Button>
-      </div>
-    </FormProvider>
+    <div className="space-y-4">
+      <Button 
+        onClick={handlePayment}
+        className="w-full" 
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Loading...
+          </>
+        ) : (
+          `Pay ${amount.toLocaleString()} FCFA`
+        )}
+      </Button>
+    </div>
   )
 }
