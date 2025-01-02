@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
+import { PaymentMethodSelector } from "./PaymentMethodSelector"
 
 export function PaymentDialog({ 
   open, 
@@ -24,6 +25,7 @@ export function PaymentDialog({
     resolver: zodResolver(paymentFormSchema),
   })
   const [paymentSuccess, setPaymentSuccess] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState("cinetpay")
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -40,6 +42,38 @@ export function PaymentDialog({
       navigate('/login')
     }
     onOpenChange(false)
+  }
+
+  const renderPaymentForm = () => {
+    switch (paymentMethod) {
+      case "cinetpay":
+        return (
+          <CinetPayForm 
+            amount={amount || 0}
+            description={planName ? `Subscription to ${planName} plan` : 'Payment'}
+            agencyId={tempAgencyId}
+            onSuccess={handlePaymentSuccess}
+          />
+        )
+      case "paydunya":
+        return (
+          <div className="text-center p-4">
+            <p className="text-sm text-gray-500">
+              L'intégration PayDunya sera bientôt disponible
+            </p>
+          </div>
+        )
+      case "orange-money":
+        return (
+          <div className="text-center p-4">
+            <p className="text-sm text-gray-500">
+              L'intégration Orange Money sera bientôt disponible
+            </p>
+          </div>
+        )
+      default:
+        return null
+    }
   }
 
   return (
@@ -69,12 +103,11 @@ export function PaymentDialog({
             ) : (
               <Form {...form}>
                 <form className="space-y-4">
-                  <CinetPayForm 
-                    amount={amount || 0}
-                    description={planName ? `Subscription to ${planName} plan` : 'Payment'}
-                    agencyId={tempAgencyId}
-                    onSuccess={handlePaymentSuccess}
+                  <PaymentMethodSelector 
+                    selectedMethod={paymentMethod}
+                    onMethodChange={setPaymentMethod}
                   />
+                  {renderPaymentForm()}
                 </form>
               </Form>
             )}
