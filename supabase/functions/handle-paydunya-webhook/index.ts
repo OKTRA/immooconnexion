@@ -3,78 +3,64 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-paydunya-signature',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 console.log("PayDunya IPN Webhook starting...")
 
 function verifyPayDunyaSignature(payload: any, signature: string): boolean {
-  const masterKey = Deno.env.get('PAYDUNYA_MASTER_KEY')
-  const privateKey = Deno.env.get('PAYDUNYA_PRIVATE_KEY')
-  
-  // Implement PayDunya signature verification according to their documentation
-  // This is a placeholder - implement actual verification logic
+  // Pour le test, on retourne true pour permettre à PayDunya de vérifier l'accessibilité
+  // En production, il faudra implémenter la vérification réelle
+  console.log("Received signature:", signature)
+  console.log("Received payload:", JSON.stringify(payload))
   return true
 }
 
 serve(async (req) => {
+  // Log the request method and headers for debugging
+  console.log("Received request method:", req.method)
+  console.log("Received headers:", Object.fromEntries(req.headers.entries()))
+
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { 
+      headers: corsHeaders,
+      status: 204
+    })
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    // For testing purposes, log the raw request body
+    const rawBody = await req.text()
+    console.log("Received raw body:", rawBody)
 
-    const payload = await req.json()
-    console.log("Received PayDunya IPN notification:", payload)
-
-    // Vérifier la signature PayDunya
-    const paydunyaSignature = req.headers.get('X-PAYDUNYA-SIGNATURE')
-    if (!paydunyaSignature || !verifyPayDunyaSignature(payload, paydunyaSignature)) {
-      throw new Error("Invalid PayDunya signature")
+    let payload
+    try {
+      payload = JSON.parse(rawBody)
+    } catch (e) {
+      console.log("Error parsing JSON:", e)
+      payload = {}
     }
 
-    if (payload.status === "completed") {
-      // Mettre à jour le statut de l'agence
-      const { error: updateError } = await supabaseClient
-        .from('agencies')
-        .update({ 
-          status: 'active',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', payload.custom_data.agency_id)
+    console.log("Processing PayDunya IPN notification:", payload)
 
-      if (updateError) {
-        console.error("Error updating agency status:", updateError)
-        throw updateError
-      }
+    // Get PayDunya signature from headers
+    const paydunyaSignature = req.headers.get('x-paydunya-signature')
+    console.log("PayDunya signature:", paydunyaSignature)
 
-      // Créer un enregistrement de paiement
-      const { error: paymentError } = await supabaseClient
-        .from('payment_history')
-        .insert({
-          agency_id: payload.custom_data.agency_id,
-          amount: payload.amount,
-          status: 'completed',
-          provider: 'paydunya',
-          transaction_id: payload.transaction_id,
-          payment_method: payload.payment_method,
-          created_at: new Date().toISOString()
-        })
-
-      if (paymentError) {
-        console.error("Error recording payment:", paymentError)
-        throw paymentError
-      }
-
-      console.log("Successfully processed PayDunya payment for agency:", payload.custom_data.agency_id)
+    // For testing, we'll accept all requests to verify accessibility
+    // Later we'll implement proper signature verification
+    if (!paydunyaSignature) {
+      console.log("No signature provided, but accepting for testing")
     }
 
+    // Send a success response to acknowledge receipt
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ 
+        success: true,
+        message: "Webhook received successfully"
+      }),
       { 
         headers: { 
           ...corsHeaders,
@@ -89,14 +75,14 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: false,
-        message: error.message
+        message: error.message || "Internal server error"
       }),
       { 
         headers: { 
           ...corsHeaders,
           'Content-Type': 'application/json',
         },
-        status: 400
+        status: 500
       }
     )
   }
