@@ -33,9 +33,8 @@ serve(async (req) => {
       throw new Error("Missing PayDunya API keys")
     }
 
-    // Get the origin from the request headers or URL
-    const requestUrl = new URL(req.url)
-    const baseUrl = `${requestUrl.protocol}//${requestUrl.hostname}`
+    // Use a fixed domain for development/testing
+    const baseUrl = "https://apidxwaaogboeoctlhtz.supabase.co"
     console.log("Base URL for callbacks:", baseUrl)
 
     const payload = {
@@ -46,7 +45,7 @@ serve(async (req) => {
       invoice: {
         total_amount: amount,
         description: description,
-        callback_url: `${baseUrl}/api/payment-callback`,
+        callback_url: `${baseUrl}/functions/v1/handle-paydunya-webhook`,
         cancel_url: `${baseUrl}/payment-cancelled`,
         return_url: `${baseUrl}/payment-success`,
       },
