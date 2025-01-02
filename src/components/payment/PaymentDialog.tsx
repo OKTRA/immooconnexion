@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { PaymentFormFields } from "./PaymentFormFields"
 import { paymentFormSchema, type PaymentFormData, type PaymentDialogProps } from "./types"
 import { CinetPayForm } from "./CinetPayForm"
+import { PaydunyaForm } from "./PaydunyaForm"
 import { Card } from "@/components/ui/card"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
@@ -57,11 +58,12 @@ export function PaymentDialog({
         )
       case "paydunya":
         return (
-          <div className="text-center p-4">
-            <p className="text-sm text-gray-500">
-              L'intégration PayDunya sera bientôt disponible
-            </p>
-          </div>
+          <PaydunyaForm 
+            amount={amount || 0}
+            description={planName ? `Subscription to ${planName} plan` : 'Payment'}
+            agencyId={tempAgencyId}
+            onSuccess={handlePaymentSuccess}
+          />
         )
       case "orange-money":
         return (
