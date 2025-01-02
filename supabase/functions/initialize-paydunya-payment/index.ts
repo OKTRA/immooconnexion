@@ -17,6 +17,12 @@ serve(async (req) => {
       metadata
     } = await req.json()
 
+    // Validate request payload
+    if (!amount || !description) {
+      console.error("Missing required fields:", { amount, description })
+      throw new Error("Amount and description are required")
+    }
+
     const PAYDUNYA_PRIVATE_KEY = Deno.env.get('PAYDUNYA_PRIVATE_KEY')
     const PAYDUNYA_TOKEN = Deno.env.get('PAYDUNYA_TOKEN')
 
@@ -80,7 +86,9 @@ serve(async (req) => {
   } catch (error) {
     console.error("PayDunya error:", error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message || "An error occurred while processing the payment"
+      }),
       { 
         headers: { 
           ...corsHeaders,
