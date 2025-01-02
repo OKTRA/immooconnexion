@@ -69,7 +69,7 @@ serve(async (req) => {
       actions: {
         cancel_url: `${req.headers.get('origin')}/pricing`,
         return_url: `${req.headers.get('origin')}/pricing`,
-        callback_url: `${req.headers.get('origin')}/api/handle-paydunya-webhook`,
+        callback_url: `https://apidxwaaogboeoctlhtz.supabase.co/functions/v1/handle-paydunya-webhook`,
       },
     }
 
