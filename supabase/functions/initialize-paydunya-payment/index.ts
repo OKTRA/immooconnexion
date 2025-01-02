@@ -20,7 +20,12 @@ serve(async (req) => {
     const PAYDUNYA_PRIVATE_KEY = Deno.env.get('PAYDUNYA_PRIVATE_KEY')
     const PAYDUNYA_TOKEN = Deno.env.get('PAYDUNYA_TOKEN')
 
+    // Validate required environment variables
     if (!PAYDUNYA_PRIVATE_KEY || !PAYDUNYA_TOKEN) {
+      console.error("Missing PayDunya credentials:", {
+        hasPrivateKey: !!PAYDUNYA_PRIVATE_KEY,
+        hasToken: !!PAYDUNYA_TOKEN
+      })
       throw new Error("PayDunya API keys are not configured")
     }
 
