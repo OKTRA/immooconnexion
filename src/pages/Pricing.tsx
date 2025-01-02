@@ -5,27 +5,13 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
-import { CinetPayForm } from "@/components/payment/CinetPayForm"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { PaymentFormData } from "@/components/payment/types"
+import { PaymentDialog } from "@/components/payment/PaymentDialog"
 
 export default function Pricing() {
   const { toast } = useToast()
   const [selectedPlan, setSelectedPlan] = useState<any>(null)
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
-  
-  const defaultFormData: PaymentFormData = {
-    email: "",
-    password: "",
-    confirm_password: "",
-    agency_name: "",
-    agency_address: "",
-    country: "",
-    city: "",
-    first_name: "",
-    last_name: "",
-    phone_number: "",
-  }
 
   const { data: plans = [] } = useQuery({
     queryKey: ['subscription-plans'],
@@ -104,35 +90,15 @@ export default function Pricing() {
         </div>
       </div>
 
-      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Paiement - {selectedPlan?.name}</DialogTitle>
-          </DialogHeader>
-          {selectedPlan && (
-            <CinetPayForm 
-              amount={selectedPlan.price}
-              description={`Abonnement au plan ${selectedPlan.name}`}
-              onSuccess={() => {
-                toast({
-                  title: "Paiement réussi",
-                  description: "Votre abonnement a été activé avec succès",
-                })
-                setShowPaymentDialog(false)
-              }}
-              onError={(error) => {
-                console.error("Erreur de paiement:", error)
-                toast({
-                  title: "Erreur de paiement",
-                  description: error.message || "Une erreur est survenue lors du paiement",
-                  variant: "destructive",
-                })
-              }}
-              formData={defaultFormData}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {selectedPlan && (
+        <PaymentDialog
+          open={showPaymentDialog}
+          onOpenChange={setShowPaymentDialog}
+          planId={selectedPlan.id}
+          planName={selectedPlan.name}
+          amount={selectedPlan.price}
+        />
+      )}
     </div>
   )
 }
