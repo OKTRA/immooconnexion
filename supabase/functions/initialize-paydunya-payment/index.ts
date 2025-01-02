@@ -17,11 +17,10 @@ serve(async (req) => {
       metadata
     } = await req.json()
 
-    const PAYDUNYA_MASTER_KEY = Deno.env.get('PAYDUNYA_MASTER_KEY')
     const PAYDUNYA_PRIVATE_KEY = Deno.env.get('PAYDUNYA_PRIVATE_KEY')
     const PAYDUNYA_TOKEN = Deno.env.get('PAYDUNYA_TOKEN')
 
-    if (!PAYDUNYA_MASTER_KEY || !PAYDUNYA_PRIVATE_KEY || !PAYDUNYA_TOKEN) {
+    if (!PAYDUNYA_PRIVATE_KEY || !PAYDUNYA_TOKEN) {
       throw new Error("PayDunya API keys are not configured")
     }
 
@@ -48,7 +47,6 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'PAYDUNYA-MASTER-KEY': PAYDUNYA_MASTER_KEY,
         'PAYDUNYA-PRIVATE-KEY': PAYDUNYA_PRIVATE_KEY,
         'PAYDUNYA-TOKEN': PAYDUNYA_TOKEN,
       },
