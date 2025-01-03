@@ -8,17 +8,10 @@ import {
   Wallet,
   TrendingUp,
   FileText,
-  Menu,
+  CreditCard,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
 import { useSidebar } from "@/components/ui/sidebar"
 
 const menuItems = [
@@ -57,6 +50,11 @@ const menuItems = [
     href: "/agence/rapports",
     icon: FileText,
   },
+  {
+    title: "Abonnements",
+    href: "/agence/abonnements",
+    icon: CreditCard,
+  },
 ]
 
 const MenuContent = () => {
@@ -78,6 +76,7 @@ const MenuContent = () => {
                 className={cn("w-full justify-start", {
                   "justify-center": isCollapsed,
                 })}
+                title={item.title}
               >
                 <Icon className="h-5 w-5" />
                 {!isCollapsed && <span className="ml-2">{item.title}</span>}
@@ -92,47 +91,9 @@ const MenuContent = () => {
 
 export function AppSidebar() {
   return (
-    <>
-      {/* Desktop Sidebar */}
-      <aside className="fixed top-14 left-0 z-30 hidden h-screen w-[15%] min-w-[200px] border-r bg-background md:block">
-        <MenuContent />
-      </aside>
-
-      {/* Mobile Menu Button - Always visible on mobile */}
-      <div className="fixed top-3 left-2 z-50 md:hidden">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10"
-            >
-              <Menu className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-72 p-0">
-            <SheetHeader className="p-4 border-b">
-              <SheetTitle>Menu</SheetTitle>
-            </SheetHeader>
-            <nav className="flex flex-col">
-              {menuItems.map((item) => {
-                const Icon = item.icon
-                return (
-                  <Link 
-                    key={item.href} 
-                    to={item.href} 
-                    className="flex items-center px-4 py-2 text-sm hover:bg-accent"
-                  >
-                    <Icon className="h-5 w-5 mr-2" />
-                    <span>{item.title}</span>
-                  </Link>
-                )
-              })}
-            </nav>
-          </SheetContent>
-        </Sheet>
-      </div>
-    </>
+    <aside className="fixed top-14 left-0 z-30 h-screen w-[15%] min-w-[80px] border-r bg-background">
+      <MenuContent />
+    </aside>
   )
 }
 
