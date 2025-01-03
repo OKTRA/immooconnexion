@@ -27,7 +27,7 @@ export function PaymentDialog({
   })
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [showPaymentMethods, setShowPaymentMethods] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState("cinetpay")
+  const [paymentMethod, setPaymentMethod] = useState<string>("cinetpay")
   const [formData, setFormData] = useState<PaymentFormData | null>(null)
   const { toast } = useToast()
   const navigate = useNavigate()
@@ -35,8 +35,8 @@ export function PaymentDialog({
   const handlePaymentSuccess = () => {
     setPaymentSuccess(true)
     toast({
-      title: "Success",
-      description: "Your payment has been processed. You can now log in to access your dashboard.",
+      title: "Succès",
+      description: "Votre paiement a été traité. Vous pouvez maintenant vous connecter pour accéder à votre tableau de bord.",
     })
   }
 
@@ -52,37 +52,45 @@ export function PaymentDialog({
   const handleFormSubmit = async (data: PaymentFormData) => {
     const result = await form.trigger()
     if (!result) {
-      // Show error toast if form validation fails
       toast({
-        title: "Error",
-        description: "Please fill in all required fields",
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs requis",
         variant: "destructive"
       })
       return
     }
+    console.log("Form data submitted:", data)
     setFormData(data)
     setShowPaymentMethods(true)
   }
 
   const renderPaymentForm = () => {
-    if (!formData) return null
+    console.log("Current payment method:", paymentMethod)
+    console.log("Form data:", formData)
+
+    if (!formData) {
+      console.log("No form data available")
+      return null
+    }
 
     switch (paymentMethod) {
       case "cinetpay":
+        console.log("Rendering CinetPay form")
         return (
           <CinetPayForm 
             amount={amount || 0}
-            description={planName ? `Subscription to ${planName} plan` : 'Payment'}
+            description={planName ? `Abonnement au plan ${planName}` : 'Paiement'}
             agencyId={tempAgencyId}
             onSuccess={handlePaymentSuccess}
             formData={formData}
           />
         )
       case "paydunya":
+        console.log("Rendering PayDunya form")
         return (
           <PaydunyaForm 
             amount={amount || 0}
-            description={planName ? `Subscription to ${planName} plan` : 'Payment'}
+            description={planName ? `Abonnement au plan ${planName}` : 'Paiement'}
             agencyId={tempAgencyId}
             onSuccess={handlePaymentSuccess}
             formData={formData}
@@ -97,6 +105,7 @@ export function PaymentDialog({
           </div>
         )
       default:
+        console.log("No payment method matched")
         return null
     }
   }
@@ -107,10 +116,10 @@ export function PaymentDialog({
         <DialogHeader>
           <DialogTitle>
             {paymentSuccess 
-              ? "Registration Successful" 
+              ? "Inscription réussie" 
               : planName 
-                ? `Complete Registration - ${planName} Plan` 
-                : 'Payment'}
+                ? `Finaliser l'inscription - Plan ${planName}` 
+                : 'Paiement'}
           </DialogTitle>
         </DialogHeader>
         <Card className="p-6">
@@ -118,11 +127,11 @@ export function PaymentDialog({
             {paymentSuccess ? (
               <div className="space-y-4">
                 <p className="text-sm text-gray-500">
-                  Your payment has been processed and your account has been created. 
-                  You can now log in to access your dashboard.
+                  Votre paiement a été traité et votre compte a été créé. 
+                  Vous pouvez maintenant vous connecter pour accéder à votre tableau de bord.
                 </p>
                 <Button onClick={handleClose} className="w-full">
-                  Go to Login
+                  Aller à la connexion
                 </Button>
               </div>
             ) : showPaymentMethods ? (
@@ -138,7 +147,7 @@ export function PaymentDialog({
                 <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
                   <PaymentFormFields form={form} />
                   <Button type="submit" className="w-full">
-                    Continue
+                    Continuer
                   </Button>
                 </form>
               </Form>
