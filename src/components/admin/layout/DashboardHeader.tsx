@@ -3,11 +3,10 @@ import {
   LogOut, 
   Moon, 
   Sun,
-  LayoutDashboard,
+  ChartBar,
   Users,
   Building2,
-  CreditCard,
-  ChartBar
+  CreditCard
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
@@ -77,7 +76,7 @@ export function DashboardHeader() {
           <div className="flex items-center gap-4">
             <AnimatedLogo />
             <Separator orientation="vertical" className="h-6 bg-white/20" />
-            <nav className="hidden md:flex items-center gap-2">
+            <nav className="flex items-center gap-2">
               {navItems.map((item) => (
                 <Tooltip key={item.path}>
                   <TooltipTrigger asChild>
@@ -88,7 +87,7 @@ export function DashboardHeader() {
                       onClick={() => navigate(item.path)}
                     >
                       <item.icon className="h-4 w-4 mr-2" />
-                      <span>{item.label}</span>
+                      <span className="hidden md:inline">{item.label}</span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
