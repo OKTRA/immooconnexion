@@ -6,25 +6,34 @@ import { AdminAgencies } from "../dashboard/AdminAgencies"
 import { AdminPaymentDashboard } from "../dashboard/AdminPaymentDashboard"
 import { AdminTransactionHistory } from "../dashboard/AdminTransactionHistory"
 import { AdminNotifications } from "../dashboard/AdminNotifications"
-import { Building2, Receipt, Users, Bell, CircleDollarSign, History } from "lucide-react"
+import { 
+  BarChart3, 
+  Users, 
+  Building2, 
+  Receipt, 
+  CircleDollarSign, 
+  History 
+} from "lucide-react"
 
 export function DashboardTabs() {
   return (
     <Tabs defaultValue="stats" className="w-full">
-      <TabsList className="grid w-full grid-cols-7">
-        <TabsTrigger value="stats">Statistiques</TabsTrigger>
-        <TabsTrigger value="agents">Agents</TabsTrigger>
+      <TabsList className="grid w-full grid-cols-6">
+        <TabsTrigger value="stats" className="flex items-center gap-2">
+          <BarChart3 className="h-4 w-4" />
+          Statistiques
+        </TabsTrigger>
         <TabsTrigger value="agencies" className="flex items-center gap-2">
           <Building2 className="h-4 w-4" />
           Agences
         </TabsTrigger>
+        <TabsTrigger value="agents" className="flex items-center gap-2">
+          <Users className="h-4 w-4" />
+          Agents
+        </TabsTrigger>
         <TabsTrigger value="plans" className="flex items-center gap-2">
           <Receipt className="h-4 w-4" />
           Plans d'abonnement
-        </TabsTrigger>
-        <TabsTrigger value="notifications" className="flex items-center gap-2">
-          <Bell className="h-4 w-4" />
-          Notifications
         </TabsTrigger>
         <TabsTrigger value="payments" className="flex items-center gap-2">
           <CircleDollarSign className="h-4 w-4" />
@@ -40,20 +49,16 @@ export function DashboardTabs() {
         <AdminStats />
       </TabsContent>
 
-      <TabsContent value="agents">
-        <AdminProfiles />
-      </TabsContent>
-
       <TabsContent value="agencies">
         <AdminAgencies />
       </TabsContent>
 
-      <TabsContent value="plans">
-        <AdminSubscriptionPlans />
+      <TabsContent value="agents">
+        <AdminProfiles />
       </TabsContent>
 
-      <TabsContent value="notifications">
-        <AdminNotifications />
+      <TabsContent value="plans">
+        <AdminSubscriptionPlans />
       </TabsContent>
 
       <TabsContent value="payments">
