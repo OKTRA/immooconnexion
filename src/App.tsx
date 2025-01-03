@@ -7,6 +7,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { GlobalHeader } from "@/components/layout/GlobalHeader"
 import { Loader2 } from "lucide-react"
+import { AdminDashboard } from "@/pages/AdminDashboard"
+import { AdminProfiles } from "@/components/AdminProfiles"
+import { AdminSubscriptionPlans } from "@/components/subscription/AdminSubscriptionPlans"
 
 // Lazy load all pages
 const Index = lazy(() => import("./pages/Index"))
@@ -22,7 +25,6 @@ const Expenses = lazy(() => import("./pages/Expenses"))
 const AgencyEarnings = lazy(() => import("./pages/AgencyEarnings"))
 const Reports = lazy(() => import("./pages/Reports"))
 const TenantContracts = lazy(() => import("./pages/TenantContracts"))
-const AdminDashboard = lazy(() => import("./pages/AdminDashboard"))
 const TermsOfService = lazy(() => import("./pages/TermsOfService"))
 
 const PageLoader = () => (
@@ -72,6 +74,22 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/super-admin/agents"
+            element={
+              <ProtectedRoute>
+                <AdminProfiles />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/super-admin/plans"
+            element={
+              <ProtectedRoute>
+                <AdminSubscriptionPlans />
               </ProtectedRoute>
             }
           />
