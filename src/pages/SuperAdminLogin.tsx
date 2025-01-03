@@ -1,10 +1,8 @@
-import { PublicHeader } from "@/components/layout/PublicHeader"
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm"
 
 const SuperAdminLogin = () => {
   return (
-    <div>
-      <PublicHeader />
+    <div className="min-h-screen w-full">
       <AdminLoginForm />
     </div>
   )
