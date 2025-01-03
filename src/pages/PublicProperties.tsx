@@ -6,20 +6,38 @@ import { SearchBar } from "@/components/home/SearchBar"
 import { HomeBanner } from "@/components/home/HomeBanner"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { useState } from "react"
 
 const PublicProperties = () => {
+  const [selectedAgency, setSelectedAgency] = useState<string | null>(null)
+  const [selectedType, setSelectedType] = useState<string | null>(null)
+  const [location, setLocation] = useState("")
+
   const { data: properties, isLoading, error } = useQuery({
-    queryKey: ['public-properties'],
+    queryKey: ['public-properties', selectedAgency, selectedType, location],
     queryFn: async () => {
       console.log("Fetching public properties...")
-      const { data, error } = await supabase
+      let query = supabase
         .from('properties')
         .select(`
           *,
           agency:agencies(name, address)
         `)
         .eq('statut', 'disponible')
-        .order('created_at', { ascending: false })
+
+      if (selectedAgency) {
+        query = query.eq('agency_id', selectedAgency)
+      }
+
+      if (selectedType) {
+        query = query.eq('type', selectedType)
+      }
+
+      if (location) {
+        query = query.ilike('ville', `%${location}%`)
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) {
         console.error("Error fetching properties:", error)
@@ -55,7 +73,11 @@ const PublicProperties = () => {
       <PublicHeader />
       <HomeBanner />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <SearchBar />
+        <SearchBar 
+          onAgencyChange={setSelectedAgency}
+          onTypeChange={setSelectedType}
+          onLocationChange={setLocation}
+        />
         {isLoading ? (
           <div className="flex justify-center items-center min-h-[200px]">
             <Loader2 className="h-8 w-8 animate-spin text-gray-400" />

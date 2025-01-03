@@ -1,53 +1,63 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Bed, Bath, Square } from "lucide-react"
+import { Building2, MapPin, Home } from "lucide-react"
 
 interface PropertyCardProps {
   property: {
-    bien: string
-    ville: string
-    chambres: number
-    type: string
-    loyer: number
-    photo_url: string | null
-  }
+    bien: string;
+    type: string;
+    ville?: string;
+    loyer?: number;
+    photo_url?: string;
+    agency?: {
+      name: string;
+      address?: string;
+    } | null;
+  };
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
   return (
-    <Card className="overflow-hidden group cursor-pointer">
-      <div className="relative h-[300px] overflow-hidden">
-        <img
-          src={property.photo_url ? 
-            `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/product_photos/${property.photo_url}` :
-            "/placeholder.svg"
-          }
-          alt={property.bien}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-        />
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+      <div className="aspect-[16/9] relative bg-gray-100">
+        {property.photo_url ? (
+          <img
+            src={property.photo_url}
+            alt={property.bien}
+            className="object-cover w-full h-full"
+          />
+        ) : (
+          <div className="flex items-center justify-center w-full h-full">
+            <Home className="h-12 w-12 text-gray-400" />
+          </div>
+        )}
       </div>
-      
-      <CardContent className="p-6">
-        <h3 className="text-2xl font-semibold mb-2">{property.bien}</h3>
-        <p className="text-gray-600 text-lg mb-4">{property.ville}</p>
-        
-        <div className="flex items-center gap-6 mb-4">
-          <div className="flex items-center gap-2">
-            <Bed className="h-5 w-5 text-gray-500" />
-            <span>{property.chambres}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Bath className="h-5 w-5 text-gray-500" />
-            <span>{property.type === 'appartement' ? '1' : '2'}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Square className="h-5 w-5 text-gray-500" />
-            <span>120m²</span>
-          </div>
+      <CardHeader className="p-4">
+        <h3 className="text-lg font-semibold">{property.bien}</h3>
+        <div className="flex items-center text-sm text-gray-500 mt-1">
+          <Building2 className="h-4 w-4 mr-1" />
+          {property.type}
         </div>
-        
-        <p className="text-2xl font-bold text-red-500">
-          {property.loyer?.toLocaleString()} FCFA <span className="text-base font-normal">/mois</span>
-        </p>
+        {property.ville && (
+          <div className="flex items-center text-sm text-gray-500">
+            <MapPin className="h-4 w-4 mr-1" />
+            {property.ville}
+          </div>
+        )}
+      </CardHeader>
+      <CardContent className="p-4 pt-0 space-y-2">
+        {property.loyer && (
+          <div className="text-xl font-bold text-red-500">
+            {property.loyer.toLocaleString()} FCFA
+          </div>
+        )}
+        {property.agency && (
+          <div className="text-sm text-gray-600 border-t pt-2 mt-2">
+            <div className="font-medium">{property.agency.name}</div>
+            {property.agency.address && (
+              <div className="text-gray-500">{property.agency.address}</div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   )
