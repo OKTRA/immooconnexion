@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/button"
 import { 
   LogOut, 
   Moon, 
@@ -17,6 +16,7 @@ import { AnimatedLogo } from "@/components/header/AnimatedLogo"
 import { useQuery } from "@tanstack/react-query"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/button"
 import {
   Tooltip,
   TooltipContent,
