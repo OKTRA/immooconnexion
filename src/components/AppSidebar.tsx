@@ -13,6 +13,12 @@ import {
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useSidebar } from "@/components/ui/sidebar"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const menuItems = [
   {
@@ -70,18 +76,28 @@ const MenuContent = () => {
           const Icon = item.icon
 
           return (
-            <Link key={item.href} to={item.href}>
-              <Button
-                variant={isActive ? "secondary" : "ghost"}
-                className={cn("w-full justify-start", {
-                  "justify-center": isCollapsed,
-                })}
-                title={item.title}
-              >
-                <Icon className="h-5 w-5" />
-                {!isCollapsed && <span className="ml-2">{item.title}</span>}
-              </Button>
-            </Link>
+            <TooltipProvider key={item.href}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link to={item.href}>
+                    <Button
+                      variant={isActive ? "secondary" : "ghost"}
+                      className={cn("w-full justify-start", {
+                        "justify-center": isCollapsed,
+                      })}
+                    >
+                      <Icon className="h-5 w-5" />
+                      {!isCollapsed && <span className="ml-2">{item.title}</span>}
+                    </Button>
+                  </Link>
+                </TooltipTrigger>
+                {isCollapsed && (
+                  <TooltipContent side="right">
+                    <p>{item.title}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
           )
         })}
       </div>
