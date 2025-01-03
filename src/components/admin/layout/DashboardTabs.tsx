@@ -72,58 +72,18 @@ export function DashboardTabs() {
         </Alert>
       )}
       
-      <TabsList className="grid w-full grid-cols-2 md:grid-cols-6">
+      <TabsList className="grid w-full grid-cols-2 md:grid-cols-3">
         <TabsTrigger value="stats">Statistiques</TabsTrigger>
-        <TabsTrigger 
-          value="profiles" 
-          disabled={!isProfileComplete}
-        >
-          Agents
-        </TabsTrigger>
-        <TabsTrigger 
-          value="agencies" 
-          disabled={!isProfileComplete}
-        >
-          Agences
-        </TabsTrigger>
-        <TabsTrigger 
-          value="properties" 
-          disabled={!isProfileComplete}
-        >
-          Biens
-        </TabsTrigger>
-        <TabsTrigger 
-          value="tenants" 
-          disabled={!isProfileComplete}
-        >
-          Locataires
-        </TabsTrigger>
-        <TabsTrigger 
-          value="plans" 
-          disabled={!isProfileComplete}
-        >
-          Abonnements
-        </TabsTrigger>
+        <TabsTrigger value="agents">Agents</TabsTrigger>
+        <TabsTrigger value="plans">Plans d'abonnement</TabsTrigger>
       </TabsList>
 
       <TabsContent value="stats">
         <AdminStats />
       </TabsContent>
 
-      <TabsContent value="profiles">
+      <TabsContent value="agents">
         <AdminProfiles />
-      </TabsContent>
-
-      <TabsContent value="agencies">
-        <AdminAgencies />
-      </TabsContent>
-
-      <TabsContent value="properties">
-        <AdminProperties />
-      </TabsContent>
-
-      <TabsContent value="tenants">
-        <AdminTenants />
       </TabsContent>
 
       <TabsContent value="plans">
