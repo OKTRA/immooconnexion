@@ -96,7 +96,7 @@
 
 { 
 "scripts": {
-"buildidev"' : "vite build --mode development"
+"buildidev" : "vite build --mode development"
 },
 "dependencies": {
 // ... vos dépendances existante
