@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { AdminLayout } from "@/components/admin/layout/AdminLayout"
-import { DashboardHeader } from "@/components/admin/layout/DashboardHeader"
 import { DashboardTabs } from "@/components/admin/layout/DashboardTabs"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
@@ -65,14 +64,11 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardHeader />
-      <AdminLayout>
-        <div className="w-full overflow-x-hidden">
-          <DashboardTabs />
-        </div>
-      </AdminLayout>
-    </div>
+    <AdminLayout>
+      <div className="w-full overflow-x-hidden">
+        <DashboardTabs />
+      </div>
+    </AdminLayout>
   )
 }
 
