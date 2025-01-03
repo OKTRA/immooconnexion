@@ -8,7 +8,7 @@ import { useState } from "react"
 import { AddPlanForm } from "./AddPlanForm"
 import { PlansTable } from "./PlansTable"
 
-export function AdminSubscriptionPlans() {
+export default function AdminSubscriptionPlans() {
   const [showAddDialog, setShowAddDialog] = useState(false)
   const { toast } = useToast()
   
@@ -18,8 +18,8 @@ export function AdminSubscriptionPlans() {
       const { data, error } = await supabase
         .from("subscription_plans")
         .select("*")
-        .order("price", { ascending: true })
-
+        .order("price", { ascending: true });
+      
       if (error) {
         console.error("Error fetching plans:", error)
         throw error

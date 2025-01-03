@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AdminStats } from "../dashboard/AdminStats"
 import { AdminProfiles } from "../AdminProfiles"
-import { AdminSubscriptionPlans } from "../subscription/AdminSubscriptionPlans"
+import AdminSubscriptionPlans from "../subscription/AdminSubscriptionPlans"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Alert, AlertDescription } from "@/components/ui/alert"
