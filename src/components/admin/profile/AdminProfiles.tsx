@@ -8,7 +8,7 @@ import { useAddProfileHandler } from "./AddProfileHandler"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 
-export function AdminProfiles() {
+function AdminProfiles() {
   const [searchTerm, setSearchTerm] = useState("")
   const [showAddDialog, setShowAddDialog] = useState(false)
   const { data: profiles = [], refetch } = useProfiles()
@@ -78,3 +78,5 @@ export function AdminProfiles() {
     </div>
   )
 }
+
+export default AdminProfiles

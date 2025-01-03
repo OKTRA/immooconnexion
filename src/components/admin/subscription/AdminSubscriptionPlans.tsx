@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 
-export function AdminSubscriptionPlans() {
+function AdminSubscriptionPlans() {
   const [showAddDialog, setShowAddDialog] = useState(false)
 
   const { data: plans = [], isLoading } = useQuery({
@@ -58,3 +58,5 @@ export function AdminSubscriptionPlans() {
     </div>
   )
 }
+
+export default AdminSubscriptionPlans
