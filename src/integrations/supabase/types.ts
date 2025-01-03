@@ -44,50 +44,6 @@ export type Database = {
           },
         ]
       }
-      admin_payment_notifications: {
-        Row: {
-          agency_id: string | null
-          amount: number
-          created_at: string | null
-          id: string
-          is_read: boolean | null
-          payment_id: string
-          payment_method: string
-          status: string
-          updated_at: string | null
-        }
-        Insert: {
-          agency_id?: string | null
-          amount: number
-          created_at?: string | null
-          id?: string
-          is_read?: boolean | null
-          payment_id: string
-          payment_method: string
-          status: string
-          updated_at?: string | null
-        }
-        Update: {
-          agency_id?: string | null
-          amount?: number
-          created_at?: string | null
-          id?: string
-          is_read?: boolean | null
-          payment_id?: string
-          payment_method?: string
-          status?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "admin_payment_notifications_agency_id_fkey"
-            columns: ["agency_id"]
-            isOneToOne: false
-            referencedRelation: "agencies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       administrators: {
         Row: {
           agency_id: string | null
