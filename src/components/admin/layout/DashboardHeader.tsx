@@ -1,6 +1,14 @@
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { LogOut, Moon, Sun } from "lucide-react"
+import { 
+  LogOut, 
+  Moon, 
+  Sun, 
+  Users, 
+  CreditCard,
+  ChartBar,
+  Building2
+} from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useTheme } from "next-themes"
@@ -8,6 +16,12 @@ import { AnimatedLogo } from "@/components/header/AnimatedLogo"
 import { useQuery } from "@tanstack/react-query"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export function DashboardHeader() {
   const navigate = useNavigate()
@@ -48,57 +62,96 @@ export function DashboardHeader() {
     }
   }
 
+  const navItems = [
+    { icon: ChartBar, label: "Statistiques", path: "/super-admin/admin" },
+    { icon: Users, label: "Agents", path: "/super-admin/agents" },
+    { icon: Building2, label: "Agences", path: "/super-admin/agencies" },
+    { icon: CreditCard, label: "Abonnements", path: "/super-admin/subscriptions" },
+  ]
+
   return (
-    <header className="sticky top-0 z-10 w-full backdrop-blur-md bg-white/5 border-b border-white/10">
-      <div className="container flex h-16 items-center justify-between py-4">
-        <div className="flex items-center gap-4">
-          <AnimatedLogo />
-          <Separator orientation="vertical" className="h-6 bg-white/20" />
-          <h1 className="text-xl font-semibold text-white">
-            Tableau de bord {profile?.role === 'admin' ? 'Super Admin' : 'Administrateur'}
-          </h1>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 mr-4">
-            <Avatar className="h-8 w-8 border border-white/20">
-              <AvatarFallback className="bg-white/10 text-white">
-                {profile?.first_name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="hidden md:block">
-              <p className="text-sm font-medium text-white">
-                {profile?.first_name || profile?.email || 'Utilisateur'}
-              </p>
-              <p className="text-xs text-white/70">
-                {profile?.role === 'admin' ? 'Administrateur' : 'Utilisateur'}
-              </p>
+    <TooltipProvider>
+      <header className="sticky top-0 z-10 w-full backdrop-blur-md bg-dashboard-gradient-from/5 border-b border-white/10">
+        <div className="container flex h-16 items-center justify-between py-4">
+          <div className="flex items-center gap-4">
+            <AnimatedLogo />
+            <Separator orientation="vertical" className="h-6 bg-white/20" />
+            <div className="hidden md:flex items-center gap-4">
+              {navItems.map((item) => (
+                <Tooltip key={item.path}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-white hover:bg-white/10"
+                      onClick={() => navigate(item.path)}
+                    >
+                      <item.icon className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{item.label}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
             </div>
           </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 mr-4">
+              <Avatar className="h-8 w-8 border border-white/20">
+                <AvatarFallback className="bg-white/10 text-white">
+                  {profile?.first_name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="hidden md:block">
+                <p className="text-sm font-medium text-white">
+                  {profile?.first_name || profile?.email || 'Utilisateur'}
+                </p>
+                <p className="text-xs text-white/70">
+                  Super Admin
+                </p>
+              </div>
+            </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="text-white hover:bg-white/10"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
-          </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="text-white hover:bg-white/10"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Changer le thème</p>
+              </TooltipContent>
+            </Tooltip>
 
-          <Button
-            variant="ghost"
-            className="text-white hover:bg-white/10 hover:text-white"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            <span className="hidden md:inline">Déconnexion</span>
-          </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:bg-white/10"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Déconnexion</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </TooltipProvider>
   )
 }
