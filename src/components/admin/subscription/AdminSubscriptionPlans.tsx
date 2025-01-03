@@ -23,6 +23,14 @@ const AdminSubscriptionPlans = () => {
     },
   })
 
+  const handleEdit = (plan: any) => {
+    // Add edit functionality
+  }
+
+  const handleDelete = async (id: string) => {
+    // Add delete functionality
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -33,17 +41,34 @@ const AdminSubscriptionPlans = () => {
         </Button>
       </div>
 
-      <PlansTable plans={plans} refetch={refetch} />
+      <PlansTable 
+        plans={plans} 
+        onEdit={handleEdit} 
+        onDelete={handleDelete}
+        refetch={refetch}
+      />
 
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Ajouter un plan d'abonnement</DialogTitle>
           </DialogHeader>
-          <AddPlanForm onSuccess={() => {
-            setShowAddDialog(false)
-            refetch()
-          }} />
+          <AddPlanForm 
+            onSubmit={async (plan) => {
+              const { error } = await supabase
+                .from("subscription_plans")
+                .insert(plan)
+              
+              if (!error) {
+                setShowAddDialog(false)
+                refetch()
+              }
+            }}
+            onSuccess={() => {
+              setShowAddDialog(false)
+              refetch()
+            }}
+          />
         </DialogContent>
       </Dialog>
     </div>

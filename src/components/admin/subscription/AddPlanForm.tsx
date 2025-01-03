@@ -6,9 +6,10 @@ import { useState } from "react"
 
 interface AddPlanFormProps {
   onSubmit: (plan: any) => void
+  onSuccess?: () => void
 }
 
-export function AddPlanForm({ onSubmit }: AddPlanFormProps) {
+export function AddPlanForm({ onSubmit, onSuccess }: AddPlanFormProps) {
   const [newPlan, setNewPlan] = useState({
     name: "",
     price: 0,
@@ -24,6 +25,7 @@ export function AddPlanForm({ onSubmit }: AddPlanFormProps) {
       ...newPlan,
       features: featuresInput.split('\n').filter(Boolean),
     })
+    onSuccess?.()
   }
 
   return (

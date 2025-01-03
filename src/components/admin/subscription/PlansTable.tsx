@@ -1,13 +1,15 @@
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { SubscriptionPlanRow } from "./SubscriptionPlanRow"
+import { RefetchOptions } from "@tanstack/react-query"
 
 interface PlansTableProps {
   plans: any[]
   onEdit: (plan: any) => void
   onDelete: (id: string) => void
+  refetch: (options?: RefetchOptions) => Promise<any>
 }
 
-export function PlansTable({ plans, onEdit, onDelete }: PlansTableProps) {
+export function PlansTable({ plans, onEdit, onDelete, refetch }: PlansTableProps) {
   return (
     <div className="rounded-md border overflow-x-auto">
       <Table>
