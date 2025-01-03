@@ -19,7 +19,17 @@ export function DashboardTabs() {
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          *,
+          agencies (
+            id,
+            name,
+            address,
+            phone,
+            email,
+            status
+          )
+        `)
         .eq('id', user.id)
         .single()
 
@@ -28,10 +38,22 @@ export function DashboardTabs() {
     }
   })
 
-  const isProfileComplete = profile?.first_name && 
-                          profile?.last_name && 
-                          profile?.email && 
-                          profile?.phone_number
+  const needsProfileUpdate = profile?.role === 'admin' && (
+    !profile.first_name || 
+    !profile.last_name || 
+    !profile.phone_number ||
+    !profile.email
+  )
+
+  const needsAgencyUpdate = profile?.role === 'admin' && profile?.agencies && (
+    !profile.agencies.name ||
+    !profile.agencies.address ||
+    !profile.agencies.phone ||
+    !profile.agencies.email ||
+    profile.agencies.status === 'pending'
+  )
+
+  const isProfileComplete = !needsProfileUpdate && !needsAgencyUpdate
 
   return (
     <Tabs defaultValue="stats" className="w-full">
@@ -39,7 +61,13 @@ export function DashboardTabs() {
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Veuillez compléter votre profil avant d'accéder aux autres fonctionnalités
+            {needsProfileUpdate && needsAgencyUpdate ? (
+              "Veuillez compléter votre profil et les informations de votre agence pour accéder à toutes les fonctionnalités"
+            ) : needsProfileUpdate ? (
+              "Veuillez compléter votre profil pour continuer"
+            ) : (
+              "Veuillez compléter les informations de votre agence pour continuer"
+            )}
           </AlertDescription>
         </Alert>
       )}
