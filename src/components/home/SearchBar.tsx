@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import { toast } from "sonner"
 
 interface SearchBarProps {
   onAgencyChange?: (agencyId: string | null) => void;
@@ -12,7 +13,7 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ onAgencyChange, onTypeChange, onLocationChange }: SearchBarProps) {
-  const { data: agencies } = useQuery({
+  const { data: agencies, isError } = useQuery({
     queryKey: ['public-agencies'],
     queryFn: async () => {
       console.log("Fetching public agencies...")
@@ -30,6 +31,12 @@ export function SearchBar({ onAgencyChange, onTypeChange, onLocationChange }: Se
 
       console.log("Agencies fetched:", data)
       return data || []
+    },
+    meta: {
+      onError: (error: Error) => {
+        console.error("Query error:", error)
+        toast.error("Impossible de charger la liste des agences")
+      }
     }
   })
 
@@ -53,7 +60,7 @@ export function SearchBar({ onAgencyChange, onTypeChange, onLocationChange }: Se
             <SelectValue placeholder="Agence" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Toutes les agences</SelectItem>
+            <SelectItem value="all">Toutes les agences</SelectItem>
             {agencies?.map((agency) => (
               <SelectItem key={agency.id} value={agency.id}>
                 {agency.name}
