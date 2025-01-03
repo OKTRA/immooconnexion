@@ -1,15 +1,15 @@
 import { TableCell, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Edit, Trash2, CreditCard } from "lucide-react"
+import { Edit, Trash2 } from "lucide-react"
 import { useState } from "react"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { EditPlanDialog } from "./EditPlanDialog"
-import { PaymentDialog } from "./PaymentDialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { SubscriptionPlanRowProps } from "./types"
 
 export function SubscriptionPlanRow({ plan, onEdit, onDelete, refetch }: SubscriptionPlanRowProps) {
   const [showEditDialog, setShowEditDialog] = useState(false)
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const { toast } = useToast()
 
   const handleSaveEdit = async (updatedPlan: any) => {
@@ -30,12 +30,9 @@ export function SubscriptionPlanRow({ plan, onEdit, onDelete, refetch }: Subscri
     }
   }
 
-  const handlePaymentSuccess = () => {
-    toast({
-      title: "Paiement réussi",
-      description: "Votre abonnement a été activé avec succès",
-    })
-    setShowPaymentDialog(false)
+  const handleDelete = () => {
+    onDelete(plan.id)
+    setShowDeleteDialog(false)
   }
 
   return (
@@ -71,16 +68,9 @@ export function SubscriptionPlanRow({ plan, onEdit, onDelete, refetch }: Subscri
             <Button
               variant="destructive"
               size="icon"
-              onClick={() => onDelete(plan.id)}
+              onClick={() => setShowDeleteDialog(true)}
             >
               <Trash2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="default"
-              size="icon"
-              onClick={() => setShowPaymentDialog(true)}
-            >
-              <CreditCard className="h-4 w-4" />
             </Button>
           </div>
         </TableCell>
@@ -93,12 +83,20 @@ export function SubscriptionPlanRow({ plan, onEdit, onDelete, refetch }: Subscri
         onSave={handleSaveEdit}
       />
 
-      <PaymentDialog
-        plan={plan}
-        isOpen={showPaymentDialog}
-        onOpenChange={setShowPaymentDialog}
-        onSuccess={handlePaymentSuccess}
-      />
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. Cela supprimera définitivement le plan d'abonnement.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Supprimer</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
