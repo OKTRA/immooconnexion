@@ -93,3 +93,14 @@
     "vite": "^5.4.1"
   }
 }
+
+{ 
+"scripts": {
+"buildidev"' : "vite build --mode development"
+},
+"dependencies": {
+// ... vos dépendances existante
+
+}
+}
+
