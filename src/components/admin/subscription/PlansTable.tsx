@@ -2,7 +2,7 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components
 import { SubscriptionPlanRow } from "./SubscriptionPlanRow"
 import { RefetchOptions } from "@tanstack/react-query"
 
-interface PlansTableProps {
+export interface PlansTableProps {
   plans: any[]
   onEdit: (plan: any) => void
   onDelete: (id: string) => void
@@ -31,6 +31,7 @@ export function PlansTable({ plans, onEdit, onDelete, refetch }: PlansTableProps
               plan={plan}
               onEdit={onEdit}
               onDelete={onDelete}
+              refetch={refetch}
             />
           ))}
         </TableBody>
