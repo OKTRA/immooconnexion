@@ -5,7 +5,7 @@ import AdminSubscriptionPlans from "../subscription/AdminSubscriptionPlans"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, Receipt } from "lucide-react"
 
 export function DashboardTabs() {
   const { data: profile } = useQuery({
@@ -69,10 +69,13 @@ export function DashboardTabs() {
         </Alert>
       )}
       
-      <TabsList className="grid w-full grid-cols-2 md:grid-cols-3">
+      <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="stats">Statistiques</TabsTrigger>
         <TabsTrigger value="agents">Agents</TabsTrigger>
-        <TabsTrigger value="plans">Plans d'abonnement</TabsTrigger>
+        <TabsTrigger value="plans" className="flex items-center gap-2">
+          <Receipt className="h-4 w-4" />
+          Plans d'abonnement
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="stats">
