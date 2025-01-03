@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button"
 import { 
   LogOut, 
   Moon, 
-  Sun, 
-  Users, 
+  Sun,
+  LayoutDashboard,
+  Users,
+  Building2,
   CreditCard,
-  ChartBar,
-  Building2
+  ChartBar
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
@@ -47,7 +48,7 @@ export function DashboardHeader() {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut()
-      navigate("/login")
+      navigate("/super-admin/login")
       toast({
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès",
@@ -63,7 +64,7 @@ export function DashboardHeader() {
   }
 
   const navItems = [
-    { icon: ChartBar, label: "Statistiques", path: "/super-admin/admin" },
+    { icon: ChartBar, label: "Tableau de bord", path: "/super-admin/admin" },
     { icon: Users, label: "Agents", path: "/super-admin/agents" },
     { icon: Building2, label: "Agences", path: "/super-admin/agencies" },
     { icon: CreditCard, label: "Abonnements", path: "/super-admin/subscriptions" },
@@ -71,22 +72,23 @@ export function DashboardHeader() {
 
   return (
     <TooltipProvider>
-      <header className="sticky top-0 z-10 w-full backdrop-blur-md bg-dashboard-gradient-from/5 border-b border-white/10">
+      <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-dashboard-gradient-from/5 border-b border-white/10">
         <div className="container flex h-16 items-center justify-between py-4">
           <div className="flex items-center gap-4">
             <AnimatedLogo />
             <Separator orientation="vertical" className="h-6 bg-white/20" />
-            <div className="hidden md:flex items-center gap-4">
+            <nav className="hidden md:flex items-center gap-2">
               {navItems.map((item) => (
                 <Tooltip key={item.path}>
                   <TooltipTrigger asChild>
                     <Button
                       variant="ghost"
-                      size="icon"
+                      size="sm"
                       className="text-white hover:bg-white/10"
                       onClick={() => navigate(item.path)}
                     >
-                      <item.icon className="h-5 w-5" />
+                      <item.icon className="h-4 w-4 mr-2" />
+                      <span>{item.label}</span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -94,11 +96,11 @@ export function DashboardHeader() {
                   </TooltipContent>
                 </Tooltip>
               ))}
-            </div>
+            </nav>
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 mr-4">
+            <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8 border border-white/20">
                 <AvatarFallback className="bg-white/10 text-white">
                   {profile?.first_name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
