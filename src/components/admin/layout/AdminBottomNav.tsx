@@ -1,45 +1,50 @@
-import { Home, Users, LineChart, Settings } from "lucide-react"
-import { Link, useLocation } from "react-router-dom"
+import { ChartBar, Users, CreditCard } from "lucide-react"
+import { useState } from "react"
 
 export function AdminBottomNav() {
-  const location = useLocation()
+  const [activeTab, setActiveTab] = useState("stats")
   
-  const isActive = (path: string) => {
-    return location.pathname === path
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab)
+    // Find the corresponding tab trigger and click it
+    const tabTrigger = document.querySelector(`[data-state][value="${tab}"]`) as HTMLButtonElement
+    if (tabTrigger) {
+      tabTrigger.click()
+    }
   }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 dark:bg-gray-800 dark:border-gray-700">
       <div className="flex justify-around items-center h-16">
-        <Link 
-          to="/super-admin/admin" 
+        <button 
+          onClick={() => handleTabChange("stats")} 
           className={`flex flex-col items-center space-y-1 px-4 py-2 ${
-            isActive('/super-admin/admin') ? 'text-primary' : 'text-gray-600 dark:text-gray-400'
+            activeTab === "stats" ? "text-primary" : "text-gray-600 dark:text-gray-400"
           }`}
         >
-          <LineChart className="h-6 w-6" />
+          <ChartBar className="h-6 w-6" />
           <span className="text-xs">Statistiques</span>
-        </Link>
+        </button>
         
-        <Link 
-          to="/super-admin/agents" 
+        <button 
+          onClick={() => handleTabChange("agents")} 
           className={`flex flex-col items-center space-y-1 px-4 py-2 ${
-            isActive('/super-admin/agents') ? 'text-primary' : 'text-gray-600 dark:text-gray-400'
+            activeTab === "agents" ? "text-primary" : "text-gray-600 dark:text-gray-400"
           }`}
         >
           <Users className="h-6 w-6" />
           <span className="text-xs">Agents</span>
-        </Link>
+        </button>
         
-        <Link 
-          to="/super-admin/plans" 
+        <button 
+          onClick={() => handleTabChange("plans")} 
           className={`flex flex-col items-center space-y-1 px-4 py-2 ${
-            isActive('/super-admin/plans') ? 'text-primary' : 'text-gray-600 dark:text-gray-400'
+            activeTab === "plans" ? "text-primary" : "text-gray-600 dark:text-gray-400"
           }`}
         >
-          <Settings className="h-6 w-6" />
+          <CreditCard className="h-6 w-6" />
           <span className="text-xs">Plans</span>
-        </Link>
+        </button>
       </div>
     </div>
   )
