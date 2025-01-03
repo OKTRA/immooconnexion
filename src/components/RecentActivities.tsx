@@ -53,15 +53,15 @@ export function RecentActivities() {
           property_id,
           agency_id
         `)
+        .order("created_at", { ascending: false })
+        .limit(5)
 
       // Si l'utilisateur n'est pas admin, on filtre par agency_id
-      if (userProfile.role !== 'admin') {
+      if (userProfile.role !== 'super_admin') {
         query = query.eq('agency_id', userProfile.agency_id)
       }
 
       const { data: contracts, error } = await query
-        .order("created_at", { ascending: false })
-        .limit(5)
 
       if (error) {
         console.error("Error fetching recent activities:", error)
