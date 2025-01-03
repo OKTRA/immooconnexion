@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
 
 interface SearchBarProps {
   onAgencyChange?: (agencyId: string | null) => void;
@@ -22,7 +22,7 @@ export function SearchBar({ onAgencyChange, onTypeChange, onLocationChange }: Se
         .select('id, name')
         .eq('status', 'active')
         .eq('list_properties_on_site', true)
-        .order('name')
+        .order('name', { ascending: true })
 
       if (error) {
         console.error("Error fetching agencies:", error)
@@ -55,7 +55,7 @@ export function SearchBar({ onAgencyChange, onTypeChange, onLocationChange }: Se
           </SelectContent>
         </Select>
 
-        <Select onValueChange={(value) => onAgencyChange?.(value || null)}>
+        <Select onValueChange={(value) => onAgencyChange?.(value === "all" ? null : value)}>
           <SelectTrigger className="w-full md:w-[200px]">
             <SelectValue placeholder="Agence" />
           </SelectTrigger>
