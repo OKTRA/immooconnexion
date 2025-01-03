@@ -1,5 +1,4 @@
 import { SidebarProvider } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/AppSidebar"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { MobileMenu } from "@/components/property-details/MobileMenu"
 import { PropertyDetailsContent } from "@/components/property-details/PropertyDetailsContent"
@@ -10,7 +9,6 @@ const PropertyDetails = () => {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
-        {!isMobile && <AppSidebar />}
         <main className="flex-1 w-full">
           <div className="container mx-auto">
             {isMobile && <MobileMenu />}

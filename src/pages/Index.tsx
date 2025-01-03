@@ -4,12 +4,13 @@ import { supabase } from "@/integrations/supabase/client"
 import { StatCard } from "@/components/StatCard"
 import { RevenueChart } from "@/components/RevenueChart"
 import { RecentActivities } from "@/components/RecentActivities"
-import { AppSidebar } from "@/components/AppSidebar"
 import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { TestPayment } from "@/components/payment/TestPayment"
+
+// ... keep existing code (all the hooks and logic)
 
 const Index = () => {
   const navigate = useNavigate()
@@ -150,11 +151,7 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <div className="hidden md:block md:w-[15%] min-w-[200px]">
-          <AppSidebar />
-        </div>
-        <main className="w-full md:w-[85%] p-4 md:p-8 min-w-0">
-          {/* Ajout du bouton de test */}
+        <main className="w-full p-4 md:p-8 min-w-0">
           <div className="mb-8">
             <TestPayment />
           </div>

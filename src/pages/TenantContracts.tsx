@@ -1,5 +1,4 @@
 import { SidebarProvider } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/AppSidebar"
 import { TenantContracts } from "@/components/TenantContracts"
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
@@ -14,8 +13,6 @@ const TenantContractsPage = () => {
     queryFn: async () => {
       if (!id) throw new Error("ID du locataire non fourni")
 
-      console.log("Fetching tenant:", id)
-
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
@@ -27,7 +24,6 @@ const TenantContractsPage = () => {
         throw profileError
       }
 
-      console.log("Profile data:", profileData)
       return profileData
     },
     enabled: !!id,
@@ -52,7 +48,6 @@ const TenantContractsPage = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <AppSidebar />
         <main className="flex-1 p-8">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold">
