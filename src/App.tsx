@@ -22,10 +22,8 @@ const Expenses = lazy(() => import("./pages/Expenses"))
 const AgencyEarnings = lazy(() => import("./pages/AgencyEarnings"))
 const Reports = lazy(() => import("./pages/Reports"))
 const TenantContracts = lazy(() => import("./pages/TenantContracts"))
-const TermsOfService = lazy(() => import("./pages/TermsOfService"))
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"))
-const AdminProfiles = lazy(() => import("./components/admin/profile/AdminProfiles"))
-const AdminSubscriptionPlans = lazy(() => import("./components/admin/subscription/AdminSubscriptionPlans"))
+const TermsOfService = lazy(() => import("./pages/TermsOfService"))
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -77,24 +75,6 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/super-admin/agents"
-            element={
-              <ProtectedRoute>
-                <AdminProfiles />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/super-admin/plans"
-            element={
-              <ProtectedRoute>
-                <AdminSubscriptionPlans />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Other protected routes */}
           <Route
             path="/agence/locataires"
             element={
@@ -160,7 +140,7 @@ function AppRoutes() {
             }
           />
 
-          {/* Catch all route */}
+          {/* Catch all route - redirect to index */}
           <Route path="*" element={<Navigate to="/index" replace />} />
         </Routes>
       </Suspense>
