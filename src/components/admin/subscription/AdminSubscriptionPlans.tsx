@@ -1,18 +1,13 @@
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useState } from "react"
-import { AddPlanForm } from "./AddPlanForm"
-import { PlansTable } from "./PlansTable"
 
 export function AdminSubscriptionPlans() {
   const [showAddDialog, setShowAddDialog] = useState(false)
-  const { toast } = useToast()
-  
-  const { data: plans = [], refetch } = useQuery({
+
+  const { data: plans = [], isLoading } = useQuery({
     queryKey: ["subscription-plans"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -20,118 +15,46 @@ export function AdminSubscriptionPlans() {
         .select("*")
         .order("price", { ascending: true })
 
-      if (error) {
-        console.error("Error fetching plans:", error)
-        throw error
-      }
+      if (error) throw error
       return data
     },
   })
 
-  const handleAddPlan = async (newPlan: any) => {
-    try {
-      const { error } = await supabase
-        .from("subscription_plans")
-        .insert(newPlan)
-
-      if (error) throw error
-
-      toast({
-        title: "Plan ajouté",
-        description: "Le nouveau plan d'abonnement a été ajouté avec succès",
-      })
-      setShowAddDialog(false)
-      refetch()
-    } catch (error: any) {
-      console.error("Error adding plan:", error)
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'ajout du plan",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const handleEditPlan = async (plan: any) => {
-    try {
-      const { error } = await supabase
-        .from("subscription_plans")
-        .update({
-          name: plan.name,
-          price: plan.price,
-          max_properties: plan.max_properties,
-          max_tenants: plan.max_tenants,
-          max_users: plan.max_users,
-          features: plan.features
-        })
-        .eq("id", plan.id)
-
-      if (error) throw error
-
-      toast({
-        title: "Plan mis à jour",
-        description: "Le plan d'abonnement a été mis à jour avec succès",
-      })
-      refetch()
-    } catch (error: any) {
-      console.error("Error updating plan:", error)
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de la mise à jour du plan",
-        variant: "destructive",
-      })
-      throw error
-    }
-  }
-
-  const handleDeletePlan = async (planId: string) => {
-    try {
-      const { error } = await supabase
-        .from("subscription_plans")
-        .delete()
-        .eq("id", planId)
-
-      if (error) throw error
-
-      toast({
-        title: "Plan supprimé",
-        description: "Le plan d'abonnement a été supprimé avec succès",
-      })
-      refetch()
-    } catch (error: any) {
-      console.error("Error deleting plan:", error)
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de la suppression du plan",
-        variant: "destructive",
-      })
-    }
+  if (isLoading) {
+    return <div>Chargement...</div>
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Plans d'abonnement</h2>
         <Button onClick={() => setShowAddDialog(true)}>
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="h-4 w-4 mr-2" />
           Ajouter un plan
         </Button>
       </div>
-      
-      <PlansTable 
-        plans={plans}
-        onEdit={handleEditPlan}
-        onDelete={handleDeletePlan}
-      />
 
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="w-[95%] max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Ajouter un nouveau plan</DialogTitle>
-          </DialogHeader>
-          <AddPlanForm onSubmit={handleAddPlan} />
-        </DialogContent>
-      </Dialog>
+      <div className="grid gap-4 md:grid-cols-3">
+        {plans.map((plan) => (
+          <div 
+            key={plan.id}
+            className="p-6 rounded-lg border bg-card text-card-foreground shadow-sm"
+          >
+            <h3 className="text-lg font-semibold">{plan.name}</h3>
+            <p className="text-2xl font-bold mt-2">
+              {plan.price.toLocaleString()} XOF
+              <span className="text-sm font-normal text-muted-foreground">/mois</span>
+            </p>
+            <ul className="mt-4 space-y-2">
+              {plan.features?.map((feature, index) => (
+                <li key={index} className="flex items-center text-sm">
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

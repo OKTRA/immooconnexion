@@ -7,9 +7,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { GlobalHeader } from "@/components/layout/GlobalHeader"
 import { Loader2 } from "lucide-react"
-import { AdminDashboard } from "@/pages/AdminDashboard"
-import { AdminProfiles } from "@/components/AdminProfiles"
-import { AdminSubscriptionPlans } from "@/components/subscription/AdminSubscriptionPlans"
 
 // Lazy load all pages
 const Index = lazy(() => import("./pages/Index"))
@@ -26,6 +23,9 @@ const AgencyEarnings = lazy(() => import("./pages/AgencyEarnings"))
 const Reports = lazy(() => import("./pages/Reports"))
 const TenantContracts = lazy(() => import("./pages/TenantContracts"))
 const TermsOfService = lazy(() => import("./pages/TermsOfService"))
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"))
+const AdminProfiles = lazy(() => import("./components/admin/profile/AdminProfiles"))
+const AdminSubscriptionPlans = lazy(() => import("./components/admin/subscription/AdminSubscriptionPlans"))
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -93,6 +93,8 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
+
+          {/* Other protected routes */}
           <Route
             path="/agence/locataires"
             element={
@@ -158,7 +160,7 @@ function AppRoutes() {
             }
           />
 
-          {/* Catch all route - redirect to index */}
+          {/* Catch all route */}
           <Route path="*" element={<Navigate to="/index" replace />} />
         </Routes>
       </Suspense>
