@@ -3,25 +3,49 @@ import { supabase } from "@/integrations/supabase/client"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import { Loader2 } from "lucide-react"
 
 interface AgencyTenantsProps {
   agencyId: string
 }
 
 export function AgencyTenants({ agencyId }: AgencyTenantsProps) {
-  const { data: tenants = [] } = useQuery({
+  const { data: tenants = [], isLoading, error } = useQuery({
     queryKey: ["agency-tenants", agencyId],
     queryFn: async () => {
+      if (!agencyId) throw new Error("Agency ID is required")
+
       const { data, error } = await supabase
         .from("tenants")
         .select("*")
         .eq("agency_id", agencyId)
         .order("created_at", { ascending: false })
 
-      if (error) throw error
-      return data
+      if (error) {
+        console.error("Error fetching tenants:", error)
+        throw error
+      }
+
+      return data || []
     },
+    enabled: !!agencyId
   })
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8 text-red-500">
+        Une erreur est survenue lors du chargement des locataires
+      </div>
+    )
+  }
 
   return (
     <div className="rounded-md border">
