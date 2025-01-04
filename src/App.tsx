@@ -19,6 +19,7 @@ import TenantContracts from "@/pages/TenantContracts"
 import AgencyEarnings from "@/pages/AgencyEarnings"
 import Pricing from "@/pages/Pricing"
 import SuperAdminLogin from "@/pages/SuperAdminLogin"
+import TermsOfService from "@/pages/TermsOfService"
 
 const queryClient = new QueryClient()
 
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
   {
     path: "/pricing",
     element: <Pricing />,
+  },
+  {
+    path: "/terms",
+    element: <TermsOfService />,
   },
   {
     path: "/login",
