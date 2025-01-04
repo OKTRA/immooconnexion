@@ -15,19 +15,19 @@ export function PublicNavbar() {
     <div className="flex flex-col md:flex-row items-center gap-4">
       <Link 
         to="/public" 
-        className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors py-2 md:py-0"
+        className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors py-2 md:py-0 dark:text-gray-200 dark:hover:text-primary"
       >
         <Home className="h-4 w-4" />
         Propriétés
       </Link>
       <Link 
         to="/pricing" 
-        className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors py-2 md:py-0"
+        className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors py-2 md:py-0 dark:text-gray-200 dark:hover:text-primary"
       >
         <CreditCard className="h-4 w-4" />
         Tarifs
       </Link>
-      <Link to="/login" className="w-full md:w-auto">
+      <Link to="/login">
         <Button className="w-full md:w-auto flex items-center gap-2">
           <LogIn className="h-4 w-4" />
           Espace propriétaire
