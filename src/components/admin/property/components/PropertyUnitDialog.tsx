@@ -67,13 +67,13 @@ export function PropertyUnitDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh]">
-        <DialogHeader>
+      <DialogContent className="max-w-3xl h-[90vh] flex flex-col p-0">
+        <DialogHeader className="p-6 pb-0">
           <DialogTitle>
             {editingUnit ? "Modifier l'unité" : "Ajouter une nouvelle unité"}
           </DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-full pr-4">
+        <ScrollArea className="flex-1 p-6 pt-4">
           <form onSubmit={handleSubmit} className="space-y-6">
             <BasicInfoFields formData={formData} setFormData={setFormData} />
             <PricingFields formData={formData} setFormData={setFormData} />
