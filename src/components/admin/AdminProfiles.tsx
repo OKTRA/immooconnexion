@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client"
 
 export function AdminProfiles() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedAgency, setSelectedAgency] = useState("")
+  const [selectedAgency, setSelectedAgency] = useState("all")
   const [showAddDialog, setShowAddDialog] = useState(false)
   const { data: profiles = [], refetch } = useProfiles()
   const { toast } = useToast()
@@ -55,7 +55,7 @@ export function AdminProfiles() {
         profile.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         profile.email?.toLowerCase().includes(searchTerm.toLowerCase())
       
-      const matchesAgency = !selectedAgency || profile.agency_id === selectedAgency
+      const matchesAgency = selectedAgency === "all" || profile.agency_id === selectedAgency
 
       return matchesSearch && matchesAgency
     }

@@ -42,7 +42,7 @@ export function ProfileSearch({
           <SelectValue placeholder="Filtrer par agence" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">Toutes les agences</SelectItem>
+          <SelectItem value="all">Toutes les agences</SelectItem>
           {agencies.map((agency) => (
             <SelectItem key={agency.id} value={agency.id}>
               {agency.name}
