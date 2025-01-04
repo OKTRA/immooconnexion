@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search } from "lucide-react"
+import { Search, Building2, MapPin } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { toast } from "sonner"
@@ -41,44 +41,66 @@ export function SearchBar({ onAgencyChange, onTypeChange, onLocationChange }: Se
   })
 
   return (
-    <div className="max-w-5xl mx-auto p-4 -mt-8 relative z-10">
-      <div className="bg-white rounded-lg shadow-lg p-4 flex gap-4 flex-wrap md:flex-nowrap">
-        <Select onValueChange={(value) => onTypeChange?.(value || null)}>
-          <SelectTrigger className="w-full md:w-[200px]">
-            <SelectValue placeholder="Type de bien" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="appartement">Appartement</SelectItem>
-            <SelectItem value="maison">Maison</SelectItem>
-            <SelectItem value="villa">Villa</SelectItem>
-            <SelectItem value="studio">Studio</SelectItem>
-          </SelectContent>
-        </Select>
+    <div className="max-w-5xl mx-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-xl">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Type de bien</label>
+            <Select onValueChange={(value) => onTypeChange?.(value || null)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="appartement">
+                  <div className="flex items-center">
+                    <Building2 className="mr-2 h-4 w-4" />
+                    Appartement
+                  </div>
+                </SelectItem>
+                <SelectItem value="maison">Maison</SelectItem>
+                <SelectItem value="villa">Villa</SelectItem>
+                <SelectItem value="studio">Studio</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        <Select onValueChange={(value) => onAgencyChange?.(value === "all" ? null : value)}>
-          <SelectTrigger className="w-full md:w-[200px]">
-            <SelectValue placeholder="Agence" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Toutes les agences</SelectItem>
-            {agencies?.map((agency) => (
-              <SelectItem key={agency.id} value={agency.id}>
-                {agency.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        
-        <Input 
-          placeholder="Lieu" 
-          className="flex-1"
-          onChange={(e) => onLocationChange?.(e.target.value)}
-        />
-        
-        <Button className="w-full md:w-auto bg-red-500 hover:bg-red-600">
-          <Search className="mr-2 h-4 w-4" />
-          Rechercher
-        </Button>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Agence</label>
+            <Select onValueChange={(value) => onAgencyChange?.(value === "all" ? null : value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Toutes les agences" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes les agences</SelectItem>
+                {agencies?.map((agency) => (
+                  <SelectItem key={agency.id} value={agency.id}>
+                    {agency.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Lieu</label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input 
+                placeholder="Ville ou quartier" 
+                className="pl-9"
+                onChange={(e) => onLocationChange?.(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">&nbsp;</label>
+            <Button className="w-full bg-primary hover:bg-primary/90">
+              <Search className="mr-2 h-4 w-4" />
+              Rechercher
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -1,106 +1,92 @@
+import { useEffect, useState } from "react"
+import { PublicNavbar } from "@/components/home/PublicNavbar"
+import { HomeBanner } from "@/components/home/HomeBanner"
+import { SearchBar } from "@/components/home/SearchBar"
+import { PropertiesGrid } from "@/components/home/PropertiesGrid"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { PublicHeader } from "@/components/layout/PublicHeader"
-import { PropertiesGrid } from "@/components/home/PropertiesGrid"
-import { SearchBar } from "@/components/home/SearchBar"
-import { HomeBanner } from "@/components/home/HomeBanner"
 import { Loader2 } from "lucide-react"
-import { toast } from "sonner"
-import { useState } from "react"
 
-const PublicProperties = () => {
+export default function PublicProperties() {
   const [selectedAgency, setSelectedAgency] = useState<string | null>(null)
   const [selectedType, setSelectedType] = useState<string | null>(null)
-  const [location, setLocation] = useState("")
+  const [searchLocation, setSearchLocation] = useState("")
 
-  const { data: properties, isLoading, error } = useQuery({
-    queryKey: ['public-properties', selectedAgency, selectedType, location],
+  const { data: properties, isLoading } = useQuery({
+    queryKey: ["public-properties", selectedAgency, selectedType, searchLocation],
     queryFn: async () => {
-      console.log("Fetching public properties...")
+      console.log("Fetching properties with filters:", { selectedAgency, selectedType, searchLocation })
       let query = supabase
-        .from('properties')
+        .from("properties")
         .select(`
           *,
           agency:agencies(name, address)
         `)
-        .eq('statut', 'disponible')
-
-      // Log the initial query conditions
-      console.log("Initial query conditions:", {
-        status: 'disponible',
-        selectedAgency,
-        selectedType,
-        location
-      })
+        .eq("statut", "disponible")
 
       if (selectedAgency) {
-        query = query.eq('agency_id', selectedAgency)
+        query = query.eq("agency_id", selectedAgency)
       }
-
       if (selectedType) {
-        query = query.eq('type', selectedType)
+        query = query.eq("type", selectedType)
+      }
+      if (searchLocation) {
+        query = query.ilike("ville", `%${searchLocation}%`)
       }
 
-      if (location) {
-        query = query.ilike('ville', `%${location}%`)
-      }
-
-      const { data, error } = await query.order('created_at', { ascending: false })
+      const { data, error } = await query
 
       if (error) {
         console.error("Error fetching properties:", error)
         throw error
       }
 
-      // Log the fetched data for debugging
-      console.log("Properties query result:", {
-        count: data?.length || 0,
-        properties: data
-      })
-
+      console.log("Fetched properties:", data)
       return data || []
-    },
-    meta: {
-      onError: (error: Error) => {
-        console.error("Query error:", error)
-        toast.error("Une erreur est survenue lors du chargement des propriétés")
-      }
     }
   })
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <PublicHeader />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center text-red-600">
-            Une erreur est survenue lors du chargement des propriétés
-          </div>
-        </div>
-      </div>
-    )
-  }
+  useEffect(() => {
+    document.title = "Biens Disponibles | Immoo.pro"
+  }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <PublicHeader />
-      <HomeBanner />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <SearchBar 
-          onAgencyChange={setSelectedAgency}
-          onTypeChange={setSelectedType}
-          onLocationChange={setLocation}
-        />
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <PublicNavbar />
+      
+      <main className="container mx-auto px-4 pb-12 animate-fade-in">
+        <HomeBanner />
+        
+        <div className="relative z-10 -mt-8 mb-12">
+          <SearchBar
+            onAgencyChange={setSelectedAgency}
+            onTypeChange={setSelectedType}
+            onLocationChange={setSearchLocation}
+          />
+        </div>
+
         {isLoading ? (
-          <div className="flex justify-center items-center min-h-[200px]">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : properties && properties.length > 0 ? (
+          <div className="space-y-8">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+              {properties.length} bien{properties.length > 1 ? 's' : ''} disponible{properties.length > 1 ? 's' : ''}
+            </h2>
+            <PropertiesGrid properties={properties} />
           </div>
         ) : (
-          <PropertiesGrid properties={properties || []} />
+          <div className="text-center py-12">
+            <h2 className="text-xl font-medium text-gray-600 dark:text-gray-400">
+              Aucun bien disponible pour le moment
+            </h2>
+            <p className="mt-2 text-gray-500 dark:text-gray-500">
+              Veuillez modifier vos critères de recherche ou réessayer plus tard
+            </p>
+          </div>
         )}
-      </div>
+      </main>
     </div>
   )
 }
-
-export default PublicProperties
