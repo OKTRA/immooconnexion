@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Eye, Pencil, Trash2 } from "lucide-react"
+import { Eye, Pencil, Trash2, Building2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 interface PropertyActionsProps {
@@ -23,6 +23,10 @@ export function PropertyActions({ propertyId, onEdit, onDelete }: PropertyAction
     } catch (error) {
       console.error("Navigation error:", error)
     }
+  }
+
+  const handleManageUnits = () => {
+    navigate(`/agence/appartements/${propertyId}/unites`)
   }
 
   return (
@@ -50,6 +54,14 @@ export function PropertyActions({ propertyId, onEdit, onDelete }: PropertyAction
         title="Supprimer"
       >
         <Trash2 className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={handleManageUnits}
+        title="Gérer les unités"
+      >
+        <Building2 className="h-4 w-4" />
       </Button>
     </div>
   )
