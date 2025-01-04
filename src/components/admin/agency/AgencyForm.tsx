@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertTriangle } from "lucide-react"
+import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits"
 
 interface AgencyFormProps {
   agency: Agency
@@ -28,21 +29,7 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
     },
   })
 
-  const canDowngrade = (planId: string) => {
-    const selectedPlan = plans.find(p => p.id === planId)
-    if (!selectedPlan || !agency) return false
-    
-    const exceedsProperties = selectedPlan.max_properties !== -1 && 
-      (agency.current_properties_count || 0) > selectedPlan.max_properties
-    
-    const exceedsTenants = selectedPlan.max_tenants !== -1 && 
-      (agency.current_tenants_count || 0) > selectedPlan.max_tenants
-    
-    const exceedsUsers = selectedPlan.max_users !== -1 && 
-      (agency.current_profiles_count || 0) > selectedPlan.max_users
-
-    return !exceedsProperties && !exceedsTenants && !exceedsUsers
-  }
+  const { checkDowngradeEligibility } = useSubscriptionLimits(agency.id)
 
   const handlePlanChange = (planId: string) => {
     const currentPlan = plans.find(p => p.id === agency.subscription_plan_id)
@@ -52,7 +39,7 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
     
     const isDowngrade = newPlan.price < currentPlan.price
     
-    if (isDowngrade && !canDowngrade(planId)) {
+    if (isDowngrade && !checkDowngradeEligibility(newPlan)) {
       return
     }
     
@@ -60,7 +47,7 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
   }
 
   const selectedPlan = plans.find(p => p.id === agency.subscription_plan_id)
-  const showDowngradeWarning = selectedPlan && !canDowngrade(selectedPlan.id)
+  const showDowngradeWarning = selectedPlan && !checkDowngradeEligibility(selectedPlan)
 
   return (
     <ScrollArea className="h-[calc(100vh-200px)] md:h-auto">
@@ -110,7 +97,8 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
             </SelectTrigger>
             <SelectContent>
               {plans.map((plan) => {
-                const isDisabled = plan.price < (selectedPlan?.price || 0) && !canDowngrade(plan.id)
+                const isDisabled = plan.price < (selectedPlan?.price || 0) && 
+                  !checkDowngradeEligibility(plan)
                 return (
                   <SelectItem 
                     key={plan.id} 
