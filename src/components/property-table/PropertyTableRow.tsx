@@ -10,6 +10,8 @@ interface Property {
   loyer: number
   caution: number
   statut: string
+  total_units: number
+  property_category: string
 }
 
 interface PropertyTableRowProps {

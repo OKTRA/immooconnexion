@@ -37,6 +37,8 @@ interface Property {
   agency_id: string
   created_at: string
   updated_at: string
+  total_units: number
+  property_category: string
 }
 
 export function PropertyTable() {

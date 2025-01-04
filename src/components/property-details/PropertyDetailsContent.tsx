@@ -28,19 +28,25 @@ export const PropertyDetailsContent = () => {
   } = useContractsData(id)
 
   const handlePrintReceipt = (contract: Contract) => {
-    // TODO: Implement receipt printing logic
     toast({
-      title: "Printing Receipt",
-      description: `Printing receipt for contract ${contract.id}`,
+      title: "Impression du reçu",
+      description: `Impression du reçu pour le contrat ${contract.id}`,
     })
   }
 
   const handlePrintContract = (contract: Contract) => {
-    // TODO: Implement contract printing logic
     toast({
-      title: "Printing Contract",
-      description: `Printing contract ${contract.id}`,
+      title: "Impression du contrat",
+      description: `Impression du contrat ${contract.id}`,
     })
+  }
+
+  if (!id || id === 'ajouter') {
+    return (
+      <div className="flex items-center justify-center min-h-[400px] text-gray-500">
+        Sélectionnez un bien pour voir les détails
+      </div>
+    )
   }
 
   if (isLoadingProperty || isLoadingContracts) {
@@ -62,16 +68,16 @@ export const PropertyDetailsContent = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
       <PropertyInfo property={property} />
-      <PropertyActions propertyId={id || ''} contracts={contracts} />
-      {property.type === 'appartement' && <PropertyUnitsManager propertyId={id || ''} />}
+      <PropertyActions propertyId={id} contracts={contracts} />
+      {property.type === 'appartement' && <PropertyUnitsManager propertyId={id} />}
       <PaymentHistory 
-        propertyId={id || ''} 
+        propertyId={id} 
         contracts={contracts}
         onPrintReceipt={handlePrintReceipt}
         onPrintContract={handlePrintContract}
       />
       <InspectionsList contracts={contracts} />
-      {property.is_for_sale && <PropertySalesSection propertyId={id || ''} />}
+      {property.is_for_sale && <PropertySalesSection propertyId={id} />}
     </div>
   )
 }
