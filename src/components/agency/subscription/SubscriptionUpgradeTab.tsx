@@ -182,6 +182,8 @@ export function SubscriptionUpgradeTab() {
           onOpenChange={setShowUpgradeDialog}
           planId={selectedPlan.id}
           planName={selectedPlan.name}
+          amount={selectedPlan.price}
+          isUpgrade={true}
         />
       )}
     </div>
