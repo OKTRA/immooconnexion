@@ -13,7 +13,6 @@ interface AgencyFieldsProps {
     email: string;
     subscription_plan_id?: string;
     show_phone_on_site?: boolean;
-    list_properties_on_site?: boolean;
   };
   setAgencyData: (data: any) => void;
 }
@@ -89,8 +88,7 @@ export function AgencyFields({ agencyData, setAgencyData }: AgencyFieldsProps) {
             setAgencyData({ 
               ...agencyData, 
               subscription_plan_id: value,
-              show_phone_on_site: false,
-              list_properties_on_site: false
+              show_phone_on_site: false
             })
           }}
         >
@@ -119,18 +117,6 @@ export function AgencyFields({ agencyData, setAgencyData }: AgencyFieldsProps) {
               setAgencyData({ ...agencyData, show_phone_on_site: checked })
             }
             disabled={!canShowPhoneNumber}
-          />
-        </div>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 sm:space-x-4">
-          <Label htmlFor="list_properties">
-            Lister les propriétés sur le site
-          </Label>
-          <Switch
-            id="list_properties"
-            checked={agencyData.list_properties_on_site}
-            onCheckedChange={(checked) => 
-              setAgencyData({ ...agencyData, list_properties_on_site: checked })
-            }
           />
         </div>
       </div>
