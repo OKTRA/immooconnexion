@@ -18,7 +18,8 @@ export function UserMenu() {
       try {
         const { data: { session } } = await supabase.auth.getSession()
         if (!session) {
-          localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token')
+          const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
+          localStorage.removeItem(`sb-${projectId}-auth-token`)
           navigate("/agence/login")
           return
         }
@@ -33,7 +34,8 @@ export function UserMenu() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session || event === 'SIGNED_OUT') {
-        localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token')
+        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
+        localStorage.removeItem(`sb-${projectId}-auth-token`)
         navigate("/agence/login")
       }
     })

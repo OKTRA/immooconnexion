@@ -15,26 +15,34 @@ export function LogoutButton() {
 
   const handleLogout = async () => {
     try {
+      // First check if there's a valid session
       const { data: { session } } = await supabase.auth.getSession()
       
+      // If no session exists, just clean up and redirect
       if (!session) {
-        localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token')
+        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
+        localStorage.removeItem(`sb-${projectId}-auth-token`)
         navigate("/agence/login")
         return
       }
 
+      // Attempt to sign out
       const { error } = await supabase.auth.signOut()
       
       if (error) {
+        // If session not found error, clean up and redirect
         if (error.message.includes('session_not_found')) {
-          localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token')
+          const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
+          localStorage.removeItem(`sb-${projectId}-auth-token`)
           navigate("/agence/login")
           return
         }
         throw error
       }
 
-      localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token')
+      // Clean up and redirect on successful logout
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
+      localStorage.removeItem(`sb-${projectId}-auth-token`)
       navigate("/agence/login")
       toast({
         title: "Déconnexion réussie",
