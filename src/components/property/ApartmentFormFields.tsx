@@ -30,15 +30,14 @@ export function ApartmentFormFields({
     setFormData({ ...formData, [id]: value })
   }
 
-  const previewUrls = imagePreviewUrl 
-    ? Array.isArray(imagePreviewUrl) 
-      ? imagePreviewUrl 
-      : [imagePreviewUrl]
-    : []
+  const handleSelectChange = (value: string, field: string) => {
+    setFormData({ ...formData, [field]: value })
+  }
+
+  const previewUrls = Array.isArray(imagePreviewUrl) ? imagePreviewUrl : imagePreviewUrl ? [imagePreviewUrl] : []
 
   return (
     <div className="grid gap-6 py-4">
-      {/* Informations de base */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Informations de base</h3>
         <div className="grid gap-4">
@@ -56,7 +55,7 @@ export function ApartmentFormFields({
             <Label htmlFor="property_category">Type de bien</Label>
             <Select 
               value={formData.property_category} 
-              onValueChange={(value) => setFormData({ ...formData, property_category: value })}
+              onValueChange={(value) => handleSelectChange(value, 'property_category')}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner le type" />
@@ -73,45 +72,12 @@ export function ApartmentFormFields({
             <Label htmlFor="ville">Ville</Label>
             <Input 
               id="ville" 
+              placeholder="Ex: Abidjan"
               value={formData.ville}
               onChange={handleInputChange}
             />
           </div>
-        </div>
-      </div>
 
-      <Separator />
-
-      {/* Informations du propriétaire */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Informations du propriétaire</h3>
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="owner_name">Nom du propriétaire</Label>
-            <Input 
-              id="owner_name" 
-              value={formData.owner_name}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="owner_phone">Téléphone du propriétaire</Label>
-            <Input 
-              id="owner_phone" 
-              value={formData.owner_phone}
-              onChange={handleInputChange}
-            />
-          </div>
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Gestion des unités */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Gestion des unités</h3>
-        <div className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="total_units">Nombre total d'unités</Label>
             <Input 
@@ -126,7 +92,35 @@ export function ApartmentFormFields({
         </div>
       </div>
 
-      {/* Photos */}
+      <Separator />
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Informations du propriétaire</h3>
+        <div className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="owner_name">Nom du propriétaire</Label>
+            <Input 
+              id="owner_name" 
+              placeholder="Ex: John Doe"
+              value={formData.owner_name}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="owner_phone">Téléphone du propriétaire</Label>
+            <Input 
+              id="owner_phone" 
+              placeholder="Ex: +225 XX XX XX XX XX"
+              value={formData.owner_phone}
+              onChange={handleInputChange}
+            />
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Photos</h3>
         <div className="grid gap-2">
