@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useState } from "react"
@@ -42,41 +43,48 @@ export function PropertyUnitDialog({
     status: editingUnit?.status || "available"
   })
 
-  const { data: propertyData, isError } = useQuery({
+  const { data: propertyData, isError, error } = useQuery({
     queryKey: ['property', propertyId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('id', propertyId)
-        .maybeSingle()
-      
-      if (error) {
-        console.error("Error fetching property:", error)
+      try {
+        const { data, error } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('id', propertyId)
+          .maybeSingle()
+        
+        if (error) {
+          console.error("Error fetching property:", error)
+          throw error
+        }
+
+        if (!data) {
+          console.log("No property found with ID:", propertyId)
+          toast({
+            title: "Propriété non trouvée",
+            description: "La propriété demandée n'existe pas",
+            variant: "destructive",
+          })
+          return null
+        }
+
+        return data
+      } catch (err) {
+        console.error("Error in property query:", err)
         toast({
           title: "Erreur",
           description: "Impossible de charger les informations de la propriété",
           variant: "destructive",
         })
-        throw error
+        throw err
       }
-
-      if (!data) {
-        toast({
-          title: "Propriété non trouvée",
-          description: "La propriété demandée n'existe pas",
-          variant: "destructive",
-        })
-        return null
-      }
-
-      return data
-    }
+    },
+    enabled: !!propertyId
   })
 
-  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null)
+  const [selectedFiles, setSelectedFiles] = useState(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     onSubmit({
       ...formData,
@@ -99,50 +107,59 @@ export function PropertyUnitDialog({
   ]
 
   if (isError) {
+    console.error("Query error:", error)
+    return null
+  }
+
+  if (!propertyData) {
     return null
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl h-[90vh] flex flex-col p-0 bg-gradient-to-br from-purple-50 to-white dark:from-gray-900 dark:to-gray-800">
-        <DialogHeader editingUnit={editingUnit} />
+        <DialogHeader 
+          title={editingUnit ? "Modifier l'unité" : "Ajouter une nouvelle unité"} 
+        />
+        
         <ScrollArea className="flex-1 p-6 pt-4">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <ParentPropertyInfo propertyData={propertyData} />
-
-            <div className="p-4 bg-white/50 dark:bg-gray-800/50 rounded-lg border border-purple-100 dark:border-gray-700 shadow-sm">
-              <BasicInfoFields formData={formData} setFormData={setFormData} />
-            </div>
-
-            <div className="p-4 bg-white/50 dark:bg-gray-800/50 rounded-lg border border-purple-100 dark:border-gray-700 shadow-sm">
-              <PricingFields formData={formData} setFormData={setFormData} />
-            </div>
-
+            <ParentPropertyInfo property={propertyData} />
+            
+            <BasicInfoFields 
+              formData={formData}
+              setFormData={setFormData}
+            />
+            
+            <PricingFields 
+              formData={formData}
+              setFormData={setFormData}
+            />
+            
             <StatusSection 
-              status={formData.status}
-              onStatusChange={(value) => setFormData({ ...formData, status: value })}
+              formData={formData}
+              setFormData={setFormData}
             />
-
-            <div className="p-4 bg-white/50 dark:bg-gray-800/50 rounded-lg border border-purple-100 dark:border-gray-700 shadow-sm">
-              <AmenitiesSection 
-                formData={formData} 
-                setFormData={setFormData}
-                amenitiesList={amenitiesList}
-              />
-            </div>
-
-            <div className="p-4 bg-white/50 dark:bg-gray-800/50 rounded-lg border border-purple-100 dark:border-gray-700 shadow-sm">
-              <PhotoUploadSection 
-                onPhotosChange={(files) => setSelectedFiles(files)} 
-              />
-            </div>
-
+            
+            <AmenitiesSection 
+              formData={formData}
+              setFormData={setFormData}
+              amenitiesList={amenitiesList}
+            />
+            
+            <PhotoUploadSection 
+              onPhotosChange={(files) => setSelectedFiles(files)}
+            />
+            
             <DescriptionSection 
-              description={formData.description}
-              onDescriptionChange={(value) => setFormData({ ...formData, description: value })}
+              formData={formData}
+              setFormData={setFormData}
             />
-
-            <DialogActions onClose={onClose} editingUnit={editingUnit} />
+            
+            <DialogActions 
+              onClose={onClose}
+              isEditing={!!editingUnit}
+            />
           </form>
         </ScrollArea>
       </DialogContent>
