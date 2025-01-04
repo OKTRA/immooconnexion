@@ -34,7 +34,6 @@ export function AgencyFields({ agencyData, setAgencyData }: AgencyFieldsProps) {
 
   const selectedPlan = plans.find(plan => plan.id === agencyData.subscription_plan_id)
   const canShowPhoneNumber = selectedPlan?.name === "Professionnel" || selectedPlan?.name === "Enterprise"
-  const canListProperties = selectedPlan?.name === "Professionnel" || selectedPlan?.name === "Enterprise"
 
   return (
     <div className="space-y-6">
@@ -123,8 +122,8 @@ export function AgencyFields({ agencyData, setAgencyData }: AgencyFieldsProps) {
           />
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 sm:space-x-4">
-          <Label htmlFor="list_properties" className={!canListProperties ? "text-gray-400" : ""}>
-            Lister les propriétés sur le site {!canListProperties && "(Nécessite un abonnement Professionnel ou Enterprise)"}
+          <Label htmlFor="list_properties">
+            Lister les propriétés sur le site
           </Label>
           <Switch
             id="list_properties"
@@ -132,7 +131,6 @@ export function AgencyFields({ agencyData, setAgencyData }: AgencyFieldsProps) {
             onCheckedChange={(checked) => 
               setAgencyData({ ...agencyData, list_properties_on_site: checked })
             }
-            disabled={!canListProperties}
           />
         </div>
       </div>
