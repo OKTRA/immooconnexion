@@ -9,15 +9,9 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ApartmentFormFields } from "./ApartmentFormFields"
 import { useApartmentForm } from "./useApartmentForm"
-import { Property } from "./types"
+import { ApartmentDialogProps } from "./types"
 
-interface ApartmentDialogProps {
-  property?: Property | null
-  onOpenChange?: (open: boolean) => void
-  open?: boolean
-}
-
-export function ApartmentDialog({ property, onOpenChange, open }: ApartmentDialogProps) {
+export function ApartmentDialog({ apartment, onOpenChange, open }: ApartmentDialogProps) {
   const {
     images,
     setImages,
@@ -25,7 +19,7 @@ export function ApartmentDialog({ property, onOpenChange, open }: ApartmentDialo
     setFormData,
     handleSubmit,
     previewUrls
-  } = useApartmentForm(property, () => {
+  } = useApartmentForm(apartment, () => {
     onOpenChange?.(false)
   })
 
@@ -39,7 +33,7 @@ export function ApartmentDialog({ property, onOpenChange, open }: ApartmentDialo
     <DialogContent className="w-[95vw] max-w-[500px] h-[95vh] md:h-[90vh] p-4 md:p-6 overflow-hidden">
       <DialogHeader>
         <DialogTitle className="text-lg md:text-xl">
-          {property ? "Modifier l'appartement" : "Ajouter un nouvel appartement"}
+          {apartment ? "Modifier l'appartement" : "Ajouter un nouvel appartement"}
         </DialogTitle>
       </DialogHeader>
       
@@ -67,7 +61,7 @@ export function ApartmentDialog({ property, onOpenChange, open }: ApartmentDialo
             onClick={handleSubmit}
             className="w-full md:w-auto"
           >
-            {property ? "Modifier" : "Enregistrer"}
+            {apartment ? "Modifier" : "Enregistrer"}
           </Button>
         </div>
       </ScrollArea>

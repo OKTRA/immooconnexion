@@ -2,22 +2,7 @@ import { Separator } from "@/components/ui/separator"
 import { BasicInfoSection } from "../apartment/form-sections/BasicInfoSection"
 import { OwnerInfoSection } from "../apartment/form-sections/OwnerInfoSection"
 import { PhotoUploadSection } from "../apartment/form-sections/PhotoUploadSection"
-
-interface ApartmentFormFieldsProps {
-  formData: {
-    bien: string
-    type: string
-    ville: string
-    total_units: string
-    property_category: string
-    owner_name: string
-    owner_phone: string
-    country: string
-  }
-  setFormData: (data: any) => void
-  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  imagePreviewUrl?: string | string[]
-}
+import { ApartmentFormFieldsProps } from "./types"
 
 export function ApartmentFormFields({ 
   formData, 
