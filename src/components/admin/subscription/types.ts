@@ -27,8 +27,24 @@ export interface EditPlanDialogProps {
 }
 
 export interface PaymentDialogProps {
-  plan: SubscriptionPlan
-  isOpen: boolean
+  open: boolean
   onOpenChange: (open: boolean) => void
-  onSuccess: () => void
+  planId?: string
+  planName?: string
+  amount?: number
+  isUpgrade?: boolean
+  propertyId?: string
+}
+
+export interface PaymentFormData {
+  email: string
+  password: string
+  confirm_password: string
+  agency_name: string
+  agency_address: string
+  country: string
+  city: string
+  first_name: string
+  last_name: string
+  phone_number: string
 }
