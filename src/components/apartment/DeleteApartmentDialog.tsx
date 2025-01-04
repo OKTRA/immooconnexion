@@ -44,11 +44,11 @@ export function DeleteApartmentDialog({
 
       if (!profile?.agency_id) throw new Error("Aucune agence associée")
 
+      // Suppression de l'appartement
       const { error } = await supabase
-        .from('properties')
+        .from('apartments')
         .delete()
         .eq('id', selectedProperty.id)
-        .eq('agency_id', profile.agency_id)
 
       if (error) throw error
 
