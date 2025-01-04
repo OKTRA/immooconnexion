@@ -64,14 +64,22 @@ export async function checkSubscriptionLimits(agencyId: string, type: 'property'
       users: usersCount
     })
 
-    // Special handling for free plan with 1 property limit
+    // Special handling for basic/free plan
     if (plan.name.toLowerCase().includes('basic') || plan.name.toLowerCase().includes('gratuit')) {
-      if (type === 'property' && (propertiesCount || 0) >= 1) {
-        console.log("Basic plan property limit reached")
-        return false
+      if (type === 'property') {
+        // Allow adding a property if count is 0
+        return (propertiesCount || 0) < 1
       }
+      if (type === 'tenant') {
+        return (tenantsCount || 0) < 1
+      }
+      if (type === 'user') {
+        return (usersCount || 0) < 1
+      }
+      return false
     }
 
+    // Regular plan checks
     if (type === 'property' && plan.max_properties !== -1) {
       return (propertiesCount || 0) < plan.max_properties
     }
