@@ -8,8 +8,12 @@
   </head>
   <body>
     <div id="root"></div>
-    <!-- Add required Lovable script before other scripts -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    <!-- Add required Lovable script with correct configuration -->
+    <script 
+      src="https://cdn.gpteng.co/gptengineer.js" 
+      data-allowed-origins="https://lovable.dev,https://www.immoo.pro"
+      type="module"
+    ></script>
     <!-- Add CinetPay SDK after Lovable script -->
     <script src="https://cdn.cinetpay.com/seamless/main.js"></script>
     <!-- Add main application script last -->
