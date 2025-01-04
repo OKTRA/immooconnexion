@@ -1,22 +1,29 @@
-import { ReactNode } from "react"
-import { SidebarProvider } from "@/components/ui/sidebar"
 import { AgencySidebar } from "./AgencySidebar"
 
 interface AgencyLayoutProps {
-  children: ReactNode
+  children: React.ReactNode
 }
 
 export function AgencyLayout({ children }: AgencyLayoutProps) {
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex flex-col">
-        <div className="flex-1 flex">
-          <AgencySidebar />
-          <main className="flex-1 ml-[250px] p-4 md:p-8">
-            {children}
-          </main>
-        </div>
+    <div className="flex min-h-screen">
+      <AgencySidebar />
+      <div className="flex-1">
+        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container flex h-14 items-center">
+            <div className="mr-4 hidden md:flex">
+              <a className="mr-6 flex items-center space-x-2" href="/agence/admin">
+                <span className="hidden font-bold sm:inline-block">
+                  Tableau de bord
+                </span>
+              </a>
+            </div>
+          </div>
+        </header>
+        <main className="container py-6">
+          {children}
+        </main>
       </div>
-    </SidebarProvider>
+    </div>
   )
 }
