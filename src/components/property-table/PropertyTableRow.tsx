@@ -1,18 +1,6 @@
 import { TableCell, TableRow } from "@/components/ui/table"
 import { PropertyActions } from "./PropertyActions"
-
-interface Property {
-  id: string
-  bien: string
-  type: string
-  chambres: number
-  ville: string
-  loyer: number
-  caution: number
-  statut: string
-  total_units: number
-  property_category: string
-}
+import { Property } from "@/integrations/supabase/types/properties"
 
 interface PropertyTableRowProps {
   property: Property
