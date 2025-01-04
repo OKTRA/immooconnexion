@@ -21,6 +21,7 @@ import SubscriptionUpgrade from "@/pages/SubscriptionUpgrade"
 import AdminDashboard from "@/pages/AdminDashboard"
 import SuperAdminLogin from "@/pages/SuperAdminLogin"
 import AgencyDashboard from "@/pages/AgencyDashboard"
+import Pricing from "@/pages/Pricing"
 
 const queryClient = new QueryClient()
 
@@ -36,6 +37,7 @@ function App() {
               <Route path="/properties/:id" element={<PublicPropertyDetails />} />
               <Route path="/agence/login" element={<Login />} />
               <Route path="/super-admin/login" element={<SuperAdminLogin />} />
+              <Route path="/pricing" element={<Pricing />} />
               
               {/* Protected agency routes */}
               <Route path="/agence" element={<ProtectedRoute />}>
