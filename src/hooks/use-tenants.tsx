@@ -20,7 +20,9 @@ export function useTenants() {
   const navigate = useNavigate()
   const [session, setSession] = useState(null)
 
+  // Set up auth state listener
   useEffect(() => {
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         navigate('/agence/login')
@@ -29,6 +31,7 @@ export function useTenants() {
       setSession(session)
     })
 
+    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -48,66 +51,66 @@ export function useTenants() {
       if (!session) {
         throw new Error("Non authentifié")
       }
-      
-      // Get the user's profile to access their agency_id
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        throw new Error("Non authentifié")
+
+      try {
+        // Get the user's profile to access their agency_id
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('agency_id')
+          .eq('id', session.user.id)
+          .maybeSingle()
+        
+        if (profileError) {
+          console.error('Erreur lors de la vérification du profil:', profileError)
+          throw profileError
+        }
+
+        if (!profileData?.agency_id) {
+          console.log('No agency_id found for user')
+          return []
+        }
+
+        console.log('Fetching tenants for agency:', profileData.agency_id)
+
+        const { data: tenantsData, error: tenantsError } = await supabase
+          .from('tenants')
+          .select(`
+            id,
+            nom,
+            prenom,
+            birth_date,
+            phone_number,
+            photo_id_url,
+            agency_fees,
+            user_id,
+            agency_id
+          `)
+          .eq('agency_id', profileData.agency_id)
+          .order('created_at', { ascending: false })
+        
+        if (tenantsError) {
+          console.error('Erreur lors de la récupération des locataires:', tenantsError)
+          throw tenantsError
+        }
+
+        console.log('Tenants data:', tenantsData)
+
+        return tenantsData.map((tenant: any) => ({
+          id: tenant.id,
+          nom: tenant.nom || '',
+          prenom: tenant.prenom || '',
+          dateNaissance: tenant.birth_date || '',
+          telephone: tenant.phone_number || '',
+          photoIdUrl: tenant.photo_id_url,
+          fraisAgence: tenant.agency_fees?.toString(),
+          user_id: tenant.user_id,
+        }))
+      } catch (error) {
+        console.error('Error fetching tenants:', error)
+        throw error
       }
-
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('agency_id')
-        .eq('id', user.id)
-        .maybeSingle()
-      
-      if (profileError) {
-        console.error('Erreur lors de la vérification du profil:', profileError)
-        throw profileError
-      }
-
-      if (!profileData?.agency_id) {
-        console.log('No agency_id found for user')
-        return []
-      }
-
-      console.log('Fetching tenants for agency:', profileData.agency_id)
-
-      const { data: tenantsData, error: tenantsError } = await supabase
-        .from('tenants')
-        .select(`
-          id,
-          nom,
-          prenom,
-          birth_date,
-          phone_number,
-          photo_id_url,
-          agency_fees,
-          user_id,
-          agency_id
-        `)
-        .eq('agency_id', profileData.agency_id)
-        .order('created_at', { ascending: false })
-      
-      if (tenantsError) {
-        console.error('Erreur lors de la récupération des locataires:', tenantsError)
-        throw tenantsError
-      }
-
-      console.log('Tenants data:', tenantsData)
-
-      return tenantsData.map((tenant: any) => ({
-        id: tenant.id,
-        nom: tenant.nom || '',
-        prenom: tenant.prenom || '',
-        dateNaissance: tenant.birth_date || '',
-        telephone: tenant.phone_number || '',
-        photoIdUrl: tenant.photo_id_url,
-        fraisAgence: tenant.agency_fees?.toString(),
-        user_id: tenant.user_id,
-      }))
     },
-    enabled: !!session
+    enabled: !!session // Only run query when we have a session
   })
 
   return { tenants, isLoading, error, session, refetch }
