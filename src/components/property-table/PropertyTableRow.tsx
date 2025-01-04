@@ -1,18 +1,17 @@
-import { Property } from "@/components/property/types"
+import { TableCell, TableRow } from "@/components/ui/table"
 import { PropertyActions } from "./PropertyActions"
+import { Property } from "@/integrations/supabase/types/properties"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Building2 } from "lucide-react"
-import { ReactNode } from "react"
 
 interface PropertyTableRowProps {
   property: Property
   onEdit: () => void
   onDelete: () => void
-  customActions?: ReactNode
 }
 
-export function PropertyTableRow({ property, onEdit, onDelete, customActions }: PropertyTableRowProps) {
+export function PropertyTableRow({ property, onEdit, onDelete }: PropertyTableRowProps) {
   return (
     <ResponsiveTable.Row>
       <ResponsiveTable.Cell>
@@ -29,13 +28,12 @@ export function PropertyTableRow({ property, onEdit, onDelete, customActions }: 
       <ResponsiveTable.Cell>{property.owner_name}</ResponsiveTable.Cell>
       <ResponsiveTable.Cell>{property.owner_phone}</ResponsiveTable.Cell>
       <ResponsiveTable.Cell>{property.statut}</ResponsiveTable.Cell>
-      <ResponsiveTable.Cell className="text-right space-x-2">
+      <ResponsiveTable.Cell className="text-right">
         <PropertyActions
           propertyId={property.id}
           onEdit={onEdit}
           onDelete={onDelete}
         />
-        {customActions}
       </ResponsiveTable.Cell>
     </ResponsiveTable.Row>
   )
