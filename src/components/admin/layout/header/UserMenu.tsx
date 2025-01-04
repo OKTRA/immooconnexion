@@ -25,15 +25,7 @@ export function UserMenu() {
 
       const { data } = await supabase
         .from("profiles")
-        .select(`
-          *,
-          agencies (
-            name,
-            subscription_plans (
-              name
-            )
-          )
-        `)
+        .select("*")
         .eq("id", user.id)
         .maybeSingle()
 
@@ -72,7 +64,7 @@ export function UserMenu() {
             {profile?.first_name || profile?.email || 'Utilisateur'}
           </p>
           <p className="text-xs text-white/70">
-            {profile?.agencies?.subscription_plans?.name || 'Plan non défini'}
+            Super Admin
           </p>
         </div>
       </div>
