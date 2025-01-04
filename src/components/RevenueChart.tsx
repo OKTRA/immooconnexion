@@ -12,32 +12,27 @@ export function RevenueChart() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
-      console.log('User ID:', user.id)
-
       const { data: profile } = await supabase
         .from('profiles')
         .select('role, agency_id')
         .eq('id', user.id)
         .maybeSingle()
 
+      if (!profile?.agency_id) {
+        throw new Error("Agence non trouvée")
+      }
+
       console.log('User profile:', profile)
 
-      let query = supabase
+      const { data: contracts, error } = await supabase
         .from('contracts')
         .select(`
           montant,
           created_at,
-          type,
-          agency_id
+          type
         `)
         .eq('type', 'loyer')
-
-      // If not admin, filter by agency_id
-      if (profile?.role !== 'admin') {
-        query = query.eq('agency_id', user.id)
-      }
-
-      const { data: contracts, error } = await query
+        .eq('agency_id', profile.agency_id)
         .order('created_at', { ascending: true })
 
       if (error) {

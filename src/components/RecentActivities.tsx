@@ -37,12 +37,11 @@ export function RecentActivities() {
   const { data: recentContracts, isLoading: isLoadingContracts } = useQuery({
     queryKey: ["recent-activities", userProfile?.id],
     queryFn: async () => {
-      if (!userProfile) return []
+      if (!userProfile?.agency_id) return []
       
       console.log("Récupération des activités récentes pour le profil:", userProfile)
       
-      // Build the base query for contracts
-      let query = supabase
+      const { data: contracts, error } = await supabase
         .from("contracts")
         .select(`
           id,
@@ -53,15 +52,9 @@ export function RecentActivities() {
           property_id,
           agency_id
         `)
+        .eq('agency_id', userProfile.agency_id)
         .order("created_at", { ascending: false })
         .limit(5)
-
-      // Si l'utilisateur n'est pas admin, on filtre par agency_id
-      if (userProfile.role !== 'super_admin') {
-        query = query.eq('agency_id', userProfile.agency_id)
-      }
-
-      const { data: contracts, error } = await query
 
       if (error) {
         console.error("Error fetching recent activities:", error)
@@ -102,7 +95,7 @@ export function RecentActivities() {
       console.log("Recent activities data:", contractsWithDetails)
       return contractsWithDetails
     },
-    enabled: !!userProfile,
+    enabled: !!userProfile?.agency_id,
   })
 
   if (isLoadingProfile || isLoadingContracts) {

@@ -23,15 +23,21 @@ export function AgencyEarningsTable() {
     queryFn: async () => {
       console.log('Fetching agency earnings...')
       
-      // Get current user's profile to check role
+      // Get current user's profile to check role and agency
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, agency_id')
         .eq('id', user.id)
         .maybeSingle()
+
+      if (!profile?.agency_id) {
+        throw new Error("Agence non trouvée")
+      }
+
+      console.log('User profile:', profile)
 
       let query = supabase
         .from('contracts')
@@ -48,12 +54,8 @@ export function AgencyEarningsTable() {
             taux_commission
           )
         `)
+        .eq('agency_id', profile.agency_id)
         .order('created_at', { ascending: false })
-
-      // If not admin, only show agency's contracts
-      if (profile?.role !== 'admin') {
-        query = query.eq('agency_id', user.id)
-      }
       
       const { data: contracts, error } = await query
       
@@ -61,6 +63,8 @@ export function AgencyEarningsTable() {
         console.error('Error fetching contracts:', error)
         throw error
       }
+
+      console.log('Contracts retrieved:', contracts)
 
       // Séparer les frais d'agence et les loyers
       const agencyFees = (contracts as ContractWithProperties[])
