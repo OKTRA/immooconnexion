@@ -5,69 +5,78 @@ import AdminSubscriptionPlans from "../subscription/AdminSubscriptionPlans"
 import { AdminAgencies } from "../dashboard/AdminAgencies"
 import { AdminPaymentDashboard } from "../dashboard/AdminPaymentDashboard"
 import { AdminTransactionHistory } from "../dashboard/AdminTransactionHistory"
-import { AdminNotifications } from "../dashboard/AdminNotifications"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { 
   BarChart3, 
-  Users, 
   Building2, 
+  Users, 
   Receipt, 
   CircleDollarSign, 
   History 
 } from "lucide-react"
 
 export function DashboardTabs() {
+  const isMobile = useIsMobile()
+
+  const tabs = [
+    {
+      value: "stats",
+      label: "Statistiques",
+      icon: BarChart3,
+      content: <AdminStats />
+    },
+    {
+      value: "agencies",
+      label: "Agences",
+      icon: Building2,
+      content: <AdminAgencies />
+    },
+    {
+      value: "agents",
+      label: "Agents",
+      icon: Users,
+      content: <AdminProfiles />
+    },
+    {
+      value: "plans",
+      label: "Plans d'abonnement",
+      icon: Receipt,
+      content: <AdminSubscriptionPlans />
+    },
+    {
+      value: "payments",
+      label: "Paiements",
+      icon: CircleDollarSign,
+      content: <AdminPaymentDashboard />
+    },
+    {
+      value: "transactions",
+      label: "Transactions",
+      icon: History,
+      content: <AdminTransactionHistory />
+    }
+  ]
+
   return (
     <Tabs defaultValue="stats" className="w-full">
       <TabsList className="grid w-full grid-cols-6">
-        <TabsTrigger value="stats" className="flex items-center gap-2">
-          <BarChart3 className="h-4 w-4" />
-          Statistiques
-        </TabsTrigger>
-        <TabsTrigger value="agencies" className="flex items-center gap-2">
-          <Building2 className="h-4 w-4" />
-          Agences
-        </TabsTrigger>
-        <TabsTrigger value="agents" className="flex items-center gap-2">
-          <Users className="h-4 w-4" />
-          Agents
-        </TabsTrigger>
-        <TabsTrigger value="plans" className="flex items-center gap-2">
-          <Receipt className="h-4 w-4" />
-          Plans d'abonnement
-        </TabsTrigger>
-        <TabsTrigger value="payments" className="flex items-center gap-2">
-          <CircleDollarSign className="h-4 w-4" />
-          Paiements
-        </TabsTrigger>
-        <TabsTrigger value="transactions" className="flex items-center gap-2">
-          <History className="h-4 w-4" />
-          Transactions
-        </TabsTrigger>
+        {tabs.map(({ value, label, icon: Icon }) => (
+          <TabsTrigger 
+            key={value} 
+            value={value} 
+            className="flex items-center gap-2"
+          >
+            <Icon className="h-4 w-4" />
+            <span className={isMobile ? "hidden" : "inline"}>{label}</span>
+          </TabsTrigger>
+        ))}
       </TabsList>
 
-      <TabsContent value="stats">
-        <AdminStats />
-      </TabsContent>
-
-      <TabsContent value="agencies">
-        <AdminAgencies />
-      </TabsContent>
-
-      <TabsContent value="agents">
-        <AdminProfiles />
-      </TabsContent>
-
-      <TabsContent value="plans">
-        <AdminSubscriptionPlans />
-      </TabsContent>
-
-      <TabsContent value="payments">
-        <AdminPaymentDashboard />
-      </TabsContent>
-
-      <TabsContent value="transactions">
-        <AdminTransactionHistory />
-      </TabsContent>
+      {tabs.map(({ value, content }) => (
+        <TabsContent key={value} value={value}>
+          {content}
+        </TabsContent>
+      ))}
     </Tabs>
   )
 }
