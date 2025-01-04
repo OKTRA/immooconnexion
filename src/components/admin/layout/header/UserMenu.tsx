@@ -25,8 +25,9 @@ export function UserMenu() {
 
     checkAuth()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session && isSessionChecked) {
+    // Only listen for signOut events, not all auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT' && isSessionChecked) {
         navigate("/agence/login")
       }
     })

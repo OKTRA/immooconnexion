@@ -14,25 +14,4 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-// Helper function to check and refresh session
-export const checkSession = async () => {
-  try {
-    const { data: { session }, error } = await supabase.auth.getSession();
-    if (error) throw error;
-    if (!session) return null;
-    
-    // Verify if the session is still valid
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      await supabase.auth.refreshSession();
-      return null;
-    }
-    
-    return session;
-  } catch (error) {
-    console.error('Error checking session:', error);
-    return null;
-  }
-};
-
 export { supabaseUrl };

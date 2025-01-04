@@ -18,7 +18,7 @@ export function LogoutButton() {
       const { error } = await supabase.auth.signOut()
       if (error) throw error
 
-      // Clear any stored session data
+      // Clear session data after successful logout
       localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token')
       
       navigate("/agence/login")
@@ -33,8 +33,6 @@ export function LogoutButton() {
         description: "Une erreur est survenue lors de la déconnexion",
         variant: "destructive"
       })
-      // Si la déconnexion échoue, rediriger quand même vers la page de connexion par sécurité
-      navigate("/agence/login")
     }
   }
 
