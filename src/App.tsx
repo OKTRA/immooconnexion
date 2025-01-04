@@ -1,4 +1,3 @@
-```tsx
 import { Routes, Route, Navigate } from "react-router-dom"
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
@@ -37,7 +36,7 @@ import AdminSubscriptionPlans from "@/pages/admin/AdminSubscriptionPlans"
 
 const queryClient = new QueryClient()
 
-function App() {
+export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
@@ -87,4 +86,3 @@ function App() {
 }
 
 export default App
-```
