@@ -64,9 +64,9 @@ export function BasicInfoFields({
             placeholder="email@example.com"
           />
         </div>
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="password">
-            {isEditing ? "Nouveau mot de passe (laisser vide pour ne pas changer)" : "Mot de passe*"}
+            {isEditing ? "Nouveau mot de passe (optionnel)" : "Mot de passe*"}
           </Label>
           <Input
             id="password"
@@ -77,6 +77,11 @@ export function BasicInfoFields({
             placeholder="Minimum 6 caractères"
             minLength={6}
           />
+          <p className="text-sm text-gray-500">
+            {isEditing 
+              ? "Laissez vide pour conserver le mot de passe actuel. Si modifié, doit contenir au moins 6 caractères."
+              : "Le mot de passe doit contenir au moins 6 caractères"}
+          </p>
         </div>
       </div>
     )
