@@ -13,6 +13,7 @@ interface ApartmentFormData {
   owner_phone: string
   total_units: string
   property_category: string
+  country: string  // Added country field
 }
 
 export function useApartmentForm(property: Property | null | undefined, onSuccess?: () => void) {
@@ -25,7 +26,8 @@ export function useApartmentForm(property: Property | null | undefined, onSucces
     owner_name: "",
     owner_phone: "",
     total_units: "1",
-    property_category: "apartment"
+    property_category: "apartment",
+    country: "CI"  // Default to Côte d'Ivoire
   })
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -40,7 +42,8 @@ export function useApartmentForm(property: Property | null | undefined, onSucces
         owner_name: property.owner_name || "",
         owner_phone: property.owner_phone || "",
         total_units: property.total_units?.toString() || "1",
-        property_category: property.property_category || "apartment"
+        property_category: property.property_category || "apartment",
+        country: property.country || "CI"  // Added country field with default
       })
 
       if (property.photo_url) {
@@ -103,7 +106,8 @@ export function useApartmentForm(property: Property | null | undefined, onSucces
         total_units: parseInt(formData.total_units),
         property_category: formData.property_category,
         rental_type: "long_term",
-        statut: "disponible"
+        statut: "disponible",
+        country: formData.country  // Added country field to submission
       }
 
       if (property?.id) {

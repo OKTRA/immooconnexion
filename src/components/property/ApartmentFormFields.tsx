@@ -12,6 +12,7 @@ interface ApartmentFormFieldsProps {
     property_category: string
     owner_name: string
     owner_phone: string
+    country: string
   }
   setFormData: (data: any) => void
   handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
@@ -33,8 +34,6 @@ export function ApartmentFormFields({
     setFormData({ ...formData, [field]: value })
   }
 
-  const previewUrls = Array.isArray(imagePreviewUrl) ? imagePreviewUrl : imagePreviewUrl ? [imagePreviewUrl] : []
-
   return (
     <div className="grid gap-6 py-4">
       <BasicInfoSection 
@@ -54,7 +53,7 @@ export function ApartmentFormFields({
 
       <PhotoUploadSection 
         handleImageChange={handleImageChange}
-        previewUrls={previewUrls}
+        previewUrls={Array.isArray(imagePreviewUrl) ? imagePreviewUrl : imagePreviewUrl ? [imagePreviewUrl] : []}
       />
     </div>
   )
