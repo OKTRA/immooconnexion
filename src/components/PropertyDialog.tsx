@@ -37,7 +37,11 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
         </DialogTitle>
       </DialogHeader>
       
-      <ScrollArea className="h-[calc(90vh-120px)] md:h-auto pr-4">
+      <ScrollArea 
+        className="h-[calc(90vh-120px)] md:h-auto pr-4"
+        type="always"
+        scrollHideDelay={400}
+      >
         <PropertyFormFields
           formData={formData}
           setFormData={setFormData}
