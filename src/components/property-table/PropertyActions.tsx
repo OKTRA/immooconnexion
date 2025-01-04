@@ -12,21 +12,15 @@ export function PropertyActions({ propertyId, onEdit, onDelete }: PropertyAction
   const navigate = useNavigate()
 
   const handleViewProperty = () => {
-    console.log("Attempting to navigate to property:", propertyId)
     if (!propertyId) {
       console.error("Property ID is missing")
       return
     }
-    
-    try {
-      navigate(`/agence/biens/${propertyId}`)
-    } catch (error) {
-      console.error("Navigation error:", error)
-    }
+    navigate(`/agence/biens/${propertyId}`)
   }
 
   const handleManageUnits = () => {
-    navigate(`/agence/appartements/${propertyId}/unites`)
+    navigate(`/agence/biens/${propertyId}/unites`)
   }
 
   return (
@@ -59,6 +53,7 @@ export function PropertyActions({ propertyId, onEdit, onDelete }: PropertyAction
         variant="ghost"
         size="icon"
         onClick={handleManageUnits}
+        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
         title="Gérer les unités"
       >
         <Building2 className="h-4 w-4" />
