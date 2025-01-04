@@ -19,6 +19,7 @@ import AgencyEarnings from "@/pages/AgencyEarnings"
 import Pricing from "@/pages/Pricing"
 import SuperAdminLogin from "@/pages/SuperAdminLogin"
 import TermsOfService from "@/pages/TermsOfService"
+import Login from "@/pages/Login"
 
 const queryClient = new QueryClient()
 
