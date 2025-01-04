@@ -4,7 +4,7 @@ import { useApartmentProperties } from "@/hooks/useApartmentProperties"
 import { ApartmentContent } from "@/components/apartment/ApartmentContent"
 
 export default function ApartmentManagement() {
-  const { data: properties, isLoading, error } = useApartmentProperties()
+  const { data: apartments, isLoading, error } = useApartmentProperties()
 
   if (isLoading) {
     return (
@@ -28,7 +28,7 @@ export default function ApartmentManagement() {
 
   return (
     <AgencyLayout>
-      <ApartmentContent properties={properties || []} />
+      <ApartmentContent apartments={apartments || []} />
     </AgencyLayout>
   )
 }

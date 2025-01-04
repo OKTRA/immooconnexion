@@ -26,21 +26,19 @@ export function useApartmentProperties() {
 
       console.log("User profile:", profile)
 
-      let query = supabase
-        .from('properties')
+      // Modifié pour utiliser la table apartments au lieu de properties
+      const { data, error } = await supabase
+        .from('apartments')
         .select('*')
         .eq('agency_id', profile.agency_id)
-        .eq('property_category', 'apartment')
         .order('created_at', { ascending: false })
-
-      const { data, error } = await query
       
       if (error) {
-        console.error("Error fetching properties:", error)
+        console.error("Error fetching apartments:", error)
         throw error
       }
 
-      console.log("Fetched properties:", data)
+      console.log("Fetched apartments:", data)
       return data
     }
   })

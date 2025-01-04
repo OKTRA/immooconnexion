@@ -6,36 +6,16 @@ import { PropertyTableRow } from "@/components/property-table/PropertyTableRow"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { PropertyTableHeader } from "@/components/property-table/PropertyTableHeader"
 import { DeleteApartmentDialog } from "./DeleteApartmentDialog"
-import { Property } from "@/integrations/supabase/types/properties"
 import { Apartment } from "@/components/property/types"
 
 interface ApartmentContentProps {
-  properties: Property[]
+  apartments: Apartment[]
 }
 
-export function ApartmentContent({ properties }: ApartmentContentProps) {
+export function ApartmentContent({ apartments }: ApartmentContentProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null)
-
-  // Conversion de Property vers Apartment pour la compatibilité
-  const convertPropertyToApartment = (property: Property): Apartment => {
-    return {
-      id: property.id,
-      name: property.bien,
-      total_units: property.total_units || 1,
-      city: property.ville || "",
-      country: "CI",
-      owner_name: property.owner_name || null,
-      owner_phone: property.owner_phone || null,
-      photo_url: property.photo_url,
-      status: property.statut,
-      agency_id: property.agency_id,
-      created_by_user_id: property.created_by_user_id || null,
-      created_at: property.created_at,
-      updated_at: property.updated_at
-    }
-  }
 
   return (
     <div className="container mx-auto py-6">
@@ -64,16 +44,36 @@ export function ApartmentContent({ properties }: ApartmentContentProps) {
           <ResponsiveTable>
             <PropertyTableHeader />
             <ResponsiveTable.Body>
-              {properties?.map((property) => (
+              {apartments?.map((apartment) => (
                 <PropertyTableRow
-                  key={property.id}
-                  property={property}
+                  key={apartment.id}
+                  property={{
+                    id: apartment.id,
+                    bien: apartment.name,
+                    type: 'appartement',
+                    chambres: 0,
+                    ville: apartment.city || '',
+                    loyer: 0,
+                    frais_agence: 0,
+                    taux_commission: 0,
+                    caution: 0,
+                    photo_url: apartment.photo_url,
+                    statut: apartment.status,
+                    user_id: '',
+                    agency_id: apartment.agency_id || '',
+                    created_at: apartment.created_at,
+                    updated_at: apartment.updated_at,
+                    owner_name: apartment.owner_name || '',
+                    owner_phone: apartment.owner_phone || '',
+                    total_units: apartment.total_units,
+                    property_category: 'apartment'
+                  }}
                   onEdit={() => {
-                    setSelectedApartment(convertPropertyToApartment(property))
+                    setSelectedApartment(apartment)
                     setEditDialogOpen(true)
                   }}
                   onDelete={() => {
-                    setSelectedApartment(convertPropertyToApartment(property))
+                    setSelectedApartment(apartment)
                     setDeleteDialogOpen(true)
                   }}
                 />
@@ -86,16 +86,36 @@ export function ApartmentContent({ properties }: ApartmentContentProps) {
           <ResponsiveTable>
             <PropertyTableHeader />
             <ResponsiveTable.Body>
-              {properties?.filter(p => p.statut === 'disponible').map((property) => (
+              {apartments?.filter(a => a.status === 'disponible').map((apartment) => (
                 <PropertyTableRow
-                  key={property.id}
-                  property={property}
+                  key={apartment.id}
+                  property={{
+                    id: apartment.id,
+                    bien: apartment.name,
+                    type: 'appartement',
+                    chambres: 0,
+                    ville: apartment.city || '',
+                    loyer: 0,
+                    frais_agence: 0,
+                    taux_commission: 0,
+                    caution: 0,
+                    photo_url: apartment.photo_url,
+                    statut: apartment.status,
+                    user_id: '',
+                    agency_id: apartment.agency_id || '',
+                    created_at: apartment.created_at,
+                    updated_at: apartment.updated_at,
+                    owner_name: apartment.owner_name || '',
+                    owner_phone: apartment.owner_phone || '',
+                    total_units: apartment.total_units,
+                    property_category: 'apartment'
+                  }}
                   onEdit={() => {
-                    setSelectedApartment(convertPropertyToApartment(property))
+                    setSelectedApartment(apartment)
                     setEditDialogOpen(true)
                   }}
                   onDelete={() => {
-                    setSelectedApartment(convertPropertyToApartment(property))
+                    setSelectedApartment(apartment)
                     setDeleteDialogOpen(true)
                   }}
                 />
@@ -108,16 +128,36 @@ export function ApartmentContent({ properties }: ApartmentContentProps) {
           <ResponsiveTable>
             <PropertyTableHeader />
             <ResponsiveTable.Body>
-              {properties?.filter(p => p.statut === 'occupé').map((property) => (
+              {apartments?.filter(a => a.status === 'occupé').map((apartment) => (
                 <PropertyTableRow
-                  key={property.id}
-                  property={property}
+                  key={apartment.id}
+                  property={{
+                    id: apartment.id,
+                    bien: apartment.name,
+                    type: 'appartement',
+                    chambres: 0,
+                    ville: apartment.city || '',
+                    loyer: 0,
+                    frais_agence: 0,
+                    taux_commission: 0,
+                    caution: 0,
+                    photo_url: apartment.photo_url,
+                    statut: apartment.status,
+                    user_id: '',
+                    agency_id: apartment.agency_id || '',
+                    created_at: apartment.created_at,
+                    updated_at: apartment.updated_at,
+                    owner_name: apartment.owner_name || '',
+                    owner_phone: apartment.owner_phone || '',
+                    total_units: apartment.total_units,
+                    property_category: 'apartment'
+                  }}
                   onEdit={() => {
-                    setSelectedApartment(convertPropertyToApartment(property))
+                    setSelectedApartment(apartment)
                     setEditDialogOpen(true)
                   }}
                   onDelete={() => {
-                    setSelectedApartment(convertPropertyToApartment(property))
+                    setSelectedApartment(apartment)
                     setDeleteDialogOpen(true)
                   }}
                 />
