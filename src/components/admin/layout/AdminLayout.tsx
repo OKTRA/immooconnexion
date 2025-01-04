@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { DashboardHeader } from "./DashboardHeader"
+import { UserMenu } from "./header/UserMenu"
 
 interface AdminLayoutProps {
   children: ReactNode
@@ -59,6 +60,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="min-h-screen w-full bg-gradient-to-r from-dashboard-gradient-from to-dashboard-gradient-to">
       <DashboardHeader />
+      <div className="fixed top-0 right-0 p-4 z-50">
+        <UserMenu />
+      </div>
       <div className="ml-[250px] pt-[60px]">
         <div className="container mx-auto p-4 md:p-6 lg:p-8 max-w-[1400px] animate-fade-in">
           {showWarning && (
