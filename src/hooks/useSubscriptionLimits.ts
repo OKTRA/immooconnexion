@@ -17,8 +17,10 @@ export function useSubscriptionLimits(agencyId: string) {
   const { data: limits } = useQuery({
     queryKey: ["subscription-limits", agencyId],
     queryFn: async () => {
+      console.log("Fetching limits for agency:", agencyId)
+      
       // Récupérer l'agence et son plan actuel
-      const { data: agency } = await supabase
+      const { data: agency, error } = await supabase
         .from("agencies")
         .select(`
           current_properties_count,
@@ -33,7 +35,12 @@ export function useSubscriptionLimits(agencyId: string) {
         .eq("id", agencyId)
         .single()
 
-      if (!agency) throw new Error("Agency not found")
+      if (error) {
+        console.error("Error fetching agency limits:", error)
+        throw error
+      }
+
+      console.log("Agency data:", agency)
 
       return {
         max_properties: agency.subscription_plans?.max_properties ?? -1,
@@ -54,6 +61,11 @@ export function useSubscriptionLimits(agencyId: string) {
   }) => {
     if (!limits) return false
 
+    console.log("Checking downgrade eligibility:", {
+      planLimits,
+      currentLimits: limits
+    })
+
     const exceedsProperties = planLimits.max_properties !== -1 && 
       limits.current_properties > planLimits.max_properties
     
@@ -67,7 +79,12 @@ export function useSubscriptionLimits(agencyId: string) {
   }
 
   const checkLimitReached = async (type: 'property' | 'tenant' | 'user') => {
-    if (!limits) return false
+    if (!limits) {
+      console.log("No limits data available")
+      return false
+    }
+
+    console.log("Checking limit for type:", type, "Current limits:", limits)
 
     const isLimitReached = (() => {
       switch (type) {
@@ -82,6 +99,8 @@ export function useSubscriptionLimits(agencyId: string) {
             limits.current_users >= limits.max_users
       }
     })()
+
+    console.log("Limit reached?", isLimitReached)
 
     if (isLimitReached) {
       const typeLabel = type === 'property' ? 'propriétés' : 
