@@ -75,6 +75,14 @@ export function PaymentDialog({
     }
   }
 
+  const handlePaymentSuccess = () => {
+    setPaymentSuccess(true)
+    toast({
+      title: "Succès",
+      description: "Votre paiement a été traité. Vous pouvez maintenant vous connecter pour accéder à votre tableau de bord.",
+    })
+  }
+
   const handleFormSubmit = async (data: PaymentFormData) => {
     const result = await form.trigger()
     if (!result) {
