@@ -30,7 +30,7 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
   }
 
   const dialogContent = (
-    <DialogContent className="w-[95vw] max-w-[500px] h-[90vh] md:h-auto p-4 md:p-6">
+    <DialogContent className="w-[95vw] max-w-[500px] h-[95vh] md:h-[90vh] p-4 md:p-6 overflow-hidden">
       <DialogHeader>
         <DialogTitle className="text-lg md:text-xl">
           {property ? "Modifier le bien" : "Ajouter un nouveau bien"}
@@ -38,7 +38,7 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
       </DialogHeader>
       
       <ScrollArea 
-        className="h-[calc(90vh-120px)] md:h-auto pr-4"
+        className="flex-1 h-[calc(95vh-180px)] md:h-[calc(90vh-180px)] pr-4 -mr-4"
         type="always"
         scrollHideDelay={400}
       >
@@ -49,7 +49,7 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
           imagePreviewUrl={previewUrls}
         />
 
-        <div className="flex justify-end gap-2 mt-6">
+        <div className="flex justify-end gap-2 mt-6 sticky bottom-0 bg-background py-4">
           <Button 
             variant="outline" 
             onClick={() => onOpenChange?.(false)}
