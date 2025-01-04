@@ -1,14 +1,22 @@
 import { ReactNode } from "react"
-import { GlobalHeader } from "@/components/layout/GlobalHeader"
-import { Outlet } from "react-router-dom"
+import { SidebarProvider } from "@/components/ui/sidebar"
+import { AgencySidebar } from "./AgencySidebar"
 
-export function AgencyLayout() {
+interface AgencyLayoutProps {
+  children: ReactNode
+}
+
+export function AgencyLayout({ children }: AgencyLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col">
-      <GlobalHeader />
-      <main className="flex-1 p-4 md:p-8 mt-[60px]">
-        <Outlet />
-      </main>
-    </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex flex-col">
+        <div className="flex-1 flex">
+          <AgencySidebar />
+          <main className="flex-1 ml-[250px] p-4 md:p-8">
+            {children}
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
   )
 }
