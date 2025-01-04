@@ -4,7 +4,7 @@ import {
   Building2, Users, Calendar, Shield, BarChart3, Settings, 
   Home, CreditCard, FileText, PieChart, Bell, MessageSquare,
   Receipt, ClipboardList, Key, Percent, Wallet, FileSpreadsheet,
-  Check // Add the Check icon import here
+  Check
 } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
