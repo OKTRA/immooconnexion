@@ -461,6 +461,8 @@ export type Database = {
           loyer: number | null
           maximum_stay: number | null
           minimum_stay: number | null
+          owner_name: string | null
+          owner_phone: string | null
           parent_property_id: string | null
           photo_url: string | null
           price_per_night: number | null
@@ -489,6 +491,8 @@ export type Database = {
           loyer?: number | null
           maximum_stay?: number | null
           minimum_stay?: number | null
+          owner_name?: string | null
+          owner_phone?: string | null
           parent_property_id?: string | null
           photo_url?: string | null
           price_per_night?: number | null
@@ -517,6 +521,8 @@ export type Database = {
           loyer?: number | null
           maximum_stay?: number | null
           minimum_stay?: number | null
+          owner_name?: string | null
+          owner_phone?: string | null
           parent_property_id?: string | null
           photo_url?: string | null
           price_per_night?: number | null
