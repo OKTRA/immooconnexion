@@ -45,7 +45,6 @@ const queryClient = new QueryClient({
 function AppRoutes() {
   return (
     <>
-      <GlobalHeader />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Root redirect */}
@@ -60,82 +59,31 @@ function AppRoutes() {
 
           {/* Protected agency routes */}
           <Route
-            path="/agence/admin"
+            path="/agence/*"
             element={
               <ProtectedRoute>
-                <Index />
+                <GlobalHeader />
+                <Routes>
+                  <Route path="admin" element={<Index />} />
+                  <Route path="locataires" element={<Tenants />} />
+                  <Route path="locataires/:id/contrats" element={<TenantContracts />} />
+                  <Route path="biens" element={<Properties />} />
+                  <Route path="biens/:id" element={<PropertyDetails />} />
+                  <Route path="ventes" element={<PropertySales />} />
+                  <Route path="depenses" element={<Expenses />} />
+                  <Route path="gains" element={<AgencyEarnings />} />
+                  <Route path="rapports" element={<Reports />} />
+                </Routes>
               </ProtectedRoute>
             }
           />
+
+          {/* Protected super admin routes */}
           <Route
             path="/super-admin/admin"
             element={
               <ProtectedRoute>
                 <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/agence/locataires"
-            element={
-              <ProtectedRoute>
-                <Tenants />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/agence/locataires/:id/contrats"
-            element={
-              <ProtectedRoute>
-                <TenantContracts />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/agence/biens"
-            element={
-              <ProtectedRoute>
-                <Properties />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/agence/biens/:id"
-            element={
-              <ProtectedRoute>
-                <PropertyDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/agence/ventes"
-            element={
-              <ProtectedRoute>
-                <PropertySales />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/agence/depenses"
-            element={
-              <ProtectedRoute>
-                <Expenses />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/agence/gains"
-            element={
-              <ProtectedRoute>
-                <AgencyEarnings />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/agence/rapports"
-            element={
-              <ProtectedRoute>
-                <Reports />
               </ProtectedRoute>
             }
           />
