@@ -22,39 +22,44 @@ export default function PropertyUnits() {
   return (
     <AgencyLayout>
       <div className="container mx-auto py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Gestion des Appartements</h1>
+        <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-lg shadow-sm">
+          <h1 className="text-2xl font-bold text-gray-800">Gestion des Appartements</h1>
         </div>
 
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="all" className="flex items-center gap-2">
+        <Tabs defaultValue="all" className="w-full space-y-6">
+          <TabsList className="bg-white p-1 rounded-lg shadow-sm">
+            <TabsTrigger value="all" className="flex items-center gap-2 px-4 py-2">
               <Building2 className="h-4 w-4" />
               <span>Tous les appartements</span>
             </TabsTrigger>
-            <TabsTrigger value="available" className="flex items-center gap-2">
+            <TabsTrigger value="available" className="flex items-center gap-2 px-4 py-2">
               <Home className="h-4 w-4" />
               <span>Disponibles</span>
             </TabsTrigger>
-            <TabsTrigger value="occupied" className="flex items-center gap-2">
+            <TabsTrigger value="occupied" className="flex items-center gap-2 px-4 py-2">
               <Building className="h-4 w-4" />
               <span>Occupés</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="all" className="mt-6">
+          <TabsContent value="all" className="mt-6 bg-gray-50 p-4 rounded-lg">
             {properties?.map((property) => (
               <div key={property.id} className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">{property.bien}</h2>
+                <h2 className="text-xl font-semibold mb-4 text-gray-700">{property.bien}</h2>
                 <PropertyUnitsManager propertyId={property.id} />
               </div>
             ))}
+            {!properties?.length && (
+              <div className="text-center py-8 text-gray-500">
+                Aucun appartement trouvé
+              </div>
+            )}
           </TabsContent>
 
-          <TabsContent value="available" className="mt-6">
+          <TabsContent value="available" className="mt-6 bg-gray-50 p-4 rounded-lg">
             {properties?.map((property) => (
               <div key={property.id} className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">{property.bien}</h2>
+                <h2 className="text-xl font-semibold mb-4 text-gray-700">{property.bien}</h2>
                 <PropertyUnitsManager 
                   propertyId={property.id}
                   filterStatus="available"
@@ -63,10 +68,10 @@ export default function PropertyUnits() {
             ))}
           </TabsContent>
 
-          <TabsContent value="occupied" className="mt-6">
+          <TabsContent value="occupied" className="mt-6 bg-gray-50 p-4 rounded-lg">
             {properties?.map((property) => (
               <div key={property.id} className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">{property.bien}</h2>
+                <h2 className="text-xl font-semibold mb-4 text-gray-700">{property.bien}</h2>
                 <PropertyUnitsManager 
                   propertyId={property.id}
                   filterStatus="occupied"
