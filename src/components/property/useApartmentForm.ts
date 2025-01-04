@@ -8,11 +8,7 @@ import { useSubscriptionLimits } from "@/utils/subscriptionLimits"
 interface ApartmentFormData {
   bien: string
   type: string
-  chambres: string
   ville: string
-  loyer: string
-  taux_commission: string
-  caution: string
   owner_name: string
   owner_phone: string
   total_units: string
@@ -25,11 +21,7 @@ export function useApartmentForm(property: Property | null | undefined, onSucces
   const [formData, setFormData] = useState<ApartmentFormData>({
     bien: "",
     type: "apartment",
-    chambres: "",
     ville: "",
-    loyer: "",
-    taux_commission: "",
-    caution: "",
     owner_name: "",
     owner_phone: "",
     total_units: "1",
@@ -44,11 +36,7 @@ export function useApartmentForm(property: Property | null | undefined, onSucces
       setFormData({
         bien: property.bien || "",
         type: property.type || "",
-        chambres: property.chambres?.toString() || "",
         ville: property.ville || "",
-        loyer: property.loyer?.toString() || "",
-        taux_commission: property.taux_commission?.toString() || "",
-        caution: property.caution?.toString() || "",
         owner_name: property.owner_name || "",
         owner_phone: property.owner_phone || "",
         total_units: property.total_units?.toString() || "1",
@@ -105,11 +93,7 @@ export function useApartmentForm(property: Property | null | undefined, onSucces
       const propertyData = {
         bien: formData.bien,
         type: formData.type,
-        chambres: parseInt(formData.chambres),
         ville: formData.ville,
-        loyer: parseFloat(formData.loyer),
-        taux_commission: parseFloat(formData.taux_commission),
-        caution: parseFloat(formData.caution),
         photo_url: photo_urls[0],
         user_id: user.id,
         agency_id: profile.agency_id,
@@ -129,8 +113,8 @@ export function useApartmentForm(property: Property | null | undefined, onSucces
 
         if (error) throw error
         toast({
-          title: "Appartement modifié avec succès",
-          description: "L'appartement a été mis à jour",
+          title: "Immeuble modifié avec succès",
+          description: "L'immeuble a été mis à jour",
         })
       } else {
         const { error } = await supabase
@@ -139,8 +123,8 @@ export function useApartmentForm(property: Property | null | undefined, onSucces
 
         if (error) throw error
         toast({
-          title: "Appartement ajouté avec succès",
-          description: "L'appartement a été ajouté à la liste",
+          title: "Immeuble ajouté avec succès",
+          description: "L'immeuble a été ajouté à la liste",
         })
       }
 
