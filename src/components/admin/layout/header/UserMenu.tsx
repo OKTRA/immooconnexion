@@ -12,31 +12,61 @@ import {
   TooltipTrigger,
   TooltipProvider
 } from "@/components/ui/tooltip"
+import { useEffect } from "react"
 
 export function UserMenu() {
   const navigate = useNavigate()
   const { toast } = useToast()
   const { theme, setTheme } = useTheme()
 
-  const { data: profile } = useQuery({
+  // Check session on component mount
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession()
+      if (error || !session) {
+        console.error('Session error:', error)
+        navigate("/super-admin/login")
+      }
+    }
+    checkSession()
+  }, [navigate])
+
+  const { data: profile, isError } = useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return null
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError || !session) {
+          throw new Error('No active session')
+        }
 
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle()
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .maybeSingle()
 
-      return data
+        if (error) throw error
+        return data
+      } catch (error) {
+        console.error('Profile fetch error:', error)
+        throw error
+      }
     },
+    retry: false,
+    onError: () => {
+      navigate("/super-admin/login")
+    }
   })
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut()
+      // Clear any existing session data first
+      localStorage.removeItem('sb-' + supabaseUrl + '-auth-token')
+      
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+
       navigate("/super-admin/login")
       toast({
         title: "Déconnexion réussie",
@@ -44,12 +74,18 @@ export function UserMenu() {
       })
     } catch (error) {
       console.error('Logout error:', error)
+      // Force navigation to login even if there's an error
+      navigate("/super-admin/login")
       toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la déconnexion",
+        title: "Session expirée",
+        description: "Votre session a expiré, veuillez vous reconnecter",
         variant: "destructive"
       })
     }
+  }
+
+  if (isError) {
+    return null
   }
 
   return (
