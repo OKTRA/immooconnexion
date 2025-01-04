@@ -10,11 +10,11 @@ interface AgencyLayoutProps {
 export function AgencyLayout({ children }: AgencyLayoutProps) {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex flex-col w-full">
+      <div className="min-h-screen flex flex-col">
         <GlobalHeader />
-        <div className="flex flex-1">
+        <div className="flex-1 flex">
           <AgencySidebar />
-          <main className="ml-[250px] pt-[60px] flex-1 p-4 md:p-8">
+          <main className="flex-1 ml-[250px] p-4 md:p-8">
             {children}
           </main>
         </div>
