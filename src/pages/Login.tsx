@@ -120,28 +120,24 @@ const Login = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-r from-[#243949] to-[#517fa4]">
       <PublicHeader />
-      <div 
-        className="relative min-h-screen flex flex-col items-center justify-center p-4"
-        style={{
-          background: `linear-gradient(to right, #243949 0%, #517fa4 100%)`,
-        }}
-      >
-        <Card className="w-[90%] max-w-[320px] shadow-lg bg-white/90 backdrop-blur-sm border-0 rounded-lg overflow-hidden">
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-lg font-semibold text-center">Connexion</CardTitle>
-            <CardDescription className="text-center text-sm">
-              Bienvenue sur votre espace
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <LoginForm view={view} setView={setView} />
-          </CardContent>
-        </Card>
-
-        <WarningDialog open={showWarning} onClose={handleWarningClose} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="min-h-[calc(100vh-3.5rem)] flex flex-col items-center justify-center p-4">
+          <Card className="w-[90%] max-w-[320px] shadow-lg bg-white/90 backdrop-blur-sm border-0 rounded-lg overflow-hidden">
+            <CardHeader className="space-y-1 pb-4">
+              <CardTitle className="text-lg font-semibold text-center">Connexion</CardTitle>
+              <CardDescription className="text-center text-sm">
+                Bienvenue sur votre espace
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <LoginForm view={view} setView={setView} />
+            </CardContent>
+          </Card>
+        </div>
       </div>
+      <WarningDialog open={showWarning} onClose={handleWarningClose} />
     </div>
   )
 }
