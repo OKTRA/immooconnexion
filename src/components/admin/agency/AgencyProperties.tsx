@@ -12,7 +12,9 @@ interface AgencyPropertiesProps {
 }
 
 export function AgencyProperties({ agencyId }: AgencyPropertiesProps) {
-  const { data: properties = [], isLoading: propertiesLoading } = useQuery({
+  console.log("AgencyProperties component - agencyId:", agencyId)
+
+  const { data: properties = [], isLoading: propertiesLoading, error: propertiesError } = useQuery({
     queryKey: ["agency-properties", agencyId],
     queryFn: async () => {
       console.log("Fetching properties for agency:", agencyId)
@@ -31,10 +33,11 @@ export function AgencyProperties({ agencyId }: AgencyPropertiesProps) {
       console.log("Properties data:", data)
       return data || []
     },
-    enabled: !!agencyId
+    enabled: !!agencyId,
+    retry: 1
   })
 
-  const { data: propertySales = [], isLoading: salesLoading } = useQuery({
+  const { data: propertySales = [], isLoading: salesLoading, error: salesError } = useQuery({
     queryKey: ["agency-property-sales", agencyId],
     queryFn: async () => {
       console.log("Fetching property sales for agency:", agencyId)
@@ -56,8 +59,13 @@ export function AgencyProperties({ agencyId }: AgencyPropertiesProps) {
       console.log("Property sales data:", data)
       return data || []
     },
-    enabled: !!agencyId
+    enabled: !!agencyId,
+    retry: 1
   })
+
+  // Log any errors
+  if (propertiesError) console.error("Properties query error:", propertiesError)
+  if (salesError) console.error("Sales query error:", salesError)
 
   if (propertiesLoading || salesLoading) {
     return (
