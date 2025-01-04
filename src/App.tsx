@@ -17,6 +17,7 @@ import SubscriptionUpgrade from "@/pages/SubscriptionUpgrade"
 import Tenants from "@/pages/Tenants"
 import TenantContracts from "@/pages/TenantContracts"
 import AgencyEarnings from "@/pages/AgencyEarnings"
+import Pricing from "@/pages/Pricing"
 
 const queryClient = new QueryClient()
 
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
   {
     path: "/public",
     element: <PublicProperties />,
+  },
+  {
+    path: "/pricing",
+    element: <Pricing />,
   },
   {
     path: "/login",
