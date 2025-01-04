@@ -64,35 +64,36 @@ export async function checkSubscriptionLimits(agencyId: string, type: 'property'
       users: usersCount
     })
 
-    // Special handling for basic/free plan
-    if (plan.name.toLowerCase().includes('basic') || plan.name.toLowerCase().includes('gratuit')) {
-      if (type === 'property') {
-        // Allow adding a property if count is 0
-        return (propertiesCount || 0) < 1
+    // Basic/Free plan specific logic
+    const isBasicPlan = plan.name.toLowerCase().includes('basic') || plan.name.toLowerCase().includes('gratuit')
+    if (isBasicPlan) {
+      console.log("Basic plan detected, checking limits...")
+      
+      switch (type) {
+        case 'property':
+          const canAddProperty = (propertiesCount || 0) < 1
+          console.log(`Can add property: ${canAddProperty} (current count: ${propertiesCount})`)
+          return canAddProperty
+        case 'tenant':
+          return (tenantsCount || 0) < 1
+        case 'user':
+          return (usersCount || 0) < 1
+        default:
+          return false
       }
-      if (type === 'tenant') {
-        return (tenantsCount || 0) < 1
-      }
-      if (type === 'user') {
-        return (usersCount || 0) < 1
-      }
-      return false
     }
 
     // Regular plan checks
-    if (type === 'property' && plan.max_properties !== -1) {
-      return (propertiesCount || 0) < plan.max_properties
+    switch (type) {
+      case 'property':
+        return plan.max_properties === -1 || (propertiesCount || 0) < plan.max_properties
+      case 'tenant':
+        return plan.max_tenants === -1 || (tenantsCount || 0) < plan.max_tenants
+      case 'user':
+        return plan.max_users === -1 || (usersCount || 0) < plan.max_users
+      default:
+        return false
     }
-
-    if (type === 'tenant' && plan.max_tenants !== -1) {
-      return (tenantsCount || 0) < plan.max_tenants
-    }
-
-    if (type === 'user' && plan.max_users !== -1) {
-      return (usersCount || 0) < plan.max_users
-    }
-
-    return true
   } catch (error) {
     console.error('Error checking subscription limits:', error)
     return false
