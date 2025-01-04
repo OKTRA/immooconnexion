@@ -22,7 +22,7 @@ export function AgencySidebar() {
       "fixed top-[60px] left-0 h-[calc(100vh-60px)] border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 w-[250px] transition-transform duration-300 ease-in-out z-50",
       isMobile ? "-translate-x-full mobile-sidebar" : ""
     )}>
-      <div className="flex flex-col gap-2 p-4 overflow-y-auto">
+      <div className="flex flex-col gap-2 p-4">
         {menuItems.map((item) => (
           <Link
             key={item.href}
@@ -39,7 +39,12 @@ export function AgencySidebar() {
             )}
           >
             {item.icon && <item.icon className="h-5 w-5" />}
-            {item.label}
+            <span className={cn(
+              "transition-opacity duration-200",
+              isMobile ? "opacity-100" : "opacity-100"
+            )}>
+              {item.label}
+            </span>
           </Link>
         ))}
       </div>
