@@ -26,7 +26,10 @@ export function PropertySaleDialog({
     selectedFiles,
     setSelectedFiles,
     handleSubmit
-  } = useSaleForm(propertyId, initialData, () => onOpenChange(false))
+  } = useSaleForm(propertyId, initialData, () => {
+    // Fermer le dialogue après la soumission réussie
+    onOpenChange(false)
+  })
 
   const handleFormChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))

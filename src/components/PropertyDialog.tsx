@@ -18,7 +18,10 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
     setFormData,
     handleSubmit,
     previewUrls
-  } = usePropertyForm(property, onOpenChange)
+  } = usePropertyForm(property, () => {
+    // Fermer le dialogue après la soumission réussie
+    onOpenChange?.(false)
+  })
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
