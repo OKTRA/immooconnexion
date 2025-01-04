@@ -25,6 +25,7 @@ export async function updateAgencyLimits(agencyId: string) {
     ])
 
     if (propError || tenantError || profileError) {
+      console.error('Error fetching counts:', { propError, tenantError, profileError })
       throw new Error('Error fetching counts')
     }
 
@@ -51,6 +52,7 @@ export async function updateAgencyLimits(agencyId: string) {
     }
 
     console.log("Agency limits updated successfully")
+    return { propertiesCount, tenantsCount, profilesCount }
   } catch (error) {
     console.error('Error in updateAgencyLimits:', error)
     throw error
