@@ -29,19 +29,19 @@ export function PricingPlans({ onSelectPlan }: PricingPlansProps) {
   }
 
   return (
-    <div className="py-16 sm:py-24">
+    <div className="py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center mb-16">
+        <div className="mx-auto max-w-4xl text-center mb-12">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Des Plans Adaptés à Vos Besoins
           </h2>
-          <p className="mt-6 text-lg leading-8 text-gray-600">
+          <p className="mt-4 text-lg leading-8 text-gray-600">
             Choisissez le plan qui correspond le mieux à votre activité. 
             Tous nos plans incluent une période d'essai de 14 jours.
           </p>
         </div>
         
-        <div className="isolate mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="isolate mx-auto grid max-w-6xl grid-cols-1 gap-6 lg:grid-cols-3">
           {plans.map((plan) => (
             <PricingCard
               key={plan.id}

@@ -12,50 +12,56 @@ export function PricingCard({ plan, onSelect }: PricingCardProps) {
   return (
     <Card
       className={cn(
-        "rounded-3xl p-8 ring-1 ring-gray-200",
+        "rounded-2xl p-6 ring-1 ring-gray-200",
         "hover:shadow-lg transition-shadow duration-300",
         "bg-white/50 backdrop-blur-sm"
       )}
     >
-      <h3 className="text-2xl font-semibold leading-8 text-gray-900">
+      <h3 className="text-xl font-semibold leading-7 text-gray-900">
         {plan.name}
       </h3>
-      <div className="mt-4 flex items-baseline gap-x-2">
-        <span className="text-4xl font-bold tracking-tight text-gray-900">
+      <div className="mt-3 flex items-baseline gap-x-2">
+        <span className="text-3xl font-bold tracking-tight text-gray-900">
           {plan.price.toLocaleString()}
         </span>
         <span className="text-sm font-semibold leading-6 text-gray-600">FCFA/mois</span>
       </div>
       <Button 
-        className="mt-6 w-full"
+        className="mt-4 w-full py-1.5 px-3 h-9 text-sm"
         onClick={() => onSelect(plan)}
       >
         Commencer maintenant
       </Button>
-      <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-gray-600">
+      <ul role="list" className="mt-6 space-y-2 text-sm leading-6 text-gray-600">
         {plan.features?.map((feature: string) => (
-          <li key={feature} className="flex gap-x-3">
-            <Check className="h-6 w-5 flex-none text-primary" />
-            {feature}
+          <li key={feature} className="flex gap-x-3 items-center">
+            <Check className="h-4 w-4 flex-none text-primary" />
+            <span className="flex-1">{feature}</span>
           </li>
         ))}
-        <li className="flex gap-x-3">
-          <Check className="h-6 w-5 flex-none text-primary" />
-          {plan.max_tenants === -1 
-            ? "Locataires illimités" 
-            : `Jusqu'à ${plan.max_tenants} locataire${plan.max_tenants > 1 ? 's' : ''}`}
+        <li className="flex gap-x-3 items-center">
+          <Check className="h-4 w-4 flex-none text-primary" />
+          <span className="flex-1">
+            {plan.max_tenants === -1 
+              ? "Locataires illimités" 
+              : `Jusqu'à ${plan.max_tenants} locataire${plan.max_tenants > 1 ? 's' : ''}`}
+          </span>
         </li>
-        <li className="flex gap-x-3">
-          <Check className="h-6 w-5 flex-none text-primary" />
-          {plan.max_properties === -1 
-            ? "Propriétés illimitées" 
-            : `Jusqu'à ${plan.max_properties} propriété${plan.max_properties > 1 ? 's' : ''}`}
+        <li className="flex gap-x-3 items-center">
+          <Check className="h-4 w-4 flex-none text-primary" />
+          <span className="flex-1">
+            {plan.max_properties === -1 
+              ? "Propriétés illimitées" 
+              : `Jusqu'à ${plan.max_properties} propriété${plan.max_properties > 1 ? 's' : ''}`}
+          </span>
         </li>
-        <li className="flex gap-x-3">
-          <Check className="h-6 w-5 flex-none text-primary" />
-          {plan.max_users === -1 
-            ? "Utilisateurs illimités" 
-            : `Jusqu'à ${plan.max_users} utilisateur${plan.max_users > 1 ? 's' : ''}`}
+        <li className="flex gap-x-3 items-center">
+          <Check className="h-4 w-4 flex-none text-primary" />
+          <span className="flex-1">
+            {plan.max_users === -1 
+              ? "Utilisateurs illimités" 
+              : `Jusqu'à ${plan.max_users} utilisateur${plan.max_users > 1 ? 's' : ''}`}
+          </span>
         </li>
       </ul>
     </Card>
