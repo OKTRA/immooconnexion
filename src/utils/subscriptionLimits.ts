@@ -3,7 +3,7 @@ import { useToast } from "@/hooks/use-toast"
 
 export async function checkSubscriptionLimits(agencyId: string, type: 'property' | 'tenant' | 'user'): Promise<boolean> {
   try {
-    console.log("Checking limits for agency:", agencyId, "type:", type)
+    console.log("🔍 Checking limits for agency:", agencyId, "type:", type)
     
     // Get agency's subscription plan and current counts
     const { data: agency, error: agencyError } = await supabase
@@ -27,72 +27,76 @@ export async function checkSubscriptionLimits(agencyId: string, type: 'property'
       .single()
 
     if (agencyError) {
-      console.error('Error fetching agency:', agencyError)
+      console.error('❌ Error fetching agency:', agencyError)
       return false
     }
 
     if (!agency?.subscription_plans) {
-      console.error('No subscription plan found for agency')
+      console.error('❌ No subscription plan found for agency')
       return false
     }
 
-    const plan = agency.subscription_plans
-    const currentCounts = {
-      properties: agency.current_properties_count || 0,
-      tenants: agency.current_tenants_count || 0,
-      users: agency.current_profiles_count || 0
-    }
-
-    console.log("Agency details:", {
-      plan,
-      currentCounts,
-      agencyId
+    console.log("📊 Agency details:", {
+      plan: agency.subscription_plans,
+      currentCounts: {
+        properties: agency.current_properties_count,
+        tenants: agency.current_tenants_count,
+        users: agency.current_profiles_count
+      }
     })
 
     // Check limits based on type
+    let canAdd = false
     switch (type) {
       case 'property':
         // -1 means unlimited
-        if (plan.max_properties === -1) {
-          console.log("Unlimited properties allowed")
-          return true
+        if (agency.subscription_plans.max_properties === -1) {
+          console.log("✅ Unlimited properties allowed")
+          canAdd = true
+        } else {
+          canAdd = agency.current_properties_count < agency.subscription_plans.max_properties
+          console.log("📝 Property limits check:", {
+            current: agency.current_properties_count,
+            max: agency.subscription_plans.max_properties,
+            canAdd
+          })
         }
-        console.log("Property limits check:", {
-          current: currentCounts.properties,
-          max: plan.max_properties,
-          canAdd: currentCounts.properties < plan.max_properties
-        })
-        return currentCounts.properties < plan.max_properties
+        break
         
       case 'tenant':
-        if (plan.max_tenants === -1) {
-          console.log("Unlimited tenants allowed")
-          return true
+        if (agency.subscription_plans.max_tenants === -1) {
+          console.log("✅ Unlimited tenants allowed")
+          canAdd = true
+        } else {
+          canAdd = agency.current_tenants_count < agency.subscription_plans.max_tenants
+          console.log("👥 Tenant limits check:", {
+            current: agency.current_tenants_count,
+            max: agency.subscription_plans.max_tenants,
+            canAdd
+          })
         }
-        console.log("Tenant limits check:", {
-          current: currentCounts.tenants,
-          max: plan.max_tenants,
-          canAdd: currentCounts.tenants < plan.max_tenants
-        })
-        return currentCounts.tenants < plan.max_tenants
+        break
         
       case 'user':
-        if (plan.max_users === -1) {
-          console.log("Unlimited users allowed")
-          return true
+        if (agency.subscription_plans.max_users === -1) {
+          console.log("✅ Unlimited users allowed")
+          canAdd = true
+        } else {
+          canAdd = agency.current_profiles_count < agency.subscription_plans.max_users
+          console.log("👤 User limits check:", {
+            current: agency.current_profiles_count,
+            max: agency.subscription_plans.max_users,
+            canAdd
+          })
         }
-        console.log("User limits check:", {
-          current: currentCounts.users,
-          max: plan.max_users,
-          canAdd: currentCounts.users < plan.max_users
-        })
-        return currentCounts.users < plan.max_users
-        
-      default:
-        return false
+        break
     }
+
+    console.log(`${canAdd ? '✅' : '❌'} Can add ${type}:`, canAdd)
+    return canAdd
+
   } catch (error) {
-    console.error('Error checking subscription limits:', error)
+    console.error('❌ Error checking subscription limits:', error)
     return false
   }
 }
@@ -101,7 +105,10 @@ export function useSubscriptionLimits() {
   const { toast } = useToast()
 
   const checkAndNotifyLimits = async (agencyId: string, type: 'property' | 'tenant' | 'user'): Promise<boolean> => {
+    console.log("🔄 Starting limit check for:", { agencyId, type })
+    
     const canAdd = await checkSubscriptionLimits(agencyId, type)
+    console.log("📋 Result of limit check:", canAdd)
     
     if (!canAdd) {
       const { data: agency } = await supabase
@@ -139,7 +146,7 @@ export function useSubscriptionLimits() {
           user: 'utilisateurs'
         }
         
-        console.log("Limit reached details:", {
+        console.log("❌ Limit reached details:", {
           type,
           currentValue: currentCounts[type],
           maxValue: maxValues[type],
