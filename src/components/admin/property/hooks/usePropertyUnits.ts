@@ -10,6 +10,7 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
   const { data: units = [], isLoading } = useQuery({
     queryKey: ["property-units", propertyId, filterStatus],
     queryFn: async () => {
+      console.log("Fetching units for property:", propertyId)
       let query = supabase
         .from("property_units")
         .select("*")
@@ -21,13 +22,18 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
       }
 
       const { data, error } = await query
-      if (error) throw error
+      if (error) {
+        console.error("Error fetching units:", error)
+        throw error
+      }
+      console.log("Fetched units:", data)
       return data as PropertyUnit[]
     },
   })
 
   const mutation = useMutation({
     mutationFn: async (unit: PropertyUnit) => {
+      console.log("Mutating unit:", unit)
       if (unit.id) {
         const { error } = await supabase
           .from("property_units")
@@ -64,22 +70,12 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["property-units"] })
-      toast({
-        title: "Succès",
-        description: "L'unité a été mise à jour avec succès",
-      })
-    },
-    onError: (error) => {
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue: " + error.message,
-        variant: "destructive",
-      })
-    },
+    }
   })
 
   const deleteMutation = useMutation({
     mutationFn: async (unitId: string) => {
+      console.log("Deleting unit:", unitId)
       const { error } = await supabase
         .from("property_units")
         .delete()
@@ -88,18 +84,7 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["property-units"] })
-      toast({
-        title: "Unité supprimée",
-        description: "L'unité a été supprimée avec succès",
-      })
-    },
-    onError: (error) => {
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue: " + error.message,
-        variant: "destructive",
-      })
-    },
+    }
   })
 
   return {

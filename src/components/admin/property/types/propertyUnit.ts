@@ -21,6 +21,7 @@ export interface PropertyUnitFormData {
   deposit: string;
   description: string;
   category: string;
+  amenities: string[];
 }
 
 export interface PropertyUnitDialogProps {
