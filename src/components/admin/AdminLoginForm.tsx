@@ -24,8 +24,8 @@ export function AdminLoginForm() {
       await supabase.auth.signOut()
       
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: email.trim(),
+        password: password.trim(),
       })
 
       if (signInError) {
@@ -33,9 +33,7 @@ export function AdminLoginForm() {
         
         let errorMessage = "Identifiants incorrects. Veuillez vérifier votre email et mot de passe."
         
-        if (signInError.message.includes("Email not confirmed")) {
-          errorMessage = "Veuillez confirmer votre email avant de vous connecter."
-        } else if (signInError.message.includes("Invalid login credentials")) {
+        if (signInError.message.includes("Invalid login credentials")) {
           errorMessage = "Email ou mot de passe incorrect."
         }
 
@@ -44,7 +42,6 @@ export function AdminLoginForm() {
           description: errorMessage,
           variant: "destructive",
         })
-        setIsLoading(false)
         return
       }
 
@@ -54,7 +51,6 @@ export function AdminLoginForm() {
           description: "Aucun utilisateur trouvé",
           variant: "destructive",
         })
-        setIsLoading(false)
         return
       }
 
@@ -73,7 +69,6 @@ export function AdminLoginForm() {
           variant: "destructive",
         })
         await supabase.auth.signOut()
-        setIsLoading(false)
         return
       }
 
@@ -85,7 +80,6 @@ export function AdminLoginForm() {
           variant: "destructive",
         })
         await supabase.auth.signOut()
-        setIsLoading(false)
         return
       }
 
