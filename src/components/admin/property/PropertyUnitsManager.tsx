@@ -13,26 +13,28 @@ import {
 import { Plus, Edit2, Trash2 } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { PropertyUnitDialog } from "./components/PropertyUnitDialog"
-import { PropertyUnit } from "./types/propertyUnit"
+import { PropertyUnit, PropertyUnitsManagerProps } from "./types/propertyUnit"
 
-interface PropertyUnitsManagerProps {
-  propertyId: string
-}
-
-export function PropertyUnitsManager({ propertyId }: PropertyUnitsManagerProps) {
+export function PropertyUnitsManager({ propertyId, filterStatus }: PropertyUnitsManagerProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingUnit, setEditingUnit] = useState<PropertyUnit | null>(null)
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
   const { data: units = [], isLoading } = useQuery({
-    queryKey: ["property-units", propertyId],
+    queryKey: ["property-units", propertyId, filterStatus],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("property_units")
         .select("*")
         .eq("property_id", propertyId)
         .order("unit_number")
+
+      if (filterStatus) {
+        query = query.eq("status", filterStatus)
+      }
+
+      const { data, error } = await query
 
       if (error) throw error
       return data as PropertyUnit[]
