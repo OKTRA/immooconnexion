@@ -21,10 +21,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { PropertyTableHeader } from "./property-table/PropertyTableHeader"
 import { PropertyTableRow } from "./property-table/PropertyTableRow"
 
-interface PropertyTableProps {
-  propertyType?: string
-}
-
 interface Property {
   id: string
   bien: string
@@ -43,7 +39,7 @@ interface Property {
   updated_at: string
 }
 
-export function PropertyTable({ propertyType }: PropertyTableProps) {
+export function PropertyTable() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
@@ -51,7 +47,7 @@ export function PropertyTable({ propertyType }: PropertyTableProps) {
   const queryClient = useQueryClient()
 
   const { data: properties, isLoading } = useQuery({
-    queryKey: ['properties', propertyType],
+    queryKey: ['properties'],
     queryFn: async () => {
       console.log("Début de la récupération des biens...")
       
@@ -81,11 +77,6 @@ export function PropertyTable({ propertyType }: PropertyTableProps) {
       let query = supabase
         .from('properties')
         .select('*')
-
-      // Filter by property type if specified
-      if (propertyType) {
-        query = query.eq('type', propertyType)
-      }
 
       // If user is not admin or super admin, filter by agency_id
       if (!adminData?.is_super_admin && profile?.role !== 'admin') {
