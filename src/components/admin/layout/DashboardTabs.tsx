@@ -5,6 +5,7 @@ import AdminSubscriptionPlans from "../subscription/AdminSubscriptionPlans"
 import { AdminAgencies } from "../dashboard/AdminAgencies"
 import { AdminPaymentDashboard } from "../dashboard/AdminPaymentDashboard"
 import { AdminTransactionHistory } from "../dashboard/AdminTransactionHistory"
+import { SubscriptionUpgradeTab } from "@/components/agency/subscription/SubscriptionUpgradeTab"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { 
   BarChart3, 
@@ -12,7 +13,8 @@ import {
   Users, 
   Receipt, 
   CircleDollarSign, 
-  History 
+  History,
+  ArrowUpDown
 } from "lucide-react"
 
 export function DashboardTabs() {
@@ -54,12 +56,18 @@ export function DashboardTabs() {
       label: "Transactions",
       icon: History,
       content: <AdminTransactionHistory />
+    },
+    {
+      value: "upgrade",
+      label: "Changer de plan",
+      icon: ArrowUpDown,
+      content: <SubscriptionUpgradeTab />
     }
   ]
 
   return (
     <Tabs defaultValue="stats" className="w-full">
-      <TabsList className="grid w-full grid-cols-6">
+      <TabsList className="grid w-full grid-cols-7">
         {tabs.map(({ value, label, icon: Icon }) => (
           <TabsTrigger 
             key={value} 
