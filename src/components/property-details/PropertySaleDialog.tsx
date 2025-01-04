@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface PropertySaleDialogProps {
   propertyId: string
@@ -75,56 +76,58 @@ export function PropertySaleDialog({ propertyId, open, onOpenChange }: PropertyS
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Enregistrer une vente</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="buyer_name">Nom de l'acheteur</Label>
-            <Input
-              id="buyer_name"
-              value={formData.buyer_name}
-              onChange={(e) => setFormData({ ...formData, buyer_name: e.target.value })}
-            />
+        <ScrollArea className="h-[60vh] pr-4">
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="buyer_name">Nom de l'acheteur</Label>
+              <Input
+                id="buyer_name"
+                value={formData.buyer_name}
+                onChange={(e) => setFormData({ ...formData, buyer_name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="buyer_contact">Contact de l'acheteur</Label>
+              <Input
+                id="buyer_contact"
+                value={formData.buyer_contact}
+                onChange={(e) => setFormData({ ...formData, buyer_contact: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="sale_price">Prix de vente (FCFA)</Label>
+              <Input
+                id="sale_price"
+                type="number"
+                value={formData.sale_price}
+                onChange={(e) => setFormData({ ...formData, sale_price: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="commission_amount">Commission (FCFA)</Label>
+              <Input
+                id="commission_amount"
+                type="number"
+                value={formData.commission_amount}
+                onChange={(e) => setFormData({ ...formData, commission_amount: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="sale_date">Date de vente</Label>
+              <Input
+                id="sale_date"
+                type="date"
+                value={formData.sale_date}
+                onChange={(e) => setFormData({ ...formData, sale_date: e.target.value })}
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="buyer_contact">Contact de l'acheteur</Label>
-            <Input
-              id="buyer_contact"
-              value={formData.buyer_contact}
-              onChange={(e) => setFormData({ ...formData, buyer_contact: e.target.value })}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="sale_price">Prix de vente (FCFA)</Label>
-            <Input
-              id="sale_price"
-              type="number"
-              value={formData.sale_price}
-              onChange={(e) => setFormData({ ...formData, sale_price: e.target.value })}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="commission_amount">Commission (FCFA)</Label>
-            <Input
-              id="commission_amount"
-              type="number"
-              value={formData.commission_amount}
-              onChange={(e) => setFormData({ ...formData, commission_amount: e.target.value })}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="sale_date">Date de vente</Label>
-            <Input
-              id="sale_date"
-              type="date"
-              value={formData.sale_date}
-              onChange={(e) => setFormData({ ...formData, sale_date: e.target.value })}
-            />
-          </div>
-        </div>
-        <div className="flex justify-end gap-2">
+        </ScrollArea>
+        <div className="flex justify-end gap-2 pt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuler
           </Button>
