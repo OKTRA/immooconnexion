@@ -16,6 +16,8 @@ export interface Property {
   updated_at: string
   owner_name?: string
   owner_phone?: string
+  total_units: number
+  property_category: string
 }
 
 export interface PropertyFormData {

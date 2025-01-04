@@ -23,6 +23,7 @@ import SuperAdminLogin from "@/pages/SuperAdminLogin"
 import AgencyDashboard from "@/pages/AgencyDashboard"
 import Pricing from "@/pages/Pricing"
 import PropertyUnits from "@/pages/PropertyUnits"
+import ApartmentManagement from "@/pages/ApartmentManagement"
 
 const queryClient = new QueryClient()
 
@@ -45,7 +46,8 @@ function App() {
                 <Route path="admin" element={<AgencyDashboard />} />
                 <Route path="biens" element={<Properties />} />
                 <Route path="biens/:id" element={<PropertyDetails />} />
-                <Route path="appartements" element={<PropertyUnits />} />
+                <Route path="appartements" element={<ApartmentManagement />} />
+                <Route path="appartements/unites" element={<PropertyUnits />} />
                 <Route path="locataires" element={<Tenants />} />
                 <Route path="depenses" element={<Expenses />} />
                 <Route path="rapports" element={<Reports />} />
