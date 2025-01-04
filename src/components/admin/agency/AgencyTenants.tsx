@@ -17,36 +17,20 @@ export function AgencyTenants({ agencyId }: AgencyTenantsProps) {
 
       console.log("Fetching tenants for agency:", agencyId)
 
-      // Fetch tenants with explicit agency_id filter
       const { data, error } = await supabase
         .from("tenants")
-        .select(`
-          id,
-          nom,
-          prenom,
-          phone_number,
-          birth_date,
-          agency_fees,
-          agency_id
-        `)
-        .eq('agency_id', agencyId)
-        .order('created_at', { ascending: false })
+        .select("*")
+        .eq("agency_id", agencyId)
 
       if (error) {
         console.error("Error fetching tenants:", error)
         throw error
       }
 
-      console.log("Raw tenants data:", data)
-      
-      // Additional verification of agency_id match
-      const filteredTenants = data?.filter(tenant => tenant.agency_id === agencyId)
-      console.log("Filtered tenants:", filteredTenants)
-      
-      return filteredTenants || []
+      console.log("Tenants data for agency", agencyId, ":", data)
+      return data || []
     },
-    enabled: !!agencyId,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    enabled: !!agencyId
   })
 
   if (isLoading) {
