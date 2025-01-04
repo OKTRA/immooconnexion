@@ -16,7 +16,7 @@ import { PhotoUploadSection } from "./unit-form/PhotoUploadSection"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/integrations/supabase/client"
 
 interface PropertyUnitDialogProps {
   isOpen: boolean;
