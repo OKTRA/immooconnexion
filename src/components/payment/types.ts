@@ -18,6 +18,16 @@ export const paymentFormSchema = z.object({
 
 export type PaymentFormData = z.infer<typeof paymentFormSchema>
 
+export interface PaymentDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  planId?: string
+  planName?: string
+  amount?: number
+  isUpgrade?: boolean
+  propertyId?: string
+}
+
 export interface CinetPayFormProps {
   amount: number
   description: string
@@ -25,14 +35,5 @@ export interface CinetPayFormProps {
   onError?: (error: any) => void
   agencyId?: string | null
   formData: PaymentFormData
-}
-
-export interface PaymentDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  planId?: string
-  planName?: string
-  amount?: number
-  tempAgencyId?: string | null
   propertyId?: string
 }

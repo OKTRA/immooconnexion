@@ -7,15 +7,7 @@ import { CinetPayForm } from "./CinetPayForm"
 import { PaydunyaForm } from "./PaydunyaForm"
 import { useToast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
-
-interface PaymentDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  planId?: string
-  planName?: string
-  amount?: number
-  isUpgrade?: boolean
-}
+import { PaymentDialogProps } from "./types"
 
 export function PaymentDialog({ 
   open, 
@@ -23,7 +15,8 @@ export function PaymentDialog({
   planId, 
   planName, 
   amount = 0,
-  isUpgrade = false
+  isUpgrade = false,
+  propertyId
 }: PaymentDialogProps) {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<string>("cinetpay")
@@ -41,8 +34,23 @@ export function PaymentDialog({
     setPaymentSuccess(true)
     toast({
       title: "Succès",
-      description: "Votre abonnement a été mis à jour avec succès",
+      description: isUpgrade 
+        ? "Votre abonnement a été mis à jour avec succès" 
+        : "Le paiement a été effectué avec succès",
     })
+  }
+
+  const defaultFormData = {
+    email: "",
+    password: "",
+    confirm_password: "",
+    agency_name: "",
+    agency_address: "",
+    country: "",
+    city: "",
+    first_name: "",
+    last_name: "",
+    phone_number: "",
   }
 
   return (
@@ -62,7 +70,9 @@ export function PaymentDialog({
             {paymentSuccess ? (
               <div className="space-y-4">
                 <p className="text-sm text-gray-500">
-                  Votre paiement a été traité et votre abonnement a été mis à jour.
+                  {isUpgrade 
+                    ? "Votre abonnement a été mis à jour avec succès."
+                    : "Votre paiement a été traité avec succès."}
                 </p>
                 <Button onClick={handleClose} className="w-full">
                   Retour au tableau de bord
@@ -77,41 +87,21 @@ export function PaymentDialog({
                 {paymentMethod === "cinetpay" && (
                   <CinetPayForm 
                     amount={amount}
-                    description={`Abonnement au plan ${planName}`}
+                    description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
                     agencyId={planId}
+                    propertyId={propertyId}
                     onSuccess={handlePaymentSuccess}
-                    formData={{
-                      email: "",
-                      password: "",
-                      confirm_password: "",
-                      agency_name: "",
-                      agency_address: "",
-                      country: "",
-                      city: "",
-                      first_name: "",
-                      last_name: "",
-                      phone_number: "",
-                    }}
+                    formData={defaultFormData}
                   />
                 )}
                 {paymentMethod === "paydunya" && (
                   <PaydunyaForm 
                     amount={amount}
-                    description={`Abonnement au plan ${planName}`}
+                    description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
                     agencyId={planId}
+                    propertyId={propertyId}
                     onSuccess={handlePaymentSuccess}
-                    formData={{
-                      email: "",
-                      password: "",
-                      confirm_password: "",
-                      agency_name: "",
-                      agency_address: "",
-                      country: "",
-                      city: "",
-                      first_name: "",
-                      last_name: "",
-                      phone_number: "",
-                    }}
+                    formData={defaultFormData}
                   />
                 )}
               </div>
