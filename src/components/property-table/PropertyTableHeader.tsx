@@ -31,6 +31,7 @@ export function PropertyTableHeader({ type = 'property' }: PropertyTableHeaderPr
         <ResponsiveTable.Head>Chambres</ResponsiveTable.Head>
         <ResponsiveTable.Head>Ville</ResponsiveTable.Head>
         <ResponsiveTable.Head>Loyer</ResponsiveTable.Head>
+        <ResponsiveTable.Head>Caution</ResponsiveTable.Head>
         <ResponsiveTable.Head>Statut</ResponsiveTable.Head>
         <ResponsiveTable.Head className="text-right">Actions</ResponsiveTable.Head>
       </ResponsiveTable.Row>

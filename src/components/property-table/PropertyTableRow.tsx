@@ -1,4 +1,3 @@
-import { TableCell, TableRow } from "@/components/ui/table"
 import { PropertyActions } from "./PropertyActions"
 import { Property } from "@/integrations/supabase/types/properties"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
@@ -23,10 +22,11 @@ export function PropertyTableRow({ property, onEdit, onDelete }: PropertyTableRo
         </Avatar>
       </ResponsiveTable.Cell>
       <ResponsiveTable.Cell className="font-medium">{property.bien}</ResponsiveTable.Cell>
+      <ResponsiveTable.Cell>{property.type}</ResponsiveTable.Cell>
+      <ResponsiveTable.Cell>{property.chambres}</ResponsiveTable.Cell>
       <ResponsiveTable.Cell>{property.ville}</ResponsiveTable.Cell>
-      <ResponsiveTable.Cell>{property.total_units}</ResponsiveTable.Cell>
-      <ResponsiveTable.Cell>{property.owner_name}</ResponsiveTable.Cell>
-      <ResponsiveTable.Cell>{property.owner_phone}</ResponsiveTable.Cell>
+      <ResponsiveTable.Cell>{property.loyer?.toLocaleString()} FCFA</ResponsiveTable.Cell>
+      <ResponsiveTable.Cell>{property.caution?.toLocaleString()} FCFA</ResponsiveTable.Cell>
       <ResponsiveTable.Cell>{property.statut}</ResponsiveTable.Cell>
       <ResponsiveTable.Cell className="text-right">
         <PropertyActions
