@@ -7,7 +7,7 @@ export function HomeBanner() {
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{ 
-          backgroundImage: "url('/lovable-uploads/cfd536c2-5c73-4d0b-9529-0e4269ed3372.png')",
+          backgroundImage: "url('https://images.unsplash.com/photo-1501854140801-50d01698950b')",
           filter: "brightness(0.65)"
         }}
       />
