@@ -3,7 +3,7 @@ import { CinetPayForm } from "@/components/payment/CinetPayForm"
 import { PaymentFormData } from "@/components/payment/types"
 import { PaymentDialogProps } from "./types"
 
-export function PaymentDialog({ plan, isOpen, onOpenChange, onSuccess, propertyId }: PaymentDialogProps) {
+export function PaymentDialog({ plan, isOpen, onOpenChange, onSuccess }: PaymentDialogProps) {
   const defaultFormData: PaymentFormData = {
     email: "",
     password: "",
@@ -28,7 +28,6 @@ export function PaymentDialog({ plan, isOpen, onOpenChange, onSuccess, propertyI
           description={`Abonnement au plan ${plan.name}`}
           onSuccess={onSuccess}
           formData={defaultFormData}
-          propertyId={propertyId}
         />
       </DialogContent>
     </Dialog>
