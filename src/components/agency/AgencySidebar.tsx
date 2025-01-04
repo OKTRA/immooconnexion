@@ -1,84 +1,81 @@
 import { 
-  Home, 
-  Users, 
-  Building2, 
-  Receipt, 
+  LayoutDashboard,
+  Users,
+  Building2,
+  Receipt,
   CircleDollarSign,
-  BarChart3,
-  FileText
+  BarChart2,
+  FileText,
+  Settings
 } from "lucide-react"
-import { useNavigate } from "react-router-dom"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar"
+import { Link, useLocation } from "react-router-dom"
+import { cn } from "@/lib/utils"
+import { Sidebar } from "@/components/ui/sidebar"
 
 const menuItems = [
   {
     title: "Tableau de bord",
-    url: "/agence/admin",
-    icon: Home,
+    href: "/agence/admin",
+    icon: LayoutDashboard,
   },
   {
     title: "Locataires",
-    url: "/agence/locataires",
+    href: "/agence/locataires",
     icon: Users,
   },
   {
     title: "Biens",
-    url: "/agence/biens",
+    href: "/agence/biens",
     icon: Building2,
   },
   {
     title: "Ventes",
-    url: "/agence/ventes",
+    href: "/agence/ventes",
     icon: Receipt,
   },
   {
     title: "Dépenses",
-    url: "/agence/depenses",
+    href: "/agence/depenses",
     icon: CircleDollarSign,
   },
   {
     title: "Gains",
-    url: "/agence/gains",
-    icon: BarChart3,
+    href: "/agence/gains",
+    icon: BarChart2,
   },
   {
     title: "Rapports",
-    url: "/agence/rapports",
+    href: "/agence/rapports",
     icon: FileText,
+  },
+  {
+    title: "Paramètres",
+    href: "/agence/parametres",
+    icon: Settings,
   },
 ]
 
 export function AgencySidebar() {
-  const navigate = useNavigate()
+  const location = useLocation()
 
   return (
     <Sidebar>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton onClick={() => navigate(item.url)}>
-                    <item.icon className="h-4 w-4 mr-2" />
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+      <div className="flex flex-col gap-2 p-4">
+        {menuItems.map((item) => (
+          <Link
+            key={item.href}
+            to={item.href}
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50",
+              location.pathname === item.href && 
+              "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50"
+            )}
+          >
+            <item.icon className="h-4 w-4" />
+            <span>{item.title}</span>
+          </Link>
+        ))}
+      </div>
     </Sidebar>
   )
 }
