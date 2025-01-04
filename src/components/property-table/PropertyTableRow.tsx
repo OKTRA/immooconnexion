@@ -1,6 +1,5 @@
-import { TableCell, TableRow } from "@/components/ui/table"
+import { Property } from "@/components/property/types"
 import { PropertyActions } from "./PropertyActions"
-import { Property } from "@/integrations/supabase/types/properties"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Building2 } from "lucide-react"
