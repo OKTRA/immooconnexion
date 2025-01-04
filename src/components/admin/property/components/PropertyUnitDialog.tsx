@@ -12,6 +12,7 @@ import { ParentPropertyInfo } from "./unit-dialog/ParentPropertyInfo"
 import { StatusSection } from "./unit-dialog/StatusSection"
 import { DescriptionSection } from "./unit-dialog/DescriptionSection"
 import { DialogActions } from "./unit-dialog/DialogActions"
+import { useToast } from "@/components/ui/use-toast"
 
 interface PropertyUnitDialogProps {
   isOpen: boolean
@@ -28,6 +29,7 @@ export function PropertyUnitDialog({
   propertyId, 
   onSubmit 
 }: PropertyUnitDialogProps) {
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     unit_number: editingUnit?.unit_number || "",
     floor_number: editingUnit?.floor_number || "",
@@ -40,16 +42,34 @@ export function PropertyUnitDialog({
     status: editingUnit?.status || "available"
   })
 
-  const { data: propertyData } = useQuery({
+  const { data: propertyData, isError } = useQuery({
     queryKey: ['property', propertyId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('properties')
         .select('*')
         .eq('id', propertyId)
-        .single()
+        .maybeSingle()
       
-      if (error) throw error
+      if (error) {
+        console.error("Error fetching property:", error)
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les informations de la propriété",
+          variant: "destructive",
+        })
+        throw error
+      }
+
+      if (!data) {
+        toast({
+          title: "Propriété non trouvée",
+          description: "La propriété demandée n'existe pas",
+          variant: "destructive",
+        })
+        return null
+      }
+
       return data
     }
   })
@@ -77,6 +97,10 @@ export function PropertyUnitDialog({
     "Meublé",
     "Vue sur mer"
   ]
+
+  if (isError) {
+    return null
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
