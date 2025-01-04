@@ -36,50 +36,57 @@ export async function checkSubscriptionLimits(agencyId: string, type: 'property'
       return false
     }
 
+    const plan = agency.subscription_plans
+    const currentCounts = {
+      properties: agency.current_properties_count || 0,
+      tenants: agency.current_tenants_count || 0,
+      users: agency.current_profiles_count || 0
+    }
+
     console.log("Agency details:", {
-      plan: agency.subscription_plans,
-      currentCounts: {
-        properties: agency.current_properties_count || 0,
-        tenants: agency.current_tenants_count || 0,
-        users: agency.current_profiles_count || 0
-      }
+      plan,
+      currentCounts,
+      agencyId
     })
 
-    const plan = agency.subscription_plans
-    
     // Check limits based on type
     switch (type) {
       case 'property':
         // -1 means unlimited
-        if (plan.max_properties === -1) return true
-        // Make sure we use 0 if the count is null
-        const currentProperties = agency.current_properties_count || 0
+        if (plan.max_properties === -1) {
+          console.log("Unlimited properties allowed")
+          return true
+        }
         console.log("Property limits check:", {
-          current: currentProperties,
+          current: currentCounts.properties,
           max: plan.max_properties,
-          canAdd: currentProperties < plan.max_properties
+          canAdd: currentCounts.properties < plan.max_properties
         })
-        return currentProperties < plan.max_properties
+        return currentCounts.properties < plan.max_properties
         
       case 'tenant':
-        if (plan.max_tenants === -1) return true
-        const currentTenants = agency.current_tenants_count || 0
+        if (plan.max_tenants === -1) {
+          console.log("Unlimited tenants allowed")
+          return true
+        }
         console.log("Tenant limits check:", {
-          current: currentTenants,
+          current: currentCounts.tenants,
           max: plan.max_tenants,
-          canAdd: currentTenants < plan.max_tenants
+          canAdd: currentCounts.tenants < plan.max_tenants
         })
-        return currentTenants < plan.max_tenants
+        return currentCounts.tenants < plan.max_tenants
         
       case 'user':
-        if (plan.max_users === -1) return true
-        const currentUsers = agency.current_profiles_count || 0
+        if (plan.max_users === -1) {
+          console.log("Unlimited users allowed")
+          return true
+        }
         console.log("User limits check:", {
-          current: currentUsers,
+          current: currentCounts.users,
           max: plan.max_users,
-          canAdd: currentUsers < plan.max_users
+          canAdd: currentCounts.users < plan.max_users
         })
-        return currentUsers < plan.max_users
+        return currentCounts.users < plan.max_users
         
       default:
         return false
@@ -106,35 +113,42 @@ export function useSubscriptionLimits() {
           subscription_plans (
             max_properties,
             max_tenants,
-            max_users
+            max_users,
+            name
           )
         `)
         .eq('id', agencyId)
         .single()
 
       if (agency) {
-        const typeLabel = type === 'property' ? 'biens' : 
-                         type === 'tenant' ? 'locataires' : 
-                         'utilisateurs'
-        
-        const currentValue = type === 'property' ? agency.current_properties_count || 0 :
-          type === 'tenant' ? agency.current_tenants_count || 0 :
-          agency.current_profiles_count || 0
+        const currentCounts = {
+          property: agency.current_properties_count || 0,
+          tenant: agency.current_tenants_count || 0,
+          user: agency.current_profiles_count || 0
+        }
 
-        const maxValue = type === 'property' ? agency.subscription_plans?.max_properties :
-          type === 'tenant' ? agency.subscription_plans?.max_tenants :
-          agency.subscription_plans?.max_users
+        const maxValues = {
+          property: agency.subscription_plans?.max_properties,
+          tenant: agency.subscription_plans?.max_tenants,
+          user: agency.subscription_plans?.max_users
+        }
+
+        const typeLabels = {
+          property: 'biens',
+          tenant: 'locataires',
+          user: 'utilisateurs'
+        }
         
-        console.log("Limit check details:", {
+        console.log("Limit reached details:", {
           type,
-          currentValue,
-          maxValue,
-          plan: agency.subscription_plans
+          currentValue: currentCounts[type],
+          maxValue: maxValues[type],
+          plan: agency.subscription_plans?.name
         })
         
         toast({
           title: "Limite atteinte",
-          description: `Vous avez atteint la limite de ${typeLabel} pour votre plan actuel (${currentValue}/${maxValue}). Veuillez mettre à niveau votre abonnement pour en ajouter davantage.`,
+          description: `Vous avez atteint la limite de ${typeLabels[type]} pour votre plan ${agency.subscription_plans?.name} (${currentCounts[type]}/${maxValues[type]}). Veuillez mettre à niveau votre abonnement pour en ajouter davantage.`,
           variant: "destructive"
         })
       }
