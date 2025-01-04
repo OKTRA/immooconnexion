@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Eye, Pencil, Trash2, Building2 } from "lucide-react"
+import { Building2, Eye, Pencil, Trash2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 interface PropertyActionsProps {
@@ -13,10 +13,6 @@ export function PropertyActions({ propertyId, onEdit, onDelete, propertyType }: 
   const navigate = useNavigate()
 
   const handleViewProperty = () => {
-    if (!propertyId) {
-      console.error("Property ID is missing")
-      return
-    }
     navigate(`/agence/biens/${propertyId}`)
   }
 
@@ -25,11 +21,12 @@ export function PropertyActions({ propertyId, onEdit, onDelete, propertyType }: 
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="flex items-center gap-2">
       <Button
         variant="ghost"
         size="icon"
         onClick={handleViewProperty}
+        className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
         title="Voir les détails"
       >
         <Eye className="h-4 w-4" />
@@ -38,6 +35,7 @@ export function PropertyActions({ propertyId, onEdit, onDelete, propertyType }: 
         variant="ghost"
         size="icon"
         onClick={onEdit}
+        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
         title="Modifier"
       >
         <Pencil className="h-4 w-4" />
@@ -46,6 +44,7 @@ export function PropertyActions({ propertyId, onEdit, onDelete, propertyType }: 
         variant="ghost"
         size="icon"
         onClick={onDelete}
+        className="text-red-600 hover:text-red-700 hover:bg-red-50"
         title="Supprimer"
       >
         <Trash2 className="h-4 w-4" />

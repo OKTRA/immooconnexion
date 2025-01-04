@@ -13,6 +13,8 @@ import { BasicInfoFields } from "./unit-form/BasicInfoFields"
 import { PricingFields } from "./unit-form/PricingFields"
 import { AmenitiesSection } from "./unit-form/AmenitiesSection"
 import { PhotoUploadSection } from "./unit-form/PhotoUploadSection"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 interface PropertyUnitDialogProps {
   isOpen: boolean;
@@ -39,6 +41,7 @@ export function PropertyUnitDialog({
     category: editingUnit?.category || "standard",
     amenities: editingUnit?.amenities || [],
     status: editingUnit?.status || "available",
+    apartment_id: propertyId
   })
 
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
@@ -75,6 +78,16 @@ export function PropertyUnitDialog({
         </DialogHeader>
         <ScrollArea className="h-full pr-4">
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label>ID de l'appartement</Label>
+              <Input
+                value={propertyId}
+                readOnly
+                disabled
+                className="bg-gray-100"
+              />
+            </div>
+
             <BasicInfoFields formData={formData} setFormData={setFormData} />
             <PricingFields formData={formData} setFormData={setFormData} />
             
