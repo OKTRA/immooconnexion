@@ -6,10 +6,10 @@ const PropertyDetails = () => {
   const isMobile = useIsMobile()
 
   return (
-    <>
+    <div>
       {isMobile && <MobileMenu />}
       <PropertyDetailsContent />
-    </>
+    </div>
   )
 }
 

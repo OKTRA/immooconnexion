@@ -6,7 +6,7 @@ import { TenantPaymentsReport } from "@/components/reports/TenantPaymentsReport"
 
 const Reports = () => {
   return (
-    <>
+    <div>
       <h1 className="text-2xl md:text-3xl font-bold mb-8">Rapports</h1>
       <div className="space-y-8">
         <OverviewStats />
@@ -15,7 +15,7 @@ const Reports = () => {
         <PropertyAnalysisReport />
         <TenantPaymentsReport />
       </div>
-    </>
+    </div>
   )
 }
 
