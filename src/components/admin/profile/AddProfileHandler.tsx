@@ -33,12 +33,6 @@ export function useAddProfileHandler({ onSuccess, onError, onClose, agencyId }: 
     if (!profile.last_name?.trim()) {
       throw new Error("Le nom est requis")
     }
-    if (!profile.role) {
-      throw new Error("Le rôle est requis")
-    }
-    if (profile.role === "admin" && !profile.agency_id) {
-      throw new Error("L'agence est requise pour un administrateur")
-    }
   }
 
   const handleCreateAuthUser = async (): Promise<string> => {
@@ -63,7 +57,7 @@ export function useAddProfileHandler({ onSuccess, onError, onClose, agencyId }: 
         password: newProfile.password!,
         options: {
           data: {
-            role: newProfile.role,
+            role: 'admin', // Définir automatiquement le rôle admin
           },
         },
       })
@@ -102,7 +96,7 @@ export function useAddProfileHandler({ onSuccess, onError, onClose, agencyId }: 
         .update({
           first_name: newProfile.first_name?.trim(),
           last_name: newProfile.last_name?.trim(),
-          role: newProfile.role as UserRole,
+          role: 'admin' as UserRole, // Définir automatiquement le rôle admin
           agency_id: agencyId || newProfile.agency_id,
           phone_number: newProfile.phone_number?.trim(),
         })
@@ -113,19 +107,18 @@ export function useAddProfileHandler({ onSuccess, onError, onClose, agencyId }: 
         throw new Error(profileError.message || "Erreur lors de la mise à jour du profil")
       }
 
-      if (newProfile.role === "admin") {
-        const { error: adminError } = await supabase
-          .from("administrators")
-          .insert({
-            id: userId,
-            agency_id: agencyId || newProfile.agency_id,
-            is_super_admin: false,
-          })
+      // Créer automatiquement l'entrée dans la table administrators
+      const { error: adminError } = await supabase
+        .from("administrators")
+        .insert({
+          id: userId,
+          agency_id: agencyId || newProfile.agency_id,
+          is_super_admin: false,
+        })
 
-        if (adminError) {
-          console.error("Admin error:", adminError)
-          throw new Error(adminError.message || "Erreur lors de la création de l'administrateur")
-        }
+      if (adminError) {
+        console.error("Admin error:", adminError)
+        throw new Error(adminError.message || "Erreur lors de la création de l'administrateur")
       }
 
       toast({
