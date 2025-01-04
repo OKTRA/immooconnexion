@@ -1,19 +1,19 @@
 import { PublicHeader } from "@/components/layout/PublicHeader"
 import { Button } from "@/components/ui/button"
-import { Check, Building2, Users, Calendar, Shield, BarChart3, Settings } from "lucide-react"
+import { Check, Building2, Users, Calendar, Shield, BarChart3, Settings, Loader2 } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { PaymentDialog } from "@/components/payment/PaymentDialog"
+import { Card } from "@/components/ui/card"
 
 export default function Pricing() {
   const { toast } = useToast()
   const [selectedPlan, setSelectedPlan] = useState<any>(null)
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
 
-  const { data: plans = [] } = useQuery({
+  const { data: plans = [], isLoading } = useQuery({
     queryKey: ['subscription-plans'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -64,12 +64,20 @@ export default function Pricing() {
     setShowPaymentDialog(true)
   }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-white">
       <PublicHeader />
       
       {/* Hero Section */}
-      <div className="bg-gradient-to-b from-primary/10 to-white py-16 sm:py-24">
+      <div className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
@@ -88,7 +96,7 @@ export default function Pricing() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, index) => (
-              <div key={index} className="relative p-6 bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 hover:shadow-lg transition-shadow">
+              <Card key={index} className="relative p-6 hover:shadow-lg transition-shadow duration-300">
                 <div className="mb-4">
                   {feature.icon}
                 </div>
@@ -98,14 +106,14 @@ export default function Pricing() {
                 <p className="text-gray-600">
                   {feature.description}
                 </p>
-              </div>
+              </Card>
             ))}
           </div>
         </div>
       </div>
 
       {/* Pricing Plans */}
-      <div className="py-16 sm:py-24 bg-gray-50">
+      <div className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-4xl text-center mb-16">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
@@ -118,9 +126,9 @@ export default function Pricing() {
           
           <div className="isolate mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-3">
             {plans.map((plan) => (
-              <div
+              <Card
                 key={plan.id}
-                className="rounded-3xl p-8 ring-1 ring-gray-200 bg-white hover:shadow-lg transition-shadow duration-300"
+                className="rounded-3xl p-8 ring-1 ring-gray-200 hover:shadow-lg transition-shadow duration-300"
               >
                 <h3 className="text-2xl font-semibold leading-8 text-gray-900">
                   {plan.name}
@@ -150,8 +158,20 @@ export default function Pricing() {
                       ? "Locataires illimités" 
                       : `Jusqu'à ${plan.max_tenants} locataire${plan.max_tenants > 1 ? 's' : ''}`}
                   </li>
+                  <li className="flex gap-x-3">
+                    <Check className="h-6 w-5 flex-none text-primary" />
+                    {plan.max_properties === -1 
+                      ? "Propriétés illimitées" 
+                      : `Jusqu'à ${plan.max_properties} propriété${plan.max_properties > 1 ? 's' : ''}`}
+                  </li>
+                  <li className="flex gap-x-3">
+                    <Check className="h-6 w-5 flex-none text-primary" />
+                    {plan.max_users === -1 
+                      ? "Utilisateurs illimités" 
+                      : `Jusqu'à ${plan.max_users} utilisateur${plan.max_users > 1 ? 's' : ''}`}
+                  </li>
                 </ul>
-              </div>
+              </Card>
             ))}
           </div>
         </div>
