@@ -68,31 +68,33 @@ export function PropertyUnitDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh]">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden">
         <UnitFormHeader editingUnit={editingUnit} />
-        <ScrollArea className="h-full pr-4">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <ApartmentIdField propertyId={propertyId} />
-            <BasicInfoFields formData={formData} setFormData={setFormData} />
-            <PricingFields formData={formData} setFormData={setFormData} />
-            <StatusSelect 
-              value={formData.status}
-              onChange={(value) => setFormData({ ...formData, status: value })}
-            />
-            <AmenitiesSection 
-              formData={formData} 
-              setFormData={setFormData}
-              amenitiesList={amenitiesList}
-            />
-            <PhotoUploadSection 
-              onPhotosChange={(files) => setSelectedFiles(files)} 
-            />
-            <UnitDescription
-              value={formData.description}
-              onChange={(value) => setFormData({ ...formData, description: value })}
-            />
-            <UnitFormActions onClose={onClose} editingUnit={editingUnit} />
-          </form>
+        <ScrollArea className="flex-1 h-[calc(90vh-8rem)]">
+          <div className="p-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <ApartmentIdField propertyId={propertyId} />
+              <BasicInfoFields formData={formData} setFormData={setFormData} />
+              <PricingFields formData={formData} setFormData={setFormData} />
+              <StatusSelect 
+                value={formData.status}
+                onChange={(value) => setFormData({ ...formData, status: value })}
+              />
+              <AmenitiesSection 
+                formData={formData} 
+                setFormData={setFormData}
+                amenitiesList={amenitiesList}
+              />
+              <PhotoUploadSection 
+                onPhotosChange={(files) => setSelectedFiles(files)} 
+              />
+              <UnitDescription
+                value={formData.description}
+                onChange={(value) => setFormData({ ...formData, description: value })}
+              />
+              <UnitFormActions onClose={onClose} editingUnit={editingUnit} />
+            </form>
+          </div>
         </ScrollArea>
       </DialogContent>
     </Dialog>
