@@ -9,7 +9,33 @@ import { DeleteApartmentDialog } from "./DeleteApartmentDialog"
 
 interface Property {
   id: string
-  [key: string]: any
+  bien: string
+  type: string
+  chambres: number
+  ville: string
+  loyer: number
+  frais_agence: number
+  taux_commission: number
+  caution: number
+  photo_url: string | null
+  statut: string
+  user_id: string | null
+  agency_id: string
+  created_at: string
+  updated_at: string
+  created_by_user_id: string | null
+  parent_property_id: string | null
+  rental_type: string
+  property_category: string
+  is_for_sale: boolean
+  sale_price: number | null
+  minimum_stay: number
+  maximum_stay: number | null
+  price_per_night: number | null
+  price_per_week: number | null
+  total_units: number
+  owner_name: string | null
+  owner_phone: string | null
 }
 
 interface ApartmentContentProps {
