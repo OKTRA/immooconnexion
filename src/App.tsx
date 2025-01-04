@@ -5,8 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
-import { GlobalHeader } from "@/components/layout/GlobalHeader"
 import { Loader2 } from "lucide-react"
+import { AgencyLayout } from "@/components/agency/AgencyLayout"
 
 // Lazy load all pages
 const Index = lazy(() => import("./pages/Index"))
@@ -42,14 +42,6 @@ const queryClient = new QueryClient({
   },
 })
 
-// Wrapper component for protected agency routes
-const ProtectedAgencyRoute = ({ children }: { children: React.ReactNode }) => (
-  <ProtectedRoute>
-    <GlobalHeader />
-    {children}
-  </ProtectedRoute>
-)
-
 function AppRoutes() {
   return (
     <>
@@ -65,85 +57,33 @@ function AppRoutes() {
           <Route path="/agence/login" element={<Login />} />
           <Route path="/super-admin/login" element={<SuperAdminLogin />} />
 
-          {/* Protected agency routes */}
+          {/* Protected agency routes - Nested under AgencyLayout */}
           <Route
-            path="/agence/admin"
+            path="/agence"
             element={
-              <ProtectedAgencyRoute>
-                <Index />
-              </ProtectedAgencyRoute>
+              <ProtectedRoute>
+                <AgencyLayout />
+              </ProtectedRoute>
             }
-          />
+          >
+            <Route path="admin" element={<Index />} />
+            <Route path="locataires" element={<Tenants />} />
+            <Route path="locataires/:id/contrats" element={<TenantContracts />} />
+            <Route path="biens" element={<Properties />} />
+            <Route path="biens/:id" element={<PropertyDetails />} />
+            <Route path="ventes" element={<PropertySales />} />
+            <Route path="depenses" element={<Expenses />} />
+            <Route path="gains" element={<AgencyEarnings />} />
+            <Route path="rapports" element={<Reports />} />
+          </Route>
+
+          {/* Super admin route */}
           <Route
             path="/super-admin/admin"
             element={
               <ProtectedRoute>
                 <AdminDashboard />
               </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/agence/locataires"
-            element={
-              <ProtectedAgencyRoute>
-                <Tenants />
-              </ProtectedAgencyRoute>
-            }
-          />
-          <Route
-            path="/agence/locataires/:id/contrats"
-            element={
-              <ProtectedAgencyRoute>
-                <TenantContracts />
-              </ProtectedAgencyRoute>
-            }
-          />
-          <Route
-            path="/agence/biens"
-            element={
-              <ProtectedAgencyRoute>
-                <Properties />
-              </ProtectedAgencyRoute>
-            }
-          />
-          <Route
-            path="/agence/biens/:id"
-            element={
-              <ProtectedAgencyRoute>
-                <PropertyDetails />
-              </ProtectedAgencyRoute>
-            }
-          />
-          <Route
-            path="/agence/ventes"
-            element={
-              <ProtectedAgencyRoute>
-                <PropertySales />
-              </ProtectedAgencyRoute>
-            }
-          />
-          <Route
-            path="/agence/depenses"
-            element={
-              <ProtectedAgencyRoute>
-                <Expenses />
-              </ProtectedAgencyRoute>
-            }
-          />
-          <Route
-            path="/agence/gains"
-            element={
-              <ProtectedAgencyRoute>
-                <AgencyEarnings />
-              </ProtectedAgencyRoute>
-            }
-          />
-          <Route
-            path="/agence/rapports"
-            element={
-              <ProtectedAgencyRoute>
-                <Reports />
-              </ProtectedAgencyRoute>
             }
           />
 
