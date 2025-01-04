@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { LogOut } from "lucide-react"
+import { LogOut, Menu } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { AnimatedLogo } from "@/components/header/AnimatedLogo"
@@ -55,6 +55,14 @@ export function GlobalHeader() {
     <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between">
         <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="md:hidden -ml-2"
+            onClick={() => document.querySelector('.mobile-sidebar')?.classList.toggle('translate-x-0')}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
           <AnimatedLogo />
           <Separator orientation="vertical" className="h-6" />
           <h1 className="text-lg font-semibold hidden sm:block">
