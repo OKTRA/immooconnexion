@@ -35,7 +35,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       return data
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    cacheTime: 1000 * 60 * 10, // Keep in cache for 10 minutes
+    gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes (previously cacheTime)
   })
 
   // Vérifier si l'utilisateur est un admin d'agence et si son profil ou son agence nécessite une mise à jour

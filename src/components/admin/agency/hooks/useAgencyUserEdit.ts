@@ -1,40 +1,27 @@
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { EditStep } from "@/types/profile"
 
-interface UseAgencyUserEditProps {
-  onSuccess?: () => void
-}
-
-export function useAgencyUserEdit({ onSuccess }: UseAgencyUserEditProps) {
+export function useAgencyUserEdit({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [showEditDialog, setShowEditDialog] = useState(false)
-  const [editStep, setEditStep] = useState(1)
+  const [editStep, setEditStep] = useState<EditStep>(1)
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const { toast } = useToast()
 
-  const handleUpdateAuth = async (email: string, password?: string) => {
+  const handleUpdateAuth = async (user: any) => {
     try {
-      if (password && password.length < 6) {
-        throw new Error("Le mot de passe doit contenir au moins 6 caractères")
-      }
-
-      const updateData: any = { email }
-      if (password && password.length >= 6) {
-        updateData.password = password
-      }
-
       const { error } = await supabase.auth.admin.updateUserById(
-        selectedUser.id,
-        updateData
+        user.id,
+        { email: user.email }
       )
-
       if (error) throw error
 
       toast({
         title: "Succès",
         description: "Les informations d'authentification ont été mises à jour",
       })
-
+      
       setEditStep(2)
     } catch (error: any) {
       toast({
@@ -42,22 +29,26 @@ export function useAgencyUserEdit({ onSuccess }: UseAgencyUserEditProps) {
         description: error.message,
         variant: "destructive",
       })
-      throw error
     }
   }
 
-  const handleUpdateProfile = async (profileData: any) => {
+  const handleUpdateProfile = async (user: any) => {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update(profileData)
-        .eq("id", selectedUser.id)
+        .update({
+          first_name: user.first_name,
+          last_name: user.last_name,
+          phone_number: user.phone_number,
+          role: user.role,
+        })
+        .eq("id", user.id)
 
       if (error) throw error
 
       toast({
         title: "Succès",
-        description: "Le profil a été mis à jour avec succès",
+        description: "Le profil a été mis à jour",
       })
 
       onSuccess?.()
@@ -74,6 +65,7 @@ export function useAgencyUserEdit({ onSuccess }: UseAgencyUserEditProps) {
 
   const handleEdit = (user: any) => {
     setSelectedUser(user)
+    setEditStep(1)
     setShowEditDialog(true)
   }
 
@@ -83,6 +75,7 @@ export function useAgencyUserEdit({ onSuccess }: UseAgencyUserEditProps) {
     editStep,
     setEditStep,
     selectedUser,
+    setSelectedUser,
     handleUpdateAuth,
     handleUpdateProfile,
     handleEdit,

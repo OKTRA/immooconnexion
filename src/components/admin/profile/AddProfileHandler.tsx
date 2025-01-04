@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { UserRole } from "@/types/profile"
 
 interface UseAddProfileHandlerProps {
   onSuccess?: () => void
@@ -16,7 +17,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: UseAddPro
     first_name: "",
     last_name: "",
     phone_number: "",
-    role: "user",
+    role: "user" as UserRole,
   })
 
   const handleCreateAuthUser = async () => {

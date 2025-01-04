@@ -12,3 +12,5 @@ export interface Profile {
   updated_at: string;
   is_tenant: boolean | null;
 }
+
+export type EditStep = 1 | 2;
