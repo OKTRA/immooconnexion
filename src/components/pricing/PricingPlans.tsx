@@ -29,9 +29,9 @@ export function PricingPlans({ onSelectPlan }: PricingPlansProps) {
   }
 
   return (
-    <div className="py-12 sm:py-16">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center mb-12">
+    <div className="py-8 sm:py-12">
+      <div className="mx-auto max-w-7xl px-4 lg:px-8">
+        <div className="mx-auto max-w-4xl text-center mb-8 sm:mb-12">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Des Plans Adaptés à Vos Besoins
           </h2>
@@ -41,7 +41,7 @@ export function PricingPlans({ onSelectPlan }: PricingPlansProps) {
           </p>
         </div>
         
-        <div className="isolate mx-auto grid max-w-6xl grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="isolate mx-auto grid max-w-6xl grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => (
             <PricingCard
               key={plan.id}
