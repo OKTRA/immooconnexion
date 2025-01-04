@@ -27,7 +27,7 @@ export default function PropertyUnits() {
         </div>
 
         <Tabs defaultValue="all" className="w-full">
-          <TabsList>
+          <TabsList className="mb-4">
             <TabsTrigger value="all" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               <span>Tous les appartements</span>
