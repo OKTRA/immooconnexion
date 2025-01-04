@@ -6,9 +6,10 @@ interface PropertyActionsProps {
   propertyId: string
   onEdit: () => void
   onDelete: () => void
+  propertyType?: string
 }
 
-export function PropertyActions({ propertyId, onEdit, onDelete }: PropertyActionsProps) {
+export function PropertyActions({ propertyId, onEdit, onDelete, propertyType }: PropertyActionsProps) {
   const navigate = useNavigate()
 
   const handleViewProperty = () => {
@@ -49,15 +50,17 @@ export function PropertyActions({ propertyId, onEdit, onDelete }: PropertyAction
       >
         <Trash2 className="h-4 w-4" />
       </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={handleManageUnits}
-        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-        title="Gérer les unités"
-      >
-        <Building2 className="h-4 w-4" />
-      </Button>
+      {propertyType === 'appartement' && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleManageUnits}
+          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+          title="Gérer les unités"
+        >
+          <Building2 className="h-4 w-4" />
+        </Button>
+      )}
     </div>
   )
 }
