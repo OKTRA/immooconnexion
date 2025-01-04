@@ -1,194 +1,86 @@
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { supabase } from "@/integrations/supabase/client"
-import { StatCard } from "@/components/StatCard"
-import { RevenueChart } from "@/components/RevenueChart"
-import { RecentActivities } from "@/components/RecentActivities"
-import { useQuery } from "@tanstack/react-query"
-import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+import { AdminLayout } from "@/components/admin/layout/AdminLayout"
 import { SidebarProvider } from "@/components/ui/sidebar"
-import { TestPayment } from "@/components/payment/TestPayment"
+import { AgencySidebar } from "@/components/agency/AgencySidebar"
 
-// ... keep existing code (all the hooks and logic)
-
-const Index = () => {
-  const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(true)
-
-  const { data: stats } = useQuery({
-    queryKey: ["dashboard-stats"],
-    queryFn: async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) throw new Error("Non authentifié")
-
-        console.log('User ID:', user.id)
-
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle()
-        
-        if (!profile) throw new Error("Profile not found")
-        
-        console.log('Profil utilisateur:', profile)
-
-        let propertiesQuery = supabase.from("properties").select("*", { count: "exact", head: true })
-        let tenantsQuery = supabase.from("tenants").select("*", { count: "exact", head: true })
-        let contractsQuery = supabase.from("contracts").select("montant, type, created_at, agency_id")
-
-        propertiesQuery = propertiesQuery.eq('agency_id', profile.agency_id)
-        tenantsQuery = tenantsQuery.eq('agency_id', profile.agency_id)
-        contractsQuery = contractsQuery.eq('agency_id', profile.agency_id)
-
-        const [
-          { count: propertiesCount },
-          { count: tenantsCount },
-          { data: contracts },
-        ] = await Promise.all([
-          propertiesQuery,
-          tenantsQuery,
-          contractsQuery,
-        ])
-
-        console.log("Détail des contrats pour le calcul des revenus:", 
-          contracts?.map(c => ({
-            montant: c.montant,
-            type: c.type,
-            date: new Date(c.created_at).toLocaleDateString(),
-            agency_id: c.agency_id
-          }))
-        )
-
-        const totalRevenue = contracts?.reduce((sum, contract) => {
-          if (contract.type === 'loyer') {
-            const montant = contract.montant || 0
-            console.log(`Ajout du montant ${montant} au total pour l'agence ${contract.agency_id}`)
-            return sum + montant
-          }
-          return sum
-        }, 0) || 0
-
-        console.log("Revenu total calculé:", totalRevenue)
-
-        return {
-          properties: propertiesCount || 0,
-          tenants: tenantsCount || 0,
-          revenue: totalRevenue,
-        }
-      } catch (error: any) {
-        console.error("Error in dashboard stats:", error)
-        toast.error(error.message || "Une erreur est survenue lors du chargement des statistiques")
-        return {
-          properties: 0,
-          tenants: 0,
-          revenue: 0,
-        }
-      }
-    },
-    enabled: !isLoading,
-  })
-
-  useEffect(() => {
-    const checkUserRole = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          navigate("/login")
-          return
-        }
-
-        const { data: profile, error } = await supabase
-          .from("profiles")
-          .select("role, agency_id")
-          .eq("id", user.id)
-          .maybeSingle()
-
-        if (error) {
-          console.error("Error fetching profile:", error)
-          toast.error("Erreur lors de la vérification du profil")
-          return
-        }
-
-        if (!profile?.agency_id) {
-          toast.error("Aucune agence associée à ce profil")
-          return
-        }
-
-        if (profile.role === "admin") {
-          const { data: adminData, error: adminError } = await supabase
-            .from("administrators")
-            .select("is_super_admin")
-            .eq("id", user.id)
-            .maybeSingle()
-
-          if (!adminError && adminData?.is_super_admin) {
-            navigate("/admin")
-            return
-          }
-        }
-
-        setIsLoading(false)
-      } catch (error) {
-        console.error("Unexpected error:", error)
-        toast.error("Une erreur inattendue s'est produite")
-      }
-    }
-
-    checkUserRole()
-  }, [navigate])
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
-  }
-
+export default function Index() {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <main className="w-full p-4 md:p-8 min-w-0">
-          <div className="mb-8">
-            <TestPayment />
-          </div>
-          
-          <div className="grid gap-4 md:grid-cols-3 mb-8">
-            <StatCard
-              title="Total Biens"
-              value={stats?.properties.toString() || "0"}
-              className="w-full"
-            />
-            <StatCard
-              title="Total Locataires"
-              value={stats?.tenants.toString() || "0"}
-              className="w-full"
-            />
-            <StatCard
-              title="Revenus Totaux"
-              value={new Intl.NumberFormat("fr-FR", {
-                style: "currency",
-                currency: "XOF",
-              }).format(stats?.revenue || 0)}
-              className="w-full"
-            />
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="w-full min-h-[400px]">
-              <RevenueChart />
+        <AgencySidebar />
+        <main className="flex-1">
+          <AdminLayout>
+            <div className="space-y-4">
+              <h1 className="text-2xl font-bold">Tableau de bord</h1>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+                  <h3 className="text-lg font-semibold">Locataires actifs</h3>
+                  <p className="text-3xl font-bold mt-2">24</p>
+                </div>
+                <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+                  <h3 className="text-lg font-semibold">Biens gérés</h3>
+                  <p className="text-3xl font-bold mt-2">12</p>
+                </div>
+                <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+                  <h3 className="text-lg font-semibold">Revenus mensuels</h3>
+                  <p className="text-3xl font-bold mt-2">15 000€</p>
+                </div>
+                <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+                  <h3 className="text-lg font-semibold">Taux d'occupation</h3>
+                  <p className="text-3xl font-bold mt-2">92%</p>
+                </div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+                  <h3 className="text-lg font-semibold mb-4">Activité récente</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Nouveau contrat signé</p>
+                        <p className="text-sm text-muted-foreground">Il y a 2 heures</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Paiement reçu</p>
+                        <p className="text-sm text-muted-foreground">Il y a 5 heures</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Nouvelle demande de visite</p>
+                        <p className="text-sm text-muted-foreground">Il y a 1 jour</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+                  <h3 className="text-lg font-semibold mb-4">Tâches en attente</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">État des lieux à planifier</p>
+                        <p className="text-sm text-muted-foreground">Pour le 15/04/2024</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Renouvellement de bail</p>
+                        <p className="text-sm text-muted-foreground">Pour le 20/04/2024</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Visite technique</p>
+                        <p className="text-sm text-muted-foreground">Pour le 25/04/2024</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="w-full min-h-[400px]">
-              <RecentActivities />
-            </div>
-          </div>
+          </AdminLayout>
         </main>
       </div>
     </SidebarProvider>
   )
 }
-
-export default Index
