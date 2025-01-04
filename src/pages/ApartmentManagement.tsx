@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -10,16 +10,63 @@ import { PropertyTableHeader } from "@/components/property-table/PropertyTableHe
 import { useState } from "react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { useToast } from "@/components/ui/use-toast"
+import { Loader2 } from "lucide-react"
 
 export default function ApartmentManagement() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedProperty, setSelectedProperty] = useState<any>(null)
   const { toast } = useToast()
+  const queryClient = useQueryClient()
 
-  const { data: properties, isLoading } = useQuery({
+  const { data: properties, isLoading, error } = useQuery({
     queryKey: ['apartment-properties'],
     queryFn: async () => {
+      console.log("Fetching apartment properties...")
+      
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        console.error("User not authenticated")
+        throw new Error("Non authentifié")
+      }
+
+      // Get user profile to get agency_id
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('agency_id, role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (!profile?.agency_id) {
+        console.error("No agency associated with user")
+        throw new Error("Aucune agence associée")
+      }
+
+      console.log("User profile:", profile)
+
+      let query = supabase
+        .from('properties')
+        .select('*')
+        .eq('agency_id', profile.agency_id)
+        .eq('property_category', 'apartment')
+        .order('created_at', { ascending: false })
+
+      const { data, error } = await query
+      
+      if (error) {
+        console.error("Error fetching properties:", error)
+        throw error
+      }
+
+      console.log("Fetched properties:", data)
+      return data
+    }
+  })
+
+  const handleDelete = async () => {
+    if (!selectedProperty) return
+
+    try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
@@ -29,32 +76,17 @@ export default function ApartmentManagement() {
         .eq('id', user.id)
         .maybeSingle()
 
-      if (!profile?.agency_id) {
-        throw new Error("Aucune agence associée")
-      }
+      if (!profile?.agency_id) throw new Error("Aucune agence associée")
 
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('agency_id', profile.agency_id)
-        .eq('property_category', 'apartment')
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      return data
-    }
-  })
-
-  const handleDelete = async () => {
-    if (!selectedProperty) return
-
-    try {
       const { error } = await supabase
         .from('properties')
         .delete()
         .eq('id', selectedProperty.id)
+        .eq('agency_id', profile.agency_id)
 
       if (error) throw error
+
+      queryClient.invalidateQueries({ queryKey: ['apartment-properties'] })
 
       toast({
         title: "Appartement supprimé",
@@ -64,7 +96,7 @@ export default function ApartmentManagement() {
       console.error('Error:', error)
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la suppression",
+        description: error.message || "Une erreur est survenue lors de la suppression",
         variant: "destructive",
       })
     } finally {
@@ -74,7 +106,23 @@ export default function ApartmentManagement() {
   }
 
   if (isLoading) {
-    return <div>Chargement...</div>
+    return (
+      <AgencyLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </AgencyLayout>
+    )
+  }
+
+  if (error) {
+    return (
+      <AgencyLayout>
+        <div className="flex items-center justify-center min-h-screen text-red-500">
+          Une erreur est survenue lors du chargement des appartements
+        </div>
+      </AgencyLayout>
+    )
   }
 
   return (
