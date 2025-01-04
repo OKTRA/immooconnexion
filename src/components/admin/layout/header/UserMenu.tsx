@@ -15,19 +15,25 @@ export function UserMenu() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) {
+          localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token')
+          navigate("/agence/login")
+          return
+        }
+        setIsSessionChecked(true)
+      } catch (error) {
+        console.error('Auth check error:', error)
         navigate("/agence/login")
-        return
       }
-      setIsSessionChecked(true)
     }
 
     checkAuth()
 
-    // Écouter uniquement les événements de déconnexion explicite
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT') {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session || event === 'SIGNED_OUT') {
+        localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token')
         navigate("/agence/login")
       }
     })
@@ -35,22 +41,27 @@ export function UserMenu() {
     return () => {
       subscription.unsubscribe()
     }
-  }, [navigate])
+  }, [navigate, toast])
 
   const { data: profile } = useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('No user found')
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) throw new Error('No user found')
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle()
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle()
 
-      if (error) throw error
-      return data
+        if (error) throw error
+        return data
+      } catch (error) {
+        console.error('Failed to fetch profile:', error)
+        return null
+      }
     },
     enabled: isSessionChecked,
     retry: false,

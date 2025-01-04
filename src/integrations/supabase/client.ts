@@ -7,26 +7,22 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     persistSession: true,
-    detectSessionInUrl: false,
-    flowType: 'pkce',
-    debug: true,
+    detectSessionInUrl: true,
     autoRefreshToken: true,
+    storage: localStorage,
   },
-  global: {
-    headers: {
-      'X-Client-Info': 'supabase-js-web'
-    }
-  }
 });
 
 // Helper function to check and refresh session
 export const checkSession = async () => {
-  const { data: { session }, error } = await supabase.auth.getSession();
-  if (error) {
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error) throw error;
+    return session;
+  } catch (error) {
     console.error('Error checking session:', error);
     return null;
   }
-  return session;
 };
 
 export { SUPABASE_URL as supabaseUrl };
