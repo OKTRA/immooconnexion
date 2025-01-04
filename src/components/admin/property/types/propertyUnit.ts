@@ -20,3 +20,8 @@ export interface PropertyUnitDialogProps {
   propertyId: string;
   onSubmit: (data: PropertyUnit) => void;
 }
+
+export interface PropertyUnitsManagerProps {
+  propertyId: string;
+  filterStatus?: 'available' | 'occupied';
+}
