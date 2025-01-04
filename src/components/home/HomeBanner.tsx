@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button"
-import { Building2, MapPin, Phone } from "lucide-react"
+import { Building2, MapPin } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 export function HomeBanner() {
+  const navigate = useNavigate()
+
   return (
     <div className="relative h-[400px] w-full mb-8 rounded-xl overflow-hidden">
       <div 
@@ -25,9 +28,14 @@ export function HomeBanner() {
               <Building2 className="mr-2 h-5 w-5" />
               Explorer les biens
             </Button>
-            <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/20">
-              <Phone className="mr-2 h-5 w-5" />
-              Nous contacter
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+              onClick={() => navigate("/pricing")}
+            >
+              <MapPin className="mr-2 h-5 w-5" />
+              Gérer mes biens
             </Button>
           </div>
         </div>
