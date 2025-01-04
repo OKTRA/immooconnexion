@@ -26,13 +26,7 @@ interface PropertyUnitDialogProps {
   onSubmit: (data: any) => void;
 }
 
-export function PropertyUnitDialog({
-  isOpen,
-  onClose,
-  editingUnit,
-  propertyId,
-  onSubmit,
-}: PropertyUnitDialogProps) {
+export function PropertyUnitDialog({ isOpen, onClose, editingUnit, propertyId, onSubmit }: PropertyUnitDialogProps) {
   const [formData, setFormData] = useState({
     unit_number: editingUnit?.unit_number || "",
     floor_number: editingUnit?.floor_number || "",
@@ -42,7 +36,7 @@ export function PropertyUnitDialog({
     description: editingUnit?.description || "",
     category: editingUnit?.category || "standard",
     amenities: editingUnit?.amenities || [],
-    status: editingUnit?.status || "available",
+    status: editingUnit?.status || "available"
   })
 
   const { data: propertyData } = useQuery({
@@ -59,7 +53,7 @@ export function PropertyUnitDialog({
     }
   })
 
-  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
