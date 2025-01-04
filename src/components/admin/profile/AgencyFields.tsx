@@ -32,9 +32,6 @@ export function AgencyFields({ agencyData, setAgencyData }: AgencyFieldsProps) {
     },
   })
 
-  const selectedPlan = plans.find(plan => plan.id === agencyData.subscription_plan_id)
-  const canShowPhoneNumber = selectedPlan?.name === "Professionnel" || selectedPlan?.name === "Enterprise"
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -89,8 +86,6 @@ export function AgencyFields({ agencyData, setAgencyData }: AgencyFieldsProps) {
             setAgencyData({ 
               ...agencyData, 
               subscription_plan_id: value,
-              show_phone_on_site: false,
-              list_properties_on_site: false
             })
           }}
         >
@@ -109,27 +104,14 @@ export function AgencyFields({ agencyData, setAgencyData }: AgencyFieldsProps) {
 
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 sm:space-x-4">
-          <Label htmlFor="show_phone" className={!canShowPhoneNumber ? "text-gray-400" : ""}>
-            Afficher le numéro sur le site {!canShowPhoneNumber && "(Nécessite un abonnement Professionnel ou Enterprise)"}
+          <Label htmlFor="show_phone">
+            Afficher le numéro sur le site
           </Label>
           <Switch
             id="show_phone"
             checked={agencyData.show_phone_on_site}
             onCheckedChange={(checked) => 
               setAgencyData({ ...agencyData, show_phone_on_site: checked })
-            }
-            disabled={!canShowPhoneNumber}
-          />
-        </div>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 sm:space-x-4">
-          <Label htmlFor="list_properties">
-            Lister les propriétés sur le site
-          </Label>
-          <Switch
-            id="list_properties"
-            checked={agencyData.list_properties_on_site}
-            onCheckedChange={(checked) => 
-              setAgencyData({ ...agencyData, list_properties_on_site: checked })
             }
           />
         </div>
