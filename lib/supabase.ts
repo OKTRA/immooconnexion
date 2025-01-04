@@ -12,7 +12,23 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     detectSessionInUrl: false,
     flowType: 'pkce',
+    debug: true // Enable debug mode to help troubleshoot auth issues
   },
+  global: {
+    headers: {
+      'X-Client-Info': 'supabase-js-web'
+    }
+  }
 });
+
+// Helper function to check and refresh session
+export const checkSession = async () => {
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (error) {
+    console.error('Error checking session:', error);
+    return null;
+  }
+  return session;
+};
 
 export { supabaseUrl };

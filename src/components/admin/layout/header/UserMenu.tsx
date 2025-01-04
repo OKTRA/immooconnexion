@@ -1,30 +1,33 @@
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase, checkSession } from "@/integrations/supabase/client"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { UserAvatar } from "./UserAvatar"
 import { ThemeToggle } from "./ThemeToggle"
 import { LogoutButton } from "./LogoutButton"
 import { useNavigate } from "react-router-dom"
 import { useEffect } from "react"
+import { useToast } from "@/hooks/use-toast"
 
 export function UserMenu() {
   const navigate = useNavigate()
+  const { toast } = useToast()
 
   const { data: profile } = useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+      const session = await checkSession();
       if (!session) {
-        throw new Error('No session')
+        throw new Error('No session');
       }
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", session.user.id)
         .maybeSingle()
 
-      return data
+      if (error) throw error;
+      return data;
     },
     retry: false,
     meta: {
@@ -33,13 +36,23 @@ export function UserMenu() {
   })
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+    const checkAuth = async () => {
+      const session = await checkSession();
       if (!session) {
         navigate("/super-admin/login")
       }
     }
-    checkSession()
+    checkAuth()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session) {
+        navigate("/super-admin/login")
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [navigate])
 
   return (

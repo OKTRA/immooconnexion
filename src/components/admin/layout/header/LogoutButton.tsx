@@ -15,20 +15,25 @@ export function LogoutButton() {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut()
+      // First clear any existing session data
+      localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token')
+      
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+
       navigate("/super-admin/login")
       toast({
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès",
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Logout error:', error)
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de la déconnexion",
         variant: "destructive"
       })
-      // If logout fails, redirect to login anyway
+      // If logout fails, redirect to login anyway for safety
       navigate("/super-admin/login")
     }
   }
