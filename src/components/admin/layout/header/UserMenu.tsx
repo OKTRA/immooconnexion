@@ -25,9 +25,9 @@ export function UserMenu() {
 
     checkAuth()
 
-    // Only listen for signOut events, not all auth state changes
+    // Écouter uniquement les événements de déconnexion explicite
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT' && isSessionChecked) {
+      if (event === 'SIGNED_OUT') {
         navigate("/agence/login")
       }
     })
@@ -35,7 +35,7 @@ export function UserMenu() {
     return () => {
       subscription.unsubscribe()
     }
-  }, [navigate, isSessionChecked])
+  }, [navigate])
 
   const { data: profile } = useQuery({
     queryKey: ["user-profile"],

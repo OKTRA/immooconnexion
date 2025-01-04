@@ -15,12 +15,23 @@ export function LogoutButton() {
 
   const handleLogout = async () => {
     try {
+      // D'abord, on récupère la session actuelle
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        // Si pas de session, rediriger vers login
+        navigate("/agence/login")
+        return
+      }
+
+      // Déconnexion avec Supabase
       const { error } = await supabase.auth.signOut()
       if (error) throw error
 
-      // Clear session data after successful logout
+      // Nettoyer les données de session locales
       localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token')
       
+      // Redirection et notification
       navigate("/agence/login")
       toast({
         title: "Déconnexion réussie",
