@@ -17,6 +17,28 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null)
 
+  const convertApartmentToProperty = (apartment: Apartment) => ({
+    id: apartment.id,
+    bien: apartment.name,
+    type: 'appartement',
+    chambres: 0,
+    ville: apartment.city || '',
+    loyer: 0,
+    frais_agence: 0,
+    taux_commission: 0,
+    caution: 0,
+    photo_url: apartment.photo_url,
+    statut: apartment.status,
+    user_id: '',
+    agency_id: apartment.agency_id || '',
+    created_at: apartment.created_at,
+    updated_at: apartment.updated_at,
+    owner_name: apartment.owner_name || '',
+    owner_phone: apartment.owner_phone || '',
+    total_units: apartment.total_units,
+    property_category: 'apartment'
+  })
+
   return (
     <div className="container mx-auto py-6">
       <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-lg shadow-sm">
@@ -47,27 +69,7 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
               {apartments?.map((apartment) => (
                 <PropertyTableRow
                   key={apartment.id}
-                  property={{
-                    id: apartment.id,
-                    bien: apartment.name,
-                    type: 'appartement',
-                    chambres: 0,
-                    ville: apartment.city || '',
-                    loyer: 0,
-                    frais_agence: 0,
-                    taux_commission: 0,
-                    caution: 0,
-                    photo_url: apartment.photo_url,
-                    statut: apartment.status,
-                    user_id: '',
-                    agency_id: apartment.agency_id || '',
-                    created_at: apartment.created_at,
-                    updated_at: apartment.updated_at,
-                    owner_name: apartment.owner_name || '',
-                    owner_phone: apartment.owner_phone || '',
-                    total_units: apartment.total_units,
-                    property_category: 'apartment'
-                  }}
+                  property={convertApartmentToProperty(apartment)}
                   onEdit={() => {
                     setSelectedApartment(apartment)
                     setEditDialogOpen(true)
@@ -89,27 +91,7 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
               {apartments?.filter(a => a.status === 'disponible').map((apartment) => (
                 <PropertyTableRow
                   key={apartment.id}
-                  property={{
-                    id: apartment.id,
-                    bien: apartment.name,
-                    type: 'appartement',
-                    chambres: 0,
-                    ville: apartment.city || '',
-                    loyer: 0,
-                    frais_agence: 0,
-                    taux_commission: 0,
-                    caution: 0,
-                    photo_url: apartment.photo_url,
-                    statut: apartment.status,
-                    user_id: '',
-                    agency_id: apartment.agency_id || '',
-                    created_at: apartment.created_at,
-                    updated_at: apartment.updated_at,
-                    owner_name: apartment.owner_name || '',
-                    owner_phone: apartment.owner_phone || '',
-                    total_units: apartment.total_units,
-                    property_category: 'apartment'
-                  }}
+                  property={convertApartmentToProperty(apartment)}
                   onEdit={() => {
                     setSelectedApartment(apartment)
                     setEditDialogOpen(true)
@@ -131,27 +113,7 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
               {apartments?.filter(a => a.status === 'occupé').map((apartment) => (
                 <PropertyTableRow
                   key={apartment.id}
-                  property={{
-                    id: apartment.id,
-                    bien: apartment.name,
-                    type: 'appartement',
-                    chambres: 0,
-                    ville: apartment.city || '',
-                    loyer: 0,
-                    frais_agence: 0,
-                    taux_commission: 0,
-                    caution: 0,
-                    photo_url: apartment.photo_url,
-                    statut: apartment.status,
-                    user_id: '',
-                    agency_id: apartment.agency_id || '',
-                    created_at: apartment.created_at,
-                    updated_at: apartment.updated_at,
-                    owner_name: apartment.owner_name || '',
-                    owner_phone: apartment.owner_phone || '',
-                    total_units: apartment.total_units,
-                    property_category: 'apartment'
-                  }}
+                  property={convertApartmentToProperty(apartment)}
                   onEdit={() => {
                     setSelectedApartment(apartment)
                     setEditDialogOpen(true)

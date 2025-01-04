@@ -1,6 +1,9 @@
 import { TableCell, TableRow } from "@/components/ui/table"
 import { PropertyActions } from "./PropertyActions"
 import { Property } from "@/integrations/supabase/types/properties"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Building2 } from "lucide-react"
 
 interface PropertyTableRowProps {
   property: Property
@@ -10,21 +13,28 @@ interface PropertyTableRowProps {
 
 export function PropertyTableRow({ property, onEdit, onDelete }: PropertyTableRowProps) {
   return (
-    <TableRow>
-      <TableCell className="font-medium">{property.bien}</TableCell>
-      <TableCell>{property.type}</TableCell>
-      <TableCell>{property.chambres}</TableCell>
-      <TableCell>{property.ville}</TableCell>
-      <TableCell>{property.loyer} FCFA</TableCell>
-      <TableCell>{property.caution} FCFA</TableCell>
-      <TableCell>{property.statut}</TableCell>
-      <TableCell>
+    <ResponsiveTable.Row>
+      <ResponsiveTable.Cell>
+        <Avatar>
+          <AvatarImage src={property.photo_url || ''} alt={property.bien} />
+          <AvatarFallback>
+            <Building2 className="h-4 w-4" />
+          </AvatarFallback>
+        </Avatar>
+      </ResponsiveTable.Cell>
+      <ResponsiveTable.Cell className="font-medium">{property.bien}</ResponsiveTable.Cell>
+      <ResponsiveTable.Cell>{property.ville}</ResponsiveTable.Cell>
+      <ResponsiveTable.Cell>{property.total_units}</ResponsiveTable.Cell>
+      <ResponsiveTable.Cell>{property.owner_name}</ResponsiveTable.Cell>
+      <ResponsiveTable.Cell>{property.owner_phone}</ResponsiveTable.Cell>
+      <ResponsiveTable.Cell>{property.statut}</ResponsiveTable.Cell>
+      <ResponsiveTable.Cell className="text-right">
         <PropertyActions
           propertyId={property.id}
           onEdit={onEdit}
           onDelete={onDelete}
         />
-      </TableCell>
-    </TableRow>
+      </ResponsiveTable.Cell>
+    </ResponsiveTable.Row>
   )
 }
