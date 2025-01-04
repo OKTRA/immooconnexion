@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
 import { AnimatedLogo } from "@/components/header/AnimatedLogo"
-import { Menu } from "lucide-react"
+import { Menu, ChevronDown } from "lucide-react"
 import {
   Sheet,
   SheetContent,
@@ -9,22 +9,51 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu"
 
 export function PublicNavbar() {
   const NavLinks = () => (
     <div className="flex flex-col md:flex-row gap-4">
-      <Link 
-        to="/public" 
-        className="text-sm font-medium text-gray-700 hover:text-blue-600 py-2 md:py-0"
-      >
-        Propriétés
-      </Link>
-      <Link 
-        to="/pricing" 
-        className="text-sm font-medium text-gray-700 hover:text-blue-600 py-2 md:py-0"
-      >
-        Tarifs
-      </Link>
+      <NavigationMenu>
+        <NavigationMenuList>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger className="bg-transparent">
+              Pages <ChevronDown className="h-4 w-4" />
+            </NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <div className="grid gap-3 p-4 w-[200px]">
+                <NavigationMenuLink asChild>
+                  <Link to="/public" className="block p-2 hover:bg-accent rounded-md">
+                    Propriétés
+                  </Link>
+                </NavigationMenuLink>
+                <NavigationMenuLink asChild>
+                  <Link to="/pricing" className="block p-2 hover:bg-accent rounded-md">
+                    Tarifs
+                  </Link>
+                </NavigationMenuLink>
+                <NavigationMenuLink asChild>
+                  <Link to="/terms" className="block p-2 hover:bg-accent rounded-md">
+                    CGU
+                  </Link>
+                </NavigationMenuLink>
+                <NavigationMenuLink asChild>
+                  <Link to="/login" className="block p-2 hover:bg-accent rounded-md">
+                    Connexion
+                  </Link>
+                </NavigationMenuLink>
+              </div>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+        </NavigationMenuList>
+      </NavigationMenu>
       <Link to="/login" className="w-full md:w-auto">
         <Button className="w-full md:w-auto">Espace propriétaire</Button>
       </Link>
