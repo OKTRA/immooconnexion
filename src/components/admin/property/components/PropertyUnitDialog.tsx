@@ -16,7 +16,8 @@ import { PhotoUploadSection } from "./unit-form/PhotoUploadSection"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/integrations/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 
 interface PropertyUnitDialogProps {
   isOpen: boolean;
@@ -45,18 +46,43 @@ export function PropertyUnitDialog({
     status: editingUnit?.status || "available",
   })
 
+  const { toast } = useToast()
+
   const { data: propertyData } = useQuery({
     queryKey: ['property', propertyId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('id', propertyId)
-        .single()
-      
-      if (error) throw error
-      return data
-    }
+      try {
+        const { data, error } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('id', propertyId)
+          .maybeSingle()
+        
+        if (error) {
+          toast({
+            title: "Erreur",
+            description: "Impossible de charger les informations de la propriété",
+            variant: "destructive"
+          })
+          throw error
+        }
+
+        if (!data) {
+          toast({
+            title: "Erreur",
+            description: "Propriété non trouvée",
+            variant: "destructive"
+          })
+          throw new Error("Property not found")
+        }
+
+        return data
+      } catch (error) {
+        console.error("Error fetching property:", error)
+        throw error
+      }
+    },
+    enabled: !!propertyId
   })
 
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
