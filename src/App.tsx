@@ -33,7 +33,7 @@ function App() {
               {/* Public routes */}
               <Route path="/" element={<PublicProperties />} />
               <Route path="/properties/:id" element={<PublicPropertyDetails />} />
-              <Route path="/login" element={<Login />} />
+              <Route path="/agence/login" element={<Login />} />
               <Route path="/super-admin/login" element={<SuperAdminLogin />} />
               
               {/* Protected agency routes */}
