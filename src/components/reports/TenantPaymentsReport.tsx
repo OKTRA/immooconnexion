@@ -20,13 +20,16 @@ export function TenantPaymentsReport() {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role')
+        .select('agency_id')
         .eq('id', user.id)
         .maybeSingle()
+
+      if (!profile?.agency_id) throw new Error("Agence non trouvée")
 
       const { data, error } = await supabase
         .from('payment_history_with_tenant')
         .select('*')
+        .eq('agency_id', profile.agency_id)
         .order('created_at', { ascending: false })
 
       if (error) {

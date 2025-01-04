@@ -8,6 +8,18 @@ export function PropertyAnalysisReport() {
   const { data: propertyExpenses } = useQuery({
     queryKey: ['property-expenses'],
     queryFn: async () => {
+      // Get current user's profile to check agency
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('agency_id')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (!profile?.agency_id) throw new Error("Agence non trouvée")
+
       const { data: expenses } = await supabase
         .from('expenses')
         .select(`
@@ -18,6 +30,7 @@ export function PropertyAnalysisReport() {
             bien
           )
         `)
+        .eq('agency_id', profile.agency_id)
         .order('date', { ascending: false })
 
       // Group expenses by property

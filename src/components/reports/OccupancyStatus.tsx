@@ -9,9 +9,22 @@ export function OccupancyStatus() {
   const { data: occupancyData } = useQuery({
     queryKey: ['occupancy-status'],
     queryFn: async () => {
+      // Get current user's profile to check agency
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('agency_id')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (!profile?.agency_id) throw new Error("Agence non trouvée")
+
       const { data: properties } = await supabase
         .from('properties')
         .select('statut')
+        .eq('agency_id', profile.agency_id)
 
       const statusCount = properties?.reduce((acc, property) => {
         const status = property.statut || 'Non défini'
@@ -19,8 +32,8 @@ export function OccupancyStatus() {
         return acc
       }, {} as Record<string, number>) || {}
 
-      return Object.entries(statusCount).map(([status, value]) => ({
-        status,
+      return Object.entries(statusCount).map(([name, value]) => ({
+        name,
         value
       }))
     }

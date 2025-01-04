@@ -7,27 +7,33 @@ export function OverviewStats() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['overview-stats'],
     queryFn: async () => {
-      // Get current user's profile to check role
+      // Get current user's profile to check role and agency
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, agency_id')
         .eq('id', user.id)
         .maybeSingle()
 
-      // Build the base queries
-      let propertiesQuery = supabase.from('properties').select('*', { count: 'exact' })
-      let tenantsQuery = supabase.from('tenants').select('*', { count: 'exact' })
-      let contractsQuery = supabase.from('contracts').select('*')
+      if (!profile?.agency_id) throw new Error("Agence non trouvée")
 
-      // If not admin, filter by agency
-      if (profile?.role !== 'admin') {
-        propertiesQuery = propertiesQuery.eq('agency_id', user.id)
-        tenantsQuery = tenantsQuery.eq('agency_id', user.id)
-        contractsQuery = contractsQuery.eq('agency_id', user.id)
-      }
+      // Build the queries with agency filter
+      const propertiesQuery = supabase
+        .from('properties')
+        .select('*', { count: 'exact' })
+        .eq('agency_id', profile.agency_id)
+
+      const tenantsQuery = supabase
+        .from('tenants')
+        .select('*', { count: 'exact' })
+        .eq('agency_id', profile.agency_id)
+
+      const contractsQuery = supabase
+        .from('contracts')
+        .select('*')
+        .eq('agency_id', profile.agency_id)
 
       const [
         { count: propertiesCount },

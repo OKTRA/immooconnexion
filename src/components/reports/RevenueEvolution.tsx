@@ -9,15 +9,17 @@ export function RevenueEvolution() {
   const { data: revenueData } = useQuery({
     queryKey: ['revenue-evolution'],
     queryFn: async () => {
-      // Get current user's profile to check role
+      // Get current user's profile to check agency
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role')
+        .select('agency_id')
         .eq('id', user.id)
         .maybeSingle()
+
+      if (!profile?.agency_id) throw new Error("Agence non trouvée")
 
       // Get last 6 months
       const months = Array.from({ length: 6 }, (_, i) => {
@@ -28,18 +30,11 @@ export function RevenueEvolution() {
         }
       }).reverse()
 
-      // Build the query
-      let query = supabase
+      const { data: contracts } = await supabase
         .from('contracts')
         .select('montant, created_at')
         .eq('type', 'loyer')
-
-      // If not admin, filter by agency
-      if (profile?.role !== 'admin') {
-        query = query.eq('agency_id', user.id)
-      }
-
-      const { data: contracts } = await query
+        .eq('agency_id', profile.agency_id)
 
       return months.map(({ start, month }) => {
         const monthlyRevenue = contracts?.reduce((sum, contract) => {
