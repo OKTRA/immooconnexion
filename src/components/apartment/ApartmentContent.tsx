@@ -7,6 +7,7 @@ import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { PropertyTableHeader } from "@/components/property-table/PropertyTableHeader"
 import { DeleteApartmentDialog } from "./DeleteApartmentDialog"
 import { Property } from "@/integrations/supabase/types/properties"
+import { Apartment } from "@/components/property/types"
 
 interface ApartmentContentProps {
   properties: Property[]
@@ -15,7 +16,26 @@ interface ApartmentContentProps {
 export function ApartmentContent({ properties }: ApartmentContentProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
+  const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null)
+
+  // Conversion de Property vers Apartment pour la compatibilité
+  const convertPropertyToApartment = (property: Property): Apartment => {
+    return {
+      id: property.id,
+      name: property.bien,
+      total_units: property.total_units || 1,
+      city: property.ville || "",
+      country: "CI",
+      owner_name: property.owner_name || null,
+      owner_phone: property.owner_phone || null,
+      photo_url: property.photo_url,
+      status: property.statut,
+      agency_id: property.agency_id,
+      created_by_user_id: property.created_by_user_id || null,
+      created_at: property.created_at,
+      updated_at: property.updated_at
+    }
+  }
 
   return (
     <div className="container mx-auto py-6">
@@ -49,11 +69,11 @@ export function ApartmentContent({ properties }: ApartmentContentProps) {
                   key={property.id}
                   property={property}
                   onEdit={() => {
-                    setSelectedProperty(property)
+                    setSelectedApartment(convertPropertyToApartment(property))
                     setEditDialogOpen(true)
                   }}
                   onDelete={() => {
-                    setSelectedProperty(property)
+                    setSelectedApartment(convertPropertyToApartment(property))
                     setDeleteDialogOpen(true)
                   }}
                 />
@@ -71,11 +91,11 @@ export function ApartmentContent({ properties }: ApartmentContentProps) {
                   key={property.id}
                   property={property}
                   onEdit={() => {
-                    setSelectedProperty(property)
+                    setSelectedApartment(convertPropertyToApartment(property))
                     setEditDialogOpen(true)
                   }}
                   onDelete={() => {
-                    setSelectedProperty(property)
+                    setSelectedApartment(convertPropertyToApartment(property))
                     setDeleteDialogOpen(true)
                   }}
                 />
@@ -93,11 +113,11 @@ export function ApartmentContent({ properties }: ApartmentContentProps) {
                   key={property.id}
                   property={property}
                   onEdit={() => {
-                    setSelectedProperty(property)
+                    setSelectedApartment(convertPropertyToApartment(property))
                     setEditDialogOpen(true)
                   }}
                   onDelete={() => {
-                    setSelectedProperty(property)
+                    setSelectedApartment(convertPropertyToApartment(property))
                     setDeleteDialogOpen(true)
                   }}
                 />
@@ -110,12 +130,12 @@ export function ApartmentContent({ properties }: ApartmentContentProps) {
       <DeleteApartmentDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        selectedProperty={selectedProperty}
-        onDelete={() => setSelectedProperty(null)}
+        selectedProperty={selectedApartment}
+        onDelete={() => setSelectedApartment(null)}
       />
 
       <ApartmentDialog
-        property={selectedProperty}
+        apartment={selectedApartment}
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
       />
