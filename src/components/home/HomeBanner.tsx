@@ -15,10 +15,10 @@ export function HomeBanner() {
       <div className="absolute inset-0 flex flex-col items-start justify-center px-8 md:px-12 lg:px-16">
         <div className="max-w-2xl space-y-5 animate-fade-in">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
-            La Plateforme de Choix des Professionnels de l'Immobilier
+            La Référence des Professionnels Immobiliers
           </h1>
           <p className="text-base md:text-lg text-gray-200 leading-relaxed">
-            Rejoignez les meilleurs promoteurs, propriétaires et agences qui gèrent efficacement leurs biens sur Immoo. Accédez aux meilleures offres immobilières, sélectionnées par des professionnels de confiance.
+            Les meilleurs promoteurs et agences gèrent leurs biens sur Immoo. Découvrez des offres immobilières sélectionnées par des professionnels.
           </p>
           <div className="flex flex-wrap gap-4">
             <Button size="lg" className="bg-primary hover:bg-primary/90">
