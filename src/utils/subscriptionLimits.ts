@@ -37,11 +37,6 @@ export async function checkSubscriptionLimits(agencyId: string, type: 'property'
 
     console.log("Plan details:", plan)
 
-    // Check if plan allows sales management
-    if (type === 'property' && !plan.features.includes('Gestion des ventes de biens')) {
-      return false
-    }
-
     // Get current counts
     const { count: propertiesCount } = await supabase
       .from('properties')
@@ -64,15 +59,15 @@ export async function checkSubscriptionLimits(agencyId: string, type: 'property'
       users: usersCount
     })
 
-    // Basic/Free plan specific logic - simplified
+    // Basic/Free plan specific logic
     if (plan.name.toLowerCase().includes('basic') || plan.name.toLowerCase().includes('gratuit')) {
       console.log("Basic/Free plan detected")
       
-      // For properties, allow exactly one
+      // For properties, allow up to one property
       if (type === 'property') {
         const currentCount = propertiesCount || 0
-        console.log(`Current properties count: ${currentCount}`)
-        return currentCount === 0
+        console.log(`Current properties count: ${currentCount}, Max allowed: 1`)
+        return currentCount < 1
       }
       
       // For other types, maintain the same logic
