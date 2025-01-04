@@ -8,6 +8,11 @@ import { PaydunyaForm } from "./PaydunyaForm"
 import { useToast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
 import { PaymentDialogProps } from "./types"
+import { useForm } from "react-hook-form"
+import { PaymentFormFields } from "./PaymentFormFields"
+import { PaymentFormData, paymentFormSchema } from "./types"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Form } from "@/components/ui/form"
 
 export function PaymentDialog({ 
   open, 
@@ -20,8 +25,25 @@ export function PaymentDialog({
 }: PaymentDialogProps) {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<string>("cinetpay")
+  const [step, setStep] = useState<'form' | 'payment'>(isUpgrade ? 'payment' : 'form')
   const { toast } = useToast()
   const navigate = useNavigate()
+
+  const form = useForm<PaymentFormData>({
+    resolver: zodResolver(paymentFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirm_password: "",
+      agency_name: "",
+      agency_address: "",
+      country: "",
+      city: "",
+      first_name: "",
+      last_name: "",
+      phone_number: "",
+    }
+  })
 
   const handleClose = () => {
     if (paymentSuccess) {
@@ -40,17 +62,8 @@ export function PaymentDialog({
     })
   }
 
-  const defaultFormData = {
-    email: "",
-    password: "",
-    confirm_password: "",
-    agency_name: "",
-    agency_address: "",
-    country: "",
-    city: "",
-    first_name: "",
-    last_name: "",
-    phone_number: "",
+  const onSubmit = (data: PaymentFormData) => {
+    setStep('payment')
   }
 
   return (
@@ -78,6 +91,15 @@ export function PaymentDialog({
                   Retour au tableau de bord
                 </Button>
               </div>
+            ) : step === 'form' ? (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <PaymentFormFields form={form} />
+                  <Button type="submit" className="w-full">
+                    Continuer vers le paiement
+                  </Button>
+                </form>
+              </Form>
             ) : (
               <div className="space-y-4">
                 <PaymentMethodSelector 
@@ -90,7 +112,7 @@ export function PaymentDialog({
                     description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
                     agencyId={agencyId || planId}
                     onSuccess={handlePaymentSuccess}
-                    formData={defaultFormData}
+                    formData={form.getValues()}
                   />
                 )}
                 {paymentMethod === "paydunya" && (
@@ -99,7 +121,7 @@ export function PaymentDialog({
                     description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
                     agencyId={agencyId || planId}
                     onSuccess={handlePaymentSuccess}
-                    formData={defaultFormData}
+                    formData={form.getValues()}
                   />
                 )}
               </div>
