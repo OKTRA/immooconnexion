@@ -7,8 +7,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { GlobalHeader } from "@/components/layout/GlobalHeader"
 import { Loader2 } from "lucide-react"
+import { AgencyLayout } from "@/components/agency/AgencyLayout"
 
-// Lazy load all pages
 const Index = lazy(() => import("./pages/Index"))
 const Login = lazy(() => import("./pages/Login"))
 const SuperAdminLogin = lazy(() => import("./pages/SuperAdminLogin"))
@@ -62,18 +62,22 @@ function AppRoutes() {
             path="/agence/*"
             element={
               <ProtectedRoute>
-                <GlobalHeader />
-                <Routes>
-                  <Route path="admin" element={<Index />} />
-                  <Route path="locataires" element={<Tenants />} />
-                  <Route path="locataires/:id/contrats" element={<TenantContracts />} />
-                  <Route path="biens" element={<Properties />} />
-                  <Route path="biens/:id" element={<PropertyDetails />} />
-                  <Route path="ventes" element={<PropertySales />} />
-                  <Route path="depenses" element={<Expenses />} />
-                  <Route path="gains" element={<AgencyEarnings />} />
-                  <Route path="rapports" element={<Reports />} />
-                </Routes>
+                <div className="min-h-screen flex flex-col">
+                  <GlobalHeader />
+                  <AgencyLayout>
+                    <Routes>
+                      <Route path="admin" element={<Index />} />
+                      <Route path="locataires" element={<Tenants />} />
+                      <Route path="locataires/:id/contrats" element={<TenantContracts />} />
+                      <Route path="biens" element={<Properties />} />
+                      <Route path="biens/:id" element={<PropertyDetails />} />
+                      <Route path="ventes" element={<PropertySales />} />
+                      <Route path="depenses" element={<Expenses />} />
+                      <Route path="gains" element={<AgencyEarnings />} />
+                      <Route path="rapports" element={<Reports />} />
+                    </Routes>
+                  </AgencyLayout>
+                </div>
               </ProtectedRoute>
             }
           />
