@@ -20,7 +20,6 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
     handleSubmit,
     previewUrls
   } = usePropertyForm(property, () => {
-    // Fermer le dialogue après la soumission réussie
     onOpenChange?.(false)
   })
 
@@ -31,12 +30,14 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
   }
 
   const dialogContent = (
-    <DialogContent className="sm:max-w-[500px]">
+    <DialogContent className="w-[95vw] max-w-[500px] h-[90vh] md:h-auto p-4 md:p-6">
       <DialogHeader>
-        <DialogTitle>{property ? "Modifier le bien" : "Ajouter un nouveau bien"}</DialogTitle>
+        <DialogTitle className="text-lg md:text-xl">
+          {property ? "Modifier le bien" : "Ajouter un nouveau bien"}
+        </DialogTitle>
       </DialogHeader>
       
-      <ScrollArea className="h-[calc(100vh-200px)] md:h-auto">
+      <ScrollArea className="h-[calc(90vh-120px)] md:h-auto pr-4">
         <PropertyFormFields
           formData={formData}
           setFormData={setFormData}
@@ -44,9 +45,20 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
           imagePreviewUrl={previewUrls}
         />
 
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={() => onOpenChange?.(false)}>Annuler</Button>
-          <Button onClick={handleSubmit}>{property ? "Modifier" : "Enregistrer"}</Button>
+        <div className="flex justify-end gap-2 mt-6">
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange?.(false)}
+            className="w-full md:w-auto"
+          >
+            Annuler
+          </Button>
+          <Button 
+            onClick={handleSubmit}
+            className="w-full md:w-auto"
+          >
+            {property ? "Modifier" : "Enregistrer"}
+          </Button>
         </div>
       </ScrollArea>
     </DialogContent>
@@ -59,7 +71,7 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Ajouter un bien</Button>
+        <Button className="w-full md:w-auto">Ajouter un bien</Button>
       </DialogTrigger>
       {dialogContent}
     </Dialog>

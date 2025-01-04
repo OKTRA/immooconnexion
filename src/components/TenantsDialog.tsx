@@ -36,13 +36,13 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="w-[95vw] max-w-2xl h-[90vh] md:h-auto p-4 md:p-6">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-lg md:text-xl">
             {tenant ? "Modifier le locataire" : "Ajouter un locataire"}
           </DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-[calc(100vh-200px)] md:h-auto">
+        <ScrollArea className="h-[calc(90vh-120px)] md:h-auto pr-4">
           {!showReceipt ? (
             <TenantCreationForm
               userProfile={userProfile}
@@ -72,6 +72,7 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
                     setShowReceipt(false);
                     onOpenChange(false);
                   }}
+                  className="w-full md:w-auto"
                 >
                   Fermer
                 </Button>
