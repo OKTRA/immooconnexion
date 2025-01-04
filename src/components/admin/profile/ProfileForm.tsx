@@ -44,6 +44,12 @@ export function ProfileForm({
             setNewProfile({ ...newProfile, id: userId })
             setCurrentStep(2)
           }
+        } else if (setNewProfile) {
+          await setNewProfile(newProfile)
+          toast({
+            title: "Succès",
+            description: "Les informations d'authentification ont été mises à jour",
+          })
         }
       } else if (currentStep === 2 && onUpdateProfile && newProfile.id) {
         await onUpdateProfile(newProfile.id)
