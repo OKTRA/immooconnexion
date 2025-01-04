@@ -7,6 +7,8 @@ import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { PropertyTableHeader } from "@/components/property-table/PropertyTableHeader"
 import { DeleteApartmentDialog } from "./DeleteApartmentDialog"
 import { Apartment } from "@/components/property/types"
+import { Button } from "@/components/ui/button"
+import { useNavigate } from "react-router-dom"
 
 interface ApartmentContentProps {
   apartments: Apartment[]
@@ -16,6 +18,7 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null)
+  const navigate = useNavigate()
 
   const convertApartmentToProperty = (apartment: Apartment) => ({
     id: apartment.id,
@@ -38,6 +41,10 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
     total_units: apartment.total_units,
     property_category: 'apartment'
   })
+
+  const handleManageUnits = (apartment: Apartment) => {
+    navigate(`/agence/appartements/${apartment.id}/unites`)
+  }
 
   return (
     <div className="container mx-auto py-6">
@@ -78,6 +85,15 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
                     setSelectedApartment(apartment)
                     setDeleteDialogOpen(true)
                   }}
+                  customActions={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleManageUnits(apartment)}
+                    >
+                      Gérer les unités
+                    </Button>
+                  }
                 />
               ))}
             </ResponsiveTable.Body>
@@ -100,6 +116,15 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
                     setSelectedApartment(apartment)
                     setDeleteDialogOpen(true)
                   }}
+                  customActions={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleManageUnits(apartment)}
+                    >
+                      Gérer les unités
+                    </Button>
+                  }
                 />
               ))}
             </ResponsiveTable.Body>
@@ -122,6 +147,15 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
                     setSelectedApartment(apartment)
                     setDeleteDialogOpen(true)
                   }}
+                  customActions={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleManageUnits(apartment)}
+                    >
+                      Gérer les unités
+                    </Button>
+                  }
                 />
               ))}
             </ResponsiveTable.Body>
