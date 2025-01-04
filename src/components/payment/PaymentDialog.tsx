@@ -16,7 +16,7 @@ export function PaymentDialog({
   planName, 
   amount = 0,
   isUpgrade = false,
-  propertyId
+  agencyId
 }: PaymentDialogProps) {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<string>("cinetpay")
@@ -88,8 +88,7 @@ export function PaymentDialog({
                   <CinetPayForm 
                     amount={amount}
                     description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
-                    agencyId={planId}
-                    propertyId={propertyId}
+                    agencyId={agencyId || planId}
                     onSuccess={handlePaymentSuccess}
                     formData={defaultFormData}
                   />
@@ -98,8 +97,7 @@ export function PaymentDialog({
                   <PaydunyaForm 
                     amount={amount}
                     description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
-                    agencyId={planId}
-                    propertyId={propertyId}
+                    agencyId={agencyId || planId}
                     onSuccess={handlePaymentSuccess}
                     formData={defaultFormData}
                   />

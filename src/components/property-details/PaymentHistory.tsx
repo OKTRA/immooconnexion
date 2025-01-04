@@ -32,7 +32,7 @@ export function PaymentHistory({
           <PaymentDialog 
             open={isPaymentDialogOpen}
             onOpenChange={setIsPaymentDialogOpen}
-            propertyId={propertyId}
+            agencyId={propertyId}
           />
         </div>
       </CardHeader>

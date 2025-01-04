@@ -25,7 +25,7 @@ export interface PaymentDialogProps {
   planName?: string
   amount?: number
   isUpgrade?: boolean
-  propertyId?: string
+  agencyId?: string
 }
 
 export interface CinetPayFormProps {
@@ -35,5 +35,13 @@ export interface CinetPayFormProps {
   onError?: (error: any) => void
   agencyId?: string | null
   formData: PaymentFormData
-  propertyId?: string
+}
+
+export interface PaydunyaFormProps {
+  amount: number
+  description: string
+  agencyId?: string | null
+  onSuccess?: () => void
+  onError?: (error: any) => void
+  formData: PaymentFormData
 }
