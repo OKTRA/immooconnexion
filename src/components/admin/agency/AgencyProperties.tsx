@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Loader2 } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface AgencyPropertiesProps {
   agencyId: string
@@ -18,6 +19,9 @@ export function AgencyProperties({ agencyId }: AgencyPropertiesProps) {
     queryKey: ["agency-properties", agencyId],
     queryFn: async () => {
       console.log("Fetching properties for agency:", agencyId)
+      
+      const { data: profile } = await supabase.auth.getUser()
+      console.log("Current user:", profile?.user?.id)
 
       const { data, error } = await supabase
         .from("properties")
@@ -41,6 +45,9 @@ export function AgencyProperties({ agencyId }: AgencyPropertiesProps) {
     queryKey: ["agency-property-sales", agencyId],
     queryFn: async () => {
       console.log("Fetching property sales for agency:", agencyId)
+
+      const { data: profile } = await supabase.auth.getUser()
+      console.log("Current user for sales:", profile?.user?.id)
 
       const { data, error } = await supabase
         .from("property_sales")
@@ -72,6 +79,16 @@ export function AgencyProperties({ agencyId }: AgencyPropertiesProps) {
       <div className="flex justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
+    )
+  }
+
+  if (propertiesError || salesError) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>
+          Une erreur est survenue lors du chargement des données. Veuillez réessayer.
+        </AlertDescription>
+      </Alert>
     )
   }
 
