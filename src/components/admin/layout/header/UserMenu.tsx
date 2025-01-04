@@ -7,14 +7,6 @@ import { useQuery } from "@tanstack/react-query"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -43,7 +35,7 @@ export function UserMenu() {
           )
         `)
         .eq("id", user.id)
-        .single()
+        .maybeSingle()
 
       return data
     },
@@ -69,47 +61,57 @@ export function UserMenu() {
 
   return (
     <div className="flex items-center gap-4">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-            <Avatar className="h-8 w-8 border border-white/20">
-              <AvatarFallback className="bg-white/10 text-white">
-                {profile?.first_name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
-              </AvatarFallback>
-            </Avatar>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end" forceMount>
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">
-                {profile?.first_name || profile?.email || 'Utilisateur'}
-              </p>
-              <p className="text-xs leading-none text-muted-foreground">
-                {profile?.email}
-              </p>
-              {profile?.agencies?.subscription_plans?.name && (
-                <p className="text-xs text-muted-foreground">
-                  Plan: {profile.agencies.subscription_plans.name}
-                </p>
-              )}
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+      <div className="flex items-center gap-2">
+        <Avatar className="h-8 w-8 border border-white/20">
+          <AvatarFallback className="bg-white/10 text-white">
+            {profile?.first_name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
+          </AvatarFallback>
+        </Avatar>
+        <div className="hidden md:block">
+          <p className="text-sm font-medium text-white">
+            {profile?.first_name || profile?.email || 'Utilisateur'}
+          </p>
+          <p className="text-xs text-white/70">
+            {profile?.agencies?.subscription_plans?.name || 'Plan non défini'}
+          </p>
+        </div>
+      </div>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="text-white hover:bg-white/10"
+          >
             {theme === "dark" ? (
-              <Sun className="mr-2 h-4 w-4" />
+              <Sun className="h-5 w-5" />
             ) : (
-              <Moon className="mr-2 h-4 w-4" />
+              <Moon className="h-5 w-5" />
             )}
-            <span>Changer le thème</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleLogout}>
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Déconnexion</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Changer le thème</p>
+        </TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white hover:bg-white/10"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Déconnexion</p>
+        </TooltipContent>
+      </Tooltip>
     </div>
   )
 }

@@ -30,14 +30,7 @@ export function DashboardTabs() {
 
       const { data } = await supabase
         .from("profiles")
-        .select(`
-          *,
-          agencies (
-            id,
-            name,
-            subscription_plan_id
-          )
-        `)
+        .select("role")
         .eq("id", user.id)
         .single()
 
@@ -45,7 +38,7 @@ export function DashboardTabs() {
     },
   })
 
-  const isAgencyAdmin = profile?.role === 'admin' && profile?.agency_id
+  const isAdmin = profile?.role === 'admin'
 
   const tabs = [
     {
@@ -60,7 +53,7 @@ export function DashboardTabs() {
       label: "Agences",
       icon: Building2,
       content: <AdminAgencies />,
-      show: true
+      show: !isAdmin
     },
     {
       value: "agents",
@@ -74,28 +67,28 @@ export function DashboardTabs() {
       label: "Plans d'abonnement",
       icon: Receipt,
       content: <AdminSubscriptionPlans />,
-      show: true
+      show: !isAdmin
     },
     {
       value: "payments",
       label: "Paiements",
       icon: CircleDollarSign,
       content: <AdminPaymentDashboard />,
-      show: true
+      show: !isAdmin
     },
     {
       value: "transactions",
       label: "Transactions",
       icon: History,
       content: <AdminTransactionHistory />,
-      show: true
+      show: !isAdmin
     },
     {
       value: "upgrade",
       label: "Changer de plan",
       icon: ArrowUpDown,
       content: <SubscriptionUpgradeTab />,
-      show: isAgencyAdmin
+      show: isAdmin
     }
   ]
 
