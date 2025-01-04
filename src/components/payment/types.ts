@@ -24,6 +24,7 @@ export interface CinetPayFormProps {
   onSuccess?: () => void
   onError?: (error: any) => void
   agencyId?: string | null
+  formData: PaymentFormData
 }
 
 export interface PaymentDialogProps {

@@ -71,7 +71,7 @@ export function PaymentDialog({
             name: data.agency_name,
             email: data.email,
             phone: data.phone_number,
-            address: data.address,
+            address: data.agency_address,
             subscription_plan_id: planId,
             status: 'active', // Actif immédiatement pour les plans gratuits
             country: data.country,
