@@ -188,6 +188,69 @@ export type Database = {
           },
         ]
       }
+      apartments: {
+        Row: {
+          agency_id: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          created_by_user_id: string | null
+          id: string
+          name: string
+          owner_name: string | null
+          owner_phone: string | null
+          photo_url: string | null
+          status: string | null
+          total_units: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          agency_id?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          created_by_user_id?: string | null
+          id?: string
+          name: string
+          owner_name?: string | null
+          owner_phone?: string | null
+          photo_url?: string | null
+          status?: string | null
+          total_units?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          agency_id?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          created_by_user_id?: string | null
+          id?: string
+          name?: string
+          owner_name?: string | null
+          owner_phone?: string | null
+          photo_url?: string | null
+          status?: string | null
+          total_units?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartments_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartments_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           agency_id: string | null
@@ -682,6 +745,7 @@ export type Database = {
       property_units: {
         Row: {
           amenities: string[] | null
+          apartment_id: string | null
           area: number | null
           category: string | null
           created_at: string | null
@@ -698,6 +762,7 @@ export type Database = {
         }
         Insert: {
           amenities?: string[] | null
+          apartment_id?: string | null
           area?: number | null
           category?: string | null
           created_at?: string | null
@@ -714,6 +779,7 @@ export type Database = {
         }
         Update: {
           amenities?: string[] | null
+          apartment_id?: string | null
           area?: number | null
           category?: string | null
           created_at?: string | null
@@ -729,6 +795,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "property_units_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_units_property_id_fkey"
             columns: ["property_id"]

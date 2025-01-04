@@ -5,9 +5,8 @@ import { westafrikanCountries } from "@/utils/countryUtils"
 
 interface BasicInfoSectionProps {
   formData: {
-    bien: string
-    property_category: string
-    ville: string
+    name: string
+    city: string
     country: string
     total_units: string
   }
@@ -25,30 +24,13 @@ export function BasicInfoSection({
       <h3 className="text-lg font-medium">Informations de base</h3>
       <div className="grid gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="bien">Nom de l'immeuble</Label>
+          <Label htmlFor="name">Nom de l'immeuble</Label>
           <Input 
-            id="bien" 
+            id="name" 
             placeholder="Ex: Résidence Les Palmiers" 
-            value={formData.bien}
+            value={formData.name}
             onChange={handleInputChange}
           />
-        </div>
-
-        <div className="grid gap-2">
-          <Label htmlFor="property_category">Type de bien</Label>
-          <Select 
-            value={formData.property_category} 
-            onValueChange={(value) => handleSelectChange(value, 'property_category')}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionner le type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="apartment">Immeuble</SelectItem>
-              <SelectItem value="studio">Studio</SelectItem>
-              <SelectItem value="duplex">Duplex</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         <div className="grid gap-2">
@@ -71,11 +53,11 @@ export function BasicInfoSection({
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="ville">Ville</Label>
+          <Label htmlFor="city">Ville</Label>
           <Input 
-            id="ville" 
+            id="city" 
             placeholder="Ex: Abidjan"
-            value={formData.ville}
+            value={formData.city}
             onChange={handleInputChange}
           />
         </div>
