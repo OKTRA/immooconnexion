@@ -9,6 +9,8 @@ export interface SubscriptionLimits {
 
 export async function checkSubscriptionLimits(agencyId: string, type: 'property' | 'tenant' | 'user'): Promise<boolean> {
   try {
+    console.log("Checking limits for agency:", agencyId, "type:", type)
+    
     // Get agency's subscription plan
     const { data: agency } = await supabase
       .from('agencies')
@@ -33,6 +35,8 @@ export async function checkSubscriptionLimits(agencyId: string, type: 'property'
       return false
     }
 
+    console.log("Plan details:", plan)
+
     // Check if plan allows sales management
     if (type === 'property' && !plan.features.includes('Gestion des ventes de biens')) {
       return false
@@ -53,6 +57,20 @@ export async function checkSubscriptionLimits(agencyId: string, type: 'property'
       .from('profiles')
       .select('*', { count: 'exact', head: true })
       .eq('agency_id', agencyId)
+
+    console.log("Current counts:", {
+      properties: propertiesCount,
+      tenants: tenantsCount,
+      users: usersCount
+    })
+
+    // Special handling for free plan with 1 property limit
+    if (plan.name.toLowerCase().includes('basic') || plan.name.toLowerCase().includes('gratuit')) {
+      if (type === 'property' && (propertiesCount || 0) >= 1) {
+        console.log("Basic plan property limit reached")
+        return false
+      }
+    }
 
     if (type === 'property' && plan.max_properties !== -1) {
       return (propertiesCount || 0) < plan.max_properties
