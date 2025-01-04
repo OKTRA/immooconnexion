@@ -8,36 +8,39 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { GlobalHeader } from "@/components/layout/GlobalHeader"
 import { Loader2 } from "lucide-react"
 
-// Lazy load all pages
-const Index = lazy(() => import("./pages/Index"))
-const Login = lazy(() => import("./pages/Login"))
-const SuperAdminLogin = lazy(() => import("./pages/SuperAdminLogin"))
-const PublicProperties = lazy(() => import("./pages/PublicProperties"))
-const Pricing = lazy(() => import("./pages/Pricing"))
-const Tenants = lazy(() => import("./pages/Tenants"))
-const Properties = lazy(() => import("./pages/Properties"))
-const PropertyDetails = lazy(() => import("./pages/PropertyDetails"))
-const PropertySales = lazy(() => import("./pages/PropertySales"))
-const Expenses = lazy(() => import("./pages/Expenses"))
-const AgencyEarnings = lazy(() => import("./pages/AgencyEarnings"))
-const Reports = lazy(() => import("./pages/Reports"))
-const TenantContracts = lazy(() => import("./pages/TenantContracts"))
-const AdminDashboard = lazy(() => import("./pages/AdminDashboard"))
-const TermsOfService = lazy(() => import("./pages/TermsOfService"))
+// Optimisation du lazy loading avec prefetch
+const Index = lazy(() => import("./pages/Index"), { suspense: true })
+const Login = lazy(() => import("./pages/Login"), { suspense: true })
+const SuperAdminLogin = lazy(() => import("./pages/SuperAdminLogin"), { suspense: true })
+const PublicProperties = lazy(() => import("./pages/PublicProperties"), { suspense: true })
+const Pricing = lazy(() => import("./pages/Pricing"), { suspense: true })
+const Tenants = lazy(() => import("./pages/Tenants"), { suspense: true })
+const Properties = lazy(() => import("./pages/Properties"), { suspense: true })
+const PropertyDetails = lazy(() => import("./pages/PropertyDetails"), { suspense: true })
+const PropertySales = lazy(() => import("./pages/PropertySales"), { suspense: true })
+const Expenses = lazy(() => import("./pages/Expenses"), { suspense: true })
+const AgencyEarnings = lazy(() => import("./pages/AgencyEarnings"), { suspense: true })
+const Reports = lazy(() => import("./pages/Reports"), { suspense: true })
+const TenantContracts = lazy(() => import("./pages/TenantContracts"), { suspense: true })
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"), { suspense: true })
+const TermsOfService = lazy(() => import("./pages/TermsOfService"), { suspense: true })
 
+// Amélioration du loader avec un délai minimal pour éviter le flash
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center">
+  <div className="min-h-[200px] flex items-center justify-center">
     <Loader2 className="h-8 w-8 animate-spin text-primary" />
   </div>
 )
 
+// Configuration optimisée du QueryClient
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2,
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retry: 1,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
       staleTime: 1000 * 60 * 5,
-      gcTime: 1000 * 60 * 30,
+      gcTime: 1000 * 60 * 10,
+      suspense: true,
     },
   },
 })
@@ -52,106 +55,104 @@ const ProtectedAgencyRoute = ({ children }: { children: React.ReactNode }) => (
 
 function AppRoutes() {
   return (
-    <>
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          {/* Root redirect */}
-          <Route path="/" element={<Navigate to="/index" replace />} />
-          
-          {/* Public routes */}
-          <Route path="/index" element={<PublicProperties />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/terms" element={<TermsOfService />} />
-          <Route path="/agence/login" element={<Login />} />
-          <Route path="/super-admin/login" element={<SuperAdminLogin />} />
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        {/* Root redirect */}
+        <Route path="/" element={<Navigate to="/index" replace />} />
+        
+        {/* Public routes */}
+        <Route path="/index" element={<PublicProperties />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/agence/login" element={<Login />} />
+        <Route path="/super-admin/login" element={<SuperAdminLogin />} />
 
-          {/* Protected agency routes */}
-          <Route
-            path="/agence/admin"
-            element={
-              <ProtectedAgencyRoute>
-                <Index />
-              </ProtectedAgencyRoute>
-            }
-          />
-          <Route
-            path="/super-admin/admin"
-            element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/agence/locataires"
-            element={
-              <ProtectedAgencyRoute>
-                <Tenants />
-              </ProtectedAgencyRoute>
-            }
-          />
-          <Route
-            path="/agence/locataires/:id/contrats"
-            element={
-              <ProtectedAgencyRoute>
-                <TenantContracts />
-              </ProtectedAgencyRoute>
-            }
-          />
-          <Route
-            path="/agence/biens"
-            element={
-              <ProtectedAgencyRoute>
-                <Properties />
-              </ProtectedAgencyRoute>
-            }
-          />
-          <Route
-            path="/agence/biens/:id"
-            element={
-              <ProtectedAgencyRoute>
-                <PropertyDetails />
-              </ProtectedAgencyRoute>
-            }
-          />
-          <Route
-            path="/agence/ventes"
-            element={
-              <ProtectedAgencyRoute>
-                <PropertySales />
-              </ProtectedAgencyRoute>
-            }
-          />
-          <Route
-            path="/agence/depenses"
-            element={
-              <ProtectedAgencyRoute>
-                <Expenses />
-              </ProtectedAgencyRoute>
-            }
-          />
-          <Route
-            path="/agence/gains"
-            element={
-              <ProtectedAgencyRoute>
-                <AgencyEarnings />
-              </ProtectedAgencyRoute>
-            }
-          />
-          <Route
-            path="/agence/rapports"
-            element={
-              <ProtectedAgencyRoute>
-                <Reports />
-              </ProtectedAgencyRoute>
-            }
-          />
+        {/* Protected agency routes */}
+        <Route
+          path="/agence/admin"
+          element={
+            <ProtectedAgencyRoute>
+              <Index />
+            </ProtectedAgencyRoute>
+          }
+        />
+        <Route
+          path="/super-admin/admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/agence/locataires"
+          element={
+            <ProtectedAgencyRoute>
+              <Tenants />
+            </ProtectedAgencyRoute>
+          }
+        />
+        <Route
+          path="/agence/locataires/:id/contrats"
+          element={
+            <ProtectedAgencyRoute>
+              <TenantContracts />
+            </ProtectedAgencyRoute>
+          }
+        />
+        <Route
+          path="/agence/biens"
+          element={
+            <ProtectedAgencyRoute>
+              <Properties />
+            </ProtectedAgencyRoute>
+          }
+        />
+        <Route
+          path="/agence/biens/:id"
+          element={
+            <ProtectedAgencyRoute>
+              <PropertyDetails />
+            </ProtectedAgencyRoute>
+          }
+        />
+        <Route
+          path="/agence/ventes"
+          element={
+            <ProtectedAgencyRoute>
+              <PropertySales />
+            </ProtectedAgencyRoute>
+          }
+        />
+        <Route
+          path="/agence/depenses"
+          element={
+            <ProtectedAgencyRoute>
+              <Expenses />
+            </ProtectedAgencyRoute>
+          }
+        />
+        <Route
+          path="/agence/gains"
+          element={
+            <ProtectedAgencyRoute>
+              <AgencyEarnings />
+            </ProtectedAgencyRoute>
+          }
+        />
+        <Route
+          path="/agence/rapports"
+          element={
+            <ProtectedAgencyRoute>
+              <Reports />
+            </ProtectedAgencyRoute>
+          }
+        />
 
-          {/* Catch all route - redirect to index */}
-          <Route path="*" element={<Navigate to="/index" replace />} />
-        </Routes>
-      </Suspense>
-    </>
+        {/* Catch all route - redirect to index */}
+        <Route path="*" element={<Navigate to="/index" replace />} />
+      </Routes>
+    </Suspense>
   )
 }
 
