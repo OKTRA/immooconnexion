@@ -140,7 +140,7 @@ export function PropertyTable() {
     <div className="space-y-4 w-full overflow-x-auto">
       <div className="min-w-full">
         <ResponsiveTable>
-          <PropertyTableHeader />
+          <PropertyTableHeader type="property" />
           <ResponsiveTable.Body>
             {properties && properties.map((property) => (
               <PropertyTableRow

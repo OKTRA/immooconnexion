@@ -64,7 +64,7 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
 
         <TabsContent value="all" className="bg-white rounded-lg shadow-sm">
           <ResponsiveTable>
-            <PropertyTableHeader />
+            <PropertyTableHeader type="apartment" />
             <ResponsiveTable.Body>
               {apartments?.map((apartment) => (
                 <PropertyTableRow
@@ -86,7 +86,7 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
 
         <TabsContent value="available" className="bg-white rounded-lg shadow-sm">
           <ResponsiveTable>
-            <PropertyTableHeader />
+            <PropertyTableHeader type="apartment" />
             <ResponsiveTable.Body>
               {apartments?.filter(a => a.status === 'disponible').map((apartment) => (
                 <PropertyTableRow
@@ -108,7 +108,7 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
 
         <TabsContent value="occupied" className="bg-white rounded-lg shadow-sm">
           <ResponsiveTable>
-            <PropertyTableHeader />
+            <PropertyTableHeader type="apartment" />
             <ResponsiveTable.Body>
               {apartments?.filter(a => a.status === 'occupé').map((apartment) => (
                 <PropertyTableRow
