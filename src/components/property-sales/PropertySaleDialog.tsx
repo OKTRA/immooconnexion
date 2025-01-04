@@ -1,9 +1,8 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { SaleFormFields } from "./form/SaleFormFields"
-import { PhotoUpload } from "./form/PhotoUpload"
+import { Dialog, DialogContent as BaseDialogContent } from "@/components/ui/dialog"
+import { DialogHeader } from "./form/DialogHeader"
+import { DialogContent } from "./form/DialogContent"
+import { DialogActions } from "./form/DialogActions"
 import { useSaleForm } from "./form/useSaleForm"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface PropertySaleDialogProps {
   propertyId: string
@@ -37,33 +36,21 @@ export function PropertySaleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh]">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditing ? "Modifier la vente" : "Enregistrer une vente"}
-          </DialogTitle>
-        </DialogHeader>
-        <ScrollArea className="h-[60vh] pr-4">
-          <div className="space-y-6">
-            <SaleFormFields
-              formData={formData}
-              onChange={handleFormChange}
-            />
-            <PhotoUpload
-              onFilesSelected={setSelectedFiles}
-              existingPhotos={initialData?.photo_urls}
-            />
-          </div>
-        </ScrollArea>
-        <div className="flex justify-end gap-2 pt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Annuler
-          </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Enregistrement..." : isEditing ? "Modifier" : "Enregistrer"}
-          </Button>
-        </div>
-      </DialogContent>
+      <BaseDialogContent className="max-h-[90vh]">
+        <DialogHeader isEditing={!!isEditing} />
+        <DialogContent
+          formData={formData}
+          onChange={handleFormChange}
+          onFilesSelected={setSelectedFiles}
+          existingPhotos={initialData?.photo_urls}
+        />
+        <DialogActions
+          onCancel={() => onOpenChange(false)}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+          isEditing={!!isEditing}
+        />
+      </BaseDialogContent>
     </Dialog>
   )
 }
