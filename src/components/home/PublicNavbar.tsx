@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
 import { AnimatedLogo } from "@/components/header/AnimatedLogo"
-import { Menu, Home, FileText, CreditCard, LogIn } from "lucide-react"
+import { Menu, Home, CreditCard, LogIn } from "lucide-react"
 import {
   Sheet,
   SheetContent,
@@ -9,14 +9,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu"
 
 export function PublicNavbar() {
   const NavLinks = () => (
@@ -34,13 +26,6 @@ export function PublicNavbar() {
       >
         <CreditCard className="h-4 w-4" />
         Tarifs
-      </Link>
-      <Link 
-        to="/terms" 
-        className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors py-2 md:py-0"
-      >
-        <FileText className="h-4 w-4" />
-        CGU
       </Link>
       <Link to="/login" className="w-full md:w-auto">
         <Button className="w-full md:w-auto flex items-center gap-2">
