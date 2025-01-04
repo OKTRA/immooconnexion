@@ -23,7 +23,7 @@ export interface EditPlanDialogProps {
   plan: SubscriptionPlan
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  onSave: (plan: SubscriptionPlan) => void
+  onSuccess: () => void
 }
 
 export interface PaymentDialogProps {
@@ -31,4 +31,5 @@ export interface PaymentDialogProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
+  propertyId?: string
 }
