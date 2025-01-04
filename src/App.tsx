@@ -18,6 +18,7 @@ import Tenants from "@/pages/Tenants"
 import TenantContracts from "@/pages/TenantContracts"
 import AgencyEarnings from "@/pages/AgencyEarnings"
 import Pricing from "@/pages/Pricing"
+import SuperAdminLogin from "@/pages/SuperAdminLogin"
 
 const queryClient = new QueryClient()
 
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
   {
     path: "/agence/login",
     element: <Login />,
+  },
+  {
+    path: "/super-admin/login",
+    element: <SuperAdminLogin />,
   },
   {
     path: "/agence/admin",
