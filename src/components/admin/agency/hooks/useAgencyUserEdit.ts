@@ -29,12 +29,12 @@ export function useAgencyUserEdit({ onSuccess }: UseAgencyUserEditProps = {}) {
         email: cleanEmail,
       }
 
-      // N'inclure le mot de passe que s'il est fourni et valide
-      if (user.password) {
-        if (user.password.length < 6) {
+      // N'inclure le mot de passe que s'il est fourni et non vide
+      if (user.password?.trim()) {
+        if (user.password.trim().length < 6) {
           throw new Error("Le mot de passe doit contenir au moins 6 caractères")
         }
-        updateData.password = user.password
+        updateData.password = user.password.trim()
       }
 
       const { error: updateError } = await supabase.auth.updateUser(updateData)
