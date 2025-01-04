@@ -25,6 +25,8 @@ export function PropertyUnitsTable({ units, onEdit, onDelete }: PropertyUnitsTab
             <TableHead className="font-semibold">Numéro d'unité</TableHead>
             <TableHead className="font-semibold">Étage</TableHead>
             <TableHead className="font-semibold">Surface (m²)</TableHead>
+            <TableHead className="font-semibold">Loyer</TableHead>
+            <TableHead className="font-semibold">Catégorie</TableHead>
             <TableHead className="font-semibold">Statut</TableHead>
             <TableHead className="font-semibold text-right pr-6">Actions</TableHead>
           </TableRow>
@@ -35,6 +37,8 @@ export function PropertyUnitsTable({ units, onEdit, onDelete }: PropertyUnitsTab
               <TableCell className="font-medium">{unit.unit_number}</TableCell>
               <TableCell>{unit.floor_number || "-"}</TableCell>
               <TableCell>{unit.area || "-"}</TableCell>
+              <TableCell>{unit.rent ? `${unit.rent.toLocaleString()} FCFA` : "-"}</TableCell>
+              <TableCell className="capitalize">{unit.category || "Standard"}</TableCell>
               <TableCell>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                   unit.status === 'available' 
@@ -68,7 +72,7 @@ export function PropertyUnitsTable({ units, onEdit, onDelete }: PropertyUnitsTab
           ))}
           {units.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+              <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                 Aucune unité trouvée pour cette propriété
               </TableCell>
             </TableRow>

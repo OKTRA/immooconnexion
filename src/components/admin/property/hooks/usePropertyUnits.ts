@@ -35,6 +35,12 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
             unit_number: unit.unit_number,
             floor_number: unit.floor_number,
             area: unit.area,
+            rent: unit.rent,
+            deposit: unit.deposit,
+            description: unit.description,
+            category: unit.category,
+            amenities: unit.amenities,
+            photo_url: unit.photo_url
           })
           .eq("id", unit.id)
         if (error) throw error
@@ -46,6 +52,12 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
             unit_number: unit.unit_number,
             floor_number: unit.floor_number,
             area: unit.area,
+            rent: unit.rent,
+            deposit: unit.deposit,
+            description: unit.description,
+            category: unit.category,
+            amenities: unit.amenities,
+            photo_url: unit.photo_url
           })
         if (error) throw error
       }

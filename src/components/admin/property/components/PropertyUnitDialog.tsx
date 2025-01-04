@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState, useEffect } from "react"
 import { PropertyUnitDialogProps, PropertyUnitFormData } from "../types/propertyUnit"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 
 export function PropertyUnitDialog({ 
   isOpen, 
@@ -16,6 +18,10 @@ export function PropertyUnitDialog({
     unit_number: "",
     floor_number: "",
     area: "",
+    rent: "",
+    deposit: "",
+    description: "",
+    category: "standard"
   })
 
   useEffect(() => {
@@ -24,12 +30,20 @@ export function PropertyUnitDialog({
         unit_number: editingUnit.unit_number,
         floor_number: editingUnit.floor_number?.toString() || "",
         area: editingUnit.area?.toString() || "",
+        rent: editingUnit.rent?.toString() || "",
+        deposit: editingUnit.deposit?.toString() || "",
+        description: editingUnit.description || "",
+        category: editingUnit.category || "standard"
       })
     } else {
       setFormData({
         unit_number: "",
         floor_number: "",
         area: "",
+        rent: "",
+        deposit: "",
+        description: "",
+        category: "standard"
       })
     }
   }, [editingUnit])
@@ -42,7 +56,13 @@ export function PropertyUnitDialog({
       unit_number: formData.unit_number,
       floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
       area: formData.area ? parseFloat(formData.area) : null,
-      status: editingUnit?.status || "available"
+      rent: formData.rent ? parseFloat(formData.rent) : null,
+      deposit: formData.deposit ? parseFloat(formData.deposit) : null,
+      description: formData.description,
+      category: formData.category,
+      status: editingUnit?.status || "available",
+      photo_url: editingUnit?.photo_url || null,
+      amenities: editingUnit?.amenities || null
     })
   }
 
@@ -87,6 +107,55 @@ export function PropertyUnitDialog({
               onChange={(e) =>
                 setFormData({ ...formData, area: e.target.value })
               }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="rent">Loyer mensuel (FCFA)</Label>
+            <Input
+              id="rent"
+              type="number"
+              value={formData.rent}
+              onChange={(e) =>
+                setFormData({ ...formData, rent: e.target.value })
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="deposit">Caution (FCFA)</Label>
+            <Input
+              id="deposit"
+              type="number"
+              value={formData.deposit}
+              onChange={(e) =>
+                setFormData({ ...formData, deposit: e.target.value })
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="category">Catégorie</Label>
+            <Select 
+              value={formData.category} 
+              onValueChange={(value) => setFormData({ ...formData, category: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner une catégorie" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="standard">Standard</SelectItem>
+                <SelectItem value="premium">Premium</SelectItem>
+                <SelectItem value="deluxe">Deluxe</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              placeholder="Description de l'unité..."
             />
           </div>
           <div className="flex justify-end gap-2">

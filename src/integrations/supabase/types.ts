@@ -681,31 +681,49 @@ export type Database = {
       }
       property_units: {
         Row: {
+          amenities: string[] | null
           area: number | null
+          category: string | null
           created_at: string | null
+          deposit: number | null
+          description: string | null
           floor_number: number | null
           id: string
+          photo_url: string | null
           property_id: string
+          rent: number | null
           status: string | null
           unit_number: string
           updated_at: string | null
         }
         Insert: {
+          amenities?: string[] | null
           area?: number | null
+          category?: string | null
           created_at?: string | null
+          deposit?: number | null
+          description?: string | null
           floor_number?: number | null
           id?: string
+          photo_url?: string | null
           property_id: string
+          rent?: number | null
           status?: string | null
           unit_number: string
           updated_at?: string | null
         }
         Update: {
+          amenities?: string[] | null
           area?: number | null
+          category?: string | null
           created_at?: string | null
+          deposit?: number | null
+          description?: string | null
           floor_number?: number | null
           id?: string
+          photo_url?: string | null
           property_id?: string
+          rent?: number | null
           status?: string | null
           unit_number?: string
           updated_at?: string | null
