@@ -64,26 +64,24 @@ export async function checkSubscriptionLimits(agencyId: string, type: 'property'
       users: usersCount
     })
 
-    // Basic/Free plan specific logic
-    const isBasicPlan = plan.name.toLowerCase().includes('basic') || plan.name.toLowerCase().includes('gratuit')
-    if (isBasicPlan) {
-      console.log("Basic plan detected, checking limits...")
+    // Basic/Free plan specific logic - simplified
+    if (plan.name.toLowerCase().includes('basic') || plan.name.toLowerCase().includes('gratuit')) {
+      console.log("Basic/Free plan detected")
       
-      switch (type) {
-        case 'property':
-          const canAddProperty = (propertiesCount || 0) < 1
-          console.log(`Can add property: ${canAddProperty} (current count: ${propertiesCount})`)
-          return canAddProperty
-        case 'tenant':
-          return (tenantsCount || 0) < 1
-        case 'user':
-          return (usersCount || 0) < 1
-        default:
-          return false
+      // For properties, allow exactly one
+      if (type === 'property') {
+        const currentCount = propertiesCount || 0
+        console.log(`Current properties count: ${currentCount}`)
+        return currentCount === 0
       }
+      
+      // For other types, maintain the same logic
+      if (type === 'tenant') return (tenantsCount || 0) < 1
+      if (type === 'user') return (usersCount || 0) < 1
+      return false
     }
 
-    // Regular plan checks
+    // For other plans, check against max limits
     switch (type) {
       case 'property':
         return plan.max_properties === -1 || (propertiesCount || 0) < plan.max_properties
@@ -109,8 +107,8 @@ export function useSubscriptionLimits() {
     if (!canAdd) {
       const typeLabel = type === 'property' ? 'biens' : type === 'tenant' ? 'locataires' : 'utilisateurs'
       toast({
-        title: "Limite atteinte ou fonctionnalité non disponible",
-        description: `Cette fonctionnalité nécessite un abonnement supérieur. Veuillez mettre à niveau votre abonnement.`,
+        title: "Limite atteinte",
+        description: `Vous avez atteint la limite de ${typeLabel} pour votre plan actuel. Veuillez mettre à niveau votre abonnement pour ajouter plus de ${typeLabel}.`,
         variant: "destructive",
       })
     }
