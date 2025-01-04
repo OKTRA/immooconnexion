@@ -15,3 +15,21 @@ export interface Profile {
   status: string
   has_seen_warning: boolean
 }
+
+export type ProfileInsert = {
+  id: string
+  first_name?: string | null
+  last_name?: string | null
+  created_at?: string
+  updated_at?: string
+  is_tenant?: boolean | null
+}
+
+export type ProfileUpdate = {
+  id?: string
+  first_name?: string | null
+  last_name?: string | null
+  created_at?: string
+  updated_at?: string
+  is_tenant?: boolean | null
+}
