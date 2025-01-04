@@ -20,6 +20,7 @@ import TenantContracts from "@/pages/TenantContracts"
 import SubscriptionUpgrade from "@/pages/SubscriptionUpgrade"
 import AdminDashboard from "@/pages/AdminDashboard"
 import SuperAdminLogin from "@/pages/SuperAdminLogin"
+import AgencyDashboard from "@/pages/AgencyDashboard"
 
 const queryClient = new QueryClient()
 
@@ -38,7 +39,7 @@ function App() {
               
               {/* Protected agency routes */}
               <Route path="/agence" element={<ProtectedRoute />}>
-                <Route path="admin" element={<AdminDashboard />} />
+                <Route path="admin" element={<AgencyDashboard />} />
                 <Route path="biens" element={<Properties />} />
                 <Route path="biens/:id" element={<PropertyDetails />} />
                 <Route path="locataires" element={<Tenants />} />
