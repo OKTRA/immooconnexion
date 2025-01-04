@@ -8,7 +8,6 @@ import AdminDashboard from "@/pages/AdminDashboard"
 import AgencyDashboard from "@/pages/AgencyDashboard"
 import ApartmentManagement from "@/pages/ApartmentManagement"
 import Expenses from "@/pages/Expenses"
-import Login from "@/pages/Login"
 import PropertyDetails from "@/pages/PropertyDetails"
 import PropertySales from "@/pages/PropertySales"
 import PublicProperties from "@/pages/PublicProperties"
@@ -29,20 +28,12 @@ const router = createBrowserRouter([
     element: <PublicProperties />,
   },
   {
-    path: "/public",
-    element: <PublicProperties />,
-  },
-  {
     path: "/pricing",
     element: <Pricing />,
   },
   {
     path: "/terms",
     element: <TermsOfService />,
-  },
-  {
-    path: "/login",
-    element: <Login />,
   },
   {
     path: "/agence/login",
