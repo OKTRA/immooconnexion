@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
 import { PaymentMethodSelector } from "./PaymentMethodSelector"
 import { FreeSignupForm } from "./FreeSignupForm"
+import { supabase } from "@/integrations/supabase/client"
 
 export function PaymentDialog({ 
   open, 
@@ -33,14 +34,6 @@ export function PaymentDialog({
   const { toast } = useToast()
   const navigate = useNavigate()
 
-  const handlePaymentSuccess = () => {
-    setPaymentSuccess(true)
-    toast({
-      title: "Succès",
-      description: "Votre paiement a été traité. Vous pouvez maintenant vous connecter pour accéder à votre tableau de bord.",
-    })
-  }
-
   const handleFormSubmit = async (data: PaymentFormData) => {
     const result = await form.trigger()
     if (!result) {
@@ -53,9 +46,80 @@ export function PaymentDialog({
     }
 
     setFormData(data)
-    // Si le plan est gratuit, on ne montre pas les méthodes de paiement
+
+    // Si le plan est gratuit, créer directement l'agence et le profil
     if (amount === 0) {
-      setShowPaymentMethods(false)
+      try {
+        // Créer l'utilisateur auth
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: data.email,
+          password: data.password,
+          options: {
+            data: {
+              role: 'admin',
+            },
+          },
+        })
+
+        if (authError) throw authError
+        if (!authData.user) throw new Error("Aucun utilisateur créé")
+
+        // Créer l'agence
+        const { data: agencyData, error: agencyError } = await supabase
+          .from('agencies')
+          .insert({
+            name: data.agency_name,
+            email: data.email,
+            phone: data.phone_number,
+            address: data.address,
+            subscription_plan_id: planId,
+            status: 'active', // Actif immédiatement pour les plans gratuits
+            country: data.country,
+            city: data.city
+          })
+          .select()
+          .single()
+
+        if (agencyError) throw agencyError
+
+        // Mettre à jour le profil avec l'ID de l'agence
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            agency_id: agencyData.id,
+            role: 'admin',
+            first_name: data.first_name,
+            last_name: data.last_name,
+            phone_number: data.phone_number
+          })
+          .eq('id', authData.user.id)
+
+        if (profileError) throw profileError
+
+        // Créer l'entrée administrateur
+        const { error: adminError } = await supabase
+          .from('administrators')
+          .insert({
+            id: authData.user.id,
+            agency_id: agencyData.id,
+            is_super_admin: false
+          })
+
+        if (adminError) throw adminError
+
+        setPaymentSuccess(true)
+        toast({
+          title: "Succès",
+          description: "Votre compte a été créé avec succès",
+        })
+      } catch (error: any) {
+        console.error('Error during free signup:', error)
+        toast({
+          title: "Erreur",
+          description: error.message || "Une erreur est survenue lors de la création du compte",
+          variant: "destructive"
+        })
+      }
     } else {
       setShowPaymentMethods(true)
     }
@@ -68,55 +132,6 @@ export function PaymentDialog({
     setShowPaymentMethods(false)
     setFormData(null)
     onOpenChange(false)
-  }
-
-  const renderPaymentForm = () => {
-    if (!formData) return null
-
-    // Si le plan est gratuit, on affiche le formulaire d'inscription gratuite
-    if (amount === 0) {
-      return (
-        <FreeSignupForm 
-          formData={formData}
-          tempAgencyId={tempAgencyId}
-          onSuccess={() => setPaymentSuccess(true)}
-        />
-      )
-    }
-
-    // Sinon on affiche le formulaire de paiement approprié
-    switch (paymentMethod) {
-      case "cinetpay":
-        return (
-          <CinetPayForm 
-            amount={amount || 0}
-            description={planName ? `Abonnement au plan ${planName}` : 'Paiement'}
-            agencyId={tempAgencyId}
-            onSuccess={handlePaymentSuccess}
-            formData={formData}
-          />
-        )
-      case "paydunya":
-        return (
-          <PaydunyaForm 
-            amount={amount || 0}
-            description={planName ? `Abonnement au plan ${planName}` : 'Paiement'}
-            agencyId={tempAgencyId}
-            onSuccess={handlePaymentSuccess}
-            formData={formData}
-          />
-        )
-      case "orange-money":
-        return (
-          <div className="text-center p-4">
-            <p className="text-sm text-gray-500">
-              L'intégration Orange Money sera bientôt disponible
-            </p>
-          </div>
-        )
-      default:
-        return null
-    }
   }
 
   return (
@@ -144,15 +159,30 @@ export function PaymentDialog({
                   Aller à la connexion
                 </Button>
               </div>
-            ) : formData && amount === 0 ? (
-              renderPaymentForm()
             ) : showPaymentMethods && amount > 0 ? (
               <div className="space-y-4">
                 <PaymentMethodSelector 
                   selectedMethod={paymentMethod}
                   onMethodChange={setPaymentMethod}
                 />
-                {renderPaymentForm()}
+                {paymentMethod === "cinetpay" && formData && (
+                  <CinetPayForm 
+                    amount={amount}
+                    description={`Abonnement au plan ${planName}`}
+                    agencyId={tempAgencyId}
+                    onSuccess={() => setPaymentSuccess(true)}
+                    formData={formData}
+                  />
+                )}
+                {paymentMethod === "paydunya" && formData && (
+                  <PaydunyaForm 
+                    amount={amount}
+                    description={`Abonnement au plan ${planName}`}
+                    agencyId={tempAgencyId}
+                    onSuccess={() => setPaymentSuccess(true)}
+                    formData={formData}
+                  />
+                )}
               </div>
             ) : (
               <Form {...form}>
