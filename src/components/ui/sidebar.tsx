@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { Link } from "react-router-dom"
 
 const SidebarContext = React.createContext<{
   expanded: boolean
@@ -30,7 +31,7 @@ export function Sidebar({ className, children }: React.HTMLAttributes<HTMLDivEle
   return (
     <div
       className={cn(
-        "h-screen bg-white dark:bg-gray-950 border-r transition-all duration-300",
+        "fixed left-0 top-0 h-screen bg-white dark:bg-gray-950 border-r transition-all duration-300 z-50",
         context.expanded ? "w-64" : "w-16",
         className
       )}
