@@ -5,29 +5,40 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import { Loader2 } from "lucide-react"
 
 interface AgencyPropertiesProps {
   agencyId: string
 }
 
 export function AgencyProperties({ agencyId }: AgencyPropertiesProps) {
-  const { data: properties = [] } = useQuery({
+  const { data: properties = [], isLoading: propertiesLoading } = useQuery({
     queryKey: ["agency-properties", agencyId],
     queryFn: async () => {
+      console.log("Fetching properties for agency:", agencyId)
+
       const { data, error } = await supabase
         .from("properties")
         .select("*")
         .eq("agency_id", agencyId)
         .order("created_at", { ascending: false })
 
-      if (error) throw error
-      return data
+      if (error) {
+        console.error("Error fetching properties:", error)
+        throw error
+      }
+
+      console.log("Properties data:", data)
+      return data || []
     },
+    enabled: !!agencyId
   })
 
-  const { data: propertySales = [] } = useQuery({
+  const { data: propertySales = [], isLoading: salesLoading } = useQuery({
     queryKey: ["agency-property-sales", agencyId],
     queryFn: async () => {
+      console.log("Fetching property sales for agency:", agencyId)
+
       const { data, error } = await supabase
         .from("property_sales")
         .select(`
@@ -37,10 +48,24 @@ export function AgencyProperties({ agencyId }: AgencyPropertiesProps) {
         .eq("agency_id", agencyId)
         .order("created_at", { ascending: false })
 
-      if (error) throw error
-      return data
+      if (error) {
+        console.error("Error fetching property sales:", error)
+        throw error
+      }
+
+      console.log("Property sales data:", data)
+      return data || []
     },
+    enabled: !!agencyId
   })
+
+  if (propertiesLoading || salesLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <Tabs defaultValue="properties" className="w-full">
@@ -50,7 +75,7 @@ export function AgencyProperties({ agencyId }: AgencyPropertiesProps) {
       </TabsList>
 
       <TabsContent value="properties">
-        <div className="rounded-md border">
+        <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -88,7 +113,7 @@ export function AgencyProperties({ agencyId }: AgencyPropertiesProps) {
       </TabsContent>
 
       <TabsContent value="sales">
-        <div className="rounded-md border">
+        <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
