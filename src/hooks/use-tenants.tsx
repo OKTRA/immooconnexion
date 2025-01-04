@@ -23,7 +23,7 @@ export function useTenants() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
-        navigate('/login')
+        navigate('/agence/login')
         return
       }
       setSession(session)
@@ -33,7 +33,7 @@ export function useTenants() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
-        navigate('/login')
+        navigate('/agence/login')
         return
       }
       setSession(session)
@@ -46,15 +46,11 @@ export function useTenants() {
     queryKey: ['tenants'],
     queryFn: async () => {
       if (!session) {
-        console.error('Non authentifié')
         throw new Error("Non authentifié")
       }
       
-      console.log('Début de la requête des locataires...')
-      
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        console.error('Utilisateur non authentifié')
         throw new Error("Non authentifié")
       }
 
@@ -69,14 +65,11 @@ export function useTenants() {
         throw profileError
       }
 
-      console.log('Profile data:', profileData)
-
       if (!profileData?.agency_id) {
-        console.log('No agency_id found for user')
         return []
       }
 
-      let query = supabase
+      const { data: tenantsData, error: tenantsError } = await supabase
         .from('tenants')
         .select(`
           id,
@@ -89,18 +82,13 @@ export function useTenants() {
           user_id,
           agency_id
         `)
-
-      query = query.eq('agency_id', profileData.agency_id)
-      
-      const { data: tenantsData, error: tenantsError } = await query
+        .eq('agency_id', profileData.agency_id)
         .order('created_at', { ascending: false })
       
       if (tenantsError) {
         console.error('Erreur lors de la récupération des locataires:', tenantsError)
         throw tenantsError
       }
-
-      console.log('Tenants data:', tenantsData)
 
       return tenantsData.map((tenant: any) => ({
         id: tenant.id,

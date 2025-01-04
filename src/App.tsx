@@ -8,39 +8,36 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { GlobalHeader } from "@/components/layout/GlobalHeader"
 import { Loader2 } from "lucide-react"
 
-// Optimisation du lazy loading avec prefetch
-const Index = lazy(() => import("./pages/Index"), { suspense: true })
-const Login = lazy(() => import("./pages/Login"), { suspense: true })
-const SuperAdminLogin = lazy(() => import("./pages/SuperAdminLogin"), { suspense: true })
-const PublicProperties = lazy(() => import("./pages/PublicProperties"), { suspense: true })
-const Pricing = lazy(() => import("./pages/Pricing"), { suspense: true })
-const Tenants = lazy(() => import("./pages/Tenants"), { suspense: true })
-const Properties = lazy(() => import("./pages/Properties"), { suspense: true })
-const PropertyDetails = lazy(() => import("./pages/PropertyDetails"), { suspense: true })
-const PropertySales = lazy(() => import("./pages/PropertySales"), { suspense: true })
-const Expenses = lazy(() => import("./pages/Expenses"), { suspense: true })
-const AgencyEarnings = lazy(() => import("./pages/AgencyEarnings"), { suspense: true })
-const Reports = lazy(() => import("./pages/Reports"), { suspense: true })
-const TenantContracts = lazy(() => import("./pages/TenantContracts"), { suspense: true })
-const AdminDashboard = lazy(() => import("./pages/AdminDashboard"), { suspense: true })
-const TermsOfService = lazy(() => import("./pages/TermsOfService"), { suspense: true })
+// Lazy load components
+const Index = lazy(() => import("./pages/Index"))
+const Login = lazy(() => import("./pages/Login"))
+const SuperAdminLogin = lazy(() => import("./pages/SuperAdminLogin"))
+const PublicProperties = lazy(() => import("./pages/PublicProperties"))
+const Pricing = lazy(() => import("./pages/Pricing"))
+const Tenants = lazy(() => import("./pages/Tenants"))
+const Properties = lazy(() => import("./pages/Properties"))
+const PropertyDetails = lazy(() => import("./pages/PropertyDetails"))
+const PropertySales = lazy(() => import("./pages/PropertySales"))
+const Expenses = lazy(() => import("./pages/Expenses"))
+const AgencyEarnings = lazy(() => import("./pages/AgencyEarnings"))
+const Reports = lazy(() => import("./pages/Reports"))
+const TenantContracts = lazy(() => import("./pages/TenantContracts"))
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"))
+const TermsOfService = lazy(() => import("./pages/TermsOfService"))
 
-// Amélioration du loader avec un délai minimal pour éviter le flash
 const PageLoader = () => (
   <div className="min-h-[200px] flex items-center justify-center">
     <Loader2 className="h-8 w-8 animate-spin text-primary" />
   </div>
 )
 
-// Configuration optimisée du QueryClient
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
       staleTime: 1000 * 60 * 5,
-      gcTime: 1000 * 60 * 10,
-      suspense: true,
+      gcTime: 1000 * 60 * 10
     },
   },
 })
