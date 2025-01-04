@@ -16,7 +16,9 @@ export function AgencyLayout({ children }: AgencyLayoutProps) {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col w-full overflow-x-hidden">
-        <GlobalHeader />
+        <div className="sticky top-0 z-50">
+          <GlobalHeader />
+        </div>
         <div className="flex-1 flex overflow-hidden">
           <AgencySidebar />
           <main className={`flex-1 p-4 md:p-8 overflow-y-auto ${!isMobile ? 'ml-[250px]' : ''}`}>
