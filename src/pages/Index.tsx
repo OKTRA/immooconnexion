@@ -8,7 +8,7 @@ export default function Index() {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AgencySidebar />
-        <main className="flex-1 p-4 md:p-8">
+        <main className="flex-1 ml-[250px] p-4 md:p-8">
           <div className="space-y-8">
             <h1 className="text-2xl font-bold">Tableau de bord</h1>
             <div className="grid gap-4 md:grid-cols-2">
