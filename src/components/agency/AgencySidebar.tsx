@@ -1,16 +1,71 @@
-import { Home, Users, Building2, Receipt, PiggyBank, CreditCard } from "lucide-react"
+import { 
+  LayoutDashboard,
+  Users,
+  Building2,
+  Receipt,
+  CircleDollarSign,
+  BarChart2,
+  FileText,
+  Settings,
+  CreditCard,
+  Building
+} from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import { Sidebar } from "@/components/ui/sidebar"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 const menuItems = [
-  { href: "/agence", label: "Accueil", icon: Home },
-  { href: "/agence/tenants", label: "Locataires", icon: Users },
-  { href: "/agence/properties", label: "Propriétés", icon: Building2 },
-  { href: "/agence/contracts", label: "Contrats", icon: Receipt },
-  { href: "/agence/earnings", label: "Gains", icon: PiggyBank },
-  { href: "/agence/billing", label: "Facturation", icon: CreditCard },
+  {
+    title: "Tableau de bord",
+    href: "/agence/admin",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Locataires",
+    href: "/agence/locataires",
+    icon: Users,
+  },
+  {
+    title: "Biens",
+    href: "/agence/biens",
+    icon: Building2,
+  },
+  {
+    title: "Appartements",
+    href: "/agence/appartements",
+    icon: Building,
+  },
+  {
+    title: "Ventes",
+    href: "/agence/ventes",
+    icon: Receipt,
+  },
+  {
+    title: "Dépenses",
+    href: "/agence/depenses",
+    icon: CircleDollarSign,
+  },
+  {
+    title: "Gains",
+    href: "/agence/gains",
+    icon: BarChart2,
+  },
+  {
+    title: "Rapports",
+    href: "/agence/rapports",
+    icon: FileText,
+  },
+  {
+    title: "Abonnement",
+    href: "/agence/abonnement",
+    icon: CreditCard,
+  },
+  {
+    title: "Paramètres",
+    href: "/agence/parametres",
+    icon: Settings,
+  },
 ]
 
 export function AgencySidebar() {
@@ -19,7 +74,7 @@ export function AgencySidebar() {
 
   return (
     <Sidebar className={cn(
-      "fixed top-[60px] left-0 h-[calc(100vh-60px)] border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 w-[250px] transition-transform duration-300 ease-in-out z-50",
+      "fixed top-[60px] left-0 h-[calc(100vh-60px)] border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 w-[250px] transition-transform duration-300 ease-in-out",
       isMobile ? "-translate-x-full mobile-sidebar" : ""
     )}>
       <div className="flex flex-col gap-2 p-4">
@@ -34,17 +89,12 @@ export function AgencySidebar() {
             }}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50",
-              location.pathname === item.href &&
-                "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50"
+              location.pathname === item.href && 
+              "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50"
             )}
           >
-            {item.icon && <item.icon className="h-5 w-5" />}
-            <span className={cn(
-              "transition-opacity duration-200",
-              isMobile ? "opacity-100" : "opacity-100"
-            )}>
-              {item.label}
-            </span>
+            <item.icon className="h-4 w-4" />
+            <span>{item.title}</span>
           </Link>
         ))}
       </div>

@@ -1,23 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, FlatList, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { supabase, checkSession } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 
 export function PropertiesList({ navigation }) {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initializeSession = async () => {
-      const session = await checkSession();
-      if (!session) {
-        // Redirect to login if no valid session
-        navigation.replace('Login');
-        return;
-      }
-      fetchProperties();
-    };
-
-    initializeSession();
+    fetchProperties();
 
     // Écouter les changements en temps réel
     const channel = supabase
@@ -34,16 +24,10 @@ export function PropertiesList({ navigation }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [navigation]);
+  }, []);
 
   async function fetchProperties() {
     try {
-      const session = await checkSession();
-      if (!session) {
-        navigation.replace('Login');
-        return;
-      }
-
       const { data, error } = await supabase
         .from('properties')
         .select('*')
