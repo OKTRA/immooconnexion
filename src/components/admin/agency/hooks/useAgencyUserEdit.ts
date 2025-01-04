@@ -24,10 +24,20 @@ export function useAgencyUserEdit({ onSuccess }: UseAgencyUserEditProps = {}) {
         throw new Error("Format d'email invalide")
       }
 
-      const { error: updateError } = await supabase.auth.updateUser({
+      // Préparer les données de mise à jour
+      const updateData: any = {
         email: cleanEmail,
-        password: user.password || undefined,
-      })
+      }
+
+      // N'inclure le mot de passe que s'il est fourni et valide
+      if (user.password) {
+        if (user.password.length < 6) {
+          throw new Error("Le mot de passe doit contenir au moins 6 caractères")
+        }
+        updateData.password = user.password
+      }
+
+      const { error: updateError } = await supabase.auth.updateUser(updateData)
 
       if (updateError) {
         console.error("Error updating auth user:", updateError)
