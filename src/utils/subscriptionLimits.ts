@@ -1,89 +1,66 @@
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 
-export interface SubscriptionLimits {
-  max_properties: number
-  max_tenants: number
-  max_users: number
-}
-
 export async function checkSubscriptionLimits(agencyId: string, type: 'property' | 'tenant' | 'user'): Promise<boolean> {
   try {
     console.log("Checking limits for agency:", agencyId, "type:", type)
     
     // Get agency's subscription plan
-    const { data: agency } = await supabase
+    const { data: agency, error: agencyError } = await supabase
       .from('agencies')
-      .select('subscription_plan_id')
+      .select(`
+        id,
+        subscription_plan_id,
+        current_properties_count,
+        current_tenants_count,
+        current_profiles_count,
+        subscription_plans (
+          id,
+          name,
+          max_properties,
+          max_tenants,
+          max_users,
+          features
+        )
+      `)
       .eq('id', agencyId)
       .single()
 
-    if (!agency?.subscription_plan_id) {
+    if (agencyError) {
+      console.error('Error fetching agency:', agencyError)
+      return false
+    }
+
+    if (!agency?.subscription_plans) {
       console.error('No subscription plan found for agency')
       return false
     }
 
-    // Get subscription plan limits and features
-    const { data: plan } = await supabase
-      .from('subscription_plans')
-      .select('max_properties, max_tenants, max_users, features, name')
-      .eq('id', agency.subscription_plan_id)
-      .single()
-
-    if (!plan) {
-      console.error('Subscription plan not found')
-      return false
-    }
-
-    console.log("Plan details:", plan)
-
-    // Get current counts
-    const { count: propertiesCount } = await supabase
-      .from('properties')
-      .select('*', { count: 'exact', head: true })
-      .eq('agency_id', agencyId)
-
-    const { count: tenantsCount } = await supabase
-      .from('tenants')
-      .select('*', { count: 'exact', head: true })
-      .eq('agency_id', agencyId)
-
-    const { count: usersCount } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .eq('agency_id', agencyId)
-
-    console.log("Current counts:", {
-      properties: propertiesCount,
-      tenants: tenantsCount,
-      users: usersCount
+    console.log("Agency details:", {
+      plan: agency.subscription_plans,
+      currentCounts: {
+        properties: agency.current_properties_count,
+        tenants: agency.current_tenants_count,
+        users: agency.current_profiles_count
+      }
     })
 
-    // Basic/Free plan specific logic
-    if (plan.name.toLowerCase().includes('basic') || plan.name.toLowerCase().includes('gratuit')) {
-      console.log("Basic/Free plan detected")
-      
-      // For properties, allow up to one property
-      if (type === 'property') {
-        const currentCount = propertiesCount || 0
-        console.log(`Current properties count: ${currentCount}, Max allowed: 1`)
-        return currentCount < 1
-      }
-      
-      // For other types, maintain the same logic
-      if (type === 'tenant') return (tenantsCount || 0) < 1
-      if (type === 'user') return (usersCount || 0) < 1
-      return false
-    }
-
-    // For other plans, check against max limits
+    const plan = agency.subscription_plans
+    
+    // Check limits based on type
     switch (type) {
       case 'property':
-        return plan.max_properties === -1 || (propertiesCount || 0) < plan.max_properties
+        if (plan.max_properties === -1) return true
+        return (agency.current_properties_count || 0) < plan.max_properties
+        
       case 'tenant':
-        return plan.max_tenants === -1 || (tenantsCount || 0) < plan.max_tenants
+        if (plan.max_tenants === -1) return true
+        return (agency.current_tenants_count || 0) < plan.max_tenants
+        
       case 'user':
-        return plan.max_users === -1 || (usersCount || 0) < plan.max_users
+        if (plan.max_users === -1) return true
+        return (agency.current_profiles_count || 0) < plan.max_users
+        
       default:
         return false
     }
@@ -100,7 +77,10 @@ export function useSubscriptionLimits() {
     const canAdd = await checkSubscriptionLimits(agencyId, type)
     
     if (!canAdd) {
-      const typeLabel = type === 'property' ? 'biens' : type === 'tenant' ? 'locataires' : 'utilisateurs'
+      const typeLabel = type === 'property' ? 'biens' : 
+                       type === 'tenant' ? 'locataires' : 
+                       'utilisateurs'
+      
       toast({
         title: "Limite atteinte",
         description: `Vous avez atteint la limite de ${typeLabel} pour votre plan actuel. Veuillez mettre à niveau votre abonnement pour ajouter plus de ${typeLabel}.`,

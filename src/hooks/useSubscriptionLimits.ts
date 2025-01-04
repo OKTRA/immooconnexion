@@ -19,7 +19,6 @@ export function useSubscriptionLimits(agencyId: string) {
     queryFn: async () => {
       console.log("Fetching limits for agency:", agencyId)
       
-      // Récupérer l'agence et son plan actuel
       const { data: agency, error } = await supabase
         .from("agencies")
         .select(`
@@ -40,15 +39,20 @@ export function useSubscriptionLimits(agencyId: string) {
         throw error
       }
 
+      if (!agency?.subscription_plans) {
+        console.error("No subscription plan found for agency")
+        throw new Error("No subscription plan found")
+      }
+
       console.log("Agency data:", agency)
 
       return {
-        max_properties: agency.subscription_plans?.max_properties ?? -1,
-        max_tenants: agency.subscription_plans?.max_tenants ?? -1,
-        max_users: agency.subscription_plans?.max_users ?? -1,
-        current_properties: agency.current_properties_count ?? 0,
-        current_tenants: agency.current_tenants_count ?? 0,
-        current_users: agency.current_profiles_count ?? 0
+        max_properties: agency.subscription_plans.max_properties,
+        max_tenants: agency.subscription_plans.max_tenants,
+        max_users: agency.subscription_plans.max_users,
+        current_properties: agency.current_properties_count || 0,
+        current_tenants: agency.current_tenants_count || 0,
+        current_users: agency.current_profiles_count || 0
       }
     },
     enabled: !!agencyId
@@ -59,13 +63,17 @@ export function useSubscriptionLimits(agencyId: string) {
     max_tenants: number
     max_users: number
   }) => {
-    if (!limits) return false
+    if (!limits) {
+      console.log("No limits data available")
+      return false
+    }
 
     console.log("Checking downgrade eligibility:", {
       planLimits,
       currentLimits: limits
     })
 
+    // For unlimited plans (-1), always allow
     const exceedsProperties = planLimits.max_properties !== -1 && 
       limits.current_properties > planLimits.max_properties
     
@@ -75,7 +83,10 @@ export function useSubscriptionLimits(agencyId: string) {
     const exceedsUsers = planLimits.max_users !== -1 && 
       limits.current_users > planLimits.max_users
 
-    return !exceedsProperties && !exceedsTenants && !exceedsUsers
+    const canDowngrade = !exceedsProperties && !exceedsTenants && !exceedsUsers
+    console.log("Can downgrade?", canDowngrade)
+
+    return canDowngrade
   }
 
   const checkLimitReached = async (type: 'property' | 'tenant' | 'user') => {
@@ -97,6 +108,8 @@ export function useSubscriptionLimits(agencyId: string) {
         case 'user':
           return limits.max_users !== -1 && 
             limits.current_users >= limits.max_users
+        default:
+          return true
       }
     })()
 
