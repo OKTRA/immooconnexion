@@ -15,8 +15,9 @@ export function AgencyTenants({ agencyId }: AgencyTenantsProps) {
     queryFn: async () => {
       if (!agencyId) throw new Error("Agency ID is required")
 
-      console.log("Fetching tenants for agency:", agencyId) // Debug log
+      console.log("Fetching tenants for agency:", agencyId)
 
+      // Fetch tenants with explicit agency_id filter
       const { data, error } = await supabase
         .from("tenants")
         .select(`
@@ -28,18 +29,24 @@ export function AgencyTenants({ agencyId }: AgencyTenantsProps) {
           agency_fees,
           agency_id
         `)
-        .eq("agency_id", agencyId)
-        .order("created_at", { ascending: false })
+        .eq('agency_id', agencyId)
+        .order('created_at', { ascending: false })
 
       if (error) {
         console.error("Error fetching tenants:", error)
         throw error
       }
 
-      console.log("Fetched tenants:", data) // Debug log
-      return data || []
+      console.log("Raw tenants data:", data)
+      
+      // Additional verification of agency_id match
+      const filteredTenants = data?.filter(tenant => tenant.agency_id === agencyId)
+      console.log("Filtered tenants:", filteredTenants)
+      
+      return filteredTenants || []
     },
-    enabled: !!agencyId
+    enabled: !!agencyId,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   })
 
   if (isLoading) {
@@ -51,6 +58,7 @@ export function AgencyTenants({ agencyId }: AgencyTenantsProps) {
   }
 
   if (error) {
+    console.error("Error in AgencyTenants:", error)
     return (
       <div className="text-center py-8 text-red-500">
         Une erreur est survenue lors du chargement des locataires
