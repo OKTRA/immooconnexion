@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Building2, MapPin, Home, BedDouble, Wallet } from "lucide-react"
+import { Building2, MapPin, Home, BedDouble, Wallet, User, Phone } from "lucide-react"
 
 interface PropertyInfoProps {
   property: {
@@ -8,11 +8,12 @@ interface PropertyInfoProps {
     type: string
     ville: string
     loyer: number
-    frais_agence: number | null
     caution: number
     statut: string
     photo_url: string | null
     chambres: number | null
+    owner_name: string | null
+    owner_phone: string | null
   }
 }
 
@@ -65,10 +66,17 @@ export function PropertyInfo({ property }: PropertyInfoProps) {
                 </div>
               </div>
               <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                <Wallet className="h-5 w-5 text-primary" />
+                <User className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Frais d'Agence</p>
-                  <p className="font-medium">{property?.frais_agence?.toLocaleString() || 0} FCFA</p>
+                  <p className="text-sm text-muted-foreground">Propriétaire</p>
+                  <p className="font-medium">{property?.owner_name || 'Non spécifié'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                <Phone className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Téléphone Propriétaire</p>
+                  <p className="font-medium">{property?.owner_phone || 'Non spécifié'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
