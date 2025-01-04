@@ -18,6 +18,8 @@ import PropertySales from "@/pages/PropertySales"
 import AgencyEarnings from "@/pages/AgencyEarnings"
 import TenantContracts from "@/pages/TenantContracts"
 import SubscriptionUpgrade from "@/pages/SubscriptionUpgrade"
+import AdminDashboard from "@/pages/AdminDashboard"
+import SuperAdminLogin from "@/pages/SuperAdminLogin"
 
 const queryClient = new QueryClient()
 
@@ -32,6 +34,7 @@ function App() {
               <Route path="/" element={<PublicProperties />} />
               <Route path="/properties/:id" element={<PublicPropertyDetails />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/super-admin/login" element={<SuperAdminLogin />} />
               
               {/* Protected agency routes */}
               <Route path="/agence" element={<ProtectedRoute />}>
@@ -44,6 +47,15 @@ function App() {
                 <Route path="revenus" element={<AgencyEarnings />} />
                 <Route path="contrats" element={<TenantContracts />} />
                 <Route path="abonnement" element={<SubscriptionUpgrade />} />
+              </Route>
+
+              {/* Super Admin routes */}
+              <Route path="/super-admin" element={<ProtectedRoute />}>
+                <Route path="admin" element={<AdminDashboard />} />
+                <Route path="agencies" element={<AdminDashboard />} />
+                <Route path="agents" element={<AdminDashboard />} />
+                <Route path="subscriptions" element={<AdminDashboard />} />
+                <Route path="transactions" element={<AdminDashboard />} />
               </Route>
             </Routes>
             <Toaster />
