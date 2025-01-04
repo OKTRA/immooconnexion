@@ -12,7 +12,7 @@ import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
 import { PaymentMethodSelector } from "./PaymentMethodSelector"
-import { supabase } from "@/integrations/supabase/client"
+import { FreeSignupForm } from "./FreeSignupForm"
 
 export function PaymentDialog({ 
   open, 
@@ -33,48 +33,6 @@ export function PaymentDialog({
   const { toast } = useToast()
   const navigate = useNavigate()
 
-  const handleFreePlanSignup = async (data: PaymentFormData) => {
-    try {
-      // Create auth user
-      const { error: signUpError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-      })
-
-      if (signUpError) throw signUpError
-
-      // Update agency status to active since it's free
-      if (tempAgencyId) {
-        const { error: updateError } = await supabase
-          .from('agencies')
-          .update({ 
-            status: 'active',
-            name: data.agency_name,
-            address: data.agency_address,
-            country: data.country,
-            city: data.city,
-            phone: data.phone_number
-          })
-          .eq('id', tempAgencyId)
-
-        if (updateError) throw updateError
-      }
-
-      setPaymentSuccess(true)
-      toast({
-        title: "Inscription réussie",
-        description: "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.",
-      })
-    } catch (error: any) {
-      console.error('Error during free plan signup:', error)
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'inscription",
-        variant: "destructive",
-      })
-    }
-  }
-
   const handlePaymentSuccess = () => {
     setPaymentSuccess(true)
     toast({
@@ -94,16 +52,13 @@ export function PaymentDialog({
       return
     }
 
-    // Si le plan est gratuit, on bypass le paiement
-    if (amount === 0) {
-      await handleFreePlanSignup(data)
-      return
-    }
-
-    // Sinon on continue avec le processus de paiement normal
-    console.log("Form data submitted:", data)
     setFormData(data)
-    setShowPaymentMethods(true)
+    // Si le plan est gratuit, on ne montre pas les méthodes de paiement
+    if (amount === 0) {
+      setShowPaymentMethods(false)
+    } else {
+      setShowPaymentMethods(true)
+    }
   }
 
   const handleClose = () => {
@@ -116,10 +71,20 @@ export function PaymentDialog({
   }
 
   const renderPaymentForm = () => {
-    if (!formData) {
-      return null
+    if (!formData) return null
+
+    // Si le plan est gratuit, on affiche le formulaire d'inscription gratuite
+    if (amount === 0) {
+      return (
+        <FreeSignupForm 
+          formData={formData}
+          tempAgencyId={tempAgencyId}
+          onSuccess={() => setPaymentSuccess(true)}
+        />
+      )
     }
 
+    // Sinon on affiche le formulaire de paiement approprié
     switch (paymentMethod) {
       case "cinetpay":
         return (
@@ -179,6 +144,8 @@ export function PaymentDialog({
                   Aller à la connexion
                 </Button>
               </div>
+            ) : formData && amount === 0 ? (
+              renderPaymentForm()
             ) : showPaymentMethods && amount > 0 ? (
               <div className="space-y-4">
                 <PaymentMethodSelector 
