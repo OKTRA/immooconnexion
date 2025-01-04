@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client"
 
 export function AdminProfiles() {
   const [searchTerm, setSearchTerm] = useState("")
+  const [selectedAgency, setSelectedAgency] = useState("")
   const [showAddDialog, setShowAddDialog] = useState(false)
   const { data: profiles = [], refetch } = useProfiles()
   const { toast } = useToast()
@@ -48,16 +49,27 @@ export function AdminProfiles() {
   }
 
   const filteredProfiles = profiles.filter(
-    (profile) =>
-      profile.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      profile.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      profile.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    (profile) => {
+      const matchesSearch = 
+        profile.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        profile.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        profile.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      
+      const matchesAgency = !selectedAgency || profile.agency_id === selectedAgency
+
+      return matchesSearch && matchesAgency
+    }
   )
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <ProfileSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        <ProfileSearch 
+          searchTerm={searchTerm} 
+          setSearchTerm={setSearchTerm}
+          selectedAgency={selectedAgency}
+          setSelectedAgency={setSelectedAgency}
+        />
         <AddProfileButton onClick={() => setShowAddDialog(true)} />
       </div>
       
