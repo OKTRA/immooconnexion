@@ -1,84 +1,82 @@
-import { 
-  Home, 
-  Users, 
-  Building2, 
-  Receipt, 
-  CircleDollarSign,
-  BarChart3,
-  FileText
-} from "lucide-react"
-import { useNavigate } from "react-router-dom"
+"use client";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar"
+  IconHome,
+  IconUsers,
+  IconBuilding,
+  IconReceipt,
+  IconCurrencyDollar,
+  IconChartBar,
+  IconFileText,
+} from "@tabler/icons-react";
+import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 const menuItems = [
   {
-    title: "Tableau de bord",
-    url: "/agence/admin",
-    icon: Home,
+    label: "Tableau de bord",
+    href: "/agence/admin",
+    icon: <IconHome className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
   },
   {
-    title: "Locataires",
-    url: "/agence/locataires",
-    icon: Users,
+    label: "Locataires",
+    href: "/agence/locataires",
+    icon: <IconUsers className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
   },
   {
-    title: "Biens",
-    url: "/agence/biens",
-    icon: Building2,
+    label: "Biens",
+    href: "/agence/biens",
+    icon: <IconBuilding className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
   },
   {
-    title: "Ventes",
-    url: "/agence/ventes",
-    icon: Receipt,
+    label: "Ventes",
+    href: "/agence/ventes",
+    icon: <IconReceipt className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
   },
   {
-    title: "Dépenses",
-    url: "/agence/depenses",
-    icon: CircleDollarSign,
+    label: "Dépenses",
+    href: "/agence/depenses",
+    icon: <IconCurrencyDollar className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
   },
   {
-    title: "Gains",
-    url: "/agence/gains",
-    icon: BarChart3,
+    label: "Gains",
+    href: "/agence/gains",
+    icon: <IconChartBar className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
   },
   {
-    title: "Rapports",
-    url: "/agence/rapports",
-    icon: FileText,
+    label: "Rapports",
+    href: "/agence/rapports",
+    icon: <IconFileText className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
   },
-]
+];
 
 export function AgencySidebar() {
-  const navigate = useNavigate()
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
-    <Sidebar>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton onClick={() => navigate(item.url)}>
-                    <item.icon className="h-4 w-4 mr-2" />
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+    <div className={cn(
+      "flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 h-screen"
+    )}>
+      <Sidebar open={open} setOpen={setOpen}>
+        <SidebarBody className="justify-between gap-10">
+          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+            <div className="mt-8 flex flex-col gap-2">
+              {menuItems.map((link, idx) => (
+                <SidebarLink 
+                  key={idx} 
+                  link={link}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate(link.href);
+                  }}
+                />
               ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
-  )
+            </div>
+          </div>
+        </SidebarBody>
+      </Sidebar>
+    </div>
+  );
 }
