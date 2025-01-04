@@ -6,6 +6,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { PropertyFormFields } from "./property/PropertyFormFields"
 import { usePropertyForm } from "./property/usePropertyForm"
 import { PropertyDialogProps } from "./property/types"
@@ -30,22 +31,24 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
   }
 
   const dialogContent = (
-    <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+    <DialogContent className="sm:max-w-[500px]">
       <DialogHeader>
         <DialogTitle>{property ? "Modifier le bien" : "Ajouter un nouveau bien"}</DialogTitle>
       </DialogHeader>
       
-      <PropertyFormFields
-        formData={formData}
-        setFormData={setFormData}
-        handleImageChange={handleImageChange}
-        imagePreviewUrl={previewUrls}
-      />
+      <ScrollArea className="h-[calc(100vh-200px)] md:h-auto">
+        <PropertyFormFields
+          formData={formData}
+          setFormData={setFormData}
+          handleImageChange={handleImageChange}
+          imagePreviewUrl={previewUrls}
+        />
 
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={() => onOpenChange?.(false)}>Annuler</Button>
-        <Button onClick={handleSubmit}>{property ? "Modifier" : "Enregistrer"}</Button>
-      </div>
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="outline" onClick={() => onOpenChange?.(false)}>Annuler</Button>
+          <Button onClick={handleSubmit}>{property ? "Modifier" : "Enregistrer"}</Button>
+        </div>
+      </ScrollArea>
     </DialogContent>
   )
 

@@ -7,6 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Plus } from "lucide-react"
 import { ExpenseFormFields } from "./expense/ExpenseFormFields"
 
@@ -29,7 +30,9 @@ export function ExpenseDialog({ propertyId }: ExpenseDialogProps) {
             Enregistrez une dépense pour ce bien
           </DialogDescription>
         </DialogHeader>
-        <ExpenseFormFields propertyId={propertyId} />
+        <ScrollArea className="h-[calc(100vh-250px)] md:h-auto">
+          <ExpenseFormFields propertyId={propertyId} />
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   )

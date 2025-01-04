@@ -4,7 +4,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button"; // Add this import
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { TenantCreationForm } from "./tenants/TenantCreationForm";
 import { TenantReceipt } from "./tenants/TenantReceipt";
@@ -35,47 +36,49 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
             {tenant ? "Modifier le locataire" : "Ajouter un locataire"}
           </DialogTitle>
         </DialogHeader>
-        {!showReceipt ? (
-          <TenantCreationForm
-            userProfile={userProfile}
-            properties={properties}
-            onSuccess={() => setShowReceipt(true)}
-            onCancel={() => onOpenChange(false)}
-            initialData={tenant}
-            isEditing={!!tenant}
-          />
-        ) : (
-          <div className="space-y-4">
-            <TenantReceipt 
-              tenant={{
-                nom: formData.nom,
-                prenom: formData.prenom,
-                telephone: formData.telephone,
-                fraisAgence: formData.fraisAgence,
-                propertyId: formData.propertyId,
-                profession: formData.profession,
-              }}
+        <ScrollArea className="h-[calc(100vh-200px)] md:h-auto">
+          {!showReceipt ? (
+            <TenantCreationForm
+              userProfile={userProfile}
+              properties={properties}
+              onSuccess={() => setShowReceipt(true)}
+              onCancel={() => onOpenChange(false)}
+              initialData={tenant}
+              isEditing={!!tenant}
             />
-            <div className="flex justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setShowReceipt(false);
-                  onOpenChange(false);
+          ) : (
+            <div className="space-y-4">
+              <TenantReceipt 
+                tenant={{
+                  nom: formData.nom,
+                  prenom: formData.prenom,
+                  telephone: formData.telephone,
+                  fraisAgence: formData.fraisAgence,
+                  propertyId: formData.propertyId,
+                  profession: formData.profession,
                 }}
-              >
-                Fermer
-              </Button>
+              />
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowReceipt(false);
+                    onOpenChange(false);
+                  }}
+                >
+                  Fermer
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

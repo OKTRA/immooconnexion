@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { ProfileForm } from "./ProfileForm"
 
 export interface AddProfileDialogProps {
@@ -42,14 +43,16 @@ export function AddProfileDialog({
         <DialogHeader>
           <DialogTitle>Ajouter un nouveau profil</DialogTitle>
         </DialogHeader>
-        <ProfileForm 
-          newProfile={newProfile} 
-          setNewProfile={setNewProfile}
-          onSubmit={handleSubmit}
-          onCreateAuthUser={handleCreateAuthUser}
-          onUpdateProfile={handleUpdateProfile}
-          selectedAgencyId={agencyId}
-        />
+        <ScrollArea className="h-[calc(100vh-200px)] md:h-auto">
+          <ProfileForm 
+            newProfile={newProfile} 
+            setNewProfile={setNewProfile}
+            onSubmit={handleSubmit}
+            onCreateAuthUser={handleCreateAuthUser}
+            onUpdateProfile={handleUpdateProfile}
+            selectedAgencyId={agencyId}
+          />
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   )
