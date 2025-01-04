@@ -16,11 +16,6 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     persistSession: true,
     detectSessionInUrl: false,
     storage: localStorage,
-    onAuthStateChange: (event, session) => {
-      if (event === 'SIGNED_OUT' || !session) {
-        clearSession();
-      }
-    },
   },
 });
 
