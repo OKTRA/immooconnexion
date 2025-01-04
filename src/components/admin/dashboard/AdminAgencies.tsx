@@ -37,10 +37,21 @@ export function AdminAgencies() {
           throw new Error("Accès non autorisé. Vous devez être super administrateur pour accéder à cette page.")
         }
 
-        // Finally fetch agencies data
+        // Finally fetch agencies data with subscription plan details and usage counts
         const { data, error } = await supabase
           .from("agencies")
-          .select("*, subscription_plans(*)")
+          .select(`
+            *,
+            subscription_plans (
+              id,
+              name,
+              price,
+              max_properties,
+              max_tenants,
+              max_users,
+              features
+            )
+          `)
           .order("name")
 
         if (error) {
@@ -65,8 +76,6 @@ export function AdminAgencies() {
           phone: editedAgency.phone,
           email: editedAgency.email,
           subscription_plan_id: editedAgency.subscription_plan_id,
-          show_phone_on_site: editedAgency.show_phone_on_site,
-          list_properties_on_site: editedAgency.list_properties_on_site,
         })
         .eq("id", editedAgency.id)
 

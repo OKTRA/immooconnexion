@@ -5,6 +5,8 @@ import { Agency } from "./types"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertTriangle } from "lucide-react"
 
 interface AgencyFormProps {
   agency: Agency
@@ -25,6 +27,40 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
       return data
     },
   })
+
+  const canDowngrade = (planId: string) => {
+    const selectedPlan = plans.find(p => p.id === planId)
+    if (!selectedPlan || !agency) return false
+    
+    const exceedsProperties = selectedPlan.max_properties !== -1 && 
+      (agency.current_properties_count || 0) > selectedPlan.max_properties
+    
+    const exceedsTenants = selectedPlan.max_tenants !== -1 && 
+      (agency.current_tenants_count || 0) > selectedPlan.max_tenants
+    
+    const exceedsUsers = selectedPlan.max_users !== -1 && 
+      (agency.current_profiles_count || 0) > selectedPlan.max_users
+
+    return !exceedsProperties && !exceedsTenants && !exceedsUsers
+  }
+
+  const handlePlanChange = (planId: string) => {
+    const currentPlan = plans.find(p => p.id === agency.subscription_plan_id)
+    const newPlan = plans.find(p => p.id === planId)
+    
+    if (!currentPlan || !newPlan) return
+    
+    const isDowngrade = newPlan.price < currentPlan.price
+    
+    if (isDowngrade && !canDowngrade(planId)) {
+      return
+    }
+    
+    setAgency({ ...agency, subscription_plan_id: planId })
+  }
+
+  const selectedPlan = plans.find(p => p.id === agency.subscription_plan_id)
+  const showDowngradeWarning = selectedPlan && !canDowngrade(selectedPlan.id)
 
   return (
     <ScrollArea className="h-[calc(100vh-200px)] md:h-auto">
@@ -63,23 +99,51 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
             onChange={(e) => setAgency({ ...agency, email: e.target.value })}
           />
         </div>
-        <div>
+        <div className="col-span-2">
           <Label htmlFor="subscription_plan">Plan d'abonnement</Label>
           <Select 
             value={agency.subscription_plan_id || ""} 
-            onValueChange={(value) => setAgency({ ...agency, subscription_plan_id: value })}
+            onValueChange={handlePlanChange}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner un plan" />
             </SelectTrigger>
             <SelectContent>
-              {plans.map((plan) => (
-                <SelectItem key={plan.id} value={plan.id}>
-                  {plan.name} ({plan.price} FCFA)
-                </SelectItem>
-              ))}
+              {plans.map((plan) => {
+                const isDisabled = plan.price < (selectedPlan?.price || 0) && !canDowngrade(plan.id)
+                return (
+                  <SelectItem 
+                    key={plan.id} 
+                    value={plan.id}
+                    disabled={isDisabled}
+                  >
+                    {plan.name} ({plan.price} FCFA) - 
+                    {plan.max_properties === -1 ? "∞" : plan.max_properties} propriétés, 
+                    {plan.max_tenants === -1 ? "∞" : plan.max_tenants} locataires,
+                    {plan.max_users === -1 ? "∞" : plan.max_users} utilisateurs
+                  </SelectItem>
+                )
+              })}
             </SelectContent>
           </Select>
+
+          {showDowngradeWarning && (
+            <Alert variant="destructive" className="mt-2">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Impossible de rétrograder vers ce plan. L'agence dépasse les limites suivantes :
+                {selectedPlan.max_properties !== -1 && agency.current_properties_count > selectedPlan.max_properties && (
+                  <div>- Propriétés : {agency.current_properties_count} / {selectedPlan.max_properties}</div>
+                )}
+                {selectedPlan.max_tenants !== -1 && agency.current_tenants_count > selectedPlan.max_tenants && (
+                  <div>- Locataires : {agency.current_tenants_count} / {selectedPlan.max_tenants}</div>
+                )}
+                {selectedPlan.max_users !== -1 && agency.current_profiles_count > selectedPlan.max_users && (
+                  <div>- Utilisateurs : {agency.current_profiles_count} / {selectedPlan.max_users}</div>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
       </div>
     </ScrollArea>
