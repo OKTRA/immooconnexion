@@ -13,6 +13,7 @@ interface ApartmentFormData {
   owner_phone: string
   total_units: string
   property_category: string
+  chambres: string
 }
 
 export function useApartmentForm(property: Property | null | undefined, onSuccess?: () => void) {
@@ -25,7 +26,8 @@ export function useApartmentForm(property: Property | null | undefined, onSucces
     owner_name: "",
     owner_phone: "",
     total_units: "1",
-    property_category: "apartment"
+    property_category: "apartment",
+    chambres: "0"
   })
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -40,7 +42,8 @@ export function useApartmentForm(property: Property | null | undefined, onSucces
         owner_name: property.owner_name || "",
         owner_phone: property.owner_phone || "",
         total_units: property.total_units?.toString() || "1",
-        property_category: property.property_category || "apartment"
+        property_category: property.property_category || "apartment",
+        chambres: property.chambres?.toString() || "0"
       })
 
       if (property.photo_url) {
@@ -102,7 +105,8 @@ export function useApartmentForm(property: Property | null | undefined, onSucces
         owner_phone: formData.owner_phone,
         total_units: parseInt(formData.total_units),
         property_category: formData.property_category,
-        rental_type: "long_term"
+        rental_type: "long_term",
+        chambres: parseInt(formData.chambres)
       }
 
       if (property?.id) {

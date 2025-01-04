@@ -71,6 +71,17 @@ export function ApartmentFormFields({
           </div>
 
           <div className="grid gap-2">
+            <Label htmlFor="chambres">Nombre de chambres</Label>
+            <Input 
+              id="chambres" 
+              type="number"
+              min="0"
+              value={formData.chambres}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div className="grid gap-2">
             <Label htmlFor="ville">Ville</Label>
             <Input 
               id="ville" 
