@@ -1,87 +1,103 @@
-import { 
-  LayoutDashboard,
-  Users,
-  Building2,
-  Receipt,
-  CircleDollarSign,
-  BarChart2,
-  FileText,
-  Settings,
-  CreditCard
-} from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
-import { cn } from "@/lib/utils"
-import { Sidebar } from "@/components/ui/sidebar"
-
-const menuItems = [
-  {
-    title: "Tableau de bord",
-    href: "/agence/admin",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Locataires",
-    href: "/agence/locataires",
-    icon: Users,
-  },
-  {
-    title: "Biens",
-    href: "/agence/biens",
-    icon: Building2,
-  },
-  {
-    title: "Ventes",
-    href: "/agence/ventes",
-    icon: Receipt,
-  },
-  {
-    title: "Dépenses",
-    href: "/agence/depenses",
-    icon: CircleDollarSign,
-  },
-  {
-    title: "Gains",
-    href: "/agence/gains",
-    icon: BarChart2,
-  },
-  {
-    title: "Rapports",
-    href: "/agence/rapports",
-    icon: FileText,
-  },
-  {
-    title: "Abonnement",
-    href: "/agence/abonnement",
-    icon: CreditCard,
-  },
-  {
-    title: "Paramètres",
-    href: "/agence/parametres",
-    icon: Settings,
-  },
-]
+import {
+  Building,
+  Building2,
+  Home,
+  Users,
+  Wallet,
+  FileText,
+  BarChart3,
+  Settings,
+} from "lucide-react"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from "@/components/ui/sidebar"
 
 export function AgencySidebar() {
   const location = useLocation()
 
+  const isActive = (path: string) => {
+    return location.pathname === path
+  }
+
+  const menuItems = [
+    {
+      title: "Tableau de bord",
+      icon: Home,
+      path: "/agence/dashboard",
+    },
+    {
+      title: "Biens",
+      icon: Building,
+      path: "/agence/biens",
+    },
+    {
+      title: "Unités/Appartements",
+      icon: Building2,
+      path: "/agence/unites",
+    },
+    {
+      title: "Locataires",
+      icon: Users,
+      path: "/agence/locataires",
+    },
+    {
+      title: "Revenus",
+      icon: Wallet,
+      path: "/agence/revenus",
+    },
+    {
+      title: "Contrats",
+      icon: FileText,
+      path: "/agence/contrats",
+    },
+    {
+      title: "Rapports",
+      icon: BarChart3,
+      path: "/agence/rapports",
+    },
+    {
+      title: "Paramètres",
+      icon: Settings,
+      path: "/agence/parametres",
+    },
+  ]
+
   return (
-    <Sidebar className="fixed top-[60px] left-0 h-[calc(100vh-60px)] border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 w-[250px]">
-      <div className="flex flex-col gap-2 p-4">
-        {menuItems.map((item) => (
-          <Link
-            key={item.href}
-            to={item.href}
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50",
-              location.pathname === item.href && 
-              "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50"
-            )}
-          >
-            <item.icon className="h-4 w-4" />
-            <span>{item.title}</span>
-          </Link>
-        ))}
-      </div>
+    <Sidebar className="fixed left-0 top-0 z-20 h-screen w-[250px] border-r bg-background pt-16">
+      <SidebarContent>
+        <div className="flex flex-col gap-2 p-4">
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {menuItems.map((item) => (
+                  <SidebarMenuItem key={item.path}>
+                    <SidebarMenuButton asChild>
+                      <Link
+                        to={item.path}
+                        className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-accent ${
+                          isActive(item.path)
+                            ? "bg-accent text-accent-foreground"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </div>
+      </SidebarContent>
     </Sidebar>
   )
 }
