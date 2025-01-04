@@ -13,6 +13,7 @@ import { PaymentFormFields } from "./PaymentFormFields"
 import { PaymentFormData, paymentFormSchema } from "./types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form } from "@/components/ui/form"
+import { FreeSignupForm } from "./FreeSignupForm"
 
 export function PaymentDialog({ 
   open, 
@@ -47,7 +48,7 @@ export function PaymentDialog({
 
   const handleClose = () => {
     if (paymentSuccess) {
-      navigate('/agence/dashboard')
+      navigate('/agence/login')
     }
     onOpenChange(false)
   }
@@ -62,7 +63,22 @@ export function PaymentDialog({
     })
   }
 
-  const onSubmit = (data: PaymentFormData) => {
+  const onSubmit = async (data: PaymentFormData) => {
+    if (amount === 0) {
+      // For free plan, handle signup directly
+      const tempAgencyId = agencyId || planId
+      return (
+        <FreeSignupForm 
+          formData={data} 
+          tempAgencyId={tempAgencyId} 
+          onSuccess={() => {
+            setPaymentSuccess(true)
+            navigate('/agence/login')
+          }} 
+        />
+      )
+    }
+    // For paid plans, proceed to payment step
     setStep('payment')
   }
 
@@ -72,10 +88,10 @@ export function PaymentDialog({
         <DialogHeader>
           <DialogTitle>
             {paymentSuccess 
-              ? "Paiement réussi" 
+              ? "Inscription réussie" 
               : planName 
-                ? `Paiement - Plan ${planName}` 
-                : 'Paiement'}
+                ? `${isUpgrade ? 'Mise à niveau -' : 'Inscription -'} Plan ${planName}` 
+                : 'Inscription'}
           </DialogTitle>
         </DialogHeader>
         <Card className="p-6">
@@ -85,18 +101,18 @@ export function PaymentDialog({
                 <p className="text-sm text-gray-500">
                   {isUpgrade 
                     ? "Votre abonnement a été mis à jour avec succès."
-                    : "Votre paiement a été traité avec succès."}
+                    : "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter."}
                 </p>
                 <Button onClick={handleClose} className="w-full">
-                  Retour au tableau de bord
+                  {isUpgrade ? "Retour au tableau de bord" : "Aller à la page de connexion"}
                 </Button>
               </div>
-            ) : step === 'form' ? (
+            ) : !isUpgrade && step === 'form' ? (
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <PaymentFormFields form={form} />
                   <Button type="submit" className="w-full">
-                    Continuer vers le paiement
+                    {amount === 0 ? "Créer mon compte" : "Continuer vers le paiement"}
                   </Button>
                 </form>
               </Form>
