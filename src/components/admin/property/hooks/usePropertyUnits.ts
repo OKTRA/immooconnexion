@@ -32,12 +32,33 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
-      const { id, ...unitData } = data
+      const { id, photo, ...unitData } = data
+      let photoUrl = unitData.photo_url
+
+      if (photo) {
+        const fileExt = photo.name.split('.').pop()
+        const fileName = `${Math.random()}.${fileExt}`
+        const filePath = `${propertyId}/${fileName}`
+
+        const { error: uploadError, data: uploadData } = await supabase.storage
+          .from('property_photos')
+          .upload(filePath, photo)
+
+        if (uploadError) throw uploadError
+
+        if (uploadData) {
+          const { data: { publicUrl } } = supabase.storage
+            .from('property_photos')
+            .getPublicUrl(filePath)
+          
+          photoUrl = publicUrl
+        }
+      }
       
       if (id) {
         const { error } = await supabase
           .from('property_units')
-          .update(unitData)
+          .update({ ...unitData, photo_url: photoUrl })
           .eq('id', id)
 
         if (error) throw error
@@ -45,7 +66,7 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
       } else {
         const { data: newUnit, error } = await supabase
           .from('property_units')
-          .insert(unitData)
+          .insert({ ...unitData, photo_url: photoUrl })
           .select()
           .single()
 
