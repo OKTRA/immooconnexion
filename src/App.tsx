@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/providers/ThemeProvider"
 import { AuthProvider } from "@/providers/AuthProvider"
@@ -25,41 +25,44 @@ import PropertyUnits from "@/pages/PropertyUnits"
 // Components
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
+import { Outlet } from "react-router-dom"
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/biens" element={<PublicProperties />} />
-          <Route path="/agence/login" element={<Login />} />
-          <Route path="/admin/login" element={<SuperAdminLogin />} />
-          <Route path="/pricing" element={<Pricing />} />
+        <Router>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/biens" element={<PublicProperties />} />
+            <Route path="/agence/login" element={<Login />} />
+            <Route path="/admin/login" element={<SuperAdminLogin />} />
+            <Route path="/pricing" element={<Pricing />} />
 
-          {/* Protected Agency Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<AgencyLayout />}>
-              <Route path="/agence/admin" element={<AgencyDashboard />} />
-              <Route path="/agence/biens" element={<Properties />} />
-              <Route path="/agence/biens/:propertyId" element={<PropertyDetails />} />
-              <Route path="/agence/appartements" element={<PropertyUnits />} />
-              <Route path="/agence/locataires" element={<Tenants />} />
-              <Route path="/agence/contrats" element={<TenantContracts />} />
-              <Route path="/agence/depenses" element={<Expenses />} />
-              <Route path="/agence/rapports" element={<Reports />} />
-              <Route path="/agence/ventes" element={<PropertySales />} />
-              <Route path="/agence/gains" element={<AgencyEarnings />} />
-              <Route path="/agence/abonnement" element={<SubscriptionUpgrade />} />
+            {/* Protected Agency Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route element={<AgencyLayout><Outlet /></AgencyLayout>}>
+                <Route path="/agence/admin" element={<AgencyDashboard />} />
+                <Route path="/agence/biens" element={<Properties />} />
+                <Route path="/agence/biens/:propertyId" element={<PropertyDetails />} />
+                <Route path="/agence/appartements" element={<PropertyUnits />} />
+                <Route path="/agence/locataires" element={<Tenants />} />
+                <Route path="/agence/contrats" element={<TenantContracts />} />
+                <Route path="/agence/depenses" element={<Expenses />} />
+                <Route path="/agence/rapports" element={<Reports />} />
+                <Route path="/agence/ventes" element={<PropertySales />} />
+                <Route path="/agence/gains" element={<AgencyEarnings />} />
+                <Route path="/agence/abonnement" element={<SubscriptionUpgrade />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Protected Admin Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/admin/*" element={<AdminDashboard />} />
-          </Route>
-        </Routes>
-        <Toaster />
+            {/* Protected Admin Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/admin/*" element={<AdminDashboard />} />
+            </Route>
+          </Routes>
+          <Toaster />
+        </Router>
       </AuthProvider>
     </ThemeProvider>
   )
