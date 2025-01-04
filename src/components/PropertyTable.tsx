@@ -137,26 +137,28 @@ export function PropertyTable() {
   }
 
   return (
-    <div className="space-y-4">
-      <ResponsiveTable>
-        <PropertyTableHeader />
-        <ResponsiveTable.Body>
-          {properties && properties.map((property) => (
-            <PropertyTableRow
-              key={property.id}
-              property={property}
-              onEdit={() => {
-                setSelectedProperty(property)
-                setEditDialogOpen(true)
-              }}
-              onDelete={() => {
-                setSelectedProperty(property)
-                setDeleteDialogOpen(true)
-              }}
-            />
-          ))}
-        </ResponsiveTable.Body>
-      </ResponsiveTable>
+    <div className="space-y-4 w-full overflow-x-auto">
+      <div className="min-w-full">
+        <ResponsiveTable>
+          <PropertyTableHeader />
+          <ResponsiveTable.Body>
+            {properties && properties.map((property) => (
+              <PropertyTableRow
+                key={property.id}
+                property={property}
+                onEdit={() => {
+                  setSelectedProperty(property)
+                  setEditDialogOpen(true)
+                }}
+                onDelete={() => {
+                  setSelectedProperty(property)
+                  setDeleteDialogOpen(true)
+                }}
+              />
+            ))}
+          </ResponsiveTable.Body>
+        </ResponsiveTable>
+      </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

@@ -15,11 +15,11 @@ export function AgencyLayout({ children }: AgencyLayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex flex-col w-full">
+      <div className="min-h-screen flex flex-col w-full overflow-x-hidden">
         <GlobalHeader />
-        <div className="flex-1 flex">
+        <div className="flex-1 flex overflow-hidden">
           <AgencySidebar />
-          <main className={`flex-1 p-4 md:p-8 ${!isMobile ? 'ml-[250px]' : ''}`}>
+          <main className={`flex-1 p-4 md:p-8 overflow-y-auto ${!isMobile ? 'ml-[250px]' : ''}`}>
             {isMobile && (
               <Button 
                 variant="ghost" 
@@ -30,7 +30,9 @@ export function AgencyLayout({ children }: AgencyLayoutProps) {
                 <Menu className="h-6 w-6" />
               </Button>
             )}
-            {children}
+            <div className="w-full max-w-full">
+              {children}
+            </div>
           </main>
         </div>
       </div>
