@@ -12,6 +12,7 @@ import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
 import { PaymentMethodSelector } from "./PaymentMethodSelector"
+import { supabase } from "@/integrations/supabase/client"
 
 export function PaymentDialog({ 
   open, 
@@ -32,21 +33,46 @@ export function PaymentDialog({
   const { toast } = useToast()
   const navigate = useNavigate()
 
-  const handlePaymentSuccess = () => {
-    setPaymentSuccess(true)
-    toast({
-      title: "Succès",
-      description: "Votre paiement a été traité. Vous pouvez maintenant vous connecter pour accéder à votre tableau de bord.",
-    })
-  }
+  const handleFreePlanSignup = async (data: PaymentFormData) => {
+    try {
+      // Create auth user
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+      })
 
-  const handleClose = () => {
-    if (paymentSuccess) {
-      navigate('/agence/login')
+      if (signUpError) throw signUpError
+
+      // Update agency status to active since it's free
+      if (tempAgencyId) {
+        const { error: updateError } = await supabase
+          .from('agencies')
+          .update({ 
+            status: 'active',
+            name: data.agency_name,
+            address: data.agency_address,
+            country: data.country,
+            city: data.city,
+            phone: data.phone_number
+          })
+          .eq('id', tempAgencyId)
+
+        if (updateError) throw updateError
+      }
+
+      setPaymentSuccess(true)
+      toast({
+        title: "Inscription réussie",
+        description: "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.",
+      })
+    } catch (error: any) {
+      console.error('Error during free plan signup:', error)
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de l'inscription",
+        variant: "destructive",
+      })
     }
-    setShowPaymentMethods(false)
-    setFormData(null)
-    onOpenChange(false)
   }
 
   const handleFormSubmit = async (data: PaymentFormData) => {
@@ -59,23 +85,35 @@ export function PaymentDialog({
       })
       return
     }
+
+    // Si le plan est gratuit, on bypass le paiement
+    if (amount === 0) {
+      await handleFreePlanSignup(data)
+      return
+    }
+
+    // Sinon on continue avec le processus de paiement normal
     console.log("Form data submitted:", data)
     setFormData(data)
     setShowPaymentMethods(true)
   }
 
-  const renderPaymentForm = () => {
-    console.log("Current payment method:", paymentMethod)
-    console.log("Form data:", formData)
+  const handleClose = () => {
+    if (paymentSuccess) {
+      navigate('/agence/login')
+    }
+    setShowPaymentMethods(false)
+    setFormData(null)
+    onOpenChange(false)
+  }
 
+  const renderPaymentForm = () => {
     if (!formData) {
-      console.log("No form data available")
       return null
     }
 
     switch (paymentMethod) {
       case "cinetpay":
-        console.log("Rendering CinetPay form")
         return (
           <CinetPayForm 
             amount={amount || 0}
@@ -86,7 +124,6 @@ export function PaymentDialog({
           />
         )
       case "paydunya":
-        console.log("Rendering PayDunya form")
         return (
           <PaydunyaForm 
             amount={amount || 0}
@@ -105,7 +142,6 @@ export function PaymentDialog({
           </div>
         )
       default:
-        console.log("No payment method matched")
         return null
     }
   }
@@ -127,14 +163,15 @@ export function PaymentDialog({
             {paymentSuccess ? (
               <div className="space-y-4">
                 <p className="text-sm text-gray-500">
-                  Votre paiement a été traité et votre compte a été créé. 
-                  Vous pouvez maintenant vous connecter pour accéder à votre tableau de bord.
+                  {amount === 0 
+                    ? "Votre compte a été créé. Vous pouvez maintenant vous connecter pour accéder à votre tableau de bord."
+                    : "Votre paiement a été traité et votre compte a été créé. Vous pouvez maintenant vous connecter pour accéder à votre tableau de bord."}
                 </p>
                 <Button onClick={handleClose} className="w-full">
                   Aller à la connexion
                 </Button>
               </div>
-            ) : showPaymentMethods ? (
+            ) : showPaymentMethods && amount > 0 ? (
               <div className="space-y-4">
                 <PaymentMethodSelector 
                   selectedMethod={paymentMethod}
@@ -147,7 +184,7 @@ export function PaymentDialog({
                 <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
                   <PaymentFormFields form={form} />
                   <Button type="submit" className="w-full">
-                    Continuer
+                    {amount === 0 ? "Créer mon compte" : "Continuer"}
                   </Button>
                 </form>
               </Form>
