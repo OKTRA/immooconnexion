@@ -6,7 +6,8 @@ import {
   CircleDollarSign,
   BarChart2,
   FileText,
-  Settings
+  Settings,
+  CreditCard
 } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { cn } from "@/lib/utils"
@@ -47,6 +48,11 @@ const menuItems = [
     title: "Rapports",
     href: "/agence/rapports",
     icon: FileText,
+  },
+  {
+    title: "Abonnement",
+    href: "/agence/abonnement",
+    icon: CreditCard,
   },
   {
     title: "Paramètres",
