@@ -15,9 +15,19 @@ export function AgencyTenants({ agencyId }: AgencyTenantsProps) {
     queryFn: async () => {
       if (!agencyId) throw new Error("Agency ID is required")
 
+      console.log("Fetching tenants for agency:", agencyId) // Debug log
+
       const { data, error } = await supabase
         .from("tenants")
-        .select("*")
+        .select(`
+          id,
+          nom,
+          prenom,
+          phone_number,
+          birth_date,
+          agency_fees,
+          agency_id
+        `)
         .eq("agency_id", agencyId)
         .order("created_at", { ascending: false })
 
@@ -26,6 +36,7 @@ export function AgencyTenants({ agencyId }: AgencyTenantsProps) {
         throw error
       }
 
+      console.log("Fetched tenants:", data) // Debug log
       return data || []
     },
     enabled: !!agencyId
