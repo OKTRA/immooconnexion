@@ -6,99 +6,69 @@ interface UseAgencyUserEditProps {
   onSuccess?: () => void
 }
 
-export function useAgencyUserEdit({ onSuccess }: UseAgencyUserEditProps = {}) {
-  const { toast } = useToast()
-  const [editStep, setEditStep] = useState<1 | 2>(1)
+export function useAgencyUserEdit({ onSuccess }: UseAgencyUserEditProps) {
   const [showEditDialog, setShowEditDialog] = useState(false)
+  const [editStep, setEditStep] = useState(1)
   const [selectedUser, setSelectedUser] = useState<any>(null)
+  const { toast } = useToast()
 
-  const handleUpdateAuth = async (user: any) => {
+  const handleUpdateAuth = async (email: string, password?: string) => {
     try {
-      console.log("Updating auth user:", user)
-      
-      // Email validation
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-      const cleanEmail = user.email.trim().toLowerCase()
-      
-      if (!emailRegex.test(cleanEmail)) {
-        throw new Error("Format d'email invalide")
+      if (password && password.length < 6) {
+        throw new Error("Le mot de passe doit contenir au moins 6 caractères")
       }
 
-      // Préparer les données de mise à jour
-      const updateData: any = {
-        email: cleanEmail,
+      const updateData: any = { email }
+      if (password && password.length >= 6) {
+        updateData.password = password
       }
 
-      // N'inclure le mot de passe que s'il est fourni et non vide
-      if (user.password?.trim()) {
-        if (user.password.trim().length < 6) {
-          throw new Error("Le mot de passe doit contenir au moins 6 caractères")
-        }
-        updateData.password = user.password.trim()
-      }
+      const { error } = await supabase.auth.admin.updateUserById(
+        selectedUser.id,
+        updateData
+      )
 
-      const { error: updateError } = await supabase.auth.updateUser(updateData)
-
-      if (updateError) {
-        console.error("Error updating auth user:", updateError)
-        throw updateError
-      }
+      if (error) throw error
 
       toast({
         title: "Succès",
         description: "Les informations d'authentification ont été mises à jour",
       })
 
-      if (onSuccess) {
-        onSuccess()
-      }
-      setShowEditDialog(false)
+      setEditStep(2)
     } catch (error: any) {
-      console.error("Error updating auth user:", error)
       toast({
         title: "Erreur",
-        description: error.message || "Erreur lors de la mise à jour des informations d'authentification",
+        description: error.message,
         variant: "destructive",
       })
       throw error
     }
   }
 
-  const handleUpdateProfile = async (user: any) => {
+  const handleUpdateProfile = async (profileData: any) => {
     try {
-      console.log("Updating profile:", user)
-      const { error: profileError } = await supabase
+      const { error } = await supabase
         .from("profiles")
-        .update({
-          first_name: user.first_name,
-          last_name: user.last_name,
-          phone_number: user.phone_number,
-          role: user.role,
-        })
-        .eq('id', user.id)
+        .update(profileData)
+        .eq("id", selectedUser.id)
 
-      if (profileError) {
-        console.error("Error updating profile:", profileError)
-        throw profileError
-      }
+      if (error) throw error
 
       toast({
         title: "Succès",
-        description: "Le profil a été mis à jour",
+        description: "Le profil a été mis à jour avec succès",
       })
 
-      if (onSuccess) {
-        onSuccess()
-      }
+      onSuccess?.()
       setShowEditDialog(false)
+      setEditStep(1)
     } catch (error: any) {
-      console.error("Error updating profile:", error)
       toast({
         title: "Erreur",
-        description: error.message || "Erreur lors de la mise à jour du profil",
+        description: error.message,
         variant: "destructive",
       })
-      throw error
     }
   }
 
@@ -108,14 +78,13 @@ export function useAgencyUserEdit({ onSuccess }: UseAgencyUserEditProps = {}) {
   }
 
   return {
-    editStep,
-    setEditStep,
     showEditDialog,
     setShowEditDialog,
+    editStep,
+    setEditStep,
     selectedUser,
-    setSelectedUser,
     handleUpdateAuth,
     handleUpdateProfile,
-    handleEdit
+    handleEdit,
   }
 }
