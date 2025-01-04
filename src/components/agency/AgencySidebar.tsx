@@ -59,7 +59,7 @@ export function AgencySidebar() {
   const location = useLocation()
 
   return (
-    <Sidebar>
+    <Sidebar className="fixed top-[60px] left-0 h-[calc(100vh-60px)] border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 w-[250px] overflow-y-auto">
       <div className="flex flex-col gap-2 p-4">
         {menuItems.map((item) => (
           <Link

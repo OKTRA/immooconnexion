@@ -58,23 +58,25 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="min-h-screen w-full bg-gradient-to-r from-dashboard-gradient-from to-dashboard-gradient-to">
       <DashboardHeader />
-      <div className="container mx-auto p-4 md:p-6 lg:p-8 max-w-[1400px] animate-fade-in">
-        {showWarning && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-lg">
-              {needsProfileUpdate && needsAgencyUpdate ? (
-                "Veuillez compléter votre profil et les informations de votre agence pour accéder à toutes les fonctionnalités"
-              ) : needsProfileUpdate ? (
-                "Veuillez compléter votre profil pour continuer"
-              ) : (
-                "Veuillez compléter les informations de votre agence pour continuer"
-              )}
-            </AlertDescription>
-          </Alert>
-        )}
-        <div className="rounded-xl bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl p-6">
-          {children}
+      <div className="ml-[250px] pt-[60px]">
+        <div className="container mx-auto p-4 md:p-6 lg:p-8 max-w-[1400px] animate-fade-in">
+          {showWarning && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="text-lg">
+                {needsProfileUpdate && needsAgencyUpdate ? (
+                  "Veuillez compléter votre profil et les informations de votre agence pour accéder à toutes les fonctionnalités"
+                ) : needsProfileUpdate ? (
+                  "Veuillez compléter votre profil pour continuer"
+                ) : (
+                  "Veuillez compléter les informations de votre agence pour continuer"
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
+          <div className="rounded-xl bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl p-6">
+            {children}
+          </div>
         </div>
       </div>
     </div>
