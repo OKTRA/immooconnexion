@@ -24,6 +24,7 @@ const Reports = lazy(() => import("./pages/Reports"))
 const TenantContracts = lazy(() => import("./pages/TenantContracts"))
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"))
 const TermsOfService = lazy(() => import("./pages/TermsOfService"))
+const SubscriptionUpgrade = lazy(() => import("./pages/SubscriptionUpgrade"))
 
 const PageLoader = () => (
   <div className="min-h-[200px] flex items-center justify-center">
@@ -70,6 +71,14 @@ function AppRoutes() {
           element={
             <ProtectedAgencyRoute>
               <Index />
+            </ProtectedAgencyRoute>
+          }
+        />
+        <Route
+          path="/agence/abonnement"
+          element={
+            <ProtectedAgencyRoute>
+              <SubscriptionUpgrade />
             </ProtectedAgencyRoute>
           }
         />
