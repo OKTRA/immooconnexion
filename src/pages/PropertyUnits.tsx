@@ -3,9 +3,12 @@ import { supabase } from "@/integrations/supabase/client"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PropertyUnitsManager } from "@/components/admin/property/PropertyUnitsManager"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
-import { Building2, Home, Building } from "lucide-react"
+import { Building2, Home, Building, Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { useNavigate } from "react-router-dom"
 
 export default function PropertyUnits() {
+  const navigate = useNavigate()
   const { data: properties } = useQuery({
     queryKey: ["apartment-properties"],
     queryFn: async () => {
@@ -24,6 +27,13 @@ export default function PropertyUnits() {
       <div className="container mx-auto py-6">
         <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-lg shadow-sm">
           <h1 className="text-2xl font-bold text-gray-800">Gestion des Appartements</h1>
+          <Button 
+            onClick={() => navigate("/agence/biens/ajouter")}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            Ajouter un appartement
+          </Button>
         </div>
 
         <Tabs defaultValue="all" className="w-full space-y-6">
