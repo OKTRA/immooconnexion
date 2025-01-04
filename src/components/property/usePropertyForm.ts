@@ -16,6 +16,8 @@ export function usePropertyForm(property: Property | null | undefined, onOpenCha
     loyer: "",
     taux_commission: "",
     caution: "",
+    owner_name: "",
+    owner_phone: "",
   })
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -31,6 +33,8 @@ export function usePropertyForm(property: Property | null | undefined, onOpenCha
         loyer: property.loyer?.toString() || "",
         taux_commission: property.taux_commission?.toString() || "",
         caution: property.caution?.toString() || "",
+        owner_name: property.owner_name || "",
+        owner_phone: property.owner_phone || "",
       })
 
       if (property.photo_url) {
@@ -92,6 +96,8 @@ export function usePropertyForm(property: Property | null | undefined, onOpenCha
         user_id: user.id,
         agency_id: profile.agency_id,
         updated_at: new Date().toISOString(),
+        owner_name: formData.owner_name,
+        owner_phone: formData.owner_phone,
       }
 
       if (property?.id) {

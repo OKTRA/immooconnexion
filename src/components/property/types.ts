@@ -14,6 +14,8 @@ export interface Property {
   agency_id: string
   created_at: string
   updated_at: string
+  owner_name?: string
+  owner_phone?: string
 }
 
 export interface PropertyFormData {
@@ -24,18 +26,6 @@ export interface PropertyFormData {
   loyer: string
   taux_commission: string
   caution: string
-}
-
-export interface PropertyDialogProps {
-  property?: Property | null
-  onOpenChange?: (open: boolean) => void
-  open?: boolean
-  className?: string
-}
-
-export interface PropertyFormFieldsProps {
-  formData: PropertyFormData
-  setFormData: (data: PropertyFormData) => void
-  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  imagePreviewUrl?: string | string[]
+  owner_name?: string
+  owner_phone?: string
 }

@@ -3,8 +3,6 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PropertyFormData } from "./types"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { X } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
 interface PropertyFormFieldsProps {
   formData: PropertyFormData
@@ -41,6 +39,27 @@ export function PropertyFormFields({
           onChange={handleInputChange}
         />
       </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="owner_name">Nom du propriétaire</Label>
+        <Input 
+          id="owner_name" 
+          placeholder="Ex: Jean Dupont" 
+          value={formData.owner_name}
+          onChange={handleInputChange}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="owner_phone">Numéro du propriétaire</Label>
+        <Input 
+          id="owner_phone" 
+          placeholder="Ex: +225 0123456789" 
+          value={formData.owner_phone}
+          onChange={handleInputChange}
+        />
+      </div>
+
       <div className="grid gap-2">
         <Label htmlFor="type">Type de bien</Label>
         <Select 
@@ -58,6 +77,7 @@ export function PropertyFormFields({
           </SelectContent>
         </Select>
       </div>
+
       <div className="grid gap-2">
         <Label htmlFor="chambres">Nombre de chambres</Label>
         <Input 
@@ -68,6 +88,7 @@ export function PropertyFormFields({
           onChange={handleInputChange}
         />
       </div>
+
       <div className="grid gap-2">
         <Label htmlFor="ville">Ville</Label>
         <Input 
@@ -76,6 +97,7 @@ export function PropertyFormFields({
           onChange={handleInputChange}
         />
       </div>
+
       <div className="grid gap-2">
         <Label htmlFor="loyer">Loyer mensuel (FCFA)</Label>
         <Input 
@@ -85,6 +107,7 @@ export function PropertyFormFields({
           onChange={handleInputChange}
         />
       </div>
+
       <div className="grid gap-2">
         <Label htmlFor="taux_commission">Taux de commission (%)</Label>
         <Input 
@@ -97,6 +120,7 @@ export function PropertyFormFields({
           onChange={handleInputChange}
         />
       </div>
+
       <div className="grid gap-2">
         <Label htmlFor="caution">Caution (FCFA)</Label>
         <Input 
@@ -106,6 +130,7 @@ export function PropertyFormFields({
           onChange={handleInputChange}
         />
       </div>
+
       <div className="grid gap-2">
         <Label htmlFor="photo">Photos du bien</Label>
         <Input 
