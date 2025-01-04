@@ -57,7 +57,6 @@ export function PublicNavbar() {
         <div className="flex justify-between items-center py-4">
           <Link to="/public" className="flex items-center gap-2">
             <AnimatedLogo />
-            <span className="font-semibold text-xl text-gray-900 dark:text-white">Immoo.pro</span>
           </Link>
 
           {/* Desktop Navigation */}
