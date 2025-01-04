@@ -19,7 +19,7 @@ export function PropertyActions({ propertyId, onEdit, onDelete }: PropertyAction
     }
     
     try {
-      navigate(`/biens/${propertyId}`)
+      navigate(`/agence/biens/${propertyId}`)
     } catch (error) {
       console.error("Navigation error:", error)
     }
