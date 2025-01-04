@@ -1,8 +1,10 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Building2, MapPin, Home } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 interface PropertyCardProps {
   property: {
+    id: string;
     bien: string;
     type: string;
     ville?: string;
@@ -16,12 +18,17 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
+  const navigate = useNavigate()
+
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+    <Card 
+      className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" 
+      onClick={() => navigate(`/properties/${property.id}`)}
+    >
       <div className="aspect-[16/9] relative bg-gray-100">
         {property.photo_url ? (
           <img
-            src={property.photo_url}
+            src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/product_photos/${property.photo_url}`}
             alt={property.bien}
             className="object-cover w-full h-full"
           />
