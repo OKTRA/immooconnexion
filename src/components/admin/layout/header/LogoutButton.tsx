@@ -1,7 +1,7 @@
 import { LogOut } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase, clearSession } from "@/integrations/supabase/client"
 import { Button } from "@/components/ui/button"
 import {
   Tooltip,
@@ -15,34 +15,8 @@ export function LogoutButton() {
 
   const handleLogout = async () => {
     try {
-      // First check if there's a valid session
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      // If no session exists, just clean up and redirect
-      if (!session) {
-        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
-        localStorage.removeItem(`sb-${projectId}-auth-token`)
-        navigate("/agence/login")
-        return
-      }
-
-      // Attempt to sign out
-      const { error } = await supabase.auth.signOut()
-      
-      if (error) {
-        // If session not found error, clean up and redirect
-        if (error.message.includes('session_not_found')) {
-          const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
-          localStorage.removeItem(`sb-${projectId}-auth-token`)
-          navigate("/agence/login")
-          return
-        }
-        throw error
-      }
-
-      // Clean up and redirect on successful logout
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
-      localStorage.removeItem(`sb-${projectId}-auth-token`)
+      clearSession();
+      await supabase.auth.signOut()
       navigate("/agence/login")
       toast({
         title: "Déconnexion réussie",
@@ -50,10 +24,12 @@ export function LogoutButton() {
       })
     } catch (error: any) {
       console.error('Logout error:', error)
+      // Even if there's an error, clear the session and redirect
+      clearSession();
+      navigate("/agence/login")
       toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la déconnexion",
-        variant: "destructive"
+        title: "Session terminée",
+        description: "Votre session a été terminée",
       })
     }
   }

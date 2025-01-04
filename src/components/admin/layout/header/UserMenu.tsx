@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase, clearSession } from "@/integrations/supabase/client"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { UserAvatar } from "./UserAvatar"
 import { ThemeToggle } from "./ThemeToggle"
@@ -18,14 +18,14 @@ export function UserMenu() {
       try {
         const { data: { session } } = await supabase.auth.getSession()
         if (!session) {
-          const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
-          localStorage.removeItem(`sb-${projectId}-auth-token`)
+          clearSession();
           navigate("/agence/login")
           return
         }
         setIsSessionChecked(true)
       } catch (error) {
         console.error('Auth check error:', error)
+        clearSession();
         navigate("/agence/login")
       }
     }
@@ -34,8 +34,7 @@ export function UserMenu() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session || event === 'SIGNED_OUT') {
-        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
-        localStorage.removeItem(`sb-${projectId}-auth-token`)
+        clearSession();
         navigate("/agence/login")
       }
     })
@@ -43,14 +42,17 @@ export function UserMenu() {
     return () => {
       subscription.unsubscribe()
     }
-  }, [navigate, toast])
+  }, [navigate])
 
   const { data: profile } = useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
-        if (!user) throw new Error('No user found')
+        if (!user) {
+          clearSession();
+          throw new Error('No user found')
+        }
 
         const { data, error } = await supabase
           .from("profiles")

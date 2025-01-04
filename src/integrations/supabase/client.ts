@@ -6,8 +6,7 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 // Helper to clear session data
 export const clearSession = () => {
-  const projectId = 'apidxwaaogboeoctlhtz';
-  localStorage.removeItem(`sb-${projectId}-auth-token`);
+  localStorage.removeItem(`sb-${SUPABASE_URL.split('//')[1]}-auth-token`);
 };
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
