@@ -27,7 +27,7 @@ export function PricingCard({ plan, onSelect }: PricingCardProps) {
         <span className="text-sm font-semibold leading-6 text-gray-600">FCFA/mois</span>
       </div>
       <Button 
-        className="mt-4 w-full py-1.5 px-3 h-9 text-sm"
+        className="mt-4 px-6 h-9 text-sm mx-auto block"
         onClick={() => onSelect(plan)}
       >
         Commencer maintenant
