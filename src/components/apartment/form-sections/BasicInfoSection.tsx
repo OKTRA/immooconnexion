@@ -1,12 +1,14 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { westafrikanCountries } from "@/utils/countryUtils"
 
 interface BasicInfoSectionProps {
   formData: {
     bien: string
     property_category: string
     ville: string
+    country: string
     total_units: string
   }
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void
@@ -45,6 +47,25 @@ export function BasicInfoSection({
               <SelectItem value="apartment">Immeuble</SelectItem>
               <SelectItem value="studio">Studio</SelectItem>
               <SelectItem value="duplex">Duplex</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="country">Pays</Label>
+          <Select
+            value={formData.country}
+            onValueChange={(value) => handleSelectChange(value, 'country')}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner le pays" />
+            </SelectTrigger>
+            <SelectContent>
+              {westafrikanCountries.map((country) => (
+                <SelectItem key={country.code} value={country.code}>
+                  {country.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

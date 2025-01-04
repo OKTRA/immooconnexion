@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { PropertyUnit } from "../types/propertyUnit"
 import { useToast } from "@/components/ui/use-toast"
 
 export function usePropertyUnits(propertyId: string, filterStatus?: string) {
@@ -8,83 +7,93 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
   const queryClient = useQueryClient()
 
   const { data: units = [], isLoading } = useQuery({
-    queryKey: ["property-units", propertyId, filterStatus],
+    queryKey: ['property-units', propertyId, filterStatus],
     queryFn: async () => {
-      console.log("Fetching units for property:", propertyId)
       let query = supabase
-        .from("property_units")
-        .select("*")
-        .eq("property_id", propertyId)
-        .order("unit_number")
+        .from('property_units')
+        .select('*')
+        .eq('property_id', propertyId)
+        .order('unit_number')
 
       if (filterStatus) {
-        query = query.eq("status", filterStatus)
+        query = query.eq('status', filterStatus)
       }
 
       const { data, error } = await query
+
       if (error) {
-        console.error("Error fetching units:", error)
+        console.error('Error fetching units:', error)
         throw error
       }
-      console.log("Fetched units:", data)
-      return data as PropertyUnit[]
+
+      return data
     },
   })
 
   const mutation = useMutation({
-    mutationFn: async (unit: PropertyUnit) => {
-      console.log("Mutating unit:", unit)
-      if (unit.id) {
+    mutationFn: async (data: any) => {
+      const { id, ...unitData } = data
+      
+      if (id) {
         const { error } = await supabase
-          .from("property_units")
-          .update({
-            unit_number: unit.unit_number,
-            floor_number: unit.floor_number,
-            area: unit.area,
-            rent: unit.rent,
-            deposit: unit.deposit,
-            description: unit.description,
-            category: unit.category,
-            amenities: unit.amenities,
-            photo_url: unit.photo_url
-          })
-          .eq("id", unit.id)
+          .from('property_units')
+          .update(unitData)
+          .eq('id', id)
+
         if (error) throw error
+        return { ...data, id }
       } else {
-        const { error } = await supabase
-          .from("property_units")
-          .insert({
-            property_id: propertyId,
-            unit_number: unit.unit_number,
-            floor_number: unit.floor_number,
-            area: unit.area,
-            rent: unit.rent,
-            deposit: unit.deposit,
-            description: unit.description,
-            category: unit.category,
-            amenities: unit.amenities,
-            photo_url: unit.photo_url
-          })
+        const { data: newUnit, error } = await supabase
+          .from('property_units')
+          .insert(unitData)
+          .select()
+          .single()
+
         if (error) throw error
+        return newUnit
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["property-units"] })
-    }
+      queryClient.invalidateQueries({ queryKey: ['property-units', propertyId] })
+      toast({
+        title: "Succès",
+        description: "L'unité a été sauvegardée avec succès",
+      })
+    },
+    onError: (error) => {
+      console.error('Error saving unit:', error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la sauvegarde",
+        variant: "destructive",
+      })
+    },
   })
 
   const deleteMutation = useMutation({
     mutationFn: async (unitId: string) => {
-      console.log("Deleting unit:", unitId)
       const { error } = await supabase
-        .from("property_units")
+        .from('property_units')
         .delete()
-        .eq("id", unitId)
+        .eq('id', unitId)
+
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["property-units"] })
-    }
+      queryClient.invalidateQueries({ queryKey: ['property-units', propertyId] })
+      toast({
+        title: "Succès",
+        description: "L'unité a été supprimée avec succès",
+      })
+    },
+    onError: (error) => {
+      console.error('Error deleting unit:', error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suppression",
+        variant: "destructive",
+      })
+    },
   })
 
   return {
