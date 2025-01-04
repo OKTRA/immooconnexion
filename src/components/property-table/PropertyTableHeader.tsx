@@ -1,18 +1,18 @@
-import { TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
 
 export function PropertyTableHeader() {
   return (
-    <TableHeader>
-      <TableRow>
-        <TableHead>Bien</TableHead>
-        <TableHead>Type</TableHead>
-        <TableHead>Chambres</TableHead>
-        <TableHead>Ville</TableHead>
-        <TableHead>Loyer</TableHead>
-        <TableHead>Caution</TableHead>
-        <TableHead>Statut</TableHead>
-        <TableHead>Actions</TableHead>
-      </TableRow>
-    </TableHeader>
+    <ResponsiveTable.Header>
+      <ResponsiveTable.Row>
+        <ResponsiveTable.Head className="w-[100px]">Photo</ResponsiveTable.Head>
+        <ResponsiveTable.Head>Nom</ResponsiveTable.Head>
+        <ResponsiveTable.Head>Ville</ResponsiveTable.Head>
+        <ResponsiveTable.Head>Unités totales</ResponsiveTable.Head>
+        <ResponsiveTable.Head>Propriétaire</ResponsiveTable.Head>
+        <ResponsiveTable.Head>Téléphone</ResponsiveTable.Head>
+        <ResponsiveTable.Head>Statut</ResponsiveTable.Head>
+        <ResponsiveTable.Head className="text-right">Actions</ResponsiveTable.Head>
+      </ResponsiveTable.Row>
+    </ResponsiveTable.Header>
   )
 }
