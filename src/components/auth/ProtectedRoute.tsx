@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Navigate, Outlet } from "react-router-dom"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase, clearSession } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 
@@ -13,13 +13,8 @@ export const ProtectedRoute = () => {
       try {
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
         
-        if (sessionError) {
-          console.error("Session error:", sessionError)
-          setIsAuthenticated(false)
-          return
-        }
-
-        if (!sessionData.session) {
+        if (sessionError || !sessionData.session) {
+          clearSession()
           setIsAuthenticated(false)
           return
         }
@@ -27,15 +22,9 @@ export const ProtectedRoute = () => {
         // Verify the user exists
         const { data: { user }, error: userError } = await supabase.auth.getUser()
         
-        if (userError) {
-          console.error("User error:", userError)
-          // If there's an auth error, sign out and clear the session
+        if (userError || !user) {
+          clearSession()
           await supabase.auth.signOut()
-          setIsAuthenticated(false)
-          return
-        }
-
-        if (!user) {
           setIsAuthenticated(false)
           return
         }
@@ -43,6 +32,7 @@ export const ProtectedRoute = () => {
         setIsAuthenticated(true)
       } catch (error) {
         console.error("Auth check error:", error)
+        clearSession()
         setIsAuthenticated(false)
         toast({
           title: "Erreur d'authentification",
@@ -58,6 +48,7 @@ export const ProtectedRoute = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
+        clearSession()
         setIsAuthenticated(false)
         return
       }

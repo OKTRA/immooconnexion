@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase, clearSession } from "@/integrations/supabase/client"
 import { Loader2 } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 
@@ -21,12 +21,10 @@ const Login = () => {
       try {
         setIsLoading(true)
         
-        // First, clear any existing session
+        // Force clear any existing session
+        clearSession()
         await supabase.auth.signOut()
         
-        // Clear any stored session data
-        localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token')
-
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
@@ -52,7 +50,6 @@ const Login = () => {
           if (profileData?.role === 'admin') {
             if (!profileData.has_seen_warning) {
               setShowWarning(true)
-              // Update has_seen_warning to true
               await supabase
                 .from('profiles')
                 .update({ has_seen_warning: true })
@@ -66,6 +63,7 @@ const Login = () => {
         }
       } catch (error: any) {
         console.error('Session check error:', error)
+        clearSession()
         toast({
           title: "Erreur d'authentification",
           description: "Une erreur est survenue. Veuillez vous reconnecter.",
@@ -82,7 +80,6 @@ const Login = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-        // Vérifier si l'utilisateur est un admin
         const { data: profileData } = await supabase
           .from('profiles')
           .select('role, has_seen_warning')
@@ -92,7 +89,6 @@ const Login = () => {
         if (profileData?.role === 'admin') {
           if (!profileData.has_seen_warning) {
             setShowWarning(true)
-            // Update has_seen_warning to true
             await supabase
               .from('profiles')
               .update({ has_seen_warning: true })
