@@ -1,6 +1,7 @@
-import { AdminLayout } from "@/components/admin/layout/AdminLayout"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { AgencySidebar } from "@/components/agency/AgencySidebar"
+import { AdminLayout } from "@/components/admin/layout/AdminLayout"
+import { Building2, Users, CreditCard, TrendingUp } from "lucide-react"
 
 export default function Index() {
   return (
@@ -13,20 +14,32 @@ export default function Index() {
               <h1 className="text-2xl font-bold">Tableau de bord</h1>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-                  <h3 className="text-lg font-semibold">Locataires actifs</h3>
-                  <p className="text-3xl font-bold mt-2">24</p>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <h3 className="text-sm font-medium">Locataires actifs</h3>
+                  </div>
+                  <p className="text-2xl font-bold mt-2">24</p>
                 </div>
                 <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-                  <h3 className="text-lg font-semibold">Biens gérés</h3>
-                  <p className="text-3xl font-bold mt-2">12</p>
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <h3 className="text-sm font-medium">Biens gérés</h3>
+                  </div>
+                  <p className="text-2xl font-bold mt-2">12</p>
                 </div>
                 <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-                  <h3 className="text-lg font-semibold">Revenus mensuels</h3>
-                  <p className="text-3xl font-bold mt-2">15 000€</p>
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-muted-foreground" />
+                    <h3 className="text-sm font-medium">Revenus mensuels</h3>
+                  </div>
+                  <p className="text-2xl font-bold mt-2">15 000€</p>
                 </div>
                 <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-                  <h3 className="text-lg font-semibold">Taux d'occupation</h3>
-                  <p className="text-3xl font-bold mt-2">92%</p>
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    <h3 className="text-sm font-medium">Taux d'occupation</h3>
+                  </div>
+                  <p className="text-2xl font-bold mt-2">92%</p>
                 </div>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
