@@ -25,6 +25,14 @@ const PublicProperties = () => {
         `)
         .eq('statut', 'disponible')
 
+      // Log the initial query conditions
+      console.log("Initial query conditions:", {
+        status: 'disponible',
+        selectedAgency,
+        selectedType,
+        location
+      })
+
       if (selectedAgency) {
         query = query.eq('agency_id', selectedAgency)
       }
@@ -44,7 +52,12 @@ const PublicProperties = () => {
         throw error
       }
 
-      console.log("Properties fetched:", data)
+      // Log the fetched data for debugging
+      console.log("Properties query result:", {
+        count: data?.length || 0,
+        properties: data
+      })
+
       return data || []
     },
     meta: {
