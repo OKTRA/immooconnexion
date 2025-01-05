@@ -27,7 +27,7 @@ export function PublicNavbar() {
         <CreditCard className="h-4 w-4" />
         Tarifs
       </Link>
-      <Link to="/login">
+      <Link to="/agence/login">
         <Button className="w-full md:w-auto flex items-center gap-2">
           <LogIn className="h-4 w-4" />
           Espace propriétaire
