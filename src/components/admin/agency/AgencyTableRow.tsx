@@ -21,6 +21,8 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
   const [showOverviewDialog, setShowOverviewDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showPlanDialog, setShowPlanDialog] = useState(false)
+  const [showPlanConfirmDialog, setShowPlanConfirmDialog] = useState(false)
+  const [pendingPlanId, setPendingPlanId] = useState<string | null>(null)
   const [editedAgency, setEditedAgency] = useState(agency)
   const { toast } = useToast()
 
@@ -80,12 +82,19 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
   }
 
   const handlePlanChange = async (planId: string) => {
+    setPendingPlanId(planId)
+    setShowPlanConfirmDialog(true)
+  }
+
+  const confirmPlanChange = async () => {
+    if (!pendingPlanId) return
+
     try {
       // First check if downgrade is possible
       const { data: plan } = await supabase
         .from('subscription_plans')
         .select('*')
-        .eq('id', planId)
+        .eq('id', pendingPlanId)
         .single()
 
       if (!plan) throw new Error("Plan not found")
@@ -106,7 +115,7 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
 
       const { error } = await supabase
         .from('agencies')
-        .update({ subscription_plan_id: planId })
+        .update({ subscription_plan_id: pendingPlanId })
         .eq('id', agency.id)
 
       if (error) throw error
@@ -123,6 +132,10 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         description: error.message || "Une erreur est survenue lors de la mise à jour du plan",
         variant: "destructive",
       })
+    } finally {
+      setShowPlanConfirmDialog(false)
+      setShowPlanDialog(false)
+      setPendingPlanId(null)
     }
   }
 
@@ -181,6 +194,29 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
             <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">
               Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showPlanConfirmDialog} onOpenChange={setShowPlanConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer le changement de plan</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir modifier le plan d'abonnement de cette agence ? 
+              Cette action peut affecter les fonctionnalités disponibles pour l'agence.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setShowPlanConfirmDialog(false)
+              setPendingPlanId(null)
+            }}>
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmPlanChange}>
+              Confirmer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
