@@ -11,7 +11,7 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
     queryFn: async () => {
       console.log('Fetching units for apartment:', apartmentId)
       let query = supabase
-        .from('property_units')
+        .from('apartment_units')
         .select('*')
         .eq('apartment_id', apartmentId)
 
@@ -58,7 +58,7 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
 
       if (id) {
         const { error } = await supabase
-          .from('property_units')
+          .from('apartment_units')
           .update({ 
             ...unitData, 
             photo_url: photoUrl,
@@ -70,7 +70,7 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
         return { ...data, id }
       } else {
         const { data: newUnit, error } = await supabase
-          .from('property_units')
+          .from('apartment_units')
           .insert([{ 
             ...unitData, 
             apartment_id: apartmentId, 
@@ -103,7 +103,7 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
   const deleteMutation = useMutation({
     mutationFn: async (unitId: string) => {
       const { error } = await supabase
-        .from('property_units')
+        .from('apartment_units')
         .delete()
         .eq('id', unitId)
 

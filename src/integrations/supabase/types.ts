@@ -188,6 +188,72 @@ export type Database = {
           },
         ]
       }
+      apartment_units: {
+        Row: {
+          amenities: string[] | null
+          apartment_id: string | null
+          area: number | null
+          category: string | null
+          created_at: string | null
+          deposit: number | null
+          description: string | null
+          floor_number: number | null
+          id: string
+          photo_url: string | null
+          rent: number | null
+          status: string | null
+          unit_number: string
+          updated_at: string | null
+        }
+        Insert: {
+          amenities?: string[] | null
+          apartment_id?: string | null
+          area?: number | null
+          category?: string | null
+          created_at?: string | null
+          deposit?: number | null
+          description?: string | null
+          floor_number?: number | null
+          id?: string
+          photo_url?: string | null
+          rent?: number | null
+          status?: string | null
+          unit_number: string
+          updated_at?: string | null
+        }
+        Update: {
+          amenities?: string[] | null
+          apartment_id?: string | null
+          area?: number | null
+          category?: string | null
+          created_at?: string | null
+          deposit?: number | null
+          description?: string | null
+          floor_number?: number | null
+          id?: string
+          photo_url?: string | null
+          rent?: number | null
+          status?: string | null
+          unit_number?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_units_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_units_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       apartments: {
         Row: {
           agency_id: string | null
@@ -320,7 +386,7 @@ export type Database = {
             foreignKeyName: "bookings_unit_id_fkey"
             columns: ["unit_id"]
             isOneToOne: false
-            referencedRelation: "property_units"
+            referencedRelation: "apartment_units"
             referencedColumns: ["id"]
           },
         ]
@@ -741,75 +807,6 @@ export type Database = {
           },
           {
             foreignKeyName: "property_sales_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_units: {
-        Row: {
-          amenities: string[] | null
-          apartment_id: string | null
-          area: number | null
-          category: string | null
-          created_at: string | null
-          deposit: number | null
-          description: string | null
-          floor_number: number | null
-          id: string
-          photo_url: string | null
-          property_id: string
-          rent: number | null
-          status: string | null
-          unit_number: string
-          updated_at: string | null
-        }
-        Insert: {
-          amenities?: string[] | null
-          apartment_id?: string | null
-          area?: number | null
-          category?: string | null
-          created_at?: string | null
-          deposit?: number | null
-          description?: string | null
-          floor_number?: number | null
-          id?: string
-          photo_url?: string | null
-          property_id: string
-          rent?: number | null
-          status?: string | null
-          unit_number: string
-          updated_at?: string | null
-        }
-        Update: {
-          amenities?: string[] | null
-          apartment_id?: string | null
-          area?: number | null
-          category?: string | null
-          created_at?: string | null
-          deposit?: number | null
-          description?: string | null
-          floor_number?: number | null
-          id?: string
-          photo_url?: string | null
-          property_id?: string
-          rent?: number | null
-          status?: string | null
-          unit_number?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_units_apartment_id_fkey"
-            columns: ["apartment_id"]
-            isOneToOne: false
-            referencedRelation: "apartments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_units_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
