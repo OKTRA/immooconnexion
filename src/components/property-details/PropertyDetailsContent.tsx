@@ -6,7 +6,7 @@ import { PaymentHistory } from "./PaymentHistory"
 import { InspectionsList } from "./InspectionsList"
 import { PropertyActions } from "./PropertyActions"
 import { PropertySalesSection } from "./PropertySalesSection"
-import { ApartUnitsManager } from "@/components/admin/property/ApartUnitsManager"
+import { PropertyUnitsManager } from "@/components/admin/property/PropertyUnitsManager"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 import { Contract } from "@/integrations/supabase/types/contracts"
@@ -69,7 +69,7 @@ export const PropertyDetailsContent = () => {
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
       <PropertyInfo property={property} />
       <PropertyActions propertyId={id} contracts={contracts} />
-      {property.type === 'appartement' && <ApartUnitsManager propertyId={id} />}
+      {property.type === 'appartement' && <PropertyUnitsManager propertyId={id} />}
       <PaymentHistory 
         propertyId={id} 
         contracts={contracts}

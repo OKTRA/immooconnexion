@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import { ApartUnitsManager } from '../components/admin/property/ApartUnitsManager';
+import { PropertyUnitsManager } from '../components/admin/property/PropertyUnitsManager';
 
 export function PropertyUnits() {
   const route = useRoute();
@@ -9,7 +9,7 @@ export function PropertyUnits() {
 
   return (
     <View style={{ flex: 1, padding: 16 }}>
-      <ApartUnitsManager propertyId={propertyId} />
+      <PropertyUnitsManager propertyId={propertyId} />
     </View>
   );
 }
