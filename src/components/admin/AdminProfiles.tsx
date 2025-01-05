@@ -7,7 +7,7 @@ import { AddProfileDialog } from "./profile/AddProfileDialog"
 import { useAddProfileHandler } from "./profile/AddProfileHandler"
 import { useToast } from "@/hooks/use-toast"
 import { Profile } from "./profile/types"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/integrations/supabase/client"
 
 export function AdminProfiles() {
   const [searchTerm, setSearchTerm] = useState("")

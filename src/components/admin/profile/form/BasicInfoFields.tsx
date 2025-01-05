@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { UserRole } from "@/types/profile"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/integrations/supabase/client"
 import { BasicInfoFieldsProps } from "../types"
 
 export function BasicInfoFields({ 

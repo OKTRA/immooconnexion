@@ -7,10 +7,11 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { ProfileForm } from "./profile/ProfileForm"
+import { Profile } from "./profile/types"
 
 interface ProfileTableRowProps {
-  profile: any
-  onEdit: (profile: any) => void
+  profile: Profile
+  onEdit: (profile: Profile) => void
   refetch: () => void
 }
 
