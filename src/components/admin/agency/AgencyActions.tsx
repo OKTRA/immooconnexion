@@ -45,15 +45,15 @@ export function AgencyActions({
         <Building2 className="h-4 w-4" />
       </Button>
       <Button
-        variant={isBlocked ? "outline" : "destructive"}
+        variant={isBlocked ? "destructive" : "outline"}
         size="icon"
         onClick={onBlockClick}
         title={isBlocked ? "Débloquer" : "Bloquer"}
       >
         {isBlocked ? (
-          <LockOpen className="h-4 w-4" />
-        ) : (
           <Lock className="h-4 w-4" />
+        ) : (
+          <LockOpen className="h-4 w-4" />
         )}
       </Button>
       <Button
