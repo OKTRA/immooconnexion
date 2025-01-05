@@ -1,12 +1,17 @@
 import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus, Building } from "lucide-react"
-import { PropertyUnitDialog } from "./components/PropertyUnitDialog"
-import { PropertyUnit, PropertyUnitsManagerProps } from "./types/propertyUnit"
+import { PropertyUnitDialog } from "./PropertyUnitDialog"
+import { PropertyUnit } from "./types/propertyUnit"
 import { usePropertyUnits } from "./hooks/usePropertyUnits"
 import { PropertyUnitsTable } from "./components/PropertyUnitsTable"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
+
+interface PropertyUnitsManagerProps {
+  propertyId: string;
+  filterStatus?: string;
+}
 
 export function PropertyUnitsManager({ propertyId, filterStatus }: PropertyUnitsManagerProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -22,34 +27,18 @@ export function PropertyUnitsManager({ propertyId, filterStatus }: PropertyUnits
   const handleSubmit = async (data: PropertyUnit) => {
     try {
       await mutation.mutateAsync(data)
-      toast({
-        title: data.id ? "Unité modifiée" : "Unité ajoutée",
-        description: "L'opération a été effectuée avec succès",
-      })
       setIsDialogOpen(false)
       setEditingUnit(null)
     } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'opération",
-        variant: "destructive",
-      })
+      console.error('Error:', error)
     }
   }
 
   const handleDelete = async (unitId: string) => {
     try {
       await deleteMutation.mutateAsync(unitId)
-      toast({
-        title: "Unité supprimée",
-        description: "L'unité a été supprimée avec succès",
-      })
     } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la suppression",
-        variant: "destructive",
-      })
+      console.error('Error:', error)
     }
   }
 

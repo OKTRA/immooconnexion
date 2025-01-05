@@ -2,17 +2,17 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/components/ui/use-toast"
 
-export function usePropertyUnits(propertyId: string, filterStatus?: string) {
+export function usePropertyUnits(apartmentId: string, filterStatus?: string) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
   const { data: units = [], isLoading } = useQuery({
-    queryKey: ['property-units', propertyId, filterStatus],
+    queryKey: ['property-units', apartmentId, filterStatus],
     queryFn: async () => {
       let query = supabase
         .from('property_units')
         .select('*')
-        .eq('property_id', propertyId)
+        .eq('apartment_id', apartmentId)
         .order('unit_number')
 
       if (filterStatus) {
@@ -35,7 +35,7 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
       const { id, photo, ...unitData } = data
       let photoUrl = unitData.photo_url
 
-      // Convertir les champs numériques
+      // Convert numeric fields
       const numericFields = {
         ...unitData,
         area: unitData.area ? Number(unitData.area) : null,
@@ -47,7 +47,7 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
       if (photo) {
         const fileExt = photo.name.split('.').pop()
         const fileName = `${Math.random()}.${fileExt}`
-        const filePath = `${propertyId}/${fileName}`
+        const filePath = `${apartmentId}/${fileName}`
 
         const { error: uploadError, data: uploadData } = await supabase.storage
           .from('property_photos')
@@ -84,7 +84,7 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['property-units', propertyId] })
+      queryClient.invalidateQueries({ queryKey: ['property-units', apartmentId] })
       toast({
         title: "Succès",
         description: "L'unité a été sauvegardée avec succès",
@@ -110,7 +110,7 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['property-units', propertyId] })
+      queryClient.invalidateQueries({ queryKey: ['property-units', apartmentId] })
       toast({
         title: "Succès",
         description: "L'unité a été supprimée avec succès",
