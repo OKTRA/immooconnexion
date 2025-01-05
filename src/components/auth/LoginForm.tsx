@@ -34,6 +34,7 @@ export function LoginForm() {
           title: "Échec de la connexion",
           description: "Email ou mot de passe incorrect",
           variant: "destructive",
+          duration: 5000,
         })
         setIsLoading(false)
         return
@@ -44,6 +45,7 @@ export function LoginForm() {
           title: "Échec de la connexion",
           description: "Email ou mot de passe incorrect",
           variant: "destructive",
+          duration: 5000,
         })
         setIsLoading(false)
         return
@@ -94,14 +96,14 @@ export function LoginForm() {
           title: "Accès refusé",
           description: "Votre agence est actuellement bloquée. Veuillez contacter l'administrateur.",
           variant: "destructive",
-          duration: 5000,
+          duration: 7000, // Increased duration for blocked message
         })
         
-        // Add a delay before signing out to ensure the toast is visible
+        // Add a longer delay before signing out to ensure the toast is clearly visible
         setTimeout(async () => {
           await supabase.auth.signOut()
           setIsLoading(false)
-        }, 500)
+        }, 1000) // Increased delay to 1 second
         return
       }
 
