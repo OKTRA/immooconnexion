@@ -1,12 +1,10 @@
-import { useQuery } from "@tanstack/react-query"
-import { supabase, clearSession } from "@/integrations/supabase/client"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { UserAvatar } from "./UserAvatar"
-import { ThemeToggle } from "./ThemeToggle"
-import { LogoutButton } from "./LogoutButton"
-import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
+import { clearSession } from "@/utils/sessionUtils"
 import { useToast } from "@/hooks/use-toast"
+import { LogoutButton } from "./LogoutButton"
 
 export function UserMenu() {
   const navigate = useNavigate()
@@ -107,20 +105,12 @@ export function UserMenu() {
         return null
       }
     },
-    enabled: isSessionChecked,
-    retry: false,
-    meta: {
-      errorMessage: "Failed to fetch user profile"
-    }
+    enabled: isSessionChecked
   })
 
-  return (
-    <TooltipProvider>
-      <div className="flex items-center gap-4">
-        <UserAvatar profile={profile} />
-        <ThemeToggle />
-        <LogoutButton />
-      </div>
-    </TooltipProvider>
-  )
+  if (!isSessionChecked) {
+    return null
+  }
+
+  return <LogoutButton />
 }

@@ -1,13 +1,9 @@
-import { LogOut } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
-import { supabase, clearSession } from "@/integrations/supabase/client"
 import { Button } from "@/components/ui/button"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { LogOut } from "lucide-react"
+import { clearSession } from "@/utils/sessionUtils"
 
 export function LogoutButton() {
   const navigate = useNavigate()
@@ -42,20 +38,14 @@ export function LogoutButton() {
   }
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-white hover:bg-white/10"
-          onClick={handleLogout}
-        >
-          <LogOut className="h-5 w-5" />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>Déconnexion</p>
-      </TooltipContent>
-    </Tooltip>
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={handleLogout}
+      className="text-red-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900"
+    >
+      <LogOut className="h-4 w-4 sm:mr-2" />
+      <span className="hidden sm:inline">Déconnexion</span>
+    </Button>
   )
 }
