@@ -4,8 +4,18 @@ import { TenantsTableHeader } from "./tenants/TenantsTableHeader"
 import { TenantsTableContent } from "./tenants/TenantsTableContent"
 import { TenantDisplay, useTenants } from "@/hooks/use-tenants"
 import { useToast } from "./ui/use-toast"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { supabase } from "@/integrations/supabase/client"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface TenantsTableProps {
   onEdit: (tenant: TenantDisplay) => void
@@ -14,6 +24,7 @@ interface TenantsTableProps {
 export function TenantsTable({ onEdit }: TenantsTableProps) {
   const { toast } = useToast()
   const { tenants, isLoading, error, session, refetch } = useTenants()
+  const [tenantToDelete, setTenantToDelete] = useState<string | null>(null)
 
   useEffect(() => {
     if (error) {
@@ -26,11 +37,17 @@ export function TenantsTable({ onEdit }: TenantsTableProps) {
   }, [error, toast])
 
   const handleDelete = async (id: string) => {
+    setTenantToDelete(id)
+  }
+
+  const confirmDelete = async () => {
+    if (!tenantToDelete) return
+
     try {
       const { error } = await supabase
         .from('tenants')
         .delete()
-        .eq('id', id)
+        .eq('id', tenantToDelete)
 
       if (error) throw error
 
@@ -47,6 +64,8 @@ export function TenantsTable({ onEdit }: TenantsTableProps) {
         description: "Une erreur est survenue lors de la suppression du locataire.",
         variant: "destructive",
       })
+    } finally {
+      setTenantToDelete(null)
     }
   }
 
@@ -86,6 +105,23 @@ export function TenantsTable({ onEdit }: TenantsTableProps) {
           />
         </Table>
       </div>
+
+      <AlertDialog open={!!tenantToDelete} onOpenChange={(open) => !open && setTenantToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer ce locataire ? Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setTenantToDelete(null)}>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-500 hover:bg-red-600">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
