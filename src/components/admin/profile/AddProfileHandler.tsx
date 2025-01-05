@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { UserRole } from "@/types/profile"
 import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits"
+import { ProfileFormData } from "./types"
 
 interface UseAddProfileHandlerProps {
   onSuccess?: () => void
@@ -13,7 +14,7 @@ interface UseAddProfileHandlerProps {
 export function useAddProfileHandler({ onSuccess, onClose, agencyId }: UseAddProfileHandlerProps) {
   const { toast } = useToast()
   const { checkLimitReached } = useSubscriptionLimits(agencyId || '')
-  const [newProfile, setNewProfile] = useState({
+  const [newProfile, setNewProfile] = useState<ProfileFormData>({
     email: "",
     password: "",
     first_name: "",

@@ -17,9 +17,18 @@ export interface Profile {
   agency_name?: string
 }
 
+export interface ProfileFormData {
+  email: string
+  password: string
+  first_name: string
+  last_name: string
+  phone_number: string
+  role: UserRole
+}
+
 export interface ProfileFormProps {
-  newProfile?: Profile
-  setNewProfile?: React.Dispatch<React.SetStateAction<Profile>>
+  newProfile?: ProfileFormData
+  setNewProfile?: React.Dispatch<React.SetStateAction<ProfileFormData>>
   onSuccess?: () => void
   isEditing?: boolean
   step?: 1 | 2
@@ -33,8 +42,8 @@ export interface ProfileFormProps {
 }
 
 export interface BasicInfoFieldsProps {
-  newProfile?: Partial<Profile>
-  onProfileChange: (profile: Partial<Profile>) => void
+  newProfile?: Partial<ProfileFormData>
+  onProfileChange: (profile: Partial<ProfileFormData>) => void
   isEditing?: boolean
   step?: 1 | 2
   selectedAgencyId?: string
@@ -46,8 +55,8 @@ export interface AddProfileDialogProps {
   onOpenChange: (open: boolean) => void
   agencyId?: string
   onProfileCreated?: () => void
-  newProfile?: Profile
-  setNewProfile?: React.Dispatch<React.SetStateAction<Profile>>
+  newProfile?: ProfileFormData
+  setNewProfile?: React.Dispatch<React.SetStateAction<ProfileFormData>>
   handleCreateAuthUser?: () => Promise<string>
   handleUpdateProfile?: (userId: string) => Promise<void>
 }
