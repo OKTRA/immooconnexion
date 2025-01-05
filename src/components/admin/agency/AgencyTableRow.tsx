@@ -8,9 +8,9 @@ import { AddProfileDialog } from "../profile/AddProfileDialog"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { AgencyActions } from "./AgencyActions"
 import { AgencyPlanSelect } from "./AgencyPlanSelect"
+import { DeleteAgencyDialog } from "./dialogs/DeleteAgencyDialog"
 
 interface AgencyTableRowProps {
   agency: Agency
@@ -23,14 +23,13 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
   const [showOverviewDialog, setShowOverviewDialog] = useState(false)
   const [showAddProfileDialog, setShowAddProfileDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [editedAgency, setEditedAgency] = useState(agency)
+  const [editedAgency, setEditedAgency] = useState<Agency>(agency)
   const { toast } = useToast()
 
   const handleStatusToggle = async () => {
     try {
       const newStatus = agency.status === 'active' ? 'blocked' : 'active'
       
-      // Update agency status
       const { error: updateError } = await supabase
         .from('agencies')
         .update({ 
@@ -40,36 +39,6 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         .eq('id', agency.id)
 
       if (updateError) throw updateError
-
-      // Get all agency profiles to notify them
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('agency_id', agency.id)
-
-      if (profilesError) throw profilesError
-
-      // Call edge function to send notification emails
-      if (profiles && profiles.length > 0) {
-        const emails = profiles.map(p => p.email).filter(Boolean)
-        
-        const { error: notifyError } = await supabase.functions.invoke('notify-agency-status', {
-          body: {
-            emails,
-            agencyName: agency.name,
-            status: newStatus
-          }
-        })
-
-        if (notifyError) {
-          console.error('Error sending notifications:', notifyError)
-          toast({
-            title: "Attention",
-            description: "Le statut a été mis à jour mais l'envoi des notifications a échoué",
-            variant: "destructive",
-          })
-        }
-      }
 
       toast({
         title: "Statut mis à jour",
@@ -191,20 +160,11 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         onProfileCreated={refetch}
       />
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer cette agence ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Cette action est irréversible. Toutes les données associées à cette agence seront supprimées.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Supprimer</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteAgencyDialog 
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleDelete}
+      />
     </>
   )
 }
