@@ -1,12 +1,12 @@
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
-import { PropertyUnitsManager } from "@/components/admin/property/PropertyUnitsManager"
+import { ApartmentUnitsManager } from "@/components/admin/property/ApartmentUnitsManager"
 import { useParams } from "react-router-dom"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Building, Users, Receipt, FileText, CreditCard } from "lucide-react"
 
-export default function PropertyUnitsPage() {
+export default function ApartmentUnitsPage() {
   const { apartmentId } = useParams()
 
   const { data: apartment } = useQuery({
@@ -61,7 +61,7 @@ export default function PropertyUnitsPage() {
           </TabsList>
 
           <TabsContent value="units" className="mt-6">
-            <PropertyUnitsManager propertyId={apartmentId} />
+            <ApartmentUnitsManager propertyId={apartmentId} />
           </TabsContent>
 
           <TabsContent value="tenants">
