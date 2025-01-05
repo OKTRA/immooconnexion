@@ -39,7 +39,7 @@ export function PropertyUnitDialog({
     category: editingUnit?.category || "standard",
     amenities: editingUnit?.amenities || [],
     status: editingUnit?.status || "available",
-    apartment_id: propertyId,
+    apartment_id: propertyId,  // Changed from property_id to apartment_id
     photo_url: editingUnit?.photo_url || null
   })
 
@@ -49,7 +49,7 @@ export function PropertyUnitDialog({
     e.preventDefault()
     onSubmit({
       ...formData,
-      apartment_id: propertyId,
+      apartment_id: propertyId,  // Changed from property_id to apartment_id
       photo: selectedFiles?.[0] || null
     })
   }
