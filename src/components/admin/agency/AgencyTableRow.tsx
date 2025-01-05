@@ -28,7 +28,7 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
 
   const handleStatusToggle = async () => {
     try {
-      const newStatus = agency.status === 'active' ? 'blocked' : 'active'
+      const newStatus: Agency['status'] = agency.status === 'active' ? 'blocked' : 'active'
       
       const { error: updateError } = await supabase
         .from('agencies')
