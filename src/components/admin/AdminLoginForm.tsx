@@ -30,16 +30,9 @@ export function AdminLoginForm() {
 
       if (signInError) {
         console.error('Login error:', signInError)
-        
-        let errorMessage = "Identifiants incorrects. Veuillez vérifier votre email et mot de passe."
-        
-        if (signInError.message.includes("Invalid login credentials")) {
-          errorMessage = "Email ou mot de passe incorrect."
-        }
-
         toast({
           title: "Échec de la connexion",
-          description: errorMessage,
+          description: "Email ou mot de passe incorrect",
           variant: "destructive",
         })
         return
@@ -48,7 +41,7 @@ export function AdminLoginForm() {
       if (!data.user) {
         toast({
           title: "Échec de la connexion",
-          description: "Aucun utilisateur trouvé",
+          description: "Email ou mot de passe incorrect",
           variant: "destructive",
         })
         return
@@ -65,7 +58,7 @@ export function AdminLoginForm() {
         console.error('Admin verification error:', adminError)
         toast({
           title: "Accès refusé",
-          description: "Vous n'avez pas les droits d'accès nécessaires",
+          description: "Email ou mot de passe incorrect",
           variant: "destructive",
         })
         await supabase.auth.signOut()
@@ -76,7 +69,7 @@ export function AdminLoginForm() {
         console.error('User is not a super admin')
         toast({
           title: "Accès refusé",
-          description: "Seuls les super administrateurs peuvent se connecter ici",
+          description: "Email ou mot de passe incorrect",
           variant: "destructive",
         })
         await supabase.auth.signOut()
@@ -93,7 +86,7 @@ export function AdminLoginForm() {
       console.error('General error:', error)
       toast({
         title: "Erreur de connexion",
-        description: "Une erreur est survenue lors de la connexion",
+        description: "Email ou mot de passe incorrect",
         variant: "destructive",
       })
     } finally {
