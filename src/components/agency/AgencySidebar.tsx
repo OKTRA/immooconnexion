@@ -32,7 +32,7 @@ const menuItems = [
     icon: Building2,
   },
   {
-    title: "Appart/unité",
+    title: "Appartements",
     href: "/agence/appartements",
     icon: Building,
   },
