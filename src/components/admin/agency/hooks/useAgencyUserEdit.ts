@@ -37,6 +37,16 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
         throw new Error("No admin session found");
       }
 
+      // Validate required fields
+      if (!newProfile.email || !newProfile.password || !newProfile.first_name || !newProfile.last_name) {
+        toast({
+          title: "Erreur",
+          description: "Veuillez remplir tous les champs obligatoires",
+          variant: "destructive",
+        });
+        return null;
+      }
+
       const userExists = await checkExistingUser(newProfile.email);
       if (userExists) {
         toast({
@@ -50,7 +60,7 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
       // Create new user
       const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
         email: newProfile.email,
-        password: newProfile.password || '',
+        password: newProfile.password,
         email_confirm: true
       });
 
