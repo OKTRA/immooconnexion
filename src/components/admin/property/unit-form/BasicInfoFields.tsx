@@ -28,16 +28,6 @@ export function BasicInfoFields({ formData, setFormData }: BasicInfoFieldsProps)
           placeholder="ex: 1"
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="area">Surface (m²)</Label>
-        <Input
-          id="area"
-          type="number"
-          value={formData.area}
-          onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-          placeholder=""
-        />
-      </div>
     </div>
   )
 }
