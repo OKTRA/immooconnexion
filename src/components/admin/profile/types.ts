@@ -26,6 +26,7 @@ export interface ProfileFormProps {
   onUpdateProfile?: (userId: string) => Promise<void>
   onSuccess?: () => void
   agencyId?: string
+  isSubmitting?: boolean
 }
 
 export interface AddProfileDialogProps {
