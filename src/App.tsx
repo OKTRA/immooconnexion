@@ -31,8 +31,8 @@ function App() {
         {/* Protected Routes */}
         <Route path="agence/admin" element={<ProtectedRoute />}>
           <Route index element={<AgencyDashboard />} />
-          <Route path="proprietes" element={<Properties />} />
-          <Route path="proprietes/:propertyId" element={<PropertyDetails />} />
+          <Route path="biens" element={<Properties />} />
+          <Route path="biens/:propertyId" element={<PropertyDetails />} />
           <Route path="locataires" element={<Tenants />} />
           <Route path="contrats" element={<TenantContracts />} />
           <Route path="depenses" element={<Expenses />} />
@@ -40,6 +40,10 @@ function App() {
           <Route path="rapports" element={<Reports />} />
           <Route path="ventes" element={<PropertySales />} />
           <Route path="abonnement/upgrade" element={<SubscriptionUpgrade />} />
+          <Route path="parametres" element={<AgencySettings />} />
+          <Route path="appartements" element={<Apartments />} />
+          <Route path="appartements/:propertyId/unites" element={<PropertyUnits />} />
+          <Route path="gains" element={<AgencyEarnings />} />
         </Route>
 
         {/* Admin Routes */}
