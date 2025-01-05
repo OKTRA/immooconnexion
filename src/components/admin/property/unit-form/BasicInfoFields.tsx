@@ -35,7 +35,7 @@ export function BasicInfoFields({ formData, setFormData }: BasicInfoFieldsProps)
           type="number"
           value={formData.area}
           onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-          placeholder="ex: 75"
+          placeholder=""
         />
       </div>
     </div>
