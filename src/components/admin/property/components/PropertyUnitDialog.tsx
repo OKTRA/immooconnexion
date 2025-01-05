@@ -4,15 +4,15 @@ import {
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useState } from "react"
-import { BasicInfoFields } from "./unit-form/BasicInfoFields"
-import { PricingFields } from "./unit-form/PricingFields"
-import { AmenitiesSection } from "./unit-form/AmenitiesSection"
-import { PhotoUploadSection } from "./unit-form/PhotoUploadSection"
-import { UnitFormHeader } from "./unit-form/UnitFormHeader"
-import { ApartmentIdField } from "./unit-form/ApartmentIdField"
-import { StatusSelect } from "./unit-form/StatusSelect"
-import { UnitDescription } from "./unit-form/UnitDescription"
-import { UnitFormActions } from "./unit-form/UnitFormActions"
+import { BasicInfoFields } from "../unit-form/BasicInfoFields"
+import { PricingFields } from "../unit-form/PricingFields"
+import { AmenitiesSection } from "../unit-form/AmenitiesSection"
+import { PhotoUploadSection } from "../unit-form/PhotoUploadSection"
+import { UnitFormHeader } from "../unit-form/UnitFormHeader"
+import { ApartmentIdField } from "../unit-form/ApartmentIdField"
+import { StatusSelect } from "../unit-form/StatusSelect"
+import { UnitDescription } from "../unit-form/UnitDescription"
+import { UnitFormActions } from "../unit-form/UnitFormActions"
 
 interface PropertyUnitDialogProps {
   isOpen: boolean;
@@ -49,8 +49,8 @@ export function PropertyUnitDialog({
     e.preventDefault()
     onSubmit({
       ...formData,
-      property_id: propertyId,
-      photo: selectedFiles?.[0] || null // Changé de 'photos' à 'photo'
+      apartment_id: propertyId, // Changed from property_id to apartment_id
+      photo: selectedFiles?.[0] || null
     })
   }
 

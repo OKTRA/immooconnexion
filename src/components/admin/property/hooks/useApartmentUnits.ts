@@ -44,7 +44,7 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
       const { id, photo, ...unitData } = data as any
       let photoUrl = unitData.photo_url
 
-      // Convert string values to numbers for numeric fields, ensuring null for empty values
+      // Convert string values to numbers for numeric fields
       const numericFields = {
         floor_number: unitData.floor_number === '' ? null : 
           unitData.floor_number ? Number(unitData.floor_number) : null,
