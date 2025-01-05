@@ -1,7 +1,7 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { useState } from "react"
 import { ProfileForm } from "../../admin/profile/ProfileForm"
-import { Profile } from "../profile/types"
+import { Profile } from "@/types/profile"
 import { useAgencyUserEdit } from "./hooks/useAgencyUserEdit"
 
 interface AgencyUserEditDialogProps {
@@ -28,8 +28,12 @@ export function AgencyUserEditDialog({
     handleUpdateProfile,
   } = useAgencyUserEdit(userId, agencyId, onSuccess)
 
-  const handleProfileChange = (profile: Profile) => {
-    setNewProfile(profile)
+  const handleProfileChange = (profile: Partial<Profile>) => {
+    setNewProfile(prev => ({
+      ...prev,
+      ...profile,
+      agency_id: agencyId // Ensure agency_id is always set
+    }))
   }
 
   return (

@@ -1,26 +1,22 @@
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-
-interface Profile {
-  email: string
-  password?: string
-  first_name: string
-  last_name: string
-  phone_number: string
-  role: 'user' | 'admin'
-  agency_id: string
-}
+import { Profile } from "@/types/profile"
 
 export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuccess?: () => void) {
   const [newProfile, setNewProfile] = useState<Profile>({
+    id: userId || '',
     email: '',
     first_name: '',
     last_name: '',
     phone_number: '',
     role: 'user',
     agency_id: agencyId,
-    password: ''
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    is_tenant: false,
+    status: 'active',
+    has_seen_warning: false
   })
   const { toast } = useToast()
 
@@ -84,7 +80,8 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
           last_name: newProfile.last_name,
           phone_number: newProfile.phone_number,
           role: newProfile.role,
-          agency_id: agencyId
+          agency_id: agencyId,
+          status: 'active'
         })
 
       if (profileError) {
