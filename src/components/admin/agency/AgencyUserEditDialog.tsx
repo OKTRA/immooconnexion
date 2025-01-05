@@ -3,6 +3,7 @@ import { ProfileForm } from "@/components/admin/profile/ProfileForm"
 import { useAgencyUserEdit } from "../agency/hooks/useAgencyUserEdit"
 import { Toaster } from "@/components/ui/toaster"
 import { useState } from "react"
+import { ProfileFormData } from "../profile/types"
 
 interface AgencyUserEditDialogProps {
   open: boolean
@@ -19,7 +20,7 @@ export function AgencyUserEditDialog({
   agencyId,
   onSuccess
 }: AgencyUserEditDialogProps) {
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState<1 | 2>(1)
   const { 
     newProfile,
     setNewProfile,
@@ -38,8 +39,8 @@ export function AgencyUserEditDialog({
           </DialogHeader>
           <div className="py-4">
             <ProfileForm
-              newProfile={newProfile}
-              setNewProfile={setNewProfile}
+              newProfile={newProfile as ProfileFormData}
+              setNewProfile={setNewProfile as (profile: ProfileFormData) => void}
               isEditing={!!userId}
               onCreateAuthUser={handleCreateAuthUser}
               onUpdateProfile={handleUpdateProfile}
