@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/components/ui/use-toast"
+import { PropertyUnit } from "../types/propertyUnit"
 
 export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
   const { toast } = useToast()
@@ -32,8 +33,8 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
   })
 
   const mutation = useMutation({
-    mutationFn: async (data: any) => {
-      const { id, photo, ...unitData } = data
+    mutationFn: async (data: Partial<PropertyUnit>) => {
+      const { id, photo, ...unitData } = data as any
       let photoUrl = unitData.photo_url
 
       if (photo) {
