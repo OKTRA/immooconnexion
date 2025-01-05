@@ -3,28 +3,46 @@ import { ProfileForm } from "./ProfileForm"
 import { useState } from "react"
 import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits"
 import { useToast } from "@/hooks/use-toast"
+import { UserRole } from "@/types/profile"
 
-interface AddProfileDialogProps {
+export interface AddProfileDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   agencyId?: string
   onProfileCreated?: () => void
+  newProfile?: {
+    email: string
+    password: string
+    first_name: string
+    last_name: string
+    phone_number: string
+    role: UserRole
+  }
+  setNewProfile?: (profile: any) => void
+  handleCreateAuthUser?: () => Promise<string>
+  handleUpdateProfile?: (userId: string) => Promise<void>
+  showAddDialog?: boolean
+  setShowAddDialog?: (show: boolean) => void
 }
 
 export function AddProfileDialog({ 
   open, 
   onOpenChange,
   agencyId,
-  onProfileCreated
+  onProfileCreated,
+  newProfile,
+  setNewProfile,
+  handleCreateAuthUser,
+  handleUpdateProfile
 }: AddProfileDialogProps) {
   const [step, setStep] = useState<1 | 2>(1)
-  const { checkAndNotifyLimits } = useSubscriptionLimits()
+  const { checkLimitReached } = useSubscriptionLimits()
   const { toast } = useToast()
 
   const handleOpenChange = async (newOpen: boolean) => {
     if (newOpen && agencyId) {
-      const canAdd = await checkAndNotifyLimits(agencyId, 'user')
-      if (!canAdd) {
+      const limitReached = await checkLimitReached('user')
+      if (limitReached) {
         return
       }
     }
@@ -44,8 +62,12 @@ export function AddProfileDialog({
         </DialogHeader>
         <ProfileForm
           step={step}
-          onStepChange={setStep}
+          setStep={setStep}
           agencyId={agencyId}
+          newProfile={newProfile}
+          setNewProfile={setNewProfile}
+          onCreateAuthUser={handleCreateAuthUser}
+          onUpdateProfile={handleUpdateProfile}
           onSuccess={() => {
             onProfileCreated?.()
             toast({

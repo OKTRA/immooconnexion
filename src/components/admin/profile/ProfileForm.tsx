@@ -4,29 +4,40 @@ import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 import { Steps } from "./form/Steps"
+import { UserRole } from "@/types/profile"
 
 interface ProfileFormProps {
-  newProfile: any
+  newProfile?: {
+    email: string
+    password: string
+    first_name: string
+    last_name: string
+    phone_number: string
+    role: UserRole
+  }
   setNewProfile?: (profile: any) => void
-  onSubmit?: () => void
+  onSuccess?: () => void
   onCreateAuthUser?: () => Promise<string>
   onUpdateProfile?: (userId: string) => Promise<void>
   selectedAgencyId?: string
   isEditing?: boolean
   step?: 1 | 2
+  setStep?: (step: 1 | 2) => void
+  agencyId?: string
 }
 
 export function ProfileForm({ 
   newProfile, 
   setNewProfile, 
-  onSubmit,
+  onSuccess,
   onCreateAuthUser,
   onUpdateProfile,
   selectedAgencyId,
   isEditing = false,
-  step = 1
+  step = 1,
+  setStep,
+  agencyId
 }: ProfileFormProps) {
-  const [currentStep, setCurrentStep] = useState(step)
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
@@ -37,13 +48,13 @@ export function ProfileForm({
     setIsLoading(true)
 
     try {
-      if (currentStep === 1) {
+      if (step === 1) {
         if (onCreateAuthUser) {
           const userId = await onCreateAuthUser()
           console.log("Auth user created with ID:", userId)
           if (userId) {
             setNewProfile({ ...newProfile, id: userId })
-            setCurrentStep(2)
+            setStep?.(2)
           }
         } else if (setNewProfile) {
           await setNewProfile(newProfile)
@@ -52,14 +63,14 @@ export function ProfileForm({
             description: "Les informations d'authentification ont été mises à jour",
           })
         }
-      } else if (currentStep === 2 && onUpdateProfile && newProfile.id) {
+      } else if (step === 2 && onUpdateProfile && newProfile?.id) {
         await onUpdateProfile(newProfile.id)
         toast({
           title: "Succès",
           description: isEditing ? "Le profil a été mis à jour" : "Le profil a été créé avec succès",
         })
-        if (onSubmit) {
-          onSubmit()
+        if (onSuccess) {
+          onSuccess()
         }
       }
     } catch (error: any) {
@@ -79,30 +90,30 @@ export function ProfileForm({
       setNewProfile({
         ...newProfile,
         ...updatedProfile,
-        agency_id: selectedAgencyId
+        agency_id: selectedAgencyId || agencyId
       })
     }
   }
 
   return (
     <div className="space-y-6">
-      <Steps currentStep={currentStep} />
+      <Steps currentStep={step} />
       
       <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-2xl mx-auto px-4 md:px-0">
         <BasicInfoFields 
           newProfile={newProfile} 
           onProfileChange={handleProfileChange}
           isEditing={isEditing}
-          step={currentStep}
-          selectedAgencyId={selectedAgencyId}
+          step={step}
+          selectedAgencyId={selectedAgencyId || agencyId}
         />
         
         <div className="flex justify-between">
-          {currentStep === 2 && (
+          {step === 2 && (
             <Button 
               type="button" 
               variant="outline"
-              onClick={() => setCurrentStep(1)}
+              onClick={() => setStep?.(1)}
               disabled={isLoading}
             >
               Retour
@@ -117,10 +128,10 @@ export function ProfileForm({
               </>
             ) : (
               isEditing
-                ? currentStep === 1
+                ? step === 1
                   ? "Mettre à jour l'authentification"
                   : "Mettre à jour le profil"
-                : currentStep === 1 
+                : step === 1 
                   ? 'Suivant' 
                   : 'Créer le profil'
             )}

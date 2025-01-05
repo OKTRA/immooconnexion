@@ -2,16 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 
-interface SubscriptionLimits {
-  max_properties: number
-  max_tenants: number
-  max_users: number
-  current_properties: number
-  current_tenants: number
-  current_users: number
-}
-
-export function useSubscriptionLimits(agencyId: string) {
+export function useSubscriptionLimits(agencyId?: string) {
   const { toast } = useToast()
 
   const { data: limits } = useQuery({
