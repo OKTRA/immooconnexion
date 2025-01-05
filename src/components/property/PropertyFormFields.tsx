@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PropertyFormData } from "./types"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { westafrikanCountries } from "@/utils/countryUtils"
 
 interface PropertyFormFieldsProps {
   formData: PropertyFormData
@@ -89,10 +90,39 @@ export function PropertyFormFields({
       </div>
 
       <div className="grid gap-2">
+        <Label htmlFor="country">Pays</Label>
+        <Select 
+          value={formData.country} 
+          onValueChange={(value) => setFormData({ ...formData, country: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Sélectionner le pays" />
+          </SelectTrigger>
+          <SelectContent>
+            {westafrikanCountries.map((country) => (
+              <SelectItem key={country.code} value={country.code}>
+                {country.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid gap-2">
         <Label htmlFor="ville">Ville</Label>
         <Input 
           id="ville" 
           value={formData.ville}
+          onChange={handleInputChange}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="quartier">Quartier</Label>
+        <Input 
+          id="quartier" 
+          placeholder="Ex: Cocody" 
+          value={formData.quartier}
           onChange={handleInputChange}
         />
       </div>

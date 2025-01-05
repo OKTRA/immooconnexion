@@ -18,6 +18,8 @@ export interface Property {
   owner_phone?: string
   total_units: number
   property_category: string
+  country?: string
+  quartier?: string
 }
 
 export interface PropertyFormData {
@@ -30,57 +32,6 @@ export interface PropertyFormData {
   caution: string
   owner_name?: string
   owner_phone?: string
-}
-
-export interface PropertyDialogProps {
-  property?: Property | null
-  onOpenChange?: (open: boolean) => void
-  open?: boolean
-  className?: string
-}
-
-export interface PropertyFormFieldsProps {
-  formData: PropertyFormData
-  setFormData: (data: PropertyFormData) => void
-  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  imagePreviewUrl?: string | string[]
-}
-
-// Nouvelles interfaces pour les appartements
-export interface Apartment {
-  id: string
-  name: string
-  total_units: number
-  city: string
-  country: string
-  owner_name: string | null
-  owner_phone: string | null
-  photo_url: string | null
-  status: string
-  agency_id: string | null
-  created_by_user_id: string | null
-  created_at: string
-  updated_at: string
-}
-
-export interface ApartmentFormData {
-  name: string
-  city: string
-  country: string
-  total_units: string
-  owner_name: string
-  owner_phone: string
-}
-
-export interface ApartmentDialogProps {
-  apartment?: Apartment | null
-  onOpenChange?: (open: boolean) => void
-  open?: boolean
-}
-
-export interface ApartmentFormFieldsProps {
-  formData: ApartmentFormData
-  setFormData: (data: ApartmentFormData) => void
-  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  imagePreviewUrl?: string | string[]
+  country?: string
+  quartier?: string
 }
