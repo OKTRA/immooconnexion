@@ -18,7 +18,8 @@ export function ProfileForm({
 }: ProfileFormProps) {
   const { toast } = useToast()
   const form = useForm({
-    defaultValues: newProfile
+    defaultValues: newProfile,
+    values: newProfile // This ensures form values are always synced with newProfile
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,6 +46,7 @@ export function ProfileForm({
         await onSuccess()
       }
 
+      // Only reset form if creating new profile, not when editing
       if (!isEditing) {
         form.reset()
       }
