@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { AgencyActions } from "./AgencyActions"
 import { AgencyPlanDialog } from "./AgencyPlanDialog"
+import { AgencyBlockDialog } from "./dialogs/AgencyBlockDialog"
 
 interface AgencyTableRowProps {
   agency: Agency
@@ -21,6 +22,7 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
   const [showOverviewDialog, setShowOverviewDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showPlanDialog, setShowPlanDialog] = useState(false)
+  const [showBlockDialog, setShowBlockDialog] = useState(false)
   const [showPlanConfirmDialog, setShowPlanConfirmDialog] = useState(false)
   const [pendingPlanId, setPendingPlanId] = useState<string | null>(null)
   const [editedAgency, setEditedAgency] = useState(agency)
@@ -84,6 +86,35 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
   const handlePlanChange = async (planId: string) => {
     setPendingPlanId(planId)
     setShowPlanConfirmDialog(true)
+  }
+
+  const handleBlockToggle = async () => {
+    try {
+      const newStatus = agency.status === 'blocked' ? 'active' : 'blocked'
+      
+      const { error } = await supabase
+        .from('agencies')
+        .update({ status: newStatus })
+        .eq('id', agency.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Succès",
+        description: newStatus === 'blocked' 
+          ? "L'agence a été bloquée avec succès" 
+          : "L'agence a été débloquée avec succès",
+      })
+      refetch()
+    } catch (error: any) {
+      console.error('Error toggling agency status:', error)
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de la modification du statut",
+        variant: "destructive",
+      })
+    }
+    setShowBlockDialog(false)
   }
 
   const confirmPlanChange = async () => {
@@ -152,6 +183,8 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
             onOverviewClick={() => setShowOverviewDialog(true)}
             onDeleteClick={() => setShowDeleteDialog(true)}
             onPlanClick={() => setShowPlanDialog(true)}
+            onBlockClick={() => setShowBlockDialog(true)}
+            isBlocked={agency.status === 'blocked'}
           />
         </TableCell>
       </TableRow>
@@ -198,6 +231,13 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AgencyBlockDialog 
+        open={showBlockDialog}
+        onOpenChange={setShowBlockDialog}
+        onConfirm={handleBlockToggle}
+        isBlocked={agency.status === 'blocked'}
+      />
 
       <AlertDialog open={showPlanConfirmDialog} onOpenChange={setShowPlanConfirmDialog}>
         <AlertDialogContent>

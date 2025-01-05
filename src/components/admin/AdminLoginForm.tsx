@@ -66,6 +66,34 @@ export function AdminLoginForm() {
       }
 
       if (!adminData.is_super_admin) {
+        // Check if the agency is blocked
+        const { data: agencyData, error: agencyError } = await supabase
+          .from('agencies')
+          .select('status')
+          .eq('id', data.user.id)
+          .single()
+
+        if (agencyError) {
+          console.error('Agency verification error:', agencyError)
+          toast({
+            title: "Erreur de vérification",
+            description: "Une erreur est survenue lors de la vérification de votre compte",
+            variant: "destructive",
+          })
+          await supabase.auth.signOut()
+          return
+        }
+
+        if (agencyData?.status === 'blocked') {
+          toast({
+            title: "Accès refusé",
+            description: "Votre agence est actuellement bloquée. Veuillez contacter l'administrateur.",
+            variant: "destructive",
+          })
+          await supabase.auth.signOut()
+          return
+        }
+
         console.error('User is not a super admin')
         toast({
           title: "Accès refusé",
