@@ -1,24 +1,15 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { AgencyUserActions } from "./AgencyUserActions"
-import { useState } from "react"
-import { AgencyUserEditDialog } from "./AgencyUserEditDialog"
+import { AgencyUser } from "./types"
 
 interface AgencyUsersListProps {
-  users: any[]
-  refetch: () => void
-  agencyId: string
+  users: AgencyUser[];
+  refetch: () => void;
+  agencyId: string;
 }
 
 export function AgencyUsersList({ users, refetch, agencyId }: AgencyUsersListProps) {
-  const [showEditDialog, setShowEditDialog] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<any>(null)
-
-  const handleEditUser = (user: any) => {
-    setSelectedUser(user)
-    setShowEditDialog(true)
-  }
-
   return (
     <div className="rounded-md border">
       <Table>
@@ -45,7 +36,6 @@ export function AgencyUsersList({ users, refetch, agencyId }: AgencyUsersListPro
               <TableCell>
                 <AgencyUserActions
                   userId={user.id}
-                  onEditProfile={() => handleEditUser(user)}
                   refetch={refetch}
                 />
               </TableCell>
@@ -53,17 +43,6 @@ export function AgencyUsersList({ users, refetch, agencyId }: AgencyUsersListPro
           ))}
         </TableBody>
       </Table>
-
-      <AgencyUserEditDialog
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-        userId={selectedUser?.id}
-        agencyId={agencyId}
-        onSuccess={() => {
-          refetch()
-          setShowEditDialog(false)
-        }}
-      />
     </div>
   )
 }
