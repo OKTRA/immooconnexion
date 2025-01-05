@@ -26,7 +26,7 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
 
   const handleCreateAuthUser = async () => {
     try {
-      // Check if user already exists
+      // First check if user already exists
       const { data: existingUser } = await supabase
         .from('profiles')
         .select('id, email')
@@ -34,18 +34,34 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
         .single()
 
       if (existingUser) {
+        // If user exists, update their profile instead of creating new
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: newProfile.first_name,
+            last_name: newProfile.last_name,
+            phone_number: newProfile.phone_number,
+            role: newProfile.role,
+            agency_id: agencyId,
+            status: 'active'
+          })
+          .eq('id', existingUser.id)
+
+        if (updateError) throw updateError
+
         toast({
           title: "Utilisateur existant",
-          description: "Un utilisateur avec cet email existe déjà dans le système.",
-          variant: "destructive",
+          description: "Le profil a été mis à jour avec succès",
         })
-        throw new Error("User already exists")
+
+        return existingUser.id
       }
 
-      // Create new user using admin API
+      // If user doesn't exist, create new user
       const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
         email: newProfile.email,
         password: newProfile.password || '',
+        email_confirm: true
       })
 
       if (signUpError) {
