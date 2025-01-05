@@ -16,7 +16,7 @@ import {
 
 interface AgencyUserActionsProps {
   userId: string
-  onEditAuth: () => void
+  onEditAuth?: () => void
   onEditProfile: () => void
   refetch: () => void
 }

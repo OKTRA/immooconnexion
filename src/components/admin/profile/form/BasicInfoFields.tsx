@@ -1,15 +1,15 @@
 import { FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { UseFormReturn } from "react-hook-form"
-import { ProfileFormData } from "../types"
+import { Profile } from "../types"
 
 interface BasicInfoFieldsProps {
   form: UseFormReturn<any>
-  onProfileChange: (updatedProfile: Partial<ProfileFormData>) => void
+  onProfileChange: (updatedProfile: Partial<Profile>) => void
   isEditing?: boolean
   step?: number
   selectedAgencyId?: string
-  newProfile?: ProfileFormData
+  newProfile?: Profile
 }
 
 export function BasicInfoFields({

@@ -29,8 +29,17 @@ export function AgencyUserEditDialog({
   } = useAgencyUserEdit(userId, agencyId, onSuccess)
 
   const handleAuthUserCreation = async () => {
-    await handleCreateAuthUser();
-    return;
+    if (handleCreateAuthUser) {
+      const id = await handleCreateAuthUser()
+      return id
+    }
+    return ""
+  }
+
+  const handleProfileUpdate = async (userId: string) => {
+    if (handleUpdateProfile) {
+      await handleUpdateProfile(userId)
+    }
   }
 
   return (
@@ -48,7 +57,7 @@ export function AgencyUserEditDialog({
               setNewProfile={setNewProfile}
               isEditing={!!userId}
               onCreateAuthUser={handleAuthUserCreation}
-              onUpdateProfile={handleUpdateProfile}
+              onUpdateProfile={handleProfileUpdate}
               selectedAgencyId={agencyId}
               step={step}
               setStep={setStep}

@@ -1,5 +1,3 @@
-import { z } from "zod"
-
 export type UserRole = 'user' | 'admin' | 'super_admin';
 
 export interface Profile {
@@ -8,7 +6,7 @@ export interface Profile {
   password?: string;
   first_name: string;
   last_name: string;
-  phone_number?: string;
+  phone_number: string;
   role?: UserRole;
   agency_id?: string;
   created_at?: string;
@@ -27,6 +25,7 @@ export interface ProfileFormProps {
   step?: 1 | 2;
   setStep?: (step: 1 | 2) => void;
   selectedAgencyId?: string;
+  agencyId?: string;
   onCreateAuthUser?: () => Promise<string>;
   onUpdateProfile?: (userId: string) => Promise<void>;
 }
@@ -37,5 +36,9 @@ export interface AddProfileDialogProps {
   newProfile: Profile;
   setNewProfile: (profile: Profile) => void;
   handleCreateAuthUser: () => Promise<string>;
-  handleUpdateProfile: () => Promise<void>;
+  handleUpdateProfile: (userId: string) => Promise<void>;
+  agencyId?: string;
+  onProfileCreated?: () => void;
 }
+
+export type ProfileFormData = Profile;
