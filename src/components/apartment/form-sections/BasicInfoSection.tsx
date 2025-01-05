@@ -56,7 +56,7 @@ export function BasicInfoSection({
           <Label htmlFor="city">Ville</Label>
           <Input 
             id="city" 
-            placeholder="Ex: Abidjan"
+            placeholder="Ex: Bamako"
             value={formData.city}
             onChange={handleInputChange}
           />

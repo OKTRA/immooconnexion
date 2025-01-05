@@ -121,7 +121,7 @@ export function PropertyFormFields({
         <Label htmlFor="quartier">Quartier</Label>
         <Input 
           id="quartier" 
-          placeholder="Ex: Cocody" 
+          placeholder="Ex: Bamako-Coura" 
           value={formData.quartier}
           onChange={handleInputChange}
         />

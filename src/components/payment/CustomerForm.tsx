@@ -53,7 +53,7 @@ export function CustomerForm({ customerInfo, onChange }: CustomerFormProps) {
         <Input
           id="phone"
           type="tel"
-          placeholder="+225 XX XX XX XX XX"
+          placeholder="+223 XX XX XX XX"
           value={customerInfo.phone}
           onChange={handleChange('phone')}
           required
