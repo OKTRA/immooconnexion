@@ -28,6 +28,10 @@ export function AgencyUserEditDialog({
     handleUpdateProfile,
   } = useAgencyUserEdit(userId, agencyId, onSuccess)
 
+  const handleProfileChange = (profile: Profile) => {
+    setNewProfile(profile)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -35,7 +39,7 @@ export function AgencyUserEditDialog({
           <ProfileForm
             isEditing={!!userId}
             newProfile={newProfile}
-            setNewProfile={setNewProfile}
+            setNewProfile={handleProfileChange}
             onCreateAuthUser={handleCreateAuthUser}
             onUpdateProfile={handleUpdateProfile}
             selectedAgencyId={agencyId}
