@@ -1,13 +1,13 @@
 import { TableCell, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Edit, Users, Building2, UserPlus } from "lucide-react"
+import { Edit, UserPlus, Building2 } from "lucide-react"
 import { useState } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Agency } from "./types"
 import { AgencyOverview } from "./AgencyOverview"
 import { AgencyForm } from "./AgencyForm"
 import { AddProfileDialog } from "../profile/AddProfileDialog"
-import { ApartmentUnitsButton } from "@/components/apartment/ApartmentUnitsButton"
+import { useNavigate } from "react-router-dom"
 
 interface AgencyTableRowProps {
   agency: Agency
@@ -20,6 +20,7 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
   const [showOverviewDialog, setShowOverviewDialog] = useState(false)
   const [showAddProfileDialog, setShowAddProfileDialog] = useState(false)
   const [editedAgency, setEditedAgency] = useState(agency)
+  const navigate = useNavigate()
 
   return (
     <>
@@ -46,7 +47,14 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
               <UserPlus className="h-4 w-4 mr-2" />
               Ajouter un profil
             </Button>
-            <ApartmentUnitsButton apartmentId={agency.id} />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(`/agence/appartements/${agency.id}/unites`)}
+            >
+              <Building2 className="h-4 w-4 mr-2" />
+              Gérer les unités
+            </Button>
             <Button
               variant="ghost"
               size="sm"
