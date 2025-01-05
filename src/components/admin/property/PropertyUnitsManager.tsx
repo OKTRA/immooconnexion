@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus, Building } from "lucide-react"
-import { PropertyUnitDialog } from "./PropertyUnitDialog"
+import { ApartmentUnitDialog } from "./PropertyUnitDialog"
 import { PropertyUnit } from "./types/propertyUnit"
 import { useApartmentUnits } from "./hooks/useApartmentUnits"
 import { PropertyUnitsTable } from "./components/PropertyUnitsTable"
@@ -84,7 +84,7 @@ export function PropertyUnitsManager({ propertyId: apartmentId, filterStatus }: 
           onDelete={handleDelete}
         />
 
-        <PropertyUnitDialog
+        <ApartmentUnitDialog
           isOpen={isDialogOpen}
           onClose={() => {
             setIsDialogOpen(false)

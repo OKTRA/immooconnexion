@@ -14,7 +14,7 @@ import { StatusSelect } from "./unit-form/StatusSelect"
 import { UnitDescription } from "./unit-form/UnitDescription"
 import { UnitFormActions } from "./unit-form/UnitFormActions"
 
-interface PropertyUnitDialogProps {
+interface ApartmentUnitDialogProps {
   isOpen: boolean;
   onClose: () => void;
   editingUnit?: any;
@@ -22,13 +22,13 @@ interface PropertyUnitDialogProps {
   onSubmit: (data: any) => void;
 }
 
-export function PropertyUnitDialog({
+export function ApartmentUnitDialog({
   isOpen,
   onClose,
   editingUnit,
   propertyId: apartmentId,
   onSubmit,
-}: PropertyUnitDialogProps) {
+}: ApartmentUnitDialogProps) {
   const [formData, setFormData] = useState({
     unit_number: editingUnit?.unit_number || "",
     floor_number: editingUnit?.floor_number || "",
