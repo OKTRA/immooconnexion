@@ -22,6 +22,7 @@ export function AgencyActions({
   onDelete
 }: AgencyActionsProps) {
   const [showBlockConfirm, setShowBlockConfirm] = useState(false)
+  const isBlocked = agency.status === 'blocked'
 
   return (
     <>
@@ -50,11 +51,12 @@ export function AgencyActions({
           <Edit className="h-4 w-4" />
         </Button>
         <Button
-          variant={agency.status === 'active' ? 'destructive' : 'outline'}
+          variant={isBlocked ? 'outline' : 'destructive'}
           size="sm"
           onClick={() => setShowBlockConfirm(true)}
         >
-          <Ban className="h-4 w-4" />
+          <Ban className="h-4 w-4 mr-2" />
+          {isBlocked ? 'Débloquer' : 'Bloquer'}
         </Button>
         <Button
           variant="destructive"
