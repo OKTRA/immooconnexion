@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { UserRole } from "@/types/profile"
+import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits"
 
 interface UseAddProfileHandlerProps {
   onSuccess?: () => void
@@ -11,6 +12,7 @@ interface UseAddProfileHandlerProps {
 
 export function useAddProfileHandler({ onSuccess, onClose, agencyId }: UseAddProfileHandlerProps) {
   const { toast } = useToast()
+  const { checkLimitReached } = useSubscriptionLimits(agencyId || '')
   const [newProfile, setNewProfile] = useState({
     email: "",
     password: "",
@@ -22,6 +24,12 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: UseAddPro
 
   const handleCreateAuthUser = async () => {
     try {
+      // Check subscription limits before creating user
+      const limitReached = await checkLimitReached('user')
+      if (limitReached) {
+        throw new Error("Limite d'utilisateurs atteinte pour votre plan")
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email: newProfile.email,
         password: newProfile.password,
@@ -34,8 +42,11 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: UseAddPro
       })
 
       if (error) throw error
+      
+      console.log("Auth user created:", data.user?.id)
       return data.user?.id
     } catch (error: any) {
+      console.error('Error creating auth user:', error)
       toast({
         title: "Erreur",
         description: error.message,
@@ -55,6 +66,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: UseAddPro
           phone_number: newProfile.phone_number,
           role: newProfile.role,
           agency_id: agencyId,
+          status: 'active'
         })
         .eq("id", userId)
 
@@ -73,6 +85,7 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: UseAddPro
         description: error.message,
         variant: "destructive",
       })
+      throw error
     }
   }
 

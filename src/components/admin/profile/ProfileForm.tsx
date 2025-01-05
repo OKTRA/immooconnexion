@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
+import { Steps } from "./form/Steps"
 
 interface ProfileFormProps {
   newProfile: any
@@ -84,30 +85,48 @@ export function ProfileForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-2xl mx-auto px-4 md:px-0">
-      <BasicInfoFields 
-        newProfile={newProfile} 
-        onProfileChange={handleProfileChange}
-        isEditing={isEditing}
-        step={currentStep}
-        selectedAgencyId={selectedAgencyId}
-      />
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Chargement...
-          </>
-        ) : (
-          isEditing
-            ? currentStep === 1
-              ? "Mettre à jour l'authentification"
-              : "Mettre à jour le profil"
-            : currentStep === 1 
-              ? 'Suivant' 
-              : 'Créer le profil'
-        )}
-      </Button>
-    </form>
+    <div className="space-y-6">
+      <Steps currentStep={currentStep} />
+      
+      <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-2xl mx-auto px-4 md:px-0">
+        <BasicInfoFields 
+          newProfile={newProfile} 
+          onProfileChange={handleProfileChange}
+          isEditing={isEditing}
+          step={currentStep}
+          selectedAgencyId={selectedAgencyId}
+        />
+        
+        <div className="flex justify-between">
+          {currentStep === 2 && (
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={() => setCurrentStep(1)}
+              disabled={isLoading}
+            >
+              Retour
+            </Button>
+          )}
+          
+          <Button type="submit" className="ml-auto" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Chargement...
+              </>
+            ) : (
+              isEditing
+                ? currentStep === 1
+                  ? "Mettre à jour l'authentification"
+                  : "Mettre à jour le profil"
+                : currentStep === 1 
+                  ? 'Suivant' 
+                  : 'Créer le profil'
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
   )
 }
