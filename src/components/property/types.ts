@@ -1,7 +1,7 @@
 import { Property as SupabaseProperty } from "@/integrations/supabase/types/properties"
 
 export type Property = Omit<SupabaseProperty, 'user_id'> & {
-  user_id?: string | null
+  user_id: string | null // Changed from optional to required to match Supabase type
 }
 
 export interface PropertyFormData {

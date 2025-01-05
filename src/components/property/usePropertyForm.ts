@@ -38,7 +38,7 @@ export function usePropertyForm(property: Property | null | undefined, onOpenCha
         taux_commission: property.taux_commission?.toString() || "",
         caution: property.caution?.toString() || "",
         frais_agence: property.frais_agence?.toString() || "",
-        property_category: property.property_category || "house",
+        property_category: property.property_category as "house" | "apartment",
         owner_name: property.owner_name || "",
         owner_phone: property.owner_phone || "",
         country: property.country || "",
