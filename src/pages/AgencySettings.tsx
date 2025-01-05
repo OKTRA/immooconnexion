@@ -35,7 +35,15 @@ const AgencySettings = () => {
     try {
       const { error } = await supabase
         .from('agencies')
-        .update(updatedAgency)
+        .update({
+          name: updatedAgency.name,
+          address: updatedAgency.address,
+          phone: updatedAgency.phone,
+          email: updatedAgency.email,
+          show_phone_on_site: updatedAgency.show_phone_on_site,
+          list_properties_on_site: updatedAgency.list_properties_on_site,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', updatedAgency.id)
 
       if (error) throw error
