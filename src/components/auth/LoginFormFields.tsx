@@ -129,7 +129,7 @@ export function LoginFormFields() {
         description: "Bienvenue dans votre espace",
         duration: 3000,
       })
-      navigate("/agence/dashboard")
+      navigate("/agence/admin")
 
     } catch (error) {
       console.error('General error:', error)
