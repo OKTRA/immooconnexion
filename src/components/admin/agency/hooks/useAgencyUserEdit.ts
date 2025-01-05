@@ -26,11 +26,13 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
   const handleCreateAuthUser = async (): Promise<void> => {
     try {
       setIsSubmitting(true)
+      // Store current session
       const { data: { session: adminSession } } = await supabase.auth.getSession()
       if (!adminSession) {
         throw new Error("No admin session found")
       }
 
+      // Create new user
       const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
         email: newProfile.email,
         password: newProfile.password || '',
@@ -43,6 +45,7 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
         throw new Error("No user data returned")
       }
 
+      // Create profile
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
@@ -58,6 +61,7 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
 
       if (profileError) throw profileError
 
+      // Restore admin session
       await supabase.auth.setSession(adminSession)
       
       toast({

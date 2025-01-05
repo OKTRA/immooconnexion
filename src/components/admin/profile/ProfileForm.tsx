@@ -13,7 +13,6 @@ export function ProfileForm({
   setNewProfile, 
   onSuccess,
   isEditing = false,
-  agencyId,
   onCreateAuthUser,
   onUpdateProfile,
   selectedAgencyId
@@ -34,16 +33,9 @@ export function ProfileForm({
       }
       
       if (isEditing && onUpdateProfile) {
-        await onUpdateProfile(newProfile.email)
+        await onUpdateProfile(newProfile.id)
       } else if (onCreateAuthUser) {
-        try {
-          await onCreateAuthUser()
-        } catch (error: any) {
-          // If the error is not about duplicate user, we still want to proceed
-          if (!error.message?.includes("User already exists")) {
-            throw error
-          }
-        }
+        await onCreateAuthUser()
       }
 
       if (onSuccess) {
