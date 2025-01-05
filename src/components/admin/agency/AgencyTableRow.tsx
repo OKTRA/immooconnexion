@@ -1,16 +1,14 @@
 import { TableCell, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Edit, Users, Building2, UserPlus, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Agency } from "./types"
 import { AgencyOverview } from "./AgencyOverview"
 import { AgencyForm } from "./AgencyForm"
-import { AddProfileDialog } from "../profile/AddProfileDialog"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
-import { AgencySubscriptionPlan } from "./AgencySubscriptionPlan"
+import { AgencyActions } from "./AgencyActions"
+import { AgencyPlanDialog } from "./AgencyPlanDialog"
 
 interface AgencyTableRowProps {
   agency: Agency
@@ -21,8 +19,8 @@ interface AgencyTableRowProps {
 export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps) {
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showOverviewDialog, setShowOverviewDialog] = useState(false)
-  const [showAddProfileDialog, setShowAddProfileDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showPlanDialog, setShowPlanDialog] = useState(false)
   const [editedAgency, setEditedAgency] = useState(agency)
   const { toast } = useToast()
 
@@ -49,7 +47,6 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         .from('agencies')
         .delete()
         .eq('id', agency.id)
-        .single()
 
       if (error) throw error
 
@@ -99,7 +96,6 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         .from('agencies')
         .update({ subscription_plan_id: planId })
         .eq('id', agency.id)
-        .single()
 
       if (error) throw error
 
@@ -126,39 +122,12 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         <TableCell>{agency.phone || "-"}</TableCell>
         <TableCell>{agency.email || "-"}</TableCell>
         <TableCell>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowOverviewDialog(true)}
-            >
-              <Building2 className="h-4 w-4 mr-2" />
-              Vue d'ensemble
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowAddProfileDialog(true)}
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Ajouter un profil
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowEditDialog(true)}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowDeleteDialog(true)}
-              className="text-red-500 hover:text-red-600"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+          <AgencyActions 
+            onEditClick={() => setShowEditDialog(true)}
+            onOverviewClick={() => setShowOverviewDialog(true)}
+            onDeleteClick={() => setShowDeleteDialog(true)}
+            onPlanClick={() => setShowPlanDialog(true)}
+          />
         </TableCell>
       </TableRow>
 
@@ -172,10 +141,6 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
               setShowEditDialog(false)
             }}
           />
-          <AgencySubscriptionPlan 
-            agency={editedAgency}
-            onPlanChange={handlePlanChange}
-          />
         </DialogContent>
       </Dialog>
 
@@ -185,11 +150,11 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         </DialogContent>
       </Dialog>
 
-      <AddProfileDialog
-        open={showAddProfileDialog}
-        onOpenChange={setShowAddProfileDialog}
-        agencyId={agency.id}
-        onProfileCreated={refetch}
+      <AgencyPlanDialog
+        open={showPlanDialog}
+        onOpenChange={setShowPlanDialog}
+        agency={agency}
+        onPlanChange={handlePlanChange}
       />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
