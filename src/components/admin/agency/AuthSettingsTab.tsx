@@ -10,18 +10,31 @@ interface AuthSettingsTabProps {
 export function AuthSettingsTab({ profile, onProfileUpdate }: AuthSettingsTabProps) {
   const { toast } = useToast()
 
-  const handleProfileUpdate = async (userId: string) => {
+  const handleProfileUpdate = async (userId: string): Promise<void> => {
     try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId)
+
+      if (error) throw error
+
       // Call the parent's onProfileUpdate after successful update
       onProfileUpdate()
-      return Promise.resolve()
+      
+      toast({
+        title: "Succès",
+        description: "Votre profil a été mis à jour",
+      })
     } catch (error: any) {
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue lors de la mise à jour du profil",
         variant: "destructive"
       })
-      return Promise.reject(error)
+      throw error // Re-throw to be handled by the form
     }
   }
 
