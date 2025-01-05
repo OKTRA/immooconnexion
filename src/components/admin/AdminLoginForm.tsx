@@ -50,7 +50,7 @@ export function AdminLoginForm() {
       // Check if the user is a super admin in the administrators table
       const { data: adminData, error: adminError } = await supabase
         .from('administrators')
-        .select('is_super_admin')
+        .select('is_super_admin, agency_id')
         .eq('id', data.user.id)
         .single()
 
@@ -63,6 +63,36 @@ export function AdminLoginForm() {
         })
         await supabase.auth.signOut()
         return
+      }
+
+      // If not a super admin, check agency status
+      if (!adminData.is_super_admin && adminData.agency_id) {
+        const { data: agencyData, error: agencyError } = await supabase
+          .from('agencies')
+          .select('status')
+          .eq('id', adminData.agency_id)
+          .single()
+
+        if (agencyError || !agencyData) {
+          console.error('Agency verification error:', agencyError)
+          toast({
+            title: "Erreur de vérification",
+            description: "Impossible de vérifier le statut de l'agence",
+            variant: "destructive",
+          })
+          await supabase.auth.signOut()
+          return
+        }
+
+        if (agencyData.status === 'blocked') {
+          toast({
+            title: "Accès refusé",
+            description: "Votre agence est actuellement bloquée. Veuillez contacter l'administrateur.",
+            variant: "destructive",
+          })
+          await supabase.auth.signOut()
+          return
+        }
       }
 
       if (!adminData.is_super_admin) {
