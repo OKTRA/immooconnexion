@@ -15,14 +15,19 @@ export function LogoutButton() {
 
   const handleLogout = async () => {
     try {
-      // First clear the session
-      clearSession();
+      // First check if there's a valid session
+      const { data: { session } } = await supabase.auth.getSession()
       
-      // Then sign out from Supabase
-      await supabase.auth.signOut()
+      // Clear the session regardless of whether it exists
+      clearSession()
+      
+      if (session) {
+        // Only attempt to sign out if there's an active session
+        await supabase.auth.signOut()
+      }
       
       // Navigate to login page
-      navigate("/agence/login")
+      navigate("/login")
       
       toast({
         title: "Déconnexion réussie",
@@ -31,8 +36,8 @@ export function LogoutButton() {
     } catch (error: any) {
       console.error('Logout error:', error)
       // Even if there's an error, clear the session and redirect
-      clearSession();
-      navigate("/agence/login")
+      clearSession()
+      navigate("/login")
       toast({
         title: "Session terminée",
         description: "Votre session a été terminée",

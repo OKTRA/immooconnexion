@@ -18,15 +18,15 @@ export function UserMenu() {
       try {
         const { data: { session } } = await supabase.auth.getSession()
         if (!session) {
-          clearSession();
-          navigate("/agence/login")
+          clearSession()
+          navigate("/login")
           return
         }
         setIsSessionChecked(true)
       } catch (error) {
         console.error('Auth check error:', error)
-        clearSession();
-        navigate("/agence/login")
+        clearSession()
+        navigate("/login")
       }
     }
 
@@ -34,8 +34,8 @@ export function UserMenu() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session || event === 'SIGNED_OUT') {
-        clearSession();
-        navigate("/agence/login")
+        clearSession()
+        navigate("/login")
       }
     })
 
@@ -50,7 +50,7 @@ export function UserMenu() {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-          clearSession();
+          clearSession()
           throw new Error('No user found')
         }
 
