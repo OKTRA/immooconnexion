@@ -2,8 +2,9 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Agency } from "./types"
 import { AgencyBasicInfo } from "./AgencyBasicInfo"
 import { Button } from "@/components/ui/button"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 
 interface AgencyFormProps {
   agency: Agency
@@ -12,8 +13,46 @@ interface AgencyFormProps {
 }
 
 export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+
   const handleFieldChange = (field: keyof Agency, value: string) => {
     setAgency({ ...agency, [field]: value })
+  }
+
+  const handleSubmit = async () => {
+    try {
+      const { error } = await supabase
+        .from('agencies')
+        .update({
+          name: agency.name,
+          address: agency.address,
+          phone: agency.phone,
+          email: agency.email,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', agency.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Succès",
+        description: "Les informations de l'agence ont été mises à jour",
+      })
+
+      // Refresh agency data
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+      
+      if (onSubmit) {
+        onSubmit(agency)
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive",
+      })
+    }
   }
 
   const { data: currentPlan } = useQuery({
@@ -52,9 +91,9 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
         </div>
 
         <Button 
-          type="submit" 
+          type="button"
           className="w-full"
-          onClick={() => onSubmit?.(agency)}
+          onClick={handleSubmit}
         >
           Enregistrer les modifications
         </Button>

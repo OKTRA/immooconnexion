@@ -14,9 +14,9 @@ export function AgencyBasicInfo({ agency, onChange }: AgencyBasicInfoProps) {
         <Label htmlFor="name">Nom</Label>
         <Input
           id="name"
-          value={agency.name}
+          value={agency.name || ""}
           onChange={(e) => onChange("name", e.target.value)}
-          required
+          placeholder="Nom de l'agence"
         />
       </div>
       <div>
@@ -25,6 +25,7 @@ export function AgencyBasicInfo({ agency, onChange }: AgencyBasicInfoProps) {
           id="address"
           value={agency.address || ""}
           onChange={(e) => onChange("address", e.target.value)}
+          placeholder="Adresse de l'agence"
         />
       </div>
       <div>
@@ -33,6 +34,7 @@ export function AgencyBasicInfo({ agency, onChange }: AgencyBasicInfoProps) {
           id="phone"
           value={agency.phone || ""}
           onChange={(e) => onChange("phone", e.target.value)}
+          placeholder="Numéro de téléphone"
         />
       </div>
       <div>
@@ -42,6 +44,7 @@ export function AgencyBasicInfo({ agency, onChange }: AgencyBasicInfoProps) {
           type="email"
           value={agency.email || ""}
           onChange={(e) => onChange("email", e.target.value)}
+          placeholder="Email de l'agence"
         />
       </div>
     </>
