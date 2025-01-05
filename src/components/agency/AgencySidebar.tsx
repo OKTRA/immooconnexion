@@ -52,19 +52,14 @@ const menuItems = [
     icon: BarChart2,
   },
   {
-    title: "Rapports",
-    href: "/agence/rapports",
-    icon: FileText,
+    title: "Paramètres",
+    href: "/agence/parametres",
+    icon: Settings,
   },
   {
     title: "Abonnement",
     href: "/agence/abonnement",
     icon: CreditCard,
-  },
-  {
-    title: "Paramètres",
-    href: "/agence/parametres",
-    icon: Settings,
   },
 ]
 
