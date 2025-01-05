@@ -516,6 +516,7 @@ export type Database = {
           bien: string
           caution: number | null
           chambres: number | null
+          country: string | null
           created_at: string | null
           created_by_user_id: string | null
           frais_agence: number | null
@@ -531,6 +532,7 @@ export type Database = {
           price_per_night: number | null
           price_per_week: number | null
           property_category: string
+          quartier: string | null
           rental_type: string | null
           sale_price: number | null
           statut: string | null
@@ -546,6 +548,7 @@ export type Database = {
           bien: string
           caution?: number | null
           chambres?: number | null
+          country?: string | null
           created_at?: string | null
           created_by_user_id?: string | null
           frais_agence?: number | null
@@ -561,6 +564,7 @@ export type Database = {
           price_per_night?: number | null
           price_per_week?: number | null
           property_category?: string
+          quartier?: string | null
           rental_type?: string | null
           sale_price?: number | null
           statut?: string | null
@@ -576,6 +580,7 @@ export type Database = {
           bien?: string
           caution?: number | null
           chambres?: number | null
+          country?: string | null
           created_at?: string | null
           created_by_user_id?: string | null
           frais_agence?: number | null
@@ -591,6 +596,7 @@ export type Database = {
           price_per_night?: number | null
           price_per_week?: number | null
           property_category?: string
+          quartier?: string | null
           rental_type?: string | null
           sale_price?: number | null
           statut?: string | null
