@@ -2,6 +2,7 @@ import { useState } from "react"
 import { AddProfileDialog } from "@/components/admin/profile/AddProfileDialog"
 import { useProfiles } from "@/hooks/useProfiles"
 import { useAgencies } from "@/hooks/useAgencies"
+import { Profile } from "@/types/profile"
 
 export default function AgencySettings() {
   const [isAddProfileDialogOpen, setIsAddProfileDialogOpen] = useState(false)
@@ -37,9 +38,15 @@ export default function AgencySettings() {
           last_name: "",
           phone_number: "",
           role: "user",
+          agency_id: agencyId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_tenant: false,
+          status: 'active',
+          has_seen_warning: false
         }}
         setNewProfile={() => {}}
-        handleCreateAuthUser={async () => ""}
+        handleCreateAuthUser={async () => {}}
         handleUpdateProfile={async () => {}}
         agencyId={agencyId}
         onProfileCreated={refetchProfiles}
