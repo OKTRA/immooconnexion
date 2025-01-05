@@ -1,7 +1,7 @@
 import { TableCell, TableRow } from "@/components/ui/table"
 import { useState } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { Agency } from "./types"
+import { Agency } from "@/integrations/supabase/types/agencies"
 import { AgencyOverview } from "./AgencyOverview"
 import { AgencyForm } from "./AgencyForm"
 import { AddProfileDialog } from "../profile/AddProfileDialog"
