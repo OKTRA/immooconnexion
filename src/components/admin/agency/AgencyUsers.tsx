@@ -44,10 +44,25 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
   } = useAgencyUserEdit(selectedUserId, agencyId, async () => {
     await refetch()
     if (onRefetch) {
-      onRefetch()
+      await onRefetch()
     }
     setShowEditDialog(false)
     setSelectedUserId(null)
+    setNewProfile({
+      id: '',
+      email: '',
+      password: '',
+      first_name: '',
+      last_name: '',
+      phone_number: '',
+      role: 'user',
+      agency_id: agencyId,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      is_tenant: false,
+      status: 'active',
+      has_seen_warning: false
+    })
   })
 
   const handleEdit = (userId: string) => {
@@ -78,7 +93,7 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
       
       await refetch()
       if (onRefetch) {
-        onRefetch()
+        await onRefetch()
       }
     } catch (error: any) {
       toast({

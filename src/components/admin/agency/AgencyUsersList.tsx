@@ -1,15 +1,15 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { AgencyUserActions } from "./AgencyUserActions"
-import { AgencyUser } from "./types"
+import { Profile } from "../profile/types"
 
 interface AgencyUsersListProps {
-  users: AgencyUser[];
-  refetch: () => void;
-  agencyId: string;
+  users: Profile[]
+  onEdit: (userId: string) => void
+  onDelete: (userId: string) => Promise<void>
 }
 
-export function AgencyUsersList({ users, refetch, agencyId }: AgencyUsersListProps) {
+export function AgencyUsersList({ users, onEdit, onDelete }: AgencyUsersListProps) {
   return (
     <div className="rounded-md border">
       <Table>
@@ -36,7 +36,8 @@ export function AgencyUsersList({ users, refetch, agencyId }: AgencyUsersListPro
               <TableCell>
                 <AgencyUserActions
                   userId={user.id}
-                  refetch={refetch}
+                  onEdit={() => onEdit(user.id)}
+                  onDelete={() => onDelete(user.id)}
                 />
               </TableCell>
             </TableRow>

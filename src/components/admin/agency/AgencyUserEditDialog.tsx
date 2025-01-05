@@ -1,47 +1,47 @@
-import { Dialog, DialogContent as BaseDialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { DialogHeader } from "./form/DialogHeader"
 import { ProfileForm } from "../profile/ProfileForm"
-import { useAgencyUserEdit } from "./hooks/useAgencyUserEdit"
+import { Profile } from "../profile/types"
 
 interface AgencyUserEditDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  userId?: string
-  agencyId: string
-  onSuccess?: () => void
+  newProfile: Profile
+  setNewProfile: (profile: Profile) => void
+  isSubmitting: boolean
+  handleCreateAuthUser: () => Promise<void>
+  handleUpdateProfile: (userId: string) => Promise<void>
+  isEditing: boolean
 }
 
 export function AgencyUserEditDialog({
   open,
   onOpenChange,
-  userId,
-  agencyId,
-  onSuccess
+  newProfile,
+  setNewProfile,
+  isSubmitting,
+  handleCreateAuthUser,
+  handleUpdateProfile,
+  isEditing
 }: AgencyUserEditDialogProps) {
-  const {
-    newProfile,
-    setNewProfile,
-    isSubmitting,
-    handleCreateAuthUser,
-    handleUpdateProfile
-  } = useAgencyUserEdit(userId || null, agencyId, () => {
-    onSuccess?.()
+  const handleSuccess = async () => {
     onOpenChange(false)
-  })
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <BaseDialogContent className="max-w-2xl">
-        <DialogHeader isEditing={!!userId} />
+      <DialogContent className="max-w-2xl">
+        <DialogHeader isEditing={isEditing} />
         <ProfileForm
-          isEditing={!!userId}
+          isEditing={isEditing}
           newProfile={newProfile}
           setNewProfile={setNewProfile}
           onCreateAuthUser={handleCreateAuthUser}
           onUpdateProfile={handleUpdateProfile}
-          selectedAgencyId={agencyId}
+          onSuccess={handleSuccess}
+          isSubmitting={isSubmitting}
         />
-      </BaseDialogContent>
+      </DialogContent>
     </Dialog>
   )
 }
