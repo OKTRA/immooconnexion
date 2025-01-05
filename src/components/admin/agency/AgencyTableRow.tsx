@@ -1,6 +1,4 @@
 import { TableCell, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Edit, Users, Building2, UserPlus, Ban, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Agency } from "./types"
@@ -11,8 +9,8 @@ import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useQuery } from "@tanstack/react-query"
+import { AgencyActions } from "./AgencyActions"
+import { AgencyPlanSelect } from "./AgencyPlanSelect"
 
 interface AgencyTableRowProps {
   agency: Agency
@@ -27,19 +25,6 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [editedAgency, setEditedAgency] = useState(agency)
   const { toast } = useToast()
-
-  const { data: plans = [] } = useQuery({
-    queryKey: ["subscription-plans"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("subscription_plans")
-        .select("*")
-        .order("price", { ascending: true })
-      
-      if (error) throw error
-      return data
-    },
-  })
 
   const handleStatusToggle = async () => {
     try {
@@ -127,62 +112,20 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
           </Badge>
         </TableCell>
         <TableCell>
-          <Select 
+          <AgencyPlanSelect 
             value={agency.subscription_plan_id || ""} 
             onValueChange={handlePlanChange}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Sélectionner un plan" />
-            </SelectTrigger>
-            <SelectContent>
-              {plans.map((plan) => (
-                <SelectItem key={plan.id} value={plan.id}>
-                  {plan.name} ({plan.price} FCFA)
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          />
         </TableCell>
         <TableCell>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowOverviewDialog(true)}
-            >
-              <Building2 className="h-4 w-4 mr-2" />
-              Vue d'ensemble
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowAddProfileDialog(true)}
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Ajouter un profil
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowEditDialog(true)}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={agency.status === 'active' ? 'destructive' : 'outline'}
-              size="sm"
-              onClick={handleStatusToggle}
-            >
-              <Ban className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setShowDeleteDialog(true)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+          <AgencyActions 
+            agency={agency}
+            onEdit={() => setShowEditDialog(true)}
+            onAddProfile={() => setShowAddProfileDialog(true)}
+            onViewOverview={() => setShowOverviewDialog(true)}
+            onToggleStatus={handleStatusToggle}
+            onDelete={() => setShowDeleteDialog(true)}
+          />
         </TableCell>
       </TableRow>
 

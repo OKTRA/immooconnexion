@@ -13,6 +13,7 @@ export interface Agency {
   current_properties_count?: number;
   current_tenants_count?: number;
   current_profiles_count?: number;
+  status: 'active' | 'blocked' | 'pending';
   subscription_plans?: {
     id: string;
     name: string;
