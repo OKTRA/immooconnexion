@@ -33,7 +33,7 @@ export function PropertyTableRow({ property, onEdit, onDelete }: PropertyTableRo
           propertyId={property.id}
           onEdit={onEdit}
           onDelete={onDelete}
-          propertyType={property.type}
+          propertyType={property.property_category}
         />
       </ResponsiveTable.Cell>
     </ResponsiveTable.Row>
