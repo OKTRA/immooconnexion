@@ -1,88 +1,134 @@
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { Profile } from "../types"
 
-export function useAgencyUserEdit({ onSuccess }: { onSuccess?: () => void } = {}) {
-  const [showEditDialog, setShowEditDialog] = useState(false)
-  const [editStep, setEditStep] = useState<1 | 2>(1)
-  const [selectedUser, setSelectedUser] = useState<any>(null)
+export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuccess?: () => void) {
+  const [newProfile, setNewProfile] = useState<Partial<Profile>>({
+    email: '',
+    first_name: '',
+    last_name: '',
+    phone_number: '',
+    role: 'user',
+    agency_id: agencyId
+  })
   const { toast } = useToast()
 
-  const handleUpdateAuth = async (user: any) => {
+  const handleCreateAuthUser = async () => {
     try {
-      // Instead of using admin endpoints, update the profile table
-      const { error } = await supabase
+      // Check if user already exists
+      const { data: existingUser } = await supabase
         .from('profiles')
-        .update({ 
-          email: user.email,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id)
+        .select('id, email')
+        .eq('email', newProfile.email)
+        .single()
 
-      if (error) throw error
+      if (existingUser) {
+        toast({
+          title: "Utilisateur existant",
+          description: "Un utilisateur avec cet email existe déjà dans le système.",
+          variant: "destructive",
+        })
+        throw new Error("User already exists")
+      }
+
+      // Create new user
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email: newProfile.email,
+        password: newProfile.password || '',
+      })
+
+      if (signUpError) {
+        let errorMessage = "Erreur lors de la création du compte"
+        
+        if (signUpError.message.includes("password")) {
+          errorMessage = "Le mot de passe doit contenir au moins 6 caractères"
+        } else if (signUpError.message.includes("email")) {
+          errorMessage = "Veuillez entrer une adresse email valide"
+        }
+
+        toast({
+          title: "Erreur d'authentification",
+          description: errorMessage,
+          variant: "destructive",
+        })
+        throw signUpError
+      }
+
+      if (!authData.user) {
+        toast({
+          title: "Erreur",
+          description: "Impossible de créer le compte utilisateur",
+          variant: "destructive",
+        })
+        throw new Error("No user data returned")
+      }
 
       toast({
         title: "Succès",
-        description: "Les informations d'authentification ont été mises à jour",
+        description: "Le compte a été créé avec succès",
       })
-      
-      setEditStep(2)
+
+      return authData.user.id
     } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
-      })
+      console.error("Error creating auth user:", error)
+      throw error
     }
   }
 
-  const handleUpdateProfile = async (user: any) => {
+  const handleUpdateProfile = async () => {
     try {
+      if (!userId) {
+        toast({
+          title: "Erreur",
+          description: "ID utilisateur manquant",
+          variant: "destructive",
+        })
+        return
+      }
+
       const { error } = await supabase
         .from("profiles")
         .update({
-          first_name: user.first_name,
-          last_name: user.last_name,
-          phone_number: user.phone_number,
-          role: user.role,
+          first_name: newProfile.first_name,
+          last_name: newProfile.last_name,
+          phone_number: newProfile.phone_number,
+          role: newProfile.role,
+          agency_id: agencyId,
           updated_at: new Date().toISOString()
         })
-        .eq("id", user.id)
+        .eq("id", userId)
 
-      if (error) throw error
+      if (error) {
+        toast({
+          title: "Erreur",
+          description: "Impossible de mettre à jour le profil",
+          variant: "destructive",
+        })
+        throw error
+      }
 
       toast({
         title: "Succès",
-        description: "Le profil a été mis à jour",
+        description: "Le profil a été mis à jour avec succès",
       })
 
       onSuccess?.()
-      setShowEditDialog(false)
-      setEditStep(1)
     } catch (error: any) {
+      console.error("Error updating profile:", error)
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error.message || "Une erreur est survenue",
         variant: "destructive",
       })
+      throw error
     }
   }
 
-  const handleEdit = (user: any) => {
-    setSelectedUser(user)
-    setEditStep(1)
-    setShowEditDialog(true)
-  }
-
   return {
-    showEditDialog,
-    setShowEditDialog,
-    editStep,
-    setEditStep,
-    selectedUser,
-    setSelectedUser,
-    handleUpdateAuth,
+    newProfile,
+    setNewProfile,
+    handleCreateAuthUser,
     handleUpdateProfile,
-    handleEdit,
   }
 }
