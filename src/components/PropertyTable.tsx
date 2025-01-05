@@ -20,26 +20,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { PropertyTableHeader } from "./property-table/PropertyTableHeader"
 import { PropertyTableRow } from "./property-table/PropertyTableRow"
-
-interface Property {
-  id: string
-  bien: string
-  type: string
-  chambres: number
-  ville: string
-  loyer: number
-  frais_agence: number
-  taux_commission: number
-  caution: number
-  statut: string
-  photo_url: string | null
-  user_id: string
-  agency_id: string
-  created_at: string
-  updated_at: string
-  total_units: number
-  property_category: string
-}
+import { Property } from "./property/types"
 
 interface PropertyTableProps {
   type?: 'apartment' | 'house'
@@ -101,8 +82,14 @@ export function PropertyTable({ type }: PropertyTableProps) {
         throw error
       }
 
-      console.log("Biens récupérés:", data)
-      return data as Property[]
+      // Cast the property_category to the correct type
+      const typedData = data?.map(item => ({
+        ...item,
+        property_category: item.property_category as "house" | "apartment"
+      })) as Property[]
+
+      console.log("Biens récupérés:", typedData)
+      return typedData || []
     }
   })
 

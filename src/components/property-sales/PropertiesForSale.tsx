@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { PropertySaleDialog } from "./PropertySaleDialog"
 import { PropertiesGrid } from "@/components/home/PropertiesGrid"
+import { Property } from "@/components/property/types"
 
 export function PropertiesForSale() {
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null)
@@ -23,8 +24,15 @@ export function PropertiesForSale() {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      console.log("Properties fetched:", data)
-      return data || []
+      
+      // Cast the property_category to the correct type
+      const typedData = data?.map(item => ({
+        ...item,
+        property_category: item.property_category as "house" | "apartment"
+      })) as (Property & { agency: { name: string; address: string } })[]
+      
+      console.log("Properties fetched:", typedData)
+      return typedData || []
     }
   })
 
