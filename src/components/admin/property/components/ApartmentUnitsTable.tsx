@@ -9,18 +9,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-
-interface PropertyUnit {
-  id: string
-  unit_number: string
-  floor_number: number
-  area: number
-  status: string
-  rent: number
-  deposit: number
-  category: string
-  amenities: string[]
-}
+import { PropertyUnit } from "../types/propertyUnit"
 
 interface ApartmentUnitsTableProps {
   units: PropertyUnit[]
@@ -52,7 +41,7 @@ const formatPrice = (price: number) => {
   }).format(price)
 }
 
-export function ApartmentUnitsTable({ units, onEdit, onDelete }: ApartmentUnitsTableProps) {
+export const ApartmentUnitsTable = ({ units, onEdit, onDelete }: ApartmentUnitsTableProps) => {
   return (
     <div className="rounded-md border">
       <Table>
