@@ -41,8 +41,16 @@ export function ProfileForm({
           await onUpdateProfile(newProfile.email)
           setStep(2)
         } else if (onCreateAuthUser) {
-          const userId = await onCreateAuthUser()
-          setStep(2)
+          try {
+            await onCreateAuthUser()
+            setStep(2)
+          } catch (error: any) {
+            // If the error is not about duplicate user, we still want to move to step 2
+            if (!error.message?.includes("User already exists")) {
+              setStep(2)
+            }
+            throw error
+          }
         }
       } else {
         // Second step - validate profile info

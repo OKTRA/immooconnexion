@@ -13,13 +13,14 @@ interface Profile {
 }
 
 export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuccess?: () => void) {
-  const [newProfile, setNewProfile] = useState<Partial<Profile>>({
+  const [newProfile, setNewProfile] = useState<Profile>({
     email: '',
     first_name: '',
     last_name: '',
     phone_number: '',
     role: 'user',
-    agency_id: agencyId
+    agency_id: agencyId,
+    password: ''
   })
   const { toast } = useToast()
 
