@@ -82,9 +82,9 @@ const AgencySettings = () => {
 
           <TabsContent value="profile">
             <ProfileForm
-              profile={profile}
+              newProfile={profile}
               isEditing={true}
-              onSuccess={() => {
+              onSubmit={() => {
                 toast({
                   title: "Succès",
                   description: "Votre profil a été mis à jour",
