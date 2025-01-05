@@ -5,17 +5,34 @@ import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { SignupFormData } from "../pricing/types"
 import { PaymentFormFields } from "./PaymentFormFields"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { paymentFormSchema } from "./types"
+import { Form } from "@/components/ui/form"
 
-interface FreeSignupFormProps {
+export interface FreeSignupFormProps {
   formData: SignupFormData
   setFormData: (data: SignupFormData) => void
   setStep: (step: number) => void
+  tempAgencyId?: string
+  onSuccess?: () => void
 }
 
-export function FreeSignupForm({ formData, setFormData, setStep }: FreeSignupFormProps) {
+export function FreeSignupForm({ 
+  formData, 
+  setFormData, 
+  setStep, 
+  tempAgencyId,
+  onSuccess 
+}: FreeSignupFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
   const navigate = useNavigate()
+
+  const form = useForm({
+    resolver: zodResolver(paymentFormSchema),
+    defaultValues: formData
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,6 +68,7 @@ export function FreeSignupForm({ formData, setFormData, setStep }: FreeSignupFor
       const { data: agency, error: agencyError } = await supabase
         .from('agencies')
         .insert([{
+          id: tempAgencyId,
           name: formData.agency_name,
           address: formData.agency_address,
           phone: formData.agency_phone,
@@ -80,6 +98,7 @@ export function FreeSignupForm({ formData, setFormData, setStep }: FreeSignupFor
         description: "Votre compte a été créé avec succès.",
       })
 
+      onSuccess?.()
       setStep(2)
     } catch (error: any) {
       console.error('Error:', error)
@@ -94,11 +113,13 @@ export function FreeSignupForm({ formData, setFormData, setStep }: FreeSignupFor
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentFormFields formData={formData} setFormData={setFormData} />
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Inscription en cours..." : "S'inscrire"}
-      </Button>
-    </form>
+    <Form {...form}>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <PaymentFormFields form={form} />
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? "Inscription en cours..." : "S'inscrire"}
+        </Button>
+      </form>
+    </Form>
   )
 }

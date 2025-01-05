@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { westafrikanCountries } from "@/utils/countryUtils"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-interface PaymentFormFieldsProps {
+export interface PaymentFormFieldsProps {
   form: UseFormReturn<PaymentFormData>
 }
 
