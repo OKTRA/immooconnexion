@@ -1,14 +1,14 @@
 import { useState } from "react"
 import { LoginForm } from "@/components/auth/LoginForm"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Header } from "@/components/header/Header"
+import { PublicNavbar } from "@/components/home/PublicNavbar"
 
 export default function Login() {
   const [view, setView] = useState<"sign_in" | "forgotten_password">("sign_in")
 
   return (
     <>
-      <Header />
+      <PublicNavbar />
       <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-r from-[#243949] to-[#517fa4] p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1 text-center">
