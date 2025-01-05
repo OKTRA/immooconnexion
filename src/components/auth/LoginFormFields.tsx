@@ -72,7 +72,15 @@ export function LoginFormFields() {
         return
       }
 
-      // Get user profile and check agency status
+      // Show success toast and navigate immediately after successful authentication
+      toast({
+        title: "Connexion réussie",
+        description: "Bienvenue dans votre espace",
+        duration: 3000,
+      })
+      navigate("/agence/admin")
+
+      // Continue with profile and agency checks in the background
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('agency_id')
@@ -81,18 +89,10 @@ export function LoginFormFields() {
 
       if (profileError || !profile?.agency_id) {
         console.error('Profile verification error:', profileError)
-        toast({
-          title: "Erreur de vérification",
-          description: "Impossible de vérifier votre profil",
-          variant: "destructive",
-          duration: 5000,
-        })
         await supabase.auth.signOut()
-        setIsLoading(false)
         return
       }
 
-      // Check agency status
       const { data: agency, error: agencyError } = await supabase
         .from('agencies')
         .select('status')
@@ -101,14 +101,7 @@ export function LoginFormFields() {
 
       if (agencyError || !agency) {
         console.error('Agency verification error:', agencyError)
-        toast({
-          title: "Erreur de vérification",
-          description: "Impossible de vérifier le statut de l'agence",
-          variant: "destructive",
-          duration: 5000,
-        })
         await supabase.auth.signOut()
-        setIsLoading(false)
         return
       }
 
@@ -120,16 +113,8 @@ export function LoginFormFields() {
           duration: 7000,
         })
         await supabase.auth.signOut()
-        setIsLoading(false)
         return
       }
-
-      toast({
-        title: "Connexion réussie",
-        description: "Bienvenue dans votre espace",
-        duration: 3000,
-      })
-      navigate("/agence/admin")
 
     } catch (error) {
       console.error('General error:', error)
