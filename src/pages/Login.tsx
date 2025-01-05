@@ -1,11 +1,8 @@
-import { useState } from "react"
+import { PublicNavbar } from "@/components/home/PublicNavbar"
 import { LoginForm } from "@/components/auth/LoginForm"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PublicNavbar } from "@/components/home/PublicNavbar"
 
 export default function Login() {
-  const [view, setView] = useState<"sign_in" | "forgotten_password">("sign_in")
-
   return (
     <>
       <PublicNavbar />
@@ -18,7 +15,7 @@ export default function Login() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <LoginForm view={view} setView={setView} />
+            <LoginForm />
           </CardContent>
         </Card>
       </div>
