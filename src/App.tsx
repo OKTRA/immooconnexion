@@ -25,7 +25,7 @@ function App() {
       <Routes>
         <Route path="/" element={<PublicProperties />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/admin/login" element={<SuperAdminLogin />} />
+        <Route path="/super-admin/login" element={<SuperAdminLogin />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/terms" element={<TermsOfService />} />
         
