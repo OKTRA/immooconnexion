@@ -29,7 +29,7 @@ function App() {
         <Route path="/terms" element={<TermsOfService />} />
         
         {/* Protected Routes */}
-        <Route path="/agence" element={<ProtectedRoute />}>
+        <Route path="agence/admin" element={<ProtectedRoute />}>
           <Route index element={<AgencyDashboard />} />
           <Route path="proprietes" element={<Properties />} />
           <Route path="proprietes/:propertyId" element={<PropertyDetails />} />
