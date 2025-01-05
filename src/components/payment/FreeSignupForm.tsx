@@ -1,42 +1,37 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { SignupFormData } from "../pricing/types"
 import { PaymentFormFields } from "./PaymentFormFields"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { paymentFormSchema } from "./types"
+import { PaymentFormData, paymentFormSchema } from "./types"
 import { Form } from "@/components/ui/form"
 
 export interface FreeSignupFormProps {
-  formData: SignupFormData
-  setFormData: (data: SignupFormData) => void
-  setStep: (step: number) => void
-  tempAgencyId?: string
+  formData: PaymentFormData
   onSuccess?: () => void
+  agencyId?: string
 }
 
 export function FreeSignupForm({ 
-  formData, 
-  setFormData, 
-  setStep, 
-  tempAgencyId,
-  onSuccess 
+  formData,
+  onSuccess,
+  agencyId
 }: FreeSignupFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
   const navigate = useNavigate()
 
-  const form = useForm({
+  const form = useForm<PaymentFormData>({
     resolver: zodResolver(paymentFormSchema),
     defaultValues: formData
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
+    
     try {
       setIsLoading(true)
       
@@ -68,12 +63,11 @@ export function FreeSignupForm({
       const { data: agency, error: agencyError } = await supabase
         .from('agencies')
         .insert([{
-          id: tempAgencyId,
+          id: agencyId,
           name: formData.agency_name,
           address: formData.agency_address,
-          phone: formData.agency_phone,
+          phone: formData.phone_number,
           email: formData.email,
-          subscription_plan_id: formData.subscription_plan_id,
           country: formData.country,
           city: formData.city,
         }])
@@ -88,6 +82,9 @@ export function FreeSignupForm({
         .update({
           agency_id: agency.id,
           role: 'admin',
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          phone_number: formData.phone_number
         })
         .eq('id', authData.user?.id)
 
@@ -99,7 +96,6 @@ export function FreeSignupForm({
       })
 
       onSuccess?.()
-      setStep(2)
     } catch (error: any) {
       console.error('Error:', error)
       toast({
