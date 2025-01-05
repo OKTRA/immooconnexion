@@ -45,10 +45,10 @@ export interface PropertyFormData {
   photo_url?: string
   statut?: string
   property_category: "house" | "apartment"
-  owner_name?: string
-  owner_phone?: string
-  country?: string
-  quartier?: string
+  owner_name: string
+  owner_phone: string
+  country: string
+  quartier: string
 }
 
 export interface PropertyDialogProps {

@@ -5,10 +5,11 @@ import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 
 interface ProtectedRouteProps {
-  adminOnly?: boolean;
+  adminOnly?: boolean
 }
 
 export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
+  const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const { toast } = useToast()
   const location = useLocation()
@@ -31,22 +32,19 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
           return
         }
 
-        // Verify the user exists and session is valid
-        const { data: { user }, error: userError } = await supabase.auth.getUser()
-        
-        if (userError || !user) {
-          console.error("User verification error:", userError)
-          await supabase.auth.signOut()
-          setIsAuthenticated(false)
-          return
-        }
+        // Get user profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .maybeSingle()
 
-        // If adminOnly, check if user is an admin
+        // If admin only route, check admin status
         if (adminOnly) {
           const { data: adminData } = await supabase
             .from('administrators')
             .select('is_super_admin')
-            .eq('id', user.id)
+            .eq('id', session.user.id)
             .maybeSingle()
 
           if (!adminData?.is_super_admin) {
@@ -67,18 +65,19 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
         setIsAuthenticated(false)
         toast({
           title: "Erreur d'authentification",
-          description: "Veuillez vous reconnecter",
+          description: "Une erreur est survenue lors de la vérification de votre session",
           variant: "destructive"
         })
+      } finally {
+        setIsLoading(false)
       }
     }
 
-    // Initial check
     checkAuth()
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT' || !session?.access_token) {
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
         setIsAuthenticated(false)
         return
       }
@@ -90,9 +89,9 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
     return () => {
       subscription.unsubscribe()
     }
-  }, [toast, adminOnly])
+  }, [adminOnly, toast])
 
-  if (isAuthenticated === null) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
