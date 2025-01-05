@@ -7,9 +7,10 @@ interface AgencyBlockDialogProps {
   onOpenChange: (open: boolean) => void
   onConfirm: () => void
   isBlocked: boolean
+  agencyId: string
 }
 
-export function AgencyBlockDialog({ open, onOpenChange, onConfirm, isBlocked }: AgencyBlockDialogProps) {
+export function AgencyBlockDialog({ open, onOpenChange, onConfirm, isBlocked, agencyId }: AgencyBlockDialogProps) {
   const { toast } = useToast()
 
   const handleConfirm = async () => {
@@ -19,7 +20,7 @@ export function AgencyBlockDialog({ open, onOpenChange, onConfirm, isBlocked }: 
       const { error } = await supabase
         .from('agencies')
         .update({ status: newStatus })
-        .eq('id', agency.id)
+        .eq('id', agencyId)
 
       if (error) throw error
 

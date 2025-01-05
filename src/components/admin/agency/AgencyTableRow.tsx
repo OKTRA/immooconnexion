@@ -88,6 +88,7 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         onOpenChange={setShowBlockDialog}
         onConfirm={refetch}
         isBlocked={agency.status === 'blocked'}
+        agencyId={agency.id}
       />
 
       <AgencyPlanConfirmDialog
