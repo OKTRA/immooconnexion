@@ -15,17 +15,27 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+        // Get the current session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
-        if (sessionError || !sessionData.session) {
+        if (sessionError) {
+          console.error("Session error:", sessionError)
           setIsAuthenticated(false)
           return
         }
 
-        // Verify the user exists
+        // If no session or session ID is empty, user is not authenticated
+        if (!session?.access_token) {
+          console.log("No valid session found")
+          setIsAuthenticated(false)
+          return
+        }
+
+        // Verify the user exists and session is valid
         const { data: { user }, error: userError } = await supabase.auth.getUser()
         
         if (userError || !user) {
+          console.error("User verification error:", userError)
           await supabase.auth.signOut()
           setIsAuthenticated(false)
           return
@@ -40,6 +50,7 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
             .maybeSingle()
 
           if (!adminData?.is_super_admin) {
+            console.log("User is not an admin")
             setIsAuthenticated(false)
             return
           }
@@ -62,7 +73,7 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT' || !session) {
+      if (event === 'SIGNED_OUT' || !session?.access_token) {
         setIsAuthenticated(false)
         return
       }
