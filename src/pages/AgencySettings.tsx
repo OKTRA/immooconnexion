@@ -10,6 +10,7 @@ import { Profile } from "@/types/profile"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
+import { Agency } from "@/components/admin/agency/types"
 
 function AgencySettings() {
   const { id } = useParams()
@@ -44,7 +45,7 @@ function AgencySettings() {
         throw error
       }
 
-      return data
+      return data as Agency
     },
   })
 
@@ -67,7 +68,7 @@ function AgencySettings() {
     return null
   }
 
-  const handleAgencyUpdate = async (updatedAgency: typeof agency) => {
+  const handleAgencyUpdate = async (updatedAgency: Agency) => {
     try {
       const { error } = await supabase
         .from("agencies")

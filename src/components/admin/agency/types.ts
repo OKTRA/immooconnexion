@@ -12,10 +12,10 @@ export interface Agency {
   created_at: string | null
   updated_at: string | null
   logo_url: string | null
-  current_properties_count?: number
-  current_tenants_count?: number
-  current_profiles_count?: number
-  status: 'active' | 'pending' | 'blocked'
+  current_properties_count: number | null
+  current_tenants_count: number | null
+  current_profiles_count: number | null
+  status: string
   country: string | null
   city: string | null
 }
@@ -25,7 +25,7 @@ export interface AgencyUser {
   first_name: string | null
   last_name: string | null
   email: string | null
-  role: 'admin' | 'user'
+  role: Database["public"]["Enums"]["user_role"]
   agency_id: string
   phone_number?: string | null
 }

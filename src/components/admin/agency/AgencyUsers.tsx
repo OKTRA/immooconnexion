@@ -43,7 +43,8 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
             last_name,
             email,
             role,
-            agency_id
+            agency_id,
+            phone_number
           `)
           .eq("agency_id", agencyId)
           .order('created_at', { ascending: false })
@@ -99,7 +100,6 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
 
       <AgencyUsersList 
         users={users}
-        onEdit={handleEdit}
         refetch={refetch}
         agencyId={agencyId}
       />
