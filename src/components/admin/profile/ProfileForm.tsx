@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
@@ -6,7 +7,6 @@ import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 import { BasicInfoFields } from "./form/BasicInfoFields"
 import { ProfileFormProps } from "./types"
-import { useState } from "react"
 
 export function ProfileForm({ 
   newProfile, 
@@ -45,7 +45,13 @@ export function ProfileForm({
       })
 
       if (onSuccess) {
-        onSuccess()
+        await onSuccess()
+      }
+
+      // Reset form state after successful submission
+      setIsSubmitting(false)
+      if (!isEditing) {
+        form.reset()
       }
     } catch (error: any) {
       toast({
