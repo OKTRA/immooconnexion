@@ -53,6 +53,7 @@ export function AdminProfiles() {
           last_name: editedProfile.last_name,
           email: editedProfile.email,
           phone_number: editedProfile.phone_number,
+          updated_at: new Date().toISOString()
         })
         .eq("id", editedProfile.id)
 
