@@ -1,4 +1,4 @@
-export type UserRole = 'user' | 'admin' | 'blocked' | 'super_admin';
+export type UserRole = 'user' | 'admin' | 'super_admin';  // Removed 'blocked' as it's not a valid role
 
 export interface Profile {
   id: string;

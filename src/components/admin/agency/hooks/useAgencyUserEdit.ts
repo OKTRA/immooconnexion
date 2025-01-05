@@ -1,20 +1,24 @@
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { EditStep } from "@/types/profile"
 
 export function useAgencyUserEdit({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [showEditDialog, setShowEditDialog] = useState(false)
-  const [editStep, setEditStep] = useState<EditStep>(1)
+  const [editStep, setEditStep] = useState<1 | 2>(1)
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const { toast } = useToast()
 
   const handleUpdateAuth = async (user: any) => {
     try {
-      const { error } = await supabase.auth.admin.updateUserById(
-        user.id,
-        { email: user.email }
-      )
+      // Instead of using admin endpoints, update the profile table
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          email: user.email,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id)
+
       if (error) throw error
 
       toast({
@@ -41,6 +45,7 @@ export function useAgencyUserEdit({ onSuccess }: { onSuccess?: () => void } = {}
           last_name: user.last_name,
           phone_number: user.phone_number,
           role: user.role,
+          updated_at: new Date().toISOString()
         })
         .eq("id", user.id)
 

@@ -24,7 +24,6 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: UseAddPro
 
   const handleCreateAuthUser = async () => {
     try {
-      // Check subscription limits before creating user
       const limitReached = await checkLimitReached('user')
       if (limitReached) {
         throw new Error("Limite d'utilisateurs atteinte pour votre plan")
