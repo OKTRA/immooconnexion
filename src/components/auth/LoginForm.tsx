@@ -1,38 +1,37 @@
-import { useForm } from "react-hook-form"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Shield } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { useState } from "react"
-import { LoginFormFields } from "./LoginFormFields"
-
-interface LoginFormData {
-  email: string
-  password: string
-}
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 
 export function LoginForm() {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const navigate = useNavigate()
   const { toast } = useToast()
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>()
+  const navigate = useNavigate()
 
-  const handleLogin = async (data: LoginFormData) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+
     try {
-      setIsLoading(true)
-
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
+      // First clear any existing session
+      await supabase.auth.signOut()
+      
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
       })
 
       if (signInError) {
+        console.error('Login error:', signInError)
         toast({
-          title: "Erreur de connexion",
+          title: "Échec de la connexion",
           description: "Email ou mot de passe incorrect",
           variant: "destructive",
         })
@@ -40,27 +39,28 @@ export function LoginForm() {
         return
       }
 
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+      if (!data.user) {
         toast({
-          title: "Erreur",
-          description: "Utilisateur non trouvé",
+          title: "Échec de la connexion",
+          description: "Email ou mot de passe incorrect",
           variant: "destructive",
         })
         setIsLoading(false)
         return
       }
 
-      const { data: profile } = await supabase
+      // Get user profile and check agency status
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('agency_id, role')
-        .eq('id', user.id)
-        .maybeSingle()
+        .select('agency_id')
+        .eq('id', data.user.id)
+        .single()
 
-      if (!profile?.agency_id) {
+      if (profileError || !profile?.agency_id) {
+        console.error('Profile verification error:', profileError)
         toast({
-          title: "Erreur",
-          description: "Aucune agence associée à ce compte",
+          title: "Erreur de vérification",
+          description: "Impossible de vérifier votre profil",
           variant: "destructive",
         })
         await supabase.auth.signOut()
@@ -68,16 +68,18 @@ export function LoginForm() {
         return
       }
 
-      const { data: agency } = await supabase
+      // Check agency status
+      const { data: agency, error: agencyError } = await supabase
         .from('agencies')
         .select('status')
         .eq('id', profile.agency_id)
-        .maybeSingle()
+        .single()
 
-      if (!agency) {
+      if (agencyError || !agency) {
+        console.error('Agency verification error:', agencyError)
         toast({
-          title: "Erreur",
-          description: "Agence non trouvée",
+          title: "Erreur de vérification",
+          description: "Impossible de vérifier le statut de l'agence",
           variant: "destructive",
         })
         await supabase.auth.signOut()
@@ -86,54 +88,84 @@ export function LoginForm() {
       }
 
       if (agency.status === 'blocked') {
+        await supabase.auth.signOut()
         toast({
           title: "Accès refusé",
           description: "Votre agence est actuellement bloquée. Veuillez contacter l'administrateur.",
           variant: "destructive",
         })
-        // Add a small delay to ensure the toast is shown before signing out
-        setTimeout(async () => {
-          await supabase.auth.signOut()
-          setIsLoading(false)
-        }, 100)
-        return
-      }
-
-      if (agency.status === 'pending') {
-        navigate('/agence/pending')
         setIsLoading(false)
         return
       }
 
-      navigate('/agence/dashboard')
-    } catch (error: any) {
-      console.error('Login error:', error)
+      // Only navigate if everything is successful
       toast({
-        title: "Erreur",
+        title: "Connexion réussie",
+        description: "Bienvenue dans votre espace",
+      })
+      navigate("/agence/dashboard")
+
+    } catch (error: any) {
+      console.error('General error:', error)
+      toast({
+        title: "Erreur de connexion",
         description: "Une erreur est survenue lors de la connexion",
         variant: "destructive",
       })
+    } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Connexion</CardTitle>
-        <CardDescription>
-          Connectez-vous à votre compte agence
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(handleLogin)} className="space-y-4">
-          <LoginFormFields
-            isLoading={isLoading}
-            register={register}
-            errors={errors}
-          />
-        </form>
-      </CardContent>
-    </Card>
+    <div 
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        background: `linear-gradient(to right, #243949 0%, #517fa4 100%)`,
+      }}
+    >
+      <Card className="w-full max-w-md shadow-xl bg-white/95 backdrop-blur-sm">
+        <CardHeader className="space-y-2">
+          <div className="flex items-center justify-center text-primary mb-4">
+            <Shield className="h-12 w-12" />
+          </div>
+          <CardTitle className="text-2xl font-bold text-center">Connexion</CardTitle>
+          <CardDescription className="text-center">
+            Connectez-vous à votre espace agence
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+                placeholder="agence@example.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Mot de passe</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
+                placeholder="••••••••"
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Connexion..." : "Se connecter"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
