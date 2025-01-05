@@ -97,6 +97,7 @@ export default function ApartmentManagement() {
         <ApartmentDialog 
           open={dialogOpen} 
           onOpenChange={setDialogOpen}
+          apartment={null}
         />
       </div>
     </AgencyLayout>
