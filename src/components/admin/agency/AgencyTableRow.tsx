@@ -26,7 +26,7 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
 
   const handleDelete = async () => {
     try {
-      // First check if there are any dependencies
+      // First check if there are any contracts
       const { data: contracts } = await supabase
         .from('contracts')
         .select('id')
@@ -43,16 +43,28 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         return
       }
 
-      const { error } = await supabase
+      // Delete associated profiles first
+      const { error: profilesError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('agency_id', agency.id)
+
+      if (profilesError) {
+        console.error('Error deleting profiles:', profilesError)
+        throw new Error("Erreur lors de la suppression des profils associés")
+      }
+
+      // Then delete the agency
+      const { error: agencyError } = await supabase
         .from('agencies')
         .delete()
         .eq('id', agency.id)
 
-      if (error) throw error
+      if (agencyError) throw agencyError
 
       toast({
         title: "Succès",
-        description: "L'agence a été supprimée avec succès",
+        description: "L'agence et ses données associées ont été supprimées avec succès",
       })
       
       refetch()
