@@ -17,8 +17,7 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
     updated_at: new Date().toISOString(),
     is_tenant: false,
     status: 'active',
-    has_seen_warning: false,
-    agency_name: ''
+    has_seen_warning: false
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -85,40 +84,19 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
   const handleUpdateProfile = async (userId: string): Promise<void> => {
     try {
       setIsSubmitting(true)
-
-      // Update email if changed
-      if (newProfile.email) {
-        const { error: emailError } = await supabase.auth.admin.updateUserById(
-          userId,
-          { email: newProfile.email }
-        )
-        if (emailError) throw emailError
-      }
-
-      // Update password if provided
-      if (newProfile.password) {
-        const { error: passwordError } = await supabase.auth.admin.updateUserById(
-          userId,
-          { password: newProfile.password }
-        )
-        if (passwordError) throw passwordError
-      }
-
-      // Update profile information
-      const { error: profileError } = await supabase
+      const { error } = await supabase
         .from("profiles")
         .update({
           first_name: newProfile.first_name,
           last_name: newProfile.last_name,
           phone_number: newProfile.phone_number,
           role: newProfile.role,
-          email: newProfile.email,
           agency_id: agencyId,
           updated_at: new Date().toISOString()
         })
         .eq("id", userId)
 
-      if (profileError) throw profileError
+      if (error) throw error
 
       toast({
         title: "Succès",

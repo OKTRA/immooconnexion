@@ -9,15 +9,14 @@ interface BasicInfoFieldsProps {
   isEditing?: boolean
   selectedAgencyId?: string
   newProfile?: Profile
-  showPasswordField?: boolean
 }
 
 export function BasicInfoFields({
   form,
   onProfileChange,
   isEditing,
+  selectedAgencyId,
   newProfile,
-  showPasswordField = false
 }: BasicInfoFieldsProps) {
   return (
     <div className="space-y-4">
@@ -32,30 +31,29 @@ export function BasicInfoFields({
                 {...field}
                 type="email"
                 placeholder="Email"
-                value={newProfile?.email || ''}
                 onChange={(e) => {
                   field.onChange(e)
                   onProfileChange({ email: e.target.value })
                 }}
+                disabled={isEditing}
               />
             </FormControl>
           </FormItem>
         )}
       />
 
-      {showPasswordField && (
+      {!isEditing && (
         <FormField
           control={form.control}
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{isEditing ? "Nouveau mot de passe (optionnel)" : "Mot de passe"}</FormLabel>
+              <FormLabel>Mot de passe</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   type="password"
-                  placeholder={isEditing ? "Laisser vide pour ne pas changer" : "Mot de passe"}
-                  value={newProfile?.password || ''}
+                  placeholder="Mot de passe"
                   onChange={(e) => {
                     field.onChange(e)
                     onProfileChange({ password: e.target.value })
@@ -77,7 +75,6 @@ export function BasicInfoFields({
               <Input
                 {...field}
                 placeholder="Prénom"
-                value={newProfile?.first_name || ''}
                 onChange={(e) => {
                   field.onChange(e)
                   onProfileChange({ first_name: e.target.value })
@@ -98,7 +95,6 @@ export function BasicInfoFields({
               <Input
                 {...field}
                 placeholder="Nom"
-                value={newProfile?.last_name || ''}
                 onChange={(e) => {
                   field.onChange(e)
                   onProfileChange({ last_name: e.target.value })
@@ -119,7 +115,6 @@ export function BasicInfoFields({
               <Input
                 {...field}
                 placeholder="Téléphone"
-                value={newProfile?.phone_number || ''}
                 onChange={(e) => {
                   field.onChange(e)
                   onProfileChange({ phone_number: e.target.value })

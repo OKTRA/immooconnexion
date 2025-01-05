@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
@@ -14,17 +14,19 @@ export function ProfileForm({
   isEditing = false,
   onCreateAuthUser,
   onUpdateProfile,
-  isSubmitting = false
+  selectedAgencyId
 }: ProfileFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const form = useForm({
-    defaultValues: newProfile,
+    defaultValues: newProfile
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isSubmitting) return
 
+    setIsSubmitting(true)
     try {
       if (!newProfile?.email) {
         throw new Error("Email requis")
@@ -45,7 +47,8 @@ export function ProfileForm({
         await onSuccess()
       }
 
-      // Only reset form if creating new profile, not when editing
+      // Reset form state after successful submission
+      setIsSubmitting(false)
       if (!isEditing) {
         form.reset()
       }
@@ -55,6 +58,17 @@ export function ProfileForm({
         description: error.message || "Une erreur est survenue",
         variant: "destructive",
       })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleProfileChange = (updatedProfile: Partial<typeof newProfile>) => {
+    if (setNewProfile && newProfile) {
+      setNewProfile({
+        ...newProfile,
+        ...updatedProfile,
+      })
     }
   }
 
@@ -63,15 +77,10 @@ export function ProfileForm({
       <form onSubmit={handleSubmit} className="space-y-6">
         <BasicInfoFields 
           form={form} 
-          onProfileChange={(updatedFields) => {
-            setNewProfile({
-              ...newProfile,
-              ...updatedFields
-            })
-          }}
+          onProfileChange={handleProfileChange}
           isEditing={isEditing}
+          selectedAgencyId={selectedAgencyId}
           newProfile={newProfile}
-          showPasswordField={true}
         />
         
         <div className="flex justify-end gap-2">
