@@ -17,12 +17,19 @@ export function AdminProfiles() {
   const { toast } = useToast()
   
   const [newProfile, setNewProfile] = useState<Profile>({
+    id: '',
     email: "",
     password: "",
     first_name: "",
     last_name: "",
     phone_number: "",
-    role: "user"
+    role: "user",
+    agency_id: "",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    is_tenant: false,
+    status: 'active',
+    has_seen_warning: false
   })
 
   const { handleCreateAuthUser, handleUpdateProfile } = useAddProfileHandler({
