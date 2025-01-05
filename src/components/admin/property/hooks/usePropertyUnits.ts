@@ -9,6 +9,7 @@ export function usePropertyUnits(apartmentId: string, filterStatus?: string) {
   const { data: units = [], isLoading } = useQuery({
     queryKey: ['apartment-units', apartmentId, filterStatus],
     queryFn: async () => {
+      console.log('Fetching units for apartment:', apartmentId)
       let query = supabase
         .from('property_units')
         .select('*')
@@ -25,6 +26,7 @@ export function usePropertyUnits(apartmentId: string, filterStatus?: string) {
         throw error
       }
 
+      console.log('Fetched units:', data)
       return data
     },
   })
@@ -53,7 +55,7 @@ export function usePropertyUnits(apartmentId: string, filterStatus?: string) {
           photoUrl = publicUrl
         }
       }
-      
+
       if (id) {
         const { error } = await supabase
           .from('property_units')
@@ -88,7 +90,7 @@ export function usePropertyUnits(apartmentId: string, filterStatus?: string) {
         description: "L'unité a été sauvegardée avec succès",
       })
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error saving unit:', error)
       toast({
         title: "Erreur",
@@ -114,7 +116,7 @@ export function usePropertyUnits(apartmentId: string, filterStatus?: string) {
         description: "L'unité a été supprimée avec succès",
       })
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error deleting unit:', error)
       toast({
         title: "Erreur",

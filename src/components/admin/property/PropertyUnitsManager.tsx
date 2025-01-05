@@ -7,9 +7,11 @@ import { usePropertyUnits } from "./hooks/usePropertyUnits"
 import { PropertyUnitsTable } from "./components/PropertyUnitsTable"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
 interface PropertyUnitsManagerProps {
-  propertyId: string;  // This will actually contain the apartment ID
+  propertyId: string;
   filterStatus?: string;
 }
 
@@ -18,6 +20,20 @@ export function PropertyUnitsManager({ propertyId: apartmentId, filterStatus }: 
   const [editingUnit, setEditingUnit] = useState<PropertyUnit | null>(null)
   const { units, isLoading, mutation, deleteMutation } = usePropertyUnits(apartmentId, filterStatus)
   const { toast } = useToast()
+
+  const { data: apartment } = useQuery({
+    queryKey: ['apartment', apartmentId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('apartments')
+        .select('name')
+        .eq('id', apartmentId)
+        .single()
+      
+      if (error) throw error
+      return data
+    }
+  })
 
   const handleEdit = (unit: PropertyUnit) => {
     setEditingUnit(unit)
@@ -51,7 +67,7 @@ export function PropertyUnitsManager({ propertyId: apartmentId, filterStatus }: 
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-xl font-bold flex items-center gap-2">
           <Building className="h-5 w-5" />
-          Gestion des unités
+          {apartment?.name ? `Unités de ${apartment.name}` : 'Gestion des unités'}
         </CardTitle>
         <Button 
           onClick={() => setIsDialogOpen(true)}
