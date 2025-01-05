@@ -7,6 +7,7 @@ import { AnimatedLogo } from "@/components/header/AnimatedLogo"
 import { useQuery } from "@tanstack/react-query"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
+import { clearSession } from "@/utils/sessionUtils"
 
 export function GlobalHeader() {
   const navigate = useNavigate()
@@ -16,14 +17,23 @@ export function GlobalHeader() {
     queryKey: ["user-profile"],
     queryFn: async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return null
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        if (userError || !user) {
+          clearSession()
+          navigate("/login")
+          return null
+        }
 
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", user.id)
           .maybeSingle()
+
+        if (error) {
+          console.error("Error fetching profile:", error)
+          return null
+        }
 
         return data
       } catch (error) {
@@ -35,18 +45,21 @@ export function GlobalHeader() {
 
   const handleLogout = async () => {
     try {
+      clearSession()
       await supabase.auth.signOut()
-      navigate("/agence/login")
+      navigate("/login")
       toast({
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès",
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Logout error:', error)
+      // Even if there's an error, we want to clear the session and redirect
+      clearSession()
+      navigate("/login")
       toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la déconnexion",
-        variant: "destructive"
+        title: "Session terminée",
+        description: "Votre session a expiré. Veuillez vous reconnecter.",
       })
     }
   }

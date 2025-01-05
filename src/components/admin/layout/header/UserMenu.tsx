@@ -1,4 +1,3 @@
-import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { LogOut, Menu } from "lucide-react"
@@ -18,51 +17,47 @@ export function UserMenu() {
     queryKey: ["user-profile"],
     queryFn: async () => {
       try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        if (sessionError) {
-          console.error('Session error:', sessionError)
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        if (userError || !user) {
           clearSession()
           navigate("/login")
-          return
+          return null
         }
-        
-        // Verify the session is still valid
-        const { error: userError } = await supabase.auth.getUser()
-        if (userError && userError.message !== "session_not_found") {
-          console.error('User verification error:', userError)
-          clearSession()
-          navigate("/login")
-          return
-        }
-        
-        return session?.user
+
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle()
+
+        return data
       } catch (error) {
-        console.error('Auth check error:', error)
-        clearSession()
-        navigate("/login")
+        console.error("Error fetching profile:", error)
+        return null
       }
     },
   })
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT') {
-        clearSession()
-        navigate("/login")
-        return
-      }
-
-      if (event === 'TOKEN_REFRESHED' && !session) {
-        clearSession()
-        navigate("/login")
-        return
-      }
-    })
-
-    return () => {
-      subscription.unsubscribe()
+  const handleLogout = async () => {
+    try {
+      clearSession()
+      await supabase.auth.signOut()
+      navigate("/login")
+      toast({
+        title: "Déconnexion réussie",
+        description: "Vous avez été déconnecté avec succès",
+      })
+    } catch (error: any) {
+      console.error('Logout error:', error)
+      // Even if there's an error, we want to clear the session and redirect
+      clearSession()
+      navigate("/login")
+      toast({
+        title: "Session terminée",
+        description: "Votre session a expiré. Veuillez vous reconnecter.",
+      })
     }
-  }, [navigate])
+  }
 
   return (
     <div className="flex items-center gap-4">
@@ -79,6 +74,7 @@ export function UserMenu() {
           {profile?.role === 'admin' ? 'Administrateur' : 'Utilisateur'}
         </p>
       </div>
+
       <Button
         variant="ghost"
         size="sm"
