@@ -13,13 +13,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { EditProfileDialog } from "./dialogs/EditProfileDialog"
-import { AgencyUserActionsProps } from "./types"
 
-export function AgencyUserActions({ userId, onEditAuth, refetch }: AgencyUserActionsProps) {
+interface AgencyUserActionsProps {
+  userId: string
+  onEdit: () => void
+  onDelete: () => Promise<void>
+}
+
+export function AgencyUserActions({ userId, onEdit, onDelete }: AgencyUserActionsProps) {
   const { toast } = useToast()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [showEditDialog, setShowEditDialog] = useState(false)
 
   const handleDelete = async () => {
     setShowDeleteConfirm(true)
@@ -27,26 +30,14 @@ export function AgencyUserActions({ userId, onEditAuth, refetch }: AgencyUserAct
 
   const confirmDelete = async () => {
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .delete()
-        .eq("id", userId)
-
-      if (error) throw error
-
-      toast({
-        title: "Utilisateur supprimé",
-        description: "L'utilisateur a été supprimé avec succès",
-      })
-      refetch()
+      await onDelete()
+      setShowDeleteConfirm(false)
     } catch (error: any) {
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de la suppression",
         variant: "destructive",
       })
-    } finally {
-      setShowDeleteConfirm(false)
     }
   }
 
@@ -56,15 +47,7 @@ export function AgencyUserActions({ userId, onEditAuth, refetch }: AgencyUserAct
         <Button
           variant="ghost"
           size="sm"
-          onClick={onEditAuth}
-          className="text-blue-500 hover:text-blue-600"
-        >
-          <Lock className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowEditDialog(true)}
+          onClick={onEdit}
           className="text-green-500 hover:text-green-600"
         >
           <UserCog className="h-4 w-4" />
@@ -95,17 +78,6 @@ export function AgencyUserActions({ userId, onEditAuth, refetch }: AgencyUserAct
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <EditProfileDialog
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-        userId={userId}
-        agencyId={userId} // This should be the actual agency ID from your data
-        onSuccess={() => {
-          refetch()
-          setShowEditDialog(false)
-        }}
-      />
     </>
   )
 }

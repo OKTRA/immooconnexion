@@ -61,7 +61,8 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
       updated_at: new Date().toISOString(),
       is_tenant: false,
       status: 'active',
-      has_seen_warning: false
+      has_seen_warning: false,
+      agency_name: ''
     })
   })
 
