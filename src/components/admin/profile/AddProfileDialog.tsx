@@ -1,58 +1,59 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { ProfileForm } from "./ProfileForm"
+import { useState } from "react"
+import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits"
+import { useToast } from "@/hooks/use-toast"
 
-export interface AddProfileDialogProps {
-  showAddDialog?: boolean
-  setShowAddDialog?: (show: boolean) => void
-  newProfile?: any
-  setNewProfile?: (profile: any) => void
-  handleAddUser?: () => void
-  handleCreateAuthUser?: () => Promise<string>
-  handleUpdateProfile?: (userId: string) => Promise<void>
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
+interface AddProfileDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
   agencyId?: string
   onProfileCreated?: () => void
 }
 
 export function AddProfileDialog({ 
-  showAddDialog, 
-  setShowAddDialog,
-  newProfile,
-  setNewProfile,
-  handleCreateAuthUser,
-  handleUpdateProfile,
-  open,
+  open, 
   onOpenChange,
   agencyId,
   onProfileCreated
 }: AddProfileDialogProps) {
-  const isOpen = open ?? showAddDialog
-  const handleOpenChange = onOpenChange ?? setShowAddDialog
+  const [step, setStep] = useState<1 | 2>(1)
+  const { checkAndNotifyLimits } = useSubscriptionLimits()
+  const { toast } = useToast()
 
-  const handleSubmit = () => {
-    if (onProfileCreated) {
-      onProfileCreated()
+  const handleOpenChange = async (newOpen: boolean) => {
+    if (newOpen && agencyId) {
+      const canAdd = await checkAndNotifyLimits(agencyId, 'user')
+      if (!canAdd) {
+        return
+      }
     }
+    if (!newOpen) {
+      setStep(1)
+    }
+    onOpenChange(newOpen)
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Ajouter un nouveau profil</DialogTitle>
+          <DialogTitle>
+            {step === 1 ? "Créer un compte" : "Informations du profil"}
+          </DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-[calc(100vh-200px)] md:h-auto">
-          <ProfileForm 
-            newProfile={newProfile} 
-            setNewProfile={setNewProfile}
-            onSubmit={handleSubmit}
-            onCreateAuthUser={handleCreateAuthUser}
-            onUpdateProfile={handleUpdateProfile}
-            selectedAgencyId={agencyId}
-          />
-        </ScrollArea>
+        <ProfileForm
+          step={step}
+          onStepChange={setStep}
+          agencyId={agencyId}
+          onSuccess={() => {
+            onProfileCreated?.()
+            toast({
+              title: "Succès",
+              description: "Le profil a été créé avec succès",
+            })
+          }}
+        />
       </DialogContent>
     </Dialog>
   )

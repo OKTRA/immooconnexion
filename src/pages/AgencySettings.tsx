@@ -4,14 +4,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Building2, User, UserCircle } from "lucide-react"
+import { Building2, User, UserCircle, UserPlus } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { AgencySettingsTab } from "@/components/admin/agency/AgencySettingsTab"
 import { AuthSettingsTab } from "@/components/admin/agency/AuthSettingsTab"
 import { ProfileSettingsTab } from "@/components/admin/agency/ProfileSettingsTab"
+import { Button } from "@/components/ui/button"
+import { AddProfileDialog } from "@/components/admin/profile/AddProfileDialog"
 
 const AgencySettings = () => {
   const [profileData, setProfileData] = useState<any>(null)
+  const [showAddDialog, setShowAddDialog] = useState(false)
   const { toast } = useToast()
   const isMobile = useIsMobile()
 
@@ -82,7 +85,18 @@ const AgencySettings = () => {
             />
           </TabsContent>
 
-          <TabsContent value="profile">
+          <TabsContent value="profile" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Gestion des profils</h2>
+              <Button 
+                onClick={() => setShowAddDialog(true)}
+                className="flex items-center gap-2"
+              >
+                <UserPlus className="h-4 w-4" />
+                Ajouter un utilisateur
+              </Button>
+            </div>
+            
             <ProfileSettingsTab
               profileData={profileData}
               onProfileUpdate={setProfileData}
@@ -90,6 +104,19 @@ const AgencySettings = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <AddProfileDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        agencyId={profile?.agencies?.id}
+        onProfileCreated={() => {
+          setShowAddDialog(false)
+          toast({
+            title: "Succès",
+            description: "Le profil a été créé avec succès",
+          })
+        }}
+      />
     </AgencyLayout>
   )
 }
