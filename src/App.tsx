@@ -17,8 +17,6 @@ import Pricing from "./pages/Pricing"
 import SubscriptionUpgrade from "./pages/SubscriptionUpgrade"
 import TermsOfService from "./pages/TermsOfService"
 import AgencySettings from "./pages/AgencySettings"
-import Apartments from "./pages/Apartments"
-import PropertyUnits from "./pages/PropertyUnits"
 import { ProtectedRoute } from "./components/auth/ProtectedRoute"
 
 function App() {
@@ -44,8 +42,6 @@ function App() {
           <Route path="ventes" element={<PropertySales />} />
           <Route path="abonnement/upgrade" element={<SubscriptionUpgrade />} />
           <Route path="parametres" element={<AgencySettings />} />
-          <Route path="appartements" element={<Apartments />} />
-          <Route path="appartements/:propertyId/unites" element={<PropertyUnits />} />
           <Route path="gains" element={<AgencyEarnings />} />
         </Route>
 
