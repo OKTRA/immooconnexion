@@ -59,17 +59,19 @@ export function AdminLoginForm() {
       if (existingSession) {
         try {
           // Verify if the existing session is for a super admin
-          await verifyAdminAccess(existingSession.user.id)
-          // If verification passes, use existing session
-          toast({
-            title: "Session active",
-            description: "Utilisation de la session existante",
-          })
-          navigate("/super-admin/admin")
-          return
+          const adminData = await verifyAdminAccess(existingSession.user.id)
+          if (adminData.is_super_admin) {
+            // If verification passes, use existing session
+            toast({
+              title: "Session active",
+              description: "Utilisation de la session existante",
+            })
+            navigate("/super-admin/admin")
+            return
+          }
         } catch (error) {
-          // Only sign out if the existing session is not a super admin
-          await supabase.auth.signOut()
+          // Only sign out if verification fails
+          console.log("Existing session is not a super admin, proceeding with login")
         }
       }
 
@@ -102,6 +104,8 @@ export function AdminLoginForm() {
         description: "Email ou mot de passe incorrect",
         variant: "destructive",
       })
+      // Only sign out if there was an error during login
+      await supabase.auth.signOut()
     } finally {
       setIsLoading(false)
     }
