@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
+import { clearSession } from "@/utils/sessionUtils"
 
 interface ProtectedRouteProps {
   adminOnly?: boolean
@@ -17,10 +18,11 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession()
+        const { data: { session }, error } = await supabase.auth.getSession()
         
-        if (!session?.access_token) {
+        if (error?.message?.includes('session_not_found') || !session?.access_token) {
           console.log("No valid session found")
+          clearSession()
           setIsAuthenticated(false)
           toast({
             title: "Session expirée",
@@ -58,6 +60,7 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
         setIsAuthenticated(true)
       } catch (error) {
         console.error("Auth check error:", error)
+        clearSession()
         setIsAuthenticated(false)
         toast({
           title: "Erreur d'authentification",
@@ -73,6 +76,7 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
+        clearSession()
         setIsAuthenticated(false)
         return
       }

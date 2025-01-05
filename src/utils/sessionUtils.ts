@@ -5,13 +5,24 @@ const getSupabaseSessionKey = () => {
 }
 
 const clearSession = () => {
+  // Remove session from localStorage
   localStorage.removeItem(getSupabaseSessionKey())
+  
+  // Clear any other session-related data
+  sessionStorage.clear()
+  
+  // Clear cookies that might contain session data
+  document.cookie.split(";").forEach((c) => {
+    document.cookie = c
+      .replace(/^ +/, "")
+      .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/")
+  })
 }
 
 const checkSession = async () => {
   try {
     const { data: { session }, error } = await supabase.auth.getSession()
-    if (error || !session) {
+    if (error?.message?.includes('session_not_found') || !session) {
       clearSession()
       return null
     }
