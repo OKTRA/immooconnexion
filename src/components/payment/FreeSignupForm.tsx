@@ -18,6 +18,15 @@ export function FreeSignupForm({ formData, tempAgencyId, onSuccess }: FreeSignup
   const [isLoading, setIsLoading] = useState(false)
 
   const handleFreePlanSignup = async () => {
+    if (!formData.email || !formData.password) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs obligatoires",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
       setIsLoading(true)
       // Create auth user

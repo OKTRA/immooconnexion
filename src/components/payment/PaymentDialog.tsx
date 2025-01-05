@@ -14,6 +14,7 @@ import { PaymentFormData, paymentFormSchema } from "./types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form } from "@/components/ui/form"
 import { FreeSignupForm } from "./FreeSignupForm"
+import { Loader2 } from "lucide-react"
 
 export function PaymentDialog({ 
   open, 
@@ -27,6 +28,7 @@ export function PaymentDialog({
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<string>("cinetpay")
   const [step, setStep] = useState<'form' | 'payment'>(isUpgrade ? 'payment' : 'form')
+  const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -65,19 +67,9 @@ export function PaymentDialog({
 
   const onSubmit = async (data: PaymentFormData) => {
     if (amount === 0) {
-      // For free plan, handle signup directly
-      return (
-        <FreeSignupForm 
-          formData={data} 
-          tempAgencyId={agencyId || planId} 
-          onSuccess={() => {
-            setPaymentSuccess(true)
-            navigate('/agence/login')
-          }} 
-        />
-      )
+      setIsLoading(true)
+      return
     }
-    // For paid plans, proceed to payment step
     setStep('payment')
   }
 
@@ -120,8 +112,15 @@ export function PaymentDialog({
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <PaymentFormFields form={form} />
-                    <Button type="submit" className="w-full">
-                      {amount === 0 ? "Créer mon compte" : "Continuer vers le paiement"}
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Création en cours...
+                        </>
+                      ) : (
+                        amount === 0 ? "Créer mon compte" : "Continuer vers le paiement"
+                      )}
                     </Button>
                   </form>
                 </Form>
