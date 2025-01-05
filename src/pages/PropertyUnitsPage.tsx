@@ -1,5 +1,5 @@
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
-import { PropertyUnitsManager } from "@/components/admin/property/PropertyUnitsManager"
+import { ApartUnitsManager } from "@/components/admin/property/ApartUnitsManager"
 import { useParams } from "react-router-dom"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useQuery } from "@tanstack/react-query"
@@ -61,7 +61,7 @@ export default function PropertyUnitsPage() {
           </TabsList>
 
           <TabsContent value="units" className="mt-6">
-            <PropertyUnitsManager propertyId={propertyId} />
+            <ApartUnitsManager propertyId={propertyId} />
           </TabsContent>
 
           <TabsContent value="tenants">
