@@ -1,7 +1,9 @@
-import { useState } from "react"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
-import { Profile } from "@/types/profile"
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Profile } from "@/types/profile";
+import { useExistingUserCheck } from "./useExistingUserCheck";
+import { useProfileManagement } from "./useProfileManagement";
 
 interface ExtendedProfile extends Profile {
   password?: string;
@@ -21,49 +23,38 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
     is_tenant: false,
     status: 'active',
     has_seen_warning: false
-  })
-  const { toast } = useToast()
+  });
+
+  const { toast } = useToast();
+  const { checkExistingUser } = useExistingUserCheck();
+  const { createProfile, updateProfile } = useProfileManagement(agencyId, onSuccess);
 
   const handleCreateAuthUser = async () => {
     try {
-      // First check if user already exists
-      const { data: existingUser } = await supabase
-        .from('profiles')
-        .select('id, email')
-        .eq('email', newProfile.email)
-        .single()
+      const userExists = await checkExistingUser(newProfile.email);
+      if (userExists) return null;
 
-      if (existingUser) {
-        toast({
-          title: "Erreur",
-          description: "Cet email existe déjà dans le système. Utilisez un autre email.",
-          variant: "destructive",
-        })
-        return null
-      }
-
-      // If user doesn't exist, create new user
       const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
         email: newProfile.email,
         password: newProfile.password || '',
         email_confirm: true
-      })
+      });
 
       if (signUpError) {
-        let errorMessage = "Erreur lors de la création du compte"
+        let errorMessage = "Erreur lors de la création du compte";
         
         if (signUpError.message.includes("password")) {
-          errorMessage = "Le mot de passe doit contenir au moins 6 caractères"
+          errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
         } else if (signUpError.message.includes("email")) {
-          errorMessage = "Veuillez entrer une adresse email valide"
+          errorMessage = "Veuillez entrer une adresse email valide";
         }
 
         toast({
           title: "Erreur d'authentification",
           description: errorMessage,
           variant: "destructive",
-        })
-        throw signUpError
+        });
+        throw signUpError;
       }
 
       if (!authData.user) {
@@ -71,98 +62,35 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
           title: "Erreur",
           description: "Impossible de créer le compte utilisateur",
           variant: "destructive",
-        })
-        throw new Error("No user data returned")
+        });
+        throw new Error("No user data returned");
       }
 
-      // Create profile for new user
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          email: newProfile.email,
-          first_name: newProfile.first_name,
-          last_name: newProfile.last_name,
-          phone_number: newProfile.phone_number,
-          role: newProfile.role,
-          agency_id: agencyId,
-          status: 'active'
-        })
-
-      if (profileError) {
-        toast({
-          title: "Erreur",
-          description: "Impossible de créer le profil utilisateur",
-          variant: "destructive",
-        })
-        throw profileError
-      }
-
-      toast({
-        title: "Succès",
-        description: "Le compte a été créé avec succès",
-      })
-
-      return authData.user.id
+      await createProfile(authData.user.id, newProfile);
+      return authData.user.id;
     } catch (error: any) {
-      console.error("Error creating auth user:", error)
-      throw error
+      console.error("Error creating auth user:", error);
+      throw error;
     }
-  }
+  };
 
   const handleUpdateProfile = async () => {
-    try {
-      if (!userId) {
-        toast({
-          title: "Erreur",
-          description: "ID utilisateur manquant",
-          variant: "destructive",
-        })
-        return
-      }
-
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          first_name: newProfile.first_name,
-          last_name: newProfile.last_name,
-          phone_number: newProfile.phone_number,
-          role: newProfile.role,
-          agency_id: agencyId,
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", userId)
-
-      if (error) {
-        toast({
-          title: "Erreur",
-          description: "Impossible de mettre à jour le profil",
-          variant: "destructive",
-        })
-        throw error
-      }
-
-      toast({
-        title: "Succès",
-        description: "Le profil a été mis à jour avec succès",
-      })
-
-      onSuccess?.()
-    } catch (error: any) {
-      console.error("Error updating profile:", error)
+    if (!userId) {
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue",
+        description: "ID utilisateur manquant",
         variant: "destructive",
-      })
-      throw error
+      });
+      return;
     }
-  }
+
+    await updateProfile(userId, newProfile);
+  };
 
   return {
     newProfile,
     setNewProfile,
     handleCreateAuthUser,
     handleUpdateProfile,
-  }
+  };
 }
