@@ -44,14 +44,19 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
       const { id, photo, ...unitData } = data as any
       let photoUrl = unitData.photo_url
 
-      // Convert string values to numbers for numeric fields
+      // Convert string values to numbers for numeric fields, ensuring null for empty values
       const numericFields = {
-        floor_number: unitData.floor_number ? Number(unitData.floor_number) : null,
-        area: unitData.area ? Number(unitData.area) : null,
-        rent: unitData.rent ? Number(unitData.rent) : null,
-        deposit: unitData.deposit ? Number(unitData.deposit) : null
+        floor_number: unitData.floor_number === '' ? null : 
+          unitData.floor_number ? Number(unitData.floor_number) : null,
+        area: unitData.area === '' ? null : 
+          unitData.area ? Number(unitData.area) : null,
+        rent: unitData.rent === '' ? null : 
+          unitData.rent ? Number(unitData.rent) : null,
+        deposit: unitData.deposit === '' ? null : 
+          unitData.deposit ? Number(unitData.deposit) : null
       }
 
+      // Handle photo upload if present
       if (photo) {
         const fileExt = photo.name.split('.').pop()
         const fileName = `${Math.random()}.${fileExt}`
@@ -72,13 +77,16 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
         }
       }
 
+      // Prepare clean data object with proper types
       const cleanedData = {
         ...unitData,
         ...numericFields,
         photo_url: photoUrl,
         apartment_id: apartmentId,
-        amenities: unitData.amenities || []
+        amenities: Array.isArray(unitData.amenities) ? unitData.amenities : []
       }
+
+      console.log('Cleaned data before save:', cleanedData)
 
       if (id) {
         const { error } = await supabase
@@ -86,7 +94,10 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
           .update(cleanedData)
           .eq('id', id)
 
-        if (error) throw error
+        if (error) {
+          console.error('Error updating unit:', error)
+          throw error
+        }
         return { ...data, id }
       } else {
         const { data: newUnit, error } = await supabase
@@ -95,7 +106,10 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
           .select()
           .single()
 
-        if (error) throw error
+        if (error) {
+          console.error('Error creating unit:', error)
+          throw error
+        }
         return newUnit
       }
     },
