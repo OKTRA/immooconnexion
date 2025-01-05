@@ -34,9 +34,6 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
       const userExists = await checkExistingUser(newProfile.email);
       if (userExists) return null;
 
-      // Get current session before creating new user
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-
       const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
         email: newProfile.email,
         password: newProfile.password || '',
@@ -69,14 +66,7 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
         throw new Error("No user data returned");
       }
 
-      // Create the profile for the new user
       await createProfile(authData.user.id, newProfile);
-
-      // If we had a current session, set it back
-      if (currentSession) {
-        await supabase.auth.setSession(currentSession);
-      }
-
       return authData.user.id;
     } catch (error: any) {
       console.error("Error creating auth user:", error);
