@@ -1,7 +1,16 @@
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { Profile } from "../types"
+
+interface Profile {
+  email: string
+  password?: string
+  first_name: string
+  last_name: string
+  phone_number: string
+  role: 'user' | 'admin'
+  agency_id: string
+}
 
 export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuccess?: () => void) {
   const [newProfile, setNewProfile] = useState<Partial<Profile>>({

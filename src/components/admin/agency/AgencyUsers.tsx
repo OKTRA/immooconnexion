@@ -7,7 +7,6 @@ import { AddProfileDialog } from "../profile/AddProfileDialog"
 import { useAddProfileHandler } from "../profile/AddProfileHandler"
 import { AgencyUsersList } from "./AgencyUsersList"
 import { AgencyUserEditDialog } from "./AgencyUserEditDialog"
-import { useAgencyUserEdit } from "./hooks/useAgencyUserEdit"
 
 interface AgencyUsersProps {
   agencyId: string
@@ -16,6 +15,8 @@ interface AgencyUsersProps {
 
 export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
   
   const { data: users = [], refetch, isLoading, error } = useQuery({
     queryKey: ["agency-users", agencyId],
@@ -54,16 +55,10 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
     },
   })
 
-  const {
-    showEditDialog,
-    setShowEditDialog,
-    editStep,
-    setEditStep,
-    selectedUser,
-    handleUpdateAuth,
-    handleUpdateProfile,
-    handleEdit
-  } = useAgencyUserEdit({ onSuccess: refetch })
+  const handleEdit = (userId: string) => {
+    setSelectedUserId(userId)
+    setShowEditDialog(true)
+  }
 
   const { 
     newProfile, 
@@ -101,14 +96,11 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
       />
 
       <AgencyUserEditDialog
-        showEditDialog={showEditDialog}
-        setShowEditDialog={setShowEditDialog}
-        selectedUser={selectedUser}
-        editStep={editStep}
-        setEditStep={setEditStep}
-        handleUpdateAuth={handleUpdateAuth}
-        handleUpdateProfile={handleUpdateProfile}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        userId={selectedUserId}
         agencyId={agencyId}
+        onSuccess={refetch}
       />
 
       <AddProfileDialog
