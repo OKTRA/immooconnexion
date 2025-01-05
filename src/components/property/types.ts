@@ -10,7 +10,7 @@ export interface Property {
   frais_agence: number
   taux_commission: number
   caution: number
-  photo_url?: string
+  photo_url: string | null
   statut?: string
   property_category: "house" | "apartment"
   owner_name?: string

@@ -6,6 +6,7 @@ import { PropertiesGrid } from "@/components/home/PropertiesGrid"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Loader2 } from "lucide-react"
+import { Property } from "@/components/property/types"
 
 export default function PublicProperties() {
   const [selectedAgency, setSelectedAgency] = useState<string | null>(null)
@@ -41,8 +42,14 @@ export default function PublicProperties() {
         throw error
       }
 
-      console.log("Fetched properties:", data)
-      return data || []
+      // Cast the property_category to the correct type
+      const typedData = data?.map(item => ({
+        ...item,
+        property_category: item.property_category as "house" | "apartment"
+      })) as (Property & { agency: { name: string; address: string } })[]
+
+      console.log("Fetched properties:", typedData)
+      return typedData || []
     }
   })
 
