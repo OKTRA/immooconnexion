@@ -62,6 +62,7 @@ export function LoginForm() {
           title: "Erreur de vérification",
           description: "Impossible de vérifier votre profil",
           variant: "destructive",
+          duration: 5000,
         })
         await supabase.auth.signOut()
         setIsLoading(false)
@@ -81,6 +82,7 @@ export function LoginForm() {
           title: "Erreur de vérification",
           description: "Impossible de vérifier le statut de l'agence",
           variant: "destructive",
+          duration: 5000,
         })
         await supabase.auth.signOut()
         setIsLoading(false)
@@ -92,9 +94,10 @@ export function LoginForm() {
           title: "Accès refusé",
           description: "Votre agence est actuellement bloquée. Veuillez contacter l'administrateur.",
           variant: "destructive",
-          duration: 5000, // Show for 5 seconds
+          duration: 5000,
         })
-        // Add a small delay before signing out to ensure the toast is shown
+        
+        // Add a delay before signing out to ensure the toast is visible
         setTimeout(async () => {
           await supabase.auth.signOut()
           setIsLoading(false)
@@ -106,6 +109,7 @@ export function LoginForm() {
       toast({
         title: "Connexion réussie",
         description: "Bienvenue dans votre espace",
+        duration: 3000,
       })
       navigate("/agence/dashboard")
 
@@ -115,6 +119,7 @@ export function LoginForm() {
         title: "Erreur de connexion",
         description: "Une erreur est survenue lors de la connexion",
         variant: "destructive",
+        duration: 5000,
       })
     } finally {
       setIsLoading(false)
