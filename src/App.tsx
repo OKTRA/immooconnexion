@@ -39,6 +39,7 @@ function App() {
           <Route path="revenus" element={<AgencyEarnings />} />
           <Route path="rapports" element={<Reports />} />
           <Route path="ventes" element={<PropertySales />} />
+          <Route path="abonnement" element={<SubscriptionUpgrade />} />
           <Route path="abonnement/upgrade" element={<SubscriptionUpgrade />} />
           <Route path="gains" element={<AgencyEarnings />} />
         </Route>
