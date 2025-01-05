@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 import { BasicInfoFields } from "./form/BasicInfoFields"
 import { ProfileFormProps } from "./types"
+import { useState } from "react"
 
 export function ProfileForm({ 
   newProfile, 
