@@ -44,6 +44,14 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
       const { id, photo, ...unitData } = data as any
       let photoUrl = unitData.photo_url
 
+      // Convert string values to numbers for numeric fields
+      const numericFields = {
+        floor_number: unitData.floor_number ? Number(unitData.floor_number) : null,
+        area: unitData.area ? Number(unitData.area) : null,
+        rent: unitData.rent ? Number(unitData.rent) : null,
+        deposit: unitData.deposit ? Number(unitData.deposit) : null
+      }
+
       if (photo) {
         const fileExt = photo.name.split('.').pop()
         const fileName = `${Math.random()}.${fileExt}`
@@ -64,14 +72,18 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
         }
       }
 
+      const cleanedData = {
+        ...unitData,
+        ...numericFields,
+        photo_url: photoUrl,
+        apartment_id: apartmentId,
+        amenities: unitData.amenities || []
+      }
+
       if (id) {
         const { error } = await supabase
           .from('apartment_units')
-          .update({ 
-            ...unitData, 
-            photo_url: photoUrl,
-            apartment_id: apartmentId 
-          })
+          .update(cleanedData)
           .eq('id', id)
 
         if (error) throw error
@@ -79,11 +91,7 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
       } else {
         const { data: newUnit, error } = await supabase
           .from('apartment_units')
-          .insert([{ 
-            ...unitData, 
-            apartment_id: apartmentId, 
-            photo_url: photoUrl 
-          }])
+          .insert([cleanedData])
           .select()
           .single()
 
