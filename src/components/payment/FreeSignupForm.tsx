@@ -49,6 +49,17 @@ export function FreeSignupForm({
         }
       })
 
+      // Handle duplicate email error specifically
+      if (signUpError?.message?.includes('User already registered')) {
+        toast({
+          title: "Email déjà utilisé",
+          description: "Un compte existe déjà avec cette adresse email. Veuillez vous connecter ou utiliser une autre adresse.",
+          variant: "default",
+        })
+        setIsLoading(false)
+        return
+      }
+
       if (signUpError) throw signUpError
 
       if (!authData.user) {
