@@ -25,6 +25,7 @@ export interface ProfileFormProps {
   onCreateAuthUser?: () => Promise<void>
   onUpdateProfile?: (userId: string) => Promise<void>
   onSuccess?: () => void
+  agencyId?: string
 }
 
 export interface AddProfileDialogProps {

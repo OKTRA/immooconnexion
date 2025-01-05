@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -10,7 +10,6 @@ import { Profile } from "@/types/profile"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
-import { useNavigate } from "react-router-dom"
 
 export function AgencySettings() {
   const { id } = useParams()
@@ -24,7 +23,7 @@ export function AgencySettings() {
     last_name: "",
     phone_number: "",
     role: "admin",
-    agency_id: "",
+    agency_id: id || "",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     is_tenant: false,
@@ -95,7 +94,7 @@ export function AgencySettings() {
           <TabsTrigger value="users">Utilisateurs</TabsTrigger>
         </TabsList>
         <TabsContent value="general" className="space-y-4">
-          <AgencyForm agency={agency} />
+          <AgencyForm agency={agency} setAgency={() => {}} />
         </TabsContent>
         <TabsContent value="users">
           <AgencyUsers agencyId={id!} />
@@ -104,3 +103,5 @@ export function AgencySettings() {
     </div>
   )
 }
+
+export default AgencySettings
