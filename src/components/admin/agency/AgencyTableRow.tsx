@@ -29,17 +29,53 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
   const handleStatusToggle = async () => {
     try {
       const newStatus = agency.status === 'active' ? 'blocked' : 'active'
-      const { error } = await supabase
+      
+      // Update agency status
+      const { error: updateError } = await supabase
         .from('agencies')
-        .update({ status: newStatus })
+        .update({ 
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', agency.id)
 
-      if (error) throw error
+      if (updateError) throw updateError
+
+      // Get all agency profiles to notify them
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('agency_id', agency.id)
+
+      if (profilesError) throw profilesError
+
+      // Call edge function to send notification emails
+      if (profiles && profiles.length > 0) {
+        const emails = profiles.map(p => p.email).filter(Boolean)
+        
+        const { error: notifyError } = await supabase.functions.invoke('notify-agency-status', {
+          body: {
+            emails,
+            agencyName: agency.name,
+            status: newStatus
+          }
+        })
+
+        if (notifyError) {
+          console.error('Error sending notifications:', notifyError)
+          toast({
+            title: "Attention",
+            description: "Le statut a été mis à jour mais l'envoi des notifications a échoué",
+            variant: "destructive",
+          })
+        }
+      }
 
       toast({
         title: "Statut mis à jour",
         description: `L'agence a été ${newStatus === 'blocked' ? 'bloquée' : 'activée'} avec succès`,
       })
+      
       refetch()
     } catch (error: any) {
       toast({

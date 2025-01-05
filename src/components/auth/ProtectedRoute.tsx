@@ -32,11 +32,31 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
           return
         }
 
+        // Check if user's agency is blocked
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role')
+          .select('agency_id, role')
           .eq('id', session.user.id)
           .maybeSingle()
+
+        if (profile?.agency_id) {
+          const { data: agency } = await supabase
+            .from('agencies')
+            .select('status')
+            .eq('id', profile.agency_id)
+            .maybeSingle()
+
+          if (agency?.status === 'blocked' && profile.role !== 'super_admin') {
+            clearSession()
+            setIsAuthenticated(false)
+            toast({
+              title: "Accès bloqué",
+              description: "Votre agence a été bloquée. Veuillez contacter l'administrateur.",
+              variant: "destructive"
+            })
+            return
+          }
+        }
 
         if (adminOnly) {
           const { data: adminData } = await supabase
