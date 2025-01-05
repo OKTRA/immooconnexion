@@ -36,6 +36,21 @@ export function AgencyUserEditDialog({
     }))
   }
 
+  const handleStepSubmit = async () => {
+    if (step === 1) {
+      // Just move to next step without creating auth user yet
+      setStep(2)
+      return
+    }
+
+    // Only create auth user on final step
+    if (!userId) {
+      await handleCreateAuthUser()
+    } else {
+      await handleUpdateProfile()
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -44,7 +59,7 @@ export function AgencyUserEditDialog({
             isEditing={!!userId}
             newProfile={newProfile}
             setNewProfile={handleProfileChange}
-            onCreateAuthUser={handleCreateAuthUser}
+            onCreateAuthUser={handleStepSubmit}
             onUpdateProfile={handleUpdateProfile}
             selectedAgencyId={agencyId}
             step={step}
