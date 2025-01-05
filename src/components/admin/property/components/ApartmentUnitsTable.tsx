@@ -22,7 +22,7 @@ interface PropertyUnit {
   amenities: string[]
 }
 
-interface PropertyUnitsTableProps {
+interface ApartmentUnitsTableProps {
   units: PropertyUnit[]
   onEdit: (unit: PropertyUnit) => void
   onDelete: (unitId: string) => void
@@ -52,7 +52,7 @@ const formatPrice = (price: number) => {
   }).format(price)
 }
 
-export function PropertyUnitsTable({ units, onEdit, onDelete }: PropertyUnitsTableProps) {
+export function ApartmentUnitsTable({ units, onEdit, onDelete }: ApartmentUnitsTableProps) {
   return (
     <div className="rounded-md border">
       <Table>
