@@ -28,7 +28,7 @@ export function ProfileActions({ profile, onEdit, refetch }: ProfileActionsProps
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showRoleConfirm, setShowRoleConfirm] = useState(false)
 
-  const handleToggleBlockUser = async (userId: string, currentRole: string | null) => {
+  const handleToggleBlockUser = async () => {
     setShowRoleConfirm(true)
   }
 
@@ -38,7 +38,10 @@ export function ProfileActions({ profile, onEdit, refetch }: ProfileActionsProps
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ role: newRole })
+        .update({ 
+          role: newRole,
+          updated_at: new Date().toISOString()
+        })
         .eq("id", profile.id)
 
       if (error) throw error
@@ -96,7 +99,7 @@ export function ProfileActions({ profile, onEdit, refetch }: ProfileActionsProps
         <Button
           variant="outline"
           size="icon"
-          onClick={() => handleToggleBlockUser(profile.id, profile.role)}
+          onClick={handleToggleBlockUser}
           title={profile.role === "admin" ? "Rétrograder" : "Promouvoir admin"}
         >
           {profile.role === "admin" ? (
