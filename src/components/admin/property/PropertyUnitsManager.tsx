@@ -11,7 +11,7 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 
 interface PropertyUnitsManagerProps {
-  propertyId: string;
+  propertyId: string;  // We'll keep this prop name for backward compatibility
   filterStatus?: string;
 }
 
