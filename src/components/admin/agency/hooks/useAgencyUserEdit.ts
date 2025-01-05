@@ -46,7 +46,6 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
       const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
         email: newProfile.email,
         password: newProfile.password || '',
-        email_confirm: true
       })
 
       if (signUpError) {
