@@ -1,7 +1,7 @@
 import { LogOut } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase, clearSession } from "@/integrations/supabase/client"
 import { Button } from "@/components/ui/button"
 import {
   Tooltip,
@@ -15,10 +15,10 @@ export function LogoutButton() {
 
   const handleLogout = async () => {
     try {
-      // Clear any local storage items
-      localStorage.removeItem(`sb-${supabase.supabaseUrl}-auth-token`)
+      // First clear the session
+      clearSession();
       
-      // Sign out from Supabase
+      // Then sign out from Supabase
       await supabase.auth.signOut()
       
       // Navigate to login page
@@ -30,8 +30,8 @@ export function LogoutButton() {
       })
     } catch (error: any) {
       console.error('Logout error:', error)
-      // Even if there's an error, clear storage and redirect
-      localStorage.removeItem(`sb-${supabase.supabaseUrl}-auth-token`)
+      // Even if there's an error, clear the session and redirect
+      clearSession();
       navigate("/agence/login")
       toast({
         title: "Session terminée",
