@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Eye, Pencil, Trash2 } from "lucide-react"
+import { Eye, Pencil, Trash2, Building2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 interface PropertyActionsProps {
@@ -16,6 +16,10 @@ export function PropertyActions({ propertyId, onEdit, onDelete, propertyType }: 
     navigate(`/agence/biens/${propertyId}`)
   }
 
+  const handleManageUnits = () => {
+    navigate(`/agence/appartements/${propertyId}/unites`)
+  }
+
   return (
     <div className="flex items-center gap-2">
       <Button
@@ -27,6 +31,16 @@ export function PropertyActions({ propertyId, onEdit, onDelete, propertyType }: 
       >
         <Eye className="h-4 w-4" />
       </Button>
+      {propertyType === 'apartment' && (
+        <Button
+          onClick={handleManageUnits}
+          className="bg-gradient-to-r from-dashboard-gradient-from to-dashboard-gradient-to text-white hover:opacity-90 transition-opacity"
+          size="sm"
+        >
+          <Building2 className="h-4 w-4 mr-2" />
+          Gérer les unités
+        </Button>
+      )}
       <Button
         variant="ghost"
         size="icon"
