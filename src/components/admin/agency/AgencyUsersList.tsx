@@ -6,7 +6,6 @@ import { AgencyUserEditDialog } from "./AgencyUserEditDialog"
 
 interface AgencyUsersListProps {
   users: any[]
-  onEdit: (user: any) => void
   refetch: () => void
   agencyId: string
 }
@@ -60,7 +59,10 @@ export function AgencyUsersList({ users, refetch, agencyId }: AgencyUsersListPro
         onOpenChange={setShowEditDialog}
         userId={selectedUser?.id}
         agencyId={agencyId}
-        onSuccess={refetch}
+        onSuccess={() => {
+          refetch()
+          setShowEditDialog(false)
+        }}
       />
     </div>
   )
