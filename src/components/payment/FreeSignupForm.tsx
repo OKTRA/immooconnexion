@@ -29,7 +29,24 @@ export function FreeSignupForm({ formData, tempAgencyId, onSuccess }: FreeSignup
 
     try {
       setIsLoading(true)
-      // Create auth user
+      
+      // First check if user exists
+      const { data: existingUser } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      })
+
+      if (existingUser.user) {
+        toast({
+          title: "Erreur",
+          description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
+          variant: "destructive",
+        })
+        navigate('/agence/login')
+        return
+      }
+
+      // Create auth user if doesn't exist
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,

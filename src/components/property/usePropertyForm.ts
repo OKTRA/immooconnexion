@@ -105,7 +105,7 @@ export function usePropertyForm(property: Property | null | undefined, onOpenCha
         user_id: user.id,
         agency_id: profile.agency_id,
         updated_at: new Date().toISOString(),
-        property_category: formData.property_category as "house" | "apartment",
+        property_category: formData.property_category,
         owner_name: formData.owner_name,
         owner_phone: formData.owner_phone,
         country: formData.country,
