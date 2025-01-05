@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { SteppedProfileForm } from "../../admin/profile/form/SteppedProfileForm"
+import { ProfileForm } from "../../admin/profile/ProfileForm"
 import { useAgencyUserEdit } from "./hooks/useAgencyUserEdit"
 import { Profile } from "@/types/profile"
 
@@ -19,7 +19,6 @@ export function AgencyUserEditDialog({
   agencyId,
   onSuccess
 }: AgencyUserEditDialogProps) {
-  const [step, setStep] = useState(1)
   const {
     newProfile,
     setNewProfile,
@@ -37,12 +36,7 @@ export function AgencyUserEditDialog({
     }))
   }
 
-  const handleStepSubmit = async () => {
-    if (step === 1) {
-      setStep(2)
-      return
-    }
-
+  const handleSubmit = async () => {
     try {
       if (!userId) {
         await handleCreateAuthUser()
@@ -60,15 +54,13 @@ export function AgencyUserEditDialog({
         <DialogHeader>
           <DialogTitle>{userId ? "Modifier" : "Ajouter"} un utilisateur</DialogTitle>
         </DialogHeader>
-        <SteppedProfileForm
+        <ProfileForm
           isEditing={!!userId}
           newProfile={newProfile}
           setNewProfile={handleProfileChange}
-          onCreateAuthUser={handleStepSubmit}
+          onCreateAuthUser={handleSubmit}
           onUpdateProfile={handleUpdateProfile}
           selectedAgencyId={agencyId}
-          step={step}
-          setStep={setStep}
         />
       </DialogContent>
     </Dialog>

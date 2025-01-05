@@ -38,7 +38,14 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
       }
 
       const userExists = await checkExistingUser(newProfile.email);
-      if (userExists) return null;
+      if (userExists) {
+        toast({
+          title: "Erreur",
+          description: "Un utilisateur avec cet email existe déjà",
+          variant: "destructive",
+        });
+        return null;
+      }
 
       // Create new user
       const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
@@ -79,6 +86,12 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
       // Restore admin session
       await supabase.auth.setSession(adminSession);
       
+      toast({
+        title: "Succès",
+        description: "L'utilisateur a été créé avec succès",
+      });
+
+      onSuccess?.();
       return authData.user.id;
     } catch (error: any) {
       console.error("Error creating auth user:", error);
