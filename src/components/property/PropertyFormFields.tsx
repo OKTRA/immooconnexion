@@ -34,7 +34,7 @@ export function PropertyFormFields({
         <Label htmlFor="bien">Nom du bien</Label>
         <Input 
           id="bien" 
-          placeholder="Ex: Appartement Jaune Block 1" 
+          placeholder="Ex: Villa Jaune Block 1" 
           value={formData.bien}
           onChange={handleInputChange}
         />
@@ -70,7 +70,6 @@ export function PropertyFormFields({
             <SelectValue placeholder="Sélectionner le type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="appartement">Appartement</SelectItem>
             <SelectItem value="maison">Maison</SelectItem>
             <SelectItem value="villa">Villa</SelectItem>
             <SelectItem value="studio">Studio</SelectItem>
