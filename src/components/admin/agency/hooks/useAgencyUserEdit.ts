@@ -31,9 +31,16 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
 
   const handleCreateAuthUser = async () => {
     try {
+      // Store current admin session
+      const { data: { session: adminSession } } = await supabase.auth.getSession();
+      if (!adminSession) {
+        throw new Error("No admin session found");
+      }
+
       const userExists = await checkExistingUser(newProfile.email);
       if (userExists) return null;
 
+      // Create new user
       const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
         email: newProfile.email,
         password: newProfile.password || '',
@@ -66,10 +73,20 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
         throw new Error("No user data returned");
       }
 
+      // Create profile for new user
       await createProfile(authData.user.id, newProfile);
+
+      // Restore admin session
+      await supabase.auth.setSession(adminSession);
+      
       return authData.user.id;
     } catch (error: any) {
       console.error("Error creating auth user:", error);
+      // Ensure we attempt to restore admin session even if there's an error
+      const { data: { session: adminSession } } = await supabase.auth.getSession();
+      if (adminSession) {
+        await supabase.auth.setSession(adminSession);
+      }
       throw error;
     }
   };

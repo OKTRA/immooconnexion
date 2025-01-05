@@ -1,8 +1,8 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { useState } from "react"
-import { ProfileForm } from "../../admin/profile/ProfileForm"
-import { Profile } from "@/types/profile"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { SteppedProfileForm } from "../../admin/profile/form/SteppedProfileForm"
 import { useAgencyUserEdit } from "./hooks/useAgencyUserEdit"
+import { Profile } from "@/types/profile"
 
 interface AgencyUserEditDialogProps {
   open: boolean
@@ -17,40 +17,59 @@ export function AgencyUserEditDialog({
   onOpenChange,
   userId,
   agencyId,
-  onSuccess,
+  onSuccess
 }: AgencyUserEditDialogProps) {
-  const [step, setStep] = useState<1 | 2>(1)
-  
+  const [step, setStep] = useState(1)
   const {
     newProfile,
     setNewProfile,
     handleCreateAuthUser,
-    handleUpdateProfile,
-  } = useAgencyUserEdit(userId, agencyId, onSuccess)
+    handleUpdateProfile
+  } = useAgencyUserEdit(userId || null, agencyId, () => {
+    onSuccess?.()
+    onOpenChange(false)
+  })
 
-  const handleProfileChange = (profile: Partial<Profile>) => {
-    setNewProfile(prev => ({
+  const handleProfileChange = (data: Partial<Profile>) => {
+    setNewProfile((prev) => ({
       ...prev,
-      ...profile,
-      agency_id: agencyId // Ensure agency_id is always set
+      ...data,
     }))
+  }
+
+  const handleStepSubmit = async () => {
+    if (step === 1) {
+      setStep(2)
+      return
+    }
+
+    try {
+      if (!userId) {
+        await handleCreateAuthUser()
+      } else {
+        await handleUpdateProfile()
+      }
+    } catch (error) {
+      console.error('Error in form submission:', error)
+    }
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
-        <div className="py-6">
-          <ProfileForm
-            isEditing={!!userId}
-            newProfile={newProfile}
-            setNewProfile={handleProfileChange}
-            onCreateAuthUser={handleCreateAuthUser}
-            onUpdateProfile={handleUpdateProfile}
-            selectedAgencyId={agencyId}
-            step={step}
-            setStep={setStep}
-          />
-        </div>
+        <DialogHeader>
+          <DialogTitle>{userId ? "Modifier" : "Ajouter"} un utilisateur</DialogTitle>
+        </DialogHeader>
+        <SteppedProfileForm
+          isEditing={!!userId}
+          newProfile={newProfile}
+          setNewProfile={handleProfileChange}
+          onCreateAuthUser={handleStepSubmit}
+          onUpdateProfile={handleUpdateProfile}
+          selectedAgencyId={agencyId}
+          step={step}
+          setStep={setStep}
+        />
       </DialogContent>
     </Dialog>
   )
