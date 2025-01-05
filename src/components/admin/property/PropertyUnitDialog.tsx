@@ -31,10 +31,10 @@ export function PropertyUnitDialog({
 }: PropertyUnitDialogProps) {
   const [formData, setFormData] = useState({
     unit_number: editingUnit?.unit_number || "",
-    floor_number: editingUnit?.floor_number || "",
-    area: editingUnit?.area || "",
-    rent: editingUnit?.rent || "",
-    deposit: editingUnit?.deposit || "",
+    floor_number: editingUnit?.floor_number || null,
+    area: editingUnit?.area || null,
+    rent: editingUnit?.rent || null,
+    deposit: editingUnit?.deposit || null,
     description: editingUnit?.description || "",
     category: editingUnit?.category || "standard",
     amenities: editingUnit?.amenities || [],
