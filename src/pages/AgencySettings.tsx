@@ -13,12 +13,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 const AgencySettings = () => {
-  const [agency, setAgency] = useState<any>(null)
   const [profileData, setProfileData] = useState<any>(null)
   const { toast } = useToast()
   const isMobile = useIsMobile()
 
-  const { data: profile } = useQuery({
+  const { data: profile, isLoading } = useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -45,8 +44,6 @@ const AgencySettings = () => {
           address: updatedAgency.address,
           phone: updatedAgency.phone,
           email: updatedAgency.email,
-          show_phone_on_site: updatedAgency.show_phone_on_site,
-          list_properties_on_site: updatedAgency.list_properties_on_site,
           updated_at: new Date().toISOString()
         })
         .eq('id', updatedAgency.id)
@@ -58,6 +55,7 @@ const AgencySettings = () => {
         description: "Les informations de l'agence ont été mises à jour",
       })
     } catch (error: any) {
+      console.error('Error updating agency:', error)
       toast({
         title: "Erreur",
         description: error.message,
@@ -94,6 +92,10 @@ const AgencySettings = () => {
     }
   }
 
+  if (isLoading) {
+    return <div>Chargement...</div>
+  }
+
   return (
     <AgencyLayout>
       <div className="space-y-6">
@@ -119,7 +121,13 @@ const AgencySettings = () => {
             {profile?.agencies && (
               <AgencyForm
                 agency={profile.agencies}
-                setAgency={setAgency}
+                setAgency={(agency) => {
+                  // Update local state
+                  setProfileData({
+                    ...profileData,
+                    agencies: agency
+                  })
+                }}
                 onSubmit={handleAgencyUpdate}
               />
             )}
