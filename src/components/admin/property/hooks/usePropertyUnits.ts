@@ -6,29 +6,9 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  // Ajout d'une requête pour vérifier la catégorie de la propriété
-  const { data: property } = useQuery({
-    queryKey: ['property', propertyId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('property_category')
-        .eq('id', propertyId)
-        .single()
-
-      if (error) throw error
-      return data
-    },
-  })
-
   const { data: units = [], isLoading } = useQuery({
     queryKey: ['property-units', propertyId, filterStatus],
     queryFn: async () => {
-      // Vérifier si la propriété est de type apartment
-      if (property?.property_category !== 'apartment') {
-        throw new Error('Cette propriété n\'est pas un appartement')
-      }
-
       let query = supabase
         .from('property_units')
         .select('*')
@@ -48,16 +28,10 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
 
       return data
     },
-    enabled: !!property, // N'exécute la requête que si nous avons les données de la propriété
   })
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
-      // Vérifier à nouveau la catégorie avant la mutation
-      if (property?.property_category !== 'apartment') {
-        throw new Error('Cette propriété n\'est pas un appartement')
-      }
-
       const { id, photo, ...unitData } = data
       let photoUrl = unitData.photo_url
 
@@ -120,7 +94,7 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
       console.error('Error saving unit:', error)
       toast({
         title: "Erreur",
-        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la sauvegarde",
+        description: "Une erreur est survenue lors de la sauvegarde",
         variant: "destructive",
       })
     },
