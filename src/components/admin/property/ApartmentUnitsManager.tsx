@@ -1,10 +1,10 @@
 import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus, Building } from "lucide-react"
-import { ApartmentUnitDialog } from "./PropertyUnitDialog"
+import { ApartmentUnitDialog } from "./ApartmentUnitDialog"
 import { PropertyUnit } from "./types/propertyUnit"
 import { useApartmentUnits } from "./hooks/useApartmentUnits"
-import { PropertyUnitsTable } from "./components/PropertyUnitsTable"
+import { ApartmentUnitsTable } from "./components/ApartmentUnitsTable"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 import { useQuery } from "@tanstack/react-query"
@@ -15,7 +15,7 @@ interface PropertyUnitsManagerProps {
   filterStatus?: string;
 }
 
-export function PropertyUnitsManager({ propertyId: apartmentId, filterStatus }: PropertyUnitsManagerProps) {
+export function ApartmentUnitsManager({ propertyId: apartmentId, filterStatus }: PropertyUnitsManagerProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingUnit, setEditingUnit] = useState<PropertyUnit | null>(null)
   const { units, isLoading, mutation, deleteMutation } = useApartmentUnits(apartmentId, filterStatus)
@@ -78,7 +78,7 @@ export function PropertyUnitsManager({ propertyId: apartmentId, filterStatus }: 
         </Button>
       </CardHeader>
       <CardContent>
-        <PropertyUnitsTable
+        <ApartmentUnitsTable
           units={units}
           onEdit={handleEdit}
           onDelete={handleDelete}
