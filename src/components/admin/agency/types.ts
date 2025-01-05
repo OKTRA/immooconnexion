@@ -24,3 +24,6 @@ export interface Agency {
     features: string[];
   };
 }
+
+export type AgencyInsert = Partial<Agency>;
+export type AgencyUpdate = Partial<Agency>;
