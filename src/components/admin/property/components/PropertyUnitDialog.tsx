@@ -39,7 +39,8 @@ export function PropertyUnitDialog({
     category: editingUnit?.category || "standard",
     amenities: editingUnit?.amenities || [],
     status: editingUnit?.status || "available",
-    apartment_id: propertyId
+    apartment_id: propertyId,
+    photo_url: editingUnit?.photo_url || null
   })
 
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
@@ -49,7 +50,7 @@ export function PropertyUnitDialog({
     onSubmit({
       ...formData,
       property_id: propertyId,
-      photos: selectedFiles
+      photo: selectedFiles?.[0] || null // Changé de 'photos' à 'photo'
     })
   }
 
