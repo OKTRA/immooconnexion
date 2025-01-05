@@ -9,14 +9,14 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 
 interface PropertyUnitsManagerProps {
-  propertyId: string;
+  propertyId: string;  // This will actually contain the apartment ID
   filterStatus?: string;
 }
 
-export function PropertyUnitsManager({ propertyId, filterStatus }: PropertyUnitsManagerProps) {
+export function PropertyUnitsManager({ propertyId: apartmentId, filterStatus }: PropertyUnitsManagerProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingUnit, setEditingUnit] = useState<PropertyUnit | null>(null)
-  const { units, isLoading, mutation, deleteMutation } = usePropertyUnits(propertyId, filterStatus)
+  const { units, isLoading, mutation, deleteMutation } = usePropertyUnits(apartmentId, filterStatus)
   const { toast } = useToast()
 
   const handleEdit = (unit: PropertyUnit) => {
@@ -75,7 +75,7 @@ export function PropertyUnitsManager({ propertyId, filterStatus }: PropertyUnits
             setEditingUnit(null)
           }}
           editingUnit={editingUnit}
-          propertyId={propertyId}
+          propertyId={apartmentId}
           onSubmit={handleSubmit}
         />
       </CardContent>

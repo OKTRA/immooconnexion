@@ -18,7 +18,7 @@ interface PropertyUnitDialogProps {
   isOpen: boolean;
   onClose: () => void;
   editingUnit?: any;
-  propertyId: string;
+  propertyId: string;  // This will contain the apartment ID
   onSubmit: (data: any) => void;
 }
 
@@ -49,7 +49,7 @@ export function PropertyUnitDialog({
     e.preventDefault()
     onSubmit({
       ...formData,
-      property_id: propertyId,
+      apartment_id: propertyId,
       photo: selectedFiles?.[0] || null
     })
   }
