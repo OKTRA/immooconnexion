@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ApartmentActions } from "./ApartmentActions"
 import { useState } from "react"
 import { DeleteApartmentDialog } from "./DeleteApartmentDialog"
-import { ApartmentDialog } from "@/components/property/ApartmentDialog"
+import { ApartmentDialog } from "./ApartmentDialog"
 import { Building } from "lucide-react"
 
 interface ApartmentContentProps {
