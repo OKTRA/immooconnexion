@@ -100,14 +100,19 @@ export function PaymentDialog({
               </div>
             ) : !isUpgrade && step === 'form' ? (
               amount === 0 ? (
-                <FreeSignupForm 
-                  formData={form.getValues()} 
-                  tempAgencyId={agencyId || planId}
-                  onSuccess={() => {
-                    setPaymentSuccess(true)
-                    navigate('/agence/login')
-                  }}
-                />
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <PaymentFormFields form={form} />
+                    <FreeSignupForm 
+                      formData={form.getValues()} 
+                      tempAgencyId={agencyId || planId}
+                      onSuccess={() => {
+                        setPaymentSuccess(true)
+                        navigate('/agence/login')
+                      }}
+                    />
+                  </form>
+                </Form>
               ) : (
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -119,7 +124,7 @@ export function PaymentDialog({
                           Création en cours...
                         </>
                       ) : (
-                        amount === 0 ? "Créer mon compte" : "Continuer vers le paiement"
+                        "Continuer vers le paiement"
                       )}
                     </Button>
                   </form>
