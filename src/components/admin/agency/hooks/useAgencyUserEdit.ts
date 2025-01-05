@@ -34,27 +34,12 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
         .single()
 
       if (existingUser) {
-        // If user exists, update their profile instead of creating new
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({
-            first_name: newProfile.first_name,
-            last_name: newProfile.last_name,
-            phone_number: newProfile.phone_number,
-            role: newProfile.role,
-            agency_id: agencyId,
-            status: 'active'
-          })
-          .eq('id', existingUser.id)
-
-        if (updateError) throw updateError
-
         toast({
-          title: "Utilisateur existant",
-          description: "Le profil a été mis à jour avec succès",
+          title: "Erreur",
+          description: "Cet email existe déjà dans le système. Utilisez un autre email.",
+          variant: "destructive",
         })
-
-        return existingUser.id
+        return null
       }
 
       // If user doesn't exist, create new user
