@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Profile } from "@/components/admin/profile/types"
+import { Profile } from "@/types/profile"
 
 export function useProfiles() {
   const { data: profiles = [], refetch: refetchProfiles } = useQuery({
@@ -27,8 +27,5 @@ export function useProfiles() {
     }
   })
 
-  return {
-    profiles,
-    refetchProfiles
-  }
+  return { profiles, refetchProfiles }
 }

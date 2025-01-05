@@ -1,7 +1,7 @@
 import { UserRole } from "@/types/profile"
 
 export interface Profile {
-  id: string
+  id?: string
   email: string
   password?: string
   first_name: string
