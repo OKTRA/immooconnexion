@@ -11,6 +11,13 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
     queryKey: ['apartment-units', apartmentId, filterStatus],
     queryFn: async () => {
       console.log('Fetching units for apartment:', apartmentId)
+      
+      // Ne pas exécuter la requête si l'ID n'est pas valide
+      if (!apartmentId || apartmentId === ':apartmentId') {
+        console.log('Invalid apartment ID, skipping query')
+        return []
+      }
+
       let query = supabase
         .from('apartment_units')
         .select('*')
@@ -30,6 +37,7 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
       console.log('Fetched units:', data)
       return data
     },
+    enabled: !!apartmentId && apartmentId !== ':apartmentId', // N'exécute la requête que si l'ID est valide
   })
 
   const mutation = useMutation({

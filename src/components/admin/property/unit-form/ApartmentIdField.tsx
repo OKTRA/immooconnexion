@@ -11,15 +11,21 @@ export function ApartmentIdField({ propertyId }: ApartmentIdFieldProps) {
   const { data: apartment } = useQuery({
     queryKey: ['apartment', propertyId],
     queryFn: async () => {
+      // Ne pas exécuter la requête si l'ID n'est pas valide
+      if (!propertyId || propertyId === ':apartmentId') {
+        return null
+      }
+
       const { data, error } = await supabase
         .from('apartments')
         .select('name')
         .eq('id', propertyId)
-        .single()
+        .maybeSingle()
       
       if (error) throw error
       return data
-    }
+    },
+    enabled: !!propertyId && propertyId !== ':apartmentId',
   })
 
   return (
