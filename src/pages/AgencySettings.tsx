@@ -53,6 +53,33 @@ const AgencySettings = () => {
     }
   }
 
+  const handleProfileUpdate = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          first_name: profile?.first_name,
+          last_name: profile?.last_name,
+          phone_number: profile?.phone_number,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId)
+
+      if (error) throw error
+
+      toast({
+        title: "Succès",
+        description: "Votre profil a été mis à jour",
+      })
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive",
+      })
+    }
+  }
+
   return (
     <AgencyLayout>
       <div className="space-y-6">
@@ -84,12 +111,7 @@ const AgencySettings = () => {
             <ProfileForm
               newProfile={profile}
               isEditing={true}
-              onSubmit={() => {
-                toast({
-                  title: "Succès",
-                  description: "Votre profil a été mis à jour",
-                })
-              }}
+              onUpdateProfile={handleProfileUpdate}
             />
           </TabsContent>
         </Tabs>
