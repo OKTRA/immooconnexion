@@ -1,37 +1,36 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ProfileForm } from "@/components/admin/profile/ProfileForm"
-import { useAgencyUserEdit } from "./hooks/useAgencyUserEdit"
-import { Toaster } from "@/components/ui/toaster"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { useState } from "react"
+import { ProfileForm } from "../../admin/profile/ProfileForm"
 import { Profile } from "../profile/types"
+import { useAgencyUserEdit } from "./hooks/useAgencyUserEdit"
 
 interface AgencyUserEditDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  userId: string | null;
-  agencyId: string;
-  onSuccess?: () => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  userId?: string
+  agencyId: string
+  onSuccess?: () => void
 }
 
-export function AgencyUserEditDialog({ 
-  open, 
+export function AgencyUserEditDialog({
+  open,
   onOpenChange,
   userId,
   agencyId,
-  onSuccess
+  onSuccess,
 }: AgencyUserEditDialogProps) {
   const [step, setStep] = useState<1 | 2>(1)
-  const { 
+  
+  const {
     newProfile,
     setNewProfile,
     handleCreateAuthUser,
-    handleUpdateProfile
+    handleUpdateProfile,
   } = useAgencyUserEdit(userId, agencyId, onSuccess)
 
   const handleAuthUserCreation = async () => {
     if (handleCreateAuthUser) {
-      const id = await handleCreateAuthUser()
-      return id
+      return await handleCreateAuthUser()
     }
     return ""
   }
@@ -43,29 +42,21 @@ export function AgencyUserEditDialog({
   }
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {userId ? "Modifier l'utilisateur" : "Ajouter un utilisateur"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <ProfileForm
-              newProfile={newProfile}
-              setNewProfile={setNewProfile}
-              isEditing={!!userId}
-              onCreateAuthUser={handleAuthUserCreation}
-              onUpdateProfile={handleProfileUpdate}
-              selectedAgencyId={agencyId}
-              step={step}
-              setStep={setStep}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
-      <Toaster />
-    </>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <div className="py-6">
+          <ProfileForm
+            isEditing={!!userId}
+            newProfile={newProfile}
+            setNewProfile={setNewProfile}
+            onCreateAuthUser={handleAuthUserCreation}
+            onUpdateProfile={handleProfileUpdate}
+            selectedAgencyId={agencyId}
+            step={step}
+            setStep={setStep}
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

@@ -15,10 +15,10 @@ interface BasicInfoFieldsProps {
 export function BasicInfoFields({
   form,
   onProfileChange,
-  isEditing = false,
-  step = 1,
+  isEditing,
+  step,
   selectedAgencyId,
-  newProfile
+  newProfile,
 }: BasicInfoFieldsProps) {
   return (
     <div className="space-y-4">
