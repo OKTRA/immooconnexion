@@ -12,7 +12,7 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
     queryFn: async () => {
       console.log('Fetching units for apartment:', apartmentId)
       
-      // Ne pas exécuter la requête si l'ID n'est pas valide
+      // Don't execute the query if the ID is not valid
       if (!apartmentId || apartmentId === ':apartmentId') {
         console.log('Invalid apartment ID, skipping query')
         return []
@@ -37,7 +37,7 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
       console.log('Fetched units:', data)
       return data
     },
-    enabled: !!apartmentId && apartmentId !== ':apartmentId', // N'exécute la requête que si l'ID est valide
+    enabled: !!apartmentId && apartmentId !== ':apartmentId',
   })
 
   const mutation = useMutation({
