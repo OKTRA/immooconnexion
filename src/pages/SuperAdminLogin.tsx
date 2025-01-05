@@ -1,10 +1,14 @@
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm"
+import { PublicNavbar } from "@/components/home/PublicNavbar"
 
 const SuperAdminLogin = () => {
   return (
-    <div className="min-h-screen w-full">
-      <AdminLoginForm />
-    </div>
+    <>
+      <PublicNavbar />
+      <div className="min-h-screen w-full">
+        <AdminLoginForm />
+      </div>
+    </>
   )
 }
 
