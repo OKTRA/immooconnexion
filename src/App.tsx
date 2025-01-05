@@ -29,8 +29,8 @@ function App() {
         <Route path="/terms" element={<TermsOfService />} />
         
         {/* Protected Routes */}
-        <Route path="agence/admin" element={<ProtectedRoute />}>
-          <Route index element={<AgencyDashboard />} />
+        <Route path="/agence" element={<ProtectedRoute />}>
+          <Route path="admin" element={<AgencyDashboard />} />
           <Route path="biens" element={<Properties />} />
           <Route path="biens/:propertyId" element={<PropertyDetails />} />
           <Route path="locataires" element={<Tenants />} />
