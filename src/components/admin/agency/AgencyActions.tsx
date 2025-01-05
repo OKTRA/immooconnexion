@@ -1,66 +1,50 @@
 import { Button } from "@/components/ui/button"
-import { Edit, Lock, LockOpen, Trash2, Building2, Eye } from "lucide-react"
+import { Building2, Edit, Trash2, CreditCard } from "lucide-react"
+import { Agency } from "./types"
 
 interface AgencyActionsProps {
   onEditClick: () => void
   onOverviewClick: () => void
   onDeleteClick: () => void
   onPlanClick: () => void
-  onBlockClick: () => void
-  isBlocked: boolean
 }
 
 export function AgencyActions({ 
   onEditClick, 
   onOverviewClick, 
-  onDeleteClick, 
-  onPlanClick,
-  onBlockClick,
-  isBlocked
+  onDeleteClick,
+  onPlanClick
 }: AgencyActionsProps) {
   return (
     <div className="flex gap-2">
       <Button
-        variant="outline"
-        size="icon"
+        variant="ghost"
+        size="sm"
+        onClick={onOverviewClick}
+      >
+        <Building2 className="h-4 w-4 mr-2" />
+        Vue d'ensemble
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onPlanClick}
+      >
+        <CreditCard className="h-4 w-4 mr-2" />
+        Plan
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={onEditClick}
-        title="Modifier"
       >
         <Edit className="h-4 w-4" />
       </Button>
       <Button
-        variant="outline"
-        size="icon"
-        onClick={onOverviewClick}
-        title="Aperçu"
-      >
-        <Eye className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={onPlanClick}
-        title="Plan"
-      >
-        <Building2 className="h-4 w-4" />
-      </Button>
-      <Button
-        variant={isBlocked ? "destructive" : "outline"}
-        size="icon"
-        onClick={onBlockClick}
-        title={isBlocked ? "Débloquer" : "Bloquer"}
-      >
-        {isBlocked ? (
-          <Lock className="h-4 w-4" />
-        ) : (
-          <LockOpen className="h-4 w-4" />
-        )}
-      </Button>
-      <Button
-        variant="destructive"
-        size="icon"
+        variant="ghost"
+        size="sm"
         onClick={onDeleteClick}
-        title="Supprimer"
+        className="text-red-500 hover:text-red-600"
       >
         <Trash2 className="h-4 w-4" />
       </Button>
