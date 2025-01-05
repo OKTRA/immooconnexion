@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Profile } from "../../profile/types"
 
-export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuccess?: () => void) {
+export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuccess?: () => Promise<void>) {
   const [newProfile, setNewProfile] = useState<Profile>({
     id: userId || '',
     email: '',
@@ -26,13 +26,11 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
   const handleCreateAuthUser = async (): Promise<void> => {
     try {
       setIsSubmitting(true)
-      // Store current session
       const { data: { session: adminSession } } = await supabase.auth.getSession()
       if (!adminSession) {
         throw new Error("No admin session found")
       }
 
-      // Create new user
       const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
         email: newProfile.email,
         password: newProfile.password || '',
@@ -45,7 +43,6 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
         throw new Error("No user data returned")
       }
 
-      // Create profile
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
@@ -61,7 +58,6 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
 
       if (profileError) throw profileError
 
-      // Restore admin session
       await supabase.auth.setSession(adminSession)
       
       toast({
@@ -69,7 +65,9 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
         description: "L'utilisateur a été créé avec succès",
       })
 
-      onSuccess?.()
+      if (onSuccess) {
+        await onSuccess()
+      }
     } catch (error: any) {
       console.error("Error creating auth user:", error)
       toast({
@@ -85,6 +83,7 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
 
   const handleUpdateProfile = async (userId: string): Promise<void> => {
     try {
+      setIsSubmitting(true)
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -104,7 +103,9 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
         description: "Le profil a été mis à jour avec succès",
       })
 
-      onSuccess?.()
+      if (onSuccess) {
+        await onSuccess()
+      }
     } catch (error: any) {
       toast({
         title: "Erreur",
@@ -112,6 +113,8 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
         variant: "destructive",
       })
       throw error
+    } finally {
+      setIsSubmitting(false)
     }
   }
 

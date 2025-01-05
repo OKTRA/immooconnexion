@@ -1,13 +1,11 @@
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
-import { AddProfileDialog } from "../profile/AddProfileDialog"
-import { useAddProfileHandler } from "../profile/AddProfileHandler"
 import { AgencyUsersList } from "./AgencyUsersList"
 import { AgencyUserEditDialog } from "./AgencyUserEditDialog"
 import { useToast } from "@/hooks/use-toast"
+import { useAgencyUserEdit } from "./hooks/useAgencyUserEdit"
+import { Profile } from "../profile/types"
 
 interface AgencyUsersProps {
   agencyId: string
@@ -15,117 +13,99 @@ interface AgencyUsersProps {
 }
 
 export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
-  const [showAddDialog, setShowAddDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
   const { toast } = useToast()
-  
-  const { data: users = [], refetch, isLoading, error } = useQuery({
+
+  const { data: users = [], refetch } = useQuery({
     queryKey: ["agency-users", agencyId],
     queryFn: async () => {
-      try {
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-        if (authError) throw authError
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("agency_id", agencyId)
+        .order("created_at", { ascending: false })
 
-        const { data: adminData, error: adminError } = await supabase
-          .from("administrators")
-          .select("is_super_admin")
-          .eq("id", user?.id)
-          .maybeSingle()
-
-        if (adminError) throw adminError
-
-        const { data, error } = await supabase
-          .from("profiles")
-          .select(`
-            id,
-            first_name,
-            last_name,
-            email,
-            role,
-            agency_id,
-            phone_number
-          `)
-          .eq("agency_id", agencyId)
-          .order('created_at', { ascending: false })
-
-        if (error) throw error
-        return data || []
-      } catch (error: any) {
+      if (error) {
         console.error("Error fetching users:", error)
         throw error
       }
+
+      return data as Profile[]
     },
+  })
+
+  const {
+    newProfile,
+    setNewProfile,
+    isSubmitting,
+    handleCreateAuthUser,
+    handleUpdateProfile,
+  } = useAgencyUserEdit(selectedUserId, agencyId, async () => {
+    await refetch()
+    if (onRefetch) {
+      onRefetch()
+    }
+    setShowEditDialog(false)
+    setSelectedUserId(null)
   })
 
   const handleEdit = (userId: string) => {
-    setSelectedUserId(userId)
-    setShowEditDialog(true)
-  }
-
-  const { 
-    newProfile, 
-    setNewProfile, 
-    handleCreateAuthUser, 
-    handleUpdateProfile: handleAddProfileUpdate 
-  } = useAddProfileHandler({
-    onSuccess: () => {
-      toast({
-        title: "Utilisateur créé",
-        description: "L'utilisateur a été créé avec succès",
+    const userToEdit = users.find(user => user.id === userId)
+    if (userToEdit) {
+      setNewProfile({
+        ...userToEdit,
+        password: "", // Clear password for edit form
       })
-      refetch()
-      setShowAddDialog(false)
-    },
-    onClose: () => setShowAddDialog(false),
-    agencyId
-  })
-
-  if (isLoading) {
-    return <div>Chargement des utilisateurs...</div>
+      setSelectedUserId(userId)
+      setShowEditDialog(true)
+    }
   }
 
-  if (error) {
-    return <div>Erreur lors du chargement des utilisateurs</div>
+  const handleDelete = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", userId)
+
+      if (error) throw error
+
+      toast({
+        title: "Succès",
+        description: "L'utilisateur a été supprimé avec succès",
+      })
+      
+      await refetch()
+      if (onRefetch) {
+        onRefetch()
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de la suppression",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button onClick={() => setShowAddDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Ajouter un agent
-        </Button>
-      </div>
-
-      <AgencyUsersList 
+      <AgencyUsersList
         users={users}
-        refetch={refetch}
-        agencyId={agencyId}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
       />
 
       <AgencyUserEditDialog
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
-        userId={selectedUserId}
-        agencyId={agencyId}
-        onSuccess={() => {
-          toast({
-            title: "Utilisateur mis à jour",
-            description: "L'utilisateur a été mis à jour avec succès",
-          })
-          refetch()
-          setShowEditDialog(false)
-        }}
-      />
-
-      <AddProfileDialog
-        open={showAddDialog}
-        onOpenChange={setShowAddDialog}
         newProfile={newProfile}
         setNewProfile={setNewProfile}
+        isSubmitting={isSubmitting}
         handleCreateAuthUser={handleCreateAuthUser}
-        handleUpdateProfile={handleAddProfileUpdate}
+        handleUpdateProfile={handleUpdateProfile}
+        isEditing={!!selectedUserId}
       />
     </div>
   )
