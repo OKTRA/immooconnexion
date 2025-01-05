@@ -3,34 +3,18 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { UserRole } from "@/types/profile"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-
-interface Profile {
-  email: string;
-  first_name: string;
-  last_name: string;
-  phone_number: string;
-  password?: string;
-  role?: UserRole;
-  agency_id?: string;
-}
-
-interface BasicInfoFieldsProps {
-  newProfile: Partial<Profile>;
-  onProfileChange: (profile: Partial<Profile>) => void;
-  isEditing?: boolean;
-  step?: 1 | 2;
-  selectedAgencyId?: string;
-}
+import { supabase } from "@/lib/supabase"
+import { BasicInfoFieldsProps } from "../types"
 
 export function BasicInfoFields({ 
   newProfile = {},
   onProfileChange,
   isEditing = false,
   step = 1,
-  selectedAgencyId
+  selectedAgencyId,
+  form
 }: BasicInfoFieldsProps) {
-  const handleChange = (field: keyof Profile, value: string) => {
+  const handleChange = (field: keyof typeof newProfile, value: string) => {
     onProfileChange({ [field]: value })
   }
 

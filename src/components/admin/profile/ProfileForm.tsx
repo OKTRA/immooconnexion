@@ -16,7 +16,10 @@ export function ProfileForm({
   step = 1,
   setStep,
   agencyId,
-  handleSubmit: onSubmit 
+  handleSubmit: onSubmit,
+  selectedAgencyId,
+  onUpdateProfile,
+  onCreateAuthUser
 }: ProfileFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
@@ -62,7 +65,7 @@ export function ProfileForm({
           onProfileChange={handleProfileChange}
           isEditing={isEditing}
           step={step}
-          selectedAgencyId={agencyId}
+          selectedAgencyId={selectedAgencyId}
         />
         
         <div className="flex justify-between">
