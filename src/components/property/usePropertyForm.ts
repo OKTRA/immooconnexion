@@ -16,8 +16,12 @@ export function usePropertyForm(property: Property | null | undefined, onOpenCha
     loyer: "",
     taux_commission: "",
     caution: "",
+    frais_agence: "",
+    property_category: "house",
     owner_name: "",
     owner_phone: "",
+    country: "",
+    quartier: "",
   })
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -33,8 +37,12 @@ export function usePropertyForm(property: Property | null | undefined, onOpenCha
         loyer: property.loyer?.toString() || "",
         taux_commission: property.taux_commission?.toString() || "",
         caution: property.caution?.toString() || "",
+        frais_agence: property.frais_agence?.toString() || "",
+        property_category: property.property_category || "house",
         owner_name: property.owner_name || "",
         owner_phone: property.owner_phone || "",
+        country: property.country || "",
+        quartier: property.quartier || "",
       })
 
       if (property.photo_url) {
@@ -87,17 +95,21 @@ export function usePropertyForm(property: Property | null | undefined, onOpenCha
       const propertyData = {
         bien: formData.bien,
         type: formData.type,
-        chambres: parseInt(formData.chambres),
+        chambres: parseInt(formData.chambres) || 0,
         ville: formData.ville,
-        loyer: parseFloat(formData.loyer),
-        taux_commission: parseFloat(formData.taux_commission),
-        caution: parseFloat(formData.caution),
-        photo_url: photo_urls[0], // Keep backward compatibility by using the first image
+        loyer: parseFloat(formData.loyer) || 0,
+        taux_commission: parseFloat(formData.taux_commission) || 0,
+        caution: parseFloat(formData.caution) || 0,
+        frais_agence: parseFloat(formData.frais_agence) || 0,
+        photo_url: photo_urls[0],
         user_id: user.id,
         agency_id: profile.agency_id,
         updated_at: new Date().toISOString(),
+        property_category: formData.property_category,
         owner_name: formData.owner_name,
         owner_phone: formData.owner_phone,
+        country: formData.country,
+        quartier: formData.quartier,
       }
 
       if (property?.id) {

@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { LogOut } from "lucide-react"
-import { clearSession } from "@/utils/sessionUtils"
 
 export function LogoutButton() {
   const navigate = useNavigate()
@@ -11,13 +10,14 @@ export function LogoutButton() {
 
   const handleLogout = async () => {
     try {
-      // Clear session first to prevent race conditions
-      clearSession()
+      // First clear any existing session from localStorage
+      localStorage.removeItem(`sb-${supabase.supabaseUrl.split('//')[1]}-auth-token`)
       
-      // Attempt to sign out from Supabase
+      // Then attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut()
       if (error) {
         console.error('Logout error:', error)
+        // Even if there's an error, we want to clear the local session
         toast({
           title: "Session terminée",
           description: "Votre session a été terminée",
