@@ -37,36 +37,7 @@ export function FreeSignupForm({
       setIsLoading(true)
       const values = form.getValues()
 
-      if (!values.email || !values.password) {
-        toast({
-          title: "Erreur",
-          description: "L'email et le mot de passe sont requis",
-          variant: "destructive",
-        })
-        return
-      }
-      
-      // First check if user exists
-      const { data: { user: existingUser }, error: signInError } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
-      })
-
-      if (signInError && !signInError.message.includes('Invalid login credentials')) {
-        throw signInError
-      }
-
-      if (existingUser) {
-        toast({
-          title: "Erreur",
-          description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
-          variant: "destructive",
-        })
-        navigate('/login')
-        return
-      }
-
-      // Create auth user if doesn't exist
+      // Create auth user
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -74,8 +45,7 @@ export function FreeSignupForm({
           data: {
             first_name: values.first_name,
             last_name: values.last_name,
-          },
-          emailRedirectTo: `${window.location.origin}/login`
+          }
         }
       })
 
@@ -96,6 +66,7 @@ export function FreeSignupForm({
           email: values.email,
           country: values.country,
           city: values.city,
+          status: 'active'
         }])
         .select()
         .single()
@@ -110,7 +81,8 @@ export function FreeSignupForm({
           role: 'admin',
           first_name: values.first_name,
           last_name: values.last_name,
-          phone_number: values.phone_number
+          phone_number: values.phone_number,
+          status: 'active'
         })
         .eq('id', authData.user?.id)
 
@@ -118,7 +90,7 @@ export function FreeSignupForm({
 
       toast({
         title: "Inscription réussie",
-        description: "Votre compte a été créé avec succès. Veuillez vérifier votre email pour confirmer votre inscription.",
+        description: "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.",
       })
 
       onSuccess?.()
