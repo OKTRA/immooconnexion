@@ -2,11 +2,12 @@ import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Building2, Home, Building } from "lucide-react"
 import { ApartmentDialog } from "@/components/property/ApartmentDialog"
-import { PropertyTableRow } from "@/components/property-table/PropertyTableRow"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { PropertyTableHeader } from "@/components/property-table/PropertyTableHeader"
 import { DeleteApartmentDialog } from "./DeleteApartmentDialog"
 import { Apartment } from "@/components/property/types"
+import { ApartmentActions } from "./ApartmentActions"
+import { TableCell, TableRow } from "@/components/ui/table"
 
 interface ApartmentContentProps {
   apartments: Apartment[]
@@ -16,28 +17,6 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null)
-
-  const convertApartmentToProperty = (apartment: Apartment) => ({
-    id: apartment.id,
-    bien: apartment.name,
-    type: 'appartement',
-    chambres: 0,
-    ville: apartment.city || '',
-    loyer: 0,
-    frais_agence: 0,
-    taux_commission: 0,
-    caution: 0,
-    photo_url: apartment.photo_url,
-    statut: apartment.status,
-    user_id: '',
-    agency_id: apartment.agency_id || '',
-    created_at: apartment.created_at,
-    updated_at: apartment.updated_at,
-    owner_name: apartment.owner_name || '',
-    owner_phone: apartment.owner_phone || '',
-    total_units: apartment.total_units,
-    property_category: 'apartment'
-  })
 
   return (
     <div className="container mx-auto py-6">
@@ -67,18 +46,35 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
             <PropertyTableHeader type="apartment" />
             <ResponsiveTable.Body>
               {apartments?.map((apartment) => (
-                <PropertyTableRow
-                  key={apartment.id}
-                  property={convertApartmentToProperty(apartment)}
-                  onEdit={() => {
-                    setSelectedApartment(apartment)
-                    setEditDialogOpen(true)
-                  }}
-                  onDelete={() => {
-                    setSelectedApartment(apartment)
-                    setDeleteDialogOpen(true)
-                  }}
-                />
+                <TableRow key={apartment.id}>
+                  <TableCell>
+                    <img 
+                      src={apartment.photo_url || '/placeholder.svg'} 
+                      alt={apartment.name}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">{apartment.name}</TableCell>
+                  <TableCell>Appartement</TableCell>
+                  <TableCell>{apartment.total_units}</TableCell>
+                  <TableCell>{apartment.city}</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>{apartment.status}</TableCell>
+                  <TableCell className="text-right">
+                    <ApartmentActions
+                      apartmentId={apartment.id}
+                      onEdit={() => {
+                        setSelectedApartment(apartment)
+                        setEditDialogOpen(true)
+                      }}
+                      onDelete={() => {
+                        setSelectedApartment(apartment)
+                        setDeleteDialogOpen(true)
+                      }}
+                    />
+                  </TableCell>
+                </TableRow>
               ))}
             </ResponsiveTable.Body>
           </ResponsiveTable>
@@ -89,18 +85,35 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
             <PropertyTableHeader type="apartment" />
             <ResponsiveTable.Body>
               {apartments?.filter(a => a.status === 'disponible').map((apartment) => (
-                <PropertyTableRow
-                  key={apartment.id}
-                  property={convertApartmentToProperty(apartment)}
-                  onEdit={() => {
-                    setSelectedApartment(apartment)
-                    setEditDialogOpen(true)
-                  }}
-                  onDelete={() => {
-                    setSelectedApartment(apartment)
-                    setDeleteDialogOpen(true)
-                  }}
-                />
+                <TableRow key={apartment.id}>
+                  <TableCell>
+                    <img 
+                      src={apartment.photo_url || '/placeholder.svg'} 
+                      alt={apartment.name}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">{apartment.name}</TableCell>
+                  <TableCell>Appartement</TableCell>
+                  <TableCell>{apartment.total_units}</TableCell>
+                  <TableCell>{apartment.city}</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>{apartment.status}</TableCell>
+                  <TableCell className="text-right">
+                    <ApartmentActions
+                      apartmentId={apartment.id}
+                      onEdit={() => {
+                        setSelectedApartment(apartment)
+                        setEditDialogOpen(true)
+                      }}
+                      onDelete={() => {
+                        setSelectedApartment(apartment)
+                        setDeleteDialogOpen(true)
+                      }}
+                    />
+                  </TableCell>
+                </TableRow>
               ))}
             </ResponsiveTable.Body>
           </ResponsiveTable>
@@ -111,18 +124,35 @@ export function ApartmentContent({ apartments }: ApartmentContentProps) {
             <PropertyTableHeader type="apartment" />
             <ResponsiveTable.Body>
               {apartments?.filter(a => a.status === 'occupé').map((apartment) => (
-                <PropertyTableRow
-                  key={apartment.id}
-                  property={convertApartmentToProperty(apartment)}
-                  onEdit={() => {
-                    setSelectedApartment(apartment)
-                    setEditDialogOpen(true)
-                  }}
-                  onDelete={() => {
-                    setSelectedApartment(apartment)
-                    setDeleteDialogOpen(true)
-                  }}
-                />
+                <TableRow key={apartment.id}>
+                  <TableCell>
+                    <img 
+                      src={apartment.photo_url || '/placeholder.svg'} 
+                      alt={apartment.name}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">{apartment.name}</TableCell>
+                  <TableCell>Appartement</TableCell>
+                  <TableCell>{apartment.total_units}</TableCell>
+                  <TableCell>{apartment.city}</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>{apartment.status}</TableCell>
+                  <TableCell className="text-right">
+                    <ApartmentActions
+                      apartmentId={apartment.id}
+                      onEdit={() => {
+                        setSelectedApartment(apartment)
+                        setEditDialogOpen(true)
+                      }}
+                      onDelete={() => {
+                        setSelectedApartment(apartment)
+                        setDeleteDialogOpen(true)
+                      }}
+                    />
+                  </TableCell>
+                </TableRow>
               ))}
             </ResponsiveTable.Body>
           </ResponsiveTable>
