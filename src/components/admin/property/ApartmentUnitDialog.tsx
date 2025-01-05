@@ -18,7 +18,7 @@ interface ApartmentUnitDialogProps {
   isOpen: boolean;
   onClose: () => void;
   editingUnit?: any;
-  propertyId: string;  // This will contain the apartment ID
+  propertyId: string;
   onSubmit: (data: any) => void;
 }
 
