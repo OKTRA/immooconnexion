@@ -33,8 +33,6 @@ export function AgencyTable({ agencies, onEdit, refetch }: AgencyTableProps) {
               <TableHead>Adresse</TableHead>
               <TableHead>Téléphone</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead>Statut</TableHead>
-              <TableHead>Plan d'abonnement</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>

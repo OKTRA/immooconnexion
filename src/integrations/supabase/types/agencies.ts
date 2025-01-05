@@ -1,5 +1,3 @@
-export type AgencyStatus = 'active' | 'blocked' | 'pending';
-
 export interface Agency {
   id: string;
   name: string;
@@ -15,9 +13,6 @@ export interface Agency {
   current_properties_count?: number;
   current_tenants_count?: number;
   current_profiles_count?: number;
-  status: AgencyStatus;
-  country: string | null;
-  city: string | null;
 }
 
 export type AgencyInsert = Partial<Agency>;

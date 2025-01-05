@@ -1,16 +1,12 @@
 import { TableCell, TableRow } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Edit, Users, Building2, UserPlus } from "lucide-react"
 import { useState } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { Agency } from "@/integrations/supabase/types/agencies"
+import { Agency } from "./types"
 import { AgencyOverview } from "./AgencyOverview"
 import { AgencyForm } from "./AgencyForm"
 import { AddProfileDialog } from "../profile/AddProfileDialog"
-import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
-import { AgencyActions } from "./AgencyActions"
-import { AgencyPlanSelect } from "./AgencyPlanSelect"
-import { DeleteAgencyDialog } from "./dialogs/DeleteAgencyDialog"
 
 interface AgencyTableRowProps {
   agency: Agency
@@ -22,87 +18,7 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showOverviewDialog, setShowOverviewDialog] = useState(false)
   const [showAddProfileDialog, setShowAddProfileDialog] = useState(false)
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [editedAgency, setEditedAgency] = useState<Agency>(agency)
-  const { toast } = useToast()
-
-  const handleStatusToggle = async () => {
-    try {
-      const newStatus: Agency['status'] = agency.status === 'active' ? 'blocked' : 'active'
-      
-      const { error: updateError } = await supabase
-        .from('agencies')
-        .update({ 
-          status: newStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', agency.id)
-
-      if (updateError) throw updateError
-
-      toast({
-        title: "Statut mis à jour",
-        description: `L'agence a été ${newStatus === 'blocked' ? 'bloquée' : 'activée'} avec succès`,
-      })
-      
-      refetch()
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
-      })
-    }
-  }
-
-  const handleDelete = async () => {
-    try {
-      const { error } = await supabase
-        .from('agencies')
-        .delete()
-        .eq('id', agency.id)
-
-      if (error) throw error
-
-      toast({
-        title: "Agence supprimée",
-        description: "L'agence a été supprimée avec succès",
-      })
-      refetch()
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
-      })
-    }
-  }
-
-  const handlePlanChange = async (planId: string) => {
-    try {
-      const { error } = await supabase
-        .from('agencies')
-        .update({ 
-          subscription_plan_id: planId,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', agency.id)
-
-      if (error) throw error
-
-      toast({
-        title: "Plan mis à jour",
-        description: "Le plan d'abonnement a été mis à jour avec succès",
-      })
-      refetch()
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
-      })
-    }
-  }
+  const [editedAgency, setEditedAgency] = useState(agency)
 
   return (
     <>
@@ -112,25 +28,31 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         <TableCell>{agency.phone || "-"}</TableCell>
         <TableCell>{agency.email || "-"}</TableCell>
         <TableCell>
-          <Badge variant={agency.status === 'active' ? 'success' : 'destructive'}>
-            {agency.status}
-          </Badge>
-        </TableCell>
-        <TableCell>
-          <AgencyPlanSelect 
-            value={agency.subscription_plan_id || ""} 
-            onValueChange={handlePlanChange}
-          />
-        </TableCell>
-        <TableCell>
-          <AgencyActions 
-            agency={agency}
-            onEdit={() => setShowEditDialog(true)}
-            onAddProfile={() => setShowAddProfileDialog(true)}
-            onViewOverview={() => setShowOverviewDialog(true)}
-            onToggleStatus={handleStatusToggle}
-            onDelete={() => setShowDeleteDialog(true)}
-          />
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowOverviewDialog(true)}
+            >
+              <Building2 className="h-4 w-4 mr-2" />
+              Vue d'ensemble
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAddProfileDialog(true)}
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              Ajouter un profil
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowEditDialog(true)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          </div>
         </TableCell>
       </TableRow>
 
@@ -158,12 +80,6 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         onOpenChange={setShowAddProfileDialog}
         agencyId={agency.id}
         onProfileCreated={refetch}
-      />
-
-      <DeleteAgencyDialog 
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        onConfirm={handleDelete}
       />
     </>
   )

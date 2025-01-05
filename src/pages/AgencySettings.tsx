@@ -11,7 +11,6 @@ import { AuthSettingsTab } from "@/components/admin/agency/AuthSettingsTab"
 import { ProfileSettingsTab } from "@/components/admin/agency/ProfileSettingsTab"
 import { Button } from "@/components/ui/button"
 import { AddProfileDialog } from "@/components/admin/profile/AddProfileDialog"
-import { Agency } from "@/integrations/supabase/types/agencies"
 
 const AgencySettings = () => {
   const [profileData, setProfileData] = useState<any>(null)

@@ -3,7 +3,6 @@ import { ThemeSupa } from "@supabase/auth-ui-shared"
 import { supabase } from "@/integrations/supabase/client"
 import { useNavigate } from "react-router-dom"
 import { useEffect } from "react"
-import { useToast } from "@/hooks/use-toast"
 
 interface LoginFormProps {
   view: "sign_in" | "forgotten_password"
@@ -12,68 +11,19 @@ interface LoginFormProps {
 
 export const LoginForm = ({ view, setView }: LoginFormProps) => {
   const navigate = useNavigate()
-  const { toast } = useToast()
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        // Check if user's agency is blocked
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('agency_id')
-          .eq('id', session.user.id)
-          .single()
-
-        if (profile?.agency_id) {
-          const { data: agency } = await supabase
-            .from('agencies')
-            .select('status')
-            .eq('id', profile.agency_id)
-            .single()
-
-          if (agency?.status === 'blocked') {
-            await supabase.auth.signOut()
-            toast({
-              title: "Accès refusé",
-              description: "Votre agence a été bloquée. Veuillez contacter l'administrateur.",
-              variant: "destructive",
-            })
-            return
-          }
-        }
         navigate("/agence/admin")
       }
     }
 
     checkAuth()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        // Check if user's agency is blocked
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('agency_id')
-          .eq('id', session.user.id)
-          .single()
-
-        if (profile?.agency_id) {
-          const { data: agency } = await supabase
-            .from('agencies')
-            .select('status')
-            .eq('id', profile.agency_id)
-            .single()
-
-          if (agency?.status === 'blocked') {
-            await supabase.auth.signOut()
-            toast({
-              title: "Accès refusé",
-              description: "Votre agence a été bloquée. Veuillez contacter l'administrateur.",
-              variant: "destructive",
-            })
-            return
-          }
-        }
         navigate("/agence/admin")
       }
     })
@@ -81,7 +31,7 @@ export const LoginForm = ({ view, setView }: LoginFormProps) => {
     return () => {
       subscription.unsubscribe()
     }
-  }, [navigate, toast])
+  }, [navigate])
 
   return (
     <>
