@@ -16,6 +16,9 @@ import PublicProperties from "./pages/PublicProperties"
 import Pricing from "./pages/Pricing"
 import SubscriptionUpgrade from "./pages/SubscriptionUpgrade"
 import TermsOfService from "./pages/TermsOfService"
+import AgencySettings from "./pages/AgencySettings"
+import Apartments from "./pages/Apartments"
+import PropertyUnits from "./pages/PropertyUnits"
 import { ProtectedRoute } from "./components/auth/ProtectedRoute"
 
 function App() {

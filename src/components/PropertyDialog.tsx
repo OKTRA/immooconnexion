@@ -11,7 +11,11 @@ import { PropertyFormFields } from "./property/PropertyFormFields"
 import { usePropertyForm } from "./property/usePropertyForm"
 import { PropertyDialogProps } from "./property/types"
 
-export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogProps) {
+export interface ExtendedPropertyDialogProps extends PropertyDialogProps {
+  type?: 'apartment' | 'house'
+}
+
+export function PropertyDialog({ property, onOpenChange, open, type }: ExtendedPropertyDialogProps) {
   const {
     images,
     setImages,
@@ -47,6 +51,7 @@ export function PropertyDialog({ property, onOpenChange, open }: PropertyDialogP
           setFormData={setFormData}
           handleImageChange={handleImageChange}
           imagePreviewUrl={previewUrls}
+          propertyType={type}
         />
 
         <div className="flex justify-end gap-2 mt-6 sticky bottom-0 bg-background py-4">

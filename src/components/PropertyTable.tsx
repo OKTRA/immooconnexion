@@ -41,7 +41,11 @@ interface Property {
   property_category: string
 }
 
-export function PropertyTable() {
+interface PropertyTableProps {
+  type?: 'apartment' | 'house'
+}
+
+export function PropertyTable({ type }: PropertyTableProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
