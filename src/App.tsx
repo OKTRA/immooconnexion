@@ -57,10 +57,6 @@ const router = createBrowserRouter([
     element: <PropertyDetails />,
   },
   {
-    path: "/agence/biens/:propertyId/unites",
-    element: <PropertyUnitsPage />,
-  },
-  {
     path: "/agence/appartements",
     element: <ApartmentManagement />,
   },
