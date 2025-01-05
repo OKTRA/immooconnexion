@@ -93,6 +93,12 @@ export function FreeSignupForm({
         description: "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.",
       })
 
+      // Sign out the user to ensure they log in fresh
+      await supabase.auth.signOut()
+      
+      // Redirect to login page
+      navigate('/login')
+      
       onSuccess?.()
     } catch (error: any) {
       console.error('Error:', error)
