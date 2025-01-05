@@ -35,6 +35,7 @@ export function LoginForm() {
           description: "Email ou mot de passe incorrect",
           variant: "destructive",
         })
+        setIsLoading(false)
         return
       }
 
@@ -44,6 +45,7 @@ export function LoginForm() {
           description: "Email ou mot de passe incorrect",
           variant: "destructive",
         })
+        setIsLoading(false)
         return
       }
 
@@ -62,6 +64,7 @@ export function LoginForm() {
           variant: "destructive",
         })
         await supabase.auth.signOut()
+        setIsLoading(false)
         return
       }
 
@@ -80,6 +83,7 @@ export function LoginForm() {
           variant: "destructive",
         })
         await supabase.auth.signOut()
+        setIsLoading(false)
         return
       }
 
@@ -90,6 +94,7 @@ export function LoginForm() {
           variant: "destructive",
         })
         await supabase.auth.signOut()
+        setIsLoading(false)
         return
       }
 
