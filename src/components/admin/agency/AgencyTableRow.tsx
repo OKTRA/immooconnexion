@@ -7,7 +7,6 @@ import { Agency } from "./types"
 import { AgencyOverview } from "./AgencyOverview"
 import { AgencyForm } from "./AgencyForm"
 import { AddProfileDialog } from "../profile/AddProfileDialog"
-import { ApartmentUnitsButton } from "@/components/apartment/ApartmentUnitsButton"
 
 interface AgencyTableRowProps {
   agency: Agency
@@ -46,7 +45,6 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
               <UserPlus className="h-4 w-4 mr-2" />
               Ajouter un profil
             </Button>
-            <ApartmentUnitsButton apartmentId={agency.id} />
             <Button
               variant="ghost"
               size="sm"
