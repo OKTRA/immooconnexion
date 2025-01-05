@@ -62,22 +62,6 @@ export function AdminLoginForm() {
       throw new Error('Not a super admin')
     }
 
-    if (!adminData.is_super_admin && adminData.agency_id) {
-      const { data: agencyData, error: agencyError } = await supabase
-        .from('agencies')
-        .select('status')
-        .eq('id', adminData.agency_id)
-        .single()
-
-      if (agencyError || !agencyData) {
-        throw new Error('Agency verification failed')
-      }
-
-      if (agencyData.status === 'blocked') {
-        throw new Error('Agency is blocked')
-      }
-    }
-
     return adminData
   }
 
@@ -90,8 +74,8 @@ export function AdminLoginForm() {
       const { data: { session: existingSession } } = await supabase.auth.getSession()
       
       if (existingSession) {
-        // Verify if the existing session is for a super admin
         try {
+          // Verify if the existing session is for a super admin
           await verifyAdminAccess(existingSession.user.id)
           // If verification passes, use existing session
           toast({
@@ -101,7 +85,8 @@ export function AdminLoginForm() {
           navigate("/super-admin/admin")
           return
         } catch (error) {
-          console.log('Existing session is not for a super admin, proceeding with new login')
+          // Only sign out if the existing session is not a super admin
+          await supabase.auth.signOut()
         }
       }
 
