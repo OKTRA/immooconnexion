@@ -88,13 +88,17 @@ export function LoginForm() {
       }
 
       if (agency.status === 'blocked') {
-        await supabase.auth.signOut()
         toast({
           title: "Accès refusé",
           description: "Votre agence est actuellement bloquée. Veuillez contacter l'administrateur.",
           variant: "destructive",
+          duration: 5000, // Show for 5 seconds
         })
-        setIsLoading(false)
+        // Add a small delay before signing out to ensure the toast is shown
+        setTimeout(async () => {
+          await supabase.auth.signOut()
+          setIsLoading(false)
+        }, 500)
         return
       }
 
