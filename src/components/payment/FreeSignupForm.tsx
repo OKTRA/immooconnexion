@@ -34,11 +34,12 @@ export function FreeSignupForm({
     
     try {
       setIsLoading(true)
+      const values = form.getValues()
       
       // First check if user exists
       const { data: { user: existingUser } } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
+        email: values.email,
+        password: values.password,
       })
 
       if (existingUser) {
@@ -53,8 +54,14 @@ export function FreeSignupForm({
 
       // Create auth user if doesn't exist
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            first_name: values.first_name,
+            last_name: values.last_name,
+          }
+        }
       })
 
       if (signUpError) throw signUpError
@@ -64,12 +71,12 @@ export function FreeSignupForm({
         .from('agencies')
         .insert([{
           id: agencyId,
-          name: formData.agency_name,
-          address: formData.agency_address,
-          phone: formData.phone_number,
-          email: formData.email,
-          country: formData.country,
-          city: formData.city,
+          name: values.agency_name,
+          address: values.agency_address,
+          phone: values.phone_number,
+          email: values.email,
+          country: values.country,
+          city: values.city,
         }])
         .select()
         .single()
@@ -82,9 +89,9 @@ export function FreeSignupForm({
         .update({
           agency_id: agency.id,
           role: 'admin',
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          phone_number: formData.phone_number
+          first_name: values.first_name,
+          last_name: values.last_name,
+          phone_number: values.phone_number
         })
         .eq('id', authData.user?.id)
 
