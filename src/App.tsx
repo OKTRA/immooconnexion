@@ -65,6 +65,10 @@ const router = createBrowserRouter([
     element: <ApartmentManagement />,
   },
   {
+    path: "/agence/appartements/:apartmentId/unites",
+    element: <PropertyUnitsPage />,
+  },
+  {
     path: "/agence/locataires",
     element: <Tenants />,
   },
