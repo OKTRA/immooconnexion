@@ -17,10 +17,8 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Get the current session
         const { data: { session } } = await supabase.auth.getSession()
         
-        // If no session or no access token, user is not authenticated
         if (!session?.access_token) {
           console.log("No valid session found")
           setIsAuthenticated(false)
@@ -32,14 +30,12 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
           return
         }
 
-        // Get user profile
         const { data: profile } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', session.user.id)
           .maybeSingle()
 
-        // If admin only route, check admin status
         if (adminOnly) {
           const { data: adminData } = await supabase
             .from('administrators')
@@ -75,14 +71,12 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
 
     checkAuth()
 
-    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         setIsAuthenticated(false)
         return
       }
       
-      // Re-verify authentication on auth state change
       checkAuth()
     })
 
@@ -100,7 +94,6 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
   }
 
   if (!isAuthenticated) {
-    // Redirect to appropriate login page based on the route
     const isAdminRoute = location.pathname.includes('/super-admin')
     const loginPath = isAdminRoute ? '/super-admin/login' : '/login'
     
