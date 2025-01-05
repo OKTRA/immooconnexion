@@ -1,12 +1,10 @@
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { LogOut, Menu } from "lucide-react"
+import { LogOut } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { AnimatedLogo } from "@/components/header/AnimatedLogo"
-import { useQuery } from "@tanstack/react-query"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Separator } from "@/components/ui/separator"
+import { useQuery } from "@tanstack/react-query"
 import { clearSession } from "@/utils/sessionUtils"
 
 export function UserMenu() {
@@ -40,22 +38,29 @@ export function UserMenu() {
 
   const handleLogout = async () => {
     try {
+      // First clear any existing session from localStorage
       clearSession()
-      await supabase.auth.signOut()
-      navigate("/login")
-      toast({
-        title: "Déconnexion réussie",
-        description: "Vous avez été déconnecté avec succès",
-      })
-    } catch (error: any) {
+      
+      // Then attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error('Logout error:', error)
+        toast({
+          title: "Erreur de déconnexion",
+          description: "Une erreur est survenue lors de la déconnexion",
+          variant: "destructive"
+        })
+      } else {
+        toast({
+          title: "Déconnexion réussie",
+          description: "Vous avez été déconnecté avec succès",
+        })
+      }
+    } catch (error) {
       console.error('Logout error:', error)
-      // Even if there's an error, we want to clear the session and redirect
-      clearSession()
-      navigate("/login")
-      toast({
-        title: "Session terminée",
-        description: "Votre session a expiré. Veuillez vous reconnecter.",
-      })
+    } finally {
+      // Always navigate to login page, even if there was an error
+      navigate("/super-admin/login")
     }
   }
 
