@@ -5,12 +5,8 @@ import { Profile } from "@/types/profile";
 import { useExistingUserCheck } from "./useExistingUserCheck";
 import { useProfileManagement } from "./useProfileManagement";
 
-interface ExtendedProfile extends Profile {
-  password?: string;
-}
-
 export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuccess?: () => void) {
-  const [newProfile, setNewProfile] = useState<ExtendedProfile>({
+  const [newProfile, setNewProfile] = useState<Profile>({
     id: userId || '',
     email: '',
     first_name: '',
@@ -25,42 +21,34 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
     has_seen_warning: false
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { checkExistingUser } = useExistingUserCheck();
   const { createProfile, updateProfile } = useProfileManagement(agencyId, onSuccess);
 
-  const handleCreateAuthUser = async () => {
+  const handleCreateAuthUser = async (): Promise<void> => {
     try {
+      setIsSubmitting(true);
       // Store current admin session
       const { data: { session: adminSession } } = await supabase.auth.getSession();
       if (!adminSession) {
         throw new Error("No admin session found");
       }
 
-      // Validate required fields
-      if (!newProfile.email || !newProfile.password || !newProfile.first_name || !newProfile.last_name) {
-        toast({
-          title: "Erreur",
-          description: "Veuillez remplir tous les champs obligatoires",
-          variant: "destructive",
-        });
-        return null;
-      }
-
-      const userExists = await checkExistingUser(newProfile.email);
+      const userExists = await checkExistingUser(newProfile.email || '');
       if (userExists) {
         toast({
           title: "Erreur",
           description: "Un utilisateur avec cet email existe déjà",
           variant: "destructive",
         });
-        return null;
+        return;
       }
 
-      // Create new user
+      // Create new auth user
       const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
-        email: newProfile.email,
-        password: newProfile.password,
+        email: newProfile.email || '',
+        password: newProfile.password || '',
         email_confirm: true
       });
 
@@ -102,7 +90,6 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
       });
 
       onSuccess?.();
-      return authData.user.id;
     } catch (error: any) {
       console.error("Error creating auth user:", error);
       // Ensure we attempt to restore admin session even if there's an error
@@ -111,6 +98,8 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
         await supabase.auth.setSession(adminSession);
       }
       throw error;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -130,6 +119,7 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
   return {
     newProfile,
     setNewProfile,
+    isSubmitting,
     handleCreateAuthUser,
     handleUpdateProfile,
   };

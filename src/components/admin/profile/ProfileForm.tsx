@@ -13,8 +13,6 @@ export function ProfileForm({
   setNewProfile, 
   onSuccess,
   isEditing = false,
-  step = 1,
-  setStep,
   agencyId,
   onCreateAuthUser,
   onUpdateProfile,
@@ -31,36 +29,25 @@ export function ProfileForm({
     setIsSubmitting(true)
 
     try {
-      if (step === 1 && setStep) {
-        // First step - validate email and password
-        if (!newProfile?.email || !newProfile?.password) {
-          throw new Error("Email et mot de passe requis")
-        }
-        
-        if (isEditing && onUpdateProfile) {
-          await onUpdateProfile(newProfile.email)
-          setStep(2)
-        } else if (onCreateAuthUser) {
-          try {
-            await onCreateAuthUser()
-            setStep(2)
-          } catch (error: any) {
-            // If the error is not about duplicate user, we still want to move to step 2
-            if (!error.message?.includes("User already exists")) {
-              setStep(2)
-            }
+      if (!newProfile?.email || !newProfile?.password) {
+        throw new Error("Email et mot de passe requis")
+      }
+      
+      if (isEditing && onUpdateProfile) {
+        await onUpdateProfile(newProfile.email)
+      } else if (onCreateAuthUser) {
+        try {
+          await onCreateAuthUser()
+        } catch (error: any) {
+          // If the error is not about duplicate user, we still want to proceed
+          if (!error.message?.includes("User already exists")) {
             throw error
           }
         }
-      } else {
-        // Second step - validate profile info
-        if (!newProfile?.first_name || !newProfile?.last_name) {
-          throw new Error("Nom et prénom requis")
-        }
+      }
 
-        if (onSuccess) {
-          onSuccess()
-        }
+      if (onSuccess) {
+        onSuccess()
       }
     } catch (error: any) {
       toast({
@@ -89,24 +76,12 @@ export function ProfileForm({
           form={form} 
           onProfileChange={handleProfileChange}
           isEditing={isEditing}
-          step={step}
           selectedAgencyId={selectedAgencyId}
           newProfile={newProfile}
         />
         
-        <div className="flex justify-between">
-          {step === 2 && setStep && (
-            <Button 
-              type="button" 
-              variant="outline"
-              onClick={() => setStep(1)}
-              disabled={isSubmitting}
-            >
-              Retour
-            </Button>
-          )}
-          
-          <Button type="submit" className="ml-auto" disabled={isSubmitting}>
+        <div className="flex justify-end gap-2">
+          <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -114,12 +89,8 @@ export function ProfileForm({
               </>
             ) : (
               isEditing
-                ? step === 1
-                  ? "Mettre à jour l'authentification"
-                  : "Mettre à jour le profil"
-                : step === 1 
-                  ? 'Suivant' 
-                  : 'Créer le profil'
+                ? "Mettre à jour"
+                : "Créer le profil"
             )}
           </Button>
         </div>
