@@ -7,15 +7,15 @@ import { supabase } from "@/integrations/supabase/client"
 import { Building, Users, Receipt, FileText, CreditCard } from "lucide-react"
 
 export default function PropertyUnitsPage() {
-  const { propertyId } = useParams()
+  const { apartmentId } = useParams()
 
   const { data: apartment } = useQuery({
-    queryKey: ['apartment', propertyId],
+    queryKey: ['apartment', apartmentId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('apartments')
         .select('name')
-        .eq('id', propertyId)
+        .eq('id', apartmentId)
         .single()
       
       if (error) throw error
@@ -23,8 +23,8 @@ export default function PropertyUnitsPage() {
     }
   })
 
-  if (!propertyId) {
-    return <div>ID de la propriété manquant</div>
+  if (!apartmentId) {
+    return <div>ID de l'appartement manquant</div>
   }
 
   return (
@@ -61,7 +61,7 @@ export default function PropertyUnitsPage() {
           </TabsList>
 
           <TabsContent value="units" className="mt-6">
-            <PropertyUnitsManager propertyId={propertyId} />
+            <PropertyUnitsManager propertyId={apartmentId} />
           </TabsContent>
 
           <TabsContent value="tenants">
