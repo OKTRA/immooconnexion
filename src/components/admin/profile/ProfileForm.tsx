@@ -19,7 +19,6 @@ export function ProfileForm({
   const { toast } = useToast()
   const form = useForm({
     defaultValues: newProfile,
-    values: newProfile // This ensures form values are always synced with newProfile
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,7 +63,13 @@ export function ProfileForm({
       <form onSubmit={handleSubmit} className="space-y-6">
         <BasicInfoFields 
           form={form} 
-          onProfileChange={setNewProfile}
+          onProfileChange={(updatedFields) => {
+            // Merge the updated fields with existing profile data
+            setNewProfile({
+              ...newProfile,
+              ...updatedFields
+            })
+          }}
           isEditing={isEditing}
           newProfile={newProfile}
           showPasswordField={true}
