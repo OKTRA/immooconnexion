@@ -11,7 +11,7 @@ export function PublicHeader() {
   const navigationLinks = [
     { href: "/", label: "Propriétés" },
     { href: "/pricing", label: "Tarifs" },
-    { href: "/agence/login", label: "Espace propriétaire" },
+    { href: "/login", label: "Espace propriétaire" },
   ]
 
   return (
