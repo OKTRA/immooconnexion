@@ -1,10 +1,11 @@
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Building2, MapPin } from "lucide-react"
+import { Search, Building2, MapPin, Globe } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { westafrikanCountries } from "@/utils/countryUtils"
 
 interface SearchBarProps {
   onAgencyChange?: (agencyId: string | null) => void;
@@ -41,61 +42,75 @@ export function SearchBar({ onAgencyChange, onTypeChange, onLocationChange }: Se
   })
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-xl">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="max-w-6xl mx-auto">
+      <div className="bg-white/90 backdrop-blur-sm dark:bg-gray-800/90 rounded-2xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl border border-gray-100 dark:border-gray-700">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Type de bien */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Type de bien</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-gray-500" />
+              Type de bien
+            </label>
             <Select onValueChange={(value) => onTypeChange?.(value || null)}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Sélectionner" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="appartement">
-                  <div className="flex items-center">
-                    <Building2 className="mr-2 h-4 w-4" />
-                    Appartement
-                  </div>
-                </SelectItem>
+                <SelectItem value="appartement">Appartement</SelectItem>
                 <SelectItem value="maison">Maison</SelectItem>
                 <SelectItem value="villa">Villa</SelectItem>
                 <SelectItem value="studio">Studio</SelectItem>
+                <SelectItem value="bureau">Bureau</SelectItem>
+                <SelectItem value="local">Local commercial</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
+          {/* Pays */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Agence</label>
-            <Select onValueChange={(value) => onAgencyChange?.(value === "all" ? null : value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Toutes les agences" />
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <Globe className="h-4 w-4 text-gray-500" />
+              Pays
+            </label>
+            <Select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Sélectionner le pays" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Toutes les agences</SelectItem>
-                {agencies?.map((agency) => (
-                  <SelectItem key={agency.id} value={agency.id}>
-                    {agency.name}
+                {westafrikanCountries.map((country) => (
+                  <SelectItem key={country.code} value={country.code}>
+                    {country.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
+          {/* Ville et Quartier */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Lieu</label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-gray-500" />
+              Localisation
+            </label>
+            <div className="grid grid-cols-2 gap-2">
               <Input 
-                placeholder="Ville ou quartier" 
-                className="pl-9"
+                placeholder="Ville" 
+                className="w-full"
                 onChange={(e) => onLocationChange?.(e.target.value)}
+              />
+              <Input 
+                placeholder="Quartier" 
+                className="w-full"
               />
             </div>
           </div>
 
+          {/* Bouton de recherche */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">&nbsp;</label>
-            <Button className="w-full bg-primary hover:bg-primary/90">
+            <label className="text-sm font-medium text-transparent dark:text-transparent">
+              &nbsp;
+            </label>
+            <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-300">
               <Search className="mr-2 h-4 w-4" />
               Rechercher
             </Button>
