@@ -22,6 +22,17 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
 
   const handleSubmit = async () => {
     try {
+      // Get current session to ensure we're still authenticated
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        toast({
+          title: "Erreur",
+          description: "Session expirée. Veuillez vous reconnecter.",
+          variant: "destructive",
+        })
+        return
+      }
+
       const { error } = await supabase
         .from('agencies')
         .update({

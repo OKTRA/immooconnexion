@@ -23,13 +23,11 @@ const checkSession = async () => {
   try {
     const { data: { session }, error } = await supabase.auth.getSession()
     if (error?.message?.includes('session_not_found') || !session) {
-      clearSession()
       return null
     }
     return session
   } catch (error) {
     console.error('Error checking session:', error)
-    clearSession()
     return null
   }
 }
