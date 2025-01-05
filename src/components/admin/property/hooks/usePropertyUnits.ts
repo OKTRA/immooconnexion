@@ -66,7 +66,7 @@ export function usePropertyUnits(apartmentId: string, filterStatus?: string) {
       } else {
         const { data: newUnit, error } = await supabase
           .from('property_units')
-          .insert({ ...unitData, photo_url: photoUrl })
+          .insert([{ ...unitData, apartment_id: apartmentId, photo_url: photoUrl }])
           .select()
           .single()
 

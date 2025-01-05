@@ -26,20 +26,19 @@ export function PropertyUnitDialog({
   isOpen,
   onClose,
   editingUnit,
-  propertyId,
+  propertyId: apartmentId,
   onSubmit,
 }: PropertyUnitDialogProps) {
   const [formData, setFormData] = useState({
     unit_number: editingUnit?.unit_number || "",
     floor_number: editingUnit?.floor_number || "",
-    area: editingUnit?.area || "",
     rent: editingUnit?.rent || "",
     deposit: editingUnit?.deposit || "",
     description: editingUnit?.description || "",
     category: editingUnit?.category || "standard",
     amenities: editingUnit?.amenities || [],
     status: editingUnit?.status || "available",
-    apartment_id: propertyId,  // Changed from property_id to apartment_id
+    apartment_id: apartmentId,
     photo_url: editingUnit?.photo_url || null
   })
 
@@ -49,7 +48,7 @@ export function PropertyUnitDialog({
     e.preventDefault()
     onSubmit({
       ...formData,
-      apartment_id: propertyId,  // Changed from property_id to apartment_id
+      apartment_id: apartmentId,
       photo: selectedFiles?.[0] || null
     })
   }
@@ -74,7 +73,7 @@ export function PropertyUnitDialog({
         <ScrollArea className="flex-1 h-[calc(90vh-8rem)]">
           <div className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <ApartmentIdField propertyId={propertyId} />
+              <ApartmentIdField propertyId={apartmentId} />
               <BasicInfoFields formData={formData} setFormData={setFormData} />
               <PricingFields formData={formData} setFormData={setFormData} />
               <StatusSelect 
