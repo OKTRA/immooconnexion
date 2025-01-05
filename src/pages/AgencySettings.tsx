@@ -18,7 +18,7 @@ const AgencySettings = () => {
   const { toast } = useToast()
   const isMobile = useIsMobile()
 
-  const { data: profile } = useQuery({
+  const { data: profile, refetch } = useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -80,6 +80,8 @@ const AgencySettings = () => {
         .eq('id', profileData.id)
 
       if (error) throw error
+
+      await refetch() // Refresh the profile data
 
       toast({
         title: "Succès",
