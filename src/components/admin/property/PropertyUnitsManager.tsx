@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Plus, Building } from "lucide-react"
 import { PropertyUnitDialog } from "./PropertyUnitDialog"
 import { PropertyUnit } from "./types/propertyUnit"
-import { usePropertyUnits } from "./hooks/usePropertyUnits"
+import { useApartmentUnits } from "./hooks/useApartmentUnits"
 import { PropertyUnitsTable } from "./components/PropertyUnitsTable"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
@@ -18,7 +18,7 @@ interface PropertyUnitsManagerProps {
 export function PropertyUnitsManager({ propertyId: apartmentId, filterStatus }: PropertyUnitsManagerProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingUnit, setEditingUnit] = useState<PropertyUnit | null>(null)
-  const { units, isLoading, mutation, deleteMutation } = usePropertyUnits(apartmentId, filterStatus)
+  const { units, isLoading, mutation, deleteMutation } = useApartmentUnits(apartmentId, filterStatus)
   const { toast } = useToast()
 
   const { data: apartment } = useQuery({

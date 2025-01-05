@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/components/ui/use-toast"
 
-export function usePropertyUnits(apartmentId: string, filterStatus?: string) {
+export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
