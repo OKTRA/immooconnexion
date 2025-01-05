@@ -6,6 +6,7 @@ import { ProfileActions } from "./ProfileActions"
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ProfileForm } from "./profile/ProfileForm"
+import { Profile as AdminProfile } from "./profile/types"
 import { Profile } from "@/types/profile"
 
 interface ProfileTableRowProps {
@@ -16,9 +17,10 @@ interface ProfileTableRowProps {
 
 export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowProps) {
   const [showEditDialog, setShowEditDialog] = useState(false)
-  const [editedProfile, setEditedProfile] = useState<Profile>({
+  const [editedProfile, setEditedProfile] = useState<AdminProfile>({
     id: profile.id,
     email: profile.email || "",
+    password: "", // Add empty password for edit form
     first_name: profile.first_name || "",
     last_name: profile.last_name || "",
     phone_number: profile.phone_number || "",
@@ -28,11 +30,27 @@ export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowPro
     updated_at: profile.updated_at,
     is_tenant: profile.is_tenant,
     status: profile.status,
-    has_seen_warning: profile.has_seen_warning
+    has_seen_warning: profile.has_seen_warning,
+    agency_name: profile.agency_name
   })
 
   const handleSubmit = async () => {
-    onEdit(editedProfile)
+    const profileToUpdate: Profile = {
+      id: editedProfile.id!,
+      email: editedProfile.email,
+      first_name: editedProfile.first_name,
+      last_name: editedProfile.last_name,
+      phone_number: editedProfile.phone_number,
+      role: editedProfile.role,
+      agency_id: editedProfile.agency_id || null,
+      created_at: editedProfile.created_at || new Date().toISOString(),
+      updated_at: editedProfile.updated_at || new Date().toISOString(),
+      is_tenant: editedProfile.is_tenant || false,
+      status: editedProfile.status || 'active',
+      has_seen_warning: editedProfile.has_seen_warning || false,
+      agency_name: editedProfile.agency_name
+    }
+    onEdit(profileToUpdate)
     setShowEditDialog(false)
   }
 
@@ -61,7 +79,10 @@ export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowPro
         </TableCell>
         <TableCell>
           <ProfileActions
-            profile={profile}
+            profile={{
+              id: profile.id,
+              role: profile.role
+            }}
             onEdit={() => setShowEditDialog(true)}
             refetch={refetch}
           />

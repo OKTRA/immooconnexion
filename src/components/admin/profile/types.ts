@@ -1,6 +1,4 @@
 import { UserRole } from "@/types/profile"
-import { Dispatch, SetStateAction } from "react"
-import { UseFormReturn } from "react-hook-form"
 
 export interface Profile {
   id?: string
@@ -10,11 +8,18 @@ export interface Profile {
   last_name: string
   phone_number: string
   role: UserRole
+  agency_id?: string
+  created_at?: string
+  updated_at?: string
+  is_tenant?: boolean
+  status?: string
+  has_seen_warning?: boolean
+  agency_name?: string
 }
 
 export interface ProfileFormProps {
   newProfile?: Profile
-  setNewProfile?: Dispatch<SetStateAction<Profile>>
+  setNewProfile?: React.Dispatch<React.SetStateAction<Profile>>
   onSuccess?: () => void
   isEditing?: boolean
   step?: 1 | 2
@@ -24,7 +29,7 @@ export interface ProfileFormProps {
   selectedAgencyId?: string
   onUpdateProfile?: (userId: string) => Promise<void>
   onCreateAuthUser?: () => Promise<string>
-  form?: UseFormReturn<Profile>
+  form?: any
 }
 
 export interface BasicInfoFieldsProps {
@@ -33,7 +38,7 @@ export interface BasicInfoFieldsProps {
   isEditing?: boolean
   step?: 1 | 2
   selectedAgencyId?: string
-  form?: UseFormReturn<Profile>
+  form?: any
 }
 
 export interface AddProfileDialogProps {
@@ -42,7 +47,7 @@ export interface AddProfileDialogProps {
   agencyId?: string
   onProfileCreated?: () => void
   newProfile?: Profile
-  setNewProfile?: Dispatch<SetStateAction<Profile>>
+  setNewProfile?: React.Dispatch<React.SetStateAction<Profile>>
   handleCreateAuthUser?: () => Promise<string>
   handleUpdateProfile?: (userId: string) => Promise<void>
 }

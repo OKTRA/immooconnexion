@@ -1,5 +1,4 @@
 export type UserRole = 'user' | 'admin' | 'blocked' | 'super_admin';
-export type EditStep = 1 | 2;
 
 export interface Profile {
   id: string;
@@ -14,9 +13,8 @@ export interface Profile {
   is_tenant: boolean;
   status: string;
   has_seen_warning: boolean;
-  agency_name?: string; // Added this field
+  agency_name?: string;
 }
 
 export type ProfileInsert = Omit<Profile, 'id' | 'created_at' | 'updated_at'>;
-
 export type ProfileUpdate = Partial<ProfileInsert>;
