@@ -54,6 +54,17 @@ export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowPro
     setShowEditDialog(false)
   }
 
+  const getBadgeVariant = (role: string) => {
+    switch (role) {
+      case "admin":
+        return "default"
+      case "super_admin":
+        return "destructive"
+      default:
+        return "secondary"
+    }
+  }
+
   return (
     <>
       <TableRow key={profile.id}>
@@ -64,13 +75,7 @@ export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowPro
         <TableCell>{profile.phone_number || "-"}</TableCell>
         <TableCell>{profile.agency_name || "-"}</TableCell>
         <TableCell>
-          <Badge 
-            variant={
-              profile.role === "admin" ? "default" : 
-              profile.role === "blocked" ? "destructive" : 
-              "secondary"
-            }
-          >
+          <Badge variant={getBadgeVariant(profile.role)}>
             {profile.role || "user"}
           </Badge>
         </TableCell>
