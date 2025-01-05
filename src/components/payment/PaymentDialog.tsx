@@ -66,11 +66,10 @@ export function PaymentDialog({
   const onSubmit = async (data: PaymentFormData) => {
     if (amount === 0) {
       // For free plan, handle signup directly
-      const tempAgencyId = agencyId || planId
       return (
         <FreeSignupForm 
           formData={data} 
-          tempAgencyId={tempAgencyId} 
+          tempAgencyId={agencyId || planId} 
           onSuccess={() => {
             setPaymentSuccess(true)
             navigate('/agence/login')
@@ -108,14 +107,25 @@ export function PaymentDialog({
                 </Button>
               </div>
             ) : !isUpgrade && step === 'form' ? (
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <PaymentFormFields form={form} />
-                  <Button type="submit" className="w-full">
-                    {amount === 0 ? "Créer mon compte" : "Continuer vers le paiement"}
-                  </Button>
-                </form>
-              </Form>
+              amount === 0 ? (
+                <FreeSignupForm 
+                  formData={form.getValues()} 
+                  tempAgencyId={agencyId || planId}
+                  onSuccess={() => {
+                    setPaymentSuccess(true)
+                    navigate('/agence/login')
+                  }}
+                />
+              ) : (
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <PaymentFormFields form={form} />
+                    <Button type="submit" className="w-full">
+                      {amount === 0 ? "Créer mon compte" : "Continuer vers le paiement"}
+                    </Button>
+                  </form>
+                </Form>
+              )
             ) : (
               <div className="space-y-4">
                 <PaymentMethodSelector 

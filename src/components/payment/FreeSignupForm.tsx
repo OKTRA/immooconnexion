@@ -2,6 +2,9 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { PaymentFormData } from "./types"
 import { useNavigate } from "react-router-dom"
+import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import { Loader2 } from "lucide-react"
 
 interface FreeSignupFormProps {
   formData: PaymentFormData
@@ -12,19 +15,27 @@ interface FreeSignupFormProps {
 export function FreeSignupForm({ formData, tempAgencyId, onSuccess }: FreeSignupFormProps) {
   const { toast } = useToast()
   const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleFreePlanSignup = async () => {
     try {
+      setIsLoading(true)
       // Create auth user
-      const { error: signUpError } = await supabase.auth.signUp({
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
+        options: {
+          data: {
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+          }
+        }
       })
 
       if (signUpError) throw signUpError
 
       // Update agency status to active since it's free
-      if (tempAgencyId) {
+      if (tempAgencyId && authData.user) {
         const { error: updateError } = await supabase
           .from('agencies')
           .update({ 
@@ -38,6 +49,21 @@ export function FreeSignupForm({ formData, tempAgencyId, onSuccess }: FreeSignup
           .eq('id', tempAgencyId)
 
         if (updateError) throw updateError
+
+        // Update profile with agency information
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            phone_number: formData.phone_number,
+            agency_id: tempAgencyId,
+            role: 'admin',
+            status: 'active'
+          })
+          .eq('id', authData.user.id)
+
+        if (profileError) throw profileError
       }
 
       onSuccess()
@@ -53,6 +79,8 @@ export function FreeSignupForm({ formData, tempAgencyId, onSuccess }: FreeSignup
         description: error.message || "Une erreur est survenue lors de l'inscription",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -61,12 +89,20 @@ export function FreeSignupForm({ formData, tempAgencyId, onSuccess }: FreeSignup
       <p className="text-sm text-gray-500">
         Vous avez choisi le plan gratuit. Cliquez sur le bouton ci-dessous pour finaliser votre inscription.
       </p>
-      <button
+      <Button
         onClick={handleFreePlanSignup}
-        className="w-full px-4 py-2 text-white bg-primary rounded hover:bg-primary/90"
+        className="w-full"
+        disabled={isLoading}
       >
-        Créer mon compte
-      </button>
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Création en cours...
+          </>
+        ) : (
+          "Créer mon compte"
+        )}
+      </Button>
     </div>
   )
 }
