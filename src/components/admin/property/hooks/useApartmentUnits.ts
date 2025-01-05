@@ -12,7 +12,6 @@ export function useApartmentUnits(apartmentId: string, filterStatus?: string) {
     queryFn: async () => {
       console.log('Fetching units for apartment:', apartmentId)
       
-      // Don't execute the query if the ID is not valid
       if (!apartmentId || apartmentId === ':apartmentId') {
         console.log('Invalid apartment ID, skipping query')
         return []
