@@ -14,7 +14,7 @@ export function PublicNavbar() {
   const NavLinks = () => (
     <div className="flex flex-col md:flex-row items-center gap-4">
       <Link 
-        to="/public" 
+        to="/" 
         className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors py-2 md:py-0 dark:text-gray-200 dark:hover:text-primary"
       >
         <Home className="h-4 w-4" />
@@ -40,7 +40,7 @@ export function PublicNavbar() {
     <header className="bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50 w-full border-b shadow-sm dark:bg-background/95">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
-          <Link to="/public" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <AnimatedLogo />
           </Link>
 
