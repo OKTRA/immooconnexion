@@ -3,8 +3,12 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { Profile } from "@/types/profile"
 
+interface ExtendedProfile extends Profile {
+  password?: string;
+}
+
 export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuccess?: () => void) {
-  const [newProfile, setNewProfile] = useState<Profile>({
+  const [newProfile, setNewProfile] = useState<ExtendedProfile>({
     id: userId || '',
     email: '',
     first_name: '',
