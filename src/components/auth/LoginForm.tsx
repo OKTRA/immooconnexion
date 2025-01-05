@@ -88,22 +88,23 @@ export function LoginForm() {
       }
 
       if (agency.status === 'blocked') {
+        await supabase.auth.signOut()
         toast({
           title: "Accès refusé",
           description: "Votre agence est actuellement bloquée. Veuillez contacter l'administrateur.",
           variant: "destructive",
         })
-        await supabase.auth.signOut()
         setIsLoading(false)
         return
       }
 
+      // Only navigate if everything is successful
       toast({
         title: "Connexion réussie",
         description: "Bienvenue dans votre espace",
       })
-
       navigate("/agence/dashboard")
+
     } catch (error: any) {
       console.error('General error:', error)
       toast({
