@@ -35,6 +35,15 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
       const { id, photo, ...unitData } = data
       let photoUrl = unitData.photo_url
 
+      // Convertir les champs numériques
+      const numericFields = {
+        ...unitData,
+        area: unitData.area ? Number(unitData.area) : null,
+        rent: unitData.rent ? Number(unitData.rent) : null,
+        deposit: unitData.deposit ? Number(unitData.deposit) : null,
+        floor_number: unitData.floor_number ? Number(unitData.floor_number) : null
+      }
+
       if (photo) {
         const fileExt = photo.name.split('.').pop()
         const fileName = `${Math.random()}.${fileExt}`
@@ -58,7 +67,7 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
       if (id) {
         const { error } = await supabase
           .from('property_units')
-          .update({ ...unitData, photo_url: photoUrl })
+          .update({ ...numericFields, photo_url: photoUrl })
           .eq('id', id)
 
         if (error) throw error
@@ -66,7 +75,7 @@ export function usePropertyUnits(propertyId: string, filterStatus?: string) {
       } else {
         const { data: newUnit, error } = await supabase
           .from('property_units')
-          .insert({ ...unitData, photo_url: photoUrl })
+          .insert({ ...numericFields, photo_url: photoUrl })
           .select()
           .single()
 
