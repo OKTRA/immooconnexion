@@ -1,14 +1,14 @@
 import { supabase } from "@/integrations/supabase/client"
 
-export const getSupabaseSessionKey = () => {
+const getSupabaseSessionKey = () => {
   return `sb-apidxwaaogboeoctlhtz-auth-token`
 }
 
-export const clearSession = () => {
+const clearSession = () => {
   localStorage.removeItem(getSupabaseSessionKey())
 }
 
-export const checkSession = async () => {
+const checkSession = async () => {
   try {
     const { data: { session }, error } = await supabase.auth.getSession()
     if (error || !session) {
@@ -22,3 +22,5 @@ export const checkSession = async () => {
     return null
   }
 }
+
+export { getSupabaseSessionKey, clearSession, checkSession }
