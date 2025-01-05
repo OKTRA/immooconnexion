@@ -12,9 +12,9 @@ import { AgencyPlanDialog } from "./AgencyPlanDialog"
 import { AgencyBlockDialog } from "./dialogs/AgencyBlockDialog"
 
 interface AgencyTableRowProps {
-  agency: Agency
-  onEdit: (agency: Agency) => void
-  refetch: () => void
+  agency: Agency;
+  onEdit: (agency: Agency) => void;
+  refetch: () => void;
 }
 
 export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps) {
@@ -30,7 +30,6 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
 
   const handleDelete = async () => {
     try {
-      // First check if there are any contracts
       const { data: contracts } = await supabase
         .from('contracts')
         .select('id')
@@ -47,7 +46,6 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         return
       }
 
-      // Delete associated profiles first
       const { error: profilesError } = await supabase
         .from('profiles')
         .delete()
@@ -58,7 +56,6 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         throw new Error("Erreur lors de la suppression des profils associés")
       }
 
-      // Then delete the agency
       const { error: agencyError } = await supabase
         .from('agencies')
         .delete()
@@ -81,11 +78,6 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
       })
     }
     setShowDeleteDialog(false)
-  }
-
-  const handlePlanChange = async (planId: string) => {
-    setPendingPlanId(planId)
-    setShowPlanConfirmDialog(true)
   }
 
   const handleBlockToggle = async () => {
@@ -117,11 +109,15 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
     setShowBlockDialog(false)
   }
 
+  const handlePlanChange = async (planId: string) => {
+    setPendingPlanId(planId)
+    setShowPlanConfirmDialog(true)
+  }
+
   const confirmPlanChange = async () => {
     if (!pendingPlanId) return
 
     try {
-      // First check if downgrade is possible
       const { data: plan } = await supabase
         .from('subscription_plans')
         .select('*')
