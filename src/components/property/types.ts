@@ -17,6 +17,20 @@ export interface Property {
   owner_phone?: string
   country?: string
   quartier?: string
+  agency_id?: string
+  created_at?: string
+  updated_at?: string
+  created_by_user_id?: string
+  parent_property_id?: string | null
+  rental_type?: string
+  is_for_sale?: boolean
+  sale_price?: number | null
+  minimum_stay?: number
+  maximum_stay?: number | null
+  price_per_night?: number | null
+  price_per_week?: number | null
+  total_units?: number
+  user_id?: string
 }
 
 export interface PropertyFormData {
@@ -41,6 +55,7 @@ export interface PropertyDialogProps {
   property?: Property | null
   onOpenChange?: (open: boolean) => void
   open?: boolean
+  type?: "apartment" | "house"
 }
 
 export interface PropertyFormFieldsProps {
