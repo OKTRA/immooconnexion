@@ -13,7 +13,6 @@ export function usePropertyUnits(apartmentId: string, filterStatus?: string) {
         .from('property_units')
         .select('*')
         .eq('apartment_id', apartmentId)
-        .order('unit_number')
 
       if (filterStatus) {
         query = query.eq('status', filterStatus)
@@ -58,7 +57,11 @@ export function usePropertyUnits(apartmentId: string, filterStatus?: string) {
       if (id) {
         const { error } = await supabase
           .from('property_units')
-          .update({ ...unitData, photo_url: photoUrl })
+          .update({ 
+            ...unitData, 
+            photo_url: photoUrl,
+            apartment_id: apartmentId 
+          })
           .eq('id', id)
 
         if (error) throw error
@@ -66,7 +69,11 @@ export function usePropertyUnits(apartmentId: string, filterStatus?: string) {
       } else {
         const { data: newUnit, error } = await supabase
           .from('property_units')
-          .insert([{ ...unitData, apartment_id: apartmentId, photo_url: photoUrl }])
+          .insert([{ 
+            ...unitData, 
+            apartment_id: apartmentId, 
+            photo_url: photoUrl 
+          }])
           .select()
           .single()
 
