@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Navigate, Outlet } from "react-router-dom"
+import { Navigate, Outlet, useLocation } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
@@ -11,23 +11,23 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const { toast } = useToast()
+  const location = useLocation()
   
   useEffect(() => {
     const checkAuth = async () => {
       try {
         // Get the current session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        const { data: { session } } = await supabase.auth.getSession()
         
-        if (sessionError) {
-          console.error("Session error:", sessionError)
-          setIsAuthenticated(false)
-          return
-        }
-
-        // If no session or session ID is empty, user is not authenticated
+        // If no session or no access token, user is not authenticated
         if (!session?.access_token) {
           console.log("No valid session found")
           setIsAuthenticated(false)
+          toast({
+            title: "Session expirée",
+            description: "Veuillez vous reconnecter",
+            variant: "destructive"
+          })
           return
         }
 
@@ -52,6 +52,11 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
           if (!adminData?.is_super_admin) {
             console.log("User is not an admin")
             setIsAuthenticated(false)
+            toast({
+              title: "Accès refusé",
+              description: "Vous n'avez pas les droits d'accès nécessaires",
+              variant: "destructive"
+            })
             return
           }
         }
@@ -78,7 +83,8 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
         return
       }
       
-      setIsAuthenticated(true)
+      // Re-verify authentication on auth state change
+      checkAuth()
     })
 
     return () => {
@@ -95,7 +101,11 @@ export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    // Redirect to appropriate login page based on the route
+    const isAdminRoute = location.pathname.includes('/super-admin')
+    const loginPath = isAdminRoute ? '/super-admin/login' : '/login'
+    
+    return <Navigate to={loginPath} replace state={{ from: location }} />
   }
 
   return <Outlet />
