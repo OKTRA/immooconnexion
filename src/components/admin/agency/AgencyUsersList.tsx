@@ -2,7 +2,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { AgencyUserActions } from "./AgencyUserActions"
 import { useState } from "react"
-import { useAgencyUserEdit } from "./hooks/useAgencyUserEdit"
 import { AgencyUserEditDialog } from "./AgencyUserEditDialog"
 
 interface AgencyUsersListProps {
@@ -15,17 +14,9 @@ interface AgencyUsersListProps {
 export function AgencyUsersList({ users, refetch, agencyId }: AgencyUsersListProps) {
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
-  const { editStep, setEditStep, handleUpdateAuth, handleUpdateProfile } = useAgencyUserEdit()
 
-  const handleEditAuth = (user: any) => {
+  const handleEditUser = (user: any) => {
     setSelectedUser(user)
-    setEditStep(1)
-    setShowEditDialog(true)
-  }
-
-  const handleEditProfile = (user: any) => {
-    setSelectedUser(user)
-    setEditStep(2)
     setShowEditDialog(true)
   }
 
@@ -55,8 +46,7 @@ export function AgencyUsersList({ users, refetch, agencyId }: AgencyUsersListPro
               <TableCell>
                 <AgencyUserActions
                   userId={user.id}
-                  onEditAuth={() => handleEditAuth(user)}
-                  onEditProfile={() => handleEditProfile(user)}
+                  onEditProfile={() => handleEditUser(user)}
                   refetch={refetch}
                 />
               </TableCell>
@@ -66,14 +56,11 @@ export function AgencyUsersList({ users, refetch, agencyId }: AgencyUsersListPro
       </Table>
 
       <AgencyUserEditDialog
-        showEditDialog={showEditDialog}
-        setShowEditDialog={setShowEditDialog}
-        selectedUser={selectedUser}
-        editStep={editStep}
-        setEditStep={setEditStep}
-        handleUpdateAuth={handleUpdateAuth}
-        handleUpdateProfile={handleUpdateProfile}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        userId={selectedUser?.id}
         agencyId={agencyId}
+        onSuccess={refetch}
       />
     </div>
   )

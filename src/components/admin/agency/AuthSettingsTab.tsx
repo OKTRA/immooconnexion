@@ -1,14 +1,17 @@
 import { ProfileForm } from "../profile/ProfileForm"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { Profile } from "../profile/types"
+import { useState } from "react"
 
 interface AuthSettingsTabProps {
-  profile: any
-  onProfileUpdate: () => void
+  profile: Profile;
+  onProfileUpdate: () => void;
 }
 
 export function AuthSettingsTab({ profile, onProfileUpdate }: AuthSettingsTabProps) {
   const { toast } = useToast()
+  const [editedProfile, setEditedProfile] = useState<Profile>(profile)
 
   const handleProfileUpdate = async (userId: string): Promise<void> => {
     try {
@@ -34,13 +37,14 @@ export function AuthSettingsTab({ profile, onProfileUpdate }: AuthSettingsTabPro
         description: error.message || "Une erreur est survenue lors de la mise à jour du profil",
         variant: "destructive"
       })
-      throw error // Re-throw to be handled by the form
+      throw error
     }
   }
 
   return (
     <ProfileForm
-      newProfile={profile}
+      newProfile={editedProfile}
+      setNewProfile={setEditedProfile}
       isEditing={true}
       onUpdateProfile={handleProfileUpdate}
     />

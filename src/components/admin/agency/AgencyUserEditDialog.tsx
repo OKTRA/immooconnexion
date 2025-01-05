@@ -1,16 +1,16 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ProfileForm } from "@/components/admin/profile/ProfileForm"
-import { useAgencyUserEdit } from "../agency/hooks/useAgencyUserEdit"
+import { useAgencyUserEdit } from "./hooks/useAgencyUserEdit"
 import { Toaster } from "@/components/ui/toaster"
 import { useState } from "react"
-import { ProfileFormData } from "../profile/types"
+import { Profile } from "../profile/types"
 
 interface AgencyUserEditDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  userId: string | null
-  agencyId: string
-  onSuccess?: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  userId: string | null;
+  agencyId: string;
+  onSuccess?: () => void;
 }
 
 export function AgencyUserEditDialog({ 
@@ -28,6 +28,11 @@ export function AgencyUserEditDialog({
     handleUpdateProfile
   } = useAgencyUserEdit(userId, agencyId, onSuccess)
 
+  const handleAuthUserCreation = async () => {
+    await handleCreateAuthUser();
+    return;
+  }
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -39,10 +44,10 @@ export function AgencyUserEditDialog({
           </DialogHeader>
           <div className="py-4">
             <ProfileForm
-              newProfile={newProfile as ProfileFormData}
-              setNewProfile={setNewProfile as (profile: ProfileFormData) => void}
+              newProfile={newProfile}
+              setNewProfile={setNewProfile}
               isEditing={!!userId}
-              onCreateAuthUser={handleCreateAuthUser}
+              onCreateAuthUser={handleAuthUserCreation}
               onUpdateProfile={handleUpdateProfile}
               selectedAgencyId={agencyId}
               step={step}

@@ -1,26 +1,41 @@
 import { z } from "zod"
 
-export interface ProfileFormData {
-  id?: string
-  email: string
-  password: string
-  first_name: string
-  last_name: string
-  role?: string
-  agency_id?: string
-  phone_number?: string
-  status?: string
+export type UserRole = 'user' | 'admin' | 'super_admin';
+
+export interface Profile {
+  id?: string;
+  email: string;
+  password?: string;
+  first_name: string;
+  last_name: string;
+  phone_number?: string;
+  role?: UserRole;
+  agency_id?: string;
+  created_at?: string;
+  updated_at?: string;
+  is_tenant?: boolean;
+  status?: string;
+  has_seen_warning?: boolean;
+  agency_name?: string;
 }
 
 export interface ProfileFormProps {
-  newProfile: ProfileFormData
-  setNewProfile: (profile: ProfileFormData) => void
-  onSuccess?: () => void
-  isEditing?: boolean
-  step?: 1 | 2
-  setStep?: (step: 1 | 2) => void
-  agencyId?: string
-  onCreateAuthUser?: () => Promise<void>
-  onUpdateProfile?: (email: string) => Promise<void>
-  selectedAgencyId?: string
+  newProfile: Profile;
+  setNewProfile: (profile: Profile) => void;
+  onSuccess?: () => void;
+  isEditing?: boolean;
+  step?: 1 | 2;
+  setStep?: (step: 1 | 2) => void;
+  selectedAgencyId?: string;
+  onCreateAuthUser?: () => Promise<string>;
+  onUpdateProfile?: (userId: string) => Promise<void>;
+}
+
+export interface AddProfileDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  newProfile: Profile;
+  setNewProfile: (profile: Profile) => void;
+  handleCreateAuthUser: () => Promise<string>;
+  handleUpdateProfile: () => Promise<void>;
 }
