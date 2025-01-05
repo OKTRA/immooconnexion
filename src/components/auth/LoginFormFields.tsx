@@ -19,19 +19,13 @@ export function LoginFormFields() {
     setIsLoading(true)
 
     try {
-      // First clear any existing session
-      await supabase.auth.signOut()
-      
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
-      })
+      const trimmedEmail = email.trim()
+      const trimmedPassword = password.trim()
 
-      if (signInError) {
-        console.error('Login error:', signInError)
+      if (!trimmedEmail || !trimmedPassword) {
         toast({
-          title: "Échec de la connexion",
-          description: "Email ou mot de passe incorrect",
+          title: "Erreur de saisie",
+          description: "Veuillez remplir tous les champs",
           variant: "destructive",
           duration: 5000,
         })
@@ -39,10 +33,38 @@ export function LoginFormFields() {
         return
       }
 
-      if (!data.user) {
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail,
+        password: trimmedPassword,
+      })
+
+      if (signInError) {
+        console.error('Login error:', signInError)
+        
+        // Handle specific error cases
+        if (signInError.message === "Invalid login credentials") {
+          toast({
+            title: "Échec de la connexion",
+            description: "Email ou mot de passe incorrect",
+            variant: "destructive",
+            duration: 5000,
+          })
+        } else {
+          toast({
+            title: "Erreur de connexion",
+            description: "Une erreur est survenue lors de la connexion",
+            variant: "destructive",
+            duration: 5000,
+          })
+        }
+        setIsLoading(false)
+        return
+      }
+
+      if (!signInData.user) {
         toast({
           title: "Échec de la connexion",
-          description: "Email ou mot de passe incorrect",
+          description: "Impossible de récupérer les informations utilisateur",
           variant: "destructive",
           duration: 5000,
         })
@@ -54,7 +76,7 @@ export function LoginFormFields() {
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('agency_id')
-        .eq('id', data.user.id)
+        .eq('id', signInData.user.id)
         .single()
 
       if (profileError || !profile?.agency_id) {
@@ -97,11 +119,8 @@ export function LoginFormFields() {
           variant: "destructive",
           duration: 7000,
         })
-        
-        setTimeout(async () => {
-          await supabase.auth.signOut()
-          setIsLoading(false)
-        }, 1000)
+        await supabase.auth.signOut()
+        setIsLoading(false)
         return
       }
 
@@ -112,7 +131,7 @@ export function LoginFormFields() {
       })
       navigate("/agence/dashboard")
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('General error:', error)
       toast({
         title: "Erreur de connexion",
