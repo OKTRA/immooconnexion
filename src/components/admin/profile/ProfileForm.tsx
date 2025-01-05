@@ -64,7 +64,6 @@ export function ProfileForm({
         <BasicInfoFields 
           form={form} 
           onProfileChange={(updatedFields) => {
-            // Merge the updated fields with existing profile data
             setNewProfile({
               ...newProfile,
               ...updatedFields
