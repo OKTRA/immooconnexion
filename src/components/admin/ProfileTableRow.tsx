@@ -10,10 +10,7 @@ import { ProfileForm } from "./profile/ProfileForm"
 import { Profile } from "./profile/types"
 
 interface ProfileTableRowProps {
-  profile: Profile & {
-    agency_name?: string;
-    created_at: string;
-  }
+  profile: Profile
   onEdit: (profile: Profile) => void
   refetch: () => void
 }
@@ -21,7 +18,7 @@ interface ProfileTableRowProps {
 export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowProps) {
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [editedProfile, setEditedProfile] = useState<Profile>({
-    id: profile.id || "",
+    id: profile.id,
     email: profile.email || "",
     password: "",
     first_name: profile.first_name || "",
@@ -45,7 +42,7 @@ export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowPro
         <TableCell>{profile.phone_number || "-"}</TableCell>
         <TableCell>{profile.agency_name || "-"}</TableCell>
         <TableCell>
-          <Badge variant={profile.role === "admin" ? "default" : profile.role === "user" ? "secondary" : "destructive"}>
+          <Badge variant={profile.role === "admin" ? "default" : profile.role === "blocked" ? "destructive" : "secondary"}>
             {profile.role || "user"}
           </Badge>
         </TableCell>
