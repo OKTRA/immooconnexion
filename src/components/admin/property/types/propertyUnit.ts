@@ -22,17 +22,5 @@ export interface PropertyUnitFormData {
   description: string;
   category: string;
   amenities: string[];
-}
-
-export interface PropertyUnitDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  editingUnit: PropertyUnit | null;
-  propertyId: string;
-  onSubmit: (data: PropertyUnit) => void;
-}
-
-export interface PropertyUnitsManagerProps {
-  propertyId: string;
-  filterStatus?: 'available' | 'occupied';
+  status: string;
 }
