@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { Loader2 } from "lucide-react"
+import { useState } from "react"
 
 interface AgencyFormProps {
   agency: Agency
@@ -15,6 +17,7 @@ interface AgencyFormProps {
 export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleFieldChange = (field: keyof Agency, value: string) => {
     setAgency({ ...agency, [field]: value })
@@ -22,6 +25,7 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
 
   const handleSubmit = async () => {
     try {
+      setIsSubmitting(true)
       // Get current session to ensure we're still authenticated
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
@@ -52,7 +56,7 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
       })
 
       // Refresh agency data
-      queryClient.invalidateQueries({ queryKey: ['profile'] })
+      queryClient.invalidateQueries({ queryKey: ['agencies'] })
       
       if (onSubmit) {
         onSubmit(agency)
@@ -63,6 +67,8 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
         description: error.message,
         variant: "destructive",
       })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -105,8 +111,16 @@ export function AgencyForm({ agency, setAgency, onSubmit }: AgencyFormProps) {
           type="button"
           className="w-full"
           onClick={handleSubmit}
+          disabled={isSubmitting}
         >
-          Enregistrer les modifications
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Mise à jour...
+            </>
+          ) : (
+            'Enregistrer les modifications'
+          )}
         </Button>
       </div>
     </ScrollArea>
