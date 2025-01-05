@@ -10,11 +10,22 @@ export function ForgotPasswordButton({ email }: ForgotPasswordButtonProps) {
   const { toast } = useToast()
 
   const handleForgotPassword = async () => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    if (!email || !email.trim()) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez saisir votre adresse email avant de réinitialiser le mot de passe.",
+        variant: "destructive",
+        duration: 5000,
+      })
+      return
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: `${window.location.origin}/reset-password`,
     })
     
     if (error) {
+      console.error('Password reset error:', error)
       toast({
         title: "Erreur",
         description: "Une erreur est survenue. Veuillez réessayer.",
@@ -36,6 +47,7 @@ export function ForgotPasswordButton({ email }: ForgotPasswordButtonProps) {
         variant="link" 
         className="text-sm text-gray-600 hover:text-primary"
         onClick={handleForgotPassword}
+        type="button"
       >
         Mot de passe oublié ?
       </Button>
