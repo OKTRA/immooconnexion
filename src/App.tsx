@@ -16,6 +16,7 @@ import PublicProperties from "./pages/PublicProperties"
 import Pricing from "./pages/Pricing"
 import SubscriptionUpgrade from "./pages/SubscriptionUpgrade"
 import TermsOfService from "./pages/TermsOfService"
+import AgencySettings from "./pages/AgencySettings"
 import { ProtectedRoute } from "./components/auth/ProtectedRoute"
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
           <Route path="abonnement" element={<SubscriptionUpgrade />} />
           <Route path="abonnement/upgrade" element={<SubscriptionUpgrade />} />
           <Route path="gains" element={<AgencyEarnings />} />
+          <Route path="parametres" element={<AgencySettings />} />
         </Route>
 
         {/* Admin Routes */}
