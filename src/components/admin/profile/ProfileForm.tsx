@@ -25,11 +25,12 @@ export function ProfileForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
+    if (isSubmitting) return
 
+    setIsSubmitting(true)
     try {
-      if (!newProfile?.email || !newProfile?.password) {
-        throw new Error("Email et mot de passe requis")
+      if (!newProfile?.email) {
+        throw new Error("Email requis")
       }
       
       if (isEditing && onUpdateProfile) {
@@ -37,6 +38,11 @@ export function ProfileForm({
       } else if (onCreateAuthUser) {
         await onCreateAuthUser()
       }
+
+      toast({
+        title: "Succès",
+        description: isEditing ? "Profil mis à jour" : "Profil créé",
+      })
 
       if (onSuccess) {
         onSuccess()
@@ -73,16 +79,18 @@ export function ProfileForm({
         />
         
         <div className="flex justify-end gap-2">
-          <Button type="submit" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="w-full"
+          >
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Chargement...
+                {isEditing ? "Mise à jour..." : "Création..."}
               </>
             ) : (
-              isEditing
-                ? "Mettre à jour"
-                : "Créer le profil"
+              isEditing ? "Mettre à jour" : "Créer le profil"
             )}
           </Button>
         </div>
