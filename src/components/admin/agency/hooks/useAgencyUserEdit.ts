@@ -42,10 +42,11 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
         throw new Error("User already exists")
       }
 
-      // Create new user
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+      // Create new user using admin API
+      const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
         email: newProfile.email,
         password: newProfile.password || '',
+        email_confirm: true
       })
 
       if (signUpError) {
@@ -72,6 +73,28 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
           variant: "destructive",
         })
         throw new Error("No user data returned")
+      }
+
+      // Create profile for new user
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          email: newProfile.email,
+          first_name: newProfile.first_name,
+          last_name: newProfile.last_name,
+          phone_number: newProfile.phone_number,
+          role: newProfile.role,
+          agency_id: agencyId
+        })
+
+      if (profileError) {
+        toast({
+          title: "Erreur",
+          description: "Impossible de créer le profil utilisateur",
+          variant: "destructive",
+        })
+        throw profileError
       }
 
       toast({
