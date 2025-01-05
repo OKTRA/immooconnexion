@@ -1,65 +1,44 @@
 import { Button } from "@/components/ui/button"
-import { Building2, Eye, Pencil, Trash2 } from "lucide-react"
+import { Building2, Edit, Trash2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 interface PropertyActionsProps {
   propertyId: string
   onEdit: () => void
   onDelete: () => void
-  propertyType?: string
+  propertyType: string
 }
 
 export function PropertyActions({ propertyId, onEdit, onDelete, propertyType }: PropertyActionsProps) {
   const navigate = useNavigate()
 
-  const handleViewProperty = () => {
-    navigate(`/agence/biens/${propertyId}`)
-  }
-
-  const handleManageUnits = () => {
-    navigate(`/agence/biens/${propertyId}/unites`)
-  }
-
   return (
     <div className="flex items-center gap-2">
+      {propertyType === 'appartement' && (
+        <Button 
+          variant="outline"
+          size="sm"
+          className="bg-dashboard-gradient-from hover:bg-dashboard-gradient-to text-white transition-colors"
+          onClick={() => navigate(`/agence/appartements/${propertyId}/unites`)}
+        >
+          <Building2 className="h-4 w-4 mr-2" />
+          Gérer les unités
+        </Button>
+      )}
       <Button
         variant="ghost"
-        size="icon"
-        onClick={handleViewProperty}
-        className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
-        title="Voir les détails"
-      >
-        <Eye className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
+        size="sm"
         onClick={onEdit}
-        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-        title="Modifier"
       >
-        <Pencil className="h-4 w-4" />
+        <Edit className="h-4 w-4" />
       </Button>
       <Button
         variant="ghost"
-        size="icon"
+        size="sm"
         onClick={onDelete}
-        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-        title="Supprimer"
       >
         <Trash2 className="h-4 w-4" />
       </Button>
-      {propertyType === 'appartement' && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleManageUnits}
-          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-          title="Gérer les unités"
-        >
-          <Building2 className="h-4 w-4" />
-        </Button>
-      )}
     </div>
   )
 }
