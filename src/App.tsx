@@ -22,12 +22,11 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={<PublicProperties />} />
         <Route path="/login" element={<Login />} />
         <Route path="/admin/login" element={<SuperAdminLogin />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/terms" element={<TermsOfService />} />
-        <Route path="/properties" element={<PublicProperties />} />
         
         {/* Protected Routes */}
         <Route path="/agence" element={<ProtectedRoute />}>
