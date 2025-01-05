@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 
-export function AgencySettings() {
+function AgencySettings() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { toast } = useToast()
@@ -31,7 +31,7 @@ export function AgencySettings() {
     has_seen_warning: false
   })
 
-  const { data: agency, isLoading } = useQuery({
+  const { data: agency, isLoading, refetch } = useQuery({
     queryKey: ["agency", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -67,6 +67,29 @@ export function AgencySettings() {
     return null
   }
 
+  const handleAgencyUpdate = async (updatedAgency: typeof agency) => {
+    try {
+      const { error } = await supabase
+        .from("agencies")
+        .update(updatedAgency)
+        .eq("id", id)
+
+      if (error) throw error
+
+      refetch()
+      toast({
+        title: "Succès",
+        description: "Les informations de l'agence ont été mises à jour",
+      })
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue",
+        variant: "destructive",
+      })
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -94,7 +117,7 @@ export function AgencySettings() {
           <TabsTrigger value="users">Utilisateurs</TabsTrigger>
         </TabsList>
         <TabsContent value="general" className="space-y-4">
-          <AgencyForm agency={agency} setAgency={() => {}} />
+          <AgencyForm agency={agency} setAgency={handleAgencyUpdate} />
         </TabsContent>
         <TabsContent value="users">
           <AgencyUsers agencyId={id!} />
