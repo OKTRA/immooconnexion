@@ -47,7 +47,9 @@ export function SubscriptionUpgradeTab() {
             max_properties,
             max_tenants,
             max_users,
-            features
+            features,
+            created_at,
+            updated_at
           )
         `)
         .eq('id', profile.agency_id)
@@ -143,7 +145,9 @@ export function SubscriptionUpgradeTab() {
     max_properties: 1,
     max_tenants: 1,
     max_users: 1,
-    features: []
+    features: [],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }
 
   const currentPlan = currentAgency.subscription_plans || 
