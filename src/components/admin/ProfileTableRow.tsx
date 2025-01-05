@@ -16,9 +16,17 @@ interface ProfileTableRowProps {
 
 export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowProps) {
   const [showEditDialog, setShowEditDialog] = useState(false)
-  const [editedProfile, setEditedProfile] = useState(profile)
+  const [editedProfile, setEditedProfile] = useState<Profile>({
+    id: profile.id,
+    email: profile.email || "",
+    password: "",
+    first_name: profile.first_name || "",
+    last_name: profile.last_name || "",
+    phone_number: profile.phone_number || "",
+    role: profile.role || "user"
+  })
 
-  const handleSaveEdit = () => {
+  const handleSubmit = async () => {
     onEdit(editedProfile)
     setShowEditDialog(false)
   }
@@ -57,7 +65,7 @@ export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowPro
           <ProfileForm 
             newProfile={editedProfile} 
             setNewProfile={setEditedProfile}
-            onSubmit={handleSaveEdit}
+            onSuccess={handleSubmit}
             isEditing={true}
           />
         </DialogContent>

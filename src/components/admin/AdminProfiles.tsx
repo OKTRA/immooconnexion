@@ -6,7 +6,7 @@ import { useProfiles } from "./profile/useProfiles"
 import { AddProfileDialog } from "./profile/AddProfileDialog"
 import { useAddProfileHandler } from "./profile/AddProfileHandler"
 import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+import { Profile } from "./profile/types"
 
 export function AdminProfiles() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -15,12 +15,21 @@ export function AdminProfiles() {
   const { data: profiles = [], refetch } = useProfiles()
   const { toast } = useToast()
   
-  const { newProfile, setNewProfile, handleCreateAuthUser, handleUpdateProfile } = useAddProfileHandler({
+  const [newProfile, setNewProfile] = useState<Profile>({
+    email: "",
+    password: "",
+    first_name: "",
+    last_name: "",
+    phone_number: "",
+    role: "user"
+  })
+
+  const { handleCreateAuthUser, handleUpdateProfile } = useAddProfileHandler({
     onSuccess: refetch,
     onClose: () => setShowAddDialog(false)
   })
 
-  const handleEditProfile = async (editedProfile: any) => {
+  const handleEditProfile = async (editedProfile: Profile) => {
     try {
       const { error } = await supabase
         .from("profiles")
@@ -80,8 +89,8 @@ export function AdminProfiles() {
       />
 
       <AddProfileDialog
-        showAddDialog={showAddDialog}
-        setShowAddDialog={setShowAddDialog}
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
         newProfile={newProfile}
         setNewProfile={setNewProfile}
         handleCreateAuthUser={handleCreateAuthUser}
