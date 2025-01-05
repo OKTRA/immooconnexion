@@ -10,13 +10,15 @@ interface PropertyFormFieldsProps {
   setFormData: (data: PropertyFormData) => void
   handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   imagePreviewUrl?: string | string[]
+  propertyType?: "apartment" | "house"
 }
 
 export function PropertyFormFields({ 
   formData, 
   setFormData, 
   handleImageChange,
-  imagePreviewUrl 
+  imagePreviewUrl,
+  propertyType 
 }: PropertyFormFieldsProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target

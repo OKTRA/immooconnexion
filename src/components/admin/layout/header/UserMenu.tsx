@@ -20,23 +20,15 @@ export function UserMenu() {
           console.error('Session error:', sessionError)
           clearSession()
           navigate("/login")
-          toast({
-            title: "Session expirée",
-            description: "Votre session a expiré. Veuillez vous reconnecter.",
-          })
           return
         }
         
         // Verify the session is still valid
         const { error: userError } = await supabase.auth.getUser()
-        if (userError) {
+        if (userError && userError.message !== "session_not_found") {
           console.error('User verification error:', userError)
           clearSession()
           navigate("/login")
-          toast({
-            title: "Session invalide",
-            description: "Votre session n'est plus valide. Veuillez vous reconnecter.",
-          })
           return
         }
         
@@ -45,10 +37,6 @@ export function UserMenu() {
         console.error('Auth check error:', error)
         clearSession()
         navigate("/login")
-        toast({
-          title: "Erreur d'authentification",
-          description: "Une erreur est survenue. Veuillez vous reconnecter.",
-        })
       }
     }
 
@@ -64,10 +52,6 @@ export function UserMenu() {
       if (event === 'TOKEN_REFRESHED' && !session) {
         clearSession()
         navigate("/login")
-        toast({
-          title: "Session expirée",
-          description: "Votre session a expiré. Veuillez vous reconnecter.",
-        })
         return
       }
     })

@@ -31,6 +31,10 @@ export interface Property {
   price_per_week?: number | null
   total_units?: number
   user_id?: string
+  agency?: {
+    name: string
+    address: string
+  }
 }
 
 export interface PropertyFormData {

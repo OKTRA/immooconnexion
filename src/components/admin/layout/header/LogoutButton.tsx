@@ -16,12 +16,12 @@ export function LogoutButton() {
       
       // Then attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut()
-      if (error) {
+      if (error && error.message !== "session_not_found") {
         console.error('Logout error:', error)
-        // Even if there's an error, we want to clear the local session
         toast({
-          title: "Session terminée",
-          description: "Votre session a été terminée",
+          title: "Erreur de déconnexion",
+          description: "Une erreur est survenue lors de la déconnexion",
+          variant: "destructive"
         })
       } else {
         toast({
