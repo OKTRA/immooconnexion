@@ -6,10 +6,11 @@ import { PricingDialog } from "@/components/pricing/PricingDialog"
 import { useState } from "react"
 import { CurrentPlanCard } from "./CurrentPlanCard"
 import { PlanCard } from "./PlanCard"
+import { SubscriptionPlan } from "@/components/admin/subscription/types"
 
 export function SubscriptionUpgradeTab() {
   const { toast } = useToast()
-  const [selectedPlan, setSelectedPlan] = useState<any>(null)
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null)
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
 
   const { data: currentAgency, isError: isAgencyError } = useQuery({
@@ -93,7 +94,7 @@ export function SubscriptionUpgradeTab() {
     )
   }
 
-  const canDowngrade = (plan: any) => {
+  const canDowngrade = (plan: SubscriptionPlan) => {
     if (!currentAgency) return false
     
     const exceedsProperties = plan.max_properties !== -1 && 
@@ -108,7 +109,7 @@ export function SubscriptionUpgradeTab() {
     return !exceedsProperties && !exceedsTenants && !exceedsUsers
   }
 
-  const handlePlanSelect = (plan: any) => {
+  const handlePlanSelect = (plan: SubscriptionPlan) => {
     const isDowngrade = plan.price < (currentAgency?.subscription_plans?.price || 0)
     
     if (isDowngrade && !canDowngrade(plan)) {
@@ -135,9 +136,19 @@ export function SubscriptionUpgradeTab() {
   }
 
   // Find the basic plan if current agency has no subscription plan
+  const basicPlan: SubscriptionPlan = {
+    id: 'basic',
+    name: 'Basic',
+    price: 0,
+    max_properties: 1,
+    max_tenants: 1,
+    max_users: 1,
+    features: []
+  }
+
   const currentPlan = currentAgency.subscription_plans || 
-    availablePlans.find((plan: any) => plan.price === 0) || 
-    { name: 'Basic', price: 0, max_properties: 1, max_tenants: 1, max_users: 1 }
+    availablePlans.find((plan: SubscriptionPlan) => plan.price === 0) || 
+    basicPlan
 
   return (
     <div className="space-y-6">
@@ -153,10 +164,10 @@ export function SubscriptionUpgradeTab() {
       <div className="space-y-4">
         <h2 className="text-2xl font-bold">Plans disponibles</h2>
         <div className="grid gap-6 md:grid-cols-3">
-          {availablePlans.map((plan) => {
-            const isCurrentPlan = plan.id === currentPlan?.id
+          {availablePlans.map((plan: SubscriptionPlan) => {
+            const isCurrentPlan = plan.id === currentPlan.id
             const canDowngradeToPlan = canDowngrade(plan)
-            const isDowngrade = plan.price < (currentPlan?.price || 0)
+            const isDowngrade = plan.price < currentPlan.price
 
             return (
               <PlanCard
