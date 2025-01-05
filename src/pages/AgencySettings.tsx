@@ -5,9 +5,9 @@ import { AgencyForm } from "@/components/admin/agency/AgencyForm"
 import { useToast } from "@/hooks/use-toast"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { ProfileForm } from "@/components/admin/profile/ProfileForm"
 import { Building2, User } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { ProfileForm } from "@/components/admin/profile/ProfileForm"
 
 const AgencySettings = () => {
   const [agency, setAgency] = useState<any>(null)
