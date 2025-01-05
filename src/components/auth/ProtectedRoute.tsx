@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react"
 import { Navigate, Outlet } from "react-router-dom"
-import { supabase, clearSession } from "@/integrations/supabase/client"
+import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 
-export const ProtectedRoute = () => {
+interface ProtectedRouteProps {
+  adminOnly?: boolean;
+}
+
+export const ProtectedRoute = ({ adminOnly }: ProtectedRouteProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const { toast } = useToast()
   
@@ -14,7 +18,6 @@ export const ProtectedRoute = () => {
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
         
         if (sessionError || !sessionData.session) {
-          clearSession()
           setIsAuthenticated(false)
           return
         }
@@ -23,16 +26,28 @@ export const ProtectedRoute = () => {
         const { data: { user }, error: userError } = await supabase.auth.getUser()
         
         if (userError || !user) {
-          clearSession()
           await supabase.auth.signOut()
           setIsAuthenticated(false)
           return
         }
 
+        // If adminOnly, check if user is an admin
+        if (adminOnly) {
+          const { data: adminData } = await supabase
+            .from('administrators')
+            .select('is_super_admin')
+            .eq('id', user.id)
+            .maybeSingle()
+
+          if (!adminData?.is_super_admin) {
+            setIsAuthenticated(false)
+            return
+          }
+        }
+
         setIsAuthenticated(true)
       } catch (error) {
         console.error("Auth check error:", error)
-        clearSession()
         setIsAuthenticated(false)
         toast({
           title: "Erreur d'authentification",
@@ -48,7 +63,6 @@ export const ProtectedRoute = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
-        clearSession()
         setIsAuthenticated(false)
         return
       }
@@ -59,7 +73,7 @@ export const ProtectedRoute = () => {
     return () => {
       subscription.unsubscribe()
     }
-  }, [toast])
+  }, [toast, adminOnly])
 
   if (isAuthenticated === null) {
     return (
@@ -70,7 +84,7 @@ export const ProtectedRoute = () => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/agence/login" replace />
+    return <Navigate to="/login" replace />
   }
 
   return <Outlet />
