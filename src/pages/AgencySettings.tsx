@@ -1,120 +1,106 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
+import { useEffect, useState } from "react"
+import { useParams } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import type { Profile } from "@/types/profile"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AgencyForm } from "@/components/admin/agency/AgencyForm"
+import { AgencyUsers } from "@/components/admin/agency/AgencyUsers"
+import { useToast } from "@/hooks/use-toast"
+import { Profile } from "@/types/profile"
+import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/button"
+import { ArrowLeft } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
-export default function AgencySettings() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [phoneNumber, setPhoneNumber] = useState("")
-  const { toast } = useToast()
+export function AgencySettings() {
+  const { id } = useParams()
   const navigate = useNavigate()
+  const { toast } = useToast()
+  const [activeTab, setActiveTab] = useState("general")
+  const [newProfile, setNewProfile] = useState<Profile>({
+    id: '',
+    email: "",
+    first_name: "",
+    last_name: "",
+    phone_number: "",
+    role: "admin",
+    agency_id: "",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    is_tenant: false,
+    status: 'active',
+    has_seen_warning: false
+  })
 
-  const handleCreateUser = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const { data: agency, isLoading } = useQuery({
+    queryKey: ["agency", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("agencies")
+        .select("*")
+        .eq("id", id)
+        .single()
 
-    try {
-      const { data: { user }, error } = await supabase.auth.signUp({
-        email,
-        password,
-      })
-
-      if (error) throw error
-
-      if (user) {
-        const profile: Profile = {
-          id: user.id,
-          email,
-          first_name: firstName,
-          last_name: lastName,
-          phone_number: phoneNumber,
-        }
-
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update(profile)
-          .eq("id", user.id)
-
-        if (profileError) throw profileError
-
-        toast({
-          title: "Success",
-          description: "User created successfully",
-        })
-
-        navigate("/agency/settings")
+      if (error) {
+        throw error
       }
-    } catch (error: any) {
+
+      return data
+    },
+  })
+
+  useEffect(() => {
+    if (!isLoading && !agency) {
+      navigate("/admin/agencies")
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Erreur",
+        description: "Cette agence n'existe pas",
         variant: "destructive",
       })
     }
+  }, [agency, isLoading, navigate, toast])
+
+  if (isLoading) {
+    return <div>Chargement...</div>
+  }
+
+  if (!agency) {
+    return null
   }
 
   return (
-    <div>
-      <h1>Agency Settings</h1>
-      <form onSubmit={handleCreateUser}>
-        <div>
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="firstName">First Name</Label>
-          <Input
-            id="firstName"
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="lastName">Last Name</Label>
-          <Input
-            id="lastName"
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="phoneNumber">Phone Number</Label>
-          <Input
-            id="phoneNumber"
-            type="text"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            required
-          />
-        </div>
-        <Button type="submit">Create User</Button>
-      </form>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/admin/agencies")}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Retour aux agences
+        </Button>
+      </div>
+
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Paramètres de l'agence</h2>
+        <p className="text-muted-foreground">
+          Gérez les paramètres de l'agence et ses utilisateurs
+        </p>
+      </div>
+
+      <Separator />
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="general">Général</TabsTrigger>
+          <TabsTrigger value="users">Utilisateurs</TabsTrigger>
+        </TabsList>
+        <TabsContent value="general" className="space-y-4">
+          <AgencyForm agency={agency} />
+        </TabsContent>
+        <TabsContent value="users">
+          <AgencyUsers agencyId={id!} />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
