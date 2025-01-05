@@ -7,7 +7,7 @@ export function usePropertyUnits(apartmentId: string, filterStatus?: string) {
   const queryClient = useQueryClient()
 
   const { data: units = [], isLoading } = useQuery({
-    queryKey: ['property-units', apartmentId, filterStatus],
+    queryKey: ['apartment-units', apartmentId, filterStatus],
     queryFn: async () => {
       let query = supabase
         .from('property_units')
@@ -41,14 +41,14 @@ export function usePropertyUnits(apartmentId: string, filterStatus?: string) {
         const filePath = `${apartmentId}/${fileName}`
 
         const { error: uploadError, data: uploadData } = await supabase.storage
-          .from('property_photos')
+          .from('product_photos')
           .upload(filePath, photo)
 
         if (uploadError) throw uploadError
 
         if (uploadData) {
           const { data: { publicUrl } } = supabase.storage
-            .from('property_photos')
+            .from('product_photos')
             .getPublicUrl(filePath)
           
           photoUrl = publicUrl
@@ -75,7 +75,7 @@ export function usePropertyUnits(apartmentId: string, filterStatus?: string) {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['property-units', apartmentId] })
+      queryClient.invalidateQueries({ queryKey: ['apartment-units', apartmentId] })
       toast({
         title: "Succès",
         description: "L'unité a été sauvegardée avec succès",
@@ -101,7 +101,7 @@ export function usePropertyUnits(apartmentId: string, filterStatus?: string) {
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['property-units', apartmentId] })
+      queryClient.invalidateQueries({ queryKey: ['apartment-units', apartmentId] })
       toast({
         title: "Succès",
         description: "L'unité a été supprimée avec succès",
