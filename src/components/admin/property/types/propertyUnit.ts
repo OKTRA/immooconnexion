@@ -10,7 +10,7 @@ export interface PropertyUnit {
   photo_url: string | null;
   description: string | null;
   category: string | null;
-  amenities: string[] | null;
+  amenities: string[];
 }
 
 export interface PropertyUnitFormData {
