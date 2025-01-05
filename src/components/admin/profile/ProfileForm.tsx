@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
@@ -14,9 +14,8 @@ export function ProfileForm({
   isEditing = false,
   onCreateAuthUser,
   onUpdateProfile,
-  selectedAgencyId
+  isSubmitting = false
 }: ProfileFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const form = useForm({
     defaultValues: newProfile
@@ -26,7 +25,6 @@ export function ProfileForm({
     e.preventDefault()
     if (isSubmitting) return
 
-    setIsSubmitting(true)
     try {
       if (!newProfile?.email) {
         throw new Error("Email requis")
@@ -47,8 +45,6 @@ export function ProfileForm({
         await onSuccess()
       }
 
-      // Reset form state after successful submission
-      setIsSubmitting(false)
       if (!isEditing) {
         form.reset()
       }
@@ -58,17 +54,6 @@ export function ProfileForm({
         description: error.message || "Une erreur est survenue",
         variant: "destructive",
       })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleProfileChange = (updatedProfile: Partial<typeof newProfile>) => {
-    if (setNewProfile && newProfile) {
-      setNewProfile({
-        ...newProfile,
-        ...updatedProfile,
-      })
     }
   }
 
@@ -77,10 +62,10 @@ export function ProfileForm({
       <form onSubmit={handleSubmit} className="space-y-6">
         <BasicInfoFields 
           form={form} 
-          onProfileChange={handleProfileChange}
+          onProfileChange={setNewProfile}
           isEditing={isEditing}
-          selectedAgencyId={selectedAgencyId}
           newProfile={newProfile}
+          showPasswordField={true}
         />
         
         <div className="flex justify-end gap-2">
