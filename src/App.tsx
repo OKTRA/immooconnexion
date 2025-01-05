@@ -44,7 +44,7 @@ function App() {
         </Route>
 
         {/* Admin Routes */}
-        <Route path="/admin" element={<ProtectedRoute adminOnly />}>
+        <Route path="/super-admin/admin" element={<ProtectedRoute adminOnly />}>
           <Route index element={<AdminDashboard />} />
         </Route>
       </Routes>
