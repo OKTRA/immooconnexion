@@ -7,6 +7,7 @@ import { AddProfileDialog } from "../profile/AddProfileDialog"
 import { useAddProfileHandler } from "../profile/AddProfileHandler"
 import { AgencyUsersList } from "./AgencyUsersList"
 import { AgencyUserEditDialog } from "./AgencyUserEditDialog"
+import { useToast } from "@/hooks/use-toast"
 
 interface AgencyUsersProps {
   agencyId: string
@@ -17,6 +18,7 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
+  const { toast } = useToast()
   
   const { data: users = [], refetch, isLoading, error } = useQuery({
     queryKey: ["agency-users", agencyId],
@@ -66,7 +68,14 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
     handleCreateAuthUser, 
     handleUpdateProfile: handleAddProfileUpdate 
   } = useAddProfileHandler({
-    onSuccess: refetch,
+    onSuccess: () => {
+      toast({
+        title: "Utilisateur créé",
+        description: "L'utilisateur a été créé avec succès",
+      })
+      refetch()
+      setShowAddDialog(false)
+    },
     onClose: () => setShowAddDialog(false),
     agencyId
   })
@@ -100,14 +109,19 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
         onOpenChange={setShowEditDialog}
         userId={selectedUserId}
         agencyId={agencyId}
-        onSuccess={refetch}
+        onSuccess={() => {
+          toast({
+            title: "Utilisateur mis à jour",
+            description: "L'utilisateur a été mis à jour avec succès",
+          })
+          refetch()
+          setShowEditDialog(false)
+        }}
       />
 
       <AddProfileDialog
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
-        agencyId={agencyId}
-        onProfileCreated={refetch}
         newProfile={newProfile}
         setNewProfile={setNewProfile}
         handleCreateAuthUser={handleCreateAuthUser}

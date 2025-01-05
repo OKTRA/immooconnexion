@@ -26,7 +26,14 @@ export function AdminProfiles() {
   })
 
   const { handleCreateAuthUser, handleUpdateProfile } = useAddProfileHandler({
-    onSuccess: refetch,
+    onSuccess: () => {
+      toast({
+        title: "Profil créé",
+        description: "Le profil a été créé avec succès",
+      })
+      refetch()
+      setShowAddDialog(false)
+    },
     onClose: () => setShowAddDialog(false)
   })
 

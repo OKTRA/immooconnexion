@@ -3,7 +3,7 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { UserRole } from "@/types/profile"
 import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits"
-import { ProfileFormData } from "./types"
+import { Profile } from "./types"
 
 interface UseAddProfileHandlerProps {
   onSuccess?: () => void
@@ -14,7 +14,7 @@ interface UseAddProfileHandlerProps {
 export function useAddProfileHandler({ onSuccess, onClose, agencyId }: UseAddProfileHandlerProps) {
   const { toast } = useToast()
   const { checkLimitReached } = useSubscriptionLimits(agencyId || '')
-  const [newProfile, setNewProfile] = useState<ProfileFormData>({
+  const [newProfile, setNewProfile] = useState<Profile>({
     email: "",
     password: "",
     first_name: "",
@@ -27,6 +27,11 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: UseAddPro
     try {
       const limitReached = await checkLimitReached('user')
       if (limitReached) {
+        toast({
+          title: "Erreur",
+          description: "Limite d'utilisateurs atteinte pour votre plan",
+          variant: "destructive",
+        })
         throw new Error("Limite d'utilisateurs atteinte pour votre plan")
       }
 
@@ -41,17 +46,19 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: UseAddPro
         }
       })
 
-      if (error) throw error
+      if (error) {
+        toast({
+          title: "Erreur",
+          description: error.message,
+          variant: "destructive",
+        })
+        throw error
+      }
       
       console.log("Auth user created:", data.user?.id)
       return data.user?.id
     } catch (error: any) {
       console.error('Error creating auth user:', error)
-      toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
-      })
       throw error
     }
   }
@@ -70,21 +77,18 @@ export function useAddProfileHandler({ onSuccess, onClose, agencyId }: UseAddPro
         })
         .eq("id", userId)
 
-      if (error) throw error
-
-      toast({
-        title: "Succès",
-        description: "Le profil a été créé avec succès",
-      })
+      if (error) {
+        toast({
+          title: "Erreur",
+          description: error.message,
+          variant: "destructive",
+        })
+        throw error
+      }
 
       onSuccess?.()
       onClose?.()
     } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
-      })
       throw error
     }
   }
