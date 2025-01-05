@@ -1,116 +1,43 @@
 import { useState } from "react"
-import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { Profile } from "@/types/profile"
-import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits"
+import type { Profile } from "@/types/profile"
 
-interface UseAddProfileHandlerProps {
-  onSuccess?: () => void
-  onClose?: () => void
-  agencyId?: string
-}
+export const useProfileCreation = () => {
+  const [isLoading, setIsLoading] = useState(false)
 
-export function useAddProfileHandler({ onSuccess, onClose, agencyId }: UseAddProfileHandlerProps) {
-  const { toast } = useToast()
-  const { checkLimitReached } = useSubscriptionLimits(agencyId || '')
-  const [newProfile, setNewProfile] = useState<Profile>({
-    id: "",
-    email: "",
-    password: "",
-    first_name: "",
-    last_name: "",
-    phone_number: "",
-    role: "user",
-    agency_id: agencyId || "",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    is_tenant: false,
-    status: 'active',
-    has_seen_warning: false
-  })
-
-  const handleCreateAuthUser = async (): Promise<void> => {
+  const createProfile = async (profileData: Omit<Profile, 'id' | 'agency_id'>) => {
+    setIsLoading(true)
     try {
-      const limitReached = await checkLimitReached('user')
-      if (limitReached) {
-        toast({
-          title: "Erreur",
-          description: "Limite d'utilisateurs atteinte pour votre plan",
-          variant: "destructive",
-        })
-        throw new Error("Limite d'utilisateurs atteinte pour votre plan")
-      }
-
-      // Store current session
-      const { data: { session: adminSession } } = await supabase.auth.getSession()
-      if (!adminSession) {
-        throw new Error("No admin session found")
-      }
-
-      const { data, error } = await supabase.auth.signUp({
-        email: newProfile.email,
-        password: newProfile.password || '',
-        options: {
-          data: {
-            first_name: newProfile.first_name,
-            last_name: newProfile.last_name,
-          }
-        }
+      const { data: { user }, error: authError } = await supabase.auth.signUp({
+        email: profileData.email,
+        password: profileData.password as string,
       })
 
-      if (error) {
-        toast({
-          title: "Erreur",
-          description: error.message,
-          variant: "destructive",
-        })
-        throw error
+      if (authError) throw authError
+
+      if (!user?.id) {
+        throw new Error("No user ID returned")
       }
 
-      // Restore admin session
-      await supabase.auth.setSession(adminSession)
-      
-      console.log("Auth user created:", data.user?.id)
-    } catch (error: any) {
-      console.error('Error creating auth user:', error)
-      throw error
-    }
-  }
-
-  const handleUpdateProfile = async (userId: string): Promise<void> => {
-    try {
-      const { error } = await supabase
+      const { error: profileError } = await supabase
         .from("profiles")
         .update({
-          first_name: newProfile.first_name,
-          last_name: newProfile.last_name,
-          phone_number: newProfile.phone_number,
-          role: newProfile.role,
-          agency_id: agencyId,
-          status: 'active'
+          first_name: profileData.first_name,
+          last_name: profileData.last_name,
+          phone_number: profileData.phone_number,
         })
-        .eq("id", userId)
+        .eq("id", user.id)
 
-      if (error) {
-        toast({
-          title: "Erreur",
-          description: error.message,
-          variant: "destructive",
-        })
-        throw error
-      }
+      if (profileError) throw profileError
 
-      onSuccess?.()
-      onClose?.()
-    } catch (error: any) {
-      throw error
+      return user.id
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return {
-    newProfile,
-    setNewProfile,
-    handleCreateAuthUser,
-    handleUpdateProfile,
+    createProfile,
+    isLoading
   }
 }

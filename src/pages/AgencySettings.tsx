@@ -1,56 +1,120 @@
 import { useState } from "react"
-import { AddProfileDialog } from "@/components/admin/profile/AddProfileDialog"
-import { useProfiles } from "@/hooks/useProfiles"
-import { useAgencies } from "@/hooks/useAgencies"
-import { Profile } from "@/types/profile"
+import { useNavigate } from "react-router-dom"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
+import type { Profile } from "@/types/profile"
 
 export default function AgencySettings() {
-  const [isAddProfileDialogOpen, setIsAddProfileDialogOpen] = useState(false)
-  const { profiles, refetchProfiles } = useProfiles()
-  const { agencyId } = useAgencies()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [phoneNumber, setPhoneNumber] = useState("")
+  const { toast } = useToast()
+  const navigate = useNavigate()
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    try {
+      const { data: { user }, error } = await supabase.auth.signUp({
+        email,
+        password,
+      })
+
+      if (error) throw error
+
+      if (user) {
+        const profile: Profile = {
+          id: user.id,
+          email,
+          first_name: firstName,
+          last_name: lastName,
+          phone_number: phoneNumber,
+        }
+
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update(profile)
+          .eq("id", user.id)
+
+        if (profileError) throw profileError
+
+        toast({
+          title: "Success",
+          description: "User created successfully",
+        })
+
+        navigate("/agency/settings")
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      })
+    }
+  }
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Paramètres de l'agence</h1>
-      <button
-        onClick={() => setIsAddProfileDialogOpen(true)}
-        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded"
-      >
-        Ajouter un utilisateur
-      </button>
-      <div className="grid grid-cols-1 gap-4">
-        {profiles.map(profile => (
-          <div key={profile.id} className="p-4 border rounded">
-            <h2 className="text-xl">{profile.first_name} {profile.last_name}</h2>
-            <p>Email: {profile.email}</p>
-            <p>Téléphone: {profile.phone_number}</p>
-            <p>Rôle: {profile.role}</p>
-          </div>
-        ))}
-      </div>
-      <AddProfileDialog
-        open={isAddProfileDialogOpen}
-        onOpenChange={setIsAddProfileDialogOpen}
-        newProfile={{
-          id: "",
-          email: "",
-          first_name: "",
-          last_name: "",
-          phone_number: "",
-          role: "user",
-          agency_id: agencyId,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          is_tenant: false,
-          status: 'active',
-          has_seen_warning: false
-        }}
-        setNewProfile={() => {}}
-        handleCreateAuthUser={async () => {}}
-        handleUpdateProfile={async () => {}}
-        agencyId={agencyId}
-        onProfileCreated={refetchProfiles}
-      />
+    <div>
+      <h1>Agency Settings</h1>
+      <form onSubmit={handleCreateUser}>
+        <div>
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="firstName">First Name</Label>
+          <Input
+            id="firstName"
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="lastName">Last Name</Label>
+          <Input
+            id="lastName"
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="phoneNumber">Phone Number</Label>
+          <Input
+            id="phoneNumber"
+            type="text"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            required
+          />
+        </div>
+        <Button type="submit">Create User</Button>
+      </form>
     </div>
   )
 }
