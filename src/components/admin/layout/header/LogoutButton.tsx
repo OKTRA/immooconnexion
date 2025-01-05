@@ -11,17 +11,16 @@ export function LogoutButton() {
 
   const handleLogout = async () => {
     try {
-      // Always clear the session first
+      // Clear session first to prevent race conditions
       clearSession()
       
       // Attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut()
       if (error) {
         console.error('Logout error:', error)
-        // Even if there's an error, we've already cleared the session
         toast({
           title: "Session terminée",
-          description: "Votre session a été terminée en raison d'une erreur",
+          description: "Votre session a été terminée",
         })
       } else {
         toast({
