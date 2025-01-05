@@ -16,10 +16,9 @@ export function ProfileForm({
   step = 1,
   setStep,
   agencyId,
-  handleSubmit: onSubmit,
-  selectedAgencyId,
+  onCreateAuthUser,
   onUpdateProfile,
-  onCreateAuthUser
+  selectedAgencyId
 }: ProfileFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
@@ -29,13 +28,31 @@ export function ProfileForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!setNewProfile || !onSubmit) return
-
     setIsSubmitting(true)
+
     try {
-      await onSubmit(e)
-      if (onSuccess) {
-        onSuccess()
+      if (step === 1 && setStep) {
+        // First step - validate email and password
+        if (!newProfile?.email || !newProfile?.password) {
+          throw new Error("Email et mot de passe requis")
+        }
+        
+        if (isEditing && onUpdateProfile) {
+          await onUpdateProfile(newProfile.email)
+          setStep(2)
+        } else if (onCreateAuthUser) {
+          const userId = await onCreateAuthUser()
+          setStep(2)
+        }
+      } else {
+        // Second step - validate profile info
+        if (!newProfile?.first_name || !newProfile?.last_name) {
+          throw new Error("Nom et prénom requis")
+        }
+
+        if (onSuccess) {
+          onSuccess()
+        }
       }
     } catch (error: any) {
       toast({
@@ -66,6 +83,7 @@ export function ProfileForm({
           isEditing={isEditing}
           step={step}
           selectedAgencyId={selectedAgencyId}
+          newProfile={newProfile}
         />
         
         <div className="flex justify-between">

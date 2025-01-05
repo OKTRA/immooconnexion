@@ -12,7 +12,6 @@ export function BasicInfoFields({
   isEditing = false,
   step = 1,
   selectedAgencyId,
-  form
 }: BasicInfoFieldsProps) {
   const handleChange = (field: keyof typeof newProfile, value: string) => {
     onProfileChange({ [field]: value })
