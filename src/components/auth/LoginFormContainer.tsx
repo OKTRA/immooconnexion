@@ -1,6 +1,7 @@
 import { Shield } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { LoginFormFields } from "./LoginFormFields"
+import { Toaster } from "@/components/ui/toaster"
 
 export function LoginFormContainer() {
   return (
@@ -24,6 +25,7 @@ export function LoginFormContainer() {
           <LoginFormFields />
         </CardContent>
       </Card>
+      <Toaster />
     </div>
   )
 }
