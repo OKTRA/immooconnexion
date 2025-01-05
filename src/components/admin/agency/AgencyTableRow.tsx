@@ -28,10 +28,28 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
 
   const handleDelete = async () => {
     try {
+      // First check if there are any dependencies
+      const { data: contracts } = await supabase
+        .from('contracts')
+        .select('id')
+        .eq('agency_id', agency.id)
+        .limit(1)
+
+      if (contracts && contracts.length > 0) {
+        toast({
+          title: "Suppression impossible",
+          description: "Cette agence a des contrats actifs. Veuillez d'abord les supprimer.",
+          variant: "destructive",
+        })
+        setShowDeleteDialog(false)
+        return
+      }
+
       const { error } = await supabase
         .from('agencies')
         .delete()
         .eq('id', agency.id)
+        .single()
 
       if (error) throw error
 
@@ -39,6 +57,7 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         title: "Succès",
         description: "L'agence a été supprimée avec succès",
       })
+      
       refetch()
     } catch (error: any) {
       console.error('Error deleting agency:', error)
@@ -80,6 +99,7 @@ export function AgencyTableRow({ agency, onEdit, refetch }: AgencyTableRowProps)
         .from('agencies')
         .update({ subscription_plan_id: planId })
         .eq('id', agency.id)
+        .single()
 
       if (error) throw error
 
