@@ -5,14 +5,13 @@ import { fr } from "date-fns/locale"
 import { ProfileActions } from "./ProfileActions"
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
 import { ProfileForm } from "./profile/ProfileForm"
-import { Profile } from "./profile/types"
+import { Profile } from "@/types/profile"
 
 interface ProfileTableRowProps {
-  profile: Profile
-  onEdit: (profile: Profile) => void
-  refetch: () => void
+  profile: Profile;
+  onEdit: (profile: Profile) => void;
+  refetch: () => void;
 }
 
 export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowProps) {
@@ -20,11 +19,16 @@ export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowPro
   const [editedProfile, setEditedProfile] = useState<Profile>({
     id: profile.id,
     email: profile.email || "",
-    password: "",
     first_name: profile.first_name || "",
     last_name: profile.last_name || "",
     phone_number: profile.phone_number || "",
-    role: profile.role || "user"
+    role: profile.role,
+    agency_id: profile.agency_id,
+    created_at: profile.created_at,
+    updated_at: profile.updated_at,
+    is_tenant: profile.is_tenant,
+    status: profile.status,
+    has_seen_warning: profile.has_seen_warning
   })
 
   const handleSubmit = async () => {
@@ -42,7 +46,13 @@ export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowPro
         <TableCell>{profile.phone_number || "-"}</TableCell>
         <TableCell>{profile.agency_name || "-"}</TableCell>
         <TableCell>
-          <Badge variant={profile.role === "admin" ? "default" : profile.role === "blocked" ? "destructive" : "secondary"}>
+          <Badge 
+            variant={
+              profile.role === "admin" ? "default" : 
+              profile.role === "blocked" ? "destructive" : 
+              "secondary"
+            }
+          >
             {profile.role || "user"}
           </Badge>
         </TableCell>
