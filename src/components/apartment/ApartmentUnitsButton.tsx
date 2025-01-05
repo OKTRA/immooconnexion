@@ -11,12 +11,12 @@ export function ApartmentUnitsButton({ apartmentId }: ApartmentUnitsButtonProps)
 
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="sm"
       className="flex items-center gap-2"
       onClick={() => navigate(`/agence/appartements/${apartmentId}/unites`)}
     >
-      <Building2 className="h-4 w-4" />
+      <Building2 className="h-4 w-4 mr-2" />
       Gérer les unités
     </Button>
   )
