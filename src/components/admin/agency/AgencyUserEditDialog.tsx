@@ -1,13 +1,13 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { DialogHeader } from "./form/DialogHeader"
 import { ProfileForm } from "../profile/ProfileForm"
-import { Profile } from "../profile/types"
+import { Profile, ProfileFormData } from "@/types/profile"
 
 interface AgencyUserEditDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  newProfile: Profile
-  setNewProfile: (profile: Profile) => void
+  newProfile: ProfileFormData
+  setNewProfile: (profile: ProfileFormData) => void
   handleCreateAuthUser: () => Promise<void>
   handleUpdateProfile: (userId: string) => Promise<void>
   isEditing: boolean
@@ -23,7 +23,12 @@ export function AgencyUserEditDialog({
   isEditing
 }: AgencyUserEditDialogProps) {
   const handleSuccess = async () => {
-    onOpenChange(false)
+    if (isEditing && newProfile.id) {
+      await handleUpdateProfile(newProfile.id);
+    } else {
+      await handleCreateAuthUser();
+    }
+    onOpenChange(false);
   }
 
   return (
@@ -34,8 +39,6 @@ export function AgencyUserEditDialog({
           isEditing={isEditing}
           newProfile={newProfile}
           setNewProfile={setNewProfile}
-          onCreateAuthUser={handleCreateAuthUser}
-          onUpdateProfile={handleUpdateProfile}
           onSuccess={handleSuccess}
         />
       </DialogContent>
