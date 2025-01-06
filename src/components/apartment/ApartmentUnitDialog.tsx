@@ -1,12 +1,12 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { PropertyUnit } from "@/components/admin/property/types/propertyUnit";
-import { UnitFormFields } from "./unit-dialog/UnitFormFields";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { UnitFormFields } from "./unit-dialog/UnitFormFields"
+import { ApartmentUnit } from "./types"
 
 export interface ApartmentUnitDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   apartmentId: string;
-  selectedUnit?: PropertyUnit;
+  selectedUnit?: ApartmentUnit;
   onSuccess: () => void;
 }
 
@@ -22,15 +22,15 @@ export function ApartmentUnitDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {selectedUnit ? "Modifier l'unité" : "Nouvelle unité"}
+            {selectedUnit ? "Modifier l'unité" : "Ajouter une unité"}
           </DialogTitle>
         </DialogHeader>
         <UnitFormFields
-          apartmentId={apartmentId}
           selectedUnit={selectedUnit}
+          apartmentId={apartmentId}
           onSuccess={onSuccess}
         />
       </DialogContent>
     </Dialog>
-  );
+  )
 }

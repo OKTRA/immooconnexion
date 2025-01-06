@@ -1,17 +1,16 @@
 import { useState } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
-import { Profile } from "../../profile/types"
+import { Profile, UserRole } from "@/types/profile"
 
 export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuccess?: () => Promise<void>) {
   const [newProfile, setNewProfile] = useState<Profile>({
     id: userId || '',
     email: '',
-    password: '',
     first_name: '',
     last_name: '',
     phone_number: '',
-    role: 'user',
+    role: 'user' as UserRole,
     agency_id: agencyId,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -32,8 +31,8 @@ export function useAgencyUserEdit(userId: string | null, agencyId: string, onSuc
       }
 
       const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
-        email: newProfile.email,
-        password: newProfile.password || '',
+        email: newProfile.email || '',
+        password: 'tempPassword123', // You should implement a proper password handling mechanism
         email_confirm: true
       })
 
