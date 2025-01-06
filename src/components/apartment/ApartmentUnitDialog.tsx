@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { UnitDialogForm } from "./unit-dialog/UnitDialogForm"
+import { useUnitMutations } from "./unit-dialog/useUnitMutations"
 
 const unitSchema = z.object({
   unit_number: z.string().min(1, "Le numéro d'unité est requis"),
@@ -29,12 +30,12 @@ interface ApartmentUnitDialogProps {
 export function ApartmentUnitDialog({
   open,
   onOpenChange,
-  onSubmit,
   initialData,
   apartmentId,
   isEditing = false
 }: ApartmentUnitDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { createUnit, updateUnit } = useUnitMutations(apartmentId)
 
   const form = useForm<ApartmentUnitFormData>({
     resolver: zodResolver(unitSchema),
@@ -61,21 +62,12 @@ export function ApartmentUnitDialog({
     try {
       setIsSubmitting(true)
       
-      const unitData: ApartmentUnit = {
-        id: initialData?.id || crypto.randomUUID(),
-        apartment_id: apartmentId,
-        unit_number: formData.unit_number,
-        floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
-        area: formData.area ? parseFloat(formData.area) : null,
-        rent_amount: parseInt(formData.rent_amount),
-        deposit_amount: formData.deposit_amount ? parseInt(formData.deposit_amount) : null,
-        status: formData.status,
-        description: formData.description || null,
-        created_at: initialData?.created_at || new Date().toISOString(),
-        updated_at: new Date().toISOString()
+      if (isEditing && initialData) {
+        await updateUnit.mutateAsync({ ...formData, id: initialData.id })
+      } else {
+        await createUnit.mutateAsync(formData)
       }
-
-      await onSubmit(unitData)
+      
       onOpenChange(false)
     } catch (error) {
       console.error('Error submitting unit:', error)
