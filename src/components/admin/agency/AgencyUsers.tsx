@@ -38,7 +38,6 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
   const {
     newProfile,
     setNewProfile,
-    isSubmitting,
     handleCreateAuthUser,
     handleUpdateProfile,
   } = useAgencyUserEdit(selectedUserId, agencyId, async () => {
@@ -118,7 +117,6 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
         onOpenChange={setShowEditDialog}
         newProfile={newProfile}
         setNewProfile={setNewProfile}
-        isSubmitting={isSubmitting}
         handleCreateAuthUser={handleCreateAuthUser}
         handleUpdateProfile={handleUpdateProfile}
         isEditing={!!selectedUserId}

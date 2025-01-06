@@ -1,5 +1,7 @@
 import { Profile } from "@/types/profile"
 
+export type { Profile }
+
 export interface ProfileFormProps {
   newProfile: Profile
   setNewProfile: (profile: Profile) => void
@@ -8,4 +10,15 @@ export interface ProfileFormProps {
   onCreateAuthUser?: () => Promise<void>
   onUpdateProfile?: (userId: string) => Promise<void>
   selectedAgencyId?: string
+}
+
+export interface AddProfileDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  newProfile: Profile
+  setNewProfile: (profile: Profile) => void
+  handleCreateAuthUser: () => Promise<void>
+  handleUpdateProfile: (userId: string) => Promise<void>
+  agencyId?: string
+  onProfileCreated?: () => Promise<void>
 }
