@@ -11,6 +11,7 @@ import { ApartmentUnitsTable } from "@/components/apartment/ApartmentUnitsTable"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { ApartmentForm } from "@/components/apartment/ApartmentForm"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { ApartmentUnit } from "@/components/apartment/types"
 
 export default function ApartmentDetails() {
   const { id } = useParams<{ id: string }>()
@@ -24,9 +25,7 @@ export default function ApartmentDetails() {
         .from("apartments")
         .select(`
           *,
-          apartment_units (
-            count
-          )
+          apartment_units (*)
         `)
         .eq("id", id)
         .single()
@@ -50,6 +49,33 @@ export default function ApartmentDetails() {
         description: "L'appartement a été supprimé avec succès",
       })
       navigate("/agence/appartements")
+    } catch (error) {
+      console.error("Error:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suppression",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleEdit = (unit: ApartmentUnit) => {
+    navigate(`/agence/appartements/${id}/unites/${unit.id}`)
+  }
+
+  const handleUnitDelete = async (unitId: string) => {
+    try {
+      const { error } = await supabase
+        .from("apartment_units")
+        .delete()
+        .eq("id", unitId)
+
+      if (error) throw error
+
+      toast({
+        title: "Unité supprimée",
+        description: "L'unité a été supprimée avec succès",
+      })
     } catch (error) {
       console.error("Error:", error)
       toast({
@@ -160,7 +186,7 @@ export default function ApartmentDetails() {
               </div>
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Nombre d'unités</dt>
-                <dd>{apartment.apartment_units[0].count}</dd>
+                <dd>{apartment.apartment_units.length}</dd>
               </div>
             </dl>
           </CardContent>
@@ -179,7 +205,7 @@ export default function ApartmentDetails() {
           <ApartmentUnitsTable
             units={apartment.apartment_units}
             onEdit={handleEdit}
-            onDelete={handleDelete}
+            onDelete={handleUnitDelete}
           />
         </div>
       </div>
