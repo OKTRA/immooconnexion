@@ -1,32 +1,45 @@
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useState, ReactNode } from "react"
 
 type Theme = "light" | "dark"
+
+type ThemeProviderProps = {
+  children: ReactNode
+}
 
 type ThemeContextType = {
   theme: Theme
   setTheme: (theme: Theme) => void
 }
 
-const ThemeContext = createContext<ThemeContextType>({
-  theme: "light",
-  setTheme: () => null,
-})
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>("light")
 
   useEffect(() => {
-    document.documentElement.classList.remove("light", "dark")
-    document.documentElement.classList.add(theme)
+    const root = window.document.documentElement
+    root.classList.remove("light", "dark")
+    root.classList.add(theme)
   }, [theme])
 
+  const value = {
+    theme,
+    setTheme,
+  }
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   )
 }
 
-export const useTheme = () => {
-  return useContext(ThemeContext)
+export function useTheme() {
+  const context = useContext(ThemeContext)
+  
+  if (context === undefined) {
+    throw new Error("useTheme must be used within a ThemeProvider")
+  }
+  
+  return context
 }
