@@ -1,13 +1,14 @@
 import { DialogTitle } from "@/components/ui/dialog"
 
 interface DialogHeaderProps {
-  isEditing: boolean
+  children?: React.ReactNode;
+  isEditing?: boolean;
 }
 
-export function DialogHeader({ isEditing }: DialogHeaderProps) {
+export function DialogHeader({ children, isEditing }: DialogHeaderProps) {
   return (
     <DialogTitle>
-      {isEditing ? "Modifier l'utilisateur" : "Ajouter un utilisateur"}
+      {children || (isEditing ? "Modifier l'utilisateur" : "Ajouter un utilisateur")}
     </DialogTitle>
   )
 }

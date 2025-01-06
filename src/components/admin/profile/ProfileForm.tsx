@@ -1,15 +1,15 @@
-import { ProfileFormData, UserRole } from "@/types/profile";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ProfileFormData, UserRole } from "@/types/profile"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface ProfileFormProps {
-  newProfile: ProfileFormData;
-  setNewProfile: (profile: ProfileFormData) => void;
-  onSuccess?: () => void;
-  isEditing?: boolean;
-  selectedAgencyId?: string;
+  newProfile: ProfileFormData
+  setNewProfile: (profile: ProfileFormData) => void
+  onSuccess?: () => void
+  isEditing?: boolean
+  selectedAgencyId?: string
 }
 
 export function ProfileForm({
@@ -20,11 +20,11 @@ export function ProfileForm({
   selectedAgencyId,
 }: ProfileFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (onSuccess) {
-      onSuccess();
+      onSuccess()
     }
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -116,5 +116,5 @@ export function ProfileForm({
         </Button>
       </div>
     </form>
-  );
+  )
 }
