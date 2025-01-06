@@ -15,7 +15,7 @@ import { Apartment } from "@/types/apartment";
 export default function ApartmentDetails() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
-  const { data: units, isLoading: unitsLoading, deleteUnit } = useApartmentUnits(id);
+  const { data: units = [], isLoading: unitsLoading, deleteUnit } = useApartmentUnits(id);
 
   const { data: apartment, isLoading: apartmentLoading } = useQuery({
     queryKey: ["apartment", id],

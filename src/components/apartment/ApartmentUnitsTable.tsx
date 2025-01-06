@@ -1,30 +1,35 @@
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Edit, Trash } from "lucide-react";
-import { ApartmentUnit } from "@/types/apartment";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Edit, Trash } from "lucide-react"
+import { ApartmentUnit } from "@/types/apartment"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface ApartmentUnitsTableProps {
-  units?: ApartmentUnit[];
-  onEdit: (unit: ApartmentUnit) => void;
-  onDelete: (unitId: string) => void;
-  isLoading?: boolean;
+  units?: ApartmentUnit[]
+  onEdit: (unit: ApartmentUnit) => void
+  onDelete: (unitId: string) => void
+  isLoading?: boolean
 }
 
-export function ApartmentUnitsTable({ units = [], onEdit, onDelete, isLoading }: ApartmentUnitsTableProps) {
+export function ApartmentUnitsTable({ 
+  units = [], 
+  onEdit, 
+  onDelete,
+  isLoading 
+}: ApartmentUnitsTableProps) {
   const getStatusBadge = (status: ApartmentUnit['status']) => {
     switch (status) {
       case 'available':
-        return <Badge variant="success">Disponible</Badge>;
+        return <Badge variant="success">Disponible</Badge>
       case 'occupied':
-        return <Badge>Occupé</Badge>;
+        return <Badge>Occupé</Badge>
       case 'maintenance':
-        return <Badge variant="warning">Maintenance</Badge>;
+        return <Badge variant="warning">Maintenance</Badge>
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return <Badge variant="secondary">{status}</Badge>
     }
-  };
+  }
 
   if (isLoading) {
     return (
@@ -54,7 +59,7 @@ export function ApartmentUnitsTable({ units = [], onEdit, onDelete, isLoading }:
           ))}
         </TableBody>
       </Table>
-    );
+    )
   }
 
   return (
@@ -87,7 +92,7 @@ export function ApartmentUnitsTable({ units = [], onEdit, onDelete, isLoading }:
               <TableCell>{unit.deposit_amount?.toLocaleString() || "-"} FCFA</TableCell>
               <TableCell>{getStatusBadge(unit.status)}</TableCell>
               <TableCell className="text-right">
-                <div className="flex justify-end space-x-2">
+                <div className="flex justify-end gap-2">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -109,5 +114,5 @@ export function ApartmentUnitsTable({ units = [], onEdit, onDelete, isLoading }:
         )}
       </TableBody>
     </Table>
-  );
+  )
 }
