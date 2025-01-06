@@ -130,6 +130,7 @@ export type Database = {
           current_properties_count: number | null
           current_tenants_count: number | null
           email: string | null
+          has_received_expiry_notice: boolean | null
           id: string
           list_properties_on_site: boolean | null
           logo_url: string | null
@@ -137,7 +138,9 @@ export type Database = {
           phone: string | null
           show_phone_on_site: boolean | null
           status: string
+          subscription_end_date: string | null
           subscription_plan_id: string | null
+          subscription_start_date: string | null
           updated_at: string | null
         }
         Insert: {
@@ -149,6 +152,7 @@ export type Database = {
           current_properties_count?: number | null
           current_tenants_count?: number | null
           email?: string | null
+          has_received_expiry_notice?: boolean | null
           id?: string
           list_properties_on_site?: boolean | null
           logo_url?: string | null
@@ -156,7 +160,9 @@ export type Database = {
           phone?: string | null
           show_phone_on_site?: boolean | null
           status?: string
+          subscription_end_date?: string | null
           subscription_plan_id?: string | null
+          subscription_start_date?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -168,6 +174,7 @@ export type Database = {
           current_properties_count?: number | null
           current_tenants_count?: number | null
           email?: string | null
+          has_received_expiry_notice?: boolean | null
           id?: string
           list_properties_on_site?: boolean | null
           logo_url?: string | null
@@ -175,7 +182,9 @@ export type Database = {
           phone?: string | null
           show_phone_on_site?: boolean | null
           status?: string
+          subscription_end_date?: string | null
           subscription_plan_id?: string | null
+          subscription_start_date?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -681,6 +690,7 @@ export type Database = {
       subscription_plans: {
         Row: {
           created_at: string | null
+          duration_months: number | null
           features: string[] | null
           id: string
           max_properties: number | null
@@ -692,6 +702,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          duration_months?: number | null
           features?: string[] | null
           id?: string
           max_properties?: number | null
@@ -703,6 +714,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          duration_months?: number | null
           features?: string[] | null
           id?: string
           max_properties?: number | null
@@ -811,7 +823,10 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      check_subscription_expiry: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       user_role: "user" | "admin" | "super_admin"
