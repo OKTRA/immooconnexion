@@ -9,7 +9,7 @@ interface AgencyLayoutProps {
 export function AgencyLayout({ children }: AgencyLayoutProps) {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen bg-gradient-to-b from-dashboard-gradient-from to-dashboard-gradient-to">
         <AgencySidebar />
         <main className="flex-1 p-8">
           <SubscriptionNotification />

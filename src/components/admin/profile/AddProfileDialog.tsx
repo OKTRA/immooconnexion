@@ -1,53 +1,40 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ProfileForm } from "./ProfileForm"
-import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits"
-import { useToast } from "@/hooks/use-toast"
-import { AddProfileDialogProps } from "./types"
+import { Profile } from "./types"
 
-export function AddProfileDialog({ 
-  open, 
+interface AddProfileDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  newProfile: Profile
+  setNewProfile: (profile: Profile) => void
+  handleCreateAuthUser: () => Promise<void>
+  handleUpdateProfile: (userId: string) => Promise<void>
+  isEditing?: boolean
+}
+
+export function AddProfileDialog({
+  open,
   onOpenChange,
-  agencyId,
-  onProfileCreated,
   newProfile,
   setNewProfile,
   handleCreateAuthUser,
-  handleUpdateProfile
+  handleUpdateProfile,
+  isEditing = false
 }: AddProfileDialogProps) {
-  const { checkLimitReached } = useSubscriptionLimits()
-  const { toast } = useToast()
-
-  const handleOpenChange = async (newOpen: boolean) => {
-    if (newOpen && agencyId) {
-      const limitReached = await checkLimitReached('user')
-      if (limitReached) {
-        return
-      }
-    }
-    onOpenChange(newOpen)
-  }
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            Créer un compte
+            {isEditing ? "Modifier le profil" : "Ajouter un nouveau profil"}
           </DialogTitle>
         </DialogHeader>
         <ProfileForm
-          agencyId={agencyId}
-          newProfile={newProfile}
-          setNewProfile={setNewProfile}
-          onCreateAuthUser={handleCreateAuthUser}
-          onUpdateProfile={handleUpdateProfile}
-          onSuccess={() => {
-            onProfileCreated?.()
-            toast({
-              title: "Succès",
-              description: "Le profil a été créé avec succès",
-            })
-          }}
+          profile={newProfile}
+          setProfile={setNewProfile}
+          onSubmit={handleCreateAuthUser}
+          onUpdate={handleUpdateProfile}
+          isEditing={isEditing}
         />
       </DialogContent>
     </Dialog>
