@@ -5,7 +5,7 @@ import { AgencyUsersList } from "./AgencyUsersList"
 import { AgencyUserEditDialog } from "./AgencyUserEditDialog"
 import { useToast } from "@/hooks/use-toast"
 import { useAgencyUserEdit } from "./hooks/useAgencyUserEdit"
-import { Profile } from "../profile/types"
+import { Profile, ProfileFormData } from "@/types/profile"
 
 interface AgencyUsersProps {
   agencyId: string
@@ -48,21 +48,17 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
     setShowEditDialog(false)
     setSelectedUserId(null)
     setNewProfile({
-      id: '',
       email: '',
-      password: '',
       first_name: '',
       last_name: '',
       phone_number: '',
       role: 'user',
       agency_id: agencyId,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
       is_tenant: false,
       status: 'active',
       has_seen_warning: false,
-      agency_name: ''
-    })
+      password: ''
+    } as ProfileFormData)
   })
 
   const handleEdit = (userId: string) => {
@@ -71,7 +67,7 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
       setNewProfile({
         ...userToEdit,
         password: "", // Clear password for edit form
-      })
+      } as ProfileFormData)
       setSelectedUserId(userId)
       setShowEditDialog(true)
     }

@@ -28,13 +28,13 @@ export function UnitFormFields({
     try {
       if (isEditing) {
         const { error } = await supabase
-          .from('property_units')
+          .from('apartment_units')
           .update({
             unit_number: data.unit_number,
             floor_number: data.floor_number,
             area: data.area,
-            rent: data.rent,
-            deposit: data.deposit,
+            rent_amount: data.rent_amount,
+            deposit_amount: data.deposit_amount,
             status: data.status,
             description: data.description,
             updated_at: new Date().toISOString()
@@ -44,14 +44,14 @@ export function UnitFormFields({
         if (error) throw error
       } else {
         const { error } = await supabase
-          .from('property_units')
+          .from('apartment_units')
           .insert({
-            property_id: apartmentId,
+            apartment_id: apartmentId,
             unit_number: data.unit_number,
             floor_number: data.floor_number,
             area: data.area,
-            rent: data.rent,
-            deposit: data.deposit,
+            rent_amount: data.rent_amount,
+            deposit_amount: data.deposit_amount,
             status: data.status,
             description: data.description,
             created_at: new Date().toISOString(),

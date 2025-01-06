@@ -16,5 +16,6 @@ export interface Profile {
   agency_name?: string;
 }
 
-export type ProfileInsert = Omit<Profile, 'id' | 'created_at' | 'updated_at'>;
-export type ProfileUpdate = Partial<ProfileInsert>;
+export interface ProfileFormData extends Omit<Profile, 'id' | 'created_at' | 'updated_at'> {
+  password?: string;
+}

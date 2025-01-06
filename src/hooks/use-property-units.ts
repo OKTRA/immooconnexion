@@ -15,15 +15,18 @@ export function usePropertyUnits(apartmentId: string) {
         .order("unit_number");
 
       if (error) throw error;
-      return data as PropertyUnit[];
+      return data as unknown as PropertyUnit[];
     }
   });
 
   const addUnit = useMutation({
-    mutationFn: async (newUnit: PropertyUnitFormData) => {
+    mutationFn: async (newUnit: PropertyUnitFormData & { apartment_id: string }) => {
       const { data, error } = await supabase
         .from("apartment_units")
-        .insert(newUnit)
+        .insert({
+          ...newUnit,
+          apartment_id: apartmentId
+        })
         .select()
         .single();
 
@@ -68,6 +71,7 @@ export function usePropertyUnits(apartmentId: string) {
 
   return {
     ...query,
+    data: query.data || [],
     addUnit,
     updateUnit,
     deleteUnit
