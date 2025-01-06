@@ -8,6 +8,7 @@ interface ProfileFormProps {
   newProfile: ProfileFormData
   setNewProfile: (profile: ProfileFormData) => void
   onSuccess?: () => void
+  onUpdateProfile?: (userId: string) => Promise<void>
   isEditing?: boolean
   selectedAgencyId?: string
 }
@@ -16,12 +17,15 @@ export function ProfileForm({
   newProfile,
   setNewProfile,
   onSuccess,
+  onUpdateProfile,
   isEditing = false,
   selectedAgencyId,
 }: ProfileFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (onSuccess) {
+    if (isEditing && onUpdateProfile && newProfile.id) {
+      await onUpdateProfile(newProfile.id)
+    } else if (onSuccess) {
       onSuccess()
     }
   }

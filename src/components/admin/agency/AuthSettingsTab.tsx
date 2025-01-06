@@ -1,17 +1,28 @@
 import { ProfileForm } from "../profile/ProfileForm"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
-import { Profile } from "../profile/types"
+import { Profile, ProfileFormData } from "@/types/profile"
 import { useState } from "react"
 
 interface AuthSettingsTabProps {
-  profile: Profile;
-  onProfileUpdate: () => void;
+  profile: Profile
+  onProfileUpdate: () => void
 }
 
 export function AuthSettingsTab({ profile, onProfileUpdate }: AuthSettingsTabProps) {
   const { toast } = useToast()
-  const [editedProfile, setEditedProfile] = useState<Profile>(profile)
+  const [editedProfile, setEditedProfile] = useState<ProfileFormData>({
+    id: profile.id,
+    first_name: profile.first_name,
+    last_name: profile.last_name,
+    email: profile.email,
+    phone_number: profile.phone_number,
+    role: profile.role,
+    agency_id: profile.agency_id,
+    is_tenant: profile.is_tenant,
+    status: profile.status,
+    has_seen_warning: profile.has_seen_warning
+  })
 
   const handleProfileUpdate = async (userId: string): Promise<void> => {
     try {
@@ -24,7 +35,6 @@ export function AuthSettingsTab({ profile, onProfileUpdate }: AuthSettingsTabPro
 
       if (error) throw error
 
-      // Call the parent's onProfileUpdate after successful update
       onProfileUpdate()
       
       toast({
