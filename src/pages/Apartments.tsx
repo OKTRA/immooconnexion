@@ -4,14 +4,10 @@ import { Building, Plus } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { Button } from "@/components/ui/button"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { ApartmentForm } from "@/components/apartment/ApartmentForm"
 
 export default function Apartments() {
   const navigate = useNavigate()
@@ -52,10 +48,20 @@ export default function Apartments() {
             Gérez vos immeubles et leurs unités
           </p>
         </div>
-        <Button onClick={() => navigate("/agence/appartements/nouveau")}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nouvel Appartement
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Nouvel Appartement
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Créer un appartement</DialogTitle>
+            </DialogHeader>
+            <ApartmentForm />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {isLoading ? (
@@ -75,13 +81,20 @@ export default function Apartments() {
             Vous n'avez pas encore ajouté d'appartement.
             Commencez par en créer un !
           </CardDescription>
-          <Button 
-            className="mt-4"
-            onClick={() => navigate("/agence/appartements/nouveau")}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Nouvel Appartement
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="mt-4">
+                <Plus className="w-4 h-4 mr-2" />
+                Nouvel Appartement
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Créer un appartement</DialogTitle>
+              </DialogHeader>
+              <ApartmentForm />
+            </DialogContent>
+          </Dialog>
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
