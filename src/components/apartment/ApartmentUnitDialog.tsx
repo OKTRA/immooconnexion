@@ -1,31 +1,40 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { UnitFormFields } from "./unit-dialog/UnitFormFields"
-import { ApartmentUnit } from "./types"
+import { useForm } from "react-hook-form"
+import { ApartmentUnit } from "@/types/apartment"
 
-export interface ApartmentUnitDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  apartmentId: string;
-  selectedUnit?: ApartmentUnit;
-  onSuccess: () => void;
+interface ApartmentUnitDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  selectedUnit?: ApartmentUnit
+  apartmentId: string
+  onSuccess: () => void
 }
 
 export function ApartmentUnitDialog({
   open,
   onOpenChange,
-  apartmentId,
   selectedUnit,
+  apartmentId,
   onSuccess
 }: ApartmentUnitDialogProps) {
+  const form = useForm({
+    defaultValues: selectedUnit || {
+      unit_number: "",
+      floor_number: 0,
+      area: 0,
+      rent_amount: 0,
+      deposit_amount: 0,
+      status: "available",
+      description: ""
+    }
+  })
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {selectedUnit ? "Modifier l'unité" : "Ajouter une unité"}
-          </DialogTitle>
-        </DialogHeader>
         <UnitFormFields
+          form={form}
           selectedUnit={selectedUnit}
           apartmentId={apartmentId}
           onSuccess={onSuccess}

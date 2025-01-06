@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { LogOut } from "lucide-react"
-import { getSessionKey } from "@/integrations/supabase/client"
 
 export function LogoutButton() {
   const navigate = useNavigate()
@@ -11,8 +10,8 @@ export function LogoutButton() {
 
   const handleLogout = async () => {
     try {
-      // First clear any existing session from localStorage
-      localStorage.removeItem(getSessionKey())
+      // Clear any existing session from localStorage
+      localStorage.removeItem('supabase.auth.token')
       
       // Then attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut()
