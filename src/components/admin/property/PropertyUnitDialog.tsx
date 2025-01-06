@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useApartmentUnits } from "@/hooks/use-apartment-units";
-import { ApartmentUnit, ApartmentUnitFormData } from "@/components/apartment/types";
+import { ApartmentUnit, ApartmentUnitFormData, ApartmentUnitStatus } from "@/components/apartment/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,22 +68,11 @@ export function PropertyUnitDialog({
   }, [unit]);
 
   const handleSubmit = async () => {
-    const unitData = {
-      apartment_id: propertyId,
-      unit_number: formData.unit_number,
-      floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
-      area: formData.area ? parseFloat(formData.area) : null,
-      rent_amount: formData.rent_amount ? parseInt(formData.rent_amount) : 0,
-      deposit_amount: formData.deposit_amount ? parseInt(formData.deposit_amount) : null,
-      description: formData.description,
-      status: formData.status,
-    };
-
     try {
       if (unit) {
-        await updateUnit.mutateAsync({ ...unitData, id: unit.id });
+        await updateUnit.mutateAsync({ ...formData, id: unit.id });
       } else {
-        await createUnit.mutateAsync(unitData);
+        await createUnit.mutateAsync(formData);
       }
       onOpenChange(false);
     } catch (error) {

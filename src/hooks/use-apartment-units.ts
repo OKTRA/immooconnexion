@@ -1,13 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ApartmentUnit } from "@/components/apartment/types";
-import { useToast } from "@/hooks/use-toast";
+import { ApartmentUnit, ApartmentUnitFormData } from "@/components/apartment/types";
+import { toast } from "@/hooks/use-toast";
 
 export function useApartmentUnits(apartmentId: string) {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
-  const query = useQuery({
+  const { data: units = [], isLoading } = useQuery({
     queryKey: ["apartment-units", apartmentId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -22,81 +21,83 @@ export function useApartmentUnits(apartmentId: string) {
   });
 
   const createUnit = useMutation({
-    mutationFn: async (newUnit: Omit<ApartmentUnit, "id" | "created_at" | "updated_at">) => {
-      const { data, error } = await supabase
+    mutationFn: async (formData: ApartmentUnitFormData) => {
+      const unitData = {
+        apartment_id: apartmentId,
+        unit_number: formData.unit_number,
+        floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
+        area: formData.area ? parseFloat(formData.area) : null,
+        rent_amount: parseInt(formData.rent_amount),
+        deposit_amount: formData.deposit_amount ? parseInt(formData.deposit_amount) : null,
+        description: formData.description || null,
+        status: formData.status,
+      };
+
+      const { error } = await supabase
         .from("apartment_units")
-        .insert([{
-          ...newUnit,
-          apartment_id: apartmentId,
-          floor_number: Number(newUnit.floor_number),
-          area: Number(newUnit.area),
-          rent_amount: Number(newUnit.rent_amount),
-          deposit_amount: Number(newUnit.deposit_amount),
-        }])
-        .select()
-        .single();
+        .insert([unitData]);
 
       if (error) throw error;
-      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] });
       toast({
         title: "Succès",
-        description: "L'unité a été créée avec succès",
+        description: "Unité créée avec succès",
       });
     },
     onError: (error) => {
+      console.error("Error:", error);
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la création de l'unité",
+        description: "Une erreur est survenue lors de la création",
         variant: "destructive",
       });
-      console.error("Error creating unit:", error);
     },
   });
 
   const updateUnit = useMutation({
-    mutationFn: async (unit: ApartmentUnit) => {
-      const { data, error } = await supabase
+    mutationFn: async ({ id, ...formData }: ApartmentUnitFormData & { id: string }) => {
+      const unitData = {
+        unit_number: formData.unit_number,
+        floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
+        area: formData.area ? parseFloat(formData.area) : null,
+        rent_amount: parseInt(formData.rent_amount),
+        deposit_amount: formData.deposit_amount ? parseInt(formData.deposit_amount) : null,
+        description: formData.description || null,
+        status: formData.status,
+      };
+
+      const { error } = await supabase
         .from("apartment_units")
-        .update({
-          ...unit,
-          floor_number: Number(unit.floor_number),
-          area: Number(unit.area),
-          rent_amount: Number(unit.rent_amount),
-          deposit_amount: Number(unit.deposit_amount),
-        })
-        .eq("id", unit.id)
-        .select()
-        .single();
+        .update(unitData)
+        .eq("id", id);
 
       if (error) throw error;
-      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] });
       toast({
         title: "Succès",
-        description: "L'unité a été mise à jour avec succès",
+        description: "Unité mise à jour avec succès",
       });
     },
     onError: (error) => {
+      console.error("Error:", error);
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la mise à jour de l'unité",
+        description: "Une erreur est survenue lors de la mise à jour",
         variant: "destructive",
       });
-      console.error("Error updating unit:", error);
     },
   });
 
   const deleteUnit = useMutation({
-    mutationFn: async (unitId: string) => {
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from("apartment_units")
         .delete()
-        .eq("id", unitId);
+        .eq("id", id);
 
       if (error) throw error;
     },
@@ -104,21 +105,22 @@ export function useApartmentUnits(apartmentId: string) {
       queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] });
       toast({
         title: "Succès",
-        description: "L'unité a été supprimée avec succès",
+        description: "Unité supprimée avec succès",
       });
     },
     onError: (error) => {
+      console.error("Error:", error);
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la suppression de l'unité",
+        description: "Une erreur est survenue lors de la suppression",
         variant: "destructive",
       });
-      console.error("Error deleting unit:", error);
     },
   });
 
   return {
-    ...query,
+    units,
+    isLoading,
     createUnit,
     updateUnit,
     deleteUnit,
