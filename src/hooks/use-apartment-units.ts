@@ -10,15 +10,22 @@ export function useApartmentUnits(apartmentId: string) {
   const { data = [], isLoading } = useQuery({
     queryKey: ["apartment-units", apartmentId],
     queryFn: async () => {
+      console.log("Fetching units for apartment:", apartmentId);
+      
       const { data, error } = await supabase
         .from("apartment_units")
         .select("*")
         .eq("apartment_id", apartmentId)
         .order("unit_number");
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching apartment units:", error);
+        throw error;
+      }
+
       return data as ApartmentUnit[];
-    }
+    },
+    enabled: !!apartmentId
   });
 
   const createUnit = useMutation({
