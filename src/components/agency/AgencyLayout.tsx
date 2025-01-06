@@ -9,7 +9,7 @@ interface AgencyLayoutProps {
 export function AgencyLayout({ children }: AgencyLayoutProps) {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen">
         <AgencySidebar />
         <main className="flex-1 p-8">
           <SubscriptionNotification />
