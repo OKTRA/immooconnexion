@@ -1,7 +1,7 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { DialogHeader } from "./form/DialogHeader"
 import { ProfileForm } from "../profile/ProfileForm"
-import { Profile, ProfileFormData } from "@/types/profile"
+import { ProfileFormData } from "@/types/profile"
 
 interface AgencyUserEditDialogProps {
   open: boolean

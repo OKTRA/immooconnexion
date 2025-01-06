@@ -1,4 +1,4 @@
-import { ProfileFormData, UserRole } from "@/types/profile";
+import { ProfileFormData } from "@/types/profile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,7 +83,7 @@ export function ProfileForm({
         <Label htmlFor="role">Rôle</Label>
         <Select
           value={newProfile.role}
-          onValueChange={(value) => setNewProfile({ ...newProfile, role: value as UserRole })}
+          onValueChange={(value) => setNewProfile({ ...newProfile, role: value as "user" | "admin" | "super_admin" })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Sélectionner un rôle" />
