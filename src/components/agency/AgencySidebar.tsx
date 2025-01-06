@@ -22,7 +22,7 @@ export function AgencySidebar({ className }: AgencySidebarProps) {
         <div className="space-y-4">
           <div className="px-3 py-2">
             <div className="space-y-1">
-              <NavLink to="/agence/dashboard">
+              <NavLink to="/">
                 {({ isActive }) => (
                   <Button
                     variant={isActive ? "secondary" : "ghost"}
