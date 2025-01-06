@@ -1,30 +1,34 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { supabase } from './lib/supabase';
-import { PropertiesList } from './screens/PropertiesList';
-import { PropertyDetails } from './screens/PropertyDetails';
-import { Login } from './screens/Login';
-import { PropertyUnits } from './screens/PropertyUnits';
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { ThemeProvider } from "./providers/ThemeProvider";
+import Properties from "./pages/Properties";
+import PropertyDetails from "./pages/PropertyDetails";
+import Login from "./pages/Login";
+import PropertyUnits from "./pages/PropertyUnits";
 
-const Stack = createNativeStackNavigator();
+const router = createBrowserRouter([
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/properties",
+    element: <Properties />,
+  },
+  {
+    path: "/properties/:id",
+    element: <PropertyDetails />,
+  },
+  {
+    path: "/properties/:id/units",
+    element: <PropertyUnits />,
+  }
+]);
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen name="Login" component={Login} />
-          <Stack.Screen name="Properties" component={PropertiesList} />
-          <Stack.Screen name="PropertyDetails" component={PropertyDetails} />
-          <Stack.Screen 
-            name="PropertyUnits" 
-            component={PropertyUnits}
-            options={{ title: "Gestion des unités" }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
+    <ThemeProvider>
+      <RouterProvider router={router} />
+    </ThemeProvider>
   );
 }
