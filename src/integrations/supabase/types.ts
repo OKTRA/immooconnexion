@@ -197,6 +197,97 @@ export type Database = {
           },
         ]
       }
+      apartment_units: {
+        Row: {
+          apartment_id: string
+          area: number | null
+          created_at: string | null
+          deposit_amount: number | null
+          description: string | null
+          floor_number: number | null
+          id: string
+          rent_amount: number
+          status: string | null
+          unit_number: string
+          updated_at: string | null
+        }
+        Insert: {
+          apartment_id: string
+          area?: number | null
+          created_at?: string | null
+          deposit_amount?: number | null
+          description?: string | null
+          floor_number?: number | null
+          id?: string
+          rent_amount: number
+          status?: string | null
+          unit_number: string
+          updated_at?: string | null
+        }
+        Update: {
+          apartment_id?: string
+          area?: number | null
+          created_at?: string | null
+          deposit_amount?: number | null
+          description?: string | null
+          floor_number?: number | null
+          id?: string
+          rent_amount?: number
+          status?: string | null
+          unit_number?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_units_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apartments: {
+        Row: {
+          address: string | null
+          agency_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          total_units: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          agency_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          total_units?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          agency_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          total_units?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartments_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           agency_id: string | null

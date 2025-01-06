@@ -1,0 +1,114 @@
+import { useQuery } from "@tanstack/react-query"
+import { useNavigate } from "react-router-dom"
+import { Building, Plus } from "lucide-react"
+import { supabase } from "@/integrations/supabase/client"
+import { Button } from "@/components/ui/button"
+import { AgencyLayout } from "@/components/agency/AgencyLayout"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { useToast } from "@/hooks/use-toast"
+
+export default function Apartments() {
+  const navigate = useNavigate()
+  const { toast } = useToast()
+
+  const { data: apartments, isLoading } = useQuery({
+    queryKey: ["apartments"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("apartments")
+        .select(`
+          *,
+          apartment_units (
+            count
+          )
+        `)
+        .order("created_at", { ascending: false })
+
+      if (error) {
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les appartements",
+          variant: "destructive",
+        })
+        throw error
+      }
+
+      return data
+    },
+  })
+
+  return (
+    <AgencyLayout>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Appartements</h1>
+          <p className="text-muted-foreground">
+            Gérez vos immeubles et leurs unités
+          </p>
+        </div>
+        <Button onClick={() => navigate("/agence/appartements/nouveau")}>
+          <Plus className="w-4 h-4 mr-2" />
+          Nouvel Appartement
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader className="h-[100px] bg-muted" />
+              <CardContent className="h-[100px] bg-muted mt-2" />
+            </Card>
+          ))}
+        </div>
+      ) : apartments?.length === 0 ? (
+        <Card className="flex flex-col items-center justify-center p-8 text-center">
+          <Building className="w-12 h-12 mb-4 text-muted-foreground" />
+          <CardTitle className="mb-2">Aucun appartement</CardTitle>
+          <CardDescription>
+            Vous n'avez pas encore ajouté d'appartement.
+            Commencez par en créer un !
+          </CardDescription>
+          <Button 
+            className="mt-4"
+            onClick={() => navigate("/agence/appartements/nouveau")}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nouvel Appartement
+          </Button>
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {apartments?.map((apartment) => (
+            <Card 
+              key={apartment.id}
+              className="cursor-pointer transition-all hover:shadow-lg"
+              onClick={() => navigate(`/agence/appartements/${apartment.id}`)}
+            >
+              <CardHeader>
+                <CardTitle>{apartment.name}</CardTitle>
+                <CardDescription>{apartment.address}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    {apartment.apartment_units[0].count} unités
+                  </span>
+                  <Button variant="outline" size="sm">
+                    Voir les détails
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </AgencyLayout>
+  )
+}

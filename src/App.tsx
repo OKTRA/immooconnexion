@@ -17,6 +17,7 @@ import Pricing from "./pages/Pricing"
 import SubscriptionUpgrade from "./pages/SubscriptionUpgrade"
 import TermsOfService from "./pages/TermsOfService"
 import AgencySettings from "./pages/AgencySettings"
+import Apartments from "./pages/Apartments"
 import { ProtectedRoute } from "./components/auth/ProtectedRoute"
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
           <Route path="admin" element={<AgencyDashboard />} />
           <Route path="biens" element={<Properties />} />
           <Route path="biens/:propertyId" element={<PropertyDetails />} />
+          <Route path="appartements" element={<Apartments />} />
           <Route path="locataires" element={<Tenants />} />
           <Route path="contrats" element={<TenantContracts />} />
           <Route path="depenses" element={<Expenses />} />
