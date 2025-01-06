@@ -15,7 +15,7 @@ import { Apartment } from "@/types/apartment";
 export default function ApartmentDetails() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
-  const { units, isLoading: unitsLoading, deleteUnit } = useApartmentUnits(id);
+  const { data: units, isLoading: unitsLoading, deleteUnit } = useApartmentUnits(id);
 
   const { data: apartment, isLoading: apartmentLoading } = useQuery({
     queryKey: ["apartment", id],
@@ -57,7 +57,7 @@ export default function ApartmentDetails() {
           <Card>
             <CardContent className="p-0">
               <ApartmentUnitsTable
-                units={units}
+                units={units || []}
                 onEdit={(unit) => navigate(`/agence/appartements/${id}/unites/${unit.id}`)}
                 onDelete={handleDelete}
               />

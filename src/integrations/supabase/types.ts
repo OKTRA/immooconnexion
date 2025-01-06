@@ -778,6 +778,56 @@ export type Database = {
           },
         ]
       }
+      property_units: {
+        Row: {
+          area: number | null
+          created_at: string | null
+          deposit_amount: number | null
+          description: string | null
+          floor_number: number | null
+          id: string
+          property_id: string
+          rent_amount: number
+          status: Database["public"]["Enums"]["property_unit_status"] | null
+          unit_number: string
+          updated_at: string | null
+        }
+        Insert: {
+          area?: number | null
+          created_at?: string | null
+          deposit_amount?: number | null
+          description?: string | null
+          floor_number?: number | null
+          id?: string
+          property_id: string
+          rent_amount: number
+          status?: Database["public"]["Enums"]["property_unit_status"] | null
+          unit_number: string
+          updated_at?: string | null
+        }
+        Update: {
+          area?: number | null
+          created_at?: string | null
+          deposit_amount?: number | null
+          description?: string | null
+          floor_number?: number | null
+          id?: string
+          property_id?: string
+          rent_amount?: number
+          status?: Database["public"]["Enums"]["property_unit_status"] | null
+          unit_number?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_plans: {
         Row: {
           created_at: string | null
@@ -920,6 +970,11 @@ export type Database = {
       }
     }
     Enums: {
+      property_unit_status:
+        | "available"
+        | "occupied"
+        | "maintenance"
+        | "reserved"
       user_role: "user" | "admin" | "super_admin"
     }
     CompositeTypes: {
