@@ -5,29 +5,23 @@ export interface ApartmentUnit {
   apartment_id: string;
   unit_number: string;
   floor_number: number;
-  area?: number;
+  area: number | null;
   rent_amount: number;
-  deposit_amount?: number;
+  deposit_amount: number | null;
   status: ApartmentUnitStatus;
-  description?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface PropertyUnit extends Omit<ApartmentUnit, 'created_at' | 'updated_at' | 'floor_number'> {
+  description: string | null;
   created_at?: string;
   updated_at?: string;
-  floor_number?: number;
 }
 
 export interface ApartmentUnitFormData {
   unit_number: string;
   floor_number: number;
-  area?: number;
+  area: number | null;
   rent_amount: number;
-  deposit_amount?: number;
+  deposit_amount: number | null;
   status: ApartmentUnitStatus;
-  description?: string;
+  description: string | null;
 }
 
 export interface Apartment {

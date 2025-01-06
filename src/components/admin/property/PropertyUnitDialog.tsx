@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useApartmentUnits } from "@/hooks/use-apartment-units";
-import { ApartmentUnit, ApartmentUnitFormData, ApartmentUnitStatus } from "@/components/apartment/types";
+import { usePropertyUnits } from "@/hooks/use-property-units";
+import { PropertyUnit, PropertyUnitStatus } from "./types/propertyUnit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface PropertyUnitDialogProps {
   propertyId: string;
-  unit?: ApartmentUnit | null;
+  unit?: PropertyUnit | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -32,15 +32,15 @@ export function PropertyUnitDialog({
   open,
   onOpenChange,
 }: PropertyUnitDialogProps) {
-  const { createUnit, updateUnit } = useApartmentUnits(propertyId);
-  const [formData, setFormData] = useState<ApartmentUnitFormData>({
+  const { createUnit, updateUnit } = usePropertyUnits(propertyId);
+  const [formData, setFormData] = useState({
     unit_number: "",
     floor_number: "",
     area: "",
     rent_amount: "",
     deposit_amount: "",
     description: "",
-    status: "available",
+    status: "available" as PropertyUnitStatus,
   });
 
   useEffect(() => {
@@ -68,11 +68,20 @@ export function PropertyUnitDialog({
   }, [unit]);
 
   const handleSubmit = async () => {
+    const processedData = {
+      ...formData,
+      floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
+      area: formData.area ? parseFloat(formData.area) : null,
+      rent_amount: parseInt(formData.rent_amount),
+      deposit_amount: formData.deposit_amount ? parseInt(formData.deposit_amount) : null,
+      property_id: propertyId
+    };
+
     try {
       if (unit) {
-        await updateUnit.mutateAsync({ ...formData, id: unit.id });
+        await updateUnit.mutateAsync({ ...processedData, id: unit.id });
       } else {
-        await createUnit.mutateAsync(formData);
+        await createUnit.mutateAsync(processedData);
       }
       onOpenChange(false);
     } catch (error) {
