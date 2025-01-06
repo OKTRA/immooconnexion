@@ -1,9 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ApartmentUnit } from "@/components/apartment/types";
+import { useToast } from "@/hooks/use-toast";
 
 export function useApartmentUnits(apartmentId: string) {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const query = useQuery({
     queryKey: ["apartment-units", apartmentId],
@@ -32,6 +34,18 @@ export function useApartmentUnits(apartmentId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] });
+      toast({
+        title: "Succès",
+        description: "L'unité a été créée avec succès",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la création de l'unité",
+        variant: "destructive",
+      });
+      console.error("Error creating unit:", error);
     },
   });
 
@@ -49,6 +63,18 @@ export function useApartmentUnits(apartmentId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] });
+      toast({
+        title: "Succès",
+        description: "L'unité a été mise à jour avec succès",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la mise à jour de l'unité",
+        variant: "destructive",
+      });
+      console.error("Error updating unit:", error);
     },
   });
 
@@ -63,6 +89,18 @@ export function useApartmentUnits(apartmentId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] });
+      toast({
+        title: "Succès",
+        description: "L'unité a été supprimée avec succès",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suppression de l'unité",
+        variant: "destructive",
+      });
+      console.error("Error deleting unit:", error);
     },
   });
 

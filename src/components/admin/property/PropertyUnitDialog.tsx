@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { usePropertyUnits } from "@/hooks/use-property-units";
-import { PropertyUnit, PropertyUnitFormData } from "./types/propertyUnit";
+import { useApartmentUnits } from "@/hooks/use-apartment-units";
+import { ApartmentUnit, ApartmentUnitFormData } from "@/components/apartment/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface PropertyUnitDialogProps {
   propertyId: string;
-  unit?: PropertyUnit | null;
+  unit?: ApartmentUnit | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -32,16 +32,14 @@ export function PropertyUnitDialog({
   open,
   onOpenChange,
 }: PropertyUnitDialogProps) {
-  const { createUnit, updateUnit } = usePropertyUnits(propertyId);
-  const [formData, setFormData] = useState<PropertyUnitFormData>({
+  const { createUnit, updateUnit } = useApartmentUnits(propertyId);
+  const [formData, setFormData] = useState<ApartmentUnitFormData>({
     unit_number: "",
     floor_number: "",
     area: "",
-    rent: "",
-    deposit: "",
+    rent_amount: "",
+    deposit_amount: "",
     description: "",
-    category: "",
-    amenities: [],
     status: "available",
   });
 
@@ -51,11 +49,9 @@ export function PropertyUnitDialog({
         unit_number: unit.unit_number,
         floor_number: unit.floor_number?.toString() || "",
         area: unit.area?.toString() || "",
-        rent: unit.rent?.toString() || "",
-        deposit: unit.deposit?.toString() || "",
+        rent_amount: unit.rent_amount.toString(),
+        deposit_amount: unit.deposit_amount?.toString() || "",
         description: unit.description || "",
-        category: unit.category || "",
-        amenities: unit.amenities || [],
         status: unit.status,
       });
     } else {
@@ -63,11 +59,9 @@ export function PropertyUnitDialog({
         unit_number: "",
         floor_number: "",
         area: "",
-        rent: "",
-        deposit: "",
+        rent_amount: "",
+        deposit_amount: "",
         description: "",
-        category: "",
-        amenities: [],
         status: "available",
       });
     }
@@ -75,15 +69,13 @@ export function PropertyUnitDialog({
 
   const handleSubmit = async () => {
     const unitData = {
-      property_id: propertyId,
+      apartment_id: propertyId,
       unit_number: formData.unit_number,
       floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
       area: formData.area ? parseFloat(formData.area) : null,
-      rent: formData.rent ? parseInt(formData.rent) : null,
-      deposit: formData.deposit ? parseInt(formData.deposit) : null,
+      rent_amount: formData.rent_amount ? parseInt(formData.rent_amount) : 0,
+      deposit_amount: formData.deposit_amount ? parseInt(formData.deposit_amount) : null,
       description: formData.description,
-      category: formData.category,
-      amenities: formData.amenities,
       status: formData.status,
     };
 
@@ -139,22 +131,22 @@ export function PropertyUnitDialog({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="rent">Loyer (FCFA)</Label>
+            <Label htmlFor="rent_amount">Loyer (FCFA)</Label>
             <Input
-              id="rent"
+              id="rent_amount"
               type="number"
-              value={formData.rent}
-              onChange={(e) => setFormData({ ...formData, rent: e.target.value })}
+              value={formData.rent_amount}
+              onChange={(e) => setFormData({ ...formData, rent_amount: e.target.value })}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="deposit">Caution (FCFA)</Label>
+            <Label htmlFor="deposit_amount">Caution (FCFA)</Label>
             <Input
-              id="deposit"
+              id="deposit_amount"
               type="number"
-              value={formData.deposit}
+              value={formData.deposit_amount}
               onChange={(e) =>
-                setFormData({ ...formData, deposit: e.target.value })
+                setFormData({ ...formData, deposit_amount: e.target.value })
               }
             />
           </div>
@@ -162,7 +154,7 @@ export function PropertyUnitDialog({
             <Label htmlFor="status">Statut</Label>
             <Select
               value={formData.status}
-              onValueChange={(value) =>
+              onValueChange={(value: ApartmentUnitStatus) =>
                 setFormData({ ...formData, status: value })
               }
             >
