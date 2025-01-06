@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import Properties from "./pages/Properties"
-import PropertyDetails from "./pages/PropertyDetails"
+import ApartmentDetails from "./pages/ApartmentDetails"
 import ApartmentUnitForm from "./pages/ApartmentUnitForm"
 import Index from "./pages/Index"
 import { ThemeProvider } from "@/providers/ThemeProvider"
@@ -12,7 +12,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/agence/appartements/:id",
-    element: <PropertyDetails />,
+    element: <ApartmentDetails />,
   },
   {
     path: "/agence/appartements/:id/unites/nouveau",
