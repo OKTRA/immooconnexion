@@ -8,6 +8,7 @@ interface AgencyUserEditDialogProps {
   onOpenChange: (open: boolean) => void
   newProfile: Profile
   setNewProfile: (profile: Profile) => void
+  isSubmitting: boolean
   handleCreateAuthUser: () => Promise<void>
   handleUpdateProfile: (userId: string) => Promise<void>
   isEditing: boolean
@@ -18,6 +19,7 @@ export function AgencyUserEditDialog({
   onOpenChange,
   newProfile,
   setNewProfile,
+  isSubmitting,
   handleCreateAuthUser,
   handleUpdateProfile,
   isEditing
@@ -37,6 +39,7 @@ export function AgencyUserEditDialog({
           onCreateAuthUser={handleCreateAuthUser}
           onUpdateProfile={handleUpdateProfile}
           onSuccess={handleSuccess}
+          isSubmitting={isSubmitting}
         />
       </DialogContent>
     </Dialog>
