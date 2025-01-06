@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
-import { Building2, Edit, Plus, Trash } from "lucide-react"
+import { Plus } from "lucide-react"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,9 +8,11 @@ import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { ApartmentUnitsTable } from "@/components/apartment/ApartmentUnitsTable"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ApartmentForm } from "@/components/apartment/ApartmentForm"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
+import { ApartmentHeader } from "@/components/apartment/ApartmentHeader"
+import { ApartmentInfo } from "@/components/apartment/ApartmentInfo"
 import { ApartmentUnit } from "@/components/apartment/types"
 
 export default function ApartmentDetails() {
@@ -28,7 +30,7 @@ export default function ApartmentDetails() {
           apartment_units (*)
         `)
         .eq("id", id)
-        .single()
+        .maybeSingle()
 
       if (error) throw error
       return data
@@ -119,81 +121,10 @@ export default function ApartmentDetails() {
 
   return (
     <AgencyLayout>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{apartment.name}</h1>
-          <p className="text-muted-foreground">{apartment.address}</p>
-        </div>
-        <div className="flex gap-2">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Edit className="w-4 h-4 mr-2" />
-                Modifier
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Modifier l'appartement</DialogTitle>
-              </DialogHeader>
-              <ApartmentForm 
-                initialData={apartment}
-                isEditing={true}
-              />
-            </DialogContent>
-          </Dialog>
-
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive">
-                <Trash className="w-4 h-4 mr-2" />
-                Supprimer
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Cette action est irréversible. Cela supprimera définitivement l'appartement
-                  et toutes ses unités.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>
-                  Supprimer
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </div>
-
+      <ApartmentHeader apartment={apartment} onDelete={handleDelete} />
       <div className="grid gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Informations</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <dl className="grid gap-4">
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">Adresse</dt>
-                <dd>{apartment.address}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">Description</dt>
-                <dd>{apartment.description || "Aucune description"}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">Nombre d'unités</dt>
-                <dd>{apartment.apartment_units.length}</dd>
-              </div>
-            </dl>
-          </CardContent>
-        </Card>
-
+        <ApartmentInfo apartment={apartment} />
         <Separator />
-
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold tracking-tight">Unités</h2>

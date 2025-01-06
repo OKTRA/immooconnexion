@@ -20,6 +20,6 @@ export interface ApartmentUnitFormData {
   area: string;
   rent_amount: string;
   deposit_amount: string;
-  description: string;
   status: ApartmentUnitStatus;
+  description: string;
 }
