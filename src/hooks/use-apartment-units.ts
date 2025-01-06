@@ -22,13 +22,21 @@ export function useApartmentUnits(apartmentId: string) {
   });
 
   const createUnit = useMutation({
-    mutationFn: async (formData: ApartmentUnitFormData & { apartment_id: string }) => {
+    mutationFn: async (formData: ApartmentUnitFormData) => {
+      const newUnit = {
+        apartment_id: apartmentId,
+        unit_number: formData.unit_number,
+        floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
+        area: formData.area ? parseFloat(formData.area) : null,
+        rent_amount: parseInt(formData.rent_amount),
+        deposit_amount: formData.deposit_amount ? parseInt(formData.deposit_amount) : null,
+        status: formData.status,
+        description: formData.description || null
+      };
+
       const { error } = await supabase
         .from("apartment_units")
-        .insert([{
-          ...formData,
-          apartment_id: apartmentId,
-        }]);
+        .insert([newUnit]);
 
       if (error) throw error;
     },

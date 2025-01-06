@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
-import { ApartmentUnit, ApartmentUnitFormData, ApartmentUnitStatus } from "@/types/apartment"
+import { ApartmentUnit, ApartmentUnitFormData } from "@/types/apartment"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -14,7 +14,7 @@ const unitSchema = z.object({
   area: z.string(),
   rent_amount: z.string().min(1, "Le loyer est requis"),
   deposit_amount: z.string(),
-  status: z.enum(["available", "occupied", "maintenance"] as const),
+  status: z.enum(["available", "occupied", "maintenance"]),
   description: z.string().optional(),
 })
 
@@ -96,7 +96,11 @@ export function ApartmentUnitDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <UnitFormFields form={form} />
+            <UnitFormFields 
+              form={form} 
+              apartmentId={apartmentId}
+              onSuccess={() => onOpenChange(false)}
+            />
             
             <div className="flex justify-end gap-2">
               <Button
