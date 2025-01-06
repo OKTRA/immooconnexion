@@ -10,11 +10,20 @@ import AgencyEarnings from "./pages/AgencyEarnings"
 import Reports from "./pages/Reports"
 import Tenants from "./pages/Tenants"
 import { ThemeProvider } from "@/providers/ThemeProvider"
+import Login from "./pages/Login"
 
 const router = createBrowserRouter([
   {
+    path: "/login",
+    element: <Login />,
+  },
+  {
     path: "/",
     element: <Index />,
+  },
+  {
+    path: "/properties",
+    element: <Properties />,
   },
   {
     path: "/agence/biens",
