@@ -7,25 +7,16 @@ import { ApartmentUnitDialog } from "@/components/apartment/ApartmentUnitDialog"
 import { ApartmentUnitsTable } from "@/components/apartment/ApartmentUnitsTable"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { useToast } from "@/hooks/use-toast"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { supabase } from "@/lib/supabase"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
+import { supabase } from "@/integrations/supabase/client"
 
 export default function ApartmentUnits() {
-  const { id: apartmentId } = useParams<{ id: string }>()
+  const { id: apartmentId } = useParams()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [selectedUnit, setSelectedUnit] = useState<any>(null)
+  const [selectedUnit, setSelectedUnit] = useState(null)
   const [unitToDelete, setUnitToDelete] = useState<string | null>(null)
 
   const { data: apartment } = useQuery({
@@ -78,7 +69,7 @@ export default function ApartmentUnits() {
       if (error) throw error
 
       toast({ title: "Unité supprimée avec succès" })
-      queryClient.invalidateQueries(["apartment-units"])
+      queryClient.invalidateQueries({ queryKey: ["apartment-units"] })
     } catch (error) {
       console.error("Erreur:", error)
       toast({
@@ -93,7 +84,7 @@ export default function ApartmentUnits() {
   }
 
   const handleSuccess = () => {
-    queryClient.invalidateQueries(["apartment-units"])
+    queryClient.invalidateQueries({ queryKey: ["apartment-units"] })
     setSelectedUnit(null)
   }
 
