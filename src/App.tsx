@@ -21,6 +21,7 @@ import PublicProperties from "@/pages/PublicProperties"
 import Apartments from "@/pages/Apartments"
 import ApartmentDetails from "@/pages/ApartmentDetails"
 import ApartmentUnits from "@/pages/ApartmentUnits"
+import SuperAdminLogin from "@/pages/SuperAdminLogin"
 
 const queryClient = new QueryClient()
 
@@ -33,6 +34,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/super-admin/login" element={<SuperAdminLogin />} />
               <Route path="/properties" element={<PublicProperties />} />
               <Route path="/agence" element={<ProtectedRoute />}>
                 <Route path="admin" element={<AgencyDashboard />} />
