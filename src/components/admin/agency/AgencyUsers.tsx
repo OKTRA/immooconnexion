@@ -16,6 +16,18 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
   const { toast } = useToast()
+  const [newProfile, setNewProfile] = useState<ProfileFormData>({
+    email: '',
+    first_name: '',
+    last_name: '',
+    phone_number: '',
+    role: 'user',
+    agency_id: agencyId,
+    is_tenant: false,
+    status: 'active',
+    has_seen_warning: false,
+    password: ''
+  })
 
   const { data: users = [], refetch } = useQuery({
     queryKey: ["agency-users", agencyId],
@@ -36,8 +48,6 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
   })
 
   const {
-    newProfile,
-    setNewProfile,
     handleCreateAuthUser,
     handleUpdateProfile,
   } = useAgencyUserEdit(selectedUserId, agencyId, async () => {
@@ -58,7 +68,7 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
       status: 'active',
       has_seen_warning: false,
       password: ''
-    } as ProfileFormData)
+    })
   })
 
   const handleEdit = (userId: string) => {
@@ -66,8 +76,8 @@ export function AgencyUsers({ agencyId, onRefetch }: AgencyUsersProps) {
     if (userToEdit) {
       setNewProfile({
         ...userToEdit,
-        password: "", // Clear password for edit form
-      } as ProfileFormData)
+        password: "",
+      })
       setSelectedUserId(userId)
       setShowEditDialog(true)
     }

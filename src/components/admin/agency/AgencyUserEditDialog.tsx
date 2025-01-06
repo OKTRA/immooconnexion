@@ -24,17 +24,18 @@ export function AgencyUserEditDialog({
 }: AgencyUserEditDialogProps) {
   const handleSuccess = async () => {
     if (isEditing && newProfile.id) {
-      await handleUpdateProfile(newProfile.id);
+      await handleUpdateProfile(newProfile.id)
     } else {
-      await handleCreateAuthUser();
+      await handleCreateAuthUser()
     }
-    onOpenChange(false);
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader isEditing={isEditing} />
+      <DialogContent>
+        <DialogHeader>
+          {isEditing ? "Modifier l'utilisateur" : "Ajouter un utilisateur"}
+        </DialogHeader>
         <ProfileForm
           isEditing={isEditing}
           newProfile={newProfile}
