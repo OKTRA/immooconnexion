@@ -1,13 +1,11 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { ApartmentUnit, ApartmentUnitFormData } from "@/types/apartment"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Form } from "@/components/ui/form"
-import { UnitFormFields } from "./unit-dialog/UnitFormFields"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { UnitDialogForm } from "./unit-dialog/UnitDialogForm"
 
 const unitSchema = z.object({
   unit_number: z.string().min(1, "Le numéro d'unité est requis"),
@@ -96,29 +94,14 @@ export function ApartmentUnitDialog({
         </DialogHeader>
 
         <ScrollArea className="h-[400px] pr-4">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              <UnitFormFields 
-                form={form} 
-                apartmentId={apartmentId}
-                onSuccess={() => onOpenChange(false)}
-              />
-              
-              <div className="flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  disabled={isSubmitting}
-                >
-                  Annuler
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Chargement..." : isEditing ? "Modifier" : "Ajouter"}
-                </Button>
-              </div>
-            </form>
-          </Form>
+          <UnitDialogForm
+            form={form}
+            apartmentId={apartmentId}
+            isSubmitting={isSubmitting}
+            isEditing={isEditing}
+            onSubmit={handleSubmit}
+            onCancel={() => onOpenChange(false)}
+          />
         </ScrollArea>
       </DialogContent>
     </Dialog>
