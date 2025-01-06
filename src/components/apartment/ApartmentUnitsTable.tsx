@@ -18,7 +18,7 @@ interface ApartmentUnit {
   area: number
   rent_amount: number
   deposit_amount: number
-  status: string
+  status: "available" | "occupied" | "maintenance"
   description?: string
 }
 

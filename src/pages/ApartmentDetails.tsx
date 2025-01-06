@@ -176,7 +176,11 @@ export default function ApartmentDetails() {
               Nouvelle unité
             </Button>
           </div>
-          <ApartmentUnitsTable apartmentId={id} />
+          <ApartmentUnitsTable
+            units={apartment.apartment_units}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
         </div>
       </div>
     </AgencyLayout>

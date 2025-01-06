@@ -21,7 +21,12 @@ type ApartmentFormData = z.infer<typeof apartmentFormSchema>
 
 interface ApartmentFormProps {
   onSuccess?: () => void
-  initialData?: ApartmentFormData
+  initialData?: {
+    id?: string
+    name: string
+    address: string
+    description?: string
+  }
   isEditing?: boolean
 }
 

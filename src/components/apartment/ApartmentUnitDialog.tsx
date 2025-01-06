@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/integrations/supabase/client"
 
 const unitSchema = z.object({
   unit_number: z.string().min(1, "Le numéro d'unité est requis"),
@@ -33,7 +33,7 @@ interface ApartmentUnitDialogProps {
     area: number
     rent_amount: number
     deposit_amount: number
-    status: string
+    status: "available" | "occupied" | "maintenance"
     description?: string
   }
   onSuccess: () => void
