@@ -25,7 +25,14 @@ export function useApartmentUnits(apartmentId: string) {
     mutationFn: async (newUnit: Omit<ApartmentUnit, "id" | "created_at" | "updated_at">) => {
       const { data, error } = await supabase
         .from("apartment_units")
-        .insert([newUnit])
+        .insert([{
+          ...newUnit,
+          apartment_id: apartmentId,
+          floor_number: Number(newUnit.floor_number),
+          area: Number(newUnit.area),
+          rent_amount: Number(newUnit.rent_amount),
+          deposit_amount: Number(newUnit.deposit_amount),
+        }])
         .select()
         .single();
 
@@ -53,7 +60,13 @@ export function useApartmentUnits(apartmentId: string) {
     mutationFn: async (unit: ApartmentUnit) => {
       const { data, error } = await supabase
         .from("apartment_units")
-        .update(unit)
+        .update({
+          ...unit,
+          floor_number: Number(unit.floor_number),
+          area: Number(unit.area),
+          rent_amount: Number(unit.rent_amount),
+          deposit_amount: Number(unit.deposit_amount),
+        })
         .eq("id", unit.id)
         .select()
         .single();
