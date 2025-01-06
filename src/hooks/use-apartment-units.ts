@@ -22,17 +22,17 @@ export function useApartmentUnits(apartmentId: string) {
   });
 
   const createUnit = useMutation({
-    mutationFn: async (formData: ApartmentUnitFormData) => {
+    mutationFn: async (formData: ApartmentUnitFormData & { apartment_id: string }) => {
       const { error } = await supabase
         .from("apartment_units")
         .insert([{
           apartment_id: apartmentId,
           unit_number: formData.unit_number,
-          floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
-          area: formData.area ? parseFloat(formData.area) : null,
-          rent_amount: parseInt(formData.rent_amount),
-          deposit_amount: formData.deposit_amount ? parseInt(formData.deposit_amount) : null,
-          description: formData.description || null,
+          floor_number: formData.floor_number,
+          area: formData.area,
+          rent_amount: formData.rent_amount,
+          deposit_amount: formData.deposit_amount,
+          description: formData.description,
           status: formData.status,
         }]);
 
@@ -55,71 +55,9 @@ export function useApartmentUnits(apartmentId: string) {
     }
   });
 
-  const updateUnit = useMutation({
-    mutationFn: async ({ id, ...formData }: ApartmentUnitFormData & { id: string }) => {
-      const { error } = await supabase
-        .from("apartment_units")
-        .update({
-          unit_number: formData.unit_number,
-          floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
-          area: formData.area ? parseFloat(formData.area) : null,
-          rent_amount: parseInt(formData.rent_amount),
-          deposit_amount: formData.deposit_amount ? parseInt(formData.deposit_amount) : null,
-          description: formData.description || null,
-          status: formData.status,
-        })
-        .eq("id", id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] });
-      toast({
-        title: "Succès",
-        description: "L'unité a été mise à jour avec succès",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la mise à jour de l'unité",
-        variant: "destructive",
-      });
-      console.error("Error updating unit:", error);
-    }
-  });
-
-  const deleteUnit = useMutation({
-    mutationFn: async (unitId: string) => {
-      const { error } = await supabase
-        .from("apartment_units")
-        .delete()
-        .eq("id", unitId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] });
-      toast({
-        title: "Succès",
-        description: "L'unité a été supprimée avec succès",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la suppression de l'unité",
-        variant: "destructive",
-      });
-      console.error("Error deleting unit:", error);
-    }
-  });
-
   return {
-    units,
+    data: units,
     isLoading,
-    createUnit,
-    updateUnit,
-    deleteUnit
+    createUnit
   };
 }

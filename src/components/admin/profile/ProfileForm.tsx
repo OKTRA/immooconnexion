@@ -69,43 +69,7 @@ export function ProfileForm({
           <option value="super_admin">Super Administrateur</option>
         </select>
       </div>
-      <div>
-        <label htmlFor="agency_id">ID de l'agence</label>
-        <input
-          id="agency_id"
-          type="text"
-          value={newProfile.agency_id || ""}
-          onChange={(e) => setNewProfile({ ...newProfile, agency_id: e.target.value })}
-        />
-      </div>
-      <div>
-        <label htmlFor="is_tenant">Est locataire</label>
-        <input
-          id="is_tenant"
-          type="checkbox"
-          checked={newProfile.is_tenant}
-          onChange={(e) => setNewProfile({ ...newProfile, is_tenant: e.target.checked })}
-        />
-      </div>
-      <div>
-        <label htmlFor="status">Statut</label>
-        <input
-          id="status"
-          type="text"
-          value={newProfile.status}
-          onChange={(e) => setNewProfile({ ...newProfile, status: e.target.value })}
-        />
-      </div>
-      <div>
-        <label htmlFor="has_seen_warning">A vu l'avertissement</label>
-        <input
-          id="has_seen_warning"
-          type="checkbox"
-          checked={newProfile.has_seen_warning}
-          onChange={(e) => setNewProfile({ ...newProfile, has_seen_warning: e.target.checked })}
-        />
-      </div>
-      {isEditing && (
+      {!isEditing && (
         <div>
           <label htmlFor="password">Mot de passe</label>
           <input
@@ -115,7 +79,9 @@ export function ProfileForm({
           />
         </div>
       )}
-      <button type="submit">{isEditing ? "Modifier le profil" : "Ajouter un profil"}</button>
+      <button type="submit">
+        {isEditing ? "Modifier le profil" : "Ajouter un profil"}
+      </button>
     </form>
   );
 }

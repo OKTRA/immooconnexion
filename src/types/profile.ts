@@ -14,9 +14,11 @@ export interface Profile {
   status: string;
   has_seen_warning: boolean;
   agency_name?: string;
+  password?: string;
 }
 
 export interface ProfileFormData {
+  id?: string;
   email: string;
   first_name?: string;
   last_name?: string;
@@ -27,4 +29,6 @@ export interface ProfileFormData {
   status: string;
   has_seen_warning: boolean;
   password?: string;
+  created_at?: string;
+  updated_at?: string;
 }
