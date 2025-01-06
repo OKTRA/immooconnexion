@@ -1,6 +1,5 @@
-import React from "react"
-import { Edit, Trash } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Edit, Trash } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -8,24 +7,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-
-interface ApartmentUnit {
-  id: string
-  unit_number: string
-  floor_number: number
-  area: number
-  rent_amount: number
-  deposit_amount: number
-  status: "available" | "occupied" | "maintenance"
-  description?: string
-}
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { ApartmentUnit } from "./types";
 
 interface ApartmentUnitsTableProps {
-  units: ApartmentUnit[]
-  onEdit: (unit: ApartmentUnit) => void
-  onDelete: (unitId: string) => void
+  units: ApartmentUnit[];
+  onEdit: (unit: ApartmentUnit) => void;
+  onDelete: (unitId: string) => void;
 }
 
 export function ApartmentUnitsTable({
@@ -33,18 +22,16 @@ export function ApartmentUnitsTable({
   onEdit,
   onDelete,
 }: ApartmentUnitsTableProps) {
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: ApartmentUnit["status"]) => {
     switch (status) {
       case "available":
-        return <Badge variant="success">Disponible</Badge>
+        return <Badge variant="success">Disponible</Badge>;
       case "occupied":
-        return <Badge variant="default">Occupé</Badge>
+        return <Badge variant="default">Occupé</Badge>;
       case "maintenance":
-        return <Badge variant="warning">En maintenance</Badge>
-      default:
-        return <Badge variant="secondary">{status}</Badge>
+        return <Badge variant="warning">En maintenance</Badge>;
     }
-  }
+  };
 
   return (
     <div className="rounded-md border">
@@ -92,5 +79,5 @@ export function ApartmentUnitsTable({
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
