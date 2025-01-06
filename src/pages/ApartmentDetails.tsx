@@ -57,7 +57,8 @@ export default function ApartmentDetails() {
           <Card>
             <CardContent className="p-0">
               <ApartmentUnitsTable
-                units={units || []}
+                units={units}
+                isLoading={unitsLoading}
                 onEdit={(unit) => navigate(`/agence/appartements/${id}/unites/${unit.id}`)}
                 onDelete={handleDelete}
               />
