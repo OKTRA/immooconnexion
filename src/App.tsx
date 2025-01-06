@@ -1,60 +1,42 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import Index from "./pages/Index"
-import Properties from "./pages/Properties"
-import PropertyDetails from "./pages/PropertyDetails"
-import Tenants from "./pages/Tenants"
-import TenantContracts from "./pages/TenantContracts"
-import Login from "./pages/Login"
-import AgencyDashboard from "./pages/AgencyDashboard"
-import Expenses from "./pages/Expenses"
-import AgencyEarnings from "./pages/AgencyEarnings"
-import Reports from "./pages/Reports"
-import PropertySales from "./pages/PropertySales"
-import AdminDashboard from "./pages/AdminDashboard"
-import SuperAdminLogin from "./pages/SuperAdminLogin"
-import PublicProperties from "./pages/PublicProperties"
-import Pricing from "./pages/Pricing"
-import SubscriptionUpgrade from "./pages/SubscriptionUpgrade"
-import TermsOfService from "./pages/TermsOfService"
-import AgencySettings from "./pages/AgencySettings"
-import Apartments from "./pages/Apartments"
-import { ProtectedRoute } from "./components/auth/ProtectedRoute"
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { supabase } from './lib/supabase';
+import { PropertiesList } from './screens/PropertiesList';
+import { PropertyDetails } from './screens/PropertyDetails';
+import { Login } from './screens/Login';
+import { PropertyUnits } from './screens/PropertyUnits';
+import { Apartments } from './pages/Apartments';
+import { ApartmentUnits } from './pages/ApartmentUnits';
 
-function App() {
+const Stack = createNativeStackNavigator();
+
+export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<PublicProperties />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/super-admin/login" element={<SuperAdminLogin />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/terms" element={<TermsOfService />} />
-        
-        {/* Protected Routes */}
-        <Route path="/agence" element={<ProtectedRoute />}>
-          <Route path="admin" element={<AgencyDashboard />} />
-          <Route path="biens" element={<Properties />} />
-          <Route path="biens/:propertyId" element={<PropertyDetails />} />
-          <Route path="appartements" element={<Apartments />} />
-          <Route path="locataires" element={<Tenants />} />
-          <Route path="contrats" element={<TenantContracts />} />
-          <Route path="depenses" element={<Expenses />} />
-          <Route path="revenus" element={<AgencyEarnings />} />
-          <Route path="rapports" element={<Reports />} />
-          <Route path="ventes" element={<PropertySales />} />
-          <Route path="abonnement" element={<SubscriptionUpgrade />} />
-          <Route path="abonnement/upgrade" element={<SubscriptionUpgrade />} />
-          <Route path="gains" element={<AgencyEarnings />} />
-          <Route path="parametres" element={<AgencySettings />} />
-        </Route>
-
-        {/* Admin Routes */}
-        <Route path="/super-admin/admin" element={<ProtectedRoute adminOnly />}>
-          <Route index element={<AdminDashboard />} />
-        </Route>
-      </Routes>
-    </Router>
-  )
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Properties" component={PropertiesList} />
+          <Stack.Screen name="PropertyDetails" component={PropertyDetails} />
+          <Stack.Screen 
+            name="PropertyUnits" 
+            component={PropertyUnits}
+            options={{ title: "Gestion des unités" }}
+          />
+          <Stack.Screen 
+            name="Apartments" 
+            component={Apartments}
+            options={{ title: "Appartements" }}
+          />
+          <Stack.Screen 
+            name="ApartmentUnits" 
+            component={ApartmentUnits}
+            options={{ title: "Gestion des unités" }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
+  );
 }
-
-export default App
