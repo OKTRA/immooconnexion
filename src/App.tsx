@@ -4,6 +4,7 @@ import Apartments from "./pages/Apartments"
 import ApartmentDetails from "./pages/ApartmentDetails"
 import ApartmentUnitForm from "./pages/ApartmentUnitForm"
 import Index from "./pages/Index"
+import PropertySales from "./pages/PropertySales"
 import { ThemeProvider } from "@/providers/ThemeProvider"
 
 const router = createBrowserRouter([
@@ -12,7 +13,7 @@ const router = createBrowserRouter([
     element: <Index />,
   },
   {
-    path: "/agence/properties",
+    path: "/agence/biens",
     element: <Properties />,
   },
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
   {
     path: "/agence/appartements/:id/unites/nouveau",
     element: <ApartmentUnitForm />,
+  },
+  {
+    path: "/agence/ventes",
+    element: <PropertySales />,
   }
 ])
 
