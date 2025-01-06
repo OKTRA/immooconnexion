@@ -1,105 +1,60 @@
-import React, { useState } from "react"
-import { useParams } from "react-router-dom"
-import { Plus } from "lucide-react"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { ApartmentUnitDialog } from "@/components/apartment/ApartmentUnitDialog"
-import { ApartmentUnitsTable } from "@/components/apartment/ApartmentUnitsTable"
-import { AgencyLayout } from "@/components/agency/AgencyLayout"
-import { useToast } from "@/hooks/use-toast"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
-import { supabase } from "@/integrations/supabase/client"
+import React, { useState } from "react";
+import { useParams } from "react-router-dom";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ApartmentUnitDialog } from "@/components/apartment/ApartmentUnitDialog";
+import { ApartmentUnitsTable } from "@/components/apartment/ApartmentUnitsTable";
+import { AgencyLayout } from "@/components/agency/AgencyLayout";
+import { useApartmentUnits } from "@/hooks/use-apartment-units";
+import { ApartmentUnit } from "@/components/apartment/types";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export default function ApartmentUnits() {
-  const { id: apartmentId } = useParams()
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [selectedUnit, setSelectedUnit] = useState(null)
-  const [unitToDelete, setUnitToDelete] = useState<string | null>(null)
+  const { id: apartmentId } = useParams<{ id: string }>();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState<ApartmentUnit | null>(null);
+  const [unitToDelete, setUnitToDelete] = useState<string | null>(null);
 
-  const { data: apartment } = useQuery({
-    queryKey: ["apartment", apartmentId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("apartments")
-        .select("*")
-        .eq("id", apartmentId)
-        .single()
+  const { units = [], isLoading, deleteUnit } = useApartmentUnits(apartmentId!);
 
-      if (error) throw error
-      return data
-    },
-  })
-
-  const { data: units = [] } = useQuery({
-    queryKey: ["apartment-units", apartmentId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("apartment_units")
-        .select("*")
-        .eq("apartment_id", apartmentId)
-        .order("unit_number")
-
-      if (error) throw error
-      return data
-    },
-  })
-
-  const handleEdit = (unit: any) => {
-    setSelectedUnit(unit)
-    setDialogOpen(true)
-  }
+  const handleEdit = (unit: ApartmentUnit) => {
+    setSelectedUnit(unit);
+    setDialogOpen(true);
+  };
 
   const handleDelete = (unitId: string) => {
-    setUnitToDelete(unitId)
-    setDeleteDialogOpen(true)
-  }
+    setUnitToDelete(unitId);
+    setDeleteDialogOpen(true);
+  };
 
   const confirmDelete = async () => {
-    if (!unitToDelete) return
-
-    try {
-      const { error } = await supabase
-        .from("apartment_units")
-        .delete()
-        .eq("id", unitToDelete)
-
-      if (error) throw error
-
-      toast({ title: "Unité supprimée avec succès" })
-      queryClient.invalidateQueries({ queryKey: ["apartment-units"] })
-    } catch (error) {
-      console.error("Erreur:", error)
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la suppression",
-        variant: "destructive",
-      })
-    } finally {
-      setDeleteDialogOpen(false)
-      setUnitToDelete(null)
-    }
-  }
+    if (!unitToDelete) return;
+    await deleteUnit.mutateAsync(unitToDelete);
+    setDeleteDialogOpen(false);
+    setUnitToDelete(null);
+  };
 
   const handleSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ["apartment-units"] })
-    setSelectedUnit(null)
-  }
+    setSelectedUnit(null);
+    setDialogOpen(false);
+  };
 
   return (
     <AgencyLayout>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            {apartment?.name} - Unités
+            Unités
           </h1>
           <p className="text-muted-foreground">
             Gérez les unités de votre immeuble
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
+        <Button onClick={() => {
+          setSelectedUnit(null);
+          setDialogOpen(true);
+        }}>
           <Plus className="w-4 h-4 mr-2" />
           Nouvelle Unité
         </Button>
@@ -115,7 +70,7 @@ export default function ApartmentUnits() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         apartmentId={apartmentId!}
-        unitToEdit={selectedUnit}
+        unit={selectedUnit}
         onSuccess={handleSuccess}
       />
 
@@ -136,5 +91,5 @@ export default function ApartmentUnits() {
         </AlertDialogContent>
       </AlertDialog>
     </AgencyLayout>
-  )
+  );
 }

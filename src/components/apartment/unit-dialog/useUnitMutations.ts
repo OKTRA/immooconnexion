@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ApartmentUnit, ApartmentUnitFormData } from "../types";
+import { ApartmentUnitFormData } from "../types";
 import { useToast } from "@/hooks/use-toast";
 
 export function useUnitMutations(apartmentId: string) {
@@ -11,7 +11,16 @@ export function useUnitMutations(apartmentId: string) {
     mutationFn: async (data: ApartmentUnitFormData) => {
       const { error } = await supabase
         .from("apartment_units")
-        .insert([{ ...data, apartment_id: apartmentId }]);
+        .insert([{
+          apartment_id: apartmentId,
+          unit_number: data.unit_number,
+          floor_number: data.floor_number ? parseInt(data.floor_number) : null,
+          area: data.area ? parseFloat(data.area) : null,
+          rent_amount: parseInt(data.rent_amount),
+          deposit_amount: data.deposit_amount ? parseInt(data.deposit_amount) : null,
+          description: data.description || null,
+          status: data.status,
+        }]);
 
       if (error) throw error;
     },
@@ -30,10 +39,18 @@ export function useUnitMutations(apartmentId: string) {
   });
 
   const updateUnit = useMutation({
-    mutationFn: async ({ id, ...data }: ApartmentUnit) => {
+    mutationFn: async ({ id, ...data }: ApartmentUnitFormData & { id: string }) => {
       const { error } = await supabase
         .from("apartment_units")
-        .update(data)
+        .update({
+          unit_number: data.unit_number,
+          floor_number: data.floor_number ? parseInt(data.floor_number) : null,
+          area: data.area ? parseFloat(data.area) : null,
+          rent_amount: parseInt(data.rent_amount),
+          deposit_amount: data.deposit_amount ? parseInt(data.deposit_amount) : null,
+          description: data.description || null,
+          status: data.status,
+        })
         .eq("id", id);
 
       if (error) throw error;
