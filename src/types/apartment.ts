@@ -4,24 +4,14 @@ export interface ApartmentUnit {
   id: string;
   apartment_id: string;
   unit_number: string;
-  floor_number: number | null;
-  area: number | null;
+  floor_number: number;
+  area?: number;
   rent_amount: number;
-  deposit_amount: number | null;
+  deposit_amount?: number;
   status: ApartmentUnitStatus;
-  description: string | null;
+  description?: string;
   created_at?: string;
   updated_at?: string;
-}
-
-export interface ApartmentUnitFormData {
-  unit_number: string;
-  floor_number: string;
-  area: string;
-  rent_amount: string;
-  deposit_amount: string;
-  description: string;
-  status: ApartmentUnitStatus;
 }
 
 export interface Apartment {
@@ -33,4 +23,14 @@ export interface Apartment {
   agency_id: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface PropertyUnitFormData {
+  unit_number: string;
+  floor_number: number;
+  area?: number;
+  rent_amount: number;
+  deposit_amount?: number;
+  status: ApartmentUnitStatus;
+  description?: string;
 }

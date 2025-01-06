@@ -16,6 +16,15 @@ export interface Profile {
   agency_name?: string;
 }
 
-export interface ProfileFormData extends Omit<Profile, 'id' | 'created_at' | 'updated_at'> {
+export interface ProfileFormData {
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  phone_number?: string;
+  role: UserRole;
+  agency_id?: string;
+  is_tenant: boolean;
+  status: string;
+  has_seen_warning: boolean;
   password?: string;
 }
