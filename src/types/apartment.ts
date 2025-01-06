@@ -23,3 +23,14 @@ export interface ApartmentUnitFormData {
   description: string;
   status: ApartmentUnitStatus;
 }
+
+export interface Apartment {
+  id: string;
+  name: string;
+  address: string | null;
+  description: string | null;
+  total_units: number;
+  agency_id: string;
+  created_at: string;
+  updated_at: string;
+}

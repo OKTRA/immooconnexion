@@ -8,36 +8,34 @@ import { ApartmentUnitsTable } from "@/components/apartment/ApartmentUnitsTable"
 import { ApartmentHeader } from "@/components/apartment/ApartmentHeader";
 import { ApartmentInfo } from "@/components/apartment/ApartmentInfo";
 import { useApartmentUnits } from "@/hooks/use-apartment-units";
-import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Apartment } from "@/types/apartment";
 
 export default function ApartmentDetails() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { units, isLoading, deleteUnit } = useApartmentUnits(id);
+  const { units, isLoading: unitsLoading, deleteUnit } = useApartmentUnits(id);
+
+  const { data: apartment, isLoading: apartmentLoading } = useQuery({
+    queryKey: ["apartment", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("apartments")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+      return data as Apartment;
+    }
+  });
 
   const handleDelete = async (unitId: string) => {
-    try {
-      await deleteUnit.mutateAsync(unitId);
-      toast({
-        title: "Unité supprimée",
-        description: "L'unité a été supprimée avec succès",
-      });
-    } catch (error) {
-      console.error("Error:", error);
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la suppression",
-        variant: "destructive",
-      });
-    }
+    await deleteUnit.mutateAsync(unitId);
   };
 
-  const handleEdit = (unitId: string) => {
-    navigate(`/agence/appartements/${id}/unites/${unitId}`);
-  };
-
-  if (isLoading) {
+  if (apartmentLoading || unitsLoading || !apartment) {
     return (
       <AgencyLayout>
         <div className="animate-pulse">
@@ -50,9 +48,12 @@ export default function ApartmentDetails() {
 
   return (
     <AgencyLayout>
-      <ApartmentHeader />
+      <ApartmentHeader 
+        apartment={apartment}
+        onDelete={() => {/* Implement apartment deletion */}}
+      />
       <div className="grid gap-6">
-        <ApartmentInfo />
+        <ApartmentInfo apartment={apartment} />
         <Separator />
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -66,7 +67,7 @@ export default function ApartmentDetails() {
             <CardContent className="p-0">
               <ApartmentUnitsTable
                 units={units}
-                onEdit={handleEdit}
+                onEdit={(unit) => navigate(`/agence/appartements/${id}/unites/${unit.id}`)}
                 onDelete={handleDelete}
               />
             </CardContent>

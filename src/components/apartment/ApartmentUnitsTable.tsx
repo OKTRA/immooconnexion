@@ -1,15 +1,8 @@
-import { Edit, Trash } from "lucide-react";
+import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Edit, Trash } from "lucide-react";
+import { ApartmentUnit } from "@/types/apartment";
 import { Badge } from "@/components/ui/badge";
-import { ApartmentUnit } from "./types";
 
 interface ApartmentUnitsTableProps {
   units: ApartmentUnit[];
@@ -17,44 +10,48 @@ interface ApartmentUnitsTableProps {
   onDelete: (unitId: string) => void;
 }
 
-export function ApartmentUnitsTable({
-  units,
-  onEdit,
-  onDelete,
-}: ApartmentUnitsTableProps) {
-  const getStatusBadge = (status: ApartmentUnit["status"]) => {
+export function ApartmentUnitsTable({ units, onEdit, onDelete }: ApartmentUnitsTableProps) {
+  const getStatusBadge = (status: ApartmentUnit['status']) => {
     switch (status) {
-      case "available":
+      case 'available':
         return <Badge variant="success">Disponible</Badge>;
-      case "occupied":
-        return <Badge variant="default">Occupé</Badge>;
-      case "maintenance":
-        return <Badge variant="warning">En maintenance</Badge>;
+      case 'occupied':
+        return <Badge>Occupé</Badge>;
+      case 'maintenance':
+        return <Badge variant="warning">Maintenance</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>N° Unité</TableHead>
+          <TableHead>Étage</TableHead>
+          <TableHead>Surface (m²)</TableHead>
+          <TableHead>Loyer</TableHead>
+          <TableHead>Caution</TableHead>
+          <TableHead>Statut</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {units.length === 0 ? (
           <TableRow>
-            <TableHead>N° Unité</TableHead>
-            <TableHead>Étage</TableHead>
-            <TableHead>Surface (m²)</TableHead>
-            <TableHead>Loyer</TableHead>
-            <TableHead>Caution</TableHead>
-            <TableHead>Statut</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableCell colSpan={7} className="text-center py-4">
+              Aucune unité trouvée
+            </TableCell>
           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {units.map((unit) => (
+        ) : (
+          units.map((unit) => (
             <TableRow key={unit.id}>
               <TableCell>{unit.unit_number}</TableCell>
-              <TableCell>{unit.floor_number}</TableCell>
-              <TableCell>{unit.area}</TableCell>
-              <TableCell>{unit.rent_amount}</TableCell>
-              <TableCell>{unit.deposit_amount}</TableCell>
+              <TableCell>{unit.floor_number || "-"}</TableCell>
+              <TableCell>{unit.area || "-"}</TableCell>
+              <TableCell>{unit.rent_amount.toLocaleString()} FCFA</TableCell>
+              <TableCell>{unit.deposit_amount?.toLocaleString() || "-"} FCFA</TableCell>
               <TableCell>{getStatusBadge(unit.status)}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end space-x-2">
@@ -75,9 +72,9 @@ export function ApartmentUnitsTable({
                 </div>
               </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+          ))
+        )}
+      </TableBody>
+    </Table>
   );
 }
