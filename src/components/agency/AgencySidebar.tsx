@@ -68,7 +68,7 @@ export function AgencySidebar() {
 
   return (
     <Sidebar className={cn(
-      "fixed top-[60px] left-0 h-[calc(100vh-60px)] border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 w-[250px] transition-transform duration-300 ease-in-out",
+      "fixed top-[3.5rem] left-0 h-[calc(100vh-3.5rem)] border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 w-[250px] transition-transform duration-300 ease-in-out",
       isMobile ? "-translate-x-full mobile-sidebar" : ""
     )}>
       <div className="flex flex-col gap-2 p-4">
