@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { ApartmentUnitDialog } from "@/components/apartment/ApartmentUnitDialog"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { toast } from "sonner"
-import { ApartmentUnitFormData } from "@/types/apartment"
+import { ApartmentUnit } from "@/types/apartment"
 
 export default function ApartmentUnitForm() {
   const { id: apartmentId } = useParams()
@@ -12,9 +12,8 @@ export default function ApartmentUnitForm() {
     return <div>Apartment ID is required</div>
   }
 
-  const handleSubmit = async (data: ApartmentUnitFormData) => {
+  const handleSubmit = (data: ApartmentUnit) => {
     try {
-      // La logique de soumission sera gérée dans le composant Dialog
       toast.success("Unité ajoutée avec succès")
       navigate(`/agence/appartements/${apartmentId}`)
     } catch (error) {
