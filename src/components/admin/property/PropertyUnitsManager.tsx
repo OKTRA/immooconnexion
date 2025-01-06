@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { PropertyUnitDialog } from "./PropertyUnitDialog"
 import { PropertyUnitsTable } from "./PropertyUnitsTable"
 import { usePropertyUnits } from "@/hooks/use-property-units"
-import { PropertyUnitFormData } from "@/types/property"
+import { PropertyUnit, PropertyUnitFormData } from "@/types/property"
 
 interface PropertyUnitsManagerProps {
   propertyId: string
@@ -14,8 +14,17 @@ export function PropertyUnitsManager({ propertyId }: PropertyUnitsManagerProps) 
   const [editingUnit, setEditingUnit] = useState<PropertyUnitFormData | undefined>()
   const { data: units, isLoading } = usePropertyUnits(propertyId)
 
-  const handleEdit = (unit: PropertyUnitFormData) => {
-    setEditingUnit(unit)
+  const handleEdit = (unit: PropertyUnit) => {
+    const formData: PropertyUnitFormData = {
+      unit_number: unit.unit_number,
+      floor_number: unit.floor_number,
+      area: unit.area,
+      rent_amount: unit.rent_amount,
+      deposit_amount: unit.deposit_amount,
+      status: unit.status,
+      description: unit.description
+    }
+    setEditingUnit(formData)
     setShowDialog(true)
   }
 

@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from "react"
 import { PropertyUnitDialogProps, PropertyUnitFormData, PropertyUnitStatus } from "@/types/property"
 import { usePropertyUnits } from "@/hooks/use-property-units"
+import { useToast } from "@/hooks/use-toast"
 
 export function PropertyUnitDialog({ 
   propertyId,
@@ -14,32 +15,50 @@ export function PropertyUnitDialog({
   initialData
 }: PropertyUnitDialogProps) {
   const { addUnit, updateUnit } = usePropertyUnits(propertyId)
+  const { toast } = useToast()
   const [formData, setFormData] = useState<PropertyUnitFormData>(initialData || {
     unit_number: "",
-    floor_number: 0,
-    area: 0,
+    floor_number: null,
+    area: null,
     rent_amount: 0,
-    deposit_amount: 0,
+    deposit_amount: null,
     status: "available",
-    description: ""
+    description: null
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (initialData) {
-      await updateUnit.mutateAsync({
-        ...formData,
-        property_id: propertyId,
-      })
-    } else {
-      await addUnit.mutateAsync({
-        ...formData,
-        property_id: propertyId,
+    try {
+      if (initialData) {
+        await updateUnit.mutateAsync({
+          ...formData,
+          property_id: propertyId,
+        })
+        toast({
+          title: "Succès",
+          description: "L'unité a été mise à jour avec succès",
+        })
+      } else {
+        await addUnit.mutateAsync({
+          ...formData,
+          property_id: propertyId,
+        })
+        toast({
+          title: "Succès",
+          description: "L'unité a été créée avec succès",
+        })
+      }
+      
+      onOpenChange(false)
+    } catch (error) {
+      console.error('Error submitting unit:', error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'opération",
+        variant: "destructive",
       })
     }
-    
-    onOpenChange(false)
   }
 
   return (
@@ -67,9 +86,8 @@ export function PropertyUnitDialog({
             <Input
               id="floor_number"
               type="number"
-              value={formData.floor_number}
-              onChange={(e) => setFormData({ ...formData, floor_number: parseInt(e.target.value) })}
-              required
+              value={formData.floor_number || ""}
+              onChange={(e) => setFormData({ ...formData, floor_number: e.target.value ? parseInt(e.target.value) : null })}
             />
           </div>
 
@@ -78,9 +96,8 @@ export function PropertyUnitDialog({
             <Input
               id="area"
               type="number"
-              value={formData.area}
-              onChange={(e) => setFormData({ ...formData, area: parseInt(e.target.value) })}
-              required
+              value={formData.area || ""}
+              onChange={(e) => setFormData({ ...formData, area: e.target.value ? parseInt(e.target.value) : null })}
             />
           </div>
 
@@ -100,9 +117,8 @@ export function PropertyUnitDialog({
             <Input
               id="deposit_amount"
               type="number"
-              value={formData.deposit_amount}
-              onChange={(e) => setFormData({ ...formData, deposit_amount: parseInt(e.target.value) })}
-              required
+              value={formData.deposit_amount || ""}
+              onChange={(e) => setFormData({ ...formData, deposit_amount: e.target.value ? parseInt(e.target.value) : null })}
             />
           </div>
 
@@ -128,7 +144,7 @@ export function PropertyUnitDialog({
             <Label htmlFor="description">Description</Label>
             <Input
               id="description"
-              value={formData.description}
+              value={formData.description || ""}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
