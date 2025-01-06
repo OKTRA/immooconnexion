@@ -30,8 +30,8 @@ export function AddProfileDialog({
           </DialogTitle>
         </DialogHeader>
         <ProfileForm
-          profile={newProfile}
-          setProfile={setNewProfile}
+          newProfile={newProfile}
+          setNewProfile={setNewProfile}
           onSubmit={handleCreateAuthUser}
           onUpdate={handleUpdateProfile}
           isEditing={isEditing}
