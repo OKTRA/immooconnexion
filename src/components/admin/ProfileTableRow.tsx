@@ -6,7 +6,7 @@ import { ProfileActions } from "./ProfileActions"
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ProfileForm } from "./profile/ProfileForm"
-import { Profile } from "@/types/profile"
+import { Profile, ProfileFormData } from "@/types/profile"
 
 interface ProfileTableRowProps {
   profile: Profile;
@@ -16,16 +16,13 @@ interface ProfileTableRowProps {
 
 export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowProps) {
   const [showEditDialog, setShowEditDialog] = useState(false)
-  const [editedProfile, setEditedProfile] = useState<Profile>({
-    id: profile.id,
+  const [editedProfile, setEditedProfile] = useState<ProfileFormData>({
     email: profile.email || "",
     first_name: profile.first_name || "",
     last_name: profile.last_name || "",
     phone_number: profile.phone_number || "",
     role: profile.role,
     agency_id: profile.agency_id,
-    created_at: profile.created_at,
-    updated_at: profile.updated_at,
     is_tenant: profile.is_tenant,
     status: profile.status,
     has_seen_warning: profile.has_seen_warning,
@@ -33,7 +30,10 @@ export function ProfileTableRow({ profile, onEdit, refetch }: ProfileTableRowPro
   })
 
   const handleSubmit = async () => {
-    onEdit(editedProfile)
+    onEdit({
+      ...profile,
+      ...editedProfile,
+    })
     setShowEditDialog(false)
   }
 

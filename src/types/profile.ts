@@ -17,18 +17,8 @@ export interface Profile {
   password?: string;
 }
 
-export interface ProfileFormData {
+export interface ProfileFormData extends Omit<Profile, 'id' | 'created_at' | 'updated_at'> {
   id?: string;
-  email: string;
-  first_name?: string;
-  last_name?: string;
-  phone_number?: string;
-  role: UserRole;
-  agency_id?: string;
-  is_tenant: boolean;
-  status: string;
-  has_seen_warning: boolean;
-  password?: string;
   created_at?: string;
   updated_at?: string;
 }
