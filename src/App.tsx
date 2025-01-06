@@ -5,6 +5,10 @@ import ApartmentDetails from "./pages/ApartmentDetails"
 import ApartmentUnitForm from "./pages/ApartmentUnitForm"
 import Index from "./pages/Index"
 import PropertySales from "./pages/PropertySales"
+import Expenses from "./pages/Expenses"
+import AgencyEarnings from "./pages/AgencyEarnings"
+import Reports from "./pages/Reports"
+import Tenants from "./pages/Tenants"
 import { ThemeProvider } from "@/providers/ThemeProvider"
 
 const router = createBrowserRouter([
@@ -31,6 +35,22 @@ const router = createBrowserRouter([
   {
     path: "/agence/ventes",
     element: <PropertySales />,
+  },
+  {
+    path: "/agence/depenses",
+    element: <Expenses />,
+  },
+  {
+    path: "/agence/gains",
+    element: <AgencyEarnings />,
+  },
+  {
+    path: "/agence/rapports",
+    element: <Reports />,
+  },
+  {
+    path: "/agence/locataires",
+    element: <Tenants />,
   }
 ])
 

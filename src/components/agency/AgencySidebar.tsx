@@ -1,7 +1,16 @@
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Building2, Home, DollarSign, LayoutDashboard } from "lucide-react"
+import { 
+  Building2, 
+  Home, 
+  DollarSign, 
+  LayoutDashboard,
+  Users,
+  Receipt,
+  PieChart,
+  Wallet
+} from "lucide-react"
 import { NavLink } from "react-router-dom"
 
 interface AgencySidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -53,6 +62,50 @@ export function AgencySidebar({ className }: AgencySidebarProps) {
                 >
                   <DollarSign className="mr-2 h-4 w-4" />
                   Ventes
+                </Button>
+              )}
+            </NavLink>
+            <NavLink to="/agence/locataires">
+              {({ isActive }) => (
+                <Button
+                  variant={isActive ? "secondary" : "ghost"}
+                  className="w-full justify-start"
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Locataires
+                </Button>
+              )}
+            </NavLink>
+            <NavLink to="/agence/depenses">
+              {({ isActive }) => (
+                <Button
+                  variant={isActive ? "secondary" : "ghost"}
+                  className="w-full justify-start"
+                >
+                  <Receipt className="mr-2 h-4 w-4" />
+                  Dépenses
+                </Button>
+              )}
+            </NavLink>
+            <NavLink to="/agence/gains">
+              {({ isActive }) => (
+                <Button
+                  variant={isActive ? "secondary" : "ghost"}
+                  className="w-full justify-start"
+                >
+                  <Wallet className="mr-2 h-4 w-4" />
+                  Gains
+                </Button>
+              )}
+            </NavLink>
+            <NavLink to="/agence/rapports">
+              {({ isActive }) => (
+                <Button
+                  variant={isActive ? "secondary" : "ghost"}
+                  className="w-full justify-start"
+                >
+                  <PieChart className="mr-2 h-4 w-4" />
+                  Rapports
                 </Button>
               )}
             </NavLink>
