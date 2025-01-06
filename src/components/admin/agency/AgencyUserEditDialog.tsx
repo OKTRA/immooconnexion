@@ -39,7 +39,6 @@ export function AgencyUserEditDialog({
           onCreateAuthUser={handleCreateAuthUser}
           onUpdateProfile={handleUpdateProfile}
           onSuccess={handleSuccess}
-          isSubmitting={isSubmitting}
         />
       </DialogContent>
     </Dialog>
