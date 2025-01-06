@@ -24,36 +24,27 @@ export default function ApartmentDetails() {
         .from("apartments")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data as Apartment;
-    }
+    },
+    enabled: !!id && id !== "nouveau"
   });
 
   const handleDelete = async (unitId: string) => {
     await deleteUnit.mutateAsync(unitId);
   };
 
-  if (apartmentLoading || unitsLoading || !apartment) {
-    return (
-      <AgencyLayout>
-        <div className="animate-pulse">
-          <div className="h-8 w-64 bg-muted rounded mb-4" />
-          <div className="h-32 bg-muted rounded" />
-        </div>
-      </AgencyLayout>
-    );
-  }
-
   return (
     <AgencyLayout>
       <ApartmentHeader 
         apartment={apartment}
+        isLoading={apartmentLoading}
         onDelete={() => {/* Implement apartment deletion */}}
       />
       <div className="grid gap-6">
-        <ApartmentInfo apartment={apartment} />
+        {apartment && <ApartmentInfo apartment={apartment} />}
         <Separator />
         <div>
           <div className="flex items-center justify-between mb-4">
