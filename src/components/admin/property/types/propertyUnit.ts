@@ -1,6 +1,6 @@
 export interface PropertyUnit {
   id: string;
-  apartment_id: string;
+  property_id: string;
   unit_number: string;
   floor_number: number | null;
   area: number | null;
