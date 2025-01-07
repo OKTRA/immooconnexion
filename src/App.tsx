@@ -33,7 +33,7 @@ function App() {
         <AuthProvider>
           <Router>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<PublicProperties />} />
               <Route path="/login" element={<Login />} />
               <Route path="/super-admin/login" element={<SuperAdminLogin />} />
               <Route path="/super-admin/admin" element={<AdminDashboard />} />
