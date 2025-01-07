@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
-import { Building, Plus } from "lucide-react"
+import { Building, Plus, Home } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { Button } from "@/components/ui/button"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
@@ -8,10 +8,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { ApartmentForm } from "@/components/apartment/ApartmentForm"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState } from "react"
+import { ApartmentUnitsSection } from "@/components/apartment/ApartmentUnitsSection"
+import { useApartmentUnits } from "@/hooks/use-apartment-units"
 
 export default function Apartments() {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const [selectedApartmentId, setSelectedApartmentId] = useState<string | null>(null)
+  const [showUnitsDialog, setShowUnitsDialog] = useState(false)
 
   const { data: apartments, isLoading } = useQuery({
     queryKey: ["apartments"],
@@ -22,7 +28,6 @@ export default function Apartments() {
         throw new Error("Non authentifié")
       }
 
-      // Get the user's agency_id first
       const { data: userProfile } = await supabase
         .from("profiles")
         .select("agency_id")
@@ -33,7 +38,6 @@ export default function Apartments() {
         throw new Error("Aucune agence associée")
       }
 
-      // First get all apartments for the agency
       const { data: apartmentsData, error: apartmentsError } = await supabase
         .from("apartments")
         .select("*")
@@ -49,7 +53,6 @@ export default function Apartments() {
         throw apartmentsError
       }
 
-      // Then get the unit counts for each apartment
       const apartmentsWithUnits = await Promise.all(
         apartmentsData.map(async (apartment) => {
           const { count } = await supabase
@@ -68,9 +71,22 @@ export default function Apartments() {
     },
   })
 
+  const { 
+    data: units = [], 
+    isLoading: unitsLoading,
+    createUnit,
+    updateUnit,
+    deleteUnit
+  } = useApartmentUnits(selectedApartmentId || undefined)
+
   const handleViewDetails = (apartmentId: string) => {
     console.log("Navigating to apartment details with ID:", apartmentId)
     navigate(`/agence/appartements/${apartmentId}`)
+  }
+
+  const handleViewUnits = (apartmentId: string) => {
+    setSelectedApartmentId(apartmentId)
+    setShowUnitsDialog(true)
   }
 
   return (
@@ -131,37 +147,95 @@ export default function Apartments() {
           </Dialog>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {apartments?.map((apartment) => (
-            <Card 
-              key={apartment.id}
-              className="cursor-pointer transition-all hover:shadow-lg"
-              onClick={() => handleViewDetails(apartment.id)}
-            >
-              <CardHeader>
-                <CardTitle>{apartment.name}</CardTitle>
-                <CardDescription>{apartment.address}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    {apartment.unit_count} {apartment.unit_count === 1 ? "unité" : "unités"}
-                  </span>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleViewDetails(apartment.id)
-                    }}
-                  >
-                    Voir les détails
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {apartments?.map((apartment) => (
+              <Card 
+                key={apartment.id}
+                className="cursor-pointer transition-all hover:shadow-lg"
+              >
+                <CardHeader>
+                  <CardTitle>{apartment.name}</CardTitle>
+                  <CardDescription>{apartment.address}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm text-muted-foreground">
+                      {apartment.unit_count} {apartment.unit_count === 1 ? "unité" : "unités"}
+                    </span>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleViewDetails(apartment.id)
+                        }}
+                      >
+                        Voir les détails
+                      </Button>
+                      <Button 
+                        variant="default" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleViewUnits(apartment.id)
+                        }}
+                      >
+                        <Home className="w-4 h-4 mr-2" />
+                        Voir Unités
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Dialog open={showUnitsDialog} onOpenChange={setShowUnitsDialog}>
+            <DialogContent className="max-w-4xl">
+              <DialogHeader>
+                <DialogTitle>Gestion des Unités</DialogTitle>
+              </DialogHeader>
+              <Tabs defaultValue="units" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="units">Unités</TabsTrigger>
+                  <TabsTrigger value="payments">Paiements</TabsTrigger>
+                  <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
+                </TabsList>
+                <TabsContent value="units">
+                  {selectedApartmentId && (
+                    <ApartmentUnitsSection
+                      apartmentId={selectedApartmentId}
+                      units={units}
+                      isLoading={unitsLoading}
+                      onCreateUnit={async (data) => {
+                        await createUnit.mutateAsync(data)
+                      }}
+                      onUpdateUnit={async (data) => {
+                        await updateUnit.mutateAsync(data)
+                      }}
+                      onDeleteUnit={async (unitId) => {
+                        await deleteUnit.mutateAsync(unitId)
+                      }}
+                      onEdit={() => {}}
+                    />
+                  )}
+                </TabsContent>
+                <TabsContent value="payments">
+                  <div className="p-4 text-center text-muted-foreground">
+                    Fonctionnalité à venir
+                  </div>
+                </TabsContent>
+                <TabsContent value="maintenance">
+                  <div className="p-4 text-center text-muted-foreground">
+                    Fonctionnalité à venir
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </DialogContent>
+          </Dialog>
+        </>
       )}
     </AgencyLayout>
   )
