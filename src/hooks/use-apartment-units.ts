@@ -43,6 +43,8 @@ export function useApartmentUnits(apartmentId: string | undefined) {
 
   const createUnit = useMutation({
     mutationFn: async (newUnit: Omit<ApartmentUnit, 'id' | 'created_at' | 'updated_at' | 'apartment_id'>) => {
+      if (!apartmentId) throw new Error("Apartment ID is required")
+
       const { data, error } = await supabase
         .from("apartment_units")
         .insert({
@@ -63,12 +65,12 @@ export function useApartmentUnits(apartmentId: string | undefined) {
       })
     },
     onError: (error) => {
+      console.error("Error creating unit:", error)
       toast({
         title: "Erreur",
         description: "Impossible de créer l'unité",
         variant: "destructive",
       })
-      throw error
     }
   })
 
@@ -92,12 +94,12 @@ export function useApartmentUnits(apartmentId: string | undefined) {
       })
     },
     onError: (error) => {
+      console.error("Error updating unit:", error)
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour l'unité",
         variant: "destructive",
       })
-      throw error
     }
   })
 
@@ -118,12 +120,12 @@ export function useApartmentUnits(apartmentId: string | undefined) {
       })
     },
     onError: (error) => {
+      console.error("Error deleting unit:", error)
       toast({
         title: "Erreur",
         description: "Impossible de supprimer l'unité",
         variant: "destructive",
       })
-      throw error
     }
   })
 
