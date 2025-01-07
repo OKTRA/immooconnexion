@@ -54,9 +54,9 @@ export default function App() {
                 <Route path="sales" element={<PropertySales />} />
                 <Route path="earnings" element={<AgencyEarnings />} />
                 <Route path="subscription" element={<SubscriptionUpgrade />} />
-                <Route path="appartements" element={<Apartments />} />
-                <Route path="appartements/:id" element={<ApartmentDetails />} />
-                <Route path="appartements/:id/unites" element={<ApartmentUnits />} />
+                <Route path="apartments" element={<Apartments />} />
+                <Route path="apartments/:id" element={<ApartmentDetails />} />
+                <Route path="apartments/:id/units" element={<ApartmentUnits />} />
               </Route>
             </Routes>
           </Router>
