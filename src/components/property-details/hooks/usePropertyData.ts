@@ -5,11 +5,6 @@ export const usePropertyData = (id: string | undefined) => {
   return useQuery({
     queryKey: ['property', id],
     queryFn: async () => {
-      if (!id) {
-        console.error("No property ID provided")
-        throw new Error("Property ID is required")
-      }
-
       console.log("Fetching property details for ID:", id)
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
@@ -20,7 +15,7 @@ export const usePropertyData = (id: string | undefined) => {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role, agency_id')
+        .select('role')
         .eq('id', user.id)
         .maybeSingle()
 
@@ -40,6 +35,6 @@ export const usePropertyData = (id: string | undefined) => {
       console.log("Property data:", data)
       return data
     },
-    enabled: !!id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+    enabled: !!id
   })
 }
