@@ -11,6 +11,7 @@ export function useApartmentDetails(apartmentId: string | undefined) {
     queryKey: ["apartment", apartmentId],
     queryFn: async () => {
       if (!apartmentId) throw new Error("No apartment ID provided")
+
       const { data, error } = await supabase
         .from("apartments")
         .select("*")
@@ -21,15 +22,21 @@ export function useApartmentDetails(apartmentId: string | undefined) {
         console.error("Error fetching apartment:", error)
         throw error
       }
+
+      if (!data) {
+        throw new Error("Apartment not found")
+      }
+
       return data as Apartment
     },
-    enabled: !!apartmentId
+    enabled: Boolean(apartmentId)
   })
 
   const { data: units = [], isLoading: unitsLoading } = useQuery({
     queryKey: ["apartment-units", apartmentId],
     queryFn: async () => {
       if (!apartmentId) throw new Error("No apartment ID provided")
+
       const { data, error } = await supabase
         .from("apartment_units")
         .select("*")
@@ -40,9 +47,10 @@ export function useApartmentDetails(apartmentId: string | undefined) {
         console.error("Error fetching units:", error)
         throw error
       }
+
       return data as ApartmentUnit[]
     },
-    enabled: !!apartmentId
+    enabled: Boolean(apartmentId)
   })
 
   const createUnit = useMutation({
