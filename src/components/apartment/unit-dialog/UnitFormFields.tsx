@@ -3,13 +3,13 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ApartmentUnitFormData } from "@/components/apartment/types"
+import { ApartmentUnitFormData, ApartmentUnitStatus } from "@/types/apartment"
 
 interface UnitFormFieldsProps {
   formData: ApartmentUnitFormData
   setFormData: (data: ApartmentUnitFormData) => void
   handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  imagePreviewUrls?: string[]
+  imagePreviewUrls: string[]
 }
 
 export function UnitFormFields({
@@ -79,46 +79,12 @@ export function UnitFormFields({
         </div>
 
         <div>
-          <Label htmlFor="minimum_stay">Durée minimum de séjour</Label>
-          <Input
-            id="minimum_stay"
-            type="number"
-            value={formData.minimum_stay}
-            onChange={(e) =>
-              setFormData({ ...formData, minimum_stay: e.target.value })
-            }
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="maximum_stay">Durée maximum de séjour</Label>
-          <Input
-            id="maximum_stay"
-            type="number"
-            value={formData.maximum_stay}
-            onChange={(e) =>
-              setFormData({ ...formData, maximum_stay: e.target.value })
-            }
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="late_fee_percentage">Pénalité de retard (%)</Label>
-          <Input
-            id="late_fee_percentage"
-            type="number"
-            value={formData.late_fee_percentage}
-            onChange={(e) =>
-              setFormData({ ...formData, late_fee_percentage: e.target.value })
-            }
-          />
-        </div>
-
-        <div>
           <Label htmlFor="status">Statut</Label>
           <Select
             value={formData.status}
-            onValueChange={(value) => setFormData({ ...formData, status: value })}
+            onValueChange={(value: ApartmentUnitStatus) => 
+              setFormData({ ...formData, status: value })
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner un statut" />
