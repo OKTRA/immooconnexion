@@ -38,7 +38,7 @@ export function useApartmentUnits(apartmentId: string | undefined) {
         status: unit.status as ApartmentUnit["status"]
       })) as ApartmentUnit[]
     },
-    enabled: Boolean(apartmentId)
+    enabled: Boolean(apartmentId) && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(apartmentId)
   })
 
   const createUnit = useMutation({

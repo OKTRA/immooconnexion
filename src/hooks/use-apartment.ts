@@ -32,6 +32,6 @@ export function useApartment(apartmentId: string | undefined) {
 
       return data
     },
-    enabled: Boolean(apartmentId)
+    enabled: Boolean(apartmentId) && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(apartmentId)
   })
 }

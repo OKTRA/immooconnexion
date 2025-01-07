@@ -13,8 +13,10 @@ import { ApartmentDepositsTab } from "@/components/apartment/tabs/ApartmentDepos
 export default function ApartmentDetails() {
   const { id } = useParams<{ id: string }>()
   
-  // Redirect to apartments list if no valid ID
-  if (!id) {
+  // Validate ID format (basic UUID validation)
+  const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+  
+  if (!isValidUUID) {
     return <Navigate to="/agence/appartements" replace />
   }
 
