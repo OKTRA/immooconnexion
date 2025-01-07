@@ -15,11 +15,11 @@ import {
 } from "@/components/ui/tooltip"
 
 const navItems = [
-  { icon: ChartBar, label: "Tableau de bord", path: "/properties" },
-  { icon: Building2, label: "Biens", path: "/agence/biens" },
-  { icon: Users, label: "Appartements", path: "/agence/appartements" },
-  { icon: CreditCard, label: "Ventes", path: "/agence/ventes" },
-  { icon: History, label: "Dépenses", path: "/agence/depenses" },
+  { icon: ChartBar, label: "Tableau de bord", path: "/super-admin/admin" },
+  { icon: Building2, label: "Agences", path: "/super-admin/agencies" },
+  { icon: Users, label: "Agents", path: "/super-admin/agents" },
+  { icon: CreditCard, label: "Abonnements", path: "/super-admin/subscriptions" },
+  { icon: History, label: "Transactions", path: "/super-admin/transactions" },
 ]
 
 export function Navigation() {

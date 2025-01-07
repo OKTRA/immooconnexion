@@ -1,63 +1,73 @@
-import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
+import { Link } from "react-router-dom"
 import { AnimatedLogo } from "@/components/header/AnimatedLogo"
-import { Menu, Building2, Shield } from "lucide-react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { useState } from "react"
+import { Menu, Home, CreditCard, LogIn } from "lucide-react"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 
 export function PublicNavbar() {
-  const [isOpen, setIsOpen] = useState(false)
-
-  const navigationLinks = [
-    { href: "/public", label: "Propriétés", icon: Building2 },
-    { href: "/super-admin/login", label: "Super Admin", icon: Shield },
-    { href: "/login", label: "Espace propriétaire" }
-  ]
+  const NavLinks = () => (
+    <div className="flex flex-col md:flex-row items-center gap-4">
+      <Link 
+        to="/" 
+        className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors py-2 md:py-0 dark:text-gray-200 dark:hover:text-primary"
+      >
+        <Home className="h-4 w-4" />
+        Propriétés
+      </Link>
+      <Link 
+        to="/pricing" 
+        className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors py-2 md:py-0 dark:text-gray-200 dark:hover:text-primary"
+      >
+        <CreditCard className="h-4 w-4" />
+        Tarifs
+      </Link>
+      <Link to="/login">
+        <Button className="w-full md:w-auto flex items-center gap-2">
+          <LogIn className="h-4 w-4" />
+          Espace propriétaire
+        </Button>
+      </Link>
+    </div>
+  )
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <AnimatedLogo />
-        </Link>
+    <header className="bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50 w-full border-b shadow-sm dark:bg-background/95">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center py-4">
+          <Link to="/" className="flex items-center gap-2">
+            <AnimatedLogo />
+          </Link>
 
-        {/* Mobile Navigation */}
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild className="lg:hidden">
-            <Button variant="ghost" size="icon">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-64">
-            <nav className="flex flex-col gap-4 mt-8">
-              {navigationLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2 text-lg font-medium transition-colors hover:text-primary"
-                >
-                  {link.icon && <link.icon className="h-4 w-4" />}
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          </SheetContent>
-        </Sheet>
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-6">
+            <NavLinks />
+          </nav>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-6">
-          {navigationLinks.map((link) => (
-            <Link
-              key={link.href}
-              to={link.href}
-              className="flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary"
-            >
-              {link.icon && <link.icon className="h-4 w-4" />}
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+          {/* Mobile Navigation */}
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Menu</SheetTitle>
+                </SheetHeader>
+                <div className="mt-4">
+                  <NavLinks />
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
       </div>
     </header>
   )

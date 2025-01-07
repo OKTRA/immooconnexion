@@ -13,41 +13,28 @@ import { supabase } from "@/integrations/supabase/client";
 import { Apartment } from "@/types/apartment";
 
 export default function ApartmentDetails() {
-  const { id } = useParams<{ id: string }>();
+  const { id = "" } = useParams();
   const navigate = useNavigate();
-  
-  const { data: units = [], isLoading: unitsLoading, deleteUnit } = useApartmentUnits(id || "");
+  const { data: units = [], isLoading: unitsLoading, deleteUnit } = useApartmentUnits(id);
 
   const { data: apartment, isLoading: apartmentLoading } = useQuery({
     queryKey: ["apartment", id],
     queryFn: async () => {
-      console.log("Fetching apartment details for ID:", id);
-      
-      if (!id) throw new Error("No apartment ID provided");
-
       const { data, error } = await supabase
         .from("apartments")
         .select("*")
         .eq("id", id)
         .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching apartment:", error);
-        throw error;
-      }
-
+      if (error) throw error;
       return data as Apartment;
     },
-    enabled: !!id
+    enabled: !!id && id !== "nouveau"
   });
 
   const handleDelete = async (unitId: string) => {
     await deleteUnit.mutateAsync(unitId);
   };
-
-  if (!id) {
-    return <div>ID d'appartement manquant</div>;
-  }
 
   return (
     <AgencyLayout>

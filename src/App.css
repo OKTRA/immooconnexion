@@ -106,31 +106,3 @@ img {
   backface-visibility: hidden;
   perspective: 1000px;
 }
-
-/* Sidebar styles */
-.sidebar {
-  position: fixed;
-  left: 0;
-  top: 3.5rem;
-  height: calc(100vh - 3.5rem);
-  width: 250px;
-  background: white;
-  border-right: 1px solid #e5e7eb;
-  overflow-y: auto;
-  transition: transform 0.3s ease;
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    transform: translateX(-100%);
-  }
-  
-  .sidebar.open {
-    transform: translateX(0);
-  }
-}
-
-.dark .sidebar {
-  background: hsl(var(--background));
-  border-color: hsl(var(--border));
-}

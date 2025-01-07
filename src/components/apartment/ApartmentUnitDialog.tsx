@@ -1,12 +1,12 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { ApartmentUnit, ApartmentUnitFormData } from "@/types/apartment"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { UnitDialogForm } from "./unit-dialog/UnitDialogForm"
-import { useUnitMutations } from "./unit-dialog/useUnitMutations"
+import { Form } from "@/components/ui/form"
+import { UnitFormFields } from "./unit-dialog/UnitFormFields"
 
 const unitSchema = z.object({
   unit_number: z.string().min(1, "Le numéro d'unité est requis"),
@@ -30,12 +30,12 @@ interface ApartmentUnitDialogProps {
 export function ApartmentUnitDialog({
   open,
   onOpenChange,
+  onSubmit,
   initialData,
   apartmentId,
   isEditing = false
 }: ApartmentUnitDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { createUnit, updateUnit } = useUnitMutations(apartmentId)
 
   const form = useForm<ApartmentUnitFormData>({
     resolver: zodResolver(unitSchema),
@@ -62,12 +62,21 @@ export function ApartmentUnitDialog({
     try {
       setIsSubmitting(true)
       
-      if (isEditing && initialData) {
-        await updateUnit.mutateAsync({ ...formData, id: initialData.id })
-      } else {
-        await createUnit.mutateAsync(formData)
+      const unitData: ApartmentUnit = {
+        id: initialData?.id || crypto.randomUUID(),
+        apartment_id: apartmentId,
+        unit_number: formData.unit_number,
+        floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
+        area: formData.area ? parseFloat(formData.area) : null,
+        rent_amount: parseInt(formData.rent_amount),
+        deposit_amount: formData.deposit_amount ? parseInt(formData.deposit_amount) : null,
+        status: formData.status,
+        description: formData.description || null,
+        created_at: initialData?.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
-      
+
+      await onSubmit(unitData)
       onOpenChange(false)
     } catch (error) {
       console.error('Error submitting unit:', error)
@@ -85,16 +94,29 @@ export function ApartmentUnitDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="h-[400px] pr-4">
-          <UnitDialogForm
-            form={form}
-            apartmentId={apartmentId}
-            isSubmitting={isSubmitting}
-            isEditing={isEditing}
-            onSubmit={handleSubmit}
-            onCancel={() => onOpenChange(false)}
-          />
-        </ScrollArea>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <UnitFormFields 
+              form={form} 
+              apartmentId={apartmentId}
+              onSuccess={() => onOpenChange(false)}
+            />
+            
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
+              >
+                Annuler
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Chargement..." : isEditing ? "Modifier" : "Ajouter"}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )

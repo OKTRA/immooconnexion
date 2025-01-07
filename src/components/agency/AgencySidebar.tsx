@@ -1,119 +1,103 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { 
-  Building2, 
-  Home, 
-  DollarSign, 
   LayoutDashboard,
   Users,
+  Building2,
   Receipt,
-  PieChart,
-  Wallet
+  CircleDollarSign,
+  BarChart2,
+  FileText,
+  Settings,
+  CreditCard,
+  Building
 } from "lucide-react"
-import { NavLink } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
+import { cn } from "@/lib/utils"
+import { Sidebar } from "@/components/ui/sidebar"
+import { useIsMobile } from "@/hooks/use-mobile"
 
-interface AgencySidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
+const menuItems = [
+  {
+    title: "Tableau de bord",
+    href: "/agence/admin",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Locataires",
+    href: "/agence/locataires",
+    icon: Users,
+  },
+  {
+    title: "Biens",
+    href: "/agence/biens",
+    icon: Building2,
+  },
+  {
+    title: "Appartements",
+    href: "/agence/appartements",
+    icon: Building,
+  },
+  {
+    title: "Ventes",
+    href: "/agence/ventes",
+    icon: Receipt,
+  },
+  {
+    title: "Dépenses",
+    href: "/agence/depenses",
+    icon: CircleDollarSign,
+  },
+  {
+    title: "Gains",
+    href: "/agence/gains",
+    icon: BarChart2,
+  },
+  {
+    title: "Rapports",
+    href: "/agence/rapports",
+    icon: FileText,
+  },
+  {
+    title: "Abonnement",
+    href: "/agence/abonnement",
+    icon: CreditCard,
+  },
+  {
+    title: "Paramètres",
+    href: "/agence/parametres",
+    icon: Settings,
+  },
+]
 
-export function AgencySidebar({ className }: AgencySidebarProps) {
+export function AgencySidebar() {
+  const location = useLocation()
+  const isMobile = useIsMobile()
+
   return (
-    <div className={cn("fixed left-0 top-14 z-30 h-[calc(100vh-3.5rem)] w-64 border-r bg-white lg:block dark:bg-gray-950", className)}>
-      <ScrollArea className="h-full py-6">
-        <div className="space-y-4">
-          <div className="px-3 py-2">
-            <div className="space-y-1">
-              <NavLink to="/properties">
-                {({ isActive }) => (
-                  <Button
-                    variant={isActive ? "secondary" : "ghost"}
-                    className="w-full justify-start"
-                  >
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Tableau de bord
-                  </Button>
-                )}
-              </NavLink>
-              <NavLink to="/agence/biens">
-                {({ isActive }) => (
-                  <Button
-                    variant={isActive ? "secondary" : "ghost"}
-                    className="w-full justify-start"
-                  >
-                    <Home className="mr-2 h-4 w-4" />
-                    Biens
-                  </Button>
-                )}
-              </NavLink>
-              <NavLink to="/agence/appartements">
-                {({ isActive }) => (
-                  <Button
-                    variant={isActive ? "secondary" : "ghost"}
-                    className="w-full justify-start"
-                  >
-                    <Building2 className="mr-2 h-4 w-4" />
-                    Appartements
-                  </Button>
-                )}
-              </NavLink>
-              <NavLink to="/agence/ventes">
-                {({ isActive }) => (
-                  <Button
-                    variant={isActive ? "secondary" : "ghost"}
-                    className="w-full justify-start"
-                  >
-                    <DollarSign className="mr-2 h-4 w-4" />
-                    Ventes
-                  </Button>
-                )}
-              </NavLink>
-              <NavLink to="/agence/locataires">
-                {({ isActive }) => (
-                  <Button
-                    variant={isActive ? "secondary" : "ghost"}
-                    className="w-full justify-start"
-                  >
-                    <Users className="mr-2 h-4 w-4" />
-                    Locataires
-                  </Button>
-                )}
-              </NavLink>
-              <NavLink to="/agence/depenses">
-                {({ isActive }) => (
-                  <Button
-                    variant={isActive ? "secondary" : "ghost"}
-                    className="w-full justify-start"
-                  >
-                    <Receipt className="mr-2 h-4 w-4" />
-                    Dépenses
-                  </Button>
-                )}
-              </NavLink>
-              <NavLink to="/agence/gains">
-                {({ isActive }) => (
-                  <Button
-                    variant={isActive ? "secondary" : "ghost"}
-                    className="w-full justify-start"
-                  >
-                    <Wallet className="mr-2 h-4 w-4" />
-                    Gains
-                  </Button>
-                )}
-              </NavLink>
-              <NavLink to="/agence/rapports">
-                {({ isActive }) => (
-                  <Button
-                    variant={isActive ? "secondary" : "ghost"}
-                    className="w-full justify-start"
-                  >
-                    <PieChart className="mr-2 h-4 w-4" />
-                    Rapports
-                  </Button>
-                )}
-              </NavLink>
-            </div>
-          </div>
-        </div>
-      </ScrollArea>
-    </div>
+    <Sidebar className={cn(
+      "fixed top-[3.5rem] left-0 h-[calc(100vh-3.5rem)] border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 w-[250px] transition-transform duration-300 ease-in-out",
+      isMobile ? "-translate-x-full mobile-sidebar" : ""
+    )}>
+      <div className="flex flex-col gap-2 p-4">
+        {menuItems.map((item) => (
+          <Link
+            key={item.href}
+            to={item.href}
+            onClick={() => {
+              if (isMobile) {
+                document.querySelector('.mobile-sidebar')?.classList.remove('translate-x-0')
+              }
+            }}
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50",
+              location.pathname === item.href && 
+              "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50"
+            )}
+          >
+            <item.icon className="h-4 w-4" />
+            <span>{item.title}</span>
+          </Link>
+        ))}
+      </div>
+    </Sidebar>
   )
 }
