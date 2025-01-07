@@ -5,10 +5,9 @@ import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
-import { toast } from "@/hooks/use-toast"
 
 export function LatePaymentFees() {
-  const { data: fees = [], refetch } = useQuery({
+  const { data: fees = [] } = useQuery({
     queryKey: ["late-payment-fees"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -16,22 +15,22 @@ export function LatePaymentFees() {
         .select(`
           *,
           lease:apartment_leases(
-            tenant:tenants(nom, prenom),
+            tenant:apartment_tenants(first_name, last_name),
             unit:apartment_units(
               unit_number,
               apartment:apartments(name)
             )
           )
         `)
-        .order("created_at", { ascending: false })
         .eq("status", "pending")
+        .order("created_at", { ascending: false })
 
       if (error) throw error
       return data
     },
   })
 
-  const updateFeeStatus = async (id: string, status: string) => {
+  const handleFeeUpdate = async (id: string, status: string) => {
     try {
       const { error } = await supabase
         .from("late_payment_fees")
@@ -39,20 +38,8 @@ export function LatePaymentFees() {
         .eq("id", id)
 
       if (error) throw error
-
-      toast({
-        title: "Statut mis à jour",
-        description: "Le statut de la pénalité a été mis à jour avec succès",
-      })
-
-      refetch()
     } catch (error) {
       console.error("Error updating fee status:", error)
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la mise à jour du statut",
-        variant: "destructive",
-      })
     }
   }
 
@@ -70,14 +57,14 @@ export function LatePaymentFees() {
             >
               <div className="space-y-1">
                 <p className="font-medium">
-                  {fee.lease?.tenant?.prenom} {fee.lease?.tenant?.nom}
+                  {fee.lease?.tenant?.first_name} {fee.lease?.tenant?.last_name}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {fee.lease?.unit?.apartment?.name} - Unité{" "}
                   {fee.lease?.unit?.unit_number}
                 </p>
                 <p className="text-sm">
-                  Montant: {fee.amount.toLocaleString()} FCFA
+                  Montant: {fee.amount?.toLocaleString()} FCFA
                 </p>
                 <p className="text-sm">Jours de retard: {fee.days_late}</p>
                 <p className="text-xs text-muted-foreground">
@@ -89,14 +76,14 @@ export function LatePaymentFees() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => updateFeeStatus(fee.id, "paid")}
+                  onClick={() => handleFeeUpdate(fee.id, "paid")}
                 >
                   Marquer comme payé
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => updateFeeStatus(fee.id, "cancelled")}
+                  onClick={() => handleFeeUpdate(fee.id, "cancelled")}
                 >
                   Annuler
                 </Button>
