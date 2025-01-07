@@ -37,7 +37,7 @@ export function ApartmentUnitDialog({
     }
   }
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = async () => {
     const unitData: ApartmentUnit = {
       id: initialData?.id || '',
       apartment_id: apartmentId,
@@ -51,7 +51,7 @@ export function ApartmentUnitDialog({
       created_at: initialData?.created_at,
       updated_at: initialData?.updated_at,
     }
-    handleSubmit()
+    await onSubmit(unitData)
     onOpenChange(false)
   }
 
