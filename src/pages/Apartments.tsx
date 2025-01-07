@@ -1,19 +1,12 @@
 import { useQuery } from "@tanstack/react-query"
-import { Plus } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
-import { Button } from "@/components/ui/button"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { useToast } from "@/hooks/use-toast"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { ApartmentForm } from "@/components/apartment/ApartmentForm"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useState } from "react"
-import { ApartmentUnitsSection } from "@/components/apartment/ApartmentUnitsSection"
 import { useApartmentUnits } from "@/hooks/use-apartment-units"
-import { ApartmentCard } from "@/components/apartment/ApartmentCard"
-import { ApartmentSkeleton } from "@/components/apartment/ApartmentSkeleton"
-import { EmptyApartmentState } from "@/components/apartment/EmptyApartmentState"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ApartmentHeader } from "@/components/apartment/ApartmentHeader"
+import { ApartmentList } from "@/components/apartment/ApartmentList"
+import { ApartmentUnitsDialog } from "@/components/apartment/ApartmentUnitsDialog"
 
 export default function Apartments() {
   const { toast } = useToast()
@@ -87,94 +80,30 @@ export default function Apartments() {
 
   return (
     <AgencyLayout>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Appartements</h1>
-          <p className="text-muted-foreground">
-            Gérez vos immeubles et leurs unités
-          </p>
-        </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Nouvel Appartement
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Créer un appartement</DialogTitle>
-            </DialogHeader>
-            <ApartmentForm />
-          </DialogContent>
-        </Dialog>
-      </div>
+      <ApartmentHeader />
+      
+      <ApartmentList
+        apartments={apartments || []}
+        isLoading={isLoading}
+        onViewUnits={handleViewUnits}
+      />
 
-      {isLoading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(3)].map((_, i) => (
-            <ApartmentSkeleton key={i} />
-          ))}
-        </div>
-      ) : apartments?.length === 0 ? (
-        <EmptyApartmentState />
-      ) : (
-        <>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {apartments?.map((apartment) => (
-              <ApartmentCard
-                key={apartment.id}
-                apartment={apartment}
-                onViewUnits={handleViewUnits}
-              />
-            ))}
-          </div>
-
-          <Dialog open={showUnitsDialog} onOpenChange={setShowUnitsDialog}>
-            <DialogContent className="max-w-4xl">
-              <DialogHeader>
-                <DialogTitle>Gestion des Unités</DialogTitle>
-              </DialogHeader>
-              <Tabs defaultValue="units" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="units">Unités</TabsTrigger>
-                  <TabsTrigger value="payments">Paiements</TabsTrigger>
-                  <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
-                </TabsList>
-                <TabsContent value="units">
-                  {selectedApartmentId && (
-                    <ApartmentUnitsSection
-                      apartmentId={selectedApartmentId}
-                      units={units}
-                      isLoading={unitsLoading}
-                      onCreateUnit={async (data) => {
-                        await createUnit.mutateAsync(data)
-                      }}
-                      onUpdateUnit={async (data) => {
-                        await updateUnit.mutateAsync(data)
-                      }}
-                      onDeleteUnit={async (unitId) => {
-                        await deleteUnit.mutateAsync(unitId)
-                      }}
-                      onEdit={() => {}}
-                    />
-                  )}
-                </TabsContent>
-                <TabsContent value="payments">
-                  <div className="p-4 text-center text-muted-foreground">
-                    Fonctionnalité à venir
-                  </div>
-                </TabsContent>
-                <TabsContent value="maintenance">
-                  <div className="p-4 text-center text-muted-foreground">
-                    Fonctionnalité à venir
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </DialogContent>
-          </Dialog>
-        </>
-      )}
+      <ApartmentUnitsDialog
+        open={showUnitsDialog}
+        onOpenChange={setShowUnitsDialog}
+        selectedApartmentId={selectedApartmentId}
+        units={units}
+        unitsLoading={unitsLoading}
+        onCreateUnit={async (data) => {
+          await createUnit.mutateAsync(data)
+        }}
+        onUpdateUnit={async (data) => {
+          await updateUnit.mutateAsync(data)
+        }}
+        onDeleteUnit={async (unitId) => {
+          await deleteUnit.mutateAsync(unitId)
+        }}
+      />
     </AgencyLayout>
   )
 }
