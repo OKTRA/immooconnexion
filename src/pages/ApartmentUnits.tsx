@@ -27,6 +27,14 @@ export default function ApartmentUnits() {
     deleteUnit
   } = useApartmentUnits(id)
 
+  const handleSubmit = async (data: ApartmentUnit) => {
+    if (selectedUnit) {
+      await updateUnit.mutateAsync(data)
+    } else {
+      await createUnit.mutateAsync(data)
+    }
+  }
+
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
@@ -53,10 +61,7 @@ export default function ApartmentUnits() {
       <ApartmentUnitDialog
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
-        onSubmit={selectedUnit ? 
-          (data) => updateUnit.mutate(data) : 
-          (data) => createUnit.mutate(data)
-        }
+        onSubmit={handleSubmit}
         initialData={selectedUnit}
         apartmentId={id}
         isEditing={!!selectedUnit}
