@@ -13,6 +13,7 @@ interface ApartmentUnitsSectionProps {
   onCreateUnit: (unit: ApartmentUnit) => Promise<void>
   onUpdateUnit: (unit: ApartmentUnit) => Promise<void>
   onDeleteUnit: (unitId: string) => Promise<void>
+  onEdit: (unit: ApartmentUnit) => void
 }
 
 export function ApartmentUnitsSection({
@@ -21,7 +22,8 @@ export function ApartmentUnitsSection({
   isLoading,
   onCreateUnit,
   onUpdateUnit,
-  onDeleteUnit
+  onDeleteUnit,
+  onEdit
 }: ApartmentUnitsSectionProps) {
   const [showDialog, setShowDialog] = useState(false)
   const [editingUnit, setEditingUnit] = useState<ApartmentUnit | undefined>()
@@ -29,6 +31,7 @@ export function ApartmentUnitsSection({
   const handleEdit = (unit: ApartmentUnit) => {
     setEditingUnit(unit)
     setShowDialog(true)
+    onEdit(unit)
   }
 
   const handleAdd = () => {
