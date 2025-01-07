@@ -7,7 +7,7 @@ import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { UnitTenantManager } from "@/components/apartment/unit-dialog/UnitTenantManager"
+import { TenantPaymentsTab } from "@/components/apartment/tenant/TenantPaymentsTab"
 
 export default function UnitDetails() {
   const { id } = useParams<{ id: string }>()
@@ -24,6 +24,23 @@ export default function UnitDetails() {
           apartment:apartments(
             name,
             address
+          ),
+          current_lease:apartment_leases(
+            id,
+            tenant_id,
+            start_date,
+            end_date,
+            rent_amount,
+            deposit_amount,
+            status,
+            tenant:apartment_tenants(
+              id,
+              first_name,
+              last_name,
+              email,
+              phone_number,
+              birth_date
+            )
           )
         `)
         .eq('id', id)
@@ -51,6 +68,9 @@ export default function UnitDetails() {
     )
   }
 
+  const currentLease = unit.current_lease?.[0]
+  const currentTenant = currentLease?.tenant
+
   return (
     <div className="container mx-auto py-6">
       <div className="mb-6">
@@ -64,8 +84,9 @@ export default function UnitDetails() {
 
       <Tabs defaultValue="details" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="details">Détails</TabsTrigger>
-          <TabsTrigger value="tenant">Locataire & Paiements</TabsTrigger>
+          <TabsTrigger value="details">Détails de l'unité</TabsTrigger>
+          <TabsTrigger value="tenant">Locataire actuel</TabsTrigger>
+          {currentTenant && <TabsTrigger value="payments">Paiements</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="details">
@@ -114,8 +135,90 @@ export default function UnitDetails() {
         </TabsContent>
 
         <TabsContent value="tenant">
-          <UnitTenantManager unitId={id} />
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {currentTenant ? 'Locataire actuel' : 'Aucun locataire'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {currentTenant ? (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Nom complet</p>
+                      <p className="font-medium">
+                        {currentTenant.first_name} {currentTenant.last_name}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Email</p>
+                      <p className="font-medium">
+                        {currentTenant.email || 'Non renseigné'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Téléphone</p>
+                      <p className="font-medium">
+                        {currentTenant.phone_number || 'Non renseigné'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Date de naissance</p>
+                      <p className="font-medium">
+                        {currentTenant.birth_date ? 
+                          format(new Date(currentTenant.birth_date), 'PP', { locale: fr }) 
+                          : 'Non renseignée'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-6">
+                    <h3 className="font-semibold mb-4">Informations du bail</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Date de début</p>
+                        <p className="font-medium">
+                          {format(new Date(currentLease.start_date), 'PP', { locale: fr })}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Date de fin</p>
+                        <p className="font-medium">
+                          {currentLease.end_date ? 
+                            format(new Date(currentLease.end_date), 'PP', { locale: fr })
+                            : 'Indéterminée'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Loyer mensuel</p>
+                        <p className="font-medium">
+                          {currentLease.rent_amount.toLocaleString()} FCFA
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Caution versée</p>
+                        <p className="font-medium">
+                          {currentLease.deposit_amount?.toLocaleString() || 0} FCFA
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-4">
+                  Aucun locataire n'occupe actuellement cette unité
+                </p>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
+
+        {currentTenant && (
+          <TabsContent value="payments">
+            <TenantPaymentsTab tenantId={currentTenant.id} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   )
