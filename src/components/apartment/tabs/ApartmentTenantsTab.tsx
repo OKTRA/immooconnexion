@@ -3,6 +3,8 @@ import { Plus } from "lucide-react"
 import { ApartmentTenantsTable } from "../tenant/ApartmentTenantsTable"
 import { ApartmentTenantDialog } from "../tenant/ApartmentTenantDialog"
 import { useState } from "react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TenantPaymentsTab } from "../tenant/TenantPaymentsTab"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +34,7 @@ export function ApartmentTenantsTab({
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedTenant, setSelectedTenant] = useState<any>(null)
   const [tenantToDelete, setTenantToDelete] = useState<string | null>(null)
+  const [selectedTab, setSelectedTab] = useState("list")
 
   const handleDeleteTenant = async () => {
     if (tenantToDelete) {
@@ -53,11 +56,31 @@ export function ApartmentTenantsTab({
         </Button>
       </div>
 
-      <ApartmentTenantsTable
-        tenants={tenants}
-        onEdit={onEditTenant}
-        onDelete={(id) => setTenantToDelete(id)}
-      />
+      <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+        <TabsList>
+          <TabsTrigger value="list">Liste</TabsTrigger>
+          {selectedTenant && (
+            <TabsTrigger value="payments">Paiements</TabsTrigger>
+          )}
+        </TabsList>
+
+        <TabsContent value="list">
+          <ApartmentTenantsTable
+            tenants={tenants}
+            onEdit={(tenant) => {
+              setSelectedTenant(tenant);
+              onEditTenant(tenant);
+            }}
+            onDelete={(id) => setTenantToDelete(id)}
+          />
+        </TabsContent>
+
+        <TabsContent value="payments">
+          {selectedTenant && (
+            <TenantPaymentsTab tenantId={selectedTenant.id} />
+          )}
+        </TabsContent>
+      </Tabs>
 
       <ApartmentTenantDialog
         open={isDialogOpen}
