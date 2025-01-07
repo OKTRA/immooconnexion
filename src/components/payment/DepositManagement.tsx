@@ -23,7 +23,7 @@ export function DepositManagement() {
         .from("apartment_leases")
         .select(`
           *,
-          tenant:apartment_tenants(first_name, last_name),
+          tenant:tenants(nom, prenom),
           unit:apartment_units(
             unit_number,
             apartment:apartments(name)
@@ -84,7 +84,7 @@ export function DepositManagement() {
               >
                 <div className="space-y-1">
                   <p className="font-medium">
-                    {lease.tenant?.first_name} {lease.tenant?.last_name}
+                    {lease.tenant?.prenom} {lease.tenant?.nom}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {lease.unit?.apartment?.name} - Unité {lease.unit?.unit_number}

@@ -8,10 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { ApartmentForm } from "@/components/apartment/ApartmentForm"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { PaymentNotifications } from "@/components/payment/PaymentNotifications"
-import { LatePaymentFees } from "@/components/payment/LatePaymentFees"
-import { DepositManagement } from "@/components/payment/DepositManagement"
 
 export default function Apartments() {
   const navigate = useNavigate()
@@ -72,90 +68,67 @@ export default function Apartments() {
         </Dialog>
       </div>
 
-      <Tabs defaultValue="apartments" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="apartments">Appartements</TabsTrigger>
-          <TabsTrigger value="payments">Paiements</TabsTrigger>
-          <TabsTrigger value="late-fees">Pénalités</TabsTrigger>
-          <TabsTrigger value="deposits">Cautions</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="apartments">
-          {isLoading ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {[...Array(3)].map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardHeader className="h-[100px] bg-muted" />
-                  <CardContent className="h-[100px] bg-muted mt-2" />
-                </Card>
-              ))}
-            </div>
-          ) : apartments?.length === 0 ? (
-            <Card className="flex flex-col items-center justify-center p-8 text-center">
-              <Building className="w-12 h-12 mb-4 text-muted-foreground" />
-              <CardTitle className="mb-2">Aucun appartement</CardTitle>
-              <CardDescription>
-                Vous n'avez pas encore ajouté d'appartement.
-                Commencez par en créer un !
-              </CardDescription>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="mt-4">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nouvel Appartement
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Créer un appartement</DialogTitle>
-                  </DialogHeader>
-                  <ApartmentForm />
-                </DialogContent>
-              </Dialog>
+      {isLoading ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader className="h-[100px] bg-muted" />
+              <CardContent className="h-[100px] bg-muted mt-2" />
             </Card>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {apartments?.map((apartment) => (
-                <Card 
-                  key={apartment.id}
-                  className="cursor-pointer transition-all hover:shadow-lg"
-                >
-                  <CardHeader>
-                    <CardTitle>{apartment.name}</CardTitle>
-                    <CardDescription>{apartment.address}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        {apartment.apartment_units[0].count} unités
-                      </span>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleViewDetails(apartment.id)}
-                      >
-                        Voir les détails
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="payments">
-          <PaymentNotifications />
-        </TabsContent>
-
-        <TabsContent value="late-fees">
-          <LatePaymentFees />
-        </TabsContent>
-
-        <TabsContent value="deposits">
-          <DepositManagement />
-        </TabsContent>
-      </Tabs>
+          ))}
+        </div>
+      ) : apartments?.length === 0 ? (
+        <Card className="flex flex-col items-center justify-center p-8 text-center">
+          <Building className="w-12 h-12 mb-4 text-muted-foreground" />
+          <CardTitle className="mb-2">Aucun appartement</CardTitle>
+          <CardDescription>
+            Vous n'avez pas encore ajouté d'appartement.
+            Commencez par en créer un !
+          </CardDescription>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="mt-4">
+                <Plus className="w-4 h-4 mr-2" />
+                Nouvel Appartement
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Créer un appartement</DialogTitle>
+              </DialogHeader>
+              <ApartmentForm />
+            </DialogContent>
+          </Dialog>
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {apartments?.map((apartment) => (
+            <Card 
+              key={apartment.id}
+              className="cursor-pointer transition-all hover:shadow-lg"
+            >
+              <CardHeader>
+                <CardTitle>{apartment.name}</CardTitle>
+                <CardDescription>{apartment.address}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    {apartment.apartment_units[0].count} unités
+                  </span>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleViewDetails(apartment.id)}
+                  >
+                    Voir les détails
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </AgencyLayout>
   )
 }
