@@ -37,6 +37,11 @@ export function ApartmentUnitDialog({
     }
   }
 
+  const handleFormSubmit = async () => {
+    await handleSubmit()
+    onOpenChange(false)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -57,7 +62,7 @@ export function ApartmentUnitDialog({
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Annuler
               </Button>
-              <Button onClick={() => handleSubmit()}>
+              <Button onClick={handleFormSubmit}>
                 {isEditing ? "Modifier" : "Ajouter"}
               </Button>
             </div>
