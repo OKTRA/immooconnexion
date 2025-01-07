@@ -35,6 +35,8 @@ function AgencySettings() {
   const { data: agency, isLoading, refetch } = useQuery({
     queryKey: ["agency", id],
     queryFn: async () => {
+      if (!id) throw new Error("Agency ID is required")
+      
       const { data, error } = await supabase
         .from("agencies")
         .select("*")
@@ -47,6 +49,7 @@ function AgencySettings() {
 
       return data as Agency
     },
+    enabled: !!id
   })
 
   useEffect(() => {

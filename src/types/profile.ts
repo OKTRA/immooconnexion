@@ -31,3 +31,12 @@ export interface ProfileFormData {
   agency_name?: string;
   password?: string;
 }
+
+export interface ProfileFormProps {
+  newProfile: ProfileFormData;
+  setNewProfile: (profile: ProfileFormData) => void;
+  onSuccess?: () => void;
+  isEditing?: boolean;
+  selectedAgencyId?: string;
+  onUpdateProfile?: (updatedData: any) => Promise<void>;
+}

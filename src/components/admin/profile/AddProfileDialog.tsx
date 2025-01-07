@@ -1,12 +1,12 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ProfileForm } from "./ProfileForm"
-import { Profile } from "./types"
+import { Profile, ProfileFormData } from "@/types/profile"
 
 interface AddProfileDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  newProfile: Profile
-  setNewProfile: (profile: Profile) => void
+  newProfile: ProfileFormData
+  setNewProfile: (profile: ProfileFormData) => void
   handleCreateAuthUser: () => Promise<void>
   handleUpdateProfile: (userId: string) => Promise<void>
   isEditing?: boolean
@@ -21,6 +21,14 @@ export function AddProfileDialog({
   handleUpdateProfile,
   isEditing = false
 }: AddProfileDialogProps) {
+  const handleSuccess = async () => {
+    if (isEditing && newProfile.id) {
+      await handleUpdateProfile(newProfile.id)
+    } else {
+      await handleCreateAuthUser()
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -32,8 +40,7 @@ export function AddProfileDialog({
         <ProfileForm
           newProfile={newProfile}
           setNewProfile={setNewProfile}
-          onSubmit={handleCreateAuthUser}
-          onUpdate={handleUpdateProfile}
+          onSuccess={handleSuccess}
           isEditing={isEditing}
         />
       </DialogContent>
