@@ -11,8 +11,8 @@ export function useLease(unitId: string, tenantId?: string) {
     endDate: "",
     rentAmount: "",
     depositAmount: "",
-    paymentFrequency: "",
-    durationType: "",
+    paymentFrequency: "monthly",
+    durationType: "fixed",
   })
 
   const handleSubmit = async () => {
@@ -44,6 +44,7 @@ export function useLease(unitId: string, tenantId?: string) {
           payment_frequency: formData.paymentFrequency,
           duration_type: formData.durationType,
           agency_id: profile.agency_id,
+          status: 'active'
         }])
 
       if (error) throw error

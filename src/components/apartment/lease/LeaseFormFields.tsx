@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { LeaseFormData } from "./types"
+import { LeaseFormData, PaymentFrequency, DurationType } from "./types"
 
 interface LeaseFormFieldsProps {
   formData: LeaseFormData
@@ -63,7 +63,7 @@ export function LeaseFormFields({
           <Label htmlFor="paymentFrequency">Fréquence de paiement</Label>
           <Select 
             value={formData.paymentFrequency} 
-            onValueChange={(value) => setFormData({ ...formData, paymentFrequency: value })}
+            onValueChange={(value: PaymentFrequency) => setFormData({ ...formData, paymentFrequency: value })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner une fréquence" />
@@ -81,17 +81,15 @@ export function LeaseFormFields({
           <Label htmlFor="durationType">Type de durée</Label>
           <Select 
             value={formData.durationType} 
-            onValueChange={(value) => setFormData({ ...formData, durationType: value })}
+            onValueChange={(value: DurationType) => setFormData({ ...formData, durationType: value })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner un type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="hour">Heure</SelectItem>
-              <SelectItem value="day">Jour</SelectItem>
-              <SelectItem value="week">Semaine</SelectItem>
-              <SelectItem value="month">Mois</SelectItem>
-              <SelectItem value="year">Année</SelectItem>
+              <SelectItem value="fixed">Durée déterminée</SelectItem>
+              <SelectItem value="month_to_month">Mois par mois</SelectItem>
+              <SelectItem value="yearly">Annuel</SelectItem>
             </SelectContent>
           </Select>
         </div>
