@@ -12,6 +12,7 @@ export function useApartmentDetails(apartmentId: string | undefined) {
     queryFn: async () => {
       if (!apartmentId) return null
 
+      console.log("Fetching apartment with ID:", apartmentId)
       const { data, error } = await supabase
         .from("apartments")
         .select("*")
@@ -38,6 +39,7 @@ export function useApartmentDetails(apartmentId: string | undefined) {
     queryFn: async () => {
       if (!apartmentId) return []
 
+      console.log("Fetching units for apartment ID:", apartmentId)
       const { data, error } = await supabase
         .from("apartment_units")
         .select("*")
