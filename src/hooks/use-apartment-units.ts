@@ -46,14 +46,6 @@ export function useApartmentUnits(apartmentId: string) {
         title: "Succès",
         description: "L'unité a été créée avec succès",
       });
-    },
-    onError: (error) => {
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la création de l'unité",
-        variant: "destructive",
-      });
-      console.error("Error creating unit:", error);
     }
   });
 
