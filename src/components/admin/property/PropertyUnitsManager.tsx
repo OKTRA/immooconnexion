@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button"
 import { PropertyUnitDialog } from "./PropertyUnitDialog"
 import { PropertyUnitsTable } from "./PropertyUnitsTable"
 import { usePropertyUnits } from "@/hooks/use-property-units"
-import { PropertyUnit, PropertyUnitFormData } from "@/types/property"
+import { PropertyUnit } from "./types/propertyUnit"
+import type { PropertyUnitFormData } from "./types/propertyUnit"
 
 interface PropertyUnitsManagerProps {
   propertyId: string
@@ -23,7 +24,8 @@ export function PropertyUnitsManager({ propertyId }: PropertyUnitsManagerProps) 
       rent_amount: unit.rent_amount,
       deposit_amount: unit.deposit_amount,
       status: unit.status,
-      description: unit.description
+      description: unit.description,
+      id: unit.id
     }
     setEditingUnit(formData)
     setShowDialog(true)

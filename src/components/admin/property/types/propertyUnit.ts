@@ -1,4 +1,4 @@
-export type PropertyUnitStatus = "available" | "occupied" | "maintenance"
+export type PropertyUnitStatus = "available" | "occupied" | "maintenance" | "reserved"
 
 export interface PropertyUnit {
   id: string
@@ -16,6 +16,7 @@ export interface PropertyUnit {
 
 export interface PropertyUnitFormData {
   id?: string
+  property_id: string
   unit_number: string
   floor_number?: number | null
   area?: number | null
