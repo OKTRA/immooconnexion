@@ -6,7 +6,7 @@ import { ApartmentInfo } from "@/components/apartment/ApartmentInfo"
 import { ApartmentUnitsSection } from "@/components/apartment/ApartmentUnitsSection"
 import { useApartmentDetails } from "@/hooks/use-apartment-details"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { PaymentNotifications } from "@/components/admin/dashboard/AdminNotifications"
+import { AdminNotifications } from "@/components/admin/dashboard/AdminNotifications"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
@@ -104,7 +104,7 @@ export default function ApartmentDetails() {
         </TabsContent>
 
         <TabsContent value="payments">
-          <PaymentNotifications />
+          <AdminNotifications />
         </TabsContent>
 
         <TabsContent value="late-fees">
