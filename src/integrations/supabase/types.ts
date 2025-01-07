@@ -371,6 +371,41 @@ export type Database = {
           },
         ]
       }
+      apartment_unit_pricing: {
+        Row: {
+          created_at: string | null
+          duration_type: string
+          id: string
+          price: number
+          unit_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          duration_type: string
+          id?: string
+          price: number
+          unit_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          duration_type?: string
+          id?: string
+          price?: number
+          unit_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_unit_pricing_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       apartment_units: {
         Row: {
           apartment_id: string

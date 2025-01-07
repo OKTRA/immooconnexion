@@ -32,10 +32,21 @@ export interface ApartmentUnitFormData {
 }
 
 export interface ApartmentUnitPricing {
-  id: string;
+  id?: string;
   unit_id: string;
   duration_type: "hour" | "day" | "week" | "month" | "year";
   price: number;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface Apartment {
+  id: string;
+  name: string;
+  address: string | null;
+  description: string | null;
+  total_units: number;
+  agency_id: string;
+  created_at: string;
+  updated_at: string;
 }

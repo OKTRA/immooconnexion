@@ -25,11 +25,11 @@ export function FlexiblePricingForm({ unitId, onSuccess }: FlexiblePricingFormPr
     try {
       const { error } = await supabase
         .from('apartment_unit_pricing')
-        .insert({
+        .insert([{
           unit_id: unitId,
           duration_type: durationType,
           price: parseInt(price),
-        } as ApartmentUnitPricing)
+        }] as ApartmentUnitPricing[])
 
       if (error) throw error
 
