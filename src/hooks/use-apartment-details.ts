@@ -17,7 +17,10 @@ export function useApartmentDetails(apartmentId: string | undefined) {
         .eq("id", apartmentId)
         .maybeSingle()
 
-      if (error) throw error
+      if (error) {
+        console.error("Error fetching apartment:", error)
+        throw error
+      }
       return data as Apartment
     },
     enabled: !!apartmentId
@@ -33,7 +36,10 @@ export function useApartmentDetails(apartmentId: string | undefined) {
         .eq("apartment_id", apartmentId)
         .order("unit_number")
 
-      if (error) throw error
+      if (error) {
+        console.error("Error fetching units:", error)
+        throw error
+      }
       return data as ApartmentUnit[]
     },
     enabled: !!apartmentId
