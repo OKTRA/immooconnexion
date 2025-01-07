@@ -79,6 +79,21 @@ export default function Apartments() {
     setShowUnitsDialog(true)
   }
 
+  const handleCreateUnit = async (data: any) => {
+    await createUnit.mutateAsync(data)
+    return Promise.resolve()
+  }
+
+  const handleUpdateUnit = async (data: any) => {
+    await updateUnit.mutateAsync(data)
+    return Promise.resolve()
+  }
+
+  const handleDeleteUnit = async (unitId: string) => {
+    await deleteUnit.mutateAsync(unitId)
+    return Promise.resolve()
+  }
+
   return (
     <AgencyLayout>
       <ApartmentHeader />
@@ -96,9 +111,9 @@ export default function Apartments() {
           selectedApartmentId={selectedApartmentId}
           units={units}
           unitsLoading={unitsLoading}
-          onCreateUnit={createUnit.mutateAsync}
-          onUpdateUnit={updateUnit.mutateAsync}
-          onDeleteUnit={deleteUnit.mutateAsync}
+          onCreateUnit={handleCreateUnit}
+          onUpdateUnit={handleUpdateUnit}
+          onDeleteUnit={handleDeleteUnit}
         />
       )}
     </AgencyLayout>

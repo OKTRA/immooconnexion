@@ -1,31 +1,41 @@
-import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { ApartmentForm } from "./ApartmentForm"
+import { Plus } from "lucide-react"
 
-export function ApartmentHeader() {
+interface ApartmentHeaderProps {
+  apartment?: {
+    name: string
+    address: string | null
+    description: string | null
+  } | null
+  isLoading?: boolean
+}
+
+export function ApartmentHeader({ apartment, isLoading }: ApartmentHeaderProps) {
+  if (isLoading) {
+    return <div className="h-24 animate-pulse bg-muted rounded-lg" />
+  }
+
   return (
-    <div className="flex items-center justify-between mb-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Appartements</h1>
-        <p className="text-muted-foreground">
-          Gérez vos immeubles et leurs unités
-        </p>
-      </div>
-      <Dialog>
-        <DialogTrigger asChild>
+    <div className="flex flex-col space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {apartment ? apartment.name : "Appartements"}
+          </h1>
+          {apartment?.address && (
+            <p className="text-muted-foreground">{apartment.address}</p>
+          )}
+        </div>
+        {!apartment && (
           <Button>
             <Plus className="w-4 h-4 mr-2" />
-            Nouvel Appartement
+            Nouvel appartement
           </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Créer un appartement</DialogTitle>
-          </DialogHeader>
-          <ApartmentForm />
-        </DialogContent>
-      </Dialog>
+        )}
+      </div>
+      {apartment?.description && (
+        <p className="text-muted-foreground">{apartment.description}</p>
+      )}
     </div>
   )
 }
