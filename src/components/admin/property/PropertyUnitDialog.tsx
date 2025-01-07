@@ -17,6 +17,7 @@ export function PropertyUnitDialog({
   const { addUnit, updateUnit } = usePropertyUnits(propertyId)
   const { toast } = useToast()
   const [formData, setFormData] = useState<PropertyUnitFormData>(initialData || {
+    property_id: propertyId,
     unit_number: "",
     floor_number: null,
     area: null,

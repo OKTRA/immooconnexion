@@ -3,6 +3,7 @@ import { SubscriptionNotification } from "../subscription/SubscriptionNotificati
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { GlobalHeader } from "../layout/GlobalHeader"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { cn } from "@/lib/utils"
 
 interface AgencyLayoutProps {
   children: React.ReactNode
