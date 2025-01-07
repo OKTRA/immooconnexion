@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
-import { Plus, Building } from "lucide-react"
+import { Plus } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { Button } from "@/components/ui/button"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
-import { Card, CardDescription, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { ApartmentForm } from "@/components/apartment/ApartmentForm"
@@ -12,6 +11,8 @@ import { useState } from "react"
 import { ApartmentUnitsSection } from "@/components/apartment/ApartmentUnitsSection"
 import { useApartmentUnits } from "@/hooks/use-apartment-units"
 import { ApartmentCard } from "@/components/apartment/ApartmentCard"
+import { ApartmentSkeleton } from "@/components/apartment/ApartmentSkeleton"
+import { EmptyApartmentState } from "@/components/apartment/EmptyApartmentState"
 
 export default function Apartments() {
   const { toast } = useToast()
@@ -111,35 +112,11 @@ export default function Apartments() {
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(3)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="h-[100px] bg-muted" />
-              <CardContent className="h-[100px] bg-muted mt-2" />
-            </Card>
+            <ApartmentSkeleton key={i} />
           ))}
         </div>
       ) : apartments?.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center p-8 text-center">
-          <Building className="w-12 h-12 mb-4 text-muted-foreground" />
-          <CardTitle className="mb-2">Aucun appartement</CardTitle>
-          <CardDescription>
-            Vous n'avez pas encore ajouté d'appartement.
-            Commencez par en créer un !
-          </CardDescription>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="mt-4">
-                <Plus className="w-4 h-4 mr-2" />
-                Nouvel Appartement
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Créer un appartement</DialogTitle>
-              </DialogHeader>
-              <ApartmentForm />
-            </DialogContent>
-          </Dialog>
-        </Card>
+        <EmptyApartmentState />
       ) : (
         <>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
