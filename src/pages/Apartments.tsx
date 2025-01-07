@@ -33,28 +33,38 @@ export default function Apartments() {
         throw new Error("Aucune agence associée")
       }
 
-      const { data, error } = await supabase
+      // First get all apartments for the agency
+      const { data: apartmentsData, error: apartmentsError } = await supabase
         .from("apartments")
-        .select(`
-          *,
-          apartment_units: apartment_units (count)
-        `)
+        .select("*")
         .eq("agency_id", userProfile.agency_id)
         .order("created_at", { ascending: false })
 
-      if (error) {
+      if (apartmentsError) {
         toast({
           title: "Erreur",
           description: "Impossible de charger les appartements",
           variant: "destructive",
         })
-        throw error
+        throw apartmentsError
       }
 
-      return data.map(apartment => ({
-        ...apartment,
-        unit_count: apartment.apartment_units[0]?.count || 0
-      }))
+      // Then get the unit counts for each apartment
+      const apartmentsWithUnits = await Promise.all(
+        apartmentsData.map(async (apartment) => {
+          const { count } = await supabase
+            .from("apartment_units")
+            .select("*", { count: "exact", head: true })
+            .eq("apartment_id", apartment.id)
+
+          return {
+            ...apartment,
+            unit_count: count || 0
+          }
+        })
+      )
+
+      return apartmentsWithUnits
     },
   })
 
