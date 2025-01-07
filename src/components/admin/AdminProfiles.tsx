@@ -6,7 +6,7 @@ import { useProfiles } from "./profile/useProfiles"
 import { AddProfileDialog } from "./profile/AddProfileDialog"
 import { useAddProfileHandler } from "./profile/AddProfileHandler"
 import { useToast } from "@/hooks/use-toast"
-import { Profile } from "./profile/types"
+import { Profile, ProfileFormData } from "@/types/profile"
 import { supabase } from "@/integrations/supabase/client"
 
 export function AdminProfiles() {
@@ -16,8 +16,7 @@ export function AdminProfiles() {
   const { data: profiles = [], refetch } = useProfiles()
   const { toast } = useToast()
   
-  const [newProfile, setNewProfile] = useState<Profile>({
-    id: '',
+  const [newProfile, setNewProfile] = useState<ProfileFormData>({
     email: "",
     password: "",
     first_name: "",
@@ -25,8 +24,6 @@ export function AdminProfiles() {
     phone_number: "",
     role: "user",
     agency_id: "",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
     is_tenant: false,
     status: 'active',
     has_seen_warning: false

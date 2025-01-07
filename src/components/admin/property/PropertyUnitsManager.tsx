@@ -16,6 +16,7 @@ export function PropertyUnitsManager({ propertyId }: PropertyUnitsManagerProps) 
 
   const handleEdit = (unit: PropertyUnit) => {
     const formData: PropertyUnitFormData = {
+      property_id: unit.property_id,
       unit_number: unit.unit_number,
       floor_number: unit.floor_number,
       area: unit.area,
