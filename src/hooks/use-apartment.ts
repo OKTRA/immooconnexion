@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Apartment } from "@/types/apartment"
 import { useToast } from "@/hooks/use-toast"
 
 export function useApartment(apartmentId: string | undefined) {
@@ -9,7 +8,10 @@ export function useApartment(apartmentId: string | undefined) {
   return useQuery({
     queryKey: ["apartment", apartmentId],
     queryFn: async () => {
-      if (!apartmentId) return null
+      if (!apartmentId) {
+        console.error("No apartment ID provided")
+        throw new Error("Apartment ID is required")
+      }
 
       console.log("Fetching apartment with ID:", apartmentId)
       const { data, error } = await supabase
@@ -28,7 +30,7 @@ export function useApartment(apartmentId: string | undefined) {
         throw error
       }
 
-      return data as Apartment
+      return data
     },
     enabled: Boolean(apartmentId)
   })

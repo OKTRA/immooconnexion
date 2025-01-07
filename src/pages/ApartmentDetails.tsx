@@ -54,32 +54,34 @@ export default function ApartmentDetails() {
             <TabsTrigger value="deposits">Cautions</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="units">
-            <ApartmentUnitsSection
-              apartmentId={id}
-              units={units}
-              isLoading={unitsLoading}
-              onCreateUnit={(data) => createUnit.mutateAsync(data)}
-              onUpdateUnit={(data) => updateUnit.mutateAsync(data)}
-              onDeleteUnit={(unitId) => deleteUnit.mutateAsync(unitId)}
-            />
-          </TabsContent>
+          <div className="mt-6">
+            <TabsContent value="units">
+              <ApartmentUnitsSection
+                apartmentId={id}
+                units={units}
+                isLoading={unitsLoading}
+                onCreateUnit={(data) => createUnit.mutateAsync(data)}
+                onUpdateUnit={(data) => updateUnit.mutateAsync(data)}
+                onDeleteUnit={(unitId) => deleteUnit.mutateAsync(unitId)}
+              />
+            </TabsContent>
 
-          <TabsContent value="info" className="space-y-4">
-            {apartment && <ApartmentInfo apartment={apartment} />}
-          </TabsContent>
+            <TabsContent value="info" className="space-y-4">
+              {apartment && <ApartmentInfo apartment={apartment} />}
+            </TabsContent>
 
-          <TabsContent value="payments">
-            <ApartmentPaymentsTab />
-          </TabsContent>
+            <TabsContent value="payments">
+              <ApartmentPaymentsTab />
+            </TabsContent>
 
-          <TabsContent value="late-fees">
-            <ApartmentLateFeesTab apartmentId={id} />
-          </TabsContent>
+            <TabsContent value="late-fees">
+              <ApartmentLateFeesTab apartmentId={id} />
+            </TabsContent>
 
-          <TabsContent value="deposits">
-            <ApartmentDepositsTab apartmentId={id} />
-          </TabsContent>
+            <TabsContent value="deposits">
+              <ApartmentDepositsTab apartmentId={id} />
+            </TabsContent>
+          </div>
         </Tabs>
       </div>
     </AgencyLayout>
