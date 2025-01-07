@@ -10,6 +10,10 @@ export interface ApartmentUnit {
   deposit_amount: number | null;
   status: ApartmentUnitStatus;
   description: string | null;
+  minimum_stay?: number | null;
+  maximum_stay?: number | null;
+  late_fee_percentage?: number | null;
+  photo_urls?: string[];
   created_at?: string;
   updated_at?: string;
 }
@@ -22,4 +26,27 @@ export interface ApartmentUnitFormData {
   deposit_amount: string;
   status: ApartmentUnitStatus;
   description: string;
+  minimum_stay?: string;
+  maximum_stay?: string;
+  late_fee_percentage?: string;
+}
+
+export interface ApartmentUnitPricing {
+  id: string;
+  unit_id: string;
+  duration_type: "hour" | "day" | "week" | "month" | "year";
+  price: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Apartment {
+  id: string;
+  name: string;
+  address: string | null;
+  description: string | null;
+  total_units: number;
+  agency_id: string;
+  created_at: string;
+  updated_at: string;
 }
