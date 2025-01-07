@@ -60,14 +60,17 @@ export function useApartmentDetails(apartmentId: string | undefined) {
   })
 
   const createUnit = useMutation({
-    mutationFn: async (unitData: ApartmentUnit) => {
+    mutationFn: async (unitData: Omit<ApartmentUnit, "id" | "apartment_id">) => {
       if (!apartmentId) throw new Error("Apartment ID is required")
 
       const { error } = await supabase
         .from("apartment_units")
         .insert([{ ...unitData, apartment_id: apartmentId }])
 
-      if (error) throw error
+      if (error) {
+        console.error("Error creating unit:", error)
+        throw error
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] })
@@ -103,7 +106,10 @@ export function useApartmentDetails(apartmentId: string | undefined) {
         })
         .eq("id", unitData.id)
 
-      if (error) throw error
+      if (error) {
+        console.error("Error updating unit:", error)
+        throw error
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] })
@@ -129,7 +135,10 @@ export function useApartmentDetails(apartmentId: string | undefined) {
         .delete()
         .eq("id", unitId)
 
-      if (error) throw error
+      if (error) {
+        console.error("Error deleting unit:", error)
+        throw error
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] })
