@@ -1,7 +1,7 @@
 export type ApartmentUnitStatus = "available" | "occupied" | "maintenance";
 
 export interface ApartmentUnit {
-  id?: string;
+  id: string;
   apartment_id: string;
   unit_number: string;
   floor_number: number | null;
