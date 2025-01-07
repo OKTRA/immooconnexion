@@ -1,5 +1,5 @@
-export type DurationType = 'fixed' | 'month_to_month' | 'yearly';
-export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+export type DurationType = "fixed" | "month_to_month" | "yearly";
+export type PaymentFrequency = "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
 
 export interface LeaseFormData {
   startDate: string;
