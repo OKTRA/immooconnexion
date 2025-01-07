@@ -41,18 +41,14 @@ export default function ApartmentDetails() {
         isLoading={apartmentLoading}
       />
       <div className="container mx-auto py-6">
-        <Tabs defaultValue="info" className="space-y-4">
+        <Tabs defaultValue="units" className="space-y-4">
           <TabsList className="w-full justify-start">
-            <TabsTrigger value="info">Information</TabsTrigger>
             <TabsTrigger value="units">Unités</TabsTrigger>
+            <TabsTrigger value="info">Information</TabsTrigger>
             <TabsTrigger value="payments">Paiements</TabsTrigger>
             <TabsTrigger value="late-fees">Pénalités de retard</TabsTrigger>
             <TabsTrigger value="deposits">Cautions</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="info" className="space-y-4">
-            {apartment && <ApartmentInfo apartment={apartment} />}
-          </TabsContent>
 
           <TabsContent value="units">
             <ApartmentUnitsSection
@@ -63,6 +59,10 @@ export default function ApartmentDetails() {
               onUpdateUnit={(data) => updateUnit.mutateAsync(data)}
               onDeleteUnit={(unitId) => deleteUnit.mutateAsync(unitId)}
             />
+          </TabsContent>
+
+          <TabsContent value="info" className="space-y-4">
+            {apartment && <ApartmentInfo apartment={apartment} />}
           </TabsContent>
 
           <TabsContent value="payments">

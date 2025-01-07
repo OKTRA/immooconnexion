@@ -34,7 +34,7 @@ export function ApartmentHeader({ apartment, onDelete, isLoading }: ApartmentHea
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Nouvelle unité</h1>
-          <p className="text-muted-foreground">Ajoutez une nouvelle unité à l'appartement</p>
+          <p className="text-muted-foreground">Ajoutez une nouvelle unité</p>
         </div>
       </div>
     );
@@ -43,7 +43,9 @@ export function ApartmentHeader({ apartment, onDelete, isLoading }: ApartmentHea
   return (
     <div className="flex items-center justify-between mb-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">{apartment.name}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {apartment.name} - Unités
+        </h1>
         {apartment.address && (
           <p className="text-muted-foreground">{apartment.address}</p>
         )}
