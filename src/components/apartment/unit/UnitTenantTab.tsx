@@ -33,7 +33,7 @@ export function UnitTenantTab({ unitId }: UnitTenantTabProps) {
         `)
         .eq("unit_id", unitId)
         .eq("status", "active")
-        .single()
+        .maybeSingle()
 
       if (error) throw error
       return data

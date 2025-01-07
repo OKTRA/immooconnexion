@@ -20,7 +20,7 @@ export function UnitTenantDialog({ open, onOpenChange, unitId }: UnitTenantDialo
       title: "Locataire ajouté",
       description: "Le locataire a été ajouté avec succès",
     })
-    queryClient.invalidateQueries(["unit-current-lease"])
+    queryClient.invalidateQueries({ queryKey: ["unit-current-lease"] })
     onOpenChange(false)
   }
 
