@@ -16,7 +16,7 @@ export function LatePaymentFees() {
         .select(`
           *,
           lease:apartment_leases(
-            tenant:tenants(nom, prenom),
+            tenant:apartment_tenants(first_name, last_name),
             unit:apartment_units(
               unit_number,
               apartment:apartments(name)
@@ -70,7 +70,7 @@ export function LatePaymentFees() {
             >
               <div className="space-y-1">
                 <p className="font-medium">
-                  {fee.lease?.tenant?.prenom} {fee.lease?.tenant?.nom}
+                  {fee.lease?.tenant?.first_name} {fee.lease?.tenant?.last_name}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {fee.lease?.unit?.apartment?.name} - Unité{" "}
