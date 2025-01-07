@@ -1,72 +1,69 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { ThemeProvider } from "@/providers/ThemeProvider"
-import { Toaster } from "@/components/ui/toaster"
-import { AuthProvider } from "@/providers/AuthProvider"
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
-import Login from "@/pages/Login"
-import Properties from "@/pages/Properties"
-import PropertyDetails from "@/pages/PropertyDetails"
-import Tenants from "@/pages/Tenants"
-import TenantContracts from "@/pages/TenantContracts"
-import Expenses from "@/pages/Expenses"
-import Reports from "@/pages/Reports"
-import AgencyDashboard from "@/pages/AgencyDashboard"
-import AgencyEarnings from "@/pages/AgencyEarnings"
-import PropertySales from "@/pages/PropertySales"
-import AdminDashboard from "@/pages/AdminDashboard"
-import SuperAdminLogin from "@/pages/SuperAdminLogin"
-import Pricing from "@/pages/Pricing"
-import SubscriptionUpgrade from "@/pages/SubscriptionUpgrade"
-import PublicProperties from "@/pages/PublicProperties"
-import TermsOfService from "@/pages/TermsOfService"
-import Apartments from "@/pages/Apartments"
-import ApartmentDetails from "@/pages/ApartmentDetails"
-import ApartmentUnits from "@/pages/ApartmentUnits"
+import { Routes, Route } from "react-router-dom";
+import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/providers/ThemeProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "./providers/AuthProvider";
 
-import "./App.css"
+// Pages
+import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Properties from "./pages/Properties";
+import PropertyDetails from "./pages/PropertyDetails";
+import Tenants from "./pages/Tenants";
+import TenantContracts from "./pages/TenantContracts";
+import Expenses from "./pages/Expenses";
+import Reports from "./pages/Reports";
+import AgencyDashboard from "./pages/AgencyDashboard";
+import AgencyEarnings from "./pages/AgencyEarnings";
+import Pricing from "./pages/Pricing";
+import SubscriptionUpgrade from "./pages/SubscriptionUpgrade";
+import AdminDashboard from "./pages/AdminDashboard";
+import SuperAdminLogin from "./pages/SuperAdminLogin";
+import PublicProperties from "./pages/PublicProperties";
+import PropertySales from "./pages/PropertySales";
+import Apartments from "./pages/Apartments";
+import ApartmentDetails from "./pages/ApartmentDetails";
+import ApartmentUnits from "./pages/ApartmentUnits";
+import TermsOfService from "./pages/TermsOfService";
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
-export default function App() {
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <Router>
-            <Routes>
-              <Route path="/" element={<Navigate to="/properties" replace />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/super-admin/login" element={<SuperAdminLogin />} />
-              <Route path="/super-admin/admin" element={<AdminDashboard />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/properties" element={<PublicProperties />} />
-              <Route path="/terms" element={<TermsOfService />} />
-              
-              <Route path="/agence" element={<ProtectedRoute />}>
-                <Route path="dashboard" element={<AgencyDashboard />} />
-                <Route path="properties" element={<Properties />} />
-                <Route path="properties/:id" element={<PropertyDetails />} />
-                <Route path="tenants" element={<Tenants />} />
-                <Route path="contracts" element={<TenantContracts />} />
-                <Route path="expenses" element={<Expenses />} />
-                <Route path="reports" element={<Reports />} />
-                <Route path="sales" element={<PropertySales />} />
-                <Route path="earnings" element={<AgencyEarnings />} />
-                <Route path="subscription" element={<SubscriptionUpgrade />} />
-                {/* Support both French and English paths */}
-                <Route path="apartments" element={<Apartments />} />
-                <Route path="apartments/:id" element={<ApartmentDetails />} />
-                <Route path="apartments/:id/units" element={<ApartmentUnits />} />
-                <Route path="appartements" element={<Navigate to="/agence/apartments" replace />} />
-                <Route path="appartements/:id" element={<Navigate to="/agence/apartments/:id" replace />} />
-                <Route path="appartements/:id/unites" element={<Navigate to="/agence/apartments/:id/units" replace />} />
-              </Route>
-            </Routes>
-          </Router>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin/login" element={<SuperAdminLogin />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/agence">
+              <Route path="tableau-de-bord" element={<AgencyDashboard />} />
+              <Route path="biens" element={<Properties />} />
+              <Route path="biens/:id" element={<PropertyDetails />} />
+              <Route path="locataires" element={<Tenants />} />
+              <Route path="locataires/:id/contrats" element={<TenantContracts />} />
+              <Route path="depenses" element={<Expenses />} />
+              <Route path="rapports" element={<Reports />} />
+              <Route path="revenus" element={<AgencyEarnings />} />
+              <Route path="ventes" element={<PropertySales />} />
+              <Route path="appartements" element={<Apartments />} />
+              <Route path="appartements/:id" element={<ApartmentDetails />} />
+              <Route path="appartements/:id/unites" element={<ApartmentUnits />} />
+            </Route>
+            <Route path="/abonnement">
+              <Route path="tarifs" element={<Pricing />} />
+              <Route path="upgrade" element={<SubscriptionUpgrade />} />
+            </Route>
+            <Route path="/biens" element={<PublicProperties />} />
+            <Route path="/conditions-utilisation" element={<TermsOfService />} />
+          </Routes>
           <Toaster />
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
-  )
+  );
 }
+
+export default App;
