@@ -256,6 +256,9 @@ export type Database = {
           agency_id: string
           created_at: string | null
           deposit_amount: number | null
+          deposit_return_amount: number | null
+          deposit_return_date: string | null
+          deposit_return_notes: string | null
           deposit_returned: boolean | null
           duration_type: string
           end_date: string
@@ -272,6 +275,9 @@ export type Database = {
           agency_id: string
           created_at?: string | null
           deposit_amount?: number | null
+          deposit_return_amount?: number | null
+          deposit_return_date?: string | null
+          deposit_return_notes?: string | null
           deposit_returned?: boolean | null
           duration_type: string
           end_date: string
@@ -288,6 +294,9 @@ export type Database = {
           agency_id?: string
           created_at?: string | null
           deposit_amount?: number | null
+          deposit_return_amount?: number | null
+          deposit_return_date?: string | null
+          deposit_return_notes?: string | null
           deposit_returned?: boolean | null
           duration_type?: string
           end_date?: string
@@ -692,6 +701,105 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      late_payment_fees: {
+        Row: {
+          amount: number
+          created_at: string | null
+          days_late: number
+          id: string
+          lease_id: string
+          payment_id: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          days_late: number
+          id?: string
+          lease_id: string
+          payment_id: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          days_late?: number
+          id?: string
+          lease_id?: string
+          payment_id?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "late_payment_fees_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_leases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "late_payment_fees_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_lease_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_notifications: {
+        Row: {
+          amount: number
+          created_at: string | null
+          due_date: string
+          id: string
+          is_read: boolean | null
+          lease_id: string
+          tenant_id: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          due_date: string
+          id?: string
+          is_read?: boolean | null
+          lease_id: string
+          tenant_id: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          due_date?: string
+          id?: string
+          is_read?: boolean | null
+          lease_id?: string
+          tenant_id?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_notifications_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_leases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_notifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -1173,6 +1281,10 @@ export type Database = {
       }
     }
     Functions: {
+      check_late_payments: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       check_subscription_expiry: {
         Args: Record<PropertyKey, never>
         Returns: undefined
