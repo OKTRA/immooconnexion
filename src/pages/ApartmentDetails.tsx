@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { Plus } from "lucide-react"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { Button } from "@/components/ui/button"
@@ -10,19 +10,18 @@ import { ApartmentInfo } from "@/components/apartment/ApartmentInfo"
 import { useApartmentUnits } from "@/hooks/use-apartment-units"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Apartment } from "@/types/apartment"
+import { Apartment, ApartmentUnit } from "@/types/apartment"
 import { ApartmentUnitDialog } from "@/components/apartment/ApartmentUnitDialog"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 
 export default function ApartmentDetails() {
   const { id = "" } = useParams()
-  const navigate = useNavigate()
   const { toast } = useToast()
   const [showDialog, setShowDialog] = useState(false)
-  const [editingUnit, setEditingUnit] = useState<any>(null)
+  const [editingUnit, setEditingUnit] = useState<ApartmentUnit | undefined>()
 
-  const { data: units = [], isLoading: unitsLoading, deleteUnit } = useApartmentUnits(id)
+  const { data: units = [], isLoading: unitsLoading, createUnit, updateUnit, deleteUnit } = useApartmentUnits(id)
 
   const { data: apartment, isLoading: apartmentLoading } = useQuery({
     queryKey: ["apartment", id],
@@ -38,6 +37,31 @@ export default function ApartmentDetails() {
     },
     enabled: !!id
   })
+
+  const handleSubmit = async (unitData: ApartmentUnit) => {
+    try {
+      if (editingUnit) {
+        await updateUnit.mutateAsync(unitData)
+        toast({
+          title: "Succès",
+          description: "L'unité a été mise à jour avec succès"
+        })
+      } else {
+        await createUnit.mutateAsync(unitData)
+        toast({
+          title: "Succès",
+          description: "L'unité a été créée avec succès"
+        })
+      }
+      setShowDialog(false)
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue",
+        variant: "destructive"
+      })
+    }
+  }
 
   const handleDelete = async (unitId: string) => {
     try {
@@ -55,13 +79,13 @@ export default function ApartmentDetails() {
     }
   }
 
-  const handleEdit = (unit: any) => {
+  const handleEdit = (unit: ApartmentUnit) => {
     setEditingUnit(unit)
     setShowDialog(true)
   }
 
   const handleAdd = () => {
-    setEditingUnit(null)
+    setEditingUnit(undefined)
     setShowDialog(true)
   }
 
@@ -100,6 +124,8 @@ export default function ApartmentDetails() {
         onOpenChange={setShowDialog}
         initialData={editingUnit}
         apartmentId={id}
+        onSubmit={handleSubmit}
+        isEditing={!!editingUnit}
       />
     </AgencyLayout>
   )

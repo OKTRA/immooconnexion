@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Form } from "@/components/ui/form"
 import { UnitFormFields } from "./unit-dialog/UnitFormFields"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 const unitSchema = z.object({
   unit_number: z.string().min(1, "Le numéro d'unité est requis"),
@@ -87,36 +88,38 @@ export function ApartmentUnitDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-[500px] max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Modifier l'unité" : "Ajouter une unité"}
           </DialogTitle>
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <UnitFormFields 
-              form={form} 
-              apartmentId={apartmentId}
-              onSuccess={() => onOpenChange(false)}
-            />
-            
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isSubmitting}
-              >
-                Annuler
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Chargement..." : isEditing ? "Modifier" : "Ajouter"}
-              </Button>
-            </div>
-          </form>
-        </Form>
+        <ScrollArea className="flex-1 max-h-[calc(90vh-180px)] pr-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+              <UnitFormFields 
+                form={form} 
+                apartmentId={apartmentId}
+                onSuccess={() => onOpenChange(false)}
+              />
+              
+              <div className="flex justify-end gap-2 sticky bottom-0 bg-background py-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isSubmitting}
+                >
+                  Annuler
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Chargement..." : isEditing ? "Modifier" : "Ajouter"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   )
