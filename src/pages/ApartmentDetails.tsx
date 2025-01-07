@@ -3,7 +3,8 @@ import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { ApartmentHeader } from "@/components/apartment/ApartmentHeader"
 import { ApartmentInfo } from "@/components/apartment/ApartmentInfo"
 import { ApartmentUnitsSection } from "@/components/apartment/ApartmentUnitsSection"
-import { useApartmentDetails } from "@/hooks/use-apartment-details"
+import { useApartment } from "@/hooks/use-apartment"
+import { useApartmentUnits } from "@/hooks/use-apartment-units"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ApartmentPaymentsTab } from "@/components/apartment/tabs/ApartmentPaymentsTab"
 import { ApartmentLateFeesTab } from "@/components/apartment/tabs/ApartmentLateFeesTab"
@@ -13,14 +14,17 @@ export default function ApartmentDetails() {
   const { id } = useParams<{ id: string }>()
   
   const {
-    apartment,
-    apartmentLoading,
-    units,
-    unitsLoading,
+    data: apartment,
+    isLoading: apartmentLoading
+  } = useApartment(id)
+
+  const {
+    data: units = [],
+    isLoading: unitsLoading,
     createUnit,
     updateUnit,
     deleteUnit
-  } = useApartmentDetails(id)
+  } = useApartmentUnits(id)
 
   if (!id) {
     return (
