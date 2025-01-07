@@ -23,6 +23,7 @@ import TermsOfService from "@/pages/TermsOfService"
 import Apartments from "@/pages/Apartments"
 import ApartmentDetails from "@/pages/ApartmentDetails"
 import ApartmentUnits from "@/pages/ApartmentUnits"
+import UnitDetails from "@/pages/UnitDetails"
 
 import "./App.css"
 
@@ -54,10 +55,10 @@ export default function App() {
                 <Route path="sales" element={<PropertySales />} />
                 <Route path="earnings" element={<AgencyEarnings />} />
                 <Route path="subscription" element={<SubscriptionUpgrade />} />
-                {/* Support both French and English paths */}
                 <Route path="apartments" element={<Apartments />} />
                 <Route path="apartments/:id" element={<ApartmentDetails />} />
                 <Route path="apartments/:id/units" element={<ApartmentUnits />} />
+                <Route path="unite/:id" element={<UnitDetails />} />
                 <Route path="appartements" element={<Navigate to="/agence/apartments" replace />} />
                 <Route path="appartements/:id" element={<Navigate to="/agence/apartments/:id" replace />} />
                 <Route path="appartements/:id/unites" element={<Navigate to="/agence/apartments/:id/units" replace />} />
