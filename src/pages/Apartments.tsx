@@ -39,8 +39,9 @@ export default function Apartments() {
     },
   })
 
-  const handleViewDetails = (id: string) => {
-    navigate(`/agence/appartements/${id}`)
+  const handleViewDetails = (apartmentId: string) => {
+    console.log("Navigating to apartment details with ID:", apartmentId)
+    navigate(`/agence/appartements/${apartmentId}`)
   }
 
   return (
