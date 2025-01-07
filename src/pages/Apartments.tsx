@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
-import { useNavigate } from "react-router-dom"
-import { Building, Plus, Home } from "lucide-react"
+import { Plus, Building } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { Button } from "@/components/ui/button"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardDescription, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { ApartmentForm } from "@/components/apartment/ApartmentForm"
@@ -12,9 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useState } from "react"
 import { ApartmentUnitsSection } from "@/components/apartment/ApartmentUnitsSection"
 import { useApartmentUnits } from "@/hooks/use-apartment-units"
+import { ApartmentCard } from "@/components/apartment/ApartmentCard"
 
 export default function Apartments() {
-  const navigate = useNavigate()
   const { toast } = useToast()
   const [selectedApartmentId, setSelectedApartmentId] = useState<string | null>(null)
   const [showUnitsDialog, setShowUnitsDialog] = useState(false)
@@ -78,11 +77,6 @@ export default function Apartments() {
     updateUnit,
     deleteUnit
   } = useApartmentUnits(selectedApartmentId || undefined)
-
-  const handleViewDetails = (apartmentId: string) => {
-    console.log("Navigating to apartment details with ID:", apartmentId)
-    navigate(`/agence/appartements/${apartmentId}`)
-  }
 
   const handleViewUnits = (apartmentId: string) => {
     setSelectedApartmentId(apartmentId)
@@ -150,45 +144,11 @@ export default function Apartments() {
         <>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {apartments?.map((apartment) => (
-              <Card 
+              <ApartmentCard
                 key={apartment.id}
-                className="cursor-pointer transition-all hover:shadow-lg"
-              >
-                <CardHeader>
-                  <CardTitle>{apartment.name}</CardTitle>
-                  <CardDescription>{apartment.address}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm text-muted-foreground">
-                      {apartment.unit_count} {apartment.unit_count === 1 ? "unité" : "unités"}
-                    </span>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleViewDetails(apartment.id)
-                        }}
-                      >
-                        Voir les détails
-                      </Button>
-                      <Button 
-                        variant="default" 
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleViewUnits(apartment.id)
-                        }}
-                      >
-                        <Home className="w-4 h-4 mr-2" />
-                        Voir Unités
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                apartment={apartment}
+                onViewUnits={handleViewUnits}
+              />
             ))}
           </div>
 
