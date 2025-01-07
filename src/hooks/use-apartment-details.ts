@@ -61,9 +61,11 @@ export function useApartmentDetails(apartmentId: string | undefined) {
 
   const createUnit = useMutation({
     mutationFn: async (unitData: ApartmentUnit) => {
+      if (!apartmentId) throw new Error("Apartment ID is required")
+
       const { error } = await supabase
         .from("apartment_units")
-        .insert([unitData])
+        .insert([{ ...unitData, apartment_id: apartmentId }])
 
       if (error) throw error
     },
@@ -86,6 +88,8 @@ export function useApartmentDetails(apartmentId: string | undefined) {
 
   const updateUnit = useMutation({
     mutationFn: async (unitData: ApartmentUnit) => {
+      if (!unitData.id) throw new Error("Unit ID is required")
+
       const { error } = await supabase
         .from("apartment_units")
         .update({
