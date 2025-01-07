@@ -16,14 +16,30 @@ export default function Apartments() {
   const { data: apartments, isLoading } = useQuery({
     queryKey: ["apartments"],
     queryFn: async () => {
+      const { data: profile } = await supabase.auth.getUser()
+      
+      if (!profile.user) {
+        throw new Error("Non authentifié")
+      }
+
+      // Get the user's agency_id first
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("agency_id")
+        .eq("id", profile.user.id)
+        .single()
+
+      if (!userProfile?.agency_id) {
+        throw new Error("Aucune agence associée")
+      }
+
       const { data, error } = await supabase
         .from("apartments")
         .select(`
           *,
-          apartment_units (
-            count
-          )
+          apartment_units: apartment_units (count)
         `)
+        .eq("agency_id", userProfile.agency_id)
         .order("created_at", { ascending: false })
 
       if (error) {
@@ -35,7 +51,10 @@ export default function Apartments() {
         throw error
       }
 
-      return data
+      return data.map(apartment => ({
+        ...apartment,
+        unit_count: apartment.apartment_units[0]?.count || 0
+      }))
     },
   })
 
@@ -115,7 +134,7 @@ export default function Apartments() {
               <CardContent>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">
-                    {apartment.apartment_units[0].count} unités
+                    {apartment.unit_count} {apartment.unit_count === 1 ? "unité" : "unités"}
                   </span>
                   <Button 
                     variant="outline" 
