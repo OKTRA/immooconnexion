@@ -1,10 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ThemeProvider } from "@/providers/ThemeProvider"
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from "@/providers/AuthProvider"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
-import Index from "@/pages/Index"
 import Login from "@/pages/Login"
 import Properties from "@/pages/Properties"
 import PropertyDetails from "@/pages/PropertyDetails"
@@ -41,7 +40,7 @@ function App() {
         <AuthProvider>
           <Router>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Navigate to="/properties" replace />} />
               <Route path="/login" element={<Login />} />
               <Route path="/super-admin/login" element={<SuperAdminLogin />} />
               <Route path="/super-admin/admin" element={<AdminDashboard />} />
