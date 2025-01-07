@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { ApartmentUnitPricing } from "../types"
 
 interface FlexiblePricingFormProps {
   unitId: string
@@ -24,12 +23,12 @@ export function FlexiblePricingForm({ unitId, onSuccess }: FlexiblePricingFormPr
 
     try {
       const { error } = await supabase
-        .from('apartment_unit_pricing')
-        .insert([{
+        .from("apartment_unit_pricing")
+        .insert({
           unit_id: unitId,
           duration_type: durationType,
           price: parseInt(price),
-        }] as ApartmentUnitPricing[])
+        })
 
       if (error) throw error
 

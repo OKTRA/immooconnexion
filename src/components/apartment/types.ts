@@ -32,7 +32,7 @@ export interface ApartmentUnitFormData {
 }
 
 export interface ApartmentUnitPricing {
-  id?: string;
+  id: string;
   unit_id: string;
   duration_type: "hour" | "day" | "week" | "month" | "year";
   price: number;

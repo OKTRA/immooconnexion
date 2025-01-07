@@ -37,24 +37,6 @@ export function ApartmentUnitDialog({
     }
   }
 
-  const handleFormSubmit = async () => {
-    const unitData: ApartmentUnit = {
-      id: initialData?.id || '',
-      apartment_id: apartmentId,
-      unit_number: formData.unit_number,
-      floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
-      area: formData.area ? parseFloat(formData.area) : null,
-      rent_amount: parseInt(formData.rent_amount),
-      deposit_amount: formData.deposit_amount ? parseInt(formData.deposit_amount) : null,
-      status: formData.status,
-      description: formData.description || null,
-      created_at: initialData?.created_at,
-      updated_at: initialData?.updated_at,
-    }
-    await onSubmit(unitData)
-    onOpenChange(false)
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -69,13 +51,13 @@ export function ApartmentUnitDialog({
               formData={formData}
               setFormData={setFormData}
               handleImageChange={handleImageChange}
-              imagePreviewUrls={previewUrls}
+              imagePreviewUrl={previewUrls}
             />
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Annuler
               </Button>
-              <Button onClick={handleFormSubmit}>
+              <Button onClick={handleSubmit}>
                 {isEditing ? "Modifier" : "Ajouter"}
               </Button>
             </div>
