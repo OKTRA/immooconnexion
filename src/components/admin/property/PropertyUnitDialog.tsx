@@ -22,9 +22,8 @@ export function PropertyUnitDialog({
     area: null,
     rent_amount: 0,
     deposit_amount: null,
-    status: "available" as PropertyUnitStatus,
-    description: null,
-    property_id: propertyId
+    status: "available",
+    description: null
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
