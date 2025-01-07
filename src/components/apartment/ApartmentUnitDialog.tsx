@@ -38,7 +38,20 @@ export function ApartmentUnitDialog({
   }
 
   const handleFormSubmit = async () => {
-    await handleSubmit()
+    const unitData: ApartmentUnit = {
+      id: initialData?.id || '',
+      apartment_id: apartmentId,
+      unit_number: formData.unit_number,
+      floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
+      area: formData.area ? parseFloat(formData.area) : null,
+      rent_amount: parseInt(formData.rent_amount),
+      deposit_amount: formData.deposit_amount ? parseInt(formData.deposit_amount) : null,
+      status: formData.status,
+      description: formData.description || null,
+      created_at: initialData?.created_at,
+      updated_at: initialData?.updated_at,
+    }
+    await onSubmit(unitData)
     onOpenChange(false)
   }
 
