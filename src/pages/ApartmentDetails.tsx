@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ApartmentPaymentsTab } from "@/components/apartment/tabs/ApartmentPaymentsTab"
 import { ApartmentLateFeesTab } from "@/components/apartment/tabs/ApartmentLateFeesTab"
 import { ApartmentDepositsTab } from "@/components/apartment/tabs/ApartmentDepositsTab"
+import { ApartmentUnit } from "@/types/apartment"
 
 export default function ApartmentDetails() {
   const { id } = useParams<{ id: string }>()
@@ -32,6 +33,12 @@ export default function ApartmentDetails() {
     updateUnit,
     deleteUnit
   } = useApartmentUnits(id)
+
+  const handleEdit = (unit: ApartmentUnit) => {
+    // This function is required by the interface but the actual edit handling
+    // is done through onUpdateUnit. We pass the unit through to maintain the interface.
+    console.log("Edit unit:", unit)
+  }
 
   return (
     <AgencyLayout>
@@ -64,6 +71,7 @@ export default function ApartmentDetails() {
                 onDeleteUnit={async (unitId) => {
                   await deleteUnit.mutateAsync(unitId)
                 }}
+                onEdit={handleEdit}
               />
             </TabsContent>
 
