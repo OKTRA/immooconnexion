@@ -3,7 +3,12 @@ import { ApartmentSkeleton } from "./ApartmentSkeleton"
 import { EmptyApartmentState } from "./EmptyApartmentState"
 
 interface ApartmentListProps {
-  apartments: any[]
+  apartments: Array<{
+    id: string
+    name: string
+    address: string
+    unit_count: number
+  }>
   isLoading: boolean
   onViewUnits: (apartmentId: string) => void
 }
@@ -25,7 +30,7 @@ export function ApartmentList({ apartments, isLoading, onViewUnits }: ApartmentL
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {apartments?.map((apartment) => (
+      {apartments.map((apartment) => (
         <ApartmentCard
           key={apartment.id}
           apartment={apartment}

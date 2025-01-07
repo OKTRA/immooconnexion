@@ -13,7 +13,7 @@ export default function Apartments() {
   const [selectedApartmentId, setSelectedApartmentId] = useState<string | null>(null)
   const [showUnitsDialog, setShowUnitsDialog] = useState(false)
 
-  const { data: apartments, isLoading } = useQuery({
+  const { data: apartments = [], isLoading } = useQuery({
     queryKey: ["apartments"],
     queryFn: async () => {
       const { data: profile } = await supabase.auth.getUser()
@@ -47,6 +47,7 @@ export default function Apartments() {
         throw apartmentsError
       }
 
+      // Get unit counts for each apartment
       const apartmentsWithUnits = await Promise.all(
         apartmentsData.map(async (apartment) => {
           const { count } = await supabase
@@ -83,27 +84,23 @@ export default function Apartments() {
       <ApartmentHeader />
       
       <ApartmentList
-        apartments={apartments || []}
+        apartments={apartments}
         isLoading={isLoading}
         onViewUnits={handleViewUnits}
       />
 
-      <ApartmentUnitsDialog
-        open={showUnitsDialog}
-        onOpenChange={setShowUnitsDialog}
-        selectedApartmentId={selectedApartmentId}
-        units={units}
-        unitsLoading={unitsLoading}
-        onCreateUnit={async (data) => {
-          await createUnit.mutateAsync(data)
-        }}
-        onUpdateUnit={async (data) => {
-          await updateUnit.mutateAsync(data)
-        }}
-        onDeleteUnit={async (unitId) => {
-          await deleteUnit.mutateAsync(unitId)
-        }}
-      />
+      {selectedApartmentId && (
+        <ApartmentUnitsDialog
+          open={showUnitsDialog}
+          onOpenChange={setShowUnitsDialog}
+          selectedApartmentId={selectedApartmentId}
+          units={units}
+          unitsLoading={unitsLoading}
+          onCreateUnit={createUnit.mutateAsync}
+          onUpdateUnit={updateUnit.mutateAsync}
+          onDeleteUnit={deleteUnit.mutateAsync}
+        />
+      )}
     </AgencyLayout>
   )
 }
