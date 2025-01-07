@@ -8,10 +8,12 @@ import { useQuery } from "@tanstack/react-query"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { clearSession } from "@/utils/sessionUtils"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export function GlobalHeader() {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isMobile = useIsMobile()
 
   const { data: profile } = useQuery({
     queryKey: ["user-profile"],
@@ -54,7 +56,6 @@ export function GlobalHeader() {
       })
     } catch (error: any) {
       console.error('Logout error:', error)
-      // Even if there's an error, we want to clear the session and redirect
       clearSession()
       navigate("/login")
       toast({
@@ -64,18 +65,25 @@ export function GlobalHeader() {
     }
   }
 
+  const toggleMobileMenu = () => {
+    const sidebar = document.querySelector('.mobile-sidebar')
+    sidebar?.classList.toggle('translate-x-0')
+  }
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="md:hidden -ml-2"
-            onClick={() => document.querySelector('.mobile-sidebar')?.classList.toggle('translate-x-0')}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
+          {isMobile && (
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="md:hidden -ml-2"
+              onClick={toggleMobileMenu}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          )}
           <AnimatedLogo />
           <Separator orientation="vertical" className="h-6" />
           <h1 className="text-lg font-semibold hidden sm:block">
