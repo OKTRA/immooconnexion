@@ -12,7 +12,6 @@ import TenantContracts from "@/pages/TenantContracts"
 import Expenses from "@/pages/Expenses"
 import Reports from "@/pages/Reports"
 import AgencyDashboard from "@/pages/AgencyDashboard"
-import AgencySettings from "@/pages/AgencySettings"
 import AgencyEarnings from "@/pages/AgencyEarnings"
 import PropertySales from "@/pages/PropertySales"
 import AdminDashboard from "@/pages/AdminDashboard"
@@ -46,8 +45,6 @@ export default function App() {
               
               <Route path="/agence" element={<ProtectedRoute />}>
                 <Route path="dashboard" element={<AgencyDashboard />} />
-                <Route path="admin" element={<AgencySettings />} />
-                <Route path="earnings" element={<AgencyEarnings />} />
                 <Route path="properties" element={<Properties />} />
                 <Route path="properties/:id" element={<PropertyDetails />} />
                 <Route path="tenants" element={<Tenants />} />
@@ -55,6 +52,7 @@ export default function App() {
                 <Route path="expenses" element={<Expenses />} />
                 <Route path="reports" element={<Reports />} />
                 <Route path="sales" element={<PropertySales />} />
+                <Route path="earnings" element={<AgencyEarnings />} />
                 <Route path="subscription" element={<SubscriptionUpgrade />} />
                 <Route path="apartments" element={<Apartments />} />
                 <Route path="apartments/:id" element={<ApartmentDetails />} />

@@ -6,7 +6,6 @@ import {
   CircleDollarSign,
   BarChart2,
   FileText,
-  Settings,
   CreditCard,
   Building
 } from "lucide-react"
@@ -18,53 +17,48 @@ import { useIsMobile } from "@/hooks/use-mobile"
 const menuItems = [
   {
     title: "Tableau de bord",
-    href: "/agence/admin",
+    href: "/agence/dashboard",
     icon: LayoutDashboard,
   },
   {
     title: "Locataires",
-    href: "/agence/locataires",
+    href: "/agence/tenants",
     icon: Users,
   },
   {
     title: "Biens",
-    href: "/agence/biens",
+    href: "/agence/properties",
     icon: Building2,
   },
   {
     title: "Appartements",
-    href: "/agence/appartements",
+    href: "/agence/apartments",
     icon: Building,
   },
   {
     title: "Ventes",
-    href: "/agence/ventes",
+    href: "/agence/sales",
     icon: Receipt,
   },
   {
     title: "Dépenses",
-    href: "/agence/depenses",
+    href: "/agence/expenses",
     icon: CircleDollarSign,
   },
   {
     title: "Gains",
-    href: "/agence/gains",
+    href: "/agence/earnings",
     icon: BarChart2,
   },
   {
     title: "Rapports",
-    href: "/agence/rapports",
+    href: "/agence/reports",
     icon: FileText,
   },
   {
     title: "Abonnement",
-    href: "/agence/abonnement",
+    href: "/agence/subscription",
     icon: CreditCard,
-  },
-  {
-    title: "Paramètres",
-    href: "/agence/parametres",
-    icon: Settings,
   },
 ]
 
