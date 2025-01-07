@@ -24,7 +24,15 @@ import ApartmentUnits from "@/pages/ApartmentUnits"
 import SuperAdminLogin from "@/pages/SuperAdminLogin"
 import AdminDashboard from "@/pages/AdminDashboard"
 
-const queryClient = new QueryClient()
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 function App() {
   return (
@@ -33,7 +41,7 @@ function App() {
         <AuthProvider>
           <Router>
             <Routes>
-              <Route path="/" element={<PublicProperties />} />
+              <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/super-admin/login" element={<SuperAdminLogin />} />
               <Route path="/super-admin/admin" element={<AdminDashboard />} />
