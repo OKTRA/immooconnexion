@@ -39,6 +39,10 @@ export default function Apartments() {
     },
   })
 
+  const handleViewDetails = (id: string) => {
+    navigate(`/agence/appartements/${id}`)
+  }
+
   return (
     <AgencyLayout>
       <div className="flex items-center justify-between mb-6">
@@ -102,7 +106,6 @@ export default function Apartments() {
             <Card 
               key={apartment.id}
               className="cursor-pointer transition-all hover:shadow-lg"
-              onClick={() => navigate(`/agence/appartements/${apartment.id}`)}
             >
               <CardHeader>
                 <CardTitle>{apartment.name}</CardTitle>
@@ -113,7 +116,11 @@ export default function Apartments() {
                   <span className="text-sm text-muted-foreground">
                     {apartment.apartment_units[0].count} unités
                   </span>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleViewDetails(apartment.id)}
+                  >
                     Voir les détails
                   </Button>
                 </div>
