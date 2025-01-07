@@ -39,6 +39,7 @@ export function ApartmentUnitDialog({
 
   const handleFormSubmit = async () => {
     await handleSubmit()
+    onOpenChange(false)
   }
 
   return (
