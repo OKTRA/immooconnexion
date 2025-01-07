@@ -53,13 +53,10 @@ export default function ApartmentUnits() {
       <ApartmentUnitDialog
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
-        onSubmit={async (data) => {
-          if (selectedUnit) {
-            await updateUnit.mutateAsync(data)
-          } else {
-            await createUnit.mutateAsync(data)
-          }
-        }}
+        onSubmit={selectedUnit ? 
+          (data) => updateUnit.mutate(data) : 
+          (data) => createUnit.mutate(data)
+        }
         initialData={selectedUnit}
         apartmentId={id}
         isEditing={!!selectedUnit}
