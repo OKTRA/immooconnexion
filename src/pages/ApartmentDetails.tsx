@@ -60,9 +60,9 @@ export default function ApartmentDetails() {
                 apartmentId={id}
                 units={units}
                 isLoading={unitsLoading}
-                onCreateUnit={(data) => createUnit.mutateAsync(data)}
-                onUpdateUnit={(data) => updateUnit.mutateAsync(data)}
-                onDeleteUnit={(unitId) => deleteUnit.mutateAsync(unitId)}
+                onCreateUnit={data => createUnit.mutateAsync(data)}
+                onUpdateUnit={data => updateUnit.mutateAsync(data)}
+                onDeleteUnit={unitId => deleteUnit.mutateAsync(unitId)}
               />
             </TabsContent>
 

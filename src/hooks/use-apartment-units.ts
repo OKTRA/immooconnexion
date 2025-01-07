@@ -1,11 +1,13 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { ApartmentUnit } from "@/types/apartment"
 
 export function useApartmentUnits(apartmentId: string | undefined) {
   const { toast } = useToast()
+  const queryClient = useQueryClient()
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ["apartment-units", apartmentId],
     queryFn: async () => {
       if (!apartmentId) {
@@ -30,8 +32,98 @@ export function useApartmentUnits(apartmentId: string | undefined) {
         throw error
       }
 
-      return data || []
+      return data as ApartmentUnit[]
     },
     enabled: Boolean(apartmentId)
   })
+
+  const createUnit = useMutation({
+    mutationFn: async (newUnit: Partial<ApartmentUnit>) => {
+      const { data, error } = await supabase
+        .from("apartment_units")
+        .insert([{ ...newUnit, apartment_id: apartmentId }])
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] })
+      toast({
+        title: "Succès",
+        description: "Unité créée avec succès",
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer l'unité",
+        variant: "destructive",
+      })
+      throw error
+    }
+  })
+
+  const updateUnit = useMutation({
+    mutationFn: async (updatedUnit: Partial<ApartmentUnit>) => {
+      const { data, error } = await supabase
+        .from("apartment_units")
+        .update(updatedUnit)
+        .eq("id", updatedUnit.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] })
+      toast({
+        title: "Succès",
+        description: "Unité mise à jour avec succès",
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour l'unité",
+        variant: "destructive",
+      })
+      throw error
+    }
+  })
+
+  const deleteUnit = useMutation({
+    mutationFn: async (unitId: string) => {
+      const { error } = await supabase
+        .from("apartment_units")
+        .delete()
+        .eq("id", unitId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] })
+      toast({
+        title: "Succès",
+        description: "Unité supprimée avec succès",
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer l'unité",
+        variant: "destructive",
+      })
+      throw error
+    }
+  })
+
+  return {
+    ...query,
+    createUnit,
+    updateUnit,
+    deleteUnit
+  }
 }
