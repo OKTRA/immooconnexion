@@ -36,11 +36,11 @@ export function usePropertyUnits(propertyId: string) {
   })
 
   const updateUnit = useMutation({
-    mutationFn: async (formData: PropertyUnitFormData & { property_id: string }) => {
+    mutationFn: async (unit: PropertyUnitFormData & { property_id: string }) => {
       const { data, error } = await supabase
         .from("property_units")
-        .update(formData)
-        .eq("property_id", propertyId)
+        .update(unit)
+        .eq("id", unit.id)
         .select()
         .single()
 
