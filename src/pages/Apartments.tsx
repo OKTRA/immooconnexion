@@ -7,6 +7,7 @@ import { useApartmentUnits } from "@/hooks/use-apartment-units"
 import { ApartmentHeader } from "@/components/apartment/ApartmentHeader"
 import { ApartmentList } from "@/components/apartment/ApartmentList"
 import { ApartmentUnitsDialog } from "@/components/apartment/ApartmentUnitsDialog"
+import { ApartmentUnit } from "@/types/apartment"
 
 export default function Apartments() {
   const { toast } = useToast()
@@ -79,19 +80,16 @@ export default function Apartments() {
     setShowUnitsDialog(true)
   }
 
-  const handleCreateUnit = async (data: any) => {
+  const handleCreateUnit = async (data: ApartmentUnit) => {
     await createUnit.mutateAsync(data)
-    return Promise.resolve()
   }
 
-  const handleUpdateUnit = async (data: any) => {
+  const handleUpdateUnit = async (data: ApartmentUnit) => {
     await updateUnit.mutateAsync(data)
-    return Promise.resolve()
   }
 
   const handleDeleteUnit = async (unitId: string) => {
     await deleteUnit.mutateAsync(unitId)
-    return Promise.resolve()
   }
 
   return (

@@ -1,12 +1,9 @@
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { Apartment } from "@/types/apartment"
 
 interface ApartmentHeaderProps {
-  apartment?: {
-    name: string
-    address: string | null
-    description: string | null
-  } | null
+  apartment?: Apartment | null
   isLoading?: boolean
 }
 
