@@ -78,7 +78,7 @@ export function LoginFormFields() {
         description: "Bienvenue dans votre espace",
         duration: 3000,
       })
-      navigate("/agence/admin")
+      navigate("/agence/dashboard")
 
       // Continue with profile and agency checks in the background
       const { data: profile, error: profileError } = await supabase
