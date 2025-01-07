@@ -1,10 +1,9 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Edit, Eye, Trash } from "lucide-react"
+import { Edit, Trash } from "lucide-react"
 import { ApartmentUnit } from "@/types/apartment"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useNavigate } from "react-router-dom"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +30,6 @@ export function ApartmentUnitsTable({
   isLoading 
 }: ApartmentUnitsTableProps) {
   const [unitToDelete, setUnitToDelete] = useState<ApartmentUnit | null>(null)
-  const navigate = useNavigate()
 
   const getStatusBadge = (status: ApartmentUnit['status']) => {
     switch (status) {
@@ -51,10 +49,6 @@ export function ApartmentUnitsTable({
       onDelete(unitToDelete.id)
       setUnitToDelete(null)
     }
-  }
-
-  const handleViewDetails = (unitId: string) => {
-    navigate(`/agence/unite/${unitId}`)
   }
 
   if (isLoading) {
@@ -120,13 +114,6 @@ export function ApartmentUnitsTable({
                 <TableCell>{getStatusBadge(unit.status)}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleViewDetails(unit.id)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
