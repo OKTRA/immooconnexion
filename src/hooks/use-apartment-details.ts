@@ -10,7 +10,10 @@ export function useApartmentDetails(apartmentId: string | undefined) {
   const { data: apartment, isLoading: apartmentLoading } = useQuery({
     queryKey: ["apartment", apartmentId],
     queryFn: async () => {
-      if (!apartmentId) throw new Error("No apartment ID provided")
+      if (!apartmentId) {
+        console.error("No apartment ID provided")
+        return null
+      }
 
       const { data, error } = await supabase
         .from("apartments")
@@ -20,11 +23,21 @@ export function useApartmentDetails(apartmentId: string | undefined) {
 
       if (error) {
         console.error("Error fetching apartment:", error)
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les détails de l'appartement",
+          variant: "destructive",
+        })
         throw error
       }
 
       if (!data) {
-        throw new Error("Apartment not found")
+        toast({
+          title: "Erreur",
+          description: "Appartement non trouvé",
+          variant: "destructive",
+        })
+        return null
       }
 
       return data as Apartment
@@ -35,7 +48,10 @@ export function useApartmentDetails(apartmentId: string | undefined) {
   const { data: units = [], isLoading: unitsLoading } = useQuery({
     queryKey: ["apartment-units", apartmentId],
     queryFn: async () => {
-      if (!apartmentId) throw new Error("No apartment ID provided")
+      if (!apartmentId) {
+        console.error("No apartment ID provided")
+        return []
+      }
 
       const { data, error } = await supabase
         .from("apartment_units")
@@ -45,6 +61,11 @@ export function useApartmentDetails(apartmentId: string | undefined) {
 
       if (error) {
         console.error("Error fetching units:", error)
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les unités",
+          variant: "destructive",
+        })
         throw error
       }
 

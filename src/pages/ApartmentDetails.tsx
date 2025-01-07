@@ -29,6 +29,8 @@ export default function ApartmentDetails() {
   const { data: latePayments = [] } = useQuery({
     queryKey: ["late-payments", id],
     queryFn: async () => {
+      if (!id) return []
+
       const { data, error } = await supabase
         .from("late_payment_fees")
         .select(`
@@ -52,6 +54,8 @@ export default function ApartmentDetails() {
   const { data: deposits = [] } = useQuery({
     queryKey: ["deposits", id],
     queryFn: async () => {
+      if (!id) return []
+
       const { data, error } = await supabase
         .from("apartment_leases")
         .select(`
