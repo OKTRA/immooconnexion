@@ -13,6 +13,7 @@ import { useApartmentUnits } from "@/hooks/use-apartment-units"
 import { ApartmentCard } from "@/components/apartment/ApartmentCard"
 import { ApartmentSkeleton } from "@/components/apartment/ApartmentSkeleton"
 import { EmptyApartmentState } from "@/components/apartment/EmptyApartmentState"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function Apartments() {
   const { toast } = useToast()
