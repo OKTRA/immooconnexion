@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./providers/AuthProvider";
+import { BrowserRouter } from "react-router-dom";
 
 // Pages
 import Index from "./pages/Index";
@@ -30,39 +31,41 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin/login" element={<SuperAdminLogin />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/agence">
-              <Route path="tableau-de-bord" element={<AgencyDashboard />} />
-              <Route path="biens" element={<Properties />} />
-              <Route path="biens/:id" element={<PropertyDetails />} />
-              <Route path="locataires" element={<Tenants />} />
-              <Route path="locataires/:id/contrats" element={<TenantContracts />} />
-              <Route path="depenses" element={<Expenses />} />
-              <Route path="rapports" element={<Reports />} />
-              <Route path="revenus" element={<AgencyEarnings />} />
-              <Route path="ventes" element={<PropertySales />} />
-              <Route path="appartements" element={<Apartments />} />
-              <Route path="appartements/:id" element={<ApartmentDetails />} />
-              <Route path="appartements/:id/unites" element={<ApartmentUnits />} />
-            </Route>
-            <Route path="/abonnement">
-              <Route path="tarifs" element={<Pricing />} />
-              <Route path="upgrade" element={<SubscriptionUpgrade />} />
-            </Route>
-            <Route path="/biens" element={<PublicProperties />} />
-            <Route path="/conditions-utilisation" element={<TermsOfService />} />
-          </Routes>
-          <Toaster />
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/admin/login" element={<SuperAdminLogin />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/agence">
+                <Route path="tableau-de-bord" element={<AgencyDashboard />} />
+                <Route path="biens" element={<Properties />} />
+                <Route path="biens/:id" element={<PropertyDetails />} />
+                <Route path="locataires" element={<Tenants />} />
+                <Route path="locataires/:id/contrats" element={<TenantContracts />} />
+                <Route path="depenses" element={<Expenses />} />
+                <Route path="rapports" element={<Reports />} />
+                <Route path="revenus" element={<AgencyEarnings />} />
+                <Route path="ventes" element={<PropertySales />} />
+                <Route path="appartements" element={<Apartments />} />
+                <Route path="appartements/:id" element={<ApartmentDetails />} />
+                <Route path="appartements/:id/unites" element={<ApartmentUnits />} />
+              </Route>
+              <Route path="/abonnement">
+                <Route path="tarifs" element={<Pricing />} />
+                <Route path="upgrade" element={<SubscriptionUpgrade />} />
+              </Route>
+              <Route path="/biens" element={<PublicProperties />} />
+              <Route path="/conditions-utilisation" element={<TermsOfService />} />
+            </Routes>
+            <Toaster />
+          </AuthProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
   );
 }
 
