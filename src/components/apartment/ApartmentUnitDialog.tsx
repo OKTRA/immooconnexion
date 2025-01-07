@@ -39,7 +39,7 @@ export function ApartmentUnitDialog({
 
   const handleFormSubmit = async () => {
     try {
-      await handleSubmit(formData)
+      await handleSubmit()
       onOpenChange(false)
     } catch (error) {
       console.error('Error submitting form:', error)

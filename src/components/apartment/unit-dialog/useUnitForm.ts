@@ -6,7 +6,7 @@ import { ApartmentUnit, ApartmentUnitFormData } from "../types"
 export function useUnitForm(
   apartmentId: string,
   initialData?: ApartmentUnit,
-  onSuccess?: () => void
+  onSuccess?: (data: ApartmentUnit) => Promise<void>
 ) {
   const [images, setImages] = useState<File[]>([])
   const [previewUrls, setPreviewUrls] = useState<string[]>([])
@@ -19,9 +19,6 @@ export function useUnitForm(
     deposit_amount: "",
     status: "available",
     description: "",
-    minimum_stay: "",
-    maximum_stay: "",
-    late_fee_percentage: "",
   })
 
   useEffect(() => {
@@ -34,14 +31,7 @@ export function useUnitForm(
         deposit_amount: initialData.deposit_amount?.toString() || "",
         status: initialData.status,
         description: initialData.description || "",
-        minimum_stay: initialData.minimum_stay?.toString() || "",
-        maximum_stay: initialData.maximum_stay?.toString() || "",
-        late_fee_percentage: initialData.late_fee_percentage?.toString() || "",
       })
-
-      if (initialData.photo_urls) {
-        setPreviewUrls(initialData.photo_urls)
-      }
     }
   }, [initialData])
 
@@ -77,7 +67,8 @@ export function useUnitForm(
         }
       }
 
-      const unitData = {
+      const unitData: ApartmentUnit = {
+        id: initialData?.id || crypto.randomUUID(),
         apartment_id: apartmentId,
         unit_number: formData.unit_number,
         floor_number: parseInt(formData.floor_number) || null,
@@ -85,45 +76,25 @@ export function useUnitForm(
         rent_amount: parseInt(formData.rent_amount),
         deposit_amount: parseInt(formData.deposit_amount) || null,
         status: formData.status,
-        description: formData.description,
-        minimum_stay: parseInt(formData.minimum_stay || "0") || null,
-        maximum_stay: parseInt(formData.maximum_stay || "0") || null,
-        late_fee_percentage: parseInt(formData.late_fee_percentage || "0") || null,
-        photo_urls: photo_urls.length > 0 ? photo_urls : undefined,
+        description: formData.description || null,
       }
 
-      if (initialData?.id) {
-        const { error } = await supabase
-          .from("apartment_units")
-          .update(unitData)
-          .eq("id", initialData.id)
-
-        if (error) throw error
-
-        toast({
-          title: "Unité modifiée",
-          description: "L'unité a été mise à jour avec succès",
-        })
-      } else {
-        const { error } = await supabase.from("apartment_units").insert([unitData])
-
-        if (error) throw error
-
-        toast({
-          title: "Unité ajoutée",
-          description: "L'unité a été ajoutée avec succès",
-        })
+      if (onSuccess) {
+        await onSuccess(unitData)
       }
 
-      onSuccess?.()
+      toast({
+        title: initialData ? "Unité modifiée" : "Unité ajoutée",
+        description: `L'unité a été ${initialData ? 'mise à jour' : 'ajoutée'} avec succès`,
+      })
     } catch (error) {
       console.error("Error:", error)
       toast({
         title: "Erreur",
-        description:
-          "Une erreur est survenue lors de l'enregistrement de l'unité",
+        description: "Une erreur est survenue lors de l'enregistrement de l'unité",
         variant: "destructive",
       })
+      throw error
     }
   }
 

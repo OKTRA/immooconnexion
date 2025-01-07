@@ -16,17 +16,32 @@ import { ApartmentUnitDialog } from "@/components/apartment/ApartmentUnitDialog"
 import { useToast } from "@/hooks/use-toast"
 
 export default function ApartmentDetails() {
-  const { id = "" } = useParams()
+  const { id } = useParams<{ id: string }>()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [showDialog, setShowDialog] = useState(false)
   const [editingUnit, setEditingUnit] = useState<ApartmentUnit | undefined>()
 
-  const { data: units = [], isLoading: unitsLoading } = useApartmentUnits(id)
+  const { data: units = [], isLoading: unitsLoading } = useQuery({
+    queryKey: ["apartment-units", id],
+    queryFn: async () => {
+      if (!id) throw new Error("No apartment ID provided")
+      const { data, error } = await supabase
+        .from("apartment_units")
+        .select("*")
+        .eq("apartment_id", id)
+        .order("unit_number")
+
+      if (error) throw error
+      return data as ApartmentUnit[]
+    },
+    enabled: !!id
+  })
 
   const { data: apartment, isLoading: apartmentLoading } = useQuery({
     queryKey: ["apartment", id],
     queryFn: async () => {
+      if (!id) throw new Error("No apartment ID provided")
       const { data, error } = await supabase
         .from("apartments")
         .select("*")
@@ -128,10 +143,15 @@ export default function ApartmentDetails() {
   })
 
   const handleSubmit = async (unitData: ApartmentUnit) => {
+    if (!id) return
+    const data = {
+      ...unitData,
+      apartment_id: id
+    }
     if (editingUnit) {
-      await updateUnit.mutateAsync(unitData)
+      await updateUnit.mutateAsync(data)
     } else {
-      await createUnit.mutateAsync(unitData)
+      await createUnit.mutateAsync(data)
     }
   }
 
@@ -144,6 +164,8 @@ export default function ApartmentDetails() {
     setEditingUnit(undefined)
     setShowDialog(true)
   }
+
+  if (!id) return null
 
   return (
     <AgencyLayout>
