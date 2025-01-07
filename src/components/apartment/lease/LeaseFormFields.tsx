@@ -1,7 +1,9 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { LeaseFormData, PaymentFrequency, DurationType } from "./types"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Textarea } from "@/components/ui/textarea"
+import { LeaseFormData, PaymentFrequency, DurationType, LeaseStatus } from "./types"
 
 interface LeaseFormFieldsProps {
   formData: LeaseFormData
@@ -93,6 +95,71 @@ export function LeaseFormFields({
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="status">Statut</Label>
+        <Select 
+          value={formData.status} 
+          onValueChange={(value: LeaseStatus) => setFormData({ ...formData, status: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Sélectionner un statut" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="active">Actif</SelectItem>
+            <SelectItem value="expired">Expiré</SelectItem>
+            <SelectItem value="terminated">Résilié</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="depositReturned"
+            checked={formData.depositReturned}
+            onCheckedChange={(checked) => 
+              setFormData({ ...formData, depositReturned: checked as boolean })
+            }
+          />
+          <Label htmlFor="depositReturned">Caution remboursée</Label>
+        </div>
+
+        {formData.depositReturned && (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="depositReturnDate">Date de remboursement</Label>
+                <Input
+                  id="depositReturnDate"
+                  type="date"
+                  value={formData.depositReturnDate}
+                  onChange={(e) => setFormData({ ...formData, depositReturnDate: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="depositReturnAmount">Montant remboursé</Label>
+                <Input
+                  id="depositReturnAmount"
+                  type="number"
+                  value={formData.depositReturnAmount}
+                  onChange={(e) => setFormData({ ...formData, depositReturnAmount: e.target.value })}
+                  placeholder="Montant en FCFA"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="depositReturnNotes">Notes sur le remboursement</Label>
+              <Textarea
+                id="depositReturnNotes"
+                value={formData.depositReturnNotes}
+                onChange={(e) => setFormData({ ...formData, depositReturnNotes: e.target.value })}
+                placeholder="Commentaires sur le remboursement de la caution"
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

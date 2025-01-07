@@ -1,5 +1,6 @@
 export type DurationType = "fixed" | "month_to_month" | "yearly";
 export type PaymentFrequency = "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
+export type LeaseStatus = "active" | "expired" | "terminated";
 
 export interface LeaseFormData {
   startDate: string;
@@ -8,6 +9,11 @@ export interface LeaseFormData {
   depositAmount: string;
   paymentFrequency: PaymentFrequency;
   durationType: DurationType;
+  status: LeaseStatus;
+  depositReturnDate?: string;
+  depositReturnAmount?: string;
+  depositReturnNotes?: string;
+  depositReturned: boolean;
 }
 
 export interface Lease {
@@ -20,8 +26,11 @@ export interface Lease {
   deposit_amount: number;
   payment_frequency: PaymentFrequency;
   duration_type: DurationType;
-  status: string;
+  status: LeaseStatus;
   deposit_returned: boolean;
+  deposit_return_date?: string;
+  deposit_return_amount?: number;
+  deposit_return_notes?: string;
   agency_id: string;
   created_at: string;
   updated_at: string;
