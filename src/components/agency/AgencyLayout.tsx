@@ -1,8 +1,9 @@
-import { AgencySidebar } from "./AgencySidebar"
 import { SubscriptionNotification } from "../subscription/SubscriptionNotification"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { GlobalHeader } from "../layout/GlobalHeader"
+import { AgencySidebar } from "./AgencySidebar"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { cn } from "@/lib/utils"
 
 interface AgencyLayoutProps {
   children: React.ReactNode
