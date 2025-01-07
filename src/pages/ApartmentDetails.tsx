@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom"
+import { useParams, Navigate } from "react-router-dom"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { ApartmentHeader } from "@/components/apartment/ApartmentHeader"
 import { ApartmentInfo } from "@/components/apartment/ApartmentInfo"
@@ -13,6 +13,11 @@ import { ApartmentDepositsTab } from "@/components/apartment/tabs/ApartmentDepos
 export default function ApartmentDetails() {
   const { id } = useParams<{ id: string }>()
   
+  // Redirect to apartments list if no valid ID
+  if (!id || id === ":id") {
+    return <Navigate to="/agence/appartements" replace />
+  }
+
   const {
     data: apartment,
     isLoading: apartmentLoading
@@ -25,18 +30,6 @@ export default function ApartmentDetails() {
     updateUnit,
     deleteUnit
   } = useApartmentUnits(id)
-
-  if (!id) {
-    return (
-      <AgencyLayout>
-        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
-          <p className="text-muted-foreground">
-            Sélectionnez un appartement pour voir les détails
-          </p>
-        </div>
-      </AgencyLayout>
-    )
-  }
 
   return (
     <AgencyLayout>

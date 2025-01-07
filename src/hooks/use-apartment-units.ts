@@ -15,12 +15,6 @@ export function useApartmentUnits(apartmentId: string | undefined) {
         throw new Error("Apartment ID is required")
       }
 
-      // Ensure apartmentId is not ":id" placeholder
-      if (apartmentId === ":id") {
-        console.error("Invalid apartment ID: :id")
-        throw new Error("Invalid apartment ID")
-      }
-
       console.log("Fetching units for apartment ID:", apartmentId)
       const { data, error } = await supabase
         .from("apartment_units")
@@ -44,7 +38,7 @@ export function useApartmentUnits(apartmentId: string | undefined) {
         status: unit.status as ApartmentUnit["status"]
       })) as ApartmentUnit[]
     },
-    enabled: Boolean(apartmentId) && apartmentId !== ":id"
+    enabled: Boolean(apartmentId)
   })
 
   const createUnit = useMutation({
