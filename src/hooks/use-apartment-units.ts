@@ -32,16 +32,23 @@ export function useApartmentUnits(apartmentId: string | undefined) {
         throw error
       }
 
-      return data as ApartmentUnit[]
+      // Convert string status to ApartmentUnitStatus
+      return (data || []).map(unit => ({
+        ...unit,
+        status: unit.status as ApartmentUnit["status"]
+      })) as ApartmentUnit[]
     },
     enabled: Boolean(apartmentId)
   })
 
   const createUnit = useMutation({
-    mutationFn: async (newUnit: Partial<ApartmentUnit>) => {
+    mutationFn: async (newUnit: Omit<ApartmentUnit, 'id' | 'created_at' | 'updated_at' | 'apartment_id'>) => {
       const { data, error } = await supabase
         .from("apartment_units")
-        .insert([{ ...newUnit, apartment_id: apartmentId }])
+        .insert({
+          ...newUnit,
+          apartment_id: apartmentId,
+        })
         .select()
         .single()
 
@@ -66,7 +73,7 @@ export function useApartmentUnits(apartmentId: string | undefined) {
   })
 
   const updateUnit = useMutation({
-    mutationFn: async (updatedUnit: Partial<ApartmentUnit>) => {
+    mutationFn: async (updatedUnit: Partial<ApartmentUnit> & { id: string }) => {
       const { data, error } = await supabase
         .from("apartment_units")
         .update(updatedUnit)
