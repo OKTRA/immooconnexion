@@ -197,6 +197,180 @@ export type Database = {
           },
         ]
       }
+      apartment_lease_payments: {
+        Row: {
+          agency_id: string
+          amount: number
+          created_at: string | null
+          due_date: string
+          id: string
+          late_fee_amount: number | null
+          lease_id: string
+          payment_date: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          agency_id: string
+          amount: number
+          created_at?: string | null
+          due_date: string
+          id?: string
+          late_fee_amount?: number | null
+          lease_id: string
+          payment_date?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          agency_id?: string
+          amount?: number
+          created_at?: string | null
+          due_date?: string
+          id?: string
+          late_fee_amount?: number | null
+          lease_id?: string
+          payment_date?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_lease_payments_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_lease_payments_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_leases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apartment_leases: {
+        Row: {
+          agency_id: string
+          created_at: string | null
+          deposit_amount: number | null
+          deposit_returned: boolean | null
+          duration_type: string
+          end_date: string
+          id: string
+          payment_frequency: string
+          rent_amount: number
+          start_date: string
+          status: string
+          tenant_id: string
+          unit_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string | null
+          deposit_amount?: number | null
+          deposit_returned?: boolean | null
+          duration_type: string
+          end_date: string
+          id?: string
+          payment_frequency: string
+          rent_amount: number
+          start_date: string
+          status?: string
+          tenant_id: string
+          unit_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string | null
+          deposit_amount?: number | null
+          deposit_returned?: boolean | null
+          duration_type?: string
+          end_date?: string
+          id?: string
+          payment_frequency?: string
+          rent_amount?: number
+          start_date?: string
+          status?: string
+          tenant_id?: string
+          unit_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_leases_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_leases_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_leases_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apartment_tenants: {
+        Row: {
+          agency_id: string
+          birth_date: string | null
+          created_at: string | null
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          phone_number: string | null
+          photo_id_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          agency_id: string
+          birth_date?: string | null
+          created_at?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          phone_number?: string | null
+          photo_id_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          agency_id?: string
+          birth_date?: string | null
+          created_at?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          phone_number?: string | null
+          photo_id_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_tenants_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       apartment_units: {
         Row: {
           apartment_id: string
@@ -965,6 +1139,10 @@ export type Database = {
     }
     Functions: {
       check_subscription_expiry: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_expired_apartment_leases: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
