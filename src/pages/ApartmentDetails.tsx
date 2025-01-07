@@ -14,7 +14,7 @@ export default function ApartmentDetails() {
   const { id } = useParams<{ id: string }>()
   
   // Redirect to apartments list if no valid ID
-  if (!id || id === ":id") {
+  if (!id) {
     return <Navigate to="/agence/appartements" replace />
   }
 

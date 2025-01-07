@@ -136,6 +136,7 @@ export default function Apartments() {
             <Card 
               key={apartment.id}
               className="cursor-pointer transition-all hover:shadow-lg"
+              onClick={() => handleViewDetails(apartment.id)}
             >
               <CardHeader>
                 <CardTitle>{apartment.name}</CardTitle>
@@ -149,7 +150,10 @@ export default function Apartments() {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => handleViewDetails(apartment.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleViewDetails(apartment.id)
+                    }}
                   >
                     Voir les détails
                   </Button>
