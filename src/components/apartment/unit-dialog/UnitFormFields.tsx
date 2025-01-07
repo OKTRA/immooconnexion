@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ApartmentUnitFormData } from "@/components/apartment/types"
+import { ApartmentUnitFormData, ApartmentUnitStatus } from "@/components/apartment/types"
 
 interface UnitFormFieldsProps {
   formData: ApartmentUnitFormData
@@ -118,7 +118,7 @@ export function UnitFormFields({
           <Label htmlFor="status">Statut</Label>
           <Select
             value={formData.status}
-            onValueChange={(value) => setFormData({ ...formData, status: value })}
+            onValueChange={(value: ApartmentUnitStatus) => setFormData({ ...formData, status: value })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner un statut" />

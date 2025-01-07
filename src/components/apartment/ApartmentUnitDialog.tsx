@@ -51,13 +51,13 @@ export function ApartmentUnitDialog({
               formData={formData}
               setFormData={setFormData}
               handleImageChange={handleImageChange}
-              imagePreviewUrl={previewUrls}
+              imagePreviewUrls={previewUrls}
             />
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Annuler
               </Button>
-              <Button onClick={handleSubmit}>
+              <Button onClick={() => handleSubmit()}>
                 {isEditing ? "Modifier" : "Ajouter"}
               </Button>
             </div>
