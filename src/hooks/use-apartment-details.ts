@@ -10,10 +10,7 @@ export function useApartmentDetails(apartmentId: string | undefined) {
   const { data: apartment, isLoading: apartmentLoading } = useQuery({
     queryKey: ["apartment", apartmentId],
     queryFn: async () => {
-      if (!apartmentId) {
-        console.error("No apartment ID provided")
-        return null
-      }
+      if (!apartmentId) return null
 
       const { data, error } = await supabase
         .from("apartments")
@@ -31,15 +28,6 @@ export function useApartmentDetails(apartmentId: string | undefined) {
         throw error
       }
 
-      if (!data) {
-        toast({
-          title: "Erreur",
-          description: "Appartement non trouvé",
-          variant: "destructive",
-        })
-        return null
-      }
-
       return data as Apartment
     },
     enabled: Boolean(apartmentId)
@@ -48,10 +36,7 @@ export function useApartmentDetails(apartmentId: string | undefined) {
   const { data: units = [], isLoading: unitsLoading } = useQuery({
     queryKey: ["apartment-units", apartmentId],
     queryFn: async () => {
-      if (!apartmentId) {
-        console.error("No apartment ID provided")
-        return []
-      }
+      if (!apartmentId) return []
 
       const { data, error } = await supabase
         .from("apartment_units")
