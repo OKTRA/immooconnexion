@@ -12,6 +12,10 @@ export interface ApartmentUnit {
   description: string | null;
   created_at?: string;
   updated_at?: string;
+  apartment?: {
+    name: string;
+    address: string | null;
+  };
 }
 
 export interface ApartmentUnitFormData {

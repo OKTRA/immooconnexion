@@ -1,5 +1,6 @@
-export type DurationType = "fixed" | "month_to_month" | "yearly";
+export type PaymentType = "upfront" | "end_of_period";
 export type PaymentFrequency = "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
+export type DurationType = "fixed" | "month_to_month" | "yearly";
 export type LeaseStatus = "active" | "expired" | "terminated";
 
 export interface LeaseFormData {
@@ -10,7 +11,7 @@ export interface LeaseFormData {
   paymentFrequency: PaymentFrequency;
   durationType: DurationType;
   status: LeaseStatus;
-  paymentType: "upfront" | "end_of_period";
+  paymentType: PaymentType;
   depositReturnDate?: string;
   depositReturnAmount?: string;
   depositReturnNotes?: string;
@@ -22,7 +23,7 @@ export interface Lease {
   tenant_id: string;
   unit_id: string;
   start_date: string;
-  end_date: string;
+  end_date: string | null;
   rent_amount: number;
   deposit_amount: number;
   payment_frequency: PaymentFrequency;
@@ -35,6 +36,6 @@ export interface Lease {
   agency_id: string;
   created_at: string;
   updated_at: string;
-  payment_type: "upfront" | "end_of_period";
+  payment_type: PaymentType;
   initial_fees_paid: boolean;
 }

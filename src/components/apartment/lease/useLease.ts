@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { LeaseFormData } from "./types"
+import { LeaseFormData, PaymentFrequency, DurationType, LeaseStatus, PaymentType } from "./types"
 
 export function useLease(unitId: string, tenantId?: string) {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -38,37 +38,34 @@ export function useLease(unitId: string, tenantId?: string) {
         throw new Error("Aucune agence associée à ce profil")
       }
 
-      // Si le type de durée n'est pas "fixed", la date de fin est null
       const endDate = formData.durationType === "fixed" ? formData.endDate : null
 
-      const leaseData = {
-        tenant_id: tenantId,
-        unit_id: unitId,
-        start_date: formData.startDate,
-        end_date: endDate,
-        rent_amount: parseInt(formData.rentAmount),
-        deposit_amount: parseInt(formData.depositAmount),
-        payment_frequency: formData.paymentFrequency,
-        duration_type: formData.durationType,
-        status: formData.status,
-        deposit_returned: formData.depositReturned,
-        deposit_return_date: formData.depositReturnDate || null,
-        deposit_return_amount: formData.depositReturnAmount ? parseInt(formData.depositReturnAmount) : null,
-        deposit_return_notes: formData.depositReturnNotes || null,
-        agency_id: profile.agency_id,
-        payment_type: formData.paymentType,
-        initial_fees_paid: false
-      }
-
-      console.log('Submitting lease data:', leaseData)
-
-      const { error } = await supabase
+      const { data: lease, error: leaseError } = await supabase
         .from('apartment_leases')
-        .insert([leaseData])
+        .insert({
+          tenant_id: tenantId,
+          unit_id: unitId,
+          start_date: formData.startDate,
+          end_date: endDate,
+          rent_amount: parseInt(formData.rentAmount),
+          deposit_amount: parseInt(formData.depositAmount),
+          payment_frequency: formData.paymentFrequency,
+          duration_type: formData.durationType,
+          status: formData.status,
+          deposit_returned: formData.depositReturned,
+          deposit_return_date: formData.depositReturnDate || null,
+          deposit_return_amount: formData.depositReturnAmount ? parseInt(formData.depositReturnAmount) : null,
+          deposit_return_notes: formData.depositReturnNotes || null,
+          agency_id: profile.agency_id,
+          payment_type: formData.paymentType,
+          initial_fees_paid: false
+        })
+        .select()
+        .single()
 
-      if (error) {
-        console.error('Supabase error:', error)
-        throw error
+      if (leaseError) {
+        console.error('Supabase error:', leaseError)
+        throw leaseError
       }
 
       // Create initial payment records if upfront payment
@@ -76,28 +73,28 @@ export function useLease(unitId: string, tenantId?: string) {
         // Create deposit payment
         const { error: depositError } = await supabase
           .from('apartment_lease_payments')
-          .insert([{
-            lease_id: leaseData.id,
-            amount: leaseData.deposit_amount,
-            due_date: leaseData.start_date,
+          .insert({
+            lease_id: lease.id,
+            amount: lease.deposit_amount,
+            due_date: lease.start_date,
             status: 'pending',
             agency_id: profile.agency_id,
             payment_method: 'cash'
-          }])
+          })
 
         if (depositError) throw depositError
 
         // Create first rent payment
         const { error: rentError } = await supabase
           .from('apartment_lease_payments')
-          .insert([{
-            lease_id: leaseData.id,
-            amount: leaseData.rent_amount,
-            due_date: leaseData.start_date,
+          .insert({
+            lease_id: lease.id,
+            amount: lease.rent_amount,
+            due_date: lease.start_date,
             status: 'pending',
             agency_id: profile.agency_id,
             payment_method: 'cash'
-          }])
+          })
 
         if (rentError) throw rentError
       }
