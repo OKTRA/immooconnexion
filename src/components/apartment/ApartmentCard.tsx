@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Home } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 interface ApartmentCardProps {
   apartment: {
@@ -9,10 +10,21 @@ interface ApartmentCardProps {
     address: string
     unit_count: number
   }
-  onViewUnits: (apartmentId: string) => void
+  onViewUnits?: (apartmentId: string) => void
 }
 
 export function ApartmentCard({ apartment, onViewUnits }: ApartmentCardProps) {
+  const navigate = useNavigate()
+
+  const handleViewUnits = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (onViewUnits) {
+      onViewUnits(apartment.id)
+    } else {
+      navigate(`/agence/appartements/${apartment.id}/unites`)
+    }
+  }
+
   return (
     <Card className="cursor-pointer transition-all hover:shadow-lg">
       <CardHeader>
@@ -27,10 +39,7 @@ export function ApartmentCard({ apartment, onViewUnits }: ApartmentCardProps) {
           <Button 
             variant="default" 
             size="sm"
-            onClick={(e) => {
-              e.stopPropagation()
-              onViewUnits(apartment.id)
-            }}
+            onClick={handleViewUnits}
           >
             <Home className="w-4 h-4 mr-2" />
             Voir Unités
