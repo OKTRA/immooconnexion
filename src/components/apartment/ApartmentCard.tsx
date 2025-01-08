@@ -21,7 +21,7 @@ export function ApartmentCard({ apartment, onViewUnits }: ApartmentCardProps) {
     if (onViewUnits) {
       onViewUnits(apartment.id)
     } else {
-      navigate(`/agence/appartements/${apartment.id}/unites`)
+      navigate(`/agence/appartements/${apartment.id}/details`)
     }
   }
 

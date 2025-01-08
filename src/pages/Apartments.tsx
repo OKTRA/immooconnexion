@@ -3,8 +3,11 @@ import { ApartmentHeader } from "@/components/apartment/ApartmentHeader"
 import { ApartmentList } from "@/components/apartment/ApartmentList"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import { useNavigate } from "react-router-dom"
 
 export default function Apartments() {
+  const navigate = useNavigate()
+  
   const { data: apartments = [], isLoading } = useQuery({
     queryKey: ["apartments"],
     queryFn: async () => {
@@ -27,15 +30,22 @@ export default function Apartments() {
       const { data, error } = await supabase
         .from("apartments")
         .select(`
-          *,
-          apartment_units (
-            count
-          )
+          id,
+          name,
+          address,
+          total_units,
+          apartment_units (count)
         `)
         .eq("agency_id", userProfile.agency_id)
 
       if (error) throw error
-      return data
+
+      return data.map(apartment => ({
+        id: apartment.id,
+        name: apartment.name,
+        address: apartment.address,
+        unit_count: apartment.total_units
+      }))
     }
   })
 
@@ -46,7 +56,7 @@ export default function Apartments() {
         <ApartmentList 
           apartments={apartments}
           isLoading={isLoading}
-          onViewUnits={(id) => console.log("View units", id)}
+          onViewUnits={(id) => navigate(`/agence/appartements/${id}/details`)}
         />
       </div>
     </AgencyLayout>
