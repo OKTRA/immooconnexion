@@ -1,184 +1,173 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
-import { useState, useEffect } from "react"
-import { useToast } from "@/components/ui/use-toast"
+import { Switch } from "@/components/ui/switch"
+import { useToast } from "@/hooks/use-toast"
+import { useState } from "react"
 import { supabase } from "@/integrations/supabase/client"
-import { useQueryClient } from "@tanstack/react-query"
 import { Contract } from "@/integrations/supabase/types/contracts"
-import { Card, CardContent } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface InspectionFormProps {
   contract: Contract
-  onSuccess?: () => void
+  onSuccess: () => void
 }
 
 export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
-  const [hasDamages, setHasDamages] = useState(false)
-  const [description, setDescription] = useState("")
-  const [repairCosts, setRepairCosts] = useState("")
-  const [photos, setPhotos] = useState<File[]>([])
-  const [previewUrls, setPreviewUrls] = useState<string[]>([])
   const { toast } = useToast()
-  const queryClient = useQueryClient()
-
-  useEffect(() => {
-    if (photos.length > 0) {
-      const urls = photos.map(file => URL.createObjectURL(file))
-      setPreviewUrls(urls)
-      return () => urls.forEach(url => URL.revokeObjectURL(url))
-    }
-  }, [photos])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState({
+    hasDamages: false,
+    damageDescription: "",
+    repairCosts: "0",
+    depositReturned: contract.montant.toString(),
+    photos: null as FileList | null,
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
 
     try {
-      const depositAmount = contract.montant // Montant de la caution
-      const returnedAmount = hasDamages ? 
-        depositAmount - parseFloat(repairCosts) : 
-        depositAmount
+      let photoUrls: string[] = []
 
-      // Upload photos if any
-      const photoUrls: string[] = []
-      if (photos.length > 0) {
-        for (const photo of photos) {
-          const fileExt = photo.name.split('.').pop()
-          const fileName = `${crypto.randomUUID()}.${fileExt}`
+      if (formData.photos) {
+        for (let i = 0; i < formData.photos.length; i++) {
+          const file = formData.photos[i]
+          const fileExt = file.name.split('.').pop()
+          const fileName = `${Math.random()}.${fileExt}`
           
-          const { error: uploadError, data } = await supabase.storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
             .from('inspection_photos')
-            .upload(fileName, photo)
+            .upload(fileName, file)
 
           if (uploadError) throw uploadError
-          if (data) photoUrls.push(data.path)
+          if (uploadData) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('inspection_photos')
+              .getPublicUrl(uploadData.path)
+            photoUrls.push(publicUrl)
+          }
         }
       }
 
-      const { error } = await supabase
+      const { error: inspectionError } = await supabase
         .from('property_inspections')
-        .insert([{
+        .insert({
           contract_id: contract.id,
-          has_damages: hasDamages,
-          damage_description: description,
-          repair_costs: hasDamages ? parseFloat(repairCosts) : 0,
-          deposit_returned: returnedAmount > 0 ? returnedAmount : 0,
+          has_damages: formData.hasDamages,
+          damage_description: formData.damageDescription,
+          repair_costs: parseInt(formData.repairCosts),
+          deposit_returned: parseInt(formData.depositReturned),
           photo_urls: photoUrls,
-          status: 'completé'
-        }])
+          status: 'completed'
+        })
 
-      if (error) throw error
+      if (inspectionError) throw inspectionError
+
+      const { error: contractError } = await supabase
+        .from('contracts')
+        .update({ statut: 'terminé' })
+        .eq('id', contract.id)
+
+      if (contractError) throw contractError
 
       toast({
-        title: "Inspection enregistrée",
+        title: "Inspection terminée",
         description: "L'inspection a été enregistrée avec succès",
       })
 
-      queryClient.invalidateQueries({ queryKey: ['inspections'] })
-      onSuccess?.()
-    } catch (error) {
+      onSuccess()
+    } catch (error: any) {
       console.error('Error:', error)
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'enregistrement",
+        description: error.message,
         variant: "destructive",
       })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handlePhotosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFormData({ ...formData, photos: e.target.files })
     }
   }
 
   return (
-    <ScrollArea className="h-[calc(100vh-200px)] md:h-auto">
-      <form onSubmit={handleSubmit} className="space-y-4 p-1">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground mb-4">
-              <p>Montant de la caution: {contract.montant?.toLocaleString()} FCFA</p>
-              {hasDamages && repairCosts && (
-                <>
-                  <p className="mt-2">Coûts de réparation: {parseFloat(repairCosts).toLocaleString()} FCFA</p>
-                  <p className="mt-2">Montant à retourner: {(contract.montant - parseFloat(repairCosts)).toLocaleString()} FCFA</p>
-                  <p className="text-xs mt-2 text-yellow-600">
-                    Note: Le montant retourné sera déduit des bénéfices réalisés sur le bien
-                  </p>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="hasDamages"
+          checked={formData.hasDamages}
+          onCheckedChange={(checked) => setFormData({ ...formData, hasDamages: checked })}
+        />
+        <Label htmlFor="hasDamages">Dégâts constatés</Label>
+      </div>
 
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="damages"
-            checked={hasDamages}
-            onCheckedChange={(checked) => setHasDamages(checked as boolean)}
-          />
-          <Label htmlFor="damages" className="text-sm md:text-base">Dégâts constatés</Label>
-        </div>
+      {formData.hasDamages && (
+        <>
+          <div className="space-y-2">
+            <Label htmlFor="damageDescription">Description des dégâts</Label>
+            <Textarea
+              id="damageDescription"
+              value={formData.damageDescription}
+              onChange={(e) => setFormData({ ...formData, damageDescription: e.target.value })}
+              required
+            />
+          </div>
 
-        {hasDamages && (
-          <>
-            <div className="space-y-2">
-              <Label htmlFor="description" className="text-sm md:text-base">Description des dégâts</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Décrivez les dégâts constatés..."
-                required={hasDamages}
-                className="min-h-[100px]"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="repairCosts">Coût des réparations (FCFA)</Label>
+            <Input
+              id="repairCosts"
+              type="number"
+              value={formData.repairCosts}
+              onChange={(e) => {
+                const repairCosts = parseInt(e.target.value)
+                const depositReturned = Math.max(0, contract.montant - repairCosts)
+                setFormData({
+                  ...formData,
+                  repairCosts: e.target.value,
+                  depositReturned: depositReturned.toString()
+                })
+              }}
+              required
+            />
+          </div>
+        </>
+      )}
 
-            <div className="space-y-2">
-              <Label htmlFor="costs" className="text-sm md:text-base">Coûts de réparation (FCFA)</Label>
-              <Input
-                id="costs"
-                type="number"
-                value={repairCosts}
-                onChange={(e) => setRepairCosts(e.target.value)}
-                placeholder="Montant des réparations"
-                required={hasDamages}
-              />
-            </div>
-          </>
-        )}
+      <div className="space-y-2">
+        <Label htmlFor="depositReturned">Montant de la caution à rembourser (FCFA)</Label>
+        <Input
+          id="depositReturned"
+          type="number"
+          value={formData.depositReturned}
+          onChange={(e) => setFormData({ ...formData, depositReturned: e.target.value })}
+          required
+        />
+      </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="photos" className="text-sm md:text-base">Photos de l'inspection</Label>
-          <Input
-            id="photos"
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => setPhotos(e.target.files ? Array.from(e.target.files) : [])}
-            className="cursor-pointer"
-          />
-          {previewUrls.length > 0 && (
-            <ScrollArea className="h-[200px] w-full rounded-md border p-4">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {previewUrls.map((url, index) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={url}
-                      alt={`Photo ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-md"
-                    />
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          )}
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="photos">Photos</Label>
+        <Input
+          id="photos"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handlePhotosChange}
+          className="cursor-pointer"
+        />
+      </div>
 
-        <div className="pt-4 flex justify-end space-x-2">
-          <Button type="submit" className="w-full md:w-auto">
-            Enregistrer l'inspection
-          </Button>
-        </div>
-      </form>
-    </ScrollArea>
+      <div className="flex justify-end space-x-2">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Chargement..." : "Terminer l'inspection"}
+        </Button>
+      </div>
+    </form>
   )
 }
