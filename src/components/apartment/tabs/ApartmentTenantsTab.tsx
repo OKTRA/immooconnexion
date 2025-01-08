@@ -1,43 +1,46 @@
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
-import { useState } from "react"
-import { ApartmentUnit } from "@/types/apartment"
 import { ApartmentTenantsTable } from "../tenant/ApartmentTenantsTable"
 import { ApartmentTenantDialog } from "../tenant/ApartmentTenantDialog"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
+import { useState } from "react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TenantPaymentsTab } from "../tenant/TenantPaymentsTab"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface ApartmentTenantsTabProps {
   apartmentId: string
-  units: ApartmentUnit[]
+  tenants: any[]
+  isLoading: boolean
+  onDeleteTenant: (id: string) => Promise<void>
+  onEditTenant: (tenant: any) => void
 }
 
-export function ApartmentTenantsTab({ apartmentId, units }: ApartmentTenantsTabProps) {
-  const [showDialog, setShowDialog] = useState(false)
+export function ApartmentTenantsTab({
+  apartmentId,
+  tenants,
+  isLoading,
+  onDeleteTenant,
+  onEditTenant
+}: ApartmentTenantsTabProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedTenant, setSelectedTenant] = useState<any>(null)
+  const [tenantToDelete, setTenantToDelete] = useState<string | null>(null)
+  const [selectedTab, setSelectedTab] = useState("list")
 
-  const { data: tenants = [], isLoading } = useQuery({
-    queryKey: ["apartment-tenants", apartmentId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("apartment_tenants")
-        .select(`
-          *,
-          apartment_units!inner (
-            unit_number,
-            apartment_id
-          )
-        `)
-        .eq("apartment_units.apartment_id", apartmentId)
-
-      if (error) throw error
-      return data
+  const handleDeleteTenant = async () => {
+    if (tenantToDelete) {
+      await onDeleteTenant(tenantToDelete)
+      setTenantToDelete(null)
     }
-  })
-
-  const handleEdit = (tenant: any) => {
-    setSelectedTenant(tenant)
-    setShowDialog(true)
   }
 
   return (
@@ -46,26 +49,67 @@ export function ApartmentTenantsTab({ apartmentId, units }: ApartmentTenantsTabP
         <h2 className="text-2xl font-bold">Locataires</h2>
         <Button onClick={() => {
           setSelectedTenant(null)
-          setShowDialog(true)
+          setIsDialogOpen(true)
         }}>
           <Plus className="w-4 h-4 mr-2" />
           Ajouter un locataire
         </Button>
       </div>
 
-      <ApartmentTenantsTable
-        tenants={tenants}
-        isLoading={isLoading}
-        onEdit={handleEdit}
-      />
+      <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+        <TabsList>
+          <TabsTrigger value="list">Liste</TabsTrigger>
+          {selectedTenant && (
+            <TabsTrigger value="payments">Paiements</TabsTrigger>
+          )}
+        </TabsList>
+
+        <TabsContent value="list">
+          <ApartmentTenantsTable
+            tenants={tenants}
+            onEdit={(tenant) => {
+              setSelectedTenant(tenant);
+              onEditTenant(tenant);
+            }}
+            onDelete={(id) => setTenantToDelete(id)}
+          />
+        </TabsContent>
+
+        <TabsContent value="payments">
+          {selectedTenant && (
+            <TenantPaymentsTab tenantId={selectedTenant.id} />
+          )}
+        </TabsContent>
+      </Tabs>
 
       <ApartmentTenantDialog
-        open={showDialog}
-        onOpenChange={setShowDialog}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
         tenant={selectedTenant}
         apartmentId={apartmentId}
-        availableUnits={units}
       />
+
+      <AlertDialog 
+        open={!!tenantToDelete} 
+        onOpenChange={(open) => !open && setTenantToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer ce locataire ? Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setTenantToDelete(null)}>
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteTenant} className="bg-red-500 hover:bg-red-600">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
