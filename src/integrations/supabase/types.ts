@@ -261,7 +261,7 @@ export type Database = {
           deposit_return_notes: string | null
           deposit_returned: boolean | null
           duration_type: string
-          end_date: string
+          end_date: string | null
           id: string
           payment_frequency: string
           rent_amount: number
@@ -280,7 +280,7 @@ export type Database = {
           deposit_return_notes?: string | null
           deposit_returned?: boolean | null
           duration_type: string
-          end_date: string
+          end_date?: string | null
           id?: string
           payment_frequency: string
           rent_amount: number
@@ -299,7 +299,7 @@ export type Database = {
           deposit_return_notes?: string | null
           deposit_returned?: boolean | null
           duration_type?: string
-          end_date?: string
+          end_date?: string | null
           id?: string
           payment_frequency?: string
           rent_amount?: number

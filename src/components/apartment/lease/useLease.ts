@@ -37,13 +37,16 @@ export function useLease(unitId: string, tenantId?: string) {
         throw new Error("Aucune agence associée à ce profil")
       }
 
+      // Si le type de durée n'est pas "fixed", la date de fin est null
+      const endDate = formData.durationType === "fixed" ? formData.endDate : null
+
       const { error } = await supabase
         .from('apartment_leases')
         .insert([{
           tenant_id: tenantId,
           unit_id: unitId,
           start_date: formData.startDate,
-          end_date: formData.endDate,
+          end_date: endDate,
           rent_amount: parseInt(formData.rentAmount),
           deposit_amount: parseInt(formData.depositAmount),
           payment_frequency: formData.paymentFrequency,

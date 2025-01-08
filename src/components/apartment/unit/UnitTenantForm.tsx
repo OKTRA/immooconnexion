@@ -96,7 +96,9 @@ export function UnitTenantForm({
 
       if (tenantError) throw tenantError
 
-      // Create lease
+      // Create lease with conditional end_date
+      const endDate = formData.durationType === "fixed" ? formData.endDate : null
+
       const { error: leaseError } = await supabase
         .from("apartment_leases")
         .insert({
@@ -105,7 +107,7 @@ export function UnitTenantForm({
           rent_amount: parseInt(formData.rentAmount),
           deposit_amount: parseInt(formData.depositAmount),
           start_date: formData.startDate,
-          end_date: formData.durationType === "fixed" ? formData.endDate : null,
+          end_date: endDate,
           payment_frequency: formData.paymentFrequency,
           duration_type: formData.durationType,
           status: formData.status,
