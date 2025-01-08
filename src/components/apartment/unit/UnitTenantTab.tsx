@@ -113,14 +113,24 @@ export function UnitTenantTab({ unitId }: UnitTenantTabProps) {
       <Card>
         <CardContent className="py-6">
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
+            <div className="flex justify-between items-start">
+              <div className="space-y-2">
                 <h3 className="text-lg font-semibold">
                   {tenant.first_name} {tenant.last_name}
                 </h3>
                 {tenant.phone_number && (
                   <p className="text-sm text-muted-foreground">
                     {tenant.phone_number}
+                  </p>
+                )}
+                {tenant.email && (
+                  <p className="text-sm text-muted-foreground">
+                    {tenant.email}
+                  </p>
+                )}
+                {tenant.birth_date && (
+                  <p className="text-sm text-muted-foreground">
+                    Date de naissance: {new Date(tenant.birth_date).toLocaleDateString()}
                   </p>
                 )}
               </div>
@@ -143,8 +153,7 @@ export function UnitTenantTab({ unitId }: UnitTenantTabProps) {
       <UnitTenantDialog
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
-        tenant={selectedTenant}
-        unitId={unitId}
+        apartmentId={unitId}
       />
 
       <Dialog open={showReceiptDialog} onOpenChange={setShowReceiptDialog}>

@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button"
 import { Edit2, Trash2, Receipt, CreditCard, FileText, CheckSquare } from "lucide-react"
-import { useNavigate } from "react-router-dom"
 
 interface TenantActionButtonsProps {
   tenant: {
@@ -24,8 +23,6 @@ export function TenantActionButtons({
   onShowPayments,
   onEndContract
 }: TenantActionButtonsProps) {
-  const navigate = useNavigate()
-
   return (
     <div className="flex flex-wrap gap-2">
       <Button
@@ -56,16 +53,6 @@ export function TenantActionButtons({
       >
         <CreditCard className="h-4 w-4" />
         <span className="hidden md:inline">Paiements</span>
-      </Button>
-
-      <Button
-        variant="outline"
-        size="sm"
-        className="flex items-center gap-2"
-        onClick={() => navigate(`/locataires/${tenant.id}/contrats`)}
-      >
-        <FileText className="h-4 w-4" />
-        <span className="hidden md:inline">Contrats</span>
       </Button>
 
       <Button
