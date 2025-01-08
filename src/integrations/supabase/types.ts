@@ -257,6 +257,7 @@ export type Database = {
           late_fee_amount: number | null
           lease_id: string
           payment_date: string | null
+          payment_method: string | null
           status: string
           updated_at: string | null
         }
@@ -269,6 +270,7 @@ export type Database = {
           late_fee_amount?: number | null
           lease_id: string
           payment_date?: string | null
+          payment_method?: string | null
           status?: string
           updated_at?: string | null
         }
@@ -281,6 +283,7 @@ export type Database = {
           late_fee_amount?: number | null
           lease_id?: string
           payment_date?: string | null
+          payment_method?: string | null
           status?: string
           updated_at?: string | null
         }
@@ -313,7 +316,9 @@ export type Database = {
           duration_type: string
           end_date: string | null
           id: string
+          initial_fees_paid: boolean | null
           payment_frequency: string
+          payment_type: string | null
           rent_amount: number
           start_date: string
           status: string
@@ -332,7 +337,9 @@ export type Database = {
           duration_type: string
           end_date?: string | null
           id?: string
+          initial_fees_paid?: boolean | null
           payment_frequency: string
+          payment_type?: string | null
           rent_amount: number
           start_date: string
           status?: string
@@ -351,7 +358,9 @@ export type Database = {
           duration_type?: string
           end_date?: string | null
           id?: string
+          initial_fees_paid?: boolean | null
           payment_frequency?: string
+          payment_type?: string | null
           rent_amount?: number
           start_date?: string
           status?: string

@@ -18,6 +18,7 @@ export function useLease(unitId: string, tenantId?: string) {
     depositReturnAmount: "",
     depositReturnDate: "",
     depositReturnNotes: "",
+    paymentType: "upfront"
   })
 
   const handleSubmit = async () => {
@@ -55,6 +56,8 @@ export function useLease(unitId: string, tenantId?: string) {
         deposit_return_amount: formData.depositReturnAmount ? parseInt(formData.depositReturnAmount) : null,
         deposit_return_notes: formData.depositReturnNotes || null,
         agency_id: profile.agency_id,
+        payment_type: formData.paymentType,
+        initial_fees_paid: false
       }
 
       console.log('Submitting lease data:', leaseData)
@@ -66,6 +69,37 @@ export function useLease(unitId: string, tenantId?: string) {
       if (error) {
         console.error('Supabase error:', error)
         throw error
+      }
+
+      // Create initial payment records if upfront payment
+      if (formData.paymentType === "upfront") {
+        // Create deposit payment
+        const { error: depositError } = await supabase
+          .from('apartment_lease_payments')
+          .insert([{
+            lease_id: leaseData.id,
+            amount: leaseData.deposit_amount,
+            due_date: leaseData.start_date,
+            status: 'pending',
+            agency_id: profile.agency_id,
+            payment_method: 'cash'
+          }])
+
+        if (depositError) throw depositError
+
+        // Create first rent payment
+        const { error: rentError } = await supabase
+          .from('apartment_lease_payments')
+          .insert([{
+            lease_id: leaseData.id,
+            amount: leaseData.rent_amount,
+            due_date: leaseData.start_date,
+            status: 'pending',
+            agency_id: profile.agency_id,
+            payment_method: 'cash'
+          }])
+
+        if (rentError) throw rentError
       }
 
       toast({

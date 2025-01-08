@@ -24,7 +24,6 @@ export function LeaseFormFields({
     setFormData({ 
       ...formData, 
       durationType: value,
-      // Clear endDate if not fixed duration
       ...(value !== 'fixed' && { endDate: '' })
     })
   }
@@ -112,21 +111,38 @@ export function LeaseFormFields({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="status">Statut</Label>
-        <Select 
-          value={formData.status} 
-          onValueChange={(value: LeaseStatus) => setFormData({ ...formData, status: value })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Sélectionner un statut" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="active">Actif</SelectItem>
-            <SelectItem value="expired">Expiré</SelectItem>
-            <SelectItem value="terminated">Résilié</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="paymentType">Type de paiement</Label>
+          <Select
+            value={formData.paymentType}
+            onValueChange={(value) => setFormData({ ...formData, paymentType: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner le type de paiement" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="upfront">Paiement d'avance</SelectItem>
+              <SelectItem value="end_of_period">Paiement en fin de période</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="status">Statut</Label>
+          <Select 
+            value={formData.status} 
+            onValueChange={(value: LeaseStatus) => setFormData({ ...formData, status: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner un statut" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Actif</SelectItem>
+              <SelectItem value="expired">Expiré</SelectItem>
+              <SelectItem value="terminated">Résilié</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="pt-4 flex justify-end space-x-2">

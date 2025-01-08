@@ -10,6 +10,7 @@ export interface LeaseFormData {
   paymentFrequency: PaymentFrequency;
   durationType: DurationType;
   status: LeaseStatus;
+  paymentType: "upfront" | "end_of_period";
   depositReturnDate?: string;
   depositReturnAmount?: string;
   depositReturnNotes?: string;
@@ -34,4 +35,6 @@ export interface Lease {
   agency_id: string;
   created_at: string;
   updated_at: string;
+  payment_type: "upfront" | "end_of_period";
+  initial_fees_paid: boolean;
 }
