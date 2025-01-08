@@ -58,7 +58,6 @@ export function UnitTenantForm({
 
       if (!profile?.agency_id) throw new Error("Agency ID not found")
 
-      // Upload photos if any
       let photoUrls: string[] = []
       if (formData.photos) {
         for (let i = 0; i < formData.photos.length; i++) {
@@ -80,7 +79,6 @@ export function UnitTenantForm({
         }
       }
 
-      // Create tenant
       const { data: tenant, error: tenantError } = await supabase
         .from("apartment_tenants")
         .insert({
@@ -96,7 +94,6 @@ export function UnitTenantForm({
 
       if (tenantError) throw tenantError
 
-      // Create lease with conditional end_date
       const endDate = formData.durationType === "fixed" ? formData.endDate : null
 
       const { error: leaseError } = await supabase
@@ -133,7 +130,7 @@ export function UnitTenantForm({
   }
 
   return (
-    <ScrollArea className="h-[600px] pr-4">
+    <div className="max-h-[600px] overflow-y-auto px-4">
       <form onSubmit={handleSubmit} className="space-y-8">
         <ContactFields formData={formData} setFormData={setFormData} />
         <LeaseFields formData={formData} setFormData={setFormData} />
@@ -148,6 +145,6 @@ export function UnitTenantForm({
           </Button>
         </div>
       </form>
-    </ScrollArea>
+    </div>
   )
 }
