@@ -7,16 +7,10 @@ import { TenantReceipt } from "./TenantReceipt"
 import { useToast } from "@/hooks/use-toast"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { supabase } from "@/integrations/supabase/client"
+import { TenantFormData, TenantReceiptData } from "@/types/tenant"
 
 interface TenantActionButtonsProps {
-  tenant: {
-    id: string;
-    nom: string;
-    prenom: string;
-    telephone: string;
-    fraisAgence?: string;
-    profession?: string;
-  };
+  tenant: TenantFormData;
   currentLease?: any;
   onEdit: () => void;
   onDelete: () => void;
@@ -70,6 +64,15 @@ export function TenantActionButtons({
     onDelete()
     setShowDeleteConfirm(false)
   }
+
+  const tenantReceiptData: TenantReceiptData = {
+    nom: tenant.nom,
+    prenom: tenant.prenom,
+    telephone: tenant.telephone,
+    fraisAgence: tenant.fraisAgence || '0',
+    profession: tenant.profession,
+    propertyId: tenant.propertyId
+  };
 
   return (
     <>
@@ -151,7 +154,7 @@ export function TenantActionButtons({
       <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
         <DialogContent className="max-w-3xl">
           <TenantReceipt 
-            tenant={tenant}
+            tenant={tenantReceiptData}
             isInitialReceipt={true}
           />
         </DialogContent>
@@ -160,7 +163,7 @@ export function TenantActionButtons({
       <Dialog open={showEndReceipt} onOpenChange={setShowEndReceipt}>
         <DialogContent className="max-w-3xl">
           <TenantReceipt 
-            tenant={tenant}
+            tenant={tenantReceiptData}
             isEndReceipt={true}
             lease={currentLease}
           />

@@ -11,9 +11,9 @@ export interface Contract {
   created_at?: string;
   updated_at?: string;
   created_by_user_id?: string;
-  tenant_nom?: string;
-  tenant_prenom?: string;
-  property_name?: string;
+  rent_amount?: number;
+  deposit_amount?: number;
+  status?: string;
 }
 
 export type ContractInsert = Partial<Contract>;

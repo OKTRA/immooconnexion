@@ -7,6 +7,7 @@ import { InspectionDialog } from "@/components/inspections/InspectionDialog"
 import { useToast } from "@/hooks/use-toast"
 import { TenantDetailsCard } from "./TenantDetailsCard"
 import { TenantActionButtons } from "./TenantActionButtons"
+import { Contract } from "@/integrations/supabase/types/contracts"
 
 interface UnitTenantTabProps {
   unitId: string
@@ -81,6 +82,17 @@ export function UnitTenantTab({ unitId }: UnitTenantTabProps) {
   }
 
   const currentLease = tenant.apartment_leases?.[0]
+
+  const contractData: Contract = {
+    id: currentLease?.id || '',
+    montant: currentLease?.rent_amount || 0,
+    type: 'location',
+    rent_amount: currentLease?.rent_amount,
+    deposit_amount: currentLease?.deposit_amount,
+    start_date: currentLease?.start_date,
+    end_date: currentLease?.end_date,
+    status: currentLease?.status
+  };
 
   return (
     <div className="space-y-4">

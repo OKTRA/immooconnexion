@@ -63,6 +63,17 @@ export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps
     onDelete(tenant.id)
   }
 
+  const tenantFormData: TenantFormData = {
+    id: tenant.id,
+    nom: tenant.nom,
+    prenom: tenant.prenom,
+    telephone: tenant.telephone,
+    fraisAgence: tenant.fraisAgence || '0',
+    dateNaissance: tenant.dateNaissance,
+    photoIdUrl: tenant.photoIdUrl,
+    profession: tenant.profession
+  };
+
   return (
     <>
       <TableRow>
@@ -74,11 +85,9 @@ export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps
         <TableCell>{tenant.telephone}</TableCell>
         <TableCell>
           <TenantActions
-            tenant={tenant}
+            tenant={tenantFormData}
             onEdit={() => onEdit(tenant)}
             onDelete={() => setShowDeleteConfirm(true)}
-            onPrintReceipt={() => setShowReceipt(true)}
-            onInspection={() => setShowInspection(true)}
           />
         </TableCell>
       </TableRow>
