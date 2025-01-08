@@ -14,6 +14,16 @@ export function LeaseFormFields({
   formData,
   setFormData,
 }: LeaseFormFieldsProps) {
+  const handleDurationTypeChange = (value: DurationType) => {
+    console.log('Duration type changed to:', value)
+    setFormData({ 
+      ...formData, 
+      durationType: value,
+      // Clear endDate if not fixed duration
+      ...(value !== 'fixed' && { endDate: '' })
+    })
+  }
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
@@ -83,7 +93,7 @@ export function LeaseFormFields({
           <Label htmlFor="durationType">Type de durée</Label>
           <Select 
             value={formData.durationType} 
-            onValueChange={(value: DurationType) => setFormData({ ...formData, durationType: value })}
+            onValueChange={handleDurationTypeChange}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner un type" />

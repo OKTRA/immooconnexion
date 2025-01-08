@@ -40,26 +40,33 @@ export function useLease(unitId: string, tenantId?: string) {
       // Si le type de durée n'est pas "fixed", la date de fin est null
       const endDate = formData.durationType === "fixed" ? formData.endDate : null
 
+      const leaseData = {
+        tenant_id: tenantId,
+        unit_id: unitId,
+        start_date: formData.startDate,
+        end_date: endDate,
+        rent_amount: parseInt(formData.rentAmount),
+        deposit_amount: parseInt(formData.depositAmount),
+        payment_frequency: formData.paymentFrequency,
+        duration_type: formData.durationType,
+        status: formData.status,
+        deposit_returned: formData.depositReturned,
+        deposit_return_date: formData.depositReturnDate || null,
+        deposit_return_amount: formData.depositReturnAmount ? parseInt(formData.depositReturnAmount) : null,
+        deposit_return_notes: formData.depositReturnNotes || null,
+        agency_id: profile.agency_id,
+      }
+
+      console.log('Submitting lease data:', leaseData)
+
       const { error } = await supabase
         .from('apartment_leases')
-        .insert([{
-          tenant_id: tenantId,
-          unit_id: unitId,
-          start_date: formData.startDate,
-          end_date: endDate,
-          rent_amount: parseInt(formData.rentAmount),
-          deposit_amount: parseInt(formData.depositAmount),
-          payment_frequency: formData.paymentFrequency,
-          duration_type: formData.durationType,
-          status: formData.status,
-          deposit_returned: formData.depositReturned,
-          deposit_return_date: formData.depositReturnDate || null,
-          deposit_return_amount: formData.depositReturnAmount ? parseInt(formData.depositReturnAmount) : null,
-          deposit_return_notes: formData.depositReturnNotes || null,
-          agency_id: profile.agency_id,
-        }])
+        .insert([leaseData])
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
 
       toast({
         title: "Contrat créé",
