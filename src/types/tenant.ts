@@ -10,11 +10,19 @@ export interface TenantFormData {
   photoIdUrl?: string;
 }
 
-export interface TenantReceiptData {
-  nom: string;
-  prenom: string;
-  telephone: string;
-  fraisAgence: string;
-  profession?: string;
-  propertyId?: string;
+export interface TenantReceiptProps {
+  tenant: {
+    nom: string;
+    prenom: string;
+    telephone: string;
+    fraisAgence: string;
+    propertyId?: string;
+    profession?: string;
+  };
+  isInitialReceipt?: boolean;
+  isEndReceipt?: boolean;
+  lease?: any;
+  contractId?: string;
+  isEndOfContract?: boolean;
+  inspection?: any;
 }

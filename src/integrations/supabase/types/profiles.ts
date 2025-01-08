@@ -4,7 +4,7 @@ export interface Profile {
   last_name?: string;
   email?: string;
   phone_number?: string;
-  role?: 'user' | 'admin' | 'super_admin';
+  role?: 'admin' | 'user';
   agency_id?: string;
   created_at?: string;
   updated_at?: string;
