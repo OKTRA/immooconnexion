@@ -1,20 +1,20 @@
 export interface TenantFormData {
   id?: string;
-  nom: string;
-  prenom: string;
-  telephone: string;
-  fraisAgence: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  agency_fees?: number;
   profession?: string;
-  propertyId?: string;
-  dateNaissance?: string;
-  photoIdUrl?: string;
+  property_id?: string;
+  birth_date?: string;
+  photo_id_url?: string;
 }
 
 export interface TenantReceiptData {
-  nom: string;
-  prenom: string;
-  telephone: string;
-  fraisAgence: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  agency_fees?: number;
   profession?: string;
-  propertyId?: string;
+  property_id?: string;
 }

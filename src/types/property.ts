@@ -31,6 +31,32 @@ export interface Property {
   quartier?: string;
 }
 
+export interface PropertyUnit {
+  id: string;
+  property_id: string;
+  unit_number: string;
+  floor_number?: number;
+  area?: number;
+  rent_amount: number;
+  deposit_amount?: number;
+  status: PropertyUnitStatus;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type PropertyUnitStatus = 'available' | 'occupied' | 'maintenance';
+
+export interface PropertyUnitFormData {
+  unit_number: string;
+  floor_number: string;
+  area: string;
+  rent_amount: string;
+  deposit_amount: string;
+  status: PropertyUnitStatus;
+  description: string;
+}
+
 export interface PropertyFormData {
   bien: string;
   type: string;

@@ -17,25 +17,3 @@ export interface LeaseFormData {
   depositReturnNotes?: string;
   depositReturned: boolean;
 }
-
-export interface Lease {
-  id: string;
-  tenant_id: string;
-  unit_id: string;
-  start_date: string;
-  end_date: string | null;
-  rent_amount: number;
-  deposit_amount: number;
-  payment_frequency: PaymentFrequency;
-  duration_type: DurationType;
-  status: LeaseStatus;
-  deposit_returned: boolean;
-  deposit_return_date?: string;
-  deposit_return_amount?: number;
-  deposit_return_notes?: string;
-  agency_id: string;
-  created_at: string;
-  updated_at: string;
-  payment_type: PaymentType;
-  initial_fees_paid: boolean;
-}
