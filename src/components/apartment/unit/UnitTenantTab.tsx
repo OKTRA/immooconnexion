@@ -1,13 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
-import { Loader2, UserPlus } from "lucide-react"
-import { useState } from "react"
+import { UserPlus } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { UnitTenantDialog } from "./UnitTenantDialog"
+import { useState } from "react"
 
 interface UnitTenantTabProps {
   unitId: string
@@ -35,7 +33,10 @@ export function UnitTenantTab({ unitId }: UnitTenantTabProps) {
         .eq("status", "active")
         .maybeSingle()
 
-      if (error) throw error
+      if (error) {
+        console.error("Error fetching lease:", error)
+        throw error
+      }
       return data
     }
   })
@@ -62,10 +63,7 @@ export function UnitTenantTab({ unitId }: UnitTenantTabProps) {
 
       {currentLease ? (
         <Card>
-          <CardHeader>
-            <CardTitle>Informations du bail</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium">Locataire</p>
@@ -96,20 +94,14 @@ export function UnitTenantTab({ unitId }: UnitTenantTabProps) {
               <div>
                 <p className="text-sm font-medium">Date de début</p>
                 <p className="text-sm text-muted-foreground">
-                  {format(new Date(currentLease.start_date), "PP", { locale: fr })}
+                  {new Date(currentLease.start_date).toLocaleDateString()}
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium">Date de fin</p>
                 <p className="text-sm text-muted-foreground">
-                  {format(new Date(currentLease.end_date), "PP", { locale: fr })}
+                  {currentLease.end_date ? new Date(currentLease.end_date).toLocaleDateString() : "-"}
                 </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Statut</p>
-                <Badge variant={currentLease.status === "active" ? "success" : "secondary"}>
-                  {currentLease.status === "active" ? "Actif" : "Terminé"}
-                </Badge>
               </div>
             </div>
           </CardContent>
