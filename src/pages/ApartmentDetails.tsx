@@ -1,54 +1,75 @@
 import { useParams } from "react-router-dom"
-import { useApartmentDetails } from "@/hooks/use-apartment-details"
+import { AgencyLayout } from "@/components/agency/AgencyLayout"
+import { ApartmentHeader } from "@/components/apartment/ApartmentHeader"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useApartment } from "@/hooks/use-apartment"
 import { useApartmentUnits } from "@/hooks/use-apartment-units"
 import { ApartmentUnitsTab } from "@/components/apartment/tabs/ApartmentUnitsTab"
 import { ApartmentTenantsTab } from "@/components/apartment/tabs/ApartmentTenantsTab"
-import { ApartmentUnit } from "@/types/apartment"
 
 export default function ApartmentDetails() {
   const { id } = useParams<{ id: string }>()
-  const { data: apartment, isLoading: isLoadingApartment } = useApartmentDetails(id!)
+  
+  const { data: apartment, isLoading: apartmentLoading } = useApartment(id)
   const { 
     data: units = [], 
-    isLoading: isLoadingUnits,
-    deleteUnit,
+    isLoading: unitsLoading,
     createUnit,
-    updateUnit
-  } = useApartmentUnits(id!)
+    updateUnit,
+    deleteUnit
+  } = useApartmentUnits(id)
 
   if (!id) return null
-  
-  if (isLoadingApartment || isLoadingUnits) {
-    return <div>Loading...</div>
-  }
-
-  if (!apartment) {
-    return <div>Apartment not found</div>
-  }
 
   return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-2xl font-bold mb-6">{apartment.name}</h1>
-      
-      <div className="space-y-6">
-        <ApartmentUnitsTab
-          apartmentId={id}
-          units={units}
-          isLoading={isLoadingUnits}
-          onCreateUnit={async (data) => {
-            await createUnit.mutateAsync(data)
-          }}
-          onUpdateUnit={async (data) => {
-            await updateUnit.mutateAsync(data)
-          }}
-          onDeleteUnit={async (unitId) => {
-            await deleteUnit.mutateAsync(unitId)
-          }}
-          onEdit={(unit: ApartmentUnit) => {
-            console.log("Edit unit:", unit)
-          }}
+    <AgencyLayout>
+      <div className="container mx-auto py-6">
+        <ApartmentHeader 
+          apartment={apartment}
+          isLoading={apartmentLoading}
         />
+
+        <Tabs defaultValue="units" className="mt-6">
+          <TabsList>
+            <TabsTrigger value="units">Unités</TabsTrigger>
+            <TabsTrigger value="tenants">Locataires</TabsTrigger>
+            <TabsTrigger value="payments">Paiements</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="units">
+            <ApartmentUnitsTab
+              apartmentId={id}
+              units={units}
+              isLoading={unitsLoading}
+              onCreateUnit={async (data) => {
+                await createUnit.mutateAsync(data)
+              }}
+              onUpdateUnit={async (data) => {
+                await updateUnit.mutateAsync(data)
+              }}
+              onDeleteUnit={async (unitId) => {
+                await deleteUnit.mutateAsync(unitId)
+              }}
+            />
+          </TabsContent>
+
+          <TabsContent value="tenants">
+            <ApartmentTenantsTab
+              apartmentId={id}
+              isLoading={false}
+              tenants={[]}
+              onDeleteTenant={() => {}}
+              onEditTenant={() => {}}
+            />
+          </TabsContent>
+
+          <TabsContent value="payments">
+            <div className="text-center py-8 text-muted-foreground">
+              Fonctionnalité à venir
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
-    </div>
+    </AgencyLayout>
   )
 }
