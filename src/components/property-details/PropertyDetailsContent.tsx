@@ -8,7 +8,7 @@ import { PropertyActions } from "./PropertyActions"
 import { PropertySalesSection } from "./PropertySalesSection"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
-import { Contract } from "@/integrations/supabase/types"
+import { Contract } from "@/integrations/supabase/types/contracts"
 
 export const PropertyDetailsContent = () => {
   const { id } = useParams()
