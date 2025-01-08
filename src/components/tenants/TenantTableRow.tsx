@@ -30,9 +30,10 @@ interface TenantTableRowProps {
     telephone: string
     photoIdUrl?: string
     fraisAgence?: string
+    profession?: string
   }
   onEdit: (tenant: any) => void
-  onDelete: (id: string) => void
+  onDelete: (id: string) => Promise<void>
 }
 
 export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps) {
@@ -58,21 +59,10 @@ export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps
     }
   })
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     setShowDeleteConfirm(false)
-    onDelete(tenant.id)
+    await onDelete(tenant.id)
   }
-
-  const tenantFormData: TenantFormData = {
-    id: tenant.id,
-    nom: tenant.nom,
-    prenom: tenant.prenom,
-    telephone: tenant.telephone,
-    fraisAgence: tenant.fraisAgence || '0',
-    dateNaissance: tenant.dateNaissance,
-    photoIdUrl: tenant.photoIdUrl,
-    profession: tenant.profession
-  };
 
   return (
     <>
@@ -85,7 +75,16 @@ export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps
         <TableCell>{tenant.telephone}</TableCell>
         <TableCell>
           <TenantActions
-            tenant={tenantFormData}
+            tenant={{
+              id: tenant.id,
+              nom: tenant.nom,
+              prenom: tenant.prenom,
+              telephone: tenant.telephone,
+              fraisAgence: tenant.fraisAgence || "0",
+              dateNaissance: tenant.dateNaissance,
+              photoIdUrl: tenant.photoIdUrl,
+              profession: tenant.profession
+            }}
             onEdit={() => onEdit(tenant)}
             onDelete={() => setShowDeleteConfirm(true)}
           />

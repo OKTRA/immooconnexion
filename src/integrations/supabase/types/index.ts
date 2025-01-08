@@ -16,15 +16,15 @@ export interface Database {
   public: {
     Tables: {
       administrators: {
-        Row: Administrator;
-        Insert: AdministratorInsert;
-        Update: AdministratorUpdate;
+        Row: any;
+        Insert: any;
+        Update: any;
         Relationships: [];
       };
       contracts: {
-        Row: Contract;
-        Insert: ContractInsert;
-        Update: ContractUpdate;
+        Row: any;
+        Insert: any;
+        Update: any;
         Relationships: [
           {
             foreignKeyName: "contracts_property_id_fkey";
@@ -36,21 +36,21 @@ export interface Database {
         ];
       };
       profiles: {
-        Row: Profile;
-        Insert: ProfileInsert;
-        Update: ProfileUpdate;
+        Row: any;
+        Insert: any;
+        Update: any;
         Relationships: [];
       };
       properties: {
-        Row: Property;
-        Insert: PropertyInsert;
-        Update: PropertyUpdate;
+        Row: any;
+        Insert: any;
+        Update: any;
         Relationships: [];
       };
       tenants: {
-        Row: Tenant;
-        Insert: TenantInsert;
-        Update: TenantUpdate;
+        Row: any;
+        Insert: any;
+        Update: any;
         Relationships: [];
       };
     };

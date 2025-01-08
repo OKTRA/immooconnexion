@@ -18,3 +18,13 @@ export interface TenantReceiptData {
   profession?: string;
   propertyId?: string;
 }
+
+export interface TenantReceiptProps {
+  tenant: TenantReceiptData;
+  contractId?: string;
+  isInitialReceipt?: boolean;
+  isEndReceipt?: boolean;
+  lease?: any;
+  isEndOfContract?: boolean;
+  inspection?: any;
+}
