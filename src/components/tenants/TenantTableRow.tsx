@@ -1,3 +1,5 @@
+import { TenantFormData } from "@/types/tenant"
+
 import { TableCell, TableRow } from "@/components/ui/table"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"

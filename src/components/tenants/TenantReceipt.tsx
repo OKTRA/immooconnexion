@@ -4,15 +4,10 @@ import { ReceiptTable } from './receipt/ReceiptTable';
 import { ReceiptActions } from './receipt/ReceiptActions';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { TenantReceiptData } from '@/types/tenant';
 
 interface TenantReceiptProps {
-  tenant: {
-    nom: string;
-    prenom: string;
-    telephone: string;
-    fraisAgence?: string;
-    profession?: string;
-  };
+  tenant: TenantReceiptData;
   isInitialReceipt?: boolean;
   isEndReceipt?: boolean;
   lease?: any;
