@@ -1,262 +1,173 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
 import { Button } from "@/components/ui/button"
-import { Form } from "@/components/ui/form"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
+import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
-import { Loader2, Upload } from "lucide-react"
-
-const inspectionSchema = z.object({
-  has_damages: z.boolean().default(false),
-  damage_description: z.string().optional(),
-  repair_costs: z.number().min(0).default(0),
-  deposit_returned: z.number().min(0).default(0),
-  photo_urls: z.array(z.string()).default([]),
-})
-
-type InspectionFormData = z.infer<typeof inspectionSchema>
+import { supabase } from "@/integrations/supabase/client"
+import { Contract } from "@/integrations/supabase/types/contracts"
 
 interface InspectionFormProps {
-  lease: {
-    id: string;
-    deposit_amount?: number | null;
-  };
-  onSuccess?: () => void;
+  contract: Contract
+  onSuccess: () => void
 }
 
-export function InspectionForm({ lease, onSuccess }: InspectionFormProps) {
+export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
   const { toast } = useToast()
-  const [isUploading, setIsUploading] = useState(false)
-  const depositAmount = lease.deposit_amount?.toString() || "0"
-
-  const form = useForm<InspectionFormData>({
-    resolver: zodResolver(inspectionSchema),
-    defaultValues: {
-      has_damages: false,
-      damage_description: "",
-      repair_costs: 0,
-      deposit_returned: Number(depositAmount),
-      photo_urls: [],
-    },
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState({
+    hasDamages: false,
+    damageDescription: "",
+    repairCosts: "0",
+    depositReturned: contract.montant.toString(),
+    photos: null as FileList | null,
   })
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files || files.length === 0) return
-
-    setIsUploading(true)
-    const uploadedUrls: string[] = []
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
 
     try {
-      for (const file of files) {
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${Math.random()}.${fileExt}`
-        const filePath = `inspection-photos/${fileName}`
+      let photoUrls: string[] = []
 
-        const { error: uploadError, data } = await supabase.storage
-          .from('inspections')
-          .upload(filePath, file)
-
-        if (uploadError) throw uploadError
-
-        if (data) {
-          const { data: { publicUrl } } = supabase.storage
-            .from('inspections')
-            .getPublicUrl(filePath)
+      if (formData.photos) {
+        for (let i = 0; i < formData.photos.length; i++) {
+          const file = formData.photos[i]
+          const fileExt = file.name.split('.').pop()
+          const fileName = `${Math.random()}.${fileExt}`
           
-          uploadedUrls.push(publicUrl)
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('inspection_photos')
+            .upload(fileName, file)
+
+          if (uploadError) throw uploadError
+          if (uploadData) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('inspection_photos')
+              .getPublicUrl(uploadData.path)
+            photoUrls.push(publicUrl)
+          }
         }
       }
 
-      const currentUrls = form.getValues('photo_urls')
-      form.setValue('photo_urls', [...currentUrls, ...uploadedUrls])
-
-      toast({
-        title: "Photos téléchargées",
-        description: "Les photos ont été téléchargées avec succès",
-      })
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: "Erreur lors du téléchargement des photos",
-        variant: "destructive",
-      })
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
-  const onSubmit = async (data: InspectionFormData) => {
-    try {
-      const { error } = await supabase
-        .from('apartment_inspections')
+      const { error: inspectionError } = await supabase
+        .from('property_inspections')
         .insert({
-          lease_id: lease.id,
-          ...data,
+          contract_id: contract.id,
+          has_damages: formData.hasDamages,
+          damage_description: formData.damageDescription,
+          repair_costs: parseInt(formData.repairCosts),
+          deposit_returned: parseInt(formData.depositReturned),
+          photo_urls: photoUrls,
+          status: 'completed'
         })
 
-      if (error) throw error
+      if (inspectionError) throw inspectionError
+
+      const { error: contractError } = await supabase
+        .from('contracts')
+        .update({ statut: 'terminé' })
+        .eq('id', contract.id)
+
+      if (contractError) throw contractError
 
       toast({
-        title: "Inspection enregistrée",
+        title: "Inspection terminée",
         description: "L'inspection a été enregistrée avec succès",
       })
 
-      onSuccess?.()
+      onSuccess()
     } catch (error: any) {
+      console.error('Error:', error)
       toast({
         title: "Erreur",
         description: error.message,
         variant: "destructive",
       })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handlePhotosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFormData({ ...formData, photos: e.target.files })
     }
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="has_damages"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel>Dégâts constatés</FormLabel>
-                <FormDescription>
-                  Cochez si des dégâts ont été constatés lors de l'inspection
-                </FormDescription>
-              </div>
-            </FormItem>
-          )}
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="hasDamages"
+          checked={formData.hasDamages}
+          onCheckedChange={(checked) => setFormData({ ...formData, hasDamages: checked })}
         />
+        <Label htmlFor="hasDamages">Dégâts constatés</Label>
+      </div>
 
-        {form.watch('has_damages') && (
-          <>
-            <FormField
-              control={form.control}
-              name="damage_description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description des dégâts</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Décrivez les dégâts constatés..."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+      {formData.hasDamages && (
+        <>
+          <div className="space-y-2">
+            <Label htmlFor="damageDescription">Description des dégâts</Label>
+            <Textarea
+              id="damageDescription"
+              value={formData.damageDescription}
+              onChange={(e) => setFormData({ ...formData, damageDescription: e.target.value })}
+              required
             />
+          </div>
 
-            <FormField
-              control={form.control}
-              name="repair_costs"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Coûts de réparation (FCFA)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={e => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+          <div className="space-y-2">
+            <Label htmlFor="repairCosts">Coût des réparations (FCFA)</Label>
+            <Input
+              id="repairCosts"
+              type="number"
+              value={formData.repairCosts}
+              onChange={(e) => {
+                const repairCosts = parseInt(e.target.value)
+                const depositReturned = Math.max(0, contract.montant - repairCosts)
+                setFormData({
+                  ...formData,
+                  repairCosts: e.target.value,
+                  depositReturned: depositReturned.toString()
+                })
+              }}
+              required
             />
-          </>
-        )}
+          </div>
+        </>
+      )}
 
-        <FormField
-          control={form.control}
-          name="deposit_returned"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Montant de la caution à rembourser (FCFA)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
-                  onChange={e => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormDescription>
-                Montant initial de la caution: {depositAmount} FCFA
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
+      <div className="space-y-2">
+        <Label htmlFor="depositReturned">Montant de la caution à rembourser (FCFA)</Label>
+        <Input
+          id="depositReturned"
+          type="number"
+          value={formData.depositReturned}
+          onChange={(e) => setFormData({ ...formData, depositReturned: e.target.value })}
+          required
         />
+      </div>
 
-        <FormField
-          control={form.control}
-          name="photo_urls"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Photos</FormLabel>
-              <FormControl>
-                <div className="space-y-4">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleFileUpload}
-                    disabled={isUploading}
-                  />
-                  {field.value.length > 0 && (
-                    <div className="grid grid-cols-2 gap-4">
-                      {field.value.map((url, index) => (
-                        <img
-                          key={index}
-                          src={url}
-                          alt={`Photo ${index + 1}`}
-                          className="rounded-md object-cover w-full h-32"
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+      <div className="space-y-2">
+        <Label htmlFor="photos">Photos</Label>
+        <Input
+          id="photos"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handlePhotosChange}
+          className="cursor-pointer"
         />
+      </div>
 
-        <Button type="submit" disabled={isUploading} className="w-full">
-          {isUploading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Téléchargement en cours...
-            </>
-          ) : (
-            <>
-              <Upload className="mr-2 h-4 w-4" />
-              Enregistrer l'inspection
-            </>
-          )}
+      <div className="flex justify-end space-x-2">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Chargement..." : "Terminer l'inspection"}
         </Button>
-      </form>
-    </Form>
+      </div>
+    </form>
   )
 }
