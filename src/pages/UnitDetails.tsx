@@ -11,6 +11,7 @@ import { TenantPaymentsTab } from "@/components/apartment/tenant/TenantPaymentsT
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2, Upload } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { ApartmentUnit } from "@/components/apartment/types"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +25,21 @@ import {
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
 
+interface UnitDetailsData extends ApartmentUnit {
+  apartment: {
+    name: string;
+  };
+  current_lease?: Array<{
+    id: string;
+    status: string;
+    tenant: {
+      id: string;
+      first_name: string;
+      last_name: string;
+    };
+  }>;
+}
+
 export default function UnitDetails() {
   const { id } = useParams<{ id: string }>()
   const { toast } = useToast()
@@ -31,7 +47,7 @@ export default function UnitDetails() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
 
-  const { data: unitDetails, isLoading: isLoadingUnit } = useQuery({
+  const { data: unitDetails, isLoading: isLoadingUnit } = useQuery<UnitDetailsData>({
     queryKey: ['unit-details', id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -122,7 +138,6 @@ export default function UnitDetails() {
         .from('apartment_photos')
         .getPublicUrl(filePath)
 
-      // Get existing photo_urls array or initialize empty array
       const currentPhotoUrls = unitDetails?.photo_urls || []
       
       await updateUnit.mutateAsync({
