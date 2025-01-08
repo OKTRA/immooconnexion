@@ -6,23 +6,44 @@ import {
 } from "@/components/ui/dialog"
 import { InspectionForm } from "./InspectionForm"
 
-interface InspectionDialogProps {
-  lease: {
+export interface InspectionDialogProps {
+  lease?: {
     id: string;
     deposit_amount?: number | null;
   };
-  onOpenChange?: (open: boolean) => void;
+  contract?: {
+    id: string;
+    montant: number;
+    type: string;
+    property_id: string;
+    tenant_id: string;
+  };
   open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  className?: string;
 }
 
-export function InspectionDialog({ lease, onOpenChange, open }: InspectionDialogProps) {
+export function InspectionDialog({ 
+  lease,
+  contract,
+  onOpenChange, 
+  open,
+  className 
+}: InspectionDialogProps) {
+  // Use either lease or contract based on what's provided
+  const inspectionData = lease || contract;
+
+  if (!inspectionData) {
+    return null;
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className={className}>
         <DialogHeader>
           <DialogTitle>Inspection de fin de bail</DialogTitle>
         </DialogHeader>
-        <InspectionForm lease={lease} onSuccess={() => onOpenChange?.(false)} />
+        <InspectionForm lease={inspectionData} onSuccess={() => onOpenChange?.(false)} />
       </DialogContent>
     </Dialog>
   )

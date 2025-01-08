@@ -64,11 +64,13 @@ export function UnitDetailsTab({ unit, hasActiveLease }: UnitDetailsTabProps) {
   }
 
   const handleDeleteLease = async () => {
+    if (!unit.current_lease?.[0]?.id) return;
+    
     try {
       const { error } = await supabase
         .from('apartment_leases')
         .delete()
-        .eq('id', unit.current_lease?.[0]?.id)
+        .eq('id', unit.current_lease[0].id)
 
       if (error) throw error
 
@@ -205,9 +207,9 @@ export function UnitDetailsTab({ unit, hasActiveLease }: UnitDetailsTabProps) {
 
       {showInspection && unit.current_lease?.[0] && (
         <InspectionDialog
+          lease={unit.current_lease[0]}
           open={showInspection}
           onOpenChange={setShowInspection}
-          lease={unit.current_lease[0]}
         />
       )}
 
@@ -222,7 +224,6 @@ export function UnitDetailsTab({ unit, hasActiveLease }: UnitDetailsTabProps) {
                 fraisAgence: "0",
                 propertyId: unit.id,
               }}
-              contractId={unit.current_lease[0].id}
             />
           </DialogContent>
         </Dialog>
