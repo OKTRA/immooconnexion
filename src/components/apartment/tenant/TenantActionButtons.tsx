@@ -35,7 +35,7 @@ export function TenantActionButtons({
       <Button
         variant="outline"
         size="sm"
-        onClick={() => navigate(`/agence/locataires/${tenant.id}/recu`)}
+        onClick={() => navigate(`/agence/appartements/locataires/${tenant.id}/recu`)}
         className="flex items-center gap-2"
       >
         <Receipt className="h-4 w-4" />
@@ -45,7 +45,7 @@ export function TenantActionButtons({
       <Button
         variant="outline"
         size="sm"
-        onClick={() => navigate(`/agence/locataires/${tenant.id}/paiements`)}
+        onClick={() => navigate(`/agence/appartements/locataires/${tenant.id}/paiements`)}
         className="flex items-center gap-2"
       >
         <CreditCard className="h-4 w-4" />
@@ -55,7 +55,7 @@ export function TenantActionButtons({
       <Button
         variant="outline"
         size="sm"
-        onClick={() => navigate(`/agence/locataires/${tenant.id}/contrats`)}
+        onClick={() => navigate(`/agence/appartements/locataires/${tenant.id}/contrats`)}
         className="flex items-center gap-2"
       >
         <ClipboardList className="h-4 w-4" />

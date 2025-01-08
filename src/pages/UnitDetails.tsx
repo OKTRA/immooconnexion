@@ -82,8 +82,8 @@ export default function UnitDetails() {
     <AgencyLayout>
       <div className="container mx-auto py-6">
         <UnitHeader 
-          unitNumber={unitDetails?.unit_number || ''} 
-          apartmentName={unitDetails?.apartment?.name || ''}
+          unitNumber={unitDetails.unit_number} 
+          apartmentName={unitDetails.apartment?.name || ''}
         />
 
         <Tabs defaultValue="details" className="space-y-4">
