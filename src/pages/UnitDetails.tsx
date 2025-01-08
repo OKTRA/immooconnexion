@@ -28,7 +28,7 @@ interface UnitDetailsData extends ApartmentUnit {
 export default function UnitDetails() {
   const { id } = useParams<{ id: string }>()
 
-  const { data: unitDetails, isLoading: isLoadingUnit } = useQuery<UnitDetailsData>({
+  const { data: unitDetails, isLoading: isLoadingUnit } = useQuery({
     queryKey: ['unit-details', id],
     queryFn: async () => {
       if (!id) throw new Error('No unit ID provided')
@@ -44,7 +44,7 @@ export default function UnitDetails() {
           )
         `)
         .eq('id', id)
-        .single()
+        .maybeSingle()
 
       if (error) throw error
       return data as UnitDetailsData
@@ -58,6 +58,18 @@ export default function UnitDetails() {
         <div className="container mx-auto py-6">
           <Skeleton className="h-8 w-64 mb-4" />
           <Skeleton className="h-[200px] w-full" />
+        </div>
+      </AgencyLayout>
+    )
+  }
+
+  if (!unitDetails) {
+    return (
+      <AgencyLayout>
+        <div className="container mx-auto py-6">
+          <div className="text-center py-8 text-gray-500">
+            Unité non trouvée
+          </div>
         </div>
       </AgencyLayout>
     )
@@ -83,7 +95,7 @@ export default function UnitDetails() {
 
           <TabsContent value="details">
             <UnitDetailsTab 
-              unit={unitDetails as UnitDetailsData} 
+              unit={unitDetails} 
               hasActiveLease={hasActiveLease}
             />
           </TabsContent>

@@ -1,173 +1,150 @@
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
 import { Button } from "@/components/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
-import { useState } from "react"
 import { supabase } from "@/integrations/supabase/client"
-import { Contract } from "@/integrations/supabase/types/contracts"
+import { Contract } from "@/integrations/supabase/types"
+
+const formSchema = z.object({
+  has_damages: z.boolean().default(false),
+  damage_description: z.string().optional(),
+  repair_costs: z.string().optional(),
+  deposit_returned: z.string(),
+})
 
 interface InspectionFormProps {
-  contract: Contract
-  onSuccess: () => void
+  lease?: any
+  contract?: Contract
 }
 
-export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
+export function InspectionForm({ lease, contract }: InspectionFormProps) {
   const { toast } = useToast()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState({
-    hasDamages: false,
-    damageDescription: "",
-    repairCosts: "0",
-    depositReturned: contract.montant.toString(),
-    photos: null as FileList | null,
+  const depositAmount = lease?.deposit_amount || contract?.montant || 0
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      has_damages: false,
+      damage_description: "",
+      repair_costs: "0",
+      deposit_returned: depositAmount.toString(),
+    },
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      let photoUrls: string[] = []
-
-      if (formData.photos) {
-        for (let i = 0; i < formData.photos.length; i++) {
-          const file = formData.photos[i]
-          const fileExt = file.name.split('.').pop()
-          const fileName = `${Math.random()}.${fileExt}`
-          
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('inspection_photos')
-            .upload(fileName, file)
-
-          if (uploadError) throw uploadError
-          if (uploadData) {
-            const { data: { publicUrl } } = supabase.storage
-              .from('inspection_photos')
-              .getPublicUrl(uploadData.path)
-            photoUrls.push(publicUrl)
-          }
-        }
+      const inspectionData = {
+        lease_id: lease?.id,
+        contract_id: contract?.id,
+        has_damages: values.has_damages,
+        damage_description: values.damage_description,
+        repair_costs: parseInt(values.repair_costs || "0"),
+        deposit_returned: parseInt(values.deposit_returned),
+        status: "completed",
       }
 
-      const { error: inspectionError } = await supabase
-        .from('property_inspections')
-        .insert({
-          contract_id: contract.id,
-          has_damages: formData.hasDamages,
-          damage_description: formData.damageDescription,
-          repair_costs: parseInt(formData.repairCosts),
-          deposit_returned: parseInt(formData.depositReturned),
-          photo_urls: photoUrls,
-          status: 'completed'
-        })
+      if (lease) {
+        const { error } = await supabase
+          .from("apartment_inspections")
+          .insert(inspectionData)
 
-      if (inspectionError) throw inspectionError
+        if (error) throw error
+      } else if (contract) {
+        const { error } = await supabase
+          .from("property_inspections")
+          .insert(inspectionData)
 
-      const { error: contractError } = await supabase
-        .from('contracts')
-        .update({ statut: 'terminé' })
-        .eq('id', contract.id)
-
-      if (contractError) throw contractError
+        if (error) throw error
+      }
 
       toast({
-        title: "Inspection terminée",
-        description: "L'inspection a été enregistrée avec succès",
+        title: "État des lieux enregistré",
+        description: "L'état des lieux a été enregistré avec succès",
       })
-
-      onSuccess()
-    } catch (error: any) {
-      console.error('Error:', error)
+    } catch (error) {
+      console.error("Error submitting inspection:", error)
       toast({
-        title: "Erreur",
-        description: error.message,
         variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'enregistrement",
       })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handlePhotosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFormData({ ...formData, photos: e.target.files })
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="hasDamages"
-          checked={formData.hasDamages}
-          onCheckedChange={(checked) => setFormData({ ...formData, hasDamages: checked })}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="has_damages"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">Dégâts constatés</FormLabel>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
         />
-        <Label htmlFor="hasDamages">Dégâts constatés</Label>
-      </div>
 
-      {formData.hasDamages && (
-        <>
-          <div className="space-y-2">
-            <Label htmlFor="damageDescription">Description des dégâts</Label>
-            <Textarea
-              id="damageDescription"
-              value={formData.damageDescription}
-              onChange={(e) => setFormData({ ...formData, damageDescription: e.target.value })}
-              required
+        {form.watch("has_damages") && (
+          <>
+            <FormField
+              control={form.control}
+              name="damage_description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description des dégâts</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="repairCosts">Coût des réparations (FCFA)</Label>
-            <Input
-              id="repairCosts"
-              type="number"
-              value={formData.repairCosts}
-              onChange={(e) => {
-                const repairCosts = parseInt(e.target.value)
-                const depositReturned = Math.max(0, contract.montant - repairCosts)
-                setFormData({
-                  ...formData,
-                  repairCosts: e.target.value,
-                  depositReturned: depositReturned.toString()
-                })
-              }}
-              required
+            <FormField
+              control={form.control}
+              name="repair_costs"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Coût des réparations (FCFA)</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-        </>
-      )}
+          </>
+        )}
 
-      <div className="space-y-2">
-        <Label htmlFor="depositReturned">Montant de la caution à rembourser (FCFA)</Label>
-        <Input
-          id="depositReturned"
-          type="number"
-          value={formData.depositReturned}
-          onChange={(e) => setFormData({ ...formData, depositReturned: e.target.value })}
-          required
+        <FormField
+          control={form.control}
+          name="deposit_returned"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Caution à rembourser (FCFA)</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="photos">Photos</Label>
-        <Input
-          id="photos"
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handlePhotosChange}
-          className="cursor-pointer"
-        />
-      </div>
-
-      <div className="flex justify-end space-x-2">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Chargement..." : "Terminer l'inspection"}
-        </Button>
-      </div>
-    </form>
+        <Button type="submit">Enregistrer</Button>
+      </form>
+    </Form>
   )
 }
