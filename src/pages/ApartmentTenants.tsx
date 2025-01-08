@@ -1,12 +1,11 @@
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
-import { ApartmentHeader } from "@/components/apartment/ApartmentHeader"
-import { ApartmentList } from "@/components/apartment/ApartmentList"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import { ApartmentTenantsTab } from "@/components/apartment/tabs/ApartmentTenantsTab"
 
-export default function Apartments() {
-  const { data: apartments = [], isLoading } = useQuery({
-    queryKey: ["apartments"],
+export default function ApartmentTenants() {
+  const { data: tenants = [], isLoading } = useQuery({
+    queryKey: ["apartment-tenants"],
     queryFn: async () => {
       const { data: profile } = await supabase.auth.getUser()
       
@@ -25,13 +24,8 @@ export default function Apartments() {
       }
 
       const { data, error } = await supabase
-        .from("apartments")
-        .select(`
-          *,
-          apartment_units (
-            count
-          )
-        `)
+        .from("apartment_tenants")
+        .select("*")
         .eq("agency_id", userProfile.agency_id)
 
       if (error) throw error
@@ -42,11 +36,14 @@ export default function Apartments() {
   return (
     <AgencyLayout>
       <div className="container mx-auto py-6">
-        <ApartmentHeader />
-        <ApartmentList 
-          apartments={apartments}
+        <h1 className="text-2xl font-bold mb-6">Locataires</h1>
+        
+        <ApartmentTenantsTab
+          apartmentId=""
+          tenants={tenants}
           isLoading={isLoading}
-          onViewUnits={(id) => console.log("View units", id)}
+          onDeleteTenant={async () => {}}
+          onEditTenant={() => {}}
         />
       </div>
     </AgencyLayout>
