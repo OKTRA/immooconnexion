@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { InspectionForm } from "./InspectionForm"
-import { Contract } from "@/integrations/supabase/types"
+import { Contract } from "@/integrations/supabase/types/contracts"
 
 export interface InspectionDialogProps {
   lease?: any
