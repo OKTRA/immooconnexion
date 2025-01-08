@@ -30,7 +30,6 @@ interface TenantTableRowProps {
     telephone: string
     photoIdUrl?: string
     fraisAgence?: string
-    profession?: string
   }
   onEdit: (tenant: any) => void
   onDelete: (id: string) => void
@@ -59,9 +58,9 @@ export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps
     }
   })
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     setShowDeleteConfirm(false)
-    await onDelete(tenant.id)
+    onDelete(tenant.id)
   }
 
   const tenantFormData: TenantFormData = {
@@ -88,7 +87,7 @@ export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps
           <TenantActions
             tenant={tenantFormData}
             onEdit={() => onEdit(tenant)}
-            onDelete={handleDelete}
+            onDelete={() => setShowDeleteConfirm(true)}
           />
         </TableCell>
       </TableRow>
@@ -104,7 +103,6 @@ export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps
               propertyId: contract?.property_id || "",
             }}
             contractId={contract?.id}
-            isEndOfContract={false}
           />
         </DialogContent>
       </Dialog>

@@ -6,5 +6,5 @@ export interface Administrator {
   agency_id?: string;
 }
 
-export interface AdministratorInsert extends Omit<Administrator, 'id' | 'created_at' | 'updated_at'> {}
-export interface AdministratorUpdate extends Partial<AdministratorInsert> {}
+export type AdministratorInsert = Partial<Administrator>;
+export type AdministratorUpdate = Partial<Administrator>;

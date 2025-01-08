@@ -14,6 +14,16 @@ export interface ApartmentUnit {
   updated_at?: string;
 }
 
+export interface ApartmentUnitFormData {
+  unit_number: string;
+  floor_number: string;
+  area: string;
+  rent_amount: string;
+  deposit_amount: string;
+  status: ApartmentUnitStatus;
+  description: string;
+}
+
 export interface ApartmentContract {
   id: string;
   montant: number;
@@ -23,11 +33,6 @@ export interface ApartmentContract {
   start_date: string;
   end_date: string;
   status: string;
-  property_id?: string;
-  tenant_id?: string;
-  statut?: string;
-  agency_id?: string;
-  created_by_user_id?: string;
 }
 
 export interface ApartmentTenantReceipt {
@@ -39,4 +44,10 @@ export interface ApartmentTenantReceipt {
   };
   isEndReceipt?: boolean;
   lease?: ApartmentContract;
+}
+
+export interface ApartmentInspectionProps {
+  lease: ApartmentContract;
+  onClose: () => void;
+  onSuccess?: () => void;
 }
