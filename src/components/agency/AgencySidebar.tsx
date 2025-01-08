@@ -36,6 +36,11 @@ const menuItems = [
     icon: Building,
   },
   {
+    title: "Locataires d'appartements",
+    href: "/agence/apartment-tenants",
+    icon: Users,
+  },
+  {
     title: "Ventes",
     href: "/agence/sales",
     icon: Receipt,
