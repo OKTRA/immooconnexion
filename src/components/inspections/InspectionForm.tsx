@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { Contract } from "@/integrations/supabase/types/contracts"
+import { Contract } from "@/integrations/supabase/types"
 
 const formSchema = z.object({
   has_damages: z.boolean().default(false),
