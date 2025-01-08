@@ -56,7 +56,7 @@ export default function App() {
                 <Route path="earnings" element={<AgencyEarnings />} />
                 <Route path="subscription" element={<SubscriptionUpgrade />} />
                 <Route path="apartments" element={<Apartments />} />
-                <Route path="apartments/:id" element={<ApartmentDetails />} />
+                <Route path="apartments/:id/details" element={<ApartmentDetails />} />
                 <Route path="apartments/:id/units" element={<ApartmentUnits />} />
                 <Route path="unite/:id" element={<UnitDetails />} />
                 <Route path="appartements" element={<Navigate to="/agence/apartments" replace />} />

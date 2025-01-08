@@ -6,6 +6,7 @@ import { useApartment } from "@/hooks/use-apartment"
 import { useApartmentUnits } from "@/hooks/use-apartment-units"
 import { ApartmentUnitsTab } from "@/components/apartment/tabs/ApartmentUnitsTab"
 import { ApartmentTenantsTab } from "@/components/apartment/tabs/ApartmentTenantsTab"
+import { ApartmentUnit } from "@/types/apartment"
 
 export default function ApartmentDetails() {
   const { id } = useParams<{ id: string }>()
@@ -49,6 +50,9 @@ export default function ApartmentDetails() {
               }}
               onDeleteUnit={async (unitId) => {
                 await deleteUnit.mutateAsync(unitId)
+              }}
+              onEdit={(unit: ApartmentUnit) => {
+                console.log("Edit unit:", unit)
               }}
             />
           </TabsContent>
