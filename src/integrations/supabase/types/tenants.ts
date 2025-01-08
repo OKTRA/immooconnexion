@@ -14,5 +14,5 @@ export interface Tenant {
   created_by_user_id: string | null;
 }
 
-export type TenantInsert = Partial<Tenant>;
-export type TenantUpdate = Partial<Tenant>;
+export interface TenantInsert extends Omit<Tenant, 'id' | 'created_at' | 'updated_at'> {}
+export interface TenantUpdate extends Partial<TenantInsert> {}

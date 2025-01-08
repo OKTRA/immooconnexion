@@ -7,7 +7,7 @@ import Apartments from "@/pages/Apartments";
 import ApartmentDetails from "@/pages/ApartmentDetails";
 import UnitDetails from "@/pages/UnitDetails";
 import ApartmentTenants from "@/pages/ApartmentTenants";
-import TenantContracts from "@/components/apartment/tenant/TenantContracts";
+import { TenantContracts } from "@/components/TenantContracts";
 
 function App() {
   return (

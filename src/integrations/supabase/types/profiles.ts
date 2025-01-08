@@ -13,5 +13,5 @@ export interface Profile {
   has_seen_warning: boolean;
 }
 
-export type ProfileInsert = Partial<Profile>;
-export type ProfileUpdate = Partial<Profile>;
+export interface ProfileInsert extends Omit<Profile, 'id' | 'created_at' | 'updated_at'> {}
+export interface ProfileUpdate extends Partial<ProfileInsert> {}
