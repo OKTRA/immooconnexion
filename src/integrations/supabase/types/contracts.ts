@@ -1,17 +1,16 @@
 export interface Contract {
   id: string;
-  property_id: string | null;
-  tenant_id: string | null;
+  property_id?: string;
+  tenant_id?: string;
   montant: number;
   type: string;
-  statut: string | null;
-  start_date: string | null;
-  end_date: string | null;
-  agency_id: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-  created_by_user_id: string | null;
-  // Additional fields from the join
+  statut?: string;
+  start_date?: string;
+  end_date?: string;
+  agency_id?: string;
+  created_at?: string;
+  updated_at?: string;
+  created_by_user_id?: string;
   tenant_nom?: string;
   tenant_prenom?: string;
   property_name?: string;

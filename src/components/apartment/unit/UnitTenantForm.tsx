@@ -8,11 +8,12 @@ import { LeaseFields } from "./form/LeaseFields"
 import { PhotoUpload } from "./form/PhotoUpload"
 import { PaymentFrequency, DurationType, LeaseStatus } from "../../apartment/lease/types"
 
-interface UnitTenantFormProps {
+export interface UnitTenantFormProps {
   unitId: string
   onSuccess: () => void
   isSubmitting: boolean
   setIsSubmitting: (value: boolean) => void
+  initialData?: any
 }
 
 export function UnitTenantForm({
@@ -20,6 +21,7 @@ export function UnitTenantForm({
   onSuccess,
   isSubmitting,
   setIsSubmitting,
+  initialData
 }: UnitTenantFormProps) {
   const { toast } = useToast()
   const [formData, setFormData] = useState({

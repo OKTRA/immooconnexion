@@ -1,31 +1,36 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { UnitTenantForm } from "./UnitTenantForm"
+import { useState } from "react"
 
-interface UnitTenantDialogProps {
+export interface UnitTenantDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   unitId: string
-  tenant?: any
+  initialData?: any
 }
 
 export function UnitTenantDialog({
   open,
   onOpenChange,
   unitId,
-  tenant
+  initialData
 }: UnitTenantDialogProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {tenant ? "Modifier le locataire" : "Ajouter un locataire"}
+            {initialData ? "Modifier le locataire" : "Ajouter un locataire"}
           </DialogTitle>
         </DialogHeader>
         <UnitTenantForm
           unitId={unitId}
-          tenant={tenant}
+          initialData={initialData}
           onSuccess={() => onOpenChange(false)}
+          isSubmitting={isSubmitting}
+          setIsSubmitting={setIsSubmitting}
         />
       </DialogContent>
     </Dialog>
