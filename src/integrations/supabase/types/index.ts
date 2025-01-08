@@ -1,8 +1,8 @@
-import { Contract, ContractInsert, ContractUpdate } from './contracts';
-import { Profile, ProfileInsert, ProfileUpdate } from './profiles';
-import { Property, PropertyInsert, PropertyUpdate } from './properties';
-import { Tenant, TenantInsert, TenantUpdate } from './tenants';
-import { Administrator, AdministratorInsert, AdministratorUpdate } from './administrators';
+export * from './contracts';
+export * from './profiles';
+export * from './properties';
+export * from './tenants';
+export * from './administrators';
 
 export type Json =
   | string
@@ -136,8 +136,3 @@ export type TablesUpdate<
     : never
   : never;
 
-export * from './contracts';
-export * from './profiles';
-export * from './properties';
-export * from './tenants';
-export * from './administrators';

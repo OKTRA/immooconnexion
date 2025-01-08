@@ -10,6 +10,7 @@ export interface Contract {
   agency_id: string | null;
   created_at: string | null;
   updated_at: string | null;
+  created_by_user_id: string | null;
   // Additional fields from the join
   tenant_nom?: string;
   tenant_prenom?: string;
