@@ -2,22 +2,45 @@ import React from 'react';
 import { ReceiptHeader } from './receipt/ReceiptHeader';
 import { ReceiptTable } from './receipt/ReceiptTable';
 import { ReceiptActions } from './receipt/ReceiptActions';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TenantReceiptProps {
   tenant: {
     nom: string;
     prenom: string;
     telephone: string;
-    fraisAgence: string;
-    propertyId: string;
+    fraisAgence?: string;
     profession?: string;
   };
-  contractId?: string;
-  isEndOfContract?: boolean;
-  inspection?: any;
+  isInitialReceipt?: boolean;
+  isEndReceipt?: boolean;
+  lease?: any;
 }
 
-export function TenantReceipt({ tenant, contractId, isEndOfContract, inspection }: TenantReceiptProps) {
+export function TenantReceipt({ 
+  tenant, 
+  isInitialReceipt,
+  isEndReceipt,
+  lease 
+}: TenantReceiptProps) {
+  const { data: userProfile } = useQuery({
+    queryKey: ['user-profile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifié");
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('agency_id')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const printReceipt = () => {
     const receiptWindow = window.open('', '_blank');
     if (!receiptWindow) return;
@@ -60,7 +83,7 @@ export function TenantReceipt({ tenant, contractId, isEndOfContract, inspection 
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Reçu de ${isEndOfContract ? 'Fin de Contrat' : 'Paiement'}</title>
+          <title>Reçu - ${tenant.prenom} ${tenant.nom}</title>
           ${style.outerHTML}
         </head>
         <body>
@@ -77,16 +100,15 @@ export function TenantReceipt({ tenant, contractId, isEndOfContract, inspection 
 
   return (
     <div id="receipt-content" className="bg-white p-6 rounded-lg shadow-md">
-      <ReceiptHeader tenant={tenant} />
+      <ReceiptHeader 
+        tenant={tenant} 
+        agencyId={userProfile?.agency_id}
+      />
       <ReceiptTable 
-        tenant={{
-          fraisAgence: tenant.fraisAgence,
-          profession: tenant.profession
-        }}
-        propertyId={tenant.propertyId}
-        isEndOfContract={isEndOfContract}
-        contractId={contractId}
-        inspection={inspection}
+        tenant={tenant}
+        isInitialReceipt={isInitialReceipt}
+        isEndReceipt={isEndReceipt}
+        lease={lease}
       />
       <div className="text-right mb-8">
         <p className="font-bold">Signature:</p>

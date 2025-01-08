@@ -8,13 +8,19 @@ interface ReceiptTableProps {
     fraisAgence: string;
     profession?: string;
   };
-  propertyId: string;
-  isEndOfContract?: boolean;
-  contractId?: string;
-  inspection?: any;
+  propertyId?: string;
+  isInitialReceipt?: boolean;
+  isEndReceipt?: boolean;
+  lease?: any;
 }
 
-export function ReceiptTable({ tenant, propertyId, isEndOfContract, contractId, inspection }: ReceiptTableProps) {
+export function ReceiptTable({ 
+  tenant, 
+  propertyId, 
+  isInitialReceipt,
+  isEndReceipt,
+  lease 
+}: ReceiptTableProps) {
   const { data: property } = useQuery({
     queryKey: ['property', propertyId],
     queryFn: async () => {
@@ -32,39 +38,79 @@ export function ReceiptTable({ tenant, propertyId, isEndOfContract, contractId, 
     enabled: !!propertyId
   });
 
-  const { data: inspectionData } = useQuery({
-    queryKey: ['inspection', contractId],
+  const { data: inspection } = useQuery({
+    queryKey: ['inspection', lease?.id],
     queryFn: async () => {
-      if (!contractId) return null;
+      if (!lease?.id) return null;
       
       const { data, error } = await supabase
         .from('property_inspections')
         .select('*')
-        .eq('contract_id', contractId)
+        .eq('contract_id', lease.id)
         .maybeSingle();
       
       if (error) throw error;
       return data;
     },
-    enabled: !!contractId && isEndOfContract
+    enabled: !!lease?.id && isEndReceipt
   });
 
-  const { data: contract } = useQuery({
-    queryKey: ['contract-details', contractId],
-    queryFn: async () => {
-      if (!contractId) return null;
-      
-      const { data, error } = await supabase
-        .from('contracts')
-        .select('*')
-        .eq('id', contractId)
-        .maybeSingle();
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!contractId
-  });
+  if (isEndReceipt && lease) {
+    return (
+      <table className="w-full border-collapse mb-8">
+        <thead>
+          <tr className="bg-gray-50">
+            <th className="border p-2 text-left">Description</th>
+            <th className="border p-2 text-left">Détails</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td className="border p-2">Date de fin</td>
+            <td className="border p-2">
+              {format(new Date(lease.end_date), "d MMM yyyy", { locale: fr })}
+            </td>
+          </tr>
+          <tr>
+            <td className="border p-2">Caution initiale</td>
+            <td className="border p-2">
+              {lease.deposit_amount?.toLocaleString()} FCFA
+            </td>
+          </tr>
+          {inspection && (
+            <>
+              <tr>
+                <td className="border p-2">Dégâts constatés</td>
+                <td className="border p-2">
+                  {inspection.has_damages ? "Oui" : "Non"}
+                </td>
+              </tr>
+              {inspection.has_damages && (
+                <>
+                  <tr>
+                    <td className="border p-2">Description des dégâts</td>
+                    <td className="border p-2">{inspection.damage_description}</td>
+                  </tr>
+                  <tr>
+                    <td className="border p-2">Coût des réparations</td>
+                    <td className="border p-2">
+                      {inspection.repair_costs?.toLocaleString()} FCFA
+                    </td>
+                  </tr>
+                </>
+              )}
+              <tr>
+                <td className="border p-2">Caution remboursée</td>
+                <td className="border p-2">
+                  {inspection.deposit_returned?.toLocaleString()} FCFA
+                </td>
+              </tr>
+            </>
+          )}
+        </tbody>
+      </table>
+    );
+  }
 
   return (
     <table className="w-full border-collapse mb-8">
@@ -77,10 +123,6 @@ export function ReceiptTable({ tenant, propertyId, isEndOfContract, contractId, 
       <tbody>
         {property && (
           <>
-            <tr>
-              <td className="border p-2">Agence</td>
-              <td className="border p-2">{property.agencies?.name}</td>
-            </tr>
             <tr>
               <td className="border p-2">Bien</td>
               <td className="border p-2">{property.bien}</td>
@@ -101,7 +143,7 @@ export function ReceiptTable({ tenant, propertyId, isEndOfContract, contractId, 
             </tr>
             <tr>
               <td className="border p-2">Frais d'agence</td>
-              <td className="border p-2">{parseFloat(tenant.fraisAgence).toLocaleString()} FCFA</td>
+              <td className="border p-2">{parseFloat(tenant.fraisAgence || "0").toLocaleString()} FCFA</td>
             </tr>
             <tr className="font-bold">
               <td className="border p-2">Total</td>
