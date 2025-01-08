@@ -4,6 +4,10 @@ import { ApartmentList } from "@/components/apartment/ApartmentList"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useNavigate } from "react-router-dom"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Plus } from "lucide-react"
+import { ApartmentForm } from "@/components/apartment/ApartmentForm"
 
 export default function Apartments() {
   const navigate = useNavigate()
@@ -33,8 +37,7 @@ export default function Apartments() {
           id,
           name,
           address,
-          total_units,
-          apartment_units (count)
+          total_units
         `)
         .eq("agency_id", userProfile.agency_id)
 
@@ -52,11 +55,28 @@ export default function Apartments() {
   return (
     <AgencyLayout>
       <div className="container mx-auto py-6">
-        <ApartmentHeader />
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold">Appartements</h1>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Nouvel appartement
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Ajouter un appartement</DialogTitle>
+              </DialogHeader>
+              <ApartmentForm />
+            </DialogContent>
+          </Dialog>
+        </div>
+        
         <ApartmentList 
           apartments={apartments}
           isLoading={isLoading}
-          onViewUnits={(id) => navigate(`/agence/appartements/${id}/details`)}
+          onViewUnits={(id) => navigate(`/agence/apartments/${id}/units`)}
         />
       </div>
     </AgencyLayout>
