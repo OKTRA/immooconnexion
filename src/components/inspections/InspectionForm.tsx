@@ -6,21 +6,23 @@ import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
 import { supabase } from "@/integrations/supabase/client"
-import { Contract } from "@/integrations/supabase/types/contracts"
 
 interface InspectionFormProps {
-  contract: Contract
-  onSuccess: () => void
+  lease: {
+    id: string;
+    deposit_amount?: number | null;
+  };
+  onSuccess: () => void;
 }
 
-export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
+export function InspectionForm({ lease, onSuccess }: InspectionFormProps) {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     hasDamages: false,
     damageDescription: "",
     repairCosts: "0",
-    depositReturned: contract.montant.toString(),
+    depositReturned: lease.deposit_amount?.toString() || "0",
     photos: null as FileList | null,
   })
 
@@ -52,9 +54,9 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
       }
 
       const { error: inspectionError } = await supabase
-        .from('property_inspections')
+        .from('apartment_inspections')
         .insert({
-          contract_id: contract.id,
+          lease_id: lease.id,
           has_damages: formData.hasDamages,
           damage_description: formData.damageDescription,
           repair_costs: parseInt(formData.repairCosts),
@@ -65,12 +67,18 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
 
       if (inspectionError) throw inspectionError
 
-      const { error: contractError } = await supabase
-        .from('contracts')
-        .update({ statut: 'terminé' })
-        .eq('id', contract.id)
+      const { error: leaseError } = await supabase
+        .from('apartment_leases')
+        .update({ 
+          status: 'terminated',
+          deposit_returned: true,
+          deposit_return_amount: parseInt(formData.depositReturned),
+          deposit_return_date: new Date().toISOString().split('T')[0],
+          deposit_return_notes: formData.hasDamages ? formData.damageDescription : 'No damages'
+        })
+        .eq('id', lease.id)
 
-      if (contractError) throw contractError
+      if (leaseError) throw leaseError
 
       toast({
         title: "Inspection terminée",
@@ -127,7 +135,7 @@ export function InspectionForm({ contract, onSuccess }: InspectionFormProps) {
               value={formData.repairCosts}
               onChange={(e) => {
                 const repairCosts = parseInt(e.target.value)
-                const depositReturned = Math.max(0, contract.montant - repairCosts)
+                const depositReturned = Math.max(0, (lease.deposit_amount || 0) - repairCosts)
                 setFormData({
                   ...formData,
                   repairCosts: e.target.value,

@@ -5,10 +5,9 @@ import {
   Receipt, 
   CreditCard, 
   ClipboardList, 
-  FileText, 
+  Clock,
   Edit, 
-  Trash2,
-  Clock
+  Trash2
 } from "lucide-react"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
@@ -23,6 +22,7 @@ interface UnitDetailsTabProps {
     current_lease?: Array<{
       id: string;
       status: string;
+      deposit_amount?: number | null;
       tenant: {
         id: string;
         first_name: string;
@@ -207,7 +207,7 @@ export function UnitDetailsTab({ unit, hasActiveLease }: UnitDetailsTabProps) {
         <InspectionDialog
           open={showInspection}
           onOpenChange={setShowInspection}
-          contract={unit.current_lease[0]}
+          lease={unit.current_lease[0]}
         />
       )}
 
