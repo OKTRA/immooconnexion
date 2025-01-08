@@ -197,6 +197,56 @@ export type Database = {
           },
         ]
       }
+      apartment_inspections: {
+        Row: {
+          created_at: string | null
+          damage_description: string | null
+          deposit_returned: number | null
+          has_damages: boolean | null
+          id: string
+          inspection_date: string
+          lease_id: string
+          photo_urls: string[] | null
+          repair_costs: number | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          damage_description?: string | null
+          deposit_returned?: number | null
+          has_damages?: boolean | null
+          id?: string
+          inspection_date?: string
+          lease_id: string
+          photo_urls?: string[] | null
+          repair_costs?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          damage_description?: string | null
+          deposit_returned?: number | null
+          has_damages?: boolean | null
+          id?: string
+          inspection_date?: string
+          lease_id?: string
+          photo_urls?: string[] | null
+          repair_costs?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_inspections_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_leases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       apartment_lease_payments: {
         Row: {
           agency_id: string

@@ -1,18 +1,23 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
 import { LeaseFormData, PaymentFrequency, DurationType, LeaseStatus } from "./types"
 
 interface LeaseFormFieldsProps {
   formData: LeaseFormData
   setFormData: (data: LeaseFormData) => void
+  onSubmit: () => void
+  isSubmitting: boolean
+  onCancel: () => void
 }
 
 export function LeaseFormFields({
   formData,
   setFormData,
+  onSubmit,
+  isSubmitting,
+  onCancel
 }: LeaseFormFieldsProps) {
   const handleDurationTypeChange = (value: DurationType) => {
     console.log('Duration type changed to:', value)
@@ -124,52 +129,13 @@ export function LeaseFormFields({
         </Select>
       </div>
 
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="depositReturned"
-            checked={formData.depositReturned}
-            onCheckedChange={(checked) => 
-              setFormData({ ...formData, depositReturned: checked as boolean })
-            }
-          />
-          <Label htmlFor="depositReturned">Caution remboursée</Label>
-        </div>
-
-        {formData.depositReturned && (
-          <>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="depositReturnDate">Date de remboursement</Label>
-                <Input
-                  id="depositReturnDate"
-                  type="date"
-                  value={formData.depositReturnDate}
-                  onChange={(e) => setFormData({ ...formData, depositReturnDate: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="depositReturnAmount">Montant remboursé</Label>
-                <Input
-                  id="depositReturnAmount"
-                  type="number"
-                  value={formData.depositReturnAmount}
-                  onChange={(e) => setFormData({ ...formData, depositReturnAmount: e.target.value })}
-                  placeholder="Montant en FCFA"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="depositReturnNotes">Notes sur le remboursement</Label>
-              <Textarea
-                id="depositReturnNotes"
-                value={formData.depositReturnNotes}
-                onChange={(e) => setFormData({ ...formData, depositReturnNotes: e.target.value })}
-                placeholder="Commentaires sur le remboursement de la caution"
-              />
-            </div>
-          </>
-        )}
+      <div className="pt-4 flex justify-end space-x-2">
+        <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
+          Annuler
+        </Button>
+        <Button onClick={onSubmit} disabled={isSubmitting}>
+          {isSubmitting ? "Chargement..." : "Enregistrer"}
+        </Button>
       </div>
     </div>
   )
