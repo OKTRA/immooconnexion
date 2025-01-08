@@ -36,10 +36,12 @@ export default function ApartmentTenants() {
   return (
     <AgencyLayout>
       <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6">Locataires d'appartements</h1>
+        <h1 className="text-2xl font-bold mb-6">Locataires</h1>
         
         <ApartmentTenantsTab
           apartmentId=""
+          tenants={tenants}
+          isLoading={isLoading}
           onDeleteTenant={async () => {}}
           onEditTenant={() => {}}
         />
