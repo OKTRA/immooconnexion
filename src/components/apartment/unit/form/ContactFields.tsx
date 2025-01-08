@@ -8,6 +8,7 @@ interface ContactFieldsProps {
     email: string
     phoneNumber: string
     secondaryPhoneNumber: string
+    birthDate: string
   }
   setFormData: (data: any) => void
 }
@@ -64,6 +65,17 @@ export function ContactFields({ formData, setFormData }: ContactFieldsProps) {
             onChange={(e) => setFormData({ ...formData, secondaryPhoneNumber: e.target.value })}
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="birthDate">Date de naissance</Label>
+        <Input
+          id="birthDate"
+          type="date"
+          value={formData.birthDate}
+          onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+          required
+        />
       </div>
     </div>
   )

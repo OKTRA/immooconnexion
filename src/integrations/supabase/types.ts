@@ -394,6 +394,7 @@ export type Database = {
           last_name: string
           phone_number: string | null
           photo_id_url: string | null
+          unit_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -406,6 +407,7 @@ export type Database = {
           last_name: string
           phone_number?: string | null
           photo_id_url?: string | null
+          unit_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -418,6 +420,7 @@ export type Database = {
           last_name?: string
           phone_number?: string | null
           photo_id_url?: string | null
+          unit_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -426,6 +429,20 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_tenants_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_apartment_tenant_unit"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_units"
             referencedColumns: ["id"]
           },
         ]

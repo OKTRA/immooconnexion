@@ -28,6 +28,7 @@ export function UnitTenantForm({
     email: "",
     phoneNumber: "",
     secondaryPhoneNumber: "",
+    birthDate: "", // Added birth date field
     rentAmount: "",
     depositAmount: "",
     startDate: "",
@@ -79,6 +80,7 @@ export function UnitTenantForm({
         }
       }
 
+      // Create tenant with unit_id
       const { data: tenant, error: tenantError } = await supabase
         .from("apartment_tenants")
         .insert({
@@ -86,8 +88,10 @@ export function UnitTenantForm({
           last_name: formData.lastName,
           email: formData.email,
           phone_number: formData.phoneNumber,
+          birth_date: formData.birthDate, // Added birth date
           photo_id_url: photoUrls.length > 0 ? photoUrls[0] : null,
           agency_id: profile.agency_id,
+          unit_id: unitId // Link tenant to unit
         })
         .select()
         .single()
