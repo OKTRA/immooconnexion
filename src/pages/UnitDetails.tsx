@@ -4,8 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { UnitTenantTab } from "@/components/apartment/unit/UnitTenantTab"
@@ -124,8 +122,11 @@ export default function UnitDetails() {
         .from('apartment_photos')
         .getPublicUrl(filePath)
 
+      // Get existing photo_urls array or initialize empty array
+      const currentPhotoUrls = unitDetails?.photo_urls || []
+      
       await updateUnit.mutateAsync({
-        photo_url: publicUrl
+        photo_urls: [...currentPhotoUrls, publicUrl]
       })
 
       toast({
@@ -247,14 +248,19 @@ export default function UnitDetails() {
                     {getStatusBadge(unitDetails?.status, hasActiveLease)}
                   </div>
                 </div>
-                {unitDetails?.photo_url && (
+                {unitDetails?.photo_urls && unitDetails.photo_urls.length > 0 && (
                   <div className="mt-4">
-                    <p className="text-sm font-medium mb-2">Photo</p>
-                    <img 
-                      src={unitDetails.photo_url} 
-                      alt="Unit" 
-                      className="rounded-lg max-w-md h-auto"
-                    />
+                    <p className="text-sm font-medium mb-2">Photos</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      {unitDetails.photo_urls.map((url, index) => (
+                        <img 
+                          key={index}
+                          src={url} 
+                          alt={`Unit ${index + 1}`} 
+                          className="rounded-lg w-full h-48 object-cover"
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
               </CardContent>

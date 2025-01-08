@@ -10,10 +10,10 @@ export interface ApartmentUnit {
   deposit_amount: number | null;
   status: ApartmentUnitStatus;
   description: string | null;
+  photo_urls?: string[];
   minimum_stay?: number | null;
   maximum_stay?: number | null;
   late_fee_percentage?: number | null;
-  photo_urls?: string[];
   created_at?: string;
   updated_at?: string;
 }
