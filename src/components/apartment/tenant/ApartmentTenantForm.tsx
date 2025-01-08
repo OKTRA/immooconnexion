@@ -1,52 +1,102 @@
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useState } from "react"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
+import { ApartmentTenant } from "@/types/apartment"
+import { useQueryClient } from "@tanstack/react-query"
 
 interface ApartmentTenantFormProps {
-  onSuccess: (data: any) => Promise<void>
-  initialData?: any
-  isSubmitting: boolean
+  apartmentId: string
+  initialData?: ApartmentTenant | null
+  onSuccess: () => void
   onCancel: () => void
 }
 
 export function ApartmentTenantForm({
-  onSuccess,
+  apartmentId,
   initialData,
-  isSubmitting,
+  onSuccess,
   onCancel
 }: ApartmentTenantFormProps) {
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
-    firstName: initialData?.first_name || "",
-    lastName: initialData?.last_name || "",
+    first_name: initialData?.first_name || "",
+    last_name: initialData?.last_name || "",
     email: initialData?.email || "",
-    phoneNumber: initialData?.phone_number || "",
-    birthDate: initialData?.birth_date || "",
+    phone_number: initialData?.phone_number || "",
+    birth_date: initialData?.birth_date || "",
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await onSuccess(formData)
+    setIsSubmitting(true)
+
+    try {
+      if (initialData) {
+        const { error } = await supabase
+          .from("apartment_tenants")
+          .update({
+            ...formData,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", initialData.id)
+
+        if (error) throw error
+      } else {
+        const { error } = await supabase
+          .from("apartment_tenants")
+          .insert([
+            {
+              ...formData,
+              apartment_id: apartmentId,
+            },
+          ])
+
+        if (error) throw error
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["apartment-tenants"] })
+      toast({
+        title: initialData ? "Locataire modifié" : "Locataire ajouté",
+        description: "L'opération a été effectuée avec succès.",
+      })
+      onSuccess()
+    } catch (error: any) {
+      console.error("Error:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue. Veuillez réessayer.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="firstName">Prénom</Label>
+        <Label htmlFor="first_name">Prénom</Label>
         <Input
-          id="firstName"
-          value={formData.firstName}
-          onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+          id="first_name"
+          value={formData.first_name}
+          onChange={(e) =>
+            setFormData({ ...formData, first_name: e.target.value })
+          }
           required
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="lastName">Nom</Label>
+        <Label htmlFor="last_name">Nom</Label>
         <Input
-          id="lastName"
-          value={formData.lastName}
-          onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+          id="last_name"
+          value={formData.last_name}
+          onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
           required
         />
       </div>
@@ -62,26 +112,29 @@ export function ApartmentTenantForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="phoneNumber">Téléphone</Label>
+        <Label htmlFor="phone_number">Téléphone</Label>
         <Input
-          id="phoneNumber"
-          type="tel"
-          value={formData.phoneNumber}
-          onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+          id="phone_number"
+          value={formData.phone_number}
+          onChange={(e) =>
+            setFormData({ ...formData, phone_number: e.target.value })
+          }
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="birthDate">Date de naissance</Label>
+        <Label htmlFor="birth_date">Date de naissance</Label>
         <Input
-          id="birthDate"
+          id="birth_date"
           type="date"
-          value={formData.birthDate}
-          onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+          value={formData.birth_date}
+          onChange={(e) =>
+            setFormData({ ...formData, birth_date: e.target.value })
+          }
         />
       </div>
 
-      <div className="flex justify-end gap-2 mt-6">
+      <div className="flex justify-end gap-2">
         <Button
           type="button"
           variant="outline"
@@ -91,7 +144,11 @@ export function ApartmentTenantForm({
           Annuler
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {initialData ? "Modifier" : "Ajouter"}
+          {isSubmitting
+            ? "Chargement..."
+            : initialData
+            ? "Modifier"
+            : "Ajouter"}
         </Button>
       </div>
     </form>

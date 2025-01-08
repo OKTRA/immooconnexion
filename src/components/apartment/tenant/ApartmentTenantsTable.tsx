@@ -7,21 +7,39 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Edit, Trash } from "lucide-react"
+import { Edit, Trash2, Receipt, CreditCard } from "lucide-react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
+import { ApartmentTenant } from "@/types/apartment"
+import { useNavigate } from "react-router-dom"
 
 interface ApartmentTenantsTableProps {
-  tenants: any[]
-  onEdit: (tenant: any) => void
-  onDelete: (id: string) => void
+  apartmentId: string
+  onEdit: (tenant: ApartmentTenant) => void
+  onDelete: (id: string) => Promise<void>
 }
 
 export function ApartmentTenantsTable({
-  tenants,
+  apartmentId,
   onEdit,
   onDelete,
 }: ApartmentTenantsTableProps) {
+  const navigate = useNavigate()
+  const { data: tenants = [] } = useQuery({
+    queryKey: ["apartment-tenants", apartmentId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("apartment_tenants")
+        .select("*")
+        .eq("apartment_id", apartmentId)
+
+      if (error) throw error
+      return data as ApartmentTenant[]
+    },
+  })
+
   return (
     <Table>
       <TableHeader>
@@ -58,9 +76,23 @@ export function ApartmentTenantsTable({
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={() => navigate(`/agence/appartements/locataires/${tenant.id}/recu`)}
+                >
+                  <Receipt className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate(`/agence/appartements/locataires/${tenant.id}/paiements`)}
+                >
+                  <CreditCard className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => onDelete(tenant.id)}
                 >
-                  <Trash className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
             </TableCell>
