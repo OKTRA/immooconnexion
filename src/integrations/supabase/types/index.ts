@@ -1,8 +1,8 @@
+export * from './administrators';
 export * from './contracts';
 export * from './profiles';
 export * from './properties';
 export * from './tenants';
-export * from './administrators';
 
 export type Json =
   | string
@@ -12,7 +12,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
       administrators: {
@@ -67,7 +67,7 @@ export type Database = {
       [_ in never]: never;
     };
   };
-};
+}
 
 export type Tables<
   PublicTableNameOrOptions extends
@@ -135,4 +135,3 @@ export type TablesUpdate<
     ? U
     : never
   : never;
-

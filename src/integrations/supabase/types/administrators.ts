@@ -1,26 +1,10 @@
-export type Administrator = {
+export interface Administrator {
   id: string;
-  full_name: string;
-  phone_number: string | null;
   is_super_admin: boolean | null;
-  created_at: string;
-  updated_at: string;
-};
+  created_at: string | null;
+  updated_at: string | null;
+  agency_id: string | null;
+}
 
-export type AdministratorInsert = {
-  id: string;
-  full_name: string;
-  phone_number?: string | null;
-  is_super_admin?: boolean | null;
-  created_at?: string;
-  updated_at?: string;
-};
-
-export type AdministratorUpdate = {
-  id?: string;
-  full_name?: string;
-  phone_number?: string | null;
-  is_super_admin?: boolean | null;
-  created_at?: string;
-  updated_at?: string;
-};
+export type AdministratorInsert = Partial<Administrator>;
+export type AdministratorUpdate = Partial<Administrator>;

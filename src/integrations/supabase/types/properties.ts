@@ -1,4 +1,4 @@
-export type Property = {
+export interface Property {
   id: string;
   bien: string;
   type: string;
@@ -27,38 +27,9 @@ export type Property = {
   total_units: number;
   owner_name?: string | null;
   owner_phone?: string | null;
-};
+  country?: string | null;
+  quartier?: string | null;
+}
 
-export type PropertyInsert = {
-  id?: string;
-  bien: string;
-  type: string;
-  chambres?: number | null;
-  ville?: string | null;
-  loyer?: number | null;
-  frais_agence?: number | null;
-  taux_commission?: number | null;
-  caution?: number | null;
-  photo_url?: string | null;
-  statut?: string | null;
-  user_id?: string | null;
-  created_at?: string;
-  updated_at?: string;
-};
-
-export type PropertyUpdate = {
-  id?: string;
-  bien?: string;
-  type?: string;
-  chambres?: number | null;
-  ville?: string | null;
-  loyer?: number | null;
-  frais_agence?: number | null;
-  taux_commission?: number | null;
-  caution?: number | null;
-  photo_url?: string | null;
-  statut?: string | null;
-  user_id?: string | null;
-  created_at?: string;
-  updated_at?: string;
-};
+export type PropertyInsert = Partial<Property>;
+export type PropertyUpdate = Partial<Property>;
