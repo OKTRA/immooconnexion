@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { LeaseFormData } from "./types"
+import { addMonths, addYears, parseISO } from "date-fns"
 
 export function useLease(unitId: string, tenantId?: string) {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -37,13 +38,23 @@ export function useLease(unitId: string, tenantId?: string) {
         throw new Error("Aucune agence associée à ce profil")
       }
 
+      // Calculer la date de fin en fonction du type de durée
+      let endDate = formData.endDate
+      const startDateObj = parseISO(formData.startDate)
+
+      if (formData.durationType === "month_to_month") {
+        endDate = addMonths(startDateObj, 1).toISOString().split('T')[0]
+      } else if (formData.durationType === "yearly") {
+        endDate = addYears(startDateObj, 1).toISOString().split('T')[0]
+      }
+
       const { error } = await supabase
         .from('apartment_leases')
         .insert([{
           tenant_id: tenantId,
           unit_id: unitId,
           start_date: formData.startDate,
-          end_date: formData.endDate,
+          end_date: endDate,
           rent_amount: parseInt(formData.rentAmount),
           deposit_amount: parseInt(formData.depositAmount),
           payment_frequency: formData.paymentFrequency,
