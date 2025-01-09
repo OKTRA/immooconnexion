@@ -28,6 +28,15 @@ export interface ApartmentTenant {
   updated_at?: string;
 }
 
+export interface ApartmentTenantDisplay extends ApartmentTenant {
+  apartment_unit?: {
+    unit_number: string;
+    apartment?: {
+      name: string;
+    };
+  };
+}
+
 export interface Apartment {
   id: string;
   name: string;
@@ -37,13 +46,4 @@ export interface Apartment {
   agency_id: string;
   created_at?: string;
   updated_at?: string;
-}
-
-export interface ApartmentTenantDisplay extends ApartmentTenant {
-  apartment?: {
-    name: string;
-  };
-  apartment_unit?: {
-    unit_number: string;
-  };
 }
