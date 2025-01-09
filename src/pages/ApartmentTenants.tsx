@@ -1,7 +1,11 @@
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { ApartmentTenantsTab } from "@/components/apartment/tabs/ApartmentTenantsTab"
+import { Card, CardContent } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
+import { Loader2 } from "lucide-react"
 
 export default function ApartmentTenants() {
   const { data: tenants = [], isLoading } = useQuery({
@@ -25,7 +29,7 @@ export default function ApartmentTenants() {
 
       const { data, error } = await supabase
         .from("apartment_tenants")
-        .select("*")
+        .select("*, apartment_units(unit_number, apartment:apartments(name))")
         .eq("agency_id", userProfile.agency_id)
 
       if (error) throw error
@@ -33,18 +37,65 @@ export default function ApartmentTenants() {
     }
   })
 
+  if (isLoading) {
+    return (
+      <AgencyLayout>
+        <div className="flex justify-center items-center min-h-screen">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </AgencyLayout>
+    )
+  }
+
   return (
     <AgencyLayout>
       <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6">Locataires</h1>
+        <h1 className="text-2xl font-bold mb-6">Locataires des appartements</h1>
         
-        <ApartmentTenantsTab
-          apartmentId=""
-          tenants={tenants}
-          isLoading={isLoading}
-          onDeleteTenant={async () => {}}
-          onEditTenant={() => {}}
-        />
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nom</TableHead>
+                  <TableHead>Prénom</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Téléphone</TableHead>
+                  <TableHead>Appartement</TableHead>
+                  <TableHead>Unité</TableHead>
+                  <TableHead>Date d'inscription</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {tenants.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-4">
+                      Aucun locataire trouvé
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  tenants.map((tenant) => (
+                    <TableRow key={tenant.id}>
+                      <TableCell>{tenant.last_name}</TableCell>
+                      <TableCell>{tenant.first_name}</TableCell>
+                      <TableCell>{tenant.email || "-"}</TableCell>
+                      <TableCell>{tenant.phone_number || "-"}</TableCell>
+                      <TableCell>{tenant.apartment_units?.apartment?.name || "-"}</TableCell>
+                      <TableCell>{tenant.apartment_units?.unit_number || "-"}</TableCell>
+                      <TableCell>
+                        {tenant.created_at ? (
+                          format(new Date(tenant.created_at), "PP", { locale: fr })
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
     </AgencyLayout>
   )

@@ -24,8 +24,7 @@ import Apartments from "@/pages/Apartments"
 import ApartmentDetails from "@/pages/ApartmentDetails"
 import ApartmentUnits from "@/pages/ApartmentUnits"
 import UnitDetails from "@/pages/UnitDetails"
-
-import "./App.css"
+import ApartmentTenants from "@/pages/ApartmentTenants"
 
 const queryClient = new QueryClient()
 
@@ -59,9 +58,7 @@ export default function App() {
                 <Route path="apartments/:id" element={<ApartmentDetails />} />
                 <Route path="apartments/:id/units" element={<ApartmentUnits />} />
                 <Route path="unite/:id" element={<UnitDetails />} />
-                <Route path="appartements" element={<Navigate to="/agence/apartments" replace />} />
-                <Route path="appartements/:id" element={<Navigate to="/agence/apartments/:id" replace />} />
-                <Route path="appartements/:id/unites" element={<Navigate to="/agence/apartments/:id/units" replace />} />
+                <Route path="apartment-tenants" element={<ApartmentTenants />} />
               </Route>
             </Routes>
           </Router>
