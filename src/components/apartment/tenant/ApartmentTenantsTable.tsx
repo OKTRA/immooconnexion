@@ -83,8 +83,8 @@ export function ApartmentTenantsTable({
             <TableCell>{tenant.first_name}</TableCell>
             <TableCell>{tenant.email || "-"}</TableCell>
             <TableCell>{tenant.phone_number || "-"}</TableCell>
-            <TableCell>{tenant.apartment_unit?.apartment?.name || "-"}</TableCell>
-            <TableCell>{tenant.apartment_unit?.unit_number || "-"}</TableCell>
+            <TableCell>{tenant.apartment_units?.apartment?.name || "-"}</TableCell>
+            <TableCell>{tenant.apartment_units?.unit_number || "-"}</TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
                 <Button
