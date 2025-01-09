@@ -17,14 +17,7 @@ export interface Property {
   created_by_user_id?: string;
   parent_property_id?: string;
   rental_type?: string;
-  property_category: string;
-  is_for_sale?: boolean;
-  sale_price?: number;
-  minimum_stay?: number;
-  maximum_stay?: number;
-  price_per_night?: number;
-  price_per_week?: number;
-  total_units?: number;
+  property_category: 'house' | 'apartment';
   owner_name?: string;
   owner_phone?: string;
   country?: string;
@@ -39,7 +32,7 @@ export interface PropertyUnit {
   area?: number | null;
   rent_amount: number;
   deposit_amount?: number | null;
-  status: string;
+  status: 'available' | 'occupied' | 'maintenance' | 'reserved';
   description?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -51,6 +44,6 @@ export interface PropertyUnitFormData {
   area?: number | null;
   rent_amount: number;
   deposit_amount?: number | null;
-  status: string;
+  status: 'available' | 'occupied' | 'maintenance' | 'reserved';
   description?: string | null;
 }

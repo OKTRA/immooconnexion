@@ -24,6 +24,7 @@ export interface ApartmentUnit {
   description?: string | null;
   created_at?: string;
   updated_at?: string;
+  photo_urls?: string[];
 }
 
 export interface ApartmentUnitFormData {
@@ -80,6 +81,7 @@ export interface TenantReceiptProps {
   tenant: TenantReceiptData;
   isEndReceipt?: boolean;
   isInitialReceipt?: boolean;
+  contractId?: string;
   lease?: {
     rent_amount: number;
     deposit_amount: number;
