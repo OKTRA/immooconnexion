@@ -71,10 +71,10 @@ export function useUnitForm(
         id: initialData?.id || crypto.randomUUID(),
         apartment_id: apartmentId,
         unit_number: formData.unit_number,
-        floor_number: parseInt(formData.floor_number) || null,
-        area: parseFloat(formData.area) || null,
+        floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
+        area: formData.area ? parseFloat(formData.area) : null,
         rent_amount: parseInt(formData.rent_amount),
-        deposit_amount: parseInt(formData.deposit_amount) || null,
+        deposit_amount: formData.deposit_amount ? parseInt(formData.deposit_amount) : null,
         status: formData.status,
         description: formData.description || null,
       }
