@@ -21,12 +21,12 @@ interface TenantsDialogProps {
 export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps) {
   const [showReceipt, setShowReceipt] = useState(false);
   const [formData, setFormData] = useState({
-    nom: tenant?.nom || "",
-    prenom: tenant?.prenom || "",
-    dateNaissance: tenant?.birth_date || "",
-    telephone: tenant?.phone_number || "",
+    first_name: tenant?.first_name || "",
+    last_name: tenant?.last_name || "",
+    birth_date: tenant?.birth_date || "",
+    phone_number: tenant?.phone_number || "",
     photoId: null as File | null,
-    fraisAgence: tenant?.agency_fees?.toString() || "",
+    agency_fees: tenant?.agency_fees?.toString() || "",
     propertyId: "",
     profession: tenant?.profession || "",
   });
@@ -56,12 +56,12 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
             <div className="space-y-4">
               <TenantReceipt 
                 tenant={{
-                  nom: formData.nom,
-                  prenom: formData.prenom,
-                  telephone: formData.telephone,
-                  fraisAgence: formData.fraisAgence,
-                  propertyId: formData.propertyId,
+                  first_name: formData.first_name,
+                  last_name: formData.last_name,
+                  phone_number: formData.phone_number,
+                  agency_fees: parseFloat(formData.agency_fees),
                   profession: formData.profession,
+                  property_id: formData.propertyId,
                 }}
               />
               <div className="flex justify-end">

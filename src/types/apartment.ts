@@ -10,8 +10,8 @@ export interface ApartmentUnit {
   deposit_amount: number | null;
   status: ApartmentUnitStatus;
   description: string | null;
-  created_at?: string;
-  updated_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ApartmentTenant {
