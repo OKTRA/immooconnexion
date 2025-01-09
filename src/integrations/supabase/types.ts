@@ -394,10 +394,20 @@ export type Database = {
       }
       apartment_tenants: {
         Row: {
+          additional_notes: string | null
+          agency_fees: number | null
           agency_id: string
+          bank_account_number: string | null
+          bank_name: string | null
           birth_date: string | null
           created_at: string | null
           email: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          emergency_contact_relationship: string | null
+          employer_address: string | null
+          employer_name: string | null
+          employer_phone: string | null
           first_name: string
           id: string
           last_name: string
@@ -407,10 +417,20 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          additional_notes?: string | null
+          agency_fees?: number | null
           agency_id: string
+          bank_account_number?: string | null
+          bank_name?: string | null
           birth_date?: string | null
           created_at?: string | null
           email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
+          employer_address?: string | null
+          employer_name?: string | null
+          employer_phone?: string | null
           first_name: string
           id?: string
           last_name: string
@@ -420,10 +440,20 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          additional_notes?: string | null
+          agency_fees?: number | null
           agency_id?: string
+          bank_account_number?: string | null
+          bank_name?: string | null
           birth_date?: string | null
           created_at?: string | null
           email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
+          employer_address?: string | null
+          employer_name?: string | null
+          employer_phone?: string | null
           first_name?: string
           id?: string
           last_name?: string

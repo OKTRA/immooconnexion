@@ -6,10 +6,11 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { Loader2 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
+import { ApartmentTenant } from "@/types/apartment"
 
 interface ApartmentTenantFormProps {
   apartmentId: string
-  initialData?: any
+  initialData?: ApartmentTenant | null
   onSuccess: () => void
   onCancel: () => void
 }
