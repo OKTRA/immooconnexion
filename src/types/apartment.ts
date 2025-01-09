@@ -1,5 +1,16 @@
 export type ApartmentUnitStatus = "available" | "occupied" | "maintenance";
 
+export interface Apartment {
+  id: string;
+  agency_id: string;
+  name: string;
+  address?: string;
+  total_units: number;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface ApartmentUnit {
   id: string;
   apartment_id: string;
@@ -14,43 +25,14 @@ export interface ApartmentUnit {
   updated_at?: string;
 }
 
-export interface ApartmentTenant {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string | null;
-  phone_number: string | null;
-  birth_date: string | null;
-  photo_id_url: string | null;
-  agency_id: string;
-  unit_id: string | null;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface ApartmentLease {
-  id: string;
-  tenant_id: string;
-  unit_id: string;
-  start_date: string;
-  end_date: string | null;
+export interface ApartmentUnitFormData {
+  unit_number: string;
+  floor_number: number;
+  area: number;
   rent_amount: number;
   deposit_amount: number;
-  payment_frequency: string;
-  duration_type: string;
-  status: string;
-  agency_id: string;
-  payment_type: "upfront" | "end_of_period";
-  initial_fees_paid: boolean;
+  status: ApartmentUnitStatus;
+  description: string;
 }
 
-export interface ApartmentPayment {
-  id: string;
-  lease_id: string;
-  amount: number;
-  due_date: string;
-  payment_date: string | null;
-  status: string;
-  payment_method: string;
-  agency_id: string;
-}
+export type PaymentType = "upfront" | "end_of_period";
