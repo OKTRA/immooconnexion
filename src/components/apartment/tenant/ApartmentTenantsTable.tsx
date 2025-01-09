@@ -5,18 +5,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Receipt, CreditCard } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { ApartmentTenantDisplay } from "@/types/apartment";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+} from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Edit, Trash2, Receipt, CreditCard } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
 interface ApartmentTenantsTableProps {
-  apartmentId: string;
-  onEdit: (tenant: ApartmentTenantDisplay) => void;
-  onDelete: (id: string) => Promise<void>;
+  apartmentId: string
+  onEdit: (tenant: any) => void
+  onDelete: (id: string) => Promise<void>
 }
 
 export function ApartmentTenantsTable({
@@ -24,25 +23,25 @@ export function ApartmentTenantsTable({
   onEdit,
   onDelete,
 }: ApartmentTenantsTableProps) {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   
-  const { data: tenantsList = [] } = useQuery({
+  const { data: tenantsList = [], isLoading } = useQuery({
     queryKey: ["apartment-tenants", apartmentId],
     queryFn: async () => {
-      const { data: profile } = await supabase.auth.getUser();
+      const { data: profile } = await supabase.auth.getUser()
       
       if (!profile.user) {
-        throw new Error("Non authentifié");
+        throw new Error("Non authentifié")
       }
 
       const { data: userProfile } = await supabase
         .from("profiles")
         .select("agency_id")
         .eq("id", profile.user.id)
-        .single();
+        .single()
 
       if (!userProfile?.agency_id) {
-        throw new Error("Aucune agence associée");
+        throw new Error("Aucune agence associée")
       }
 
       const { data, error } = await supabase
@@ -51,17 +50,21 @@ export function ApartmentTenantsTable({
           *,
           apartment_units!apartment_tenants_unit_id_fkey (
             unit_number,
-            apartment:apartments!inner (
+            apartment:apartments (
               name
             )
           )
         `)
-        .eq("agency_id", userProfile.agency_id);
+        .eq("agency_id", userProfile.agency_id)
 
-      if (error) throw error;
-      return data || [];
+      if (error) throw error
+      return data || []
     }
-  });
+  })
+
+  if (isLoading) {
+    return <div>Chargement...</div>
+  }
 
   return (
     <Table>
@@ -121,5 +124,5 @@ export function ApartmentTenantsTable({
         ))}
       </TableBody>
     </Table>
-  );
+  )
 }
