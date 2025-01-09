@@ -10,6 +10,11 @@ import Register from "@/pages/Register"
 import Dashboard from "@/pages/Dashboard"
 import Properties from "@/pages/Properties"
 import Tenants from "@/pages/Tenants"
+import Contracts from "@/pages/Contracts"
+import Payments from "@/pages/Payments"
+import Settings from "@/pages/Settings"
+import Profile from "@/pages/Profile"
+import Subscription from "@/pages/Subscription"
 import Apartments from "@/pages/Apartments"
 import ApartmentDetails from "@/pages/ApartmentDetails"
 import ApartmentTenants from "@/pages/ApartmentTenants"
@@ -47,6 +52,46 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Tenants />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/agence/contrats"
+                element={
+                  <ProtectedRoute>
+                    <Contracts />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/agence/paiements"
+                element={
+                  <ProtectedRoute>
+                    <Payments />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/agence/parametres"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/agence/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/agence/abonnement"
+                element={
+                  <ProtectedRoute>
+                    <Subscription />
                   </ProtectedRoute>
                 }
               />

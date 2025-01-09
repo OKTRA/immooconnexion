@@ -7,7 +7,7 @@ import { fr } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
 import { Loader2, Edit, CreditCard, FileText } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/components/ui/use-toast"
 
 interface ApartmentTenant {
   id: string
@@ -47,7 +47,7 @@ export default function ApartmentTenants() {
   })
 
   const { data: tenants = [], isLoading } = useQuery({
-    queryKey: ["apartment-tenants", userProfile?.agency_id],
+    queryKey: ["apartment-tenants"],
     queryFn: async () => {
       if (!userProfile?.agency_id) return []
 
@@ -55,9 +55,11 @@ export default function ApartmentTenants() {
         .from("apartment_tenants")
         .select(`
           *,
-          apartment_units!apartment_tenants_unit_id_fkey (
+          apartment_units!inner (
             unit_number,
-            apartment:apartments(name)
+            apartment:apartments(
+              name
+            )
           )
         `)
         .eq("agency_id", userProfile.agency_id)
@@ -67,6 +69,29 @@ export default function ApartmentTenants() {
     },
     enabled: !!userProfile?.agency_id
   })
+
+  const handleDelete = async (tenantId: string) => {
+    try {
+      const { error } = await supabase
+        .from("apartment_tenants")
+        .delete()
+        .eq("id", tenantId)
+
+      if (error) throw error
+
+      toast({
+        title: "Succès",
+        description: "Le locataire a été supprimé avec succès",
+      })
+    } catch (error) {
+      console.error("Error deleting tenant:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suppression",
+        variant: "destructive",
+      })
+    }
+  }
 
   if (isLoading) {
     return (
@@ -110,9 +135,9 @@ export default function ApartmentTenants() {
                     <TableCell>{tenant.email || "-"}</TableCell>
                     <TableCell>{tenant.phone_number || "-"}</TableCell>
                     <TableCell>
-                      {tenant.apartment_units?.apartment?.name || "-"}
+                      {tenant.apartment_units.apartment.name || "-"}
                     </TableCell>
-                    <TableCell>{tenant.apartment_units?.unit_number || "-"}</TableCell>
+                    <TableCell>{tenant.apartment_units.unit_number}</TableCell>
                     <TableCell>
                       {tenant.birth_date
                         ? format(new Date(tenant.birth_date), "PP", { locale: fr })

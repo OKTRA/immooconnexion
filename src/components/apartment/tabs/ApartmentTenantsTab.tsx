@@ -1,25 +1,24 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
 import { ApartmentTenantsTable } from "../tenant/ApartmentTenantsTable"
 import { ApartmentTenantDialog } from "../tenant/ApartmentTenantDialog"
-import { ApartmentTenant, ApartmentTenantsTabProps } from "@/types/apartment"
+import { Card, CardContent } from "@/components/ui/card"
+import { ApartmentTenant } from "@/types/apartment"
+
+interface ApartmentTenantsTabProps {
+  apartmentId: string
+  onDeleteTenant: (id: string) => Promise<void>
+  onEditTenant: (tenant: ApartmentTenant) => void
+}
 
 export function ApartmentTenantsTab({
   apartmentId,
-  isLoading,
   onDeleteTenant,
   onEditTenant
 }: ApartmentTenantsTabProps) {
   const [showDialog, setShowDialog] = useState(false)
   const [selectedTenant, setSelectedTenant] = useState<ApartmentTenant | null>(null)
-
-  const handleEdit = (tenant: ApartmentTenant) => {
-    setSelectedTenant(tenant)
-    setShowDialog(true)
-    onEditTenant(tenant)
-  }
 
   return (
     <div className="space-y-4">
@@ -35,8 +34,11 @@ export function ApartmentTenantsTab({
         <CardContent className="p-0">
           <ApartmentTenantsTable
             apartmentId={apartmentId}
-            isLoading={isLoading}
-            onEdit={handleEdit}
+            onEdit={(tenant) => {
+              setSelectedTenant(tenant)
+              setShowDialog(true)
+              onEditTenant(tenant)
+            }}
             onDelete={onDeleteTenant}
           />
         </CardContent>
