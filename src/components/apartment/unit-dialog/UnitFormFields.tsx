@@ -18,11 +18,6 @@ export function UnitFormFields({
   handleImageChange,
   imagePreviewUrls = [],
 }: UnitFormFieldsProps) {
-  const handleNumberInput = (value: string, field: keyof ApartmentUnitFormData) => {
-    const numberValue = value === '' ? 0 : Number(value)
-    setFormData({ ...formData, [field]: numberValue })
-  }
-
   return (
     <ScrollArea className="h-[calc(100vh-300px)] pr-4">
       <div className="space-y-4">
@@ -42,8 +37,10 @@ export function UnitFormFields({
           <Input
             id="floor_number"
             type="number"
-            value={formData.floor_number || ''}
-            onChange={(e) => handleNumberInput(e.target.value, 'floor_number')}
+            value={formData.floor_number}
+            onChange={(e) =>
+              setFormData({ ...formData, floor_number: e.target.value })
+            }
           />
         </div>
 
@@ -52,8 +49,8 @@ export function UnitFormFields({
           <Input
             id="area"
             type="number"
-            value={formData.area || ''}
-            onChange={(e) => handleNumberInput(e.target.value, 'area')}
+            value={formData.area}
+            onChange={(e) => setFormData({ ...formData, area: e.target.value })}
           />
         </div>
 
@@ -62,8 +59,10 @@ export function UnitFormFields({
           <Input
             id="rent_amount"
             type="number"
-            value={formData.rent_amount || ''}
-            onChange={(e) => handleNumberInput(e.target.value, 'rent_amount')}
+            value={formData.rent_amount}
+            onChange={(e) =>
+              setFormData({ ...formData, rent_amount: e.target.value })
+            }
           />
         </div>
 
@@ -72,8 +71,10 @@ export function UnitFormFields({
           <Input
             id="deposit_amount"
             type="number"
-            value={formData.deposit_amount || ''}
-            onChange={(e) => handleNumberInput(e.target.value, 'deposit_amount')}
+            value={formData.deposit_amount}
+            onChange={(e) =>
+              setFormData({ ...formData, deposit_amount: e.target.value })
+            }
           />
         </div>
 
@@ -92,7 +93,6 @@ export function UnitFormFields({
               <SelectItem value="available">Disponible</SelectItem>
               <SelectItem value="occupied">Occupé</SelectItem>
               <SelectItem value="maintenance">En maintenance</SelectItem>
-              <SelectItem value="reserved">Réservé</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -101,7 +101,7 @@ export function UnitFormFields({
           <Label htmlFor="description">Description</Label>
           <Textarea
             id="description"
-            value={formData.description || ''}
+            value={formData.description}
             onChange={(e) =>
               setFormData({ ...formData, description: e.target.value })
             }
