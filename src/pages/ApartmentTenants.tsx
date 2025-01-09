@@ -1,13 +1,22 @@
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Plus, Search } from "lucide-react"
+import { useState } from "react"
+import { Input } from "@/components/ui/input"
+import { ApartmentTenantsTable } from "@/components/apartment/tenant/ApartmentTenantsTable"
+import { ApartmentTenantDialog } from "@/components/apartment/tenant/ApartmentTenantDialog"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Card, CardContent } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
+import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 
 export default function ApartmentTenants() {
+  const [open, setOpen] = useState(false)
+  const [selectedTenant, setSelectedTenant] = useState<any>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const { toast } = useToast()
+
   const { data: tenants = [], isLoading } = useQuery({
     queryKey: ["apartment-tenants"],
     queryFn: async () => {
@@ -29,12 +38,60 @@ export default function ApartmentTenants() {
 
       const { data, error } = await supabase
         .from("apartment_tenants")
-        .select("*, apartment_units(unit_number, apartment:apartments(name))")
+        .select(`
+          *,
+          apartment_units(
+            unit_number,
+            apartment:apartments(
+              name
+            )
+          )
+        `)
         .eq("agency_id", userProfile.agency_id)
 
       if (error) throw error
       return data
     }
+  })
+
+  const handleEdit = (tenant: any) => {
+    setSelectedTenant(tenant)
+    setOpen(true)
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("apartment_tenants")
+        .delete()
+        .eq("id", id)
+
+      if (error) throw error
+
+      toast({
+        title: "Succès",
+        description: "Le locataire a été supprimé avec succès",
+      })
+    } catch (error) {
+      console.error("Error:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suppression",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const filteredTenants = tenants.filter((tenant) => {
+    const searchLower = searchQuery.toLowerCase()
+    return (
+      tenant.first_name?.toLowerCase().includes(searchLower) ||
+      tenant.last_name?.toLowerCase().includes(searchLower) ||
+      tenant.email?.toLowerCase().includes(searchLower) ||
+      tenant.phone_number?.toLowerCase().includes(searchLower) ||
+      tenant.apartment_units?.apartment?.name?.toLowerCase().includes(searchLower) ||
+      tenant.apartment_units?.unit_number?.toLowerCase().includes(searchLower)
+    )
   })
 
   if (isLoading) {
@@ -50,52 +107,51 @@ export default function ApartmentTenants() {
   return (
     <AgencyLayout>
       <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6">Locataires des appartements</h1>
-        
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Prénom</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Téléphone</TableHead>
-                  <TableHead>Appartement</TableHead>
-                  <TableHead>Unité</TableHead>
-                  <TableHead>Date d'inscription</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tenants.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-4">
-                      Aucun locataire trouvé
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  tenants.map((tenant) => (
-                    <TableRow key={tenant.id}>
-                      <TableCell>{tenant.last_name}</TableCell>
-                      <TableCell>{tenant.first_name}</TableCell>
-                      <TableCell>{tenant.email || "-"}</TableCell>
-                      <TableCell>{tenant.phone_number || "-"}</TableCell>
-                      <TableCell>{tenant.apartment_units?.apartment?.name || "-"}</TableCell>
-                      <TableCell>{tenant.apartment_units?.unit_number || "-"}</TableCell>
-                      <TableCell>
-                        {tenant.created_at ? (
-                          format(new Date(tenant.created_at), "PP", { locale: fr })
-                        ) : (
-                          "-"
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Locataires des appartements</h1>
+          <Button onClick={() => {
+            setSelectedTenant(null)
+            setOpen(true)
+          }}>
+            <Plus className="h-4 w-4 mr-2" />
+            Ajouter un locataire
+          </Button>
+        </div>
+
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Rechercher</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher par nom, email, téléphone..."
+                className="pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardContent className="p-0">
+            <ApartmentTenantsTable
+              apartmentId="all"
+              tenants={filteredTenants}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          </CardContent>
+        </Card>
+
+        <ApartmentTenantDialog
+          open={open}
+          onOpenChange={setOpen}
+          apartmentId="all"
+          tenant={selectedTenant}
+        />
       </div>
     </AgencyLayout>
   )
