@@ -18,6 +18,7 @@ export interface TenantReceiptData {
   phone_number: string;
   agency_fees?: number;
   property_id?: string;
+  profession?: string;
 }
 
 export interface TenantDisplay extends TenantFormData {
