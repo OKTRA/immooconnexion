@@ -1,13 +1,15 @@
-import { ApartmentTenantReceipt } from "@/components/apartment/types"
+import { TenantReceiptData } from "@/types/tenant";
 
 export interface TenantReceiptProps {
-  tenant: ApartmentTenantReceipt['tenant'];
+  tenant: TenantReceiptData;
   isEndReceipt?: boolean;
-  lease?: ApartmentTenantReceipt['lease'];
-  contractId?: string;
+  lease?: {
+    rent_amount: number;
+    deposit_amount: number;
+  };
 }
 
-export function TenantReceipt({ tenant, isEndReceipt, lease, contractId }: TenantReceiptProps) {
+export function TenantReceipt({ tenant, isEndReceipt, lease }: TenantReceiptProps) {
   return (
     <div className="p-4 border rounded">
       <h3 className="text-lg font-semibold mb-2">
@@ -25,5 +27,5 @@ export function TenantReceipt({ tenant, isEndReceipt, lease, contractId }: Tenan
         )}
       </div>
     </div>
-  )
+  );
 }

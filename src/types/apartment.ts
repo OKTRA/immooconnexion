@@ -1,18 +1,30 @@
-export type ApartmentUnitStatus = "available" | "occupied" | "maintenance";
+export type ApartmentUnitStatus = 'available' | 'occupied' | 'maintenance' | 'reserved';
 
 export interface ApartmentUnit {
   id: string;
   apartment_id: string;
   unit_number: string;
-  floor_number: number | null;
-  area: number | null;
+  floor_number: number;
+  area: number;
   rent_amount: number;
-  deposit_amount: number | null;
+  deposit_amount: number;
   status: ApartmentUnitStatus;
-  description: string | null;
+  description: string;
   created_at: string;
   updated_at: string;
 }
+
+export interface ApartmentUnitFormData {
+  unit_number: string;
+  floor_number: number;
+  area: number;
+  rent_amount: number;
+  deposit_amount: number;
+  status: ApartmentUnitStatus;
+  description: string;
+}
+
+export type PaymentType = 'upfront' | 'monthly' | 'quarterly' | 'yearly';
 
 export interface ApartmentTenant {
   id: string;
@@ -26,34 +38,4 @@ export interface ApartmentTenant {
   unit_id: string | null;
   created_at?: string;
   updated_at?: string;
-}
-
-export interface ApartmentTenantDisplay extends ApartmentTenant {
-  apartment_units?: {
-    unit_number: string;
-    apartment?: {
-      name: string;
-    };
-  };
-}
-
-export interface Apartment {
-  id: string;
-  name: string;
-  address: string | null;
-  total_units: number;
-  description: string | null;
-  agency_id: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface ApartmentUnitFormData {
-  unit_number: string;
-  floor_number: number;
-  area: number;
-  rent_amount: number;
-  deposit_amount: number;
-  status: ApartmentUnitStatus;
-  description?: string;
 }

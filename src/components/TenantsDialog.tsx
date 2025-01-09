@@ -11,23 +11,24 @@ import { TenantCreationForm } from "./tenants/TenantCreationForm";
 import { TenantReceipt } from "./tenants/TenantReceipt";
 import { useUserProfile } from "./tenants/hooks/useUserProfile";
 import { useAvailableProperties } from "./tenants/hooks/useAvailableProperties";
+import { TenantFormData } from "@/types/tenant";
 
 interface TenantsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  tenant?: any;
+  tenant?: TenantFormData;
 }
 
 export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps) {
   const [showReceipt, setShowReceipt] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<TenantFormData>({
     first_name: tenant?.first_name || "",
     last_name: tenant?.last_name || "",
     birth_date: tenant?.birth_date || "",
     phone_number: tenant?.phone_number || "",
-    photoId: null as File | null,
-    agency_fees: tenant?.agency_fees?.toString() || "",
-    propertyId: "",
+    photo_id_url: tenant?.photo_id_url,
+    agency_fees: tenant?.agency_fees,
+    property_id: tenant?.property_id || "",
     profession: tenant?.profession || "",
   });
 
@@ -59,9 +60,9 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
                   first_name: formData.first_name,
                   last_name: formData.last_name,
                   phone_number: formData.phone_number,
-                  agency_fees: parseFloat(formData.agency_fees),
+                  agency_fees: formData.agency_fees,
+                  property_id: formData.property_id,
                   profession: formData.profession,
-                  property_id: formData.propertyId,
                 }}
               />
               <div className="flex justify-end">

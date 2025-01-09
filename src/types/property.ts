@@ -1,3 +1,30 @@
+export type PropertyUnitStatus = 'available' | 'occupied' | 'maintenance' | 'reserved';
+
+export interface PropertyUnit {
+  id: string;
+  property_id: string;
+  unit_number: string;
+  floor_number: number;
+  area: number;
+  rent_amount: number;
+  deposit_amount?: number;
+  status: PropertyUnitStatus;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PropertyUnitFormData {
+  id?: string;
+  unit_number: string;
+  floor_number: number;
+  area: number;
+  rent_amount: number;
+  deposit_amount?: number;
+  status: PropertyUnitStatus;
+  description?: string;
+}
+
 export interface Property {
   id: string;
   bien: string;
@@ -17,7 +44,7 @@ export interface Property {
   created_by_user_id?: string;
   parent_property_id?: string;
   rental_type?: string;
-  property_category: "house" | "apartment";
+  property_category: 'house' | 'apartment';
   is_for_sale?: boolean;
   sale_price?: number;
   minimum_stay?: number;
@@ -29,46 +56,4 @@ export interface Property {
   owner_phone?: string;
   country?: string;
   quartier?: string;
-}
-
-export interface PropertyUnit {
-  id: string;
-  property_id: string;
-  unit_number: string;
-  floor_number?: number;
-  area?: number;
-  rent_amount: number;
-  deposit_amount?: number;
-  status: PropertyUnitStatus;
-  description?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export type PropertyUnitStatus = 'available' | 'occupied' | 'maintenance';
-
-export interface PropertyUnitFormData {
-  unit_number: string;
-  floor_number: string;
-  area: string;
-  rent_amount: string;
-  deposit_amount: string;
-  status: PropertyUnitStatus;
-  description: string;
-}
-
-export interface PropertyFormData {
-  bien: string;
-  type: string;
-  chambres: string;
-  ville: string;
-  loyer: string;
-  taux_commission: string;
-  caution: string;
-  frais_agence: string;
-  property_category: "house" | "apartment";
-  owner_name: string;
-  owner_phone: string;
-  country: string;
-  quartier: string;
 }
