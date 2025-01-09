@@ -11,14 +11,13 @@ export function useLease(unitId: string, tenantId?: string) {
     endDate: "",
     rentAmount: "",
     depositAmount: "",
-    paymentFrequency: "monthly",
-    durationType: "fixed",
-    status: "active",
-    depositReturned: false,
-    depositReturnAmount: "",
-    depositReturnDate: "",
-    depositReturnNotes: "",
-    paymentType: "upfront"
+    paymentFrequency: "monthly" as PaymentFrequency,
+    durationType: "fixed" as DurationType,
+    status: "active" as LeaseStatus,
+    paymentType: "upfront" as PaymentType,
+    tenant_id: tenantId || "",
+    unit_id: unitId,
+    initial_fees_paid: false
   })
 
   const handleSubmit = async () => {
@@ -52,10 +51,6 @@ export function useLease(unitId: string, tenantId?: string) {
           payment_frequency: formData.paymentFrequency,
           duration_type: formData.durationType,
           status: formData.status,
-          deposit_returned: formData.depositReturned,
-          deposit_return_date: formData.depositReturnDate || null,
-          deposit_return_amount: formData.depositReturnAmount ? parseInt(formData.depositReturnAmount) : null,
-          deposit_return_notes: formData.depositReturnNotes || null,
           agency_id: profile.agency_id,
           payment_type: formData.paymentType,
           initial_fees_paid: false

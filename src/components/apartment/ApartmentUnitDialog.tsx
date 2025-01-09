@@ -1,8 +1,7 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Button } from "@/components/ui/button"
-import { useUnitForm } from "./unit-dialog/useUnitForm"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { DialogHeader } from "../form/DialogHeader"
 import { UnitFormFields } from "./unit-dialog/UnitFormFields"
+import { useUnitForm } from "./unit-dialog/useUnitForm"
 import { ApartmentUnit } from "@/types/apartment"
 
 interface ApartmentUnitDialogProps {
@@ -48,30 +47,16 @@ export function ApartmentUnitDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {isEditing ? "Modifier l'unité" : "Ajouter une nouvelle unité"}
-          </DialogTitle>
+          {isEditing ? "Modifier l'unité" : "Ajouter une nouvelle unité"}
         </DialogHeader>
-        <ScrollArea className="max-h-[80vh] px-1">
-          <div className="space-y-6 py-4">
-            <UnitFormFields
-              formData={formData}
-              setFormData={setFormData}
-              handleImageChange={handleImageChange}
-              imagePreviewUrls={previewUrls}
-            />
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Annuler
-              </Button>
-              <Button onClick={handleFormSubmit}>
-                {isEditing ? "Modifier" : "Ajouter"}
-              </Button>
-            </div>
-          </div>
-        </ScrollArea>
+        <UnitFormFields
+          formData={formData}
+          setFormData={setFormData}
+          handleImageChange={handleImageChange}
+          imagePreviewUrls={previewUrls}
+        />
       </DialogContent>
     </Dialog>
   )
