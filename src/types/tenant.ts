@@ -2,9 +2,8 @@ export interface TenantFormData {
   id?: string;
   first_name: string;
   last_name: string;
-  phone_number: string;
-  email?: string;
   birth_date?: string;
+  phone_number: string;
   photo_id_url?: string;
   agency_fees?: number;
   property_id?: string;
