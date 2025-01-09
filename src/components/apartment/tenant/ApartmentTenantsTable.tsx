@@ -5,20 +5,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Edit, Trash2, Receipt, CreditCard } from "lucide-react"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { ApartmentTenant } from "@/types/apartment"
-import { useNavigate } from "react-router-dom"
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2, Receipt, CreditCard } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { ApartmentTenantDisplay } from "@/types/apartment";
+import { useNavigate } from "react-router-dom";
 
 interface ApartmentTenantsTableProps {
-  apartmentId: string
-  onEdit: (tenant: ApartmentTenant) => void
-  onDelete: (id: string) => Promise<void>
+  apartmentId: string;
+  onEdit: (tenant: ApartmentTenantDisplay) => void;
+  onDelete: (id: string) => Promise<void>;
 }
 
 export function ApartmentTenantsTable({
@@ -26,19 +24,7 @@ export function ApartmentTenantsTable({
   onEdit,
   onDelete,
 }: ApartmentTenantsTableProps) {
-  const navigate = useNavigate()
-  const { data: tenants = [] } = useQuery({
-    queryKey: ["apartment-tenants", apartmentId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("apartment_tenants")
-        .select("*")
-        .eq("apartment_id", apartmentId)
-
-      if (error) throw error
-      return data as ApartmentTenant[]
-    },
-  })
+  const navigate = useNavigate();
 
   return (
     <Table>
@@ -48,7 +34,8 @@ export function ApartmentTenantsTable({
           <TableHead>Prénom</TableHead>
           <TableHead>Email</TableHead>
           <TableHead>Téléphone</TableHead>
-          <TableHead>Date de naissance</TableHead>
+          <TableHead>Appartement</TableHead>
+          <TableHead>Unité</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -59,11 +46,8 @@ export function ApartmentTenantsTable({
             <TableCell>{tenant.first_name}</TableCell>
             <TableCell>{tenant.email || "-"}</TableCell>
             <TableCell>{tenant.phone_number || "-"}</TableCell>
-            <TableCell>
-              {tenant.birth_date
-                ? format(new Date(tenant.birth_date), "PP", { locale: fr })
-                : "-"}
-            </TableCell>
+            <TableCell>{tenant.apartment?.name || "-"}</TableCell>
+            <TableCell>{tenant.apartment_unit?.unit_number || "-"}</TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
                 <Button
@@ -98,14 +82,7 @@ export function ApartmentTenantsTable({
             </TableCell>
           </TableRow>
         ))}
-        {tenants.length === 0 && (
-          <TableRow>
-            <TableCell colSpan={6} className="text-center py-4">
-              Aucun locataire trouvé
-            </TableCell>
-          </TableRow>
-        )}
       </TableBody>
     </Table>
-  )
+  );
 }

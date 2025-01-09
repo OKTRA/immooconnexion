@@ -28,29 +28,22 @@ export interface ApartmentTenant {
   updated_at?: string;
 }
 
-export interface ApartmentLease {
+export interface Apartment {
   id: string;
-  tenant_id: string;
-  unit_id: string;
-  start_date: string;
-  end_date: string | null;
-  rent_amount: number;
-  deposit_amount: number;
-  payment_frequency: string;
-  duration_type: string;
-  status: string;
+  name: string;
+  address: string | null;
+  total_units: number;
+  description: string | null;
   agency_id: string;
-  payment_type: "upfront" | "end_of_period";
-  initial_fees_paid: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export interface ApartmentPayment {
-  id: string;
-  lease_id: string;
-  amount: number;
-  due_date: string;
-  payment_date: string | null;
-  status: string;
-  payment_method: string;
-  agency_id: string;
+export interface ApartmentTenantDisplay extends ApartmentTenant {
+  apartment?: {
+    name: string;
+  };
+  apartment_unit?: {
+    unit_number: string;
+  };
 }
