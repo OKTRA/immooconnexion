@@ -29,12 +29,12 @@ export interface ApartmentUnit {
 
 export interface ApartmentUnitFormData {
   unit_number: string;
-  floor_number?: number | null;
-  area?: number | null;
-  rent_amount: number;
-  deposit_amount?: number | null;
+  floor_number: string;
+  area: string;
+  rent_amount: string;
+  deposit_amount: string;
   status: ApartmentUnitStatus;
-  description?: string | null;
+  description: string;
 }
 
 export interface LeaseFormData {
@@ -87,8 +87,6 @@ export interface TenantReceiptData {
 export interface TenantReceiptProps {
   tenant: TenantReceiptData;
   isEndReceipt?: boolean;
-  isInitialReceipt?: boolean;
-  contractId?: string;
   lease?: {
     rent_amount: number;
     deposit_amount: number;
