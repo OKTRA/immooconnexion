@@ -10,12 +10,11 @@ export interface PropertyUnit {
   deposit_amount?: number;
   status: PropertyUnitStatus;
   description?: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface PropertyUnitFormData {
-  id?: string;
   unit_number: string;
   floor_number: number;
   area: number;
@@ -45,13 +44,6 @@ export interface Property {
   parent_property_id?: string;
   rental_type?: string;
   property_category: 'house' | 'apartment';
-  is_for_sale?: boolean;
-  sale_price?: number;
-  minimum_stay?: number;
-  maximum_stay?: number;
-  price_per_night?: number;
-  price_per_week?: number;
-  total_units?: number;
   owner_name?: string;
   owner_phone?: string;
   country?: string;

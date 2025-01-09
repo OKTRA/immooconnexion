@@ -1,70 +1,31 @@
-export * from './administrators';
-export * from './contracts';
-export * from './profiles';
-export * from './properties';
-export * from './tenants';
+import { Database } from './database';
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+export type Tables = Database['public']['Tables'];
 
-export interface Database {
-  public: {
-    Tables: {
-      administrators: {
-        Row: Administrator;
-        Insert: AdministratorInsert;
-        Update: AdministratorUpdate;
-        Relationships: [];
-      };
-      contracts: {
-        Row: Contract;
-        Insert: ContractInsert;
-        Update: ContractUpdate;
-        Relationships: [
-          {
-            foreignKeyName: "contracts_property_id_fkey";
-            columns: ["property_id"];
-            isOneToOne: false;
-            referencedRelation: "properties";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
-      profiles: {
-        Row: Profile;
-        Insert: ProfileInsert;
-        Update: ProfileUpdate;
-        Relationships: [];
-      };
-      properties: {
-        Row: Property;
-        Insert: PropertyInsert;
-        Update: PropertyUpdate;
-        Relationships: [];
-      };
-      tenants: {
-        Row: Tenant;
-        Insert: TenantInsert;
-        Update: TenantUpdate;
-        Relationships: [];
-      };
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      [_ in never]: never;
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
-}
+export type Administrator = Tables['administrators']['Row'];
+export type AdministratorInsert = Tables['administrators']['Insert'];
+export type AdministratorUpdate = Tables['administrators']['Update'];
+
+export type Agency = Tables['agencies']['Row'];
+export type AgencyInsert = Tables['agencies']['Insert'];
+export type AgencyUpdate = Tables['agencies']['Update'];
+
+export type Contract = Tables['contracts']['Row'];
+export type ContractInsert = Tables['contracts']['Insert'];
+export type ContractUpdate = Tables['contracts']['Update'];
+
+export type PaymentHistory = Tables['payment_history_with_tenant']['Row'];
+export type PaymentHistoryInsert = Tables['payment_history_with_tenant']['Insert'];
+export type PaymentHistoryUpdate = Tables['payment_history_with_tenant']['Update'];
+
+export type Profile = Tables['profiles']['Row'];
+export type ProfileInsert = Tables['profiles']['Insert'];
+export type ProfileUpdate = Tables['profiles']['Update'];
+
+export type Property = Tables['properties']['Row'];
+export type PropertyInsert = Tables['properties']['Insert'];
+export type PropertyUpdate = Tables['properties']['Update'];
+
+export type Tenant = Tables['tenants']['Row'];
+export type TenantInsert = Tables['tenants']['Insert'];
+export type TenantUpdate = Tables['tenants']['Update'];
