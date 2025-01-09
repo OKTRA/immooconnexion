@@ -6,11 +6,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Edit, Trash2, Receipt, CreditCard } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { TenantActionButtons } from "./TenantActionButtons"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface ApartmentTenantsTableProps {
   apartmentId: string
@@ -23,8 +22,6 @@ export function ApartmentTenantsTable({
   onEdit,
   onDelete,
 }: ApartmentTenantsTableProps) {
-  const navigate = useNavigate()
-  
   const { data: tenantsList = [], isLoading } = useQuery({
     queryKey: ["apartment-tenants", apartmentId],
     queryFn: async () => {
@@ -48,6 +45,14 @@ export function ApartmentTenantsTable({
         .from("apartment_tenants")
         .select(`
           *,
+          apartment_leases (
+            id,
+            rent_amount,
+            deposit_amount,
+            start_date,
+            end_date,
+            status
+          ),
           apartment_units!apartment_tenants_unit_id_fkey (
             unit_number,
             apartment:apartments (
@@ -63,7 +68,13 @@ export function ApartmentTenantsTable({
   })
 
   if (isLoading) {
-    return <div>Chargement...</div>
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+    )
   }
 
   return (
@@ -80,48 +91,33 @@ export function ApartmentTenantsTable({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {tenantsList.map((tenant) => (
-          <TableRow key={tenant.id}>
-            <TableCell>{tenant.last_name}</TableCell>
-            <TableCell>{tenant.first_name}</TableCell>
-            <TableCell>{tenant.email || "-"}</TableCell>
-            <TableCell>{tenant.phone_number || "-"}</TableCell>
-            <TableCell>{tenant.apartment_units?.apartment?.name || "-"}</TableCell>
-            <TableCell>{tenant.apartment_units?.unit_number || "-"}</TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onEdit(tenant)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => navigate(`/agence/appartements/locataires/${tenant.id}/recu`)}
-                >
-                  <Receipt className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => navigate(`/agence/appartements/locataires/${tenant.id}/paiements`)}
-                >
-                  <CreditCard className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onDelete(tenant.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+        {tenantsList.length === 0 ? (
+          <TableRow>
+            <TableCell colSpan={7} className="text-center py-4">
+              Aucun locataire trouvé
             </TableCell>
           </TableRow>
-        ))}
+        ) : (
+          tenantsList.map((tenant) => (
+            <TableRow key={tenant.id}>
+              <TableCell>{tenant.last_name}</TableCell>
+              <TableCell>{tenant.first_name}</TableCell>
+              <TableCell>{tenant.email || "-"}</TableCell>
+              <TableCell>{tenant.phone_number || "-"}</TableCell>
+              <TableCell>{tenant.apartment_units?.apartment?.name || "-"}</TableCell>
+              <TableCell>{tenant.apartment_units?.unit_number || "-"}</TableCell>
+              <TableCell>
+                <TenantActionButtons
+                  tenant={tenant}
+                  currentLease={tenant.apartment_leases?.[0]}
+                  onEdit={() => onEdit(tenant)}
+                  onDelete={() => onDelete(tenant.id)}
+                  onInspection={() => {}}
+                />
+              </TableCell>
+            </TableRow>
+          ))
+        )}
       </TableBody>
     </Table>
   )
