@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ThemeProvider } from "@/providers/ThemeProvider"
 import { Toaster } from "@/components/ui/toaster"
@@ -32,8 +32,8 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthProvider>
-          <Router>
+        <Router>
+          <AuthProvider>
             <Routes>
               <Route path="/" element={<Navigate to="/properties" replace />} />
               <Route path="/login" element={<Login />} />
@@ -61,9 +61,9 @@ export default function App() {
                 <Route path="apartment-tenants" element={<ApartmentTenants />} />
               </Route>
             </Routes>
-          </Router>
-          <Toaster />
-        </AuthProvider>
+            <Toaster />
+          </AuthProvider>
+        </Router>
       </ThemeProvider>
     </QueryClientProvider>
   )
