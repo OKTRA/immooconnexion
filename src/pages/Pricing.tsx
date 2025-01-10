@@ -4,6 +4,7 @@ import { PaymentDialog } from "@/components/payment/PaymentDialog"
 import { PricingHero } from "@/components/pricing/PricingHero"
 import { FeaturesGrid } from "@/components/pricing/FeaturesGrid"
 import { PricingPlans } from "@/components/pricing/PricingPlans"
+import { Footer } from "@/components/layout/Footer"
 
 export default function Pricing() {
   const [selectedPlan, setSelectedPlan] = useState<any>(null)
@@ -15,11 +16,14 @@ export default function Pricing() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-white">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-primary/5 to-white">
       <PublicHeader />
-      <PricingHero />
-      <FeaturesGrid />
-      <PricingPlans onSelectPlan={handleStartSubscription} />
+      <main className="flex-1">
+        <PricingHero />
+        <FeaturesGrid />
+        <PricingPlans onSelectPlan={handleStartSubscription} />
+      </main>
+      <Footer />
 
       {selectedPlan && (
         <PaymentDialog
