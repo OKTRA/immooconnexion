@@ -7,19 +7,15 @@ export function Footer() {
 
   const handleDownload = async (platform: string) => {
     try {
-      let downloadUrl = ""
-      
-      // Get the latest release URL based on platform
-      const owner = process.env.GITHUB_REPOSITORY_OWNER || 'your-org'
-      const repo = process.env.GITHUB_REPOSITORY_NAME || 'your-repo'
-      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`)
-      const release = await response.json()
-
-      if (!release.assets) {
-        throw new Error("No release assets found")
+      // Récupérer la dernière release depuis l'API GitHub
+      const response = await fetch('https://api.github.com/repos/immoov-organization/desktop-app/releases/latest')
+      if (!response.ok) {
+        throw new Error('Impossible de récupérer la dernière version')
       }
 
-      // Find the correct asset for the platform
+      const release = await response.json()
+      
+      // Trouver le bon asset selon la plateforme
       const asset = release.assets.find((asset: any) => {
         switch (platform) {
           case 'windows':
@@ -34,22 +30,27 @@ export function Footer() {
       })
 
       if (!asset) {
-        throw new Error(`No release found for ${platform}`)
+        throw new Error(`Aucune version disponible pour ${platform}`)
       }
 
-      // Trigger download
-      window.location.href = asset.browser_download_url
+      // Créer un lien temporaire pour le téléchargement
+      const link = document.createElement('a')
+      link.href = asset.browser_download_url
+      link.download = asset.name
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
 
       toast({
         title: "Téléchargement démarré",
         description: `Le téléchargement pour ${platform} a commencé`
       })
 
-    } catch (error) {
-      console.error("Download error:", error)
+    } catch (error: any) {
+      console.error("Erreur de téléchargement:", error)
       toast({
         title: "Erreur de téléchargement",
-        description: "Une erreur est survenue lors du téléchargement. Veuillez réessayer plus tard.",
+        description: error.message || "Une erreur est survenue lors du téléchargement",
         variant: "destructive"
       })
     }
