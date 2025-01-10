@@ -8,23 +8,14 @@ import { EmergencyContactFields } from "./form/EmergencyContactFields"
 import { UnitSelector } from "./form/UnitSelector"
 import { Separator } from "@/components/ui/separator"
 import { Loader2 } from "lucide-react"
-import { ApartmentTenant } from "@/types/apartment"
 
-interface ApartmentTenantFormProps {
-  apartmentId: string
-  onSuccess: () => void
-  isSubmitting: boolean
-  setIsSubmitting: (value: boolean) => void
-  initialData?: ApartmentTenant
-}
-
-export function ApartmentTenantForm({
-  apartmentId,
-  onSuccess,
-  isSubmitting,
-  setIsSubmitting,
-  initialData
-}: ApartmentTenantFormProps) {
+export function ApartmentTenantForm({ 
+  apartmentId, 
+  onSuccess, 
+  isSubmitting, 
+  setIsSubmitting, 
+  initialData 
+}) {
   const { toast } = useToast()
   const [selectedUnitId, setSelectedUnitId] = useState(initialData?.unit_id || "")
   const [formData, setFormData] = useState({
@@ -44,11 +35,12 @@ export function ApartmentTenantForm({
     bank_name: initialData?.bank_name || "",
     bank_account_number: initialData?.bank_account_number || "",
     agency_fees: initialData?.agency_fees || 0,
-    profession: initialData?.profession || "",
+    profession: initialData?.profession || ""
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    
     if (!selectedUnitId) {
       toast({
         title: "Erreur",
@@ -103,11 +95,13 @@ export function ApartmentTenantForm({
 
       toast({
         title: "Succès",
-        description: initialData ? "Locataire modifié avec succès" : "Locataire ajouté avec succès",
+        description: initialData 
+          ? "Locataire modifié avec succès"
+          : "Locataire ajouté avec succès",
       })
 
       onSuccess()
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error:", error)
       toast({
         title: "Erreur",
