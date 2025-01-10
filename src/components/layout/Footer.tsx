@@ -10,9 +10,12 @@ export function Footer() {
         if (response.ok) {
           const data = await response.json()
           setVersion(data.tag_name || "1.0.0")
+        } else {
+          console.log("Could not fetch version, using default:", response.status)
         }
       } catch (error) {
-        console.log("Could not fetch version:", error)
+        console.log("Error fetching version:", error)
+        // Keep default version if there's an error
       }
     }
 
