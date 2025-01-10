@@ -9,27 +9,42 @@ files:
   - package.json
   - electron/**/*
 
+extraMetadata:
+  main: 'electron/main.js'
+
 mac:
   category: public.app-category.business
   target:
     - dmg
     - zip
   icon: public/favicon.ico
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
 
 win:
   target:
     - nsis
-    - zip
+    - portable
   icon: public/favicon.ico
+  publisherName: Immoov
 
 linux:
   target:
     - AppImage
-    - snap
     - deb
   category: Office
   icon: public/favicon.ico
 
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Immoov
+
 publish:
   provider: github
-  releaseType: draft
+  private: false
+  releaseType: release
