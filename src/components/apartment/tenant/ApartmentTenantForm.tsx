@@ -8,14 +8,23 @@ import { EmergencyContactFields } from "./form/EmergencyContactFields"
 import { UnitSelector } from "./form/UnitSelector"
 import { Separator } from "@/components/ui/separator"
 import { Loader2 } from "lucide-react"
+import { ApartmentTenant } from "@/types/apartment"
 
-export function ApartmentTenantForm({ 
-  apartmentId, 
-  onSuccess, 
-  isSubmitting, 
-  setIsSubmitting, 
-  initialData 
-}) {
+interface ApartmentTenantFormProps {
+  apartmentId: string
+  onSuccess: () => void
+  isSubmitting: boolean
+  setIsSubmitting: (value: boolean) => void
+  initialData?: ApartmentTenant
+}
+
+export function ApartmentTenantForm({
+  apartmentId,
+  onSuccess,
+  isSubmitting,
+  setIsSubmitting,
+  initialData
+}: ApartmentTenantFormProps) {
   const { toast } = useToast()
   const [selectedUnitId, setSelectedUnitId] = useState(initialData?.unit_id || "")
   const [formData, setFormData] = useState({
@@ -35,10 +44,10 @@ export function ApartmentTenantForm({
     bank_name: initialData?.bank_name || "",
     bank_account_number: initialData?.bank_account_number || "",
     agency_fees: initialData?.agency_fees || 0,
-    profession: initialData?.profession || ""
+    profession: initialData?.profession || "",
   })
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!selectedUnitId) {
@@ -101,7 +110,7 @@ export function ApartmentTenantForm({
       })
 
       onSuccess()
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error)
       toast({
         title: "Erreur",
