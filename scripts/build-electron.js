@@ -6,8 +6,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 build({
   config: {
-    appId: 'com.immoov.app',
-    productName: 'Immoov',
+    appId: 'com.lovable.app',
+    productName: 'Lovable',
     directories: {
       output: path.join(process.cwd(), 'release'),
     },
@@ -15,7 +15,7 @@ build({
       provider: 'github',
       owner: process.env.GITHUB_REPOSITORY_OWNER,
       repo: process.env.GITHUB_REPOSITORY_NAME,
-      private: true,
+      private: false,
       releaseType: 'release'
     },
     mac: {
