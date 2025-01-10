@@ -3,31 +3,39 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const rootDir = path.join(__dirname, '..')
 
-build({
+await build({
   config: {
     appId: 'com.oktra.immoo',
     productName: 'Immoo',
     directories: {
-      output: path.join(process.cwd(), 'release'),
+      output: path.join(rootDir, 'release'),
+      buildResources: path.join(rootDir, 'public')
+    },
+    files: [
+      'dist/**/*',
+      'electron/**/*'
+    ],
+    mac: {
+      category: 'public.app-category.business',
+      target: ['dmg', 'zip'],
+      icon: path.join(rootDir, 'public/favicon.ico')
+    },
+    win: {
+      target: ['nsis', 'portable'],
+      icon: path.join(rootDir, 'public/favicon.ico')
+    },
+    linux: {
+      target: ['AppImage', 'deb'],
+      icon: path.join(rootDir, 'public/favicon.ico')
     },
     publish: {
       provider: 'github',
       owner: 'OKTRA',
       repo: 'immoo',
       private: false,
-      releaseType: 'release',
-      // Retiré le tag spécifique pour permettre la création d'une nouvelle release
-    },
-    mac: {
-      category: 'public.app-category.business',
-      target: ['dmg', 'zip']
-    },
-    win: {
-      target: ['nsis', 'portable']
-    },
-    linux: {
-      target: ['AppImage', 'deb']
+      releaseType: 'release'
     }
   }
 })
