@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Download } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
 
-interface GithubRelease {
-  assets: {
-    name: string
-    browser_download_url: string
-  }[]
+interface FooterProps extends React.HTMLAttributes<HTMLElement> {
+  className?: string
 }
 
-export function Footer() {
-  const [downloadUrl, setDownloadUrl] = useState<string>("")
-  const [isLoading, setIsLoading] = useState(true)
-  const { toast } = useToast()
+interface GitHubRelease {
+  tag_name: string
+  name: string
+  published_at: string
+}
+
+export function Footer({ className, ...props }: FooterProps) {
+  const [version, setVersion] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchReleaseData = async () => {
@@ -23,52 +23,30 @@ export function Footer() {
         )
         
         if (!response.ok) {
+          // If no releases found, just set a default version
+          if (response.status === 404) {
+            setVersion("1.0.0")
+            return
+          }
           throw new Error(`GitHub API returned ${response.status}`)
         }
 
-        const data: GithubRelease = await response.json()
-
-        // Determine OS and select appropriate download
-        const os = window.navigator.platform.toLowerCase()
-        let assetName = ""
-
-        if (os.includes("win")) {
-          assetName = ".exe"
-        } else if (os.includes("mac")) {
-          assetName = ".dmg"
-        } else {
-          assetName = ".AppImage"
-        }
-
-        const asset = data.assets.find(a => a.name.endsWith(assetName))
-        if (asset) {
-          setDownloadUrl(asset.browser_download_url)
-        } else {
-          toast({
-            title: "Version non disponible",
-            description: `La version pour votre système d'exploitation n'est pas encore disponible.`,
-            variant: "destructive"
-          })
-        }
+        const data: GitHubRelease = await response.json()
+        setVersion(data.tag_name)
       } catch (error) {
         console.error("Error fetching release:", error)
-        toast({
-          title: "Erreur de téléchargement",
-          description: "Impossible de récupérer les informations de téléchargement.",
-          variant: "destructive"
-        })
-      } finally {
-        setIsLoading(false)
+        // Set a default version if there's an error
+        setVersion("1.0.0")
       }
     }
 
     fetchReleaseData()
-  }, [toast])
+  }, [])
 
   return (
-    <footer className="w-full border-t">
-      <div className="container flex flex-col items-center gap-4 py-10 md:h-24 md:flex-row md:py-0">
-        <div className="flex flex-1 items-center gap-4 px-8 text-center md:gap-2 md:px-0">
+    <footer className={cn(className)} {...props}>
+      <div className="container flex flex-col items-center justify-between gap-4 py-10 md:h-24 md:flex-row md:py-0">
+        <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
           <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
             Built by{" "}
             <a
@@ -91,17 +69,8 @@ export function Footer() {
             .
           </p>
         </div>
-        {downloadUrl && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-8" 
-            onClick={() => window.location.href = downloadUrl}
-            disabled={isLoading}
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Télécharger l'application
-          </Button>
+        {version && (
+          <p className="text-sm text-muted-foreground">Version {version}</p>
         )}
       </div>
     </footer>
