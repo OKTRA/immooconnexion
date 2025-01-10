@@ -17,6 +17,17 @@ export type ApartmentUnitStatus = 'available' | 'occupied' | 'maintenance' | 're
 
 export type PaymentType = 'upfront' | 'end_of_period';
 
+export interface ApartmentUnitFormData {
+  unit_number: string;
+  floor_number?: number;
+  area?: number;
+  rent_amount: number;
+  deposit_amount?: number;
+  status: ApartmentUnitStatus;
+  description?: string;
+  photo_urls?: string[];
+}
+
 export interface Apartment {
   id: string;
   agency_id: string;

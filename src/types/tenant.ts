@@ -14,6 +14,7 @@ export interface TenantFormData {
   prenom?: string;
   telephone?: string;
   fraisAgence?: string;
+  dateNaissance?: string;
 }
 
 export interface TenantReceiptProps {
@@ -34,6 +35,8 @@ export interface TenantReceiptData {
   telephone?: string;
   nom?: string;
   prenom?: string;
+  dateNaissance?: string;
+  fraisAgence?: string;
 }
 
 export interface TenantDisplay {
