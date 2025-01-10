@@ -1,17 +1,16 @@
-appId: com.immoo.app
-productName: Immoo
+appId: com.lovable.app
+productName: Lovable
 directories:
-  buildResources: build
+  output: release/
+  buildResources: public/
 files:
-  - "dist/**/*"
-  - "electron/**/*"
-extraMetadata:
-  main: electron/main.js
-win:
-  target: nsis
-  icon: public/favicon.ico
+  - dist/**/*
+  - electron/**/*
 mac:
   target: dmg
+  icon: public/favicon.ico
+win:
+  target: nsis
   icon: public/favicon.ico
 linux:
   target: AppImage
@@ -19,3 +18,5 @@ linux:
 publish:
   provider: github
   releaseType: release
+  private: false
+  token: ${GH_TOKEN}
