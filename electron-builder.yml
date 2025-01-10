@@ -16,3 +16,6 @@ mac:
 linux:
   target: AppImage
   icon: public/favicon.ico
+publish:
+  provider: github
+  releaseType: release

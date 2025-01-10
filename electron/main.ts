@@ -23,6 +23,8 @@ function createWindow() {
     // En production, on charge le fichier HTML buildé
     win.loadFile(path.join(process.cwd(), 'dist/index.html'))
   }
+
+  return win
 }
 
 app.whenReady().then(() => {
