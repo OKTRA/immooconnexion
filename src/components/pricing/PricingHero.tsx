@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Download, Apple, Windows } from "lucide-react"
+import { Download, Apple } from "lucide-react"
 
 export function PricingHero() {
   return (
@@ -25,7 +25,7 @@ export function PricingHero() {
                  target="_blank" 
                  rel="noopener noreferrer"
               >
-                <Windows className="w-4 h-4" />
+                <Download className="w-4 h-4" />
                 Windows
               </a>
             </Button>
