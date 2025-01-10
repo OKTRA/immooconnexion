@@ -1,11 +1,58 @@
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 export function Footer() {
-  const handleDownload = (platform: string) => {
-    // Temporairement, on affiche juste un message
-    console.log(`Téléchargement pour ${platform} sera bientôt disponible`)
-    alert("Le téléchargement sera bientôt disponible")
+  const { toast } = useToast()
+
+  const handleDownload = async (platform: string) => {
+    try {
+      let downloadUrl = ""
+      
+      // Get the latest release URL based on platform
+      const owner = process.env.GITHUB_REPOSITORY_OWNER || 'your-org'
+      const repo = process.env.GITHUB_REPOSITORY_NAME || 'your-repo'
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`)
+      const release = await response.json()
+
+      if (!release.assets) {
+        throw new Error("No release assets found")
+      }
+
+      // Find the correct asset for the platform
+      const asset = release.assets.find((asset: any) => {
+        switch (platform) {
+          case 'windows':
+            return asset.name.endsWith('.exe')
+          case 'macos':
+            return asset.name.endsWith('.dmg')
+          case 'linux':
+            return asset.name.endsWith('.AppImage')
+          default:
+            return false
+        }
+      })
+
+      if (!asset) {
+        throw new Error(`No release found for ${platform}`)
+      }
+
+      // Trigger download
+      window.location.href = asset.browser_download_url
+
+      toast({
+        title: "Téléchargement démarré",
+        description: `Le téléchargement pour ${platform} a commencé`
+      })
+
+    } catch (error) {
+      console.error("Download error:", error)
+      toast({
+        title: "Erreur de téléchargement",
+        description: "Une erreur est survenue lors du téléchargement. Veuillez réessayer plus tard.",
+        variant: "destructive"
+      })
+    }
   }
 
   return (
