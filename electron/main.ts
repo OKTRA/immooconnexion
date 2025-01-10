@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
-import path from 'path'
+import path from 'node:path'
 import Store from 'electron-store'
 
 const store = new Store()
@@ -9,7 +9,7 @@ function createWindow() {
     width: 1200,
     height: 800,
     webPreferences: {
-      nodeIntegration: true,
+      nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     }
@@ -21,7 +21,7 @@ function createWindow() {
     win.webContents.openDevTools()
   } else {
     // En production, on charge le fichier HTML buildé
-    win.loadFile(path.join(__dirname, '../dist/index.html'))
+    win.loadFile(path.join(process.cwd(), 'dist/index.html'))
   }
 }
 
@@ -42,10 +42,10 @@ app.on('window-all-closed', () => {
 })
 
 // IPC handlers pour la synchronisation des données
-ipcMain.handle('get-stored-data', (event, key) => {
+ipcMain.handle('get-stored-data', async (_, key: string) => {
   return store.get(key)
 })
 
-ipcMain.handle('set-stored-data', (event, key, value) => {
+ipcMain.handle('set-stored-data', async (_, key: string, value: any) => {
   store.set(key, value)
 })

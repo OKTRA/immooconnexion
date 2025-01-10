@@ -12,13 +12,19 @@ async function startElectron() {
 }
 
 async function watchMain() {
-  await build({
-    configFile: 'vite.config.ts',
-    build: {
-      watch: {},
-    },
-  })
-  startElectron()
+  try {
+    await build({
+      configFile: 'vite.config.ts',
+      mode: 'development',
+      build: {
+        watch: {},
+      },
+    })
+    startElectron()
+  } catch (err) {
+    console.error('Error during build:', err)
+    process.exit(1)
+  }
 }
 
 watchMain()
