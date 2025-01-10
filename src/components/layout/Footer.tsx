@@ -19,7 +19,7 @@ export function Footer() {
     const fetchReleaseData = async () => {
       try {
         const response = await fetch(
-          "https://api.github.com/repos/immoov-organization/desktop-app/releases/tags/V1.0.0"
+          "https://api.github.com/repos/OKTRA/immoo/releases/latest"
         )
         
         if (!response.ok) {
@@ -72,16 +72,16 @@ export function Footer() {
           <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
             Built by{" "}
             <a
-              href="https://twitter.com/shadcn"
+              href="https://oktra.fr"
               target="_blank"
               rel="noreferrer"
               className="font-medium underline underline-offset-4"
             >
-              IMMOO
+              OKTRA
             </a>
             . The source code is available on{" "}
             <a
-              href="https://github.com/immoov-organization/desktop-app"
+              href="https://github.com/OKTRA/immoo"
               target="_blank"
               rel="noreferrer"
               className="font-medium underline underline-offset-4"
