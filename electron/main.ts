@@ -11,6 +11,7 @@ autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = true
 
 function createWindow() {
+  console.log('Creating main window...')
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -47,8 +48,11 @@ function createWindow() {
 
   // Charger l'application
   if (process.env.VITE_DEV_SERVER_URL) {
+    console.log('Loading from dev server:', process.env.VITE_DEV_SERVER_URL)
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL)
+    mainWindow.webContents.openDevTools()
   } else {
+    console.log('Loading from file:', path.join(__dirname, '../dist/index.html'))
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
   }
 
@@ -79,6 +83,7 @@ function createWindow() {
 
 // Gestion du mode hors-ligne
 app.on('ready', () => {
+  console.log('App is ready, creating window...')
   createWindow()
 
   // Vérifier la connexion internet

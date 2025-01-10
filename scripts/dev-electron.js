@@ -4,21 +4,21 @@ const electron = require('electron')
 const path = require('path')
 
 async function startElectron() {
-  const electronPath = path.join(process.cwd(), '.')
-  console.log('Starting Electron process...')
+  const electronPath = path.join(__dirname, '..')
+  console.log('Starting Electron process from:', electronPath)
   
-  const process = spawn(electron, [electronPath], { 
+  const process = spawn(electron, ['.'], { 
     stdio: 'inherit',
+    cwd: electronPath,
     env: {
       ...process.env,
-      ELECTRON_START_URL: 'http://localhost:8080',
+      VITE_DEV_SERVER_URL: 'http://localhost:8080',
       NODE_ENV: 'development'
     }
   })
   
   process.on('close', () => {
     console.log('Electron process terminated')
-    process.kill(0)
     process.exit()
   })
 }
