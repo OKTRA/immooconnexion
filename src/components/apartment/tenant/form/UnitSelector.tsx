@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface UnitSelectorProps {
   apartmentId: string
@@ -35,8 +36,10 @@ export function UnitSelector({ apartmentId, value, onChange }: UnitSelectorProps
         .select(`
           id,
           unit_number,
+          rent_amount,
           apartment:apartments (
-            name
+            name,
+            address
           )
         `)
         .eq("status", "available")
@@ -49,8 +52,18 @@ export function UnitSelector({ apartmentId, value, onChange }: UnitSelectorProps
 
       if (error) throw error
       return data || []
-    }
+    },
+    enabled: !!apartmentId
   })
+
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        <Label>Unité d'appartement</Label>
+        <Skeleton className="h-10 w-full" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-2">
@@ -60,15 +73,21 @@ export function UnitSelector({ apartmentId, value, onChange }: UnitSelectorProps
         onValueChange={onChange}
         disabled={isLoading}
       >
-        <SelectTrigger id="unit">
-          <SelectValue placeholder="Sélectionner une unité" />
+        <SelectTrigger id="unit" className="w-full">
+          <SelectValue placeholder="Sélectionner une unité disponible" />
         </SelectTrigger>
         <SelectContent>
-          {units.map((unit) => (
-            <SelectItem key={unit.id} value={unit.id}>
-              {unit.apartment?.name} - Unité {unit.unit_number}
+          {units.length === 0 ? (
+            <SelectItem value="" disabled>
+              Aucune unité disponible
             </SelectItem>
-          ))}
+          ) : (
+            units.map((unit) => (
+              <SelectItem key={unit.id} value={unit.id}>
+                {unit.apartment?.name} - Unité {unit.unit_number} ({unit.rent_amount.toLocaleString()} FCFA)
+              </SelectItem>
+            ))
+          )}
         </SelectContent>
       </Select>
     </div>
