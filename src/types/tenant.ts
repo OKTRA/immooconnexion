@@ -9,6 +9,11 @@ export interface TenantFormData {
   property_id?: string
   profession?: string
   email?: string
+  nom?: string
+  prenom?: string
+  telephone?: string
+  fraisAgence?: number
+  propertyId?: string
 }
 
 export interface TenantReceiptData {
@@ -21,4 +26,23 @@ export interface TenantReceiptData {
   profession?: string
   receipt_date?: string
   receipt_number?: string
+  nom?: string
+  prenom?: string
+  telephone?: string
+  fraisAgence?: number
+}
+
+export interface TenantReceiptProps {
+  tenant: TenantReceiptData
+  isEndReceipt?: boolean
+  isInitialReceipt?: boolean
+  lease?: {
+    montant: number
+    type: 'location'
+    rent_amount: number
+    deposit_amount: number
+    start_date: string
+    end_date: string
+    status: string
+  }
 }

@@ -7,7 +7,15 @@ export function Footer() {
 
   const handleDownload = async (platform: string) => {
     try {
-      // Récupérer la dernière release depuis l'API GitHub
+      // For now, show a message that the desktop app is not yet available
+      toast({
+        title: "Application desktop",
+        description: "L'application desktop n'est pas encore disponible pour le téléchargement. Elle sera bientôt disponible.",
+        duration: 5000,
+      })
+      
+      // TODO: Once the GitHub repository is set up with releases, uncomment this code
+      /*
       const response = await fetch('https://api.github.com/repos/immoov-organization/desktop-app/releases/latest')
       if (!response.ok) {
         throw new Error('Impossible de récupérer la dernière version')
@@ -15,7 +23,6 @@ export function Footer() {
 
       const release = await response.json()
       
-      // Trouver le bon asset selon la plateforme
       const asset = release.assets.find((asset: any) => {
         switch (platform) {
           case 'windows':
@@ -33,7 +40,6 @@ export function Footer() {
         throw new Error(`Aucune version disponible pour ${platform}`)
       }
 
-      // Créer un lien temporaire pour le téléchargement
       const link = document.createElement('a')
       link.href = asset.browser_download_url
       link.download = asset.name
@@ -45,6 +51,7 @@ export function Footer() {
         title: "Téléchargement démarré",
         description: `Le téléchargement pour ${platform} a commencé`
       })
+      */
 
     } catch (error: any) {
       console.error("Erreur de téléchargement:", error)
