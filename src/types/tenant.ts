@@ -9,6 +9,7 @@ export interface TenantFormData {
   agency_fees?: number;
   photo_id_url?: string;
   propertyId?: string;
+  property_id?: string; // For backward compatibility
 }
 
 export interface TenantReceiptProps {
@@ -26,6 +27,8 @@ export interface TenantReceiptData {
   agency_fees?: number;
   profession?: string;
   property_id?: string;
+  nom?: string; // For backward compatibility
+  prenom?: string; // For backward compatibility
 }
 
 export interface TenantDisplay {
