@@ -39,6 +39,7 @@ export interface PropertyUnit {
 }
 
 export interface PropertyUnitFormData {
+  id?: string;
   unit_number: string;
   floor_number?: number | null;
   area?: number | null;

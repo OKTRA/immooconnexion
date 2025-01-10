@@ -29,8 +29,6 @@ export interface TenantReceiptData {
 export interface TenantReceiptProps {
   tenant: TenantReceiptData;
   isEndReceipt?: boolean;
-  isInitialReceipt?: boolean;
-  contractId?: string;
   lease?: {
     rent_amount: number;
     deposit_amount: number;
