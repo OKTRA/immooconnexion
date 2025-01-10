@@ -1,6 +1,17 @@
 export type ApartmentUnitStatus = 'available' | 'occupied' | 'maintenance' | 'reserved';
 export type PaymentType = 'upfront' | 'end_of_period';
 
+export interface Apartment {
+  id: string;
+  agency_id: string;
+  name: string;
+  address?: string;
+  total_units: number;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface ApartmentUnit {
   id: string;
   apartment_id: string;
@@ -37,24 +48,35 @@ export interface LeaseFormData {
   duration_type: string;
   payment_type: PaymentType;
   initial_fees_paid: boolean;
-  deposit_returned?: boolean;
+  deposit_returned: boolean;
   deposit_return_date?: string;
   deposit_return_amount?: number;
   deposit_return_notes?: string;
 }
 
-export interface TenantFormData {
+export interface ApartmentTenant {
   id?: string;
   first_name: string;
   last_name: string;
-  phone_number: string;
   email?: string;
+  phone_number: string;
   birth_date?: string;
   photo_id_url?: string;
+  employer_name?: string;
+  employer_phone?: string;
+  employer_address?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  emergency_contact_relationship?: string;
+  additional_notes?: string;
+  bank_name?: string;
+  bank_account_number?: string;
   agency_fees?: number;
-  property_id?: string;
-  profession?: string;
-  agency_id?: string;
+  agency_id: string;
+  unit_id?: string;
+  created_at?: string;
+  updated_at?: string;
+  profession: string;
 }
 
 export interface TenantReceiptData {
@@ -64,4 +86,14 @@ export interface TenantReceiptData {
   agency_fees?: number;
   property_id?: string;
   profession?: string;
+}
+
+export interface TenantReceiptProps {
+  tenant: TenantReceiptData;
+  isEndReceipt?: boolean;
+  isInitialReceipt?: boolean;
+  lease?: {
+    rent_amount: number;
+    deposit_amount: number;
+  };
 }

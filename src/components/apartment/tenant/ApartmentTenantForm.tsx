@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/integrations/supabase/client"
 import { useState } from "react"
 import { ContactFields } from "./form/ContactFields"
 import { ProfessionalFields } from "./form/ProfessionalFields"
@@ -8,13 +8,14 @@ import { EmergencyContactFields } from "./form/EmergencyContactFields"
 import { UnitSelector } from "./form/UnitSelector"
 import { Separator } from "@/components/ui/separator"
 import { Loader2 } from "lucide-react"
+import { ApartmentTenant } from "@/types/apartment"
 
 interface ApartmentTenantFormProps {
   apartmentId: string
   onSuccess: () => void
   isSubmitting: boolean
   setIsSubmitting: (value: boolean) => void
-  initialData?: any
+  initialData?: ApartmentTenant
 }
 
 export function ApartmentTenantForm({

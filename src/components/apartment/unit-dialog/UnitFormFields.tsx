@@ -6,10 +6,10 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { ApartmentUnitFormData, ApartmentUnitStatus } from "@/types/apartment"
 
 interface UnitFormFieldsProps {
-  formData: ApartmentUnitFormData
-  setFormData: (data: ApartmentUnitFormData) => void
-  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  imagePreviewUrls: string[]
+  formData: ApartmentUnitFormData;
+  setFormData: (data: ApartmentUnitFormData) => void;
+  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  imagePreviewUrls: string[];
 }
 
 export function UnitFormFields({
@@ -39,7 +39,7 @@ export function UnitFormFields({
             type="number"
             value={formData.floor_number}
             onChange={(e) =>
-              setFormData({ ...formData, floor_number: e.target.value })
+              setFormData({ ...formData, floor_number: Number(e.target.value) })
             }
           />
         </div>
@@ -50,7 +50,7 @@ export function UnitFormFields({
             id="area"
             type="number"
             value={formData.area}
-            onChange={(e) => setFormData({ ...formData, area: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, area: Number(e.target.value) })}
           />
         </div>
 
@@ -61,7 +61,7 @@ export function UnitFormFields({
             type="number"
             value={formData.rent_amount}
             onChange={(e) =>
-              setFormData({ ...formData, rent_amount: e.target.value })
+              setFormData({ ...formData, rent_amount: Number(e.target.value) })
             }
           />
         </div>
@@ -73,7 +73,7 @@ export function UnitFormFields({
             type="number"
             value={formData.deposit_amount}
             onChange={(e) =>
-              setFormData({ ...formData, deposit_amount: e.target.value })
+              setFormData({ ...formData, deposit_amount: Number(e.target.value) })
             }
           />
         </div>
@@ -93,6 +93,7 @@ export function UnitFormFields({
               <SelectItem value="available">Disponible</SelectItem>
               <SelectItem value="occupied">Occupé</SelectItem>
               <SelectItem value="maintenance">En maintenance</SelectItem>
+              <SelectItem value="reserved">Réservé</SelectItem>
             </SelectContent>
           </Select>
         </div>
