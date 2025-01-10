@@ -8,8 +8,12 @@ export interface TenantFormData {
   profession?: string;
   agency_fees?: number;
   photo_id_url?: string;
-  propertyId?: string;
-  property_id?: string; // For backward compatibility
+  property_id?: string;
+  // Backward compatibility fields
+  nom?: string;
+  prenom?: string;
+  telephone?: string;
+  fraisAgence?: string;
 }
 
 export interface TenantReceiptProps {
@@ -27,8 +31,9 @@ export interface TenantReceiptData {
   agency_fees?: number;
   profession?: string;
   property_id?: string;
-  nom?: string; // For backward compatibility
-  prenom?: string; // For backward compatibility
+  telephone?: string;
+  nom?: string;
+  prenom?: string;
 }
 
 export interface TenantDisplay {
