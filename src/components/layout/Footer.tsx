@@ -1,104 +1,108 @@
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { toast } from "@/components/ui/use-toast"
+import { Download } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+
+interface GithubRelease {
+  assets: {
+    name: string
+    browser_download_url: string
+  }[]
+}
 
 export function Footer() {
-  const handleDownload = async (platform: string) => {
-    try {
-      // Récupérer la dernière release depuis l'API GitHub
-      const response = await fetch('https://api.github.com/repos/immoov-organization/desktop-app/releases/latest')
-      if (!response.ok) {
-        if (response.status === 404) {
-          toast({
-            title: "Application en cours de déploiement",
-            description: "L'application desktop sera bientôt disponible au téléchargement. Merci de votre patience.",
-          })
-          return
-        }
-        throw new Error('Impossible de récupérer la dernière version')
-      }
-      
-      const release = await response.json()
-      
-      // Trouver le bon asset selon la plateforme
-      const asset = release.assets.find((asset: any) => {
-        switch (platform) {
-          case 'windows':
-            return asset.name.endsWith('.exe')
-          case 'mac':
-            return asset.name.endsWith('.dmg')
-          case 'linux':
-            return asset.name.endsWith('.AppImage')
-          default:
-            return false
-        }
-      })
+  const [downloadUrl, setDownloadUrl] = useState<string>("")
+  const [isLoading, setIsLoading] = useState(true)
+  const { toast } = useToast()
 
-      if (!asset) {
+  useEffect(() => {
+    const fetchReleaseData = async () => {
+      try {
+        const response = await fetch(
+          "https://api.github.com/repos/immoov-organization/desktop-app/releases/tags/V1.0.0"
+        )
+        
+        if (!response.ok) {
+          throw new Error(`GitHub API returned ${response.status}`)
+        }
+
+        const data: GithubRelease = await response.json()
+
+        // Determine OS and select appropriate download
+        const os = window.navigator.platform.toLowerCase()
+        let assetName = ""
+
+        if (os.includes("win")) {
+          assetName = ".exe"
+        } else if (os.includes("mac")) {
+          assetName = ".dmg"
+        } else {
+          assetName = ".AppImage"
+        }
+
+        const asset = data.assets.find(a => a.name.endsWith(assetName))
+        if (asset) {
+          setDownloadUrl(asset.browser_download_url)
+        } else {
+          toast({
+            title: "Version non disponible",
+            description: `La version pour votre système d'exploitation n'est pas encore disponible.`,
+            variant: "destructive"
+          })
+        }
+      } catch (error) {
+        console.error("Error fetching release:", error)
         toast({
-          title: "Version non disponible",
-          description: `La version ${platform} n'est pas encore disponible. Elle sera bientôt disponible.`,
+          title: "Erreur de téléchargement",
+          description: "Impossible de récupérer les informations de téléchargement.",
           variant: "destructive"
         })
-        return
+      } finally {
+        setIsLoading(false)
       }
-
-      // Créer un lien temporaire pour le téléchargement
-      const link = document.createElement('a')
-      link.href = asset.browser_download_url
-      link.download = asset.name
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
-      toast({
-        title: "Téléchargement démarré",
-        description: `Le téléchargement pour ${platform} a commencé`
-      })
-
-    } catch (error: any) {
-      console.error("Erreur de téléchargement:", error)
-      toast({
-        title: "Erreur de téléchargement",
-        description: error.message || "Une erreur est survenue lors du téléchargement",
-        variant: "destructive"
-      })
     }
-  }
+
+    fetchReleaseData()
+  }, [toast])
 
   return (
-    <footer className="bg-gray-100 dark:bg-gray-800 py-8 mt-auto">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-center md:text-left">
-            <h3 className="text-lg font-semibold mb-2">Télécharger l'application</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Disponible pour Windows, Mac et Linux
-            </p>
-          </div>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button 
-              variant="outline"
-              onClick={() => handleDownload('windows')}
-              className="min-w-[120px]"
+    <footer className="w-full border-t">
+      <div className="container flex flex-col items-center gap-4 py-10 md:h-24 md:flex-row md:py-0">
+        <div className="flex flex-1 items-center gap-4 px-8 text-center md:gap-2 md:px-0">
+          <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
+            Built by{" "}
+            <a
+              href="https://twitter.com/shadcn"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium underline underline-offset-4"
             >
-              Windows
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => handleDownload('mac')}
-              className="min-w-[120px]"
+              IMMOO
+            </a>
+            . The source code is available on{" "}
+            <a
+              href="https://github.com/immoov-organization/desktop-app"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium underline underline-offset-4"
             >
-              macOS
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => handleDownload('linux')}
-              className="min-w-[120px]"
-            >
-              Linux
-            </Button>
-          </div>
+              GitHub
+            </a>
+            .
+          </p>
         </div>
+        {downloadUrl && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-8" 
+            onClick={() => window.location.href = downloadUrl}
+            disabled={isLoading}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Télécharger l'application
+          </Button>
+        )}
       </div>
     </footer>
   )
