@@ -413,6 +413,7 @@ export type Database = {
           last_name: string
           phone_number: string | null
           photo_id_url: string | null
+          profession: string | null
           unit_id: string | null
           updated_at: string | null
         }
@@ -436,6 +437,7 @@ export type Database = {
           last_name: string
           phone_number?: string | null
           photo_id_url?: string | null
+          profession?: string | null
           unit_id?: string | null
           updated_at?: string | null
         }
@@ -459,6 +461,7 @@ export type Database = {
           last_name?: string
           phone_number?: string | null
           photo_id_url?: string | null
+          profession?: string | null
           unit_id?: string | null
           updated_at?: string | null
         }

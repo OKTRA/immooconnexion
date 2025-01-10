@@ -10,10 +10,11 @@ import { TenantActionButtons } from "./TenantActionButtons"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ApartmentTenant } from "@/types/apartment"
 
 interface ApartmentTenantsTableProps {
   apartmentId: string
-  onEdit: (tenant: any) => void
+  onEdit: (tenant: ApartmentTenant) => void
   onDelete: (id: string) => Promise<void>
 }
 
@@ -35,7 +36,7 @@ export function ApartmentTenantsTable({
         .from("profiles")
         .select("agency_id")
         .eq("id", profile.user.id)
-        .single()
+        .maybeSingle()
 
       if (!userProfile?.agency_id) {
         throw new Error("Aucune agence associée")

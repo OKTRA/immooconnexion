@@ -76,7 +76,7 @@ export interface ApartmentTenant {
   unit_id?: string;
   created_at?: string;
   updated_at?: string;
-  profession: string;
+  profession?: string;
 }
 
 export interface TenantReceiptData {

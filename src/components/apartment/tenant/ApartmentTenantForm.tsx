@@ -54,7 +54,7 @@ export function ApartmentTenantForm({
     rent_amount: "",
     deposit_amount: "",
     payment_frequency: "monthly",
-    payment_type: "upfront",
+    payment_type: "upfront" as const,
     start_date: "",
     end_date: "",
     duration_type: "fixed",
