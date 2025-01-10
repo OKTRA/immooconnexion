@@ -9,6 +9,9 @@ import { UnitSelector } from "./form/UnitSelector"
 import { Separator } from "@/components/ui/separator"
 import { Loader2 } from "lucide-react"
 import { ApartmentTenant } from "@/types/apartment"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface ApartmentTenantFormProps {
   apartmentId: string
@@ -47,6 +50,16 @@ export function ApartmentTenantForm({
     profession: initialData?.profession || "",
   })
 
+  const [leaseData, setLeaseData] = useState({
+    rent_amount: "",
+    deposit_amount: "",
+    payment_frequency: "monthly",
+    payment_type: "upfront",
+    start_date: "",
+    end_date: "",
+    duration_type: "fixed",
+  })
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -54,6 +67,15 @@ export function ApartmentTenantForm({
       toast({
         title: "Erreur",
         description: "Veuillez sélectionner une unité",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!leaseData.rent_amount || !leaseData.deposit_amount || !leaseData.start_date) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs obligatoires du bail",
         variant: "destructive",
       })
       return
@@ -79,6 +101,8 @@ export function ApartmentTenantForm({
         agency_id: profile.agency_id,
       }
 
+      // Create or update tenant
+      let tenantId = initialData?.id
       if (initialData?.id) {
         const { error } = await supabase
           .from("apartment_tenants")
@@ -87,11 +111,33 @@ export function ApartmentTenantForm({
 
         if (error) throw error
       } else {
-        const { error } = await supabase
+        const { data: newTenant, error } = await supabase
           .from("apartment_tenants")
           .insert([tenantData])
+          .select()
+          .single()
 
         if (error) throw error
+        tenantId = newTenant.id
+
+        // Create lease
+        const { error: leaseError } = await supabase
+          .from("apartment_leases")
+          .insert([{
+            tenant_id: tenantId,
+            unit_id: selectedUnitId,
+            rent_amount: parseInt(leaseData.rent_amount),
+            deposit_amount: parseInt(leaseData.deposit_amount),
+            payment_frequency: leaseData.payment_frequency,
+            payment_type: leaseData.payment_type,
+            start_date: leaseData.start_date,
+            end_date: leaseData.duration_type === "fixed" ? leaseData.end_date : null,
+            duration_type: leaseData.duration_type,
+            status: "active",
+            agency_id: profile.agency_id,
+          }])
+
+        if (leaseError) throw leaseError
 
         // Update unit status to occupied
         const { error: unitError } = await supabase
@@ -106,7 +152,7 @@ export function ApartmentTenantForm({
         title: "Succès",
         description: initialData 
           ? "Locataire modifié avec succès"
-          : "Locataire ajouté avec succès",
+          : "Locataire et bail ajoutés avec succès",
       })
 
       onSuccess()
@@ -150,6 +196,111 @@ export function ApartmentTenantForm({
           <div>
             <h3 className="text-lg font-medium">Contact d'urgence</h3>
             <EmergencyContactFields formData={formData} setFormData={setFormData} />
+          </div>
+
+          <Separator />
+
+          <div>
+            <h3 className="text-lg font-medium">Informations du bail</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="rent_amount">Montant du loyer</Label>
+                <Input
+                  id="rent_amount"
+                  type="number"
+                  value={leaseData.rent_amount}
+                  onChange={(e) => setLeaseData({ ...leaseData, rent_amount: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="deposit_amount">Montant de la caution</Label>
+                <Input
+                  id="deposit_amount"
+                  type="number"
+                  value={leaseData.deposit_amount}
+                  onChange={(e) => setLeaseData({ ...leaseData, deposit_amount: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="payment_frequency">Fréquence de paiement</Label>
+                <Select
+                  value={leaseData.payment_frequency}
+                  onValueChange={(value) => setLeaseData({ ...leaseData, payment_frequency: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner une fréquence" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Quotidien</SelectItem>
+                    <SelectItem value="weekly">Hebdomadaire</SelectItem>
+                    <SelectItem value="monthly">Mensuel</SelectItem>
+                    <SelectItem value="quarterly">Trimestriel</SelectItem>
+                    <SelectItem value="yearly">Annuel</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="payment_type">Type de paiement</Label>
+                <Select
+                  value={leaseData.payment_type}
+                  onValueChange={(value) => setLeaseData({ ...leaseData, payment_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner le type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="upfront">Paiement d'avance</SelectItem>
+                    <SelectItem value="end_of_period">Fin de période</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="duration_type">Type de durée</Label>
+                <Select
+                  value={leaseData.duration_type}
+                  onValueChange={(value) => setLeaseData({ ...leaseData, duration_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner le type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fixed">Durée déterminée</SelectItem>
+                    <SelectItem value="month_to_month">Mois par mois</SelectItem>
+                    <SelectItem value="yearly">Annuel</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="start_date">Date de début</Label>
+                <Input
+                  id="start_date"
+                  type="date"
+                  value={leaseData.start_date}
+                  onChange={(e) => setLeaseData({ ...leaseData, start_date: e.target.value })}
+                  required
+                />
+              </div>
+
+              {leaseData.duration_type === "fixed" && (
+                <div className="space-y-2">
+                  <Label htmlFor="end_date">Date de fin</Label>
+                  <Input
+                    id="end_date"
+                    type="date"
+                    value={leaseData.end_date}
+                    onChange={(e) => setLeaseData({ ...leaseData, end_date: e.target.value })}
+                    required
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
