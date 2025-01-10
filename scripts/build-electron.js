@@ -6,17 +6,18 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 build({
   config: {
-    appId: 'com.lovable.app',
-    productName: 'Lovable',
+    appId: 'com.oktra.immoo',
+    productName: 'Immoo',
     directories: {
       output: path.join(process.cwd(), 'release'),
     },
     publish: {
       provider: 'github',
-      owner: process.env.GITHUB_REPOSITORY_OWNER,
-      repo: process.env.GITHUB_REPOSITORY_NAME,
+      owner: 'OKTRA',
+      repo: 'immoo',
       private: false,
-      releaseType: 'release'
+      releaseType: 'release',
+      tag: 'V1.0.0'
     },
     mac: {
       category: 'public.app-category.business',
