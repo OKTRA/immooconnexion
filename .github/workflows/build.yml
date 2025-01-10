@@ -26,9 +26,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Required for Linux builds
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf
+
       - name: Build Electron app
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: npm run electron:build
 
       - name: Upload artifacts
@@ -36,9 +45,10 @@ jobs:
         with:
           name: ${{ matrix.os }}-build
           path: |
-            release/*.exe
-            release/*.dmg
-            release/*.AppImage
+            dist/electron/*/*.exe
+            dist/electron/*/*.dmg
+            dist/electron/*/*.AppImage
+            dist/electron/*/*.snap
           if-no-files-found: ignore
 
       - name: Release
@@ -46,8 +56,10 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            release/*.exe
-            release/*.dmg
-            release/*.AppImage
+            dist/electron/*/*.exe
+            dist/electron/*/*.dmg
+            dist/electron/*/*.AppImage
+            dist/electron/*/*.snap
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
