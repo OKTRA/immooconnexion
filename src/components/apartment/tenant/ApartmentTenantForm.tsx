@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { useState } from "react"
 import { ContactFields } from "./form/ContactFields"
 import { ProfessionalFields } from "./form/ProfessionalFields"
@@ -43,6 +43,7 @@ export function ApartmentTenantForm({
     bank_name: initialData?.bank_name || "",
     bank_account_number: initialData?.bank_account_number || "",
     agency_fees: initialData?.agency_fees || 0,
+    profession: initialData?.profession || "",
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,6 +90,14 @@ export function ApartmentTenantForm({
           .insert([tenantData])
 
         if (error) throw error
+
+        // Update unit status to occupied
+        const { error: unitError } = await supabase
+          .from("apartment_units")
+          .update({ status: "occupied" })
+          .eq("id", selectedUnitId)
+
+        if (unitError) throw unitError
       }
 
       toast({
