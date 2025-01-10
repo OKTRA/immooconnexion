@@ -1,7 +1,10 @@
-const builder = require('electron-builder')
-const path = require('path')
+import { build } from 'electron-builder'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-builder.build({
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+build({
   config: {
     appId: 'com.immoov.app',
     productName: 'Immoov',
