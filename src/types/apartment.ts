@@ -32,6 +32,7 @@ export interface Apartment {
   agency_id: string;
   created_at?: string;
   updated_at?: string;
+  description?: string;
 }
 
 export interface ApartmentTenant {

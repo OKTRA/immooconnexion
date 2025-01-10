@@ -1,5 +1,4 @@
 export interface TenantFormData {
-  id?: string;
   first_name: string;
   last_name: string;
   phone_number: string;
@@ -7,23 +6,16 @@ export interface TenantFormData {
   birth_date?: string;
   photo_id_url?: string;
   agency_fees?: number;
-  property_id?: string;
   profession?: string;
-  agency_id?: string;
-}
-
-export interface TenantDisplay extends TenantFormData {
-  created_at?: string;
-  updated_at?: string;
+  property_id?: string;
 }
 
 export interface TenantReceiptData {
   first_name: string;
   last_name: string;
-  phone_number?: string;
+  phone_number: string;
   agency_fees?: number;
   property_id?: string;
-  profession?: string;
 }
 
 export interface TenantReceiptProps {
