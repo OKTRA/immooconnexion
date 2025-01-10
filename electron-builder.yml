@@ -17,6 +17,9 @@ linux:
   icon: public/favicon.ico
 publish:
   provider: github
+  owner: ${GITHUB_REPOSITORY_OWNER}
+  repo: ${GITHUB_REPOSITORY_NAME}
   releaseType: release
   private: false
   token: ${GH_TOKEN}
+  publishAutoUpdate: true
