@@ -1,3 +1,14 @@
+export interface Apartment {
+  id: string
+  agency_id: string
+  name: string
+  address?: string
+  total_units?: number
+  description?: string
+  created_at?: string
+  updated_at?: string
+}
+
 export interface ApartmentUnit {
   id: string
   apartment_id: string
@@ -11,6 +22,17 @@ export interface ApartmentUnit {
   photo_urls?: string[]
   created_at: string
   updated_at: string
+}
+
+export interface ApartmentUnitFormData {
+  unit_number: string
+  floor_number?: number | string
+  area?: number | string
+  rent_amount: number | string
+  deposit_amount?: number | string
+  status: ApartmentUnitStatus
+  description?: string
+  photo_urls?: string[]
 }
 
 export type ApartmentUnitStatus = 'available' | 'occupied' | 'maintenance' | 'reserved'
@@ -60,39 +82,6 @@ export type DurationType = 'fixed' | 'month_to_month' | 'yearly'
 export type LeaseStatus = 'active' | 'expired' | 'terminated'
 export type PaymentType = 'upfront' | 'end_of_period'
 
-export interface Property {
-  id: string
-  bien: string
-  type: string
-  chambres?: number
-  ville?: string
-  loyer?: number
-  frais_agence?: number
-  taux_commission?: number
-  caution?: number
-  photo_url?: string
-  statut?: string
-  user_id?: string
-  agency_id?: string
-  created_at?: string
-  updated_at?: string
-  created_by_user_id?: string
-  parent_property_id?: string
-  rental_type?: string
-  property_category: 'house' | 'apartment'
-  is_for_sale?: boolean
-  sale_price?: number
-  minimum_stay?: number
-  maximum_stay?: number
-  price_per_night?: number
-  price_per_week?: number
-  total_units?: number
-  owner_name?: string
-  owner_phone?: string
-  country?: string
-  quartier?: string
-}
-
 export interface TenantReceiptData {
   id: string
   property_id: string
@@ -116,4 +105,28 @@ export interface TenantFormData {
   profession?: string
   agency_fees?: number
   photo_id_url?: string
+}
+
+export interface Property {
+  id: string
+  bien: string
+  type: string
+  chambres?: number
+  ville?: string
+  loyer?: number
+  frais_agence?: number
+  taux_commission?: number
+  caution?: number
+  photo_url?: string
+  statut?: string
+  user_id?: string
+  agency_id?: string
+  created_at?: string
+  updated_at?: string
+  created_by_user_id?: string
+  property_category: 'house' | 'apartment'
+  owner_name?: string
+  owner_phone?: string
+  country?: string
+  quartier?: string
 }

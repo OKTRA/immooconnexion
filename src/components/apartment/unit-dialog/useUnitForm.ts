@@ -13,8 +13,12 @@ export function useUnitForm(
     rent_amount: initialData?.rent_amount || 0,
     deposit_amount: initialData?.deposit_amount || 0,
     status: initialData?.status || "available",
-    description: initialData?.description || ""
+    description: initialData?.description || "",
+    photo_urls: initialData?.photo_urls || []
   })
+
+  const [images, setImages] = useState<File[]>([])
+  const [previewUrls, setPreviewUrls] = useState<string[]>(initialData?.photo_urls || [])
 
   const handleSubmit = async () => {
     if (!onSubmit) return
@@ -22,7 +26,16 @@ export function useUnitForm(
     const unitData: ApartmentUnit = {
       id: initialData?.id || "",
       apartment_id: apartmentId,
-      ...formData
+      unit_number: formData.unit_number,
+      floor_number: Number(formData.floor_number),
+      area: Number(formData.area),
+      rent_amount: Number(formData.rent_amount),
+      deposit_amount: Number(formData.deposit_amount),
+      status: formData.status,
+      description: formData.description,
+      photo_urls: formData.photo_urls,
+      created_at: initialData?.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
 
     await onSubmit(unitData)
@@ -31,6 +44,9 @@ export function useUnitForm(
   return {
     formData,
     setFormData,
+    images,
+    setImages,
+    previewUrls,
     handleSubmit
   }
 }
