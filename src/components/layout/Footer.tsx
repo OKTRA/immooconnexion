@@ -5,8 +5,15 @@ export function Footer() {
   const handleDownload = async (platform: string) => {
     try {
       // Récupérer la dernière release depuis l'API GitHub
-      const response = await fetch('https://api.github.com/repos/lovable-inc/desktop-app/releases/latest')
+      const response = await fetch('https://api.github.com/repos/immoov-organization/desktop-app/releases/latest')
       if (!response.ok) {
+        if (response.status === 404) {
+          toast({
+            title: "Application en cours de déploiement",
+            description: "L'application desktop sera bientôt disponible au téléchargement. Merci de votre patience.",
+          })
+          return
+        }
         throw new Error('Impossible de récupérer la dernière version')
       }
       
@@ -27,7 +34,12 @@ export function Footer() {
       })
 
       if (!asset) {
-        throw new Error(`Aucune version disponible pour ${platform}`)
+        toast({
+          title: "Version non disponible",
+          description: `La version ${platform} n'est pas encore disponible. Elle sera bientôt disponible.`,
+          variant: "destructive"
+        })
+        return
       }
 
       // Créer un lien temporaire pour le téléchargement
