@@ -17,7 +17,7 @@ build({
       repo: 'immoo',
       private: false,
       releaseType: 'release',
-      tag: 'V1.0.0'
+      // Retiré le tag spécifique pour permettre la création d'une nouvelle release
     },
     mac: {
       category: 'public.app-category.business',
