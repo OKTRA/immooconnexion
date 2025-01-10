@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { UnitTenantForm } from "../unit/UnitTenantForm"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { ApartmentTenantForm } from "./ApartmentTenantForm"
 import { useState } from "react"
 
 interface ApartmentTenantDialogProps {
@@ -23,19 +24,21 @@ export function ApartmentTenantDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl h-[90vh]">
         <DialogHeader>
           <DialogTitle>
             {tenant ? "Modifier le locataire" : "Ajouter un locataire"}
           </DialogTitle>
         </DialogHeader>
-        <UnitTenantForm
-          unitId={tenant?.unit_id || ""}
-          onSuccess={handleSuccess}
-          isSubmitting={isSubmitting}
-          setIsSubmitting={setIsSubmitting}
-          initialData={tenant}
-        />
+        <ScrollArea className="h-[calc(90vh-120px)] pr-4">
+          <ApartmentTenantForm
+            apartmentId={apartmentId}
+            onSuccess={handleSuccess}
+            isSubmitting={isSubmitting}
+            setIsSubmitting={setIsSubmitting}
+            initialData={tenant}
+          />
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   )
