@@ -22,11 +22,7 @@ export function useTenantForm({ onSuccess, initialData, unitId }: UseTenantFormP
     phone_number: initialData?.phone_number || "",
     birth_date: initialData?.birth_date || "",
     profession: initialData?.profession || "",
-    employer_name: initialData?.employer_name || "",
-    employer_phone: initialData?.employer_phone || "",
-    emergency_contact_name: initialData?.emergency_contact_name || "",
-    emergency_contact_phone: initialData?.emergency_contact_phone || "",
-    additional_notes: initialData?.additional_notes || "",
+    additional_notes: "",
   })
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,12 +68,16 @@ export function useTenantForm({ onSuccess, initialData, unitId }: UseTenantFormP
         }
       }
 
-      // Créer le locataire
       const tenantData = {
-        ...formData,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email,
+        phone_number: formData.phone_number,
+        birth_date: formData.birth_date,
         photo_id_url,
         agency_id: profile.agency_id,
         unit_id: unitId,
+        profession: formData.profession,
       }
 
       let tenantId: string

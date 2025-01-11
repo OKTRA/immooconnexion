@@ -62,7 +62,7 @@ export interface ApartmentLease {
   start_date: string;
   end_date?: string;
   rent_amount: number;
-  deposit_amount?: number;
+  deposit_amount: number;
   payment_frequency: PaymentFrequency;
   duration_type: DurationType;
   status: LeaseStatus;
@@ -72,6 +72,22 @@ export interface ApartmentLease {
   deposit_return_amount?: string;
   deposit_return_notes?: string;
   agency_id: string;
+  created_at: string;
+  updated_at: string;
+  initial_fees_paid: boolean;
+}
+
+export interface ApartmentInspection {
+  id: string;
+  lease_id: string;
+  inspection_date: string;
+  has_damages: boolean;
+  damage_description?: string;
+  repair_costs: number;
+  deposit_returned: number;
+  photo_urls: string[];
+  status: 'pending' | 'completed';
+  type?: 'initial' | 'final';
   created_at: string;
   updated_at: string;
 }
