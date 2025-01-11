@@ -6,11 +6,11 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 
 interface UnitPaymentHistoryProps {
-  unitId: string
+  unitId: string;
 }
 
 export function UnitPaymentHistory({ unitId }: UnitPaymentHistoryProps) {
-  const { data: payments } = useQuery({
+  const { data: payments, isLoading } = useQuery({
     queryKey: ["unit-payments", unitId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -18,19 +18,46 @@ export function UnitPaymentHistory({ unitId }: UnitPaymentHistoryProps) {
         .select(`
           *,
           apartment_leases (
-            tenant:apartment_tenants (
+            tenant_id,
+            apartment_tenants (
               first_name,
               last_name
             )
           )
         `)
-        .eq("apartment_leases.unit_id", unitId)
+        .eq("unit_id", unitId)
         .order("due_date", { ascending: false })
 
       if (error) throw error
       return data
     }
   })
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "paid":
+        return <Badge variant="success">Payé</Badge>
+      case "pending":
+        return <Badge variant="warning">En attente</Badge>
+      case "late":
+        return <Badge variant="destructive">En retard</Badge>
+      default:
+        return <Badge variant="secondary">{status}</Badge>
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Historique des paiements</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">Chargement...</p>
+        </CardContent>
+      </Card>
+    )
+  }
 
   if (!payments?.length) {
     return (
@@ -39,9 +66,7 @@ export function UnitPaymentHistory({ unitId }: UnitPaymentHistoryProps) {
           <CardTitle>Historique des paiements</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-center text-muted-foreground">
-            Aucun paiement enregistré
-          </p>
+          <p className="text-sm text-muted-foreground">Aucun paiement enregistré</p>
         </CardContent>
       </Card>
     )
@@ -53,40 +78,23 @@ export function UnitPaymentHistory({ unitId }: UnitPaymentHistoryProps) {
         <CardTitle>Historique des paiements</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="p-4 text-left">Date</th>
-                <th className="p-4 text-left">Locataire</th>
-                <th className="p-4 text-left">Montant</th>
-                <th className="p-4 text-left">Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {payments.map((payment) => (
-                <tr key={payment.id} className="border-b">
-                  <td className="p-4">
-                    {format(new Date(payment.due_date), "PP", { locale: fr })}
-                  </td>
-                  <td className="p-4">
-                    {payment.apartment_leases?.tenant?.first_name}{" "}
-                    {payment.apartment_leases?.tenant?.last_name}
-                  </td>
-                  <td className="p-4">
-                    {payment.amount.toLocaleString()} FCFA
-                  </td>
-                  <td className="p-4">
-                    <Badge
-                      variant={payment.status === "paid" ? "success" : "destructive"}
-                    >
-                      {payment.status === "paid" ? "Payé" : "En attente"}
-                    </Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="space-y-4">
+          {payments.map((payment) => (
+            <div key={payment.id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <p className="font-medium">
+                  {payment.apartment_leases?.apartment_tenants?.first_name} {payment.apartment_leases?.apartment_tenants?.last_name}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Échéance : {format(new Date(payment.due_date), "d MMMM yyyy", { locale: fr })}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="font-medium">{payment.amount.toLocaleString()} FCFA</p>
+                {getStatusBadge(payment.status)}
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

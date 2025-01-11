@@ -2,18 +2,39 @@ import { UnitBasicInfo } from "./tabs/UnitBasicInfo"
 import { UnitFinancialInfo } from "./tabs/UnitFinancialInfo"
 import { UnitLeaseInfo } from "./tabs/UnitLeaseInfo"
 import { UnitPaymentHistory } from "./tabs/UnitPaymentHistory"
-import { ApartmentUnit } from "@/types/apartment"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
+import { ApartmentUnit, ApartmentLease } from "@/types/apartment"
 
 interface UnitDetailsTabProps {
   unit: ApartmentUnit
 }
 
 export function UnitDetailsTab({ unit }: UnitDetailsTabProps) {
+  const { data: currentLease } = useQuery({
+    queryKey: ["unit-lease", unit.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("apartment_leases")
+        .select("*")
+        .eq("unit_id", unit.id)
+        .eq("status", "active")
+        .single()
+
+      if (error) {
+        if (error.code === "PGRST116") return null // No active lease found
+        throw error
+      }
+
+      return data as ApartmentLease
+    }
+  })
+
   return (
     <div className="space-y-6">
       <UnitBasicInfo unit={unit} />
       <UnitFinancialInfo unit={unit} />
-      <UnitLeaseInfo unitId={unit.id} />
+      <UnitLeaseInfo lease={currentLease} />
       <UnitPaymentHistory unitId={unit.id} />
     </div>
   )

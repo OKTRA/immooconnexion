@@ -2,100 +2,93 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
+import { ApartmentLease } from "@/types/apartment"
 
 interface UnitLeaseInfoProps {
-  unitId: string
+  lease: ApartmentLease | null;
 }
 
-export function UnitLeaseInfo({ unitId }: UnitLeaseInfoProps) {
-  const { data: currentLease } = useQuery({
-    queryKey: ["unit-lease", unitId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("apartment_leases")
-        .select(`
-          *,
-          tenant:apartment_tenants (
-            first_name,
-            last_name,
-            phone_number
-          )
-        `)
-        .eq("unit_id", unitId)
-        .eq("status", "active")
-        .maybeSingle()
-
-      if (error) throw error
-      return data
-    }
-  })
-
-  if (!currentLease) {
+export function UnitLeaseInfo({ lease }: UnitLeaseInfoProps) {
+  if (!lease) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Bail actuel</CardTitle>
+          <CardTitle>Informations du bail</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-center text-muted-foreground">
-            Aucun bail actif
-          </p>
+          <p className="text-sm text-muted-foreground">Aucun bail actif</p>
         </CardContent>
       </Card>
     )
   }
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "active":
+        return <Badge variant="success">Actif</Badge>
+      case "expired":
+        return <Badge variant="destructive">Expiré</Badge>
+      case "terminated":
+        return <Badge variant="warning">Résilié</Badge>
+      default:
+        return <Badge variant="secondary">{status}</Badge>
+    }
+  }
+
+  const getPaymentFrequency = (frequency: string) => {
+    switch (frequency) {
+      case "monthly":
+        return "Mensuel"
+      case "quarterly":
+        return "Trimestriel"
+      case "yearly":
+        return "Annuel"
+      default:
+        return frequency
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Bail actuel</CardTitle>
+        <CardTitle>Informations du bail</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-sm font-medium">Locataire</p>
-            <p className="text-sm text-muted-foreground">
-              {currentLease.tenant?.first_name} {currentLease.tenant?.last_name}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm font-medium">Contact</p>
-            <p className="text-sm text-muted-foreground">
-              {currentLease.tenant?.phone_number || "-"}
-            </p>
-          </div>
-          <div>
             <p className="text-sm font-medium">Date de début</p>
             <p className="text-sm text-muted-foreground">
-              {format(new Date(currentLease.start_date), "PP", { locale: fr })}
+              {format(new Date(lease.start_date), "d MMMM yyyy", { locale: fr })}
             </p>
           </div>
-          {currentLease.end_date && (
-            <div>
-              <p className="text-sm font-medium">Date de fin</p>
-              <p className="text-sm text-muted-foreground">
-                {format(new Date(currentLease.end_date), "PP", { locale: fr })}
-              </p>
-            </div>
-          )}
+          <div>
+            <p className="text-sm font-medium">Date de fin</p>
+            <p className="text-sm text-muted-foreground">
+              {lease.end_date 
+                ? format(new Date(lease.end_date), "d MMMM yyyy", { locale: fr })
+                : "Non définie"}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm font-medium">Statut</p>
+            {getStatusBadge(lease.status)}
+          </div>
           <div>
             <p className="text-sm font-medium">Fréquence de paiement</p>
             <p className="text-sm text-muted-foreground">
-              {currentLease.payment_frequency === "monthly" ? "Mensuel" : 
-               currentLease.payment_frequency === "quarterly" ? "Trimestriel" : 
-               currentLease.payment_frequency === "yearly" ? "Annuel" : 
-               currentLease.payment_frequency}
+              {getPaymentFrequency(lease.payment_frequency)}
             </p>
           </div>
           <div>
             <p className="text-sm font-medium">Type de durée</p>
             <p className="text-sm text-muted-foreground">
-              {currentLease.duration_type === "fixed" ? "Durée déterminée" :
-               currentLease.duration_type === "month_to_month" ? "Mois par mois" :
-               currentLease.duration_type === "yearly" ? "Annuel" :
-               currentLease.duration_type}
+              {lease.duration_type === "fixed" ? "Durée fixe" : "Mois par mois"}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm font-medium">Type de paiement</p>
+            <p className="text-sm text-muted-foreground">
+              {lease.payment_type === "upfront" ? "Début de période" : "Fin de période"}
             </p>
           </div>
         </div>

@@ -534,6 +534,7 @@ export type Database = {
         Row: {
           apartment_id: string
           area: number | null
+          commission_percentage: number | null
           created_at: string | null
           deposit_amount: number | null
           description: string | null
@@ -547,6 +548,7 @@ export type Database = {
         Insert: {
           apartment_id: string
           area?: number | null
+          commission_percentage?: number | null
           created_at?: string | null
           deposit_amount?: number | null
           description?: string | null
@@ -560,6 +562,7 @@ export type Database = {
         Update: {
           apartment_id?: string
           area?: number | null
+          commission_percentage?: number | null
           created_at?: string | null
           deposit_amount?: number | null
           description?: string | null
