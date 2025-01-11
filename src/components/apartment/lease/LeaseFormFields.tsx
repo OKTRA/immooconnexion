@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { LeaseFormData, PaymentFrequency, DurationType, LeaseStatus } from "./types"
+import { LeaseFormData, PaymentFrequency, DurationType, LeaseStatus, PaymentType } from "./types"
 
 interface LeaseFormFieldsProps {
   formData: LeaseFormData
@@ -23,8 +23,8 @@ export function LeaseFormFields({
     console.log('Duration type changed to:', value)
     setFormData({ 
       ...formData, 
-      durationType: value,
-      ...(value !== 'fixed' && { endDate: '' })
+      duration_type: value,
+      ...(value !== 'fixed' && { end_date: '' })
     })
   }
 
@@ -32,43 +32,43 @@ export function LeaseFormFields({
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="startDate">Date de début</Label>
+          <Label htmlFor="start_date">Date de début</Label>
           <Input
-            id="startDate"
+            id="start_date"
             type="date"
-            value={formData.startDate}
-            onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+            value={formData.start_date}
+            onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="endDate">Date de fin</Label>
+          <Label htmlFor="end_date">Date de fin</Label>
           <Input
-            id="endDate"
+            id="end_date"
             type="date"
-            value={formData.endDate}
-            onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+            value={formData.end_date}
+            onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
           />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="rentAmount">Montant du loyer</Label>
+          <Label htmlFor="rent_amount">Montant du loyer</Label>
           <Input
-            id="rentAmount"
+            id="rent_amount"
             type="number"
-            value={formData.rentAmount}
-            onChange={(e) => setFormData({ ...formData, rentAmount: e.target.value })}
+            value={formData.rent_amount}
+            onChange={(e) => setFormData({ ...formData, rent_amount: Number(e.target.value) })}
             placeholder="Montant en FCFA"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="depositAmount">Montant de la caution</Label>
+          <Label htmlFor="deposit_amount">Montant de la caution</Label>
           <Input
-            id="depositAmount"
+            id="deposit_amount"
             type="number"
-            value={formData.depositAmount}
-            onChange={(e) => setFormData({ ...formData, depositAmount: e.target.value })}
+            value={formData.deposit_amount}
+            onChange={(e) => setFormData({ ...formData, deposit_amount: Number(e.target.value) })}
             placeholder="Montant en FCFA"
           />
         </div>
@@ -76,10 +76,10 @@ export function LeaseFormFields({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="paymentFrequency">Fréquence de paiement</Label>
+          <Label htmlFor="payment_frequency">Fréquence de paiement</Label>
           <Select 
-            value={formData.paymentFrequency} 
-            onValueChange={(value: PaymentFrequency) => setFormData({ ...formData, paymentFrequency: value })}
+            value={formData.payment_frequency} 
+            onValueChange={(value: PaymentFrequency) => setFormData({ ...formData, payment_frequency: value })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner une fréquence" />
@@ -94,9 +94,9 @@ export function LeaseFormFields({
           </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="durationType">Type de durée</Label>
+          <Label htmlFor="duration_type">Type de durée</Label>
           <Select 
-            value={formData.durationType} 
+            value={formData.duration_type} 
             onValueChange={handleDurationTypeChange}
           >
             <SelectTrigger>
@@ -113,10 +113,10 @@ export function LeaseFormFields({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="paymentType">Type de paiement</Label>
+          <Label htmlFor="payment_type">Type de paiement</Label>
           <Select
-            value={formData.paymentType}
-            onValueChange={(value) => setFormData({ ...formData, paymentType: value as PaymentType })}
+            value={formData.payment_type}
+            onValueChange={(value: PaymentType) => setFormData({ ...formData, payment_type: value })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner le type de paiement" />

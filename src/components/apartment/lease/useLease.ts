@@ -7,18 +7,20 @@ export function useLease(unitId: string, tenantId?: string) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const [formData, setFormData] = useState<LeaseFormData>({
-    startDate: "",
-    endDate: "",
-    rentAmount: "",
-    depositAmount: "",
-    paymentFrequency: "monthly",
-    durationType: "fixed",
+    tenant_id: tenantId || '',
+    unit_id: unitId,
+    start_date: "",
+    end_date: "",
+    rent_amount: 0,
+    deposit_amount: 0,
+    payment_frequency: "monthly",
+    duration_type: "fixed",
     status: "active",
-    depositReturned: false,
-    depositReturnAmount: "",
-    depositReturnDate: "",
-    depositReturnNotes: "",
-    paymentType: "upfront"
+    payment_type: "upfront",
+    deposit_returned: false,
+    deposit_return_date: "",
+    deposit_return_amount: "",
+    deposit_return_notes: ""
   })
 
   const handleSubmit = async () => {
@@ -38,26 +40,26 @@ export function useLease(unitId: string, tenantId?: string) {
         throw new Error("Aucune agence associée à ce profil")
       }
 
-      const endDate = formData.durationType === "fixed" ? formData.endDate : null
+      const endDate = formData.duration_type === "fixed" ? formData.end_date : null
 
       const { data: lease, error: leaseError } = await supabase
         .from('apartment_leases')
         .insert({
           tenant_id: tenantId,
           unit_id: unitId,
-          start_date: formData.startDate,
+          start_date: formData.start_date,
           end_date: endDate,
-          rent_amount: parseInt(formData.rentAmount),
-          deposit_amount: parseInt(formData.depositAmount),
-          payment_frequency: formData.paymentFrequency,
-          duration_type: formData.durationType,
+          rent_amount: formData.rent_amount,
+          deposit_amount: formData.deposit_amount,
+          payment_frequency: formData.payment_frequency,
+          duration_type: formData.duration_type,
           status: formData.status,
-          deposit_returned: formData.depositReturned,
-          deposit_return_date: formData.depositReturnDate || null,
-          deposit_return_amount: formData.depositReturnAmount ? parseInt(formData.depositReturnAmount) : null,
-          deposit_return_notes: formData.depositReturnNotes || null,
+          deposit_returned: formData.deposit_returned,
+          deposit_return_date: formData.deposit_return_date || null,
+          deposit_return_amount: formData.deposit_return_amount ? parseInt(formData.deposit_return_amount) : null,
+          deposit_return_notes: formData.deposit_return_notes || null,
           agency_id: profile.agency_id,
-          payment_type: formData.paymentType,
+          payment_type: formData.payment_type,
           initial_fees_paid: false
         })
         .select()
@@ -69,7 +71,7 @@ export function useLease(unitId: string, tenantId?: string) {
       }
 
       // Create initial payment records if upfront payment
-      if (formData.paymentType === "upfront") {
+      if (formData.payment_type === "upfront") {
         // Create deposit payment
         const { error: depositError } = await supabase
           .from('apartment_lease_payments')
