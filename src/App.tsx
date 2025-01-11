@@ -54,13 +54,15 @@ export default function App() {
               <Route path="/subscription/upgrade" element={<SubscriptionUpgrade />} />
               <Route path="/public/properties" element={<PublicProperties />} />
               <Route path="/terms" element={<TermsOfService />} />
-              <Route path="/apartments" element={<Apartments />} />
-              <Route path="/apartments/:id" element={<ApartmentDetails />} />
-              <Route path="/apartments/:id/units" element={<ApartmentUnits />} />
-              <Route path="/apartments/units/:id" element={<UnitDetails />} />
-              <Route path="/apartments/tenants" element={<ApartmentTenants />} />
-              <Route path="/apartments/tenants/:id/payments" element={<ApartmentTenantPayments />} />
-              <Route path="/apartments/tenants/:id/leases" element={<ApartmentTenantLeases />} />
+              
+              {/* Routes pour la gestion des appartements */}
+              <Route path="/agence/apartments" element={<Apartments />} />
+              <Route path="/agence/apartments/:id" element={<ApartmentDetails />} />
+              <Route path="/agence/apartments/:id/units" element={<ApartmentUnits />} />
+              <Route path="/agence/apartments/units/:id" element={<UnitDetails />} />
+              <Route path="/agence/apartment-tenants" element={<ApartmentTenants />} />
+              <Route path="/agence/apartment-tenants/:id/payments" element={<ApartmentTenantPayments />} />
+              <Route path="/agence/apartment-tenants/:id/leases" element={<ApartmentTenantLeases />} />
             </Routes>
             <Toaster />
           </AuthProvider>
