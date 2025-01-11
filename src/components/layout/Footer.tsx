@@ -6,16 +6,22 @@ export function Footer() {
   useEffect(() => {
     const fetchVersion = async () => {
       try {
-        const response = await fetch("https://api.github.com/repos/OKTRA/immoo/releases/latest");
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
+        // Only attempt to fetch if we're not in development
+        if (import.meta.env.DEV) {
+          console.log("Development mode - using default version")
+          return
         }
-        const data = await response.json();
-        setVersion(data.tag_name);
+
+        const response = await fetch("https://api.github.com/repos/OKTRA/immoo/releases/latest")
+        if (!response.ok) {
+          throw new Error(`GitHub API error: ${response.status}`)
+        }
+        const data = await response.json()
+        setVersion(data.tag_name)
       } catch (error) {
-        console.log("Error fetching version:", error);
-        console.log("Using default version since repository is not accessible");
-        setVersion("1.0.0");
+        // Log the error but don't let it break the UI
+        console.log("Using default version since repository is not accessible")
+        // Keep using the default version set in state
       }
     }
 
