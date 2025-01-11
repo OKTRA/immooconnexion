@@ -6,23 +6,23 @@ import { useToast } from "@/hooks/use-toast"
 import { ContactFields } from "./form/ContactFields"
 import { LeaseFields } from "./form/LeaseFields"
 import { PhotoUpload } from "./form/PhotoUpload"
-import { PaymentFrequency, DurationType, LeaseStatus } from "../../apartment/lease/types"
+import { PaymentFrequency, DurationType, LeaseStatus } from "../lease/types"
 
-export interface UnitTenantFormProps {
-  unitId: string
+export interface ApartmentTenantFormProps {
+  apartmentId: string
   onSuccess: () => void
   isSubmitting: boolean
   setIsSubmitting: (value: boolean) => void
   initialData?: any
 }
 
-export function UnitTenantForm({
-  unitId,
+export function ApartmentTenantForm({
+  apartmentId,
   onSuccess,
   isSubmitting,
   setIsSubmitting,
   initialData
-}: UnitTenantFormProps) {
+}: ApartmentTenantFormProps) {
   const { toast } = useToast()
   const [formData, setFormData] = useState({
     firstName: "",
@@ -32,7 +32,7 @@ export function UnitTenantForm({
     birthDate: "",
     rentAmount: "",
     depositAmount: "",
-    agencyFees: "", // Ajout des frais d'agence
+    agencyFees: "",
     startDate: "",
     endDate: "",
     paymentFrequency: "monthly" as PaymentFrequency,
@@ -93,7 +93,7 @@ export function UnitTenantForm({
           birth_date: formData.birthDate,
           photo_id_url: photoUrls.length > 0 ? photoUrls[0] : null,
           agency_id: profile.agency_id,
-          unit_id: unitId,
+          unit_id: apartmentId,
           agency_fees: parseInt(formData.agencyFees)
         })
         .select()
@@ -106,7 +106,7 @@ export function UnitTenantForm({
         .from("apartment_leases")
         .insert({
           tenant_id: tenant.id,
-          unit_id: unitId,
+          unit_id: apartmentId,
           rent_amount: parseInt(formData.rentAmount),
           deposit_amount: parseInt(formData.depositAmount),
           start_date: formData.startDate,
@@ -125,7 +125,7 @@ export function UnitTenantForm({
       // Créer les paiements initiaux
       const payments = [
         {
-          lease_id: lease.data.id,
+          lease_id: lease.id,
           amount: parseInt(formData.agencyFees),
           due_date: formData.startDate,
           status: 'pending',
@@ -134,7 +134,7 @@ export function UnitTenantForm({
           type: 'agency_fees'
         },
         {
-          lease_id: lease.data.id,
+          lease_id: lease.id,
           amount: parseInt(formData.depositAmount),
           due_date: formData.startDate,
           status: 'pending',
