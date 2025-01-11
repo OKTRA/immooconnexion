@@ -1,4 +1,3 @@
-<lov-code>
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ThemeProvider } from "@/providers/ThemeProvider"
@@ -42,3 +41,31 @@ export default function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/super-admin/login" element={<SuperAdminLogin />} />
               <Route path="/super-admin/admin" element={<AdminDashboard />} />
+              <Route path="/properties" element={<Properties />} />
+              <Route path="/property/:id" element={<PropertyDetails />} />
+              <Route path="/tenants" element={<Tenants />} />
+              <Route path="/tenant-contracts" element={<TenantContracts />} />
+              <Route path="/expenses" element={<Expenses />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/agency/dashboard" element={<AgencyDashboard />} />
+              <Route path="/agency/earnings" element={<AgencyEarnings />} />
+              <Route path="/property-sales" element={<PropertySales />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/subscription/upgrade" element={<SubscriptionUpgrade />} />
+              <Route path="/public/properties" element={<PublicProperties />} />
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/apartments" element={<Apartments />} />
+              <Route path="/apartments/:id" element={<ApartmentDetails />} />
+              <Route path="/apartments/:id/units" element={<ApartmentUnits />} />
+              <Route path="/apartments/units/:id" element={<UnitDetails />} />
+              <Route path="/apartments/tenants" element={<ApartmentTenants />} />
+              <Route path="/apartments/tenants/:id/payments" element={<ApartmentTenantPayments />} />
+              <Route path="/apartments/tenants/:id/leases" element={<ApartmentTenantLeases />} />
+            </Routes>
+            <Toaster />
+          </AuthProvider>
+        </Router>
+      </ThemeProvider>
+    </QueryClientProvider>
+  )
+}
