@@ -76,6 +76,33 @@ export function LeaseFormFields({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
+          <Label htmlFor="agency_fees_percentage">Frais d'agence (%)</Label>
+          <Input
+            id="agency_fees_percentage"
+            type="number"
+            min="0"
+            max="100"
+            value={formData.agency_fees_percentage}
+            onChange={(e) => setFormData({ ...formData, agency_fees_percentage: Number(e.target.value) })}
+            placeholder="Par défaut 50% du loyer"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="commission_percentage">Commission (%)</Label>
+          <Input
+            id="commission_percentage"
+            type="number"
+            min="5"
+            max="25"
+            value={formData.commission_percentage}
+            onChange={(e) => setFormData({ ...formData, commission_percentage: Number(e.target.value) })}
+            placeholder="Entre 5% et 25%"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
           <Label htmlFor="payment_frequency">Fréquence de paiement</Label>
           <Select 
             value={formData.payment_frequency} 

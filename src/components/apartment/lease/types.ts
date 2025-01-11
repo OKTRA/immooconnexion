@@ -18,4 +18,6 @@ export interface LeaseFormData {
   deposit_return_date?: string;
   deposit_return_amount?: string;
   deposit_return_notes?: string;
+  agency_fees_percentage: number;
+  commission_percentage: number;
 }

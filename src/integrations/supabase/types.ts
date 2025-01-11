@@ -251,6 +251,7 @@ export type Database = {
         Row: {
           agency_id: string
           amount: number
+          commission_percentage: number | null
           created_at: string | null
           due_date: string
           id: string
@@ -259,11 +260,13 @@ export type Database = {
           payment_date: string | null
           payment_method: string | null
           status: string
+          type: string | null
           updated_at: string | null
         }
         Insert: {
           agency_id: string
           amount: number
+          commission_percentage?: number | null
           created_at?: string | null
           due_date: string
           id?: string
@@ -272,11 +275,13 @@ export type Database = {
           payment_date?: string | null
           payment_method?: string | null
           status?: string
+          type?: string | null
           updated_at?: string | null
         }
         Update: {
           agency_id?: string
           amount?: number
+          commission_percentage?: number | null
           created_at?: string | null
           due_date?: string
           id?: string
@@ -285,6 +290,7 @@ export type Database = {
           payment_date?: string | null
           payment_method?: string | null
           status?: string
+          type?: string | null
           updated_at?: string | null
         }
         Relationships: [
