@@ -63,8 +63,8 @@ export function useTenants() {
         .from('tenants')
         .select(`
           id,
-          first_name,
-          last_name,
+          nom,
+          prenom,
           birth_date,
           phone_number,
           photo_id_url,
@@ -84,8 +84,8 @@ export function useTenants() {
 
       return tenantsData.map(tenant => ({
         id: tenant.id,
-        first_name: tenant.first_name || '',
-        last_name: tenant.last_name || '',
+        first_name: tenant.prenom,
+        last_name: tenant.nom,
         birth_date: tenant.birth_date || '',
         phone_number: tenant.phone_number || '',
         photo_id_url: tenant.photo_id_url,
