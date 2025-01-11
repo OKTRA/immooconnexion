@@ -2,10 +2,11 @@ import { useParams } from "react-router-dom"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { UnitHeader } from "@/components/apartment/unit/UnitHeader"
 import { UnitTenantTab } from "@/components/apartment/unit/UnitTenantTab"
 import { UnitDetailsTab } from "@/components/apartment/unit/UnitDetailsTab"
+import { ApartmentUnit } from "@/components/apartment/types"
 
 export default function UnitDetails() {
   const { id } = useParams<{ id: string }>()
@@ -22,10 +23,14 @@ export default function UnitDetails() {
           apartment:apartments(name)
         `)
         .eq("id", id)
-        .single()
+        .maybeSingle()
 
-      if (error) throw error
-      return data
+      if (error) {
+        console.error("Error fetching unit:", error)
+        throw error
+      }
+
+      return data as ApartmentUnit & { apartment: { name: string } }
     },
     enabled: Boolean(id)
   })

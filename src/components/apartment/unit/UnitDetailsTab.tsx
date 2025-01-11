@@ -3,11 +3,11 @@ import { UnitFinancialInfo } from "./tabs/UnitFinancialInfo"
 import { UnitLeaseInfo } from "./tabs/UnitLeaseInfo"
 import { UnitPaymentHistory } from "./tabs/UnitPaymentHistory"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { ApartmentUnit, ApartmentLease } from "@/types/apartment"
+import { supabase } from "@/lib/supabase"
+import { ApartmentUnit, ApartmentLease } from "@/components/apartment/types"
 
 interface UnitDetailsTabProps {
-  unit: ApartmentUnit
+  unit: ApartmentUnit & { apartment?: { name: string } }
 }
 
 export function UnitDetailsTab({ unit }: UnitDetailsTabProps) {
@@ -19,9 +19,10 @@ export function UnitDetailsTab({ unit }: UnitDetailsTabProps) {
         .select("*")
         .eq("unit_id", unit.id)
         .eq("status", "active")
-        .single()
+        .maybeSingle()
 
       if (error) {
+        console.error("Error fetching lease:", error)
         if (error.code === "PGRST116") return null // No active lease found
         throw error
       }
