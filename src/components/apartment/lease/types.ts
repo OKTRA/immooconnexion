@@ -14,4 +14,8 @@ export interface LeaseFormData {
   duration_type: DurationType;
   status: LeaseStatus;
   payment_type: PaymentType;
+  deposit_returned?: boolean;
+  deposit_return_date?: string;
+  deposit_return_amount?: string;
+  deposit_return_notes?: string;
 }

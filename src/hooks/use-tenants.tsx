@@ -3,17 +3,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { useToast } from "@/components/ui/use-toast"
-
-export interface TenantDisplay {
-  id: string
-  nom: string
-  prenom: string
-  dateNaissance: string
-  telephone: string
-  photoIdUrl?: string
-  fraisAgence?: string
-  user_id?: string
-}
+import { TenantDisplay } from "@/types/tenant"
 
 export function useTenants() {
   const { toast } = useToast()
@@ -73,14 +63,16 @@ export function useTenants() {
         .from('tenants')
         .select(`
           id,
-          nom,
-          prenom,
+          first_name,
+          last_name,
           birth_date,
           phone_number,
           photo_id_url,
           agency_fees,
-          user_id,
-          agency_id
+          property_id,
+          profession,
+          created_at,
+          updated_at
         `)
         .eq('agency_id', profileData.agency_id)
         .order('created_at', { ascending: false })
@@ -90,16 +82,7 @@ export function useTenants() {
         throw tenantsError
       }
 
-      return tenantsData.map((tenant: any) => ({
-        id: tenant.id,
-        nom: tenant.nom || '',
-        prenom: tenant.prenom || '',
-        dateNaissance: tenant.birth_date || '',
-        telephone: tenant.phone_number || '',
-        photoIdUrl: tenant.photo_id_url,
-        fraisAgence: tenant.agency_fees?.toString(),
-        user_id: tenant.user_id,
-      }))
+      return tenantsData as TenantDisplay[]
     },
     enabled: !!session
   })
