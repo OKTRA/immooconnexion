@@ -42,6 +42,7 @@ export function useLease(unitId: string, tenantId?: string) {
 
       const endDate = formData.duration_type === "fixed" ? formData.end_date : null
 
+      // Create the lease
       const { data: lease, error: leaseError } = await supabase
         .from('apartment_leases')
         .insert({
@@ -70,7 +71,7 @@ export function useLease(unitId: string, tenantId?: string) {
         throw leaseError
       }
 
-      // Create initial payment records if upfront payment
+      // Create initial payments if upfront payment
       if (formData.payment_type === "upfront") {
         // Create deposit payment
         const { error: depositError } = await supabase
@@ -81,10 +82,26 @@ export function useLease(unitId: string, tenantId?: string) {
             due_date: lease.start_date,
             status: 'pending',
             agency_id: profile.agency_id,
-            payment_method: 'cash'
+            payment_method: 'cash',
+            type: 'deposit'
           })
 
         if (depositError) throw depositError
+
+        // Create agency fees payment
+        const { error: feesError } = await supabase
+          .from('apartment_lease_payments')
+          .insert({
+            lease_id: lease.id,
+            amount: lease.rent_amount * 0.1, // 10% of rent as agency fees
+            due_date: lease.start_date,
+            status: 'pending',
+            agency_id: profile.agency_id,
+            payment_method: 'cash',
+            type: 'agency_fees'
+          })
+
+        if (feesError) throw feesError
 
         // Create first rent payment
         const { error: rentError } = await supabase
@@ -95,7 +112,8 @@ export function useLease(unitId: string, tenantId?: string) {
             due_date: lease.start_date,
             status: 'pending',
             agency_id: profile.agency_id,
-            payment_method: 'cash'
+            payment_method: 'cash',
+            type: 'rent'
           })
 
         if (rentError) throw rentError
@@ -103,7 +121,7 @@ export function useLease(unitId: string, tenantId?: string) {
 
       toast({
         title: "Contrat créé",
-        description: "Le contrat de location a été créé avec succès",
+        description: "Le contrat de location et les paiements initiaux ont été créés avec succès",
       })
     } catch (error: any) {
       console.error('Error:', error)

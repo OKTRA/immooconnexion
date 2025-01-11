@@ -1,4 +1,4 @@
-export interface ApartmentUnitStatus = "available" | "occupied" | "maintenance";
+export type ApartmentUnitStatus = "available" | "occupied" | "maintenance";
 
 export interface ApartmentUnit {
   id: string;
