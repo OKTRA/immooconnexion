@@ -13,11 +13,11 @@ export function PropertyActions({ propertyId, onEdit, onDelete, propertyType }: 
   const navigate = useNavigate()
 
   const handleViewProperty = () => {
-    navigate(`/agence/biens/${propertyId}`)
+    navigate(`/agence/properties/${propertyId}`)
   }
 
   const handleManageUnits = () => {
-    navigate(`/agence/appartements/${propertyId}/unites`)
+    navigate(`/agence/apartments/${propertyId}/units`)
   }
 
   return (
