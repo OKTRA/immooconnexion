@@ -37,9 +37,9 @@ export function UnitFormFields({
           <Input
             id="floor_number"
             type="number"
-            value={formData.floor_number}
+            value={formData.floor_number || ''}
             onChange={(e) =>
-              setFormData({ ...formData, floor_number: Number(e.target.value) })
+              setFormData({ ...formData, floor_number: e.target.value ? Number(e.target.value) : null })
             }
           />
         </div>
@@ -49,8 +49,10 @@ export function UnitFormFields({
           <Input
             id="area"
             type="number"
-            value={formData.area}
-            onChange={(e) => setFormData({ ...formData, area: Number(e.target.value) })}
+            value={formData.area || ''}
+            onChange={(e) => 
+              setFormData({ ...formData, area: e.target.value ? Number(e.target.value) : null })
+            }
           />
         </div>
 
@@ -71,9 +73,23 @@ export function UnitFormFields({
           <Input
             id="deposit_amount"
             type="number"
-            value={formData.deposit_amount}
+            value={formData.deposit_amount || ''}
             onChange={(e) =>
-              setFormData({ ...formData, deposit_amount: Number(e.target.value) })
+              setFormData({ ...formData, deposit_amount: e.target.value ? Number(e.target.value) : null })
+            }
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="commission_percentage">Commission (%)</Label>
+          <Input
+            id="commission_percentage"
+            type="number"
+            min="5"
+            max="25"
+            value={formData.commission_percentage || 10}
+            onChange={(e) =>
+              setFormData({ ...formData, commission_percentage: Number(e.target.value) })
             }
           />
         </div>
@@ -102,7 +118,7 @@ export function UnitFormFields({
           <Label htmlFor="description">Description</Label>
           <Textarea
             id="description"
-            value={formData.description}
+            value={formData.description || ''}
             onChange={(e) =>
               setFormData({ ...formData, description: e.target.value })
             }

@@ -8,17 +8,17 @@ export function useUnitForm(
 ) {
   const [formData, setFormData] = useState<ApartmentUnitFormData>({
     unit_number: initialData?.unit_number || "",
-    floor_number: initialData?.floor_number || 0,
-    area: initialData?.area || 0,
+    floor_number: initialData?.floor_number || null,
+    area: initialData?.area || null,
     rent_amount: initialData?.rent_amount || 0,
-    deposit_amount: initialData?.deposit_amount || 0,
+    deposit_amount: initialData?.deposit_amount || null,
     status: initialData?.status || "available",
-    description: initialData?.description || "",
-    photo_urls: initialData?.photo_urls || []
+    description: initialData?.description || null,
+    commission_percentage: initialData?.commission_percentage || 10
   })
 
   const [images, setImages] = useState<File[]>([])
-  const [previewUrls, setPreviewUrls] = useState<string[]>(initialData?.photo_urls || [])
+  const [previewUrls, setPreviewUrls] = useState<string[]>([])
 
   const handleSubmit = async () => {
     if (!onSubmit) return
@@ -27,13 +27,13 @@ export function useUnitForm(
       id: initialData?.id || "",
       apartment_id: apartmentId,
       unit_number: formData.unit_number,
-      floor_number: Number(formData.floor_number),
-      area: Number(formData.area),
-      rent_amount: Number(formData.rent_amount),
-      deposit_amount: Number(formData.deposit_amount),
+      floor_number: formData.floor_number,
+      area: formData.area,
+      rent_amount: formData.rent_amount,
+      deposit_amount: formData.deposit_amount,
       status: formData.status,
       description: formData.description,
-      photo_urls: formData.photo_urls,
+      commission_percentage: formData.commission_percentage,
       created_at: initialData?.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString()
     }
