@@ -6,7 +6,7 @@ export interface UnitTenantDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   unitId: string;
-  onSuccess: (tenantId: string) => void;
+  onSuccess?: (tenantId: string) => void;
 }
 
 export function UnitTenantDialog({
