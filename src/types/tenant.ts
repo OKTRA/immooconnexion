@@ -23,6 +23,7 @@ export interface TenantReceiptData {
   };
   isInitialReceipt?: boolean;
   isEndReceipt?: boolean;
+  contractId?: string;
 }
 
 export interface TenantDisplay {

@@ -4,17 +4,18 @@ export interface TenantReceiptProps {
   tenant: TenantReceiptData;
   isInitialReceipt?: boolean;
   isEndReceipt?: boolean;
+  contractId?: string;
   lease?: {
     rent_amount: number;
     deposit_amount: number;
   };
 }
 
-export function TenantReceipt({ tenant, isInitialReceipt, isEndReceipt, lease }: TenantReceiptProps) {
+export function TenantReceipt({ tenant, isInitialReceipt, isEndReceipt, lease, contractId }: TenantReceiptProps) {
   return (
     <div className="p-4 border rounded">
       <h3 className="text-lg font-semibold mb-2">
-        Reçu {isEndReceipt ? "de fin de contrat" : ""}
+        {isEndReceipt ? "Reçu de fin de contrat" : "Reçu de paiement"}
       </h3>
       <div className="space-y-2">
         <p>Nom: {tenant.first_name} {tenant.last_name}</p>
