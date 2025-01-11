@@ -12,6 +12,7 @@ export interface ApartmentUnit {
   description: string | null;
   created_at?: string;
   updated_at?: string;
+  commission_percentage?: number;
 }
 
 export interface ApartmentUnitFormData {
@@ -22,6 +23,7 @@ export interface ApartmentUnitFormData {
   deposit_amount: string;
   status: ApartmentUnitStatus;
   description: string;
+  commission_percentage: string;
 }
 
 export interface ApartmentContract {
@@ -50,6 +52,20 @@ export interface ApartmentInspectionProps {
   lease: ApartmentContract;
   onClose: () => void;
   onSuccess?: () => void;
+}
+
+export interface ApartmentInspection {
+  id: string;
+  lease_id: string;
+  inspection_date: string;
+  has_damages: boolean;
+  damage_description: string | null;
+  repair_costs: number;
+  deposit_returned: number;
+  photo_urls: string[];
+  status: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Apartment {
@@ -92,3 +108,4 @@ export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'y
 export type DurationType = 'fixed' | 'month_to_month' | 'yearly';
 export type LeaseStatus = 'active' | 'expired' | 'terminated';
 export type PaymentType = 'upfront' | 'end_of_period';
+
