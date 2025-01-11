@@ -82,10 +82,24 @@ export function useTenants() {
         throw tenantsError
       }
 
-      return tenantsData as TenantDisplay[]
+      return tenantsData.map(tenant => ({
+        id: tenant.id,
+        first_name: tenant.first_name || '',
+        last_name: tenant.last_name || '',
+        birth_date: tenant.birth_date || '',
+        phone_number: tenant.phone_number || '',
+        photo_id_url: tenant.photo_id_url,
+        agency_fees: tenant.agency_fees,
+        property_id: tenant.property_id,
+        profession: tenant.profession || '',
+        created_at: tenant.created_at,
+        updated_at: tenant.updated_at
+      })) as TenantDisplay[]
     },
     enabled: !!session
   })
 
   return { tenants, isLoading, error, session, refetch }
 }
+
+export type { TenantDisplay }

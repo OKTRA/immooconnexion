@@ -10,6 +10,12 @@ export interface TenantFormData {
   profession?: string;
 }
 
+export interface TenantDisplay extends TenantFormData {
+  id: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface TenantReceiptData {
   first_name: string;
   last_name: string;
@@ -24,18 +30,4 @@ export interface TenantReceiptData {
   isInitialReceipt?: boolean;
   isEndReceipt?: boolean;
   contractId?: string;
-}
-
-export interface TenantDisplay {
-  id: string;
-  first_name: string;
-  last_name: string;
-  birth_date?: string;
-  phone_number: string;
-  photo_id_url?: string;
-  agency_fees?: number;
-  property_id?: string;
-  profession?: string;
-  created_at: string;
-  updated_at: string;
 }
