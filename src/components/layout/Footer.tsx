@@ -6,13 +6,10 @@ export function Footer() {
   useEffect(() => {
     const fetchVersion = async () => {
       try {
-        const response = await fetch("https://api.github.com/repos/OKTRA/immoo/releases/latest")
-        if (response.ok) {
-          const data = await response.json()
-          setVersion(data.tag_name || "1.0.0")
-        } else {
-          console.log("Could not fetch version, using default:", response.status)
-        }
+        // Since we're getting a 404, let's just use the default version
+        // We can update this URL later when the correct repository is available
+        console.log("Using default version since repository is not accessible")
+        setVersion("1.0.0")
       } catch (error) {
         console.log("Error fetching version:", error)
         // Keep default version if there's an error
