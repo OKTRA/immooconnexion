@@ -27,6 +27,7 @@ import UnitDetails from "@/pages/UnitDetails"
 import ApartmentTenants from "@/pages/ApartmentTenants"
 import ApartmentTenantPayments from "@/pages/ApartmentTenantPayments"
 import ApartmentTenantLeases from "@/pages/ApartmentTenantLeases"
+import ApartmentTenantDetails from "@/pages/ApartmentTenantDetails"
 
 const queryClient = new QueryClient()
 
@@ -61,6 +62,7 @@ export default function App() {
                 <Route path="apartments/:id/units" element={<ApartmentUnits />} />
                 <Route path="apartments/:apartmentId/units/:unitId" element={<UnitDetails />} />
                 <Route path="apartment-tenants" element={<ApartmentTenants />} />
+                <Route path="apartment-tenants/:tenantId" element={<ApartmentTenantDetails />} />
                 <Route path="apartments/tenants/:tenantId/payments" element={<ApartmentTenantPayments />} />
                 <Route path="apartments/tenants/:tenantId/leases" element={<ApartmentTenantLeases />} />
               </Route>

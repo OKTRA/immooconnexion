@@ -37,7 +37,7 @@ export function TenantActionButtons({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate(`/agence/apartments/${tenant.apartment_id}/units/${tenant.unit_id}`)}
+              onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}`)}
             >
               <Eye className="h-4 w-4" />
             </Button>
