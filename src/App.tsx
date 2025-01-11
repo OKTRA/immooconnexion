@@ -57,8 +57,10 @@ export default function App() {
                 <Route path="apartments" element={<Apartments />} />
                 <Route path="apartments/:id" element={<ApartmentDetails />} />
                 <Route path="apartments/:id/units" element={<ApartmentUnits />} />
-                <Route path="unite/:id" element={<UnitDetails />} />
+                <Route path="apartments/:apartmentId/units/:unitId" element={<UnitDetails />} />
                 <Route path="apartment-tenants" element={<ApartmentTenants />} />
+                <Route path="apartments/tenants/:tenantId/payments" element={<ApartmentTenantPayments />} />
+                <Route path="apartments/tenants/:tenantId/leases" element={<ApartmentTenantLeases />} />
               </Route>
             </Routes>
             <Toaster />

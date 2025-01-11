@@ -2,16 +2,14 @@ import { Button } from "@/components/ui/button"
 import { Edit, Eye, Trash2, Receipt, CreditCard, ClipboardList, FileCheck } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useState } from "react"
+import { TenantReceipt } from "@/components/tenants/TenantReceipt"
 
 interface TenantActionButtonsProps {
   tenant: any
@@ -29,90 +27,149 @@ export function TenantActionButtons({
   onInspection 
 }: TenantActionButtonsProps) {
   const navigate = useNavigate()
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-
-  const handleDelete = () => {
-    setShowDeleteConfirm(true)
-  }
-
-  const confirmDelete = async () => {
-    onDelete()
-    setShowDeleteConfirm(false)
-  }
+  const [showReceipt, setShowReceipt] = useState(false)
 
   return (
-    <>
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate(`/agence/unite/${tenant.unit_id}`)}
-        >
-          <Eye className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onEdit}
-        >
-          <Edit className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate(`/agence/locataires/${tenant.id}/recu`)}
-        >
-          <Receipt className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate(`/agence/locataires/${tenant.id}/paiements`)}
-        >
-          <CreditCard className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate(`/agence/locataires/${tenant.id}/contrats`)}
-        >
-          <ClipboardList className="h-4 w-4" />
-        </Button>
-        {currentLease?.status === 'active' && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onInspection}
-          >
-            <FileCheck className="h-4 w-4" />
-          </Button>
-        )}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleDelete}
-          className="text-red-500 hover:text-red-600"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
+    <div className="flex items-center gap-2">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(`/agence/apartments/${tenant.apartment_id}/units/${tenant.unit_id}`)}
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Voir les détails</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer ce locataire ? Cette action est irréversible.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-500 hover:bg-red-600">
-              Supprimer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onEdit}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Modifier</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowReceipt(true)}
+            >
+              <Receipt className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Reçu de paiement</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(`/agence/apartments/tenants/${tenant.id}/payments`)}
+            >
+              <CreditCard className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Paiements</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(`/agence/apartments/tenants/${tenant.id}/leases`)}
+            >
+              <ClipboardList className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Contrats</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      {currentLease?.status === 'active' && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onInspection}
+              >
+                <FileCheck className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>État des lieux</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onDelete}
+              className="text-red-500 hover:text-red-600"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Supprimer</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reçu de paiement</DialogTitle>
+          </DialogHeader>
+          <TenantReceipt 
+            tenant={{
+              first_name: tenant.first_name,
+              last_name: tenant.last_name,
+              phone_number: tenant.phone_number,
+              agency_fees: tenant.agency_fees,
+              profession: tenant.profession
+            }}
+            lease={currentLease}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }
