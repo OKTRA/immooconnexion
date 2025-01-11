@@ -20,7 +20,7 @@ export function usePropertyUnits(propertyId: string) {
   })
 
   const addUnit = useMutation({
-    mutationFn: async (formData: PropertyUnitFormData & { property_id: string }) => {
+    mutationFn: async (formData: Omit<PropertyUnitFormData, 'id'> & { property_id: string }) => {
       const { data, error } = await supabase
         .from("property_units")
         .insert([formData])
@@ -36,7 +36,7 @@ export function usePropertyUnits(propertyId: string) {
   })
 
   const updateUnit = useMutation({
-    mutationFn: async (unit: PropertyUnitFormData & { property_id: string }) => {
+    mutationFn: async (unit: PropertyUnitFormData & { property_id: string; id: string }) => {
       const { data, error } = await supabase
         .from("property_units")
         .update(unit)

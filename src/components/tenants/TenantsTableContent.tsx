@@ -1,11 +1,11 @@
 import { TableBody } from "@/components/ui/table"
 import { TenantTableRow } from "./TenantTableRow"
-import { TenantDisplay } from "@/hooks/use-tenants"
+import { TenantDisplay } from "@/types/tenant"
 
 interface TenantsTableContentProps {
   tenants: TenantDisplay[]
   onEdit: (tenant: TenantDisplay) => void
-  onDelete: (id: string) => void
+  onDelete: (id: string) => Promise<void>
 }
 
 export function TenantsTableContent({ tenants, onEdit, onDelete }: TenantsTableContentProps) {
@@ -28,7 +28,7 @@ export function TenantsTableContent({ tenants, onEdit, onDelete }: TenantsTableC
           key={tenant.id}
           tenant={tenant}
           onEdit={onEdit}
-          onDelete={onDelete}
+          onDelete={async (id) => await onDelete(id)}
         />
       ))}
     </TableBody>

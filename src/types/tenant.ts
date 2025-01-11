@@ -2,21 +2,12 @@ export interface TenantFormData {
   id?: string;
   first_name: string;
   last_name: string;
-  phone_number: string;
-  email?: string;
   birth_date?: string;
-  profession?: string;
-  agency_fees?: number;
+  phone_number: string;
   photo_id_url?: string;
+  agency_fees?: number;
   property_id?: string;
-}
-
-export interface TenantReceiptProps {
-  tenant: TenantReceiptData;
-  isEndReceipt?: boolean;
-  isInitialReceipt?: boolean;
-  lease?: any;
-  contractId?: string;
+  profession?: string;
 }
 
 export interface TenantReceiptData {
@@ -24,18 +15,26 @@ export interface TenantReceiptData {
   last_name: string;
   phone_number: string;
   agency_fees?: number;
-  profession?: string;
   property_id?: string;
+  profession?: string;
+  lease?: {
+    rent_amount: number;
+    deposit_amount: number;
+  };
+  isInitialReceipt?: boolean;
+  isEndReceipt?: boolean;
 }
 
 export interface TenantDisplay {
   id: string;
   first_name: string;
   last_name: string;
-  phone_number: string;
   birth_date?: string;
+  phone_number: string;
   photo_id_url?: string;
   agency_fees?: number;
-  profession?: string;
   property_id?: string;
+  profession?: string;
+  created_at: string;
+  updated_at: string;
 }

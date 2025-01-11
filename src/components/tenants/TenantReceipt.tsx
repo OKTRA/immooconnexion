@@ -2,6 +2,7 @@ import { TenantReceiptData } from "@/types/tenant";
 
 export interface TenantReceiptProps {
   tenant: TenantReceiptData;
+  isInitialReceipt?: boolean;
   isEndReceipt?: boolean;
   lease?: {
     rent_amount: number;
@@ -9,7 +10,7 @@ export interface TenantReceiptProps {
   };
 }
 
-export function TenantReceipt({ tenant, isEndReceipt, lease }: TenantReceiptProps) {
+export function TenantReceipt({ tenant, isInitialReceipt, isEndReceipt, lease }: TenantReceiptProps) {
   return (
     <div className="p-4 border rounded">
       <h3 className="text-lg font-semibold mb-2">
