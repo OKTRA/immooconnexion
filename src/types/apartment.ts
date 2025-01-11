@@ -49,34 +49,31 @@ export interface ApartmentTenant {
   photo_id_url?: string;
   agency_id: string;
   unit_id?: string;
-  employer_name?: string;
-  employer_phone?: string;
-  employer_address?: string;
-  emergency_contact_name?: string;
-  emergency_contact_phone?: string;
-  emergency_contact_relationship?: string;
-  additional_notes?: string;
-  bank_name?: string;
-  bank_account_number?: string;
   agency_fees?: number;
   profession?: string;
   created_at: string;
   updated_at: string;
 }
 
-export interface LeaseFormData {
-  startDate: string;
-  endDate: string;
-  rentAmount: string;
-  depositAmount: string;
-  paymentFrequency: PaymentFrequency;
-  durationType: DurationType;
+export interface ApartmentLease {
+  id: string;
+  tenant_id: string;
+  unit_id: string;
+  start_date: string;
+  end_date?: string;
+  rent_amount: number;
+  deposit_amount?: number;
+  payment_frequency: PaymentFrequency;
+  duration_type: DurationType;
   status: LeaseStatus;
-  paymentType: PaymentType;
-  depositReturned: boolean;
-  depositReturnDate?: string;
-  depositReturnAmount?: string;
-  depositReturnNotes?: string;
+  payment_type: PaymentType;
+  deposit_returned: boolean;
+  deposit_return_date?: string;
+  deposit_return_amount?: string;
+  deposit_return_notes?: string;
+  agency_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';

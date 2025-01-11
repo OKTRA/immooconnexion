@@ -12,11 +12,23 @@ import { useState } from "react"
 import { TenantReceipt } from "@/components/tenants/TenantReceipt"
 
 interface TenantActionButtonsProps {
-  tenant: any
-  currentLease?: any
-  onEdit: () => void
-  onDelete: () => void
-  onInspection: () => void
+  tenant: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    phone_number?: string;
+    agency_fees?: number;
+    profession?: string;
+  };
+  currentLease?: {
+    id: string;
+    status: string;
+    rent_amount: number;
+    deposit_amount?: number;
+  };
+  onEdit: () => void;
+  onDelete: () => void;
+  onInspection: () => void;
 }
 
 export function TenantActionButtons({ 
@@ -162,7 +174,7 @@ export function TenantActionButtons({
             tenant={{
               first_name: tenant.first_name,
               last_name: tenant.last_name,
-              phone_number: tenant.phone_number,
+              phone_number: tenant.phone_number || '',
               agency_fees: tenant.agency_fees,
               profession: tenant.profession
             }}
