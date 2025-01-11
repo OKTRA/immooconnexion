@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 
 interface ApartmentUnitsTableProps {
   units?: ApartmentUnit[]
@@ -32,6 +32,7 @@ export function ApartmentUnitsTable({
 }: ApartmentUnitsTableProps) {
   const [unitToDelete, setUnitToDelete] = useState<ApartmentUnit | null>(null)
   const navigate = useNavigate()
+  const { id: apartmentId } = useParams()
 
   const getStatusBadge = (status: ApartmentUnit['status']) => {
     switch (status) {
@@ -54,7 +55,7 @@ export function ApartmentUnitsTable({
   }
 
   const handleView = (unitId: string) => {
-    navigate(`/agence/unite/${unitId}`)
+    navigate(`/agence/apartments/${apartmentId}/units/${unitId}`)
   }
 
   if (isLoading) {
