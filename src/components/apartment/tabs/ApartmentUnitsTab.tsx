@@ -35,7 +35,19 @@ export function ApartmentUnitsTab({
           ))}
         </ul>
       )}
-      <button onClick={() => onCreateUnit({ id: '', unit_number: '', floor_number: null, area: null, rent_amount: 0, deposit_amount: null, status: 'available', description: '', created_at: '', updated_at: '' })}>
+      <button onClick={() => onCreateUnit({ 
+        id: '', 
+        apartment_id: apartmentId,
+        unit_number: '', 
+        floor_number: null, 
+        area: null, 
+        rent_amount: 0, 
+        deposit_amount: null, 
+        status: 'available', 
+        description: '', 
+        created_at: '', 
+        updated_at: '' 
+      })}>
         Ajouter une unité
       </button>
     </div>
