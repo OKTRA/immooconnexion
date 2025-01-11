@@ -1,63 +1,27 @@
-import { useState, useEffect } from "react"
-import { useToast } from "@/components/ui/use-toast"
+import { useState } from "react"
+import { Property } from "@/integrations/supabase/types/properties"
 import { supabase } from "@/integrations/supabase/client"
-import { useQueryClient } from "@tanstack/react-query"
-import { Property, PropertyFormData } from "./types"
-import { useSubscriptionLimits } from "@/utils/subscriptionLimits"
+import { useToast } from "@/hooks/use-toast"
 
-export function usePropertyForm(property: Property | null | undefined, onOpenChange?: (open: boolean) => void) {
+export function usePropertyForm(property: Property | null, onSuccess?: () => void) {
   const [images, setImages] = useState<File[]>([])
-  const [previewUrls, setPreviewUrls] = useState<string[]>([])
-  const [formData, setFormData] = useState<PropertyFormData>({
-    bien: "",
-    type: "",
-    chambres: "",
-    ville: "",
-    loyer: "",
-    taux_commission: "",
-    caution: "",
-    frais_agence: "",
-    property_category: "house",
-    owner_name: "",
-    owner_phone: "",
-    country: "",
-    quartier: "",
-  })
   const { toast } = useToast()
-  const queryClient = useQueryClient()
-  const { checkAndNotifyLimits } = useSubscriptionLimits()
-
-  useEffect(() => {
-    if (property) {
-      setFormData({
-        bien: property.bien || "",
-        type: property.type || "",
-        chambres: property.chambres?.toString() || "",
-        ville: property.ville || "",
-        loyer: property.loyer?.toString() || "",
-        taux_commission: property.taux_commission?.toString() || "",
-        caution: property.caution?.toString() || "",
-        frais_agence: property.frais_agence?.toString() || "",
-        property_category: property.property_category as "house" | "apartment",
-        owner_name: property.owner_name || "",
-        owner_phone: property.owner_phone || "",
-        country: property.country || "",
-        quartier: property.quartier || "",
-      })
-
-      if (property.photo_url) {
-        setPreviewUrls([`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/product_photos/${property.photo_url}`])
-      }
-    }
-  }, [property])
-
-  useEffect(() => {
-    if (images.length > 0) {
-      const urls = images.map(file => URL.createObjectURL(file))
-      setPreviewUrls(urls)
-      return () => urls.forEach(url => URL.revokeObjectURL(url))
-    }
-  }, [images])
+  const [previewUrls, setPreviewUrls] = useState<string[]>([])
+  const [formData, setFormData] = useState({
+    bien: property?.bien || '',
+    type: property?.type || '',
+    chambres: property?.chambres?.toString() || '',
+    ville: property?.ville || '',
+    loyer: property?.loyer?.toString() || '',
+    taux_commission: property?.taux_commission?.toString() || '',
+    caution: property?.caution?.toString() || '',
+    frais_agence: property?.frais_agence?.toString() || '',
+    property_category: property?.property_category || 'house',
+    owner_name: property?.owner_name || '',
+    owner_phone: property?.owner_phone || '',
+    country: property?.country || '',
+    quartier: property?.quartier || ''
+  })
 
   const handleSubmit = async () => {
     try {
@@ -68,80 +32,73 @@ export function usePropertyForm(property: Property | null | undefined, onOpenCha
         .from('profiles')
         .select('agency_id')
         .eq('id', user.id)
-        .maybeSingle()
+        .single()
 
       if (!profile?.agency_id) {
-        throw new Error("Aucune agence associée à ce profil")
+        throw new Error("Aucune agence associée")
       }
 
-      if (!property && !(await checkAndNotifyLimits(profile.agency_id, 'property'))) {
-        return
-      }
+      let photoUrl = property?.photo_url
 
-      let photo_urls: string[] = []
       if (images.length > 0) {
-        for (const image of images) {
-          const fileExt = image.name.split('.').pop()
-          const fileName = `${Math.random()}.${fileExt}`
-          const { error: uploadError, data } = await supabase.storage
-            .from('product_photos')
-            .upload(fileName, image)
+        const file = images[0]
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${Math.random()}.${fileExt}`
+        const filePath = `${fileName}`
 
-          if (uploadError) throw uploadError
-          if (data) photo_urls.push(data.path)
-        }
+        const { error: uploadError } = await supabase.storage
+          .from('product_photos')
+          .upload(filePath, file)
+
+        if (uploadError) throw uploadError
+
+        photoUrl = filePath
       }
 
       const propertyData = {
         bien: formData.bien,
         type: formData.type,
-        chambres: parseInt(formData.chambres) || 0,
+        chambres: formData.chambres ? parseInt(formData.chambres) : null,
         ville: formData.ville,
-        loyer: parseFloat(formData.loyer) || 0,
-        taux_commission: parseFloat(formData.taux_commission) || 0,
-        caution: parseFloat(formData.caution) || 0,
-        frais_agence: parseFloat(formData.frais_agence) || 0,
-        photo_url: photo_urls[0] || property?.photo_url,
-        user_id: user.id,
+        loyer: formData.loyer ? parseInt(formData.loyer) : null,
+        taux_commission: formData.taux_commission ? parseInt(formData.taux_commission) : null,
+        caution: formData.caution ? parseInt(formData.caution) : null,
+        frais_agence: formData.frais_agence ? parseInt(formData.frais_agence) : null,
+        photo_url: photoUrl,
         agency_id: profile.agency_id,
-        updated_at: new Date().toISOString(),
         property_category: formData.property_category,
         owner_name: formData.owner_name,
         owner_phone: formData.owner_phone,
         country: formData.country,
-        quartier: formData.quartier,
+        quartier: formData.quartier
       }
 
-      if (property?.id) {
+      if (property) {
         const { error } = await supabase
           .from('properties')
           .update(propertyData)
           .eq('id', property.id)
 
         if (error) throw error
-        toast({
-          title: "Bien modifié avec succès",
-          description: "Le bien immobilier a été mis à jour",
-        })
       } else {
         const { error } = await supabase
           .from('properties')
-          .insert([{ ...propertyData, created_at: new Date().toISOString() }])
+          .insert([propertyData])
 
         if (error) throw error
-        toast({
-          title: "Bien ajouté avec succès",
-          description: "Le bien immobilier a été ajouté à la liste",
-        })
       }
 
-      queryClient.invalidateQueries({ queryKey: ['properties'] })
-      if (onOpenChange) onOpenChange(false)
+      toast({
+        title: property ? "Bien modifié" : "Bien ajouté",
+        description: "L'opération a été effectuée avec succès",
+      })
+
+      onSuccess?.()
     } catch (error: any) {
       console.error('Error:', error)
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'opération",
+        description: error.message,
         variant: "destructive",
       })
     }
