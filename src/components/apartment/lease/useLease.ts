@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/integrations/supabase/client"
 import { LeaseFormData, PaymentFrequency, DurationType, LeaseStatus, PaymentType } from "./types"
 
 export function useLease(unitId: string, tenantId?: string) {
