@@ -23,16 +23,17 @@ import {
 
 interface TenantTableRowProps {
   tenant: {
-    id: string
-    nom: string
-    prenom: string
-    dateNaissance: string
-    telephone: string
-    photoIdUrl?: string
-    fraisAgence?: string
-  }
-  onEdit: (tenant: any) => void
-  onDelete: (id: string) => void
+    id: string;
+    nom: string;
+    prenom: string;
+    dateNaissance: string;
+    telephone: string;
+    photo_id_url?: string;
+    agency_fees?: string;
+    profession?: string;
+  };
+  onEdit: (tenant: any) => void;
+  onDelete: (id: string) => Promise<void>;
 }
 
 export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps) {
@@ -58,21 +59,23 @@ export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps
     }
   })
 
-  const handleDelete = () => {
-    setShowDeleteConfirm(false)
-    onDelete(tenant.id)
-  }
-
   const tenantFormData: TenantFormData = {
     id: tenant.id,
-    nom: tenant.nom,
-    prenom: tenant.prenom,
-    telephone: tenant.telephone,
-    fraisAgence: tenant.fraisAgence || '0',
-    dateNaissance: tenant.dateNaissance,
-    photoIdUrl: tenant.photoIdUrl,
+    first_name: tenant.nom,
+    last_name: tenant.prenom,
+    phone_number: tenant.telephone,
+    agency_fees: tenant.agency_fees ? parseInt(tenant.agency_fees) : undefined,
+    birth_date: tenant.dateNaissance,
+    photo_id_url: tenant.photo_id_url,
     profession: tenant.profession
   };
+
+  const handleDelete = async () => {
+    setShowDeleteConfirm(false);
+    await onDelete(tenant.id);
+  };
+
+  // ... keep existing code
 
   return (
     <>
@@ -91,22 +94,20 @@ export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps
           />
         </TableCell>
       </TableRow>
-
       <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
         <DialogContent className="max-w-3xl">
           <TenantReceipt
             tenant={{
-              nom: tenant.nom,
-              prenom: tenant.prenom,
-              telephone: tenant.telephone,
-              fraisAgence: tenant.fraisAgence || "0",
-              propertyId: contract?.property_id || "",
+              first_name: tenant.nom,
+              last_name: tenant.prenom,
+              phone_number: tenant.telephone,
+              agency_fees: tenant.agency_fees ? parseInt(tenant.agency_fees) : undefined,
+              property_id: contract?.property_id,
             }}
             contractId={contract?.id}
           />
         </DialogContent>
       </Dialog>
-
       {contract && (
         <InspectionDialog
           contract={contract}
@@ -130,5 +131,5 @@ export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps
         </AlertDialogContent>
       </AlertDialog>
     </>
-  )
+  );
 }

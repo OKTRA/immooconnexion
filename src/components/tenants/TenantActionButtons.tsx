@@ -66,12 +66,12 @@ export function TenantActionButtons({
   }
 
   const tenantReceiptData: TenantReceiptData = {
-    nom: tenant.nom,
-    prenom: tenant.prenom,
-    telephone: tenant.telephone,
-    fraisAgence: tenant.fraisAgence || '0',
+    first_name: tenant.first_name,
+    last_name: tenant.last_name,
+    phone_number: tenant.phone_number,
+    agency_fees: tenant.agency_fees || 0,
     profession: tenant.profession,
-    propertyId: tenant.propertyId
+    property_id: tenant.property_id
   };
 
   return (

@@ -5,13 +5,24 @@ import { TenantDisplay } from "@/hooks/use-tenants"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { TenantFormData } from "@/types/tenant"
 
 const Tenants = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [selectedTenant, setSelectedTenant] = useState<TenantDisplay | undefined>()
+  const [selectedTenant, setSelectedTenant] = useState<TenantFormData | undefined>()
 
   const handleEdit = (tenant: TenantDisplay) => {
-    setSelectedTenant(tenant)
+    const formData: TenantFormData = {
+      id: tenant.id,
+      first_name: tenant.first_name,
+      last_name: tenant.last_name,
+      phone_number: tenant.phone_number,
+      photo_id_url: tenant.photo_id_url,
+      agency_fees: tenant.agency_fees,
+      profession: tenant.profession,
+      property_id: tenant.property_id
+    };
+    setSelectedTenant(formData)
     setIsDialogOpen(true)
   }
 

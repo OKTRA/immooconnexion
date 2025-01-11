@@ -2,10 +2,10 @@ export interface ApartmentUnit {
   id: string;
   apartment_id: string;
   unit_number: string;
-  floor_number?: number;
-  area?: number;
+  floor_number?: number | null;
+  area?: number | null;
   rent_amount: number;
-  deposit_amount?: number;
+  deposit_amount?: number | null;
   status: ApartmentUnitStatus;
   description?: string;
   photo_urls?: string[];
@@ -19,10 +19,10 @@ export type PaymentType = 'upfront' | 'end_of_period';
 
 export interface ApartmentUnitFormData {
   unit_number: string;
-  floor_number?: number;
-  area?: number;
+  floor_number?: number | null;
+  area?: number | null;
   rent_amount: number;
-  deposit_amount?: number;
+  deposit_amount?: number | null;
   status: ApartmentUnitStatus;
   description?: string;
   photo_urls?: string[];

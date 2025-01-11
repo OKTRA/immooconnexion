@@ -116,7 +116,7 @@ export function LeaseFormFields({
           <Label htmlFor="paymentType">Type de paiement</Label>
           <Select
             value={formData.paymentType}
-            onValueChange={(value) => setFormData({ ...formData, paymentType: value })}
+            onValueChange={(value) => setFormData({ ...formData, paymentType: value as PaymentType })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner le type de paiement" />
