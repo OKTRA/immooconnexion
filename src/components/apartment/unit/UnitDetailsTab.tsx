@@ -3,7 +3,7 @@ import { UnitFinancialInfo } from "./tabs/UnitFinancialInfo"
 import { UnitLeaseInfo } from "./tabs/UnitLeaseInfo"
 import { UnitPaymentHistory } from "./tabs/UnitPaymentHistory"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/integrations/supabase/client"
 import { ApartmentUnit, ApartmentLease } from "@/components/apartment/types"
 
 interface UnitDetailsTabProps {
