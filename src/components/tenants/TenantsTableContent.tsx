@@ -28,16 +28,17 @@ export function TenantsTableContent({ tenants, onEdit, onDelete }: TenantsTableC
           key={tenant.id}
           tenant={{
             id: tenant.id,
-            nom: tenant.first_name,
-            prenom: tenant.last_name,
-            dateNaissance: tenant.birth_date || '',
-            telephone: tenant.phone_number,
-            photoIdUrl: tenant.photo_id_url,
-            fraisAgence: tenant.agency_fees?.toString(),
-            profession: tenant.profession
+            first_name: tenant.first_name,
+            last_name: tenant.last_name,
+            birth_date: tenant.birth_date || '',
+            phone_number: tenant.phone_number,
+            photo_id_url: tenant.photo_id_url,
+            agency_fees: tenant.agency_fees,
+            profession: tenant.profession,
+            property_id: tenant.property_id
           }}
           onEdit={() => onEdit(tenant)}
-          onDelete={async (id) => await onDelete(id)}
+          onDelete={onDelete}
         />
       ))}
     </TableBody>

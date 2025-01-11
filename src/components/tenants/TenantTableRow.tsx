@@ -1,5 +1,4 @@
 import { TenantFormData } from "@/types/tenant"
-
 import { TableCell, TableRow } from "@/components/ui/table"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
@@ -22,17 +21,8 @@ import {
 } from "@/components/ui/alert-dialog"
 
 interface TenantTableRowProps {
-  tenant: {
-    id: string;
-    nom: string;
-    prenom: string;
-    dateNaissance: string;
-    telephone: string;
-    photo_id_url?: string;
-    agency_fees?: string;
-    profession?: string;
-  };
-  onEdit: (tenant: any) => void;
+  tenant: TenantFormData;
+  onEdit: () => void;
   onDelete: (id: string) => Promise<void>;
 }
 
@@ -59,37 +49,26 @@ export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps
     }
   })
 
-  const tenantFormData: TenantFormData = {
-    id: tenant.id,
-    first_name: tenant.nom,
-    last_name: tenant.prenom,
-    phone_number: tenant.telephone,
-    agency_fees: tenant.agency_fees ? parseInt(tenant.agency_fees) : undefined,
-    birth_date: tenant.dateNaissance,
-    photo_id_url: tenant.photo_id_url,
-    profession: tenant.profession
-  };
-
   const handleDelete = async () => {
     setShowDeleteConfirm(false);
-    await onDelete(tenant.id);
+    if (tenant.id) {
+      await onDelete(tenant.id);
+    }
   };
-
-  // ... keep existing code
 
   return (
     <>
       <TableRow>
-        <TableCell>{tenant.nom}</TableCell>
-        <TableCell>{tenant.prenom}</TableCell>
+        <TableCell>{tenant.first_name}</TableCell>
+        <TableCell>{tenant.last_name}</TableCell>
         <TableCell>
-          {tenant.dateNaissance ? format(new Date(tenant.dateNaissance), 'PP', { locale: fr }) : 'Non renseigné'}
+          {tenant.birth_date ? format(new Date(tenant.birth_date), 'PP', { locale: fr }) : 'Non renseigné'}
         </TableCell>
-        <TableCell>{tenant.telephone}</TableCell>
+        <TableCell>{tenant.phone_number}</TableCell>
         <TableCell>
           <TenantActions
-            tenant={tenantFormData}
-            onEdit={() => onEdit(tenant)}
+            tenant={tenant}
+            onEdit={onEdit}
             onDelete={() => setShowDeleteConfirm(true)}
           />
         </TableCell>
@@ -98,11 +77,12 @@ export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps
         <DialogContent className="max-w-3xl">
           <TenantReceipt
             tenant={{
-              first_name: tenant.nom,
-              last_name: tenant.prenom,
-              phone_number: tenant.telephone,
-              agency_fees: tenant.agency_fees ? parseInt(tenant.agency_fees) : undefined,
-              property_id: contract?.property_id,
+              first_name: tenant.first_name,
+              last_name: tenant.last_name,
+              phone_number: tenant.phone_number,
+              agency_fees: tenant.agency_fees,
+              property_id: tenant.property_id,
+              profession: tenant.profession
             }}
             contractId={contract?.id}
           />
@@ -121,7 +101,7 @@ export function TenantTableRow({ tenant, onEdit, onDelete }: TenantTableRowProps
           <AlertDialogHeader>
             <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action ne peut pas être annulée. Cela supprimera définitivement le locataire {tenant.prenom} {tenant.nom}.
+              Cette action ne peut pas être annulée. Cela supprimera définitivement le locataire {tenant.first_name} {tenant.last_name}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
