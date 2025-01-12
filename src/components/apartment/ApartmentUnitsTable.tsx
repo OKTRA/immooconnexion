@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Trash, Pencil, Eye } from "lucide-react"
 import { ApartmentUnit } from "@/types/apartment"
 import { useNavigate } from "react-router-dom"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface ApartmentUnitsTableProps {
   units: ApartmentUnit[]
@@ -22,6 +23,24 @@ export function ApartmentUnitsTable({
 
   const handleViewDetails = (unitId: string) => {
     navigate(`/agence/apartments/${apartmentId}/units/${unitId}`)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-8 w-full" />
+      </div>
+    )
+  }
+
+  if (!units.length) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Aucune unité trouvée
+      </div>
+    )
   }
 
   return (

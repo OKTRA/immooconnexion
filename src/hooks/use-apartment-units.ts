@@ -18,7 +18,16 @@ export function useApartmentUnits(apartmentId: string | undefined) {
       console.log("Fetching units for apartment ID:", apartmentId)
       const { data, error } = await supabase
         .from("apartment_units")
-        .select("*")
+        .select(`
+          id,
+          unit_number,
+          floor_number,
+          area,
+          rent_amount,
+          deposit_amount,
+          status,
+          description
+        `)
         .eq("apartment_id", apartmentId)
         .order("unit_number")
 
@@ -32,13 +41,11 @@ export function useApartmentUnits(apartmentId: string | undefined) {
         throw error
       }
 
-      // Convert string status to ApartmentUnitStatus
-      return (data || []).map(unit => ({
-        ...unit,
-        status: unit.status as ApartmentUnit["status"]
-      })) as ApartmentUnit[]
+      return (data || []) as ApartmentUnit[]
     },
-    enabled: Boolean(apartmentId) && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(apartmentId)
+    enabled: Boolean(apartmentId) && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(apartmentId),
+    staleTime: 5 * 60 * 1000, // Cache pendant 5 minutes
+    gcTime: 30 * 60 * 1000 // Garde en cache pendant 30 minutes
   })
 
   const createUnit = useMutation({

@@ -5,6 +5,7 @@ import { ApartmentUnitsTable } from "./ApartmentUnitsTable"
 import { ApartmentUnitDialog } from "./ApartmentUnitDialog"
 import { ApartmentUnit } from "@/types/apartment"
 import { useState } from "react"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface ApartmentUnitsSectionProps {
   apartmentId: string
@@ -47,6 +48,22 @@ export function ApartmentUnitsSection({
     }
     setShowDialog(false)
     setEditingUnit(undefined)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between mb-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <Card>
+          <CardContent className="p-6">
+            <Skeleton className="h-64 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
