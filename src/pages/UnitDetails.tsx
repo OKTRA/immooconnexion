@@ -54,26 +54,15 @@ export default function UnitDetails() {
         throw new Error("Unité non trouvée")
       }
 
-      return data as ApartmentUnit & { 
-        apartment?: { name: string },
-        current_lease?: {
-          id: string
-          tenant: {
-            id: string
-            first_name: string
-            last_name: string
-            email?: string
-            phone_number?: string
-            birth_date?: string
-            profession?: string
-          }
-          start_date: string
-          end_date?: string
-          rent_amount: number
-          deposit_amount: number
-          status: string
-        }
+      const formattedData = {
+        ...data,
+        current_lease: data.current_lease ? {
+          ...data.current_lease[0],
+          tenant: data.current_lease[0]?.tenant
+        } : undefined
       }
+
+      return formattedData
     },
     enabled: !!unitId
   })

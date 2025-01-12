@@ -69,11 +69,6 @@ export interface ApartmentTenant {
   apartment_leases?: ApartmentLease[];
 }
 
-export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
-export type DurationType = 'fixed' | 'month_to_month' | 'yearly';
-export type LeaseStatus = 'active' | 'expired' | 'terminated';
-export type PaymentType = 'upfront' | 'end_of_period';
-
 export interface ApartmentInspection {
   id: string;
   lease_id: string;
@@ -88,3 +83,10 @@ export interface ApartmentInspection {
   created_at: string;
   updated_at: string;
 }
+
+export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+export type DurationType = 'fixed' | 'month_to_month' | 'yearly';
+export type LeaseStatus = 'active' | 'expired' | 'terminated';
+export type PaymentType = 'upfront' | 'end_of_period';
+
+export interface ApartmentUnitFormData extends Omit<ApartmentUnit, 'id' | 'created_at' | 'updated_at' | 'apartment_id'> {}
