@@ -1,90 +1,84 @@
 import { useParams } from "react-router-dom"
-import { AgencyLayout } from "@/components/agency/AgencyLayout"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { UnitHeader } from "@/components/apartment/unit/UnitHeader"
-import { UnitTenantTab } from "@/components/apartment/unit/UnitTenantTab"
+import { Card } from "@/components/ui/card"
+import { Loader2 } from "lucide-react"
 import { UnitDetailsTab } from "@/components/apartment/unit/UnitDetailsTab"
-import { ApartmentUnit } from "@/components/apartment/types"
+import { UnitTenantTab } from "@/components/apartment/unit/UnitTenantTab"
+import { UnitHeader } from "@/components/apartment/unit/UnitHeader"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function UnitDetails() {
-  const { id } = useParams<{ id: string }>()
+  const { apartmentId, unitId } = useParams()
 
   const { data: unit, isLoading } = useQuery({
-    queryKey: ["unit", id],
+    queryKey: ['unit', unitId],
     queryFn: async () => {
-      if (!id) return null
+      console.log('Fetching unit details for:', unitId)
+      
+      if (!unitId) throw new Error("ID de l'unité manquant")
 
       const { data, error } = await supabase
         .from("apartment_units")
         .select(`
           *,
-          apartment:apartments(name)
+          apartment:apartments(
+            id,
+            name,
+            address
+          )
         `)
-        .eq("id", id)
-        .maybeSingle()
+        .eq("id", unitId)
+        .eq("apartment_id", apartmentId)
+        .single()
 
       if (error) {
-        console.error("Error fetching unit:", error)
+        console.error('Error fetching unit:', error)
         throw error
       }
 
-      return data as ApartmentUnit & { apartment: { name: string } }
+      console.log('Unit data:', data)
+      return data
     },
-    enabled: Boolean(id)
+    enabled: !!unitId && !!apartmentId
   })
 
   if (isLoading) {
     return (
-      <AgencyLayout>
-        <div className="container mx-auto py-6">
-          <div>Chargement...</div>
-        </div>
-      </AgencyLayout>
+      <div className="flex items-center justify-center h-48">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
     )
   }
 
   if (!unit) {
     return (
-      <AgencyLayout>
-        <div className="container mx-auto py-6">
-          <div>Unité non trouvée</div>
-        </div>
-      </AgencyLayout>
+      <Card className="p-6">
+        <p className="text-center text-muted-foreground">
+          Unité non trouvée
+        </p>
+      </Card>
     )
   }
 
   return (
-    <AgencyLayout>
-      <div className="container mx-auto py-6">
-        <UnitHeader 
-          unitNumber={unit.unit_number}
-          apartmentName={unit.apartment?.name || ""}
-        />
+    <div className="space-y-6">
+      <UnitHeader unit={unit} />
+      
+      <Tabs defaultValue="details" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="details">Détails</TabsTrigger>
+          <TabsTrigger value="tenant">Locataire</TabsTrigger>
+        </TabsList>
 
-        <Tabs defaultValue="details" className="mt-6">
-          <TabsList>
-            <TabsTrigger value="details">Détails</TabsTrigger>
-            <TabsTrigger value="tenant">Locataire</TabsTrigger>
-            <TabsTrigger value="payments">Paiements</TabsTrigger>
-          </TabsList>
+        <TabsContent value="details">
+          <UnitDetailsTab unit={unit} />
+        </TabsContent>
 
-          <TabsContent value="details">
-            <UnitDetailsTab unit={unit} />
-          </TabsContent>
-
-          <TabsContent value="tenant">
-            <UnitTenantTab unitId={id} />
-          </TabsContent>
-
-          <TabsContent value="payments">
-            <div className="text-center py-8 text-muted-foreground">
-              Fonctionnalité à venir
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </AgencyLayout>
+        <TabsContent value="tenant">
+          <UnitTenantTab unit={unit} />
+        </TabsContent>
+      </Tabs>
+    </div>
   )
 }
