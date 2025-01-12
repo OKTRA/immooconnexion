@@ -18,7 +18,7 @@ interface ApartmentUnitsTableProps {
   units: ApartmentUnit[]
   apartmentId: string
   onEdit?: (unit: ApartmentUnit) => void
-  onDelete?: (unit: ApartmentUnit) => void
+  onDelete?: (unitId: string) => void
 }
 
 export function ApartmentUnitsTable({ 
@@ -103,7 +103,7 @@ export function ApartmentUnitsTable({
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onDelete(unit)}
+                      onClick={() => onDelete(unit.id)}
                     >
                       <Trash className="h-4 w-4" />
                     </Button>

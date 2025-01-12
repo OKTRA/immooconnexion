@@ -10,12 +10,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ApartmentUnit, ApartmentUnitStatus } from "@/types/apartment"
 
 export default function UnitDetails() {
-  const { apartmentId, unitId } = useParams()
+  const { unitId } = useParams()
 
   const { data: unit, isLoading } = useQuery({
-    queryKey: ['unit', unitId, apartmentId],
+    queryKey: ['unit', unitId],
     queryFn: async () => {
-      if (!unitId || !apartmentId) throw new Error("ID de l'unité ou de l'appartement manquant")
+      if (!unitId) throw new Error("ID de l'unité manquant")
 
       const { data, error } = await supabase
         .from("apartment_units")
@@ -28,21 +28,23 @@ export default function UnitDetails() {
           )
         `)
         .eq("id", unitId)
-        .eq("apartment_id", apartmentId)
-        .single()
+        .maybeSingle()
 
       if (error) {
         console.error('Error fetching unit:', error)
         throw error
       }
 
-      // Convert string status to ApartmentUnitStatus
+      if (!data) {
+        throw new Error("Unité non trouvée")
+      }
+
       return {
         ...data,
         status: data.status as ApartmentUnitStatus
       } as ApartmentUnit & { apartment?: { name: string; address: string } }
     },
-    enabled: !!unitId && !!apartmentId
+    enabled: !!unitId
   })
 
   if (isLoading) {
