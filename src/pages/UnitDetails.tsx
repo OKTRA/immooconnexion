@@ -7,16 +7,15 @@ import { UnitDetailsTab } from "@/components/apartment/unit/UnitDetailsTab"
 import { UnitTenantTab } from "@/components/apartment/unit/UnitTenantTab"
 import { UnitHeader } from "@/components/apartment/unit/UnitHeader"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ApartmentUnit, ApartmentUnitStatus } from "@/types/apartment"
 
 export default function UnitDetails() {
   const { apartmentId, unitId } = useParams()
 
   const { data: unit, isLoading } = useQuery({
-    queryKey: ['unit', unitId],
+    queryKey: ['unit', unitId, apartmentId],
     queryFn: async () => {
-      console.log('Fetching unit details for:', unitId)
-      
-      if (!unitId) throw new Error("ID de l'unité manquant")
+      if (!unitId || !apartmentId) throw new Error("ID de l'unité ou de l'appartement manquant")
 
       const { data, error } = await supabase
         .from("apartment_units")
@@ -37,8 +36,11 @@ export default function UnitDetails() {
         throw error
       }
 
-      console.log('Unit data:', data)
-      return data
+      // Convert string status to ApartmentUnitStatus
+      return {
+        ...data,
+        status: data.status as ApartmentUnitStatus
+      } as ApartmentUnit & { apartment?: { name: string; address: string } }
     },
     enabled: !!unitId && !!apartmentId
   })
@@ -63,7 +65,7 @@ export default function UnitDetails() {
 
   return (
     <div className="space-y-6">
-      <UnitHeader unit={unit} />
+      <UnitHeader unitNumber={unit.unit_number} apartmentName={unit.apartment?.name || ''} />
       
       <Tabs defaultValue="details" className="space-y-4">
         <TabsList>
@@ -76,7 +78,7 @@ export default function UnitDetails() {
         </TabsContent>
 
         <TabsContent value="tenant">
-          <UnitTenantTab unit={unit} />
+          <UnitTenantTab unitId={unit.id} apartmentId={unit.apartment_id} />
         </TabsContent>
       </Tabs>
     </div>

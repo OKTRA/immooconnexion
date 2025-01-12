@@ -1,41 +1,20 @@
-import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { UnitTenantDialog } from "./UnitTenantDialog"
-import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { TenantDetailsCard } from "./TenantDetailsCard"
-import { TenantActionButtons } from "./TenantActionButtons"
-import { LeaseDialog } from "../lease/LeaseDialog"
+import { Card, CardContent } from "@/components/ui/card"
+import { Loader2 } from "lucide-react"
 
 interface UnitTenantTabProps {
   unitId: string
+  apartmentId: string
 }
 
-export function UnitTenantTab({ unitId }: UnitTenantTabProps) {
-  const [showTenantDialog, setShowTenantDialog] = useState(false)
-  const [showLeaseDialog, setShowLeaseDialog] = useState(false)
-  const [selectedTenantId, setSelectedTenantId] = useState<string>()
-
+export function UnitTenantTab({ unitId, apartmentId }: UnitTenantTabProps) {
   const { data: tenant, isLoading } = useQuery({
-    queryKey: ["unit-tenant", unitId],
+    queryKey: ['unit-tenant', unitId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("apartment_tenants")
-        .select(`
-          *,
-          apartment_leases (
-            id,
-            rent_amount,
-            deposit_amount,
-            start_date,
-            end_date,
-            status,
-            payment_type,
-            initial_fees_paid
-          )
-        `)
+        .select("*")
         .eq("unit_id", unitId)
         .maybeSingle()
 
@@ -44,72 +23,50 @@ export function UnitTenantTab({ unitId }: UnitTenantTabProps) {
     }
   })
 
-  const handleTenantCreated = (tenantId: string) => {
-    setSelectedTenantId(tenantId)
-    setShowTenantDialog(false)
-    setShowLeaseDialog(true)
-  }
-
   if (isLoading) {
-    return <div>Chargement...</div>
-  }
-
-  if (!tenant) {
     return (
-      <div className="space-y-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center space-y-4">
-              <p className="text-muted-foreground">
-                Aucun locataire associé à cette unité
-              </p>
-              <Button onClick={() => setShowTenantDialog(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Ajouter un locataire
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <UnitTenantDialog
-          open={showTenantDialog}
-          onOpenChange={setShowTenantDialog}
-          unitId={unitId}
-          onSuccess={handleTenantCreated}
-        />
-
-        {selectedTenantId && (
-          <LeaseDialog
-            open={showLeaseDialog}
-            onOpenChange={setShowLeaseDialog}
-            unitId={unitId}
-            tenantId={selectedTenantId}
-          />
-        )}
+      <div className="flex items-center justify-center h-48">
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     )
   }
 
-  const currentLease = tenant.apartment_leases?.[0]
-
-  return (
-    <div className="space-y-4">
+  if (!tenant) {
+    return (
       <Card>
-        <CardContent className="p-6 space-y-4">
-          <TenantDetailsCard tenant={tenant} currentLease={currentLease} />
-          <TenantActionButtons
-            tenant={tenant}
-            currentLease={currentLease}
-            onEdit={() => setShowTenantDialog(true)}
-            onDelete={async () => {
-              // Handle delete
-            }}
-            onInspection={() => {
-              // Handle inspection
-            }}
-          />
+        <CardContent className="p-6">
+          <p className="text-center text-muted-foreground">
+            Aucun locataire associé à cette unité
+          </p>
         </CardContent>
       </Card>
-    </div>
+    )
+  }
+
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-medium">Informations du locataire</h3>
+            <p className="text-sm text-muted-foreground">
+              {tenant.first_name} {tenant.last_name}
+            </p>
+          </div>
+          {tenant.phone_number && (
+            <div>
+              <h3 className="font-medium">Téléphone</h3>
+              <p className="text-sm text-muted-foreground">{tenant.phone_number}</p>
+            </div>
+          )}
+          {tenant.email && (
+            <div>
+              <h3 className="font-medium">Email</h3>
+              <p className="text-sm text-muted-foreground">{tenant.email}</p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   )
 }

@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button"
 import { Edit } from "lucide-react"
 
 interface UnitHeaderProps {
-  unitNumber: string;
-  apartmentName: string;
+  unitNumber: string
+  apartmentName: string
 }
 
 export function UnitHeader({ unitNumber, apartmentName }: UnitHeaderProps) {
