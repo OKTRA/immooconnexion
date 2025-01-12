@@ -5,13 +5,13 @@ import { Loader2 } from "lucide-react"
 import { UnitHeader } from "@/components/apartment/unit/UnitHeader"
 import { UnitDetailsTab } from "@/components/apartment/unit/UnitDetailsTab"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
-import { ApartmentUnit } from "@/types/apartment"
+import { ApartmentUnit } from "@/components/apartment/types"
 
 export default function UnitDetails() {
   const { unitId } = useParams()
 
-  const { data: unit, isLoading } = useQuery({
-    queryKey: ['unit', unitId],
+  const { data: unitData, isLoading } = useQuery({
+    queryKey: ['unit-details', unitId],
     queryFn: async () => {
       if (!unitId) throw new Error("ID de l'unité manquant")
 
@@ -22,9 +22,27 @@ export default function UnitDetails() {
           apartment:apartments (
             id,
             name
+          ),
+          current_lease:apartment_leases!apartment_leases_unit_id_fkey (
+            id,
+            tenant:apartment_tenants (
+              id,
+              first_name,
+              last_name,
+              email,
+              phone_number,
+              birth_date,
+              profession
+            ),
+            start_date,
+            end_date,
+            rent_amount,
+            deposit_amount,
+            status
           )
         `)
         .eq("id", unitId)
+        .eq("apartment_leases.status", "active")
         .maybeSingle()
 
       if (error) {
@@ -36,7 +54,26 @@ export default function UnitDetails() {
         throw new Error("Unité non trouvée")
       }
 
-      return data as ApartmentUnit & { apartment?: { name: string } }
+      return data as ApartmentUnit & { 
+        apartment?: { name: string },
+        current_lease?: {
+          id: string
+          tenant: {
+            id: string
+            first_name: string
+            last_name: string
+            email?: string
+            phone_number?: string
+            birth_date?: string
+            profession?: string
+          }
+          start_date: string
+          end_date?: string
+          rent_amount: number
+          deposit_amount: number
+          status: string
+        }
+      }
     },
     enabled: !!unitId
   })
@@ -51,7 +88,7 @@ export default function UnitDetails() {
     )
   }
 
-  if (!unit) {
+  if (!unitData) {
     return (
       <AgencyLayout>
         <div className="flex justify-center items-center min-h-screen">
@@ -64,9 +101,9 @@ export default function UnitDetails() {
   return (
     <AgencyLayout>
       <div className="container mx-auto py-6">
-        <UnitHeader unit={unit} />
+        <UnitHeader unit={unitData} />
         <div className="mt-6">
-          <UnitDetailsTab unit={unit} />
+          <UnitDetailsTab unit={unitData} />
         </div>
       </div>
     </AgencyLayout>
