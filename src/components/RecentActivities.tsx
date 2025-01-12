@@ -3,11 +3,10 @@ import { supabase } from "@/integrations/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { Loader2 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export function RecentActivities() {
-  const { data: userProfile, isLoading: isLoadingProfile } = useQuery({
+  const { data: userProfile } = useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -27,7 +26,7 @@ export function RecentActivities() {
     staleTime: 30 * 60 * 1000, // Cache pendant 30 minutes
   })
 
-  const { data: recentContracts, isLoading: isLoadingContracts } = useQuery({
+  const { data: recentContracts, isLoading } = useQuery({
     queryKey: ["recent-activities", userProfile?.agency_id],
     queryFn: async () => {
       if (!userProfile?.agency_id) return []
@@ -59,9 +58,9 @@ export function RecentActivities() {
     staleTime: 1 * 60 * 1000, // Cache pendant 1 minute
   })
 
-  if (isLoadingProfile || isLoadingContracts) {
+  if (isLoading) {
     return (
-      <Card className="col-span-2">
+      <Card>
         <CardHeader>
           <CardTitle>Activités Récentes</CardTitle>
         </CardHeader>
@@ -86,7 +85,7 @@ export function RecentActivities() {
   }
 
   return (
-    <Card className="col-span-2">
+    <Card>
       <CardHeader>
         <CardTitle>Activités Récentes</CardTitle>
       </CardHeader>

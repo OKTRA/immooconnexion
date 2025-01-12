@@ -69,7 +69,6 @@ export function useTenants() {
           phone_number,
           photo_id_url,
           agency_fees,
-          property_id,
           profession,
           created_at,
           updated_at
@@ -90,13 +89,14 @@ export function useTenants() {
         phone_number: tenant.phone_number || '',
         photo_id_url: tenant.photo_id_url,
         agency_fees: tenant.agency_fees,
-        property_id: tenant.property_id,
         profession: tenant.profession || '',
         created_at: tenant.created_at,
         updated_at: tenant.updated_at
       })) as TenantDisplay[]
     },
-    enabled: !!session
+    enabled: !!session,
+    staleTime: 5 * 60 * 1000, // Cache pendant 5 minutes
+    gcTime: 30 * 60 * 1000 // Garde en cache pendant 30 minutes
   })
 
   return { tenants, isLoading, error, session, refetch }

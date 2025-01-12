@@ -80,6 +80,7 @@ export function AgencyEarningsTable() {
       return { agencyFees, rentals }
     },
     staleTime: 5 * 60 * 1000, // Cache pendant 5 minutes
+    gcTime: 30 * 60 * 1000, // Garde en cache pendant 30 minutes
   })
 
   if (isLoading) {

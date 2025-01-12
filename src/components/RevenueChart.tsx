@@ -50,7 +50,7 @@ export function RevenueChart() {
       }))
     },
     staleTime: 5 * 60 * 1000, // Cache pendant 5 minutes
-    cacheTime: 30 * 60 * 1000, // Garde en cache pendant 30 minutes
+    gcTime: 30 * 60 * 1000, // Garde en cache pendant 30 minutes
   })
 
   if (isLoading) {
