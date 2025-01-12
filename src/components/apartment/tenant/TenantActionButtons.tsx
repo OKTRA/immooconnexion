@@ -24,7 +24,7 @@ interface TenantActionButtonsProps {
     id: string;
     status: string;
     rent_amount: number;
-    deposit_amount?: number;
+    deposit_amount: number;
   };
   onEdit: () => void;
   onDelete: () => void;
@@ -178,7 +178,10 @@ export function TenantActionButtons({
               agency_fees: tenant.agency_fees,
               profession: tenant.profession
             }}
-            lease={currentLease}
+            lease={currentLease && {
+              rent_amount: currentLease.rent_amount,
+              deposit_amount: currentLease.deposit_amount || 0
+            }}
           />
         </DialogContent>
       </Dialog>

@@ -2,44 +2,28 @@ import { useParams } from "react-router-dom"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card } from "@/components/ui/card"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
 import { Loader2 } from "lucide-react"
 import { TenantPersonalInfoTab } from "@/components/apartment/tenant/tabs/TenantPersonalInfoTab"
 import { TenantLeaseTab } from "@/components/apartment/tenant/tabs/TenantLeaseTab"
 import { TenantDocumentsTab } from "@/components/apartment/tenant/tabs/TenantDocumentsTab"
 import { TenantInspectionsTab } from "@/components/apartment/tenant/tabs/TenantInspectionsTab"
 import { TenantHeader } from "@/components/apartment/tenant/TenantHeader"
+import { useApartmentTenant } from "@/hooks/use-apartment-tenant"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function ApartmentTenantDetails() {
   const { tenantId } = useParams()
+  const { toast } = useToast()
+  
+  const { data: tenant, isLoading, error } = useApartmentTenant(tenantId!)
 
-  const { data: tenant, isLoading } = useQuery({
-    queryKey: ["apartment-tenant", tenantId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("apartment_tenants")
-        .select(`
-          *,
-          apartment_units!apartment_tenants_unit_id_fkey (
-            unit_number,
-            apartment:apartments (
-              name
-            )
-          ),
-          apartment_leases (
-            *
-          )
-        `)
-        .eq("id", tenantId)
-        .order('apartment_leases.created_at', { foreignTable: 'apartment_leases', ascending: false })
-        .maybeSingle()
-
-      if (error) throw error
-      return data
-    },
-    enabled: !!tenantId
-  })
+  if (error) {
+    toast({
+      title: "Erreur",
+      description: "Impossible de charger les détails du locataire",
+      variant: "destructive",
+    })
+  }
 
   if (isLoading) {
     return (
