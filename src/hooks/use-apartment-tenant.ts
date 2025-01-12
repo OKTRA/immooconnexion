@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { ApartmentTenant } from "@/types/apartment"
+import { ApartmentTenant } from "@/components/apartment/types"
 
 export function useApartmentTenant(tenantId: string) {
   return useQuery({
@@ -46,8 +46,6 @@ export function useApartmentTenant(tenantId: string) {
       console.log("Tenant data:", data)
       return data as ApartmentTenant
     },
-    enabled: !!tenantId,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000
+    enabled: !!tenantId
   })
 }
