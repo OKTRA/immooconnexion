@@ -53,7 +53,9 @@ export function UnitPaymentHistory({ unitId }: UnitPaymentHistoryProps) {
           <CardTitle>Historique des paiements</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">Aucun paiement enregistré</p>
+          <p className="text-sm text-muted-foreground">
+            Aucun paiement enregistré
+          </p>
         </CardContent>
       </Card>
     )
