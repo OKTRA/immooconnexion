@@ -62,6 +62,7 @@ export function ApartmentUnitsSection({
         <CardContent className="p-0">
           <ApartmentUnitsTable
             units={units}
+            apartmentId={apartmentId}
             isLoading={isLoading}
             onEdit={handleEdit}
             onDelete={onDeleteUnit}

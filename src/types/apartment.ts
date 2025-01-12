@@ -82,33 +82,7 @@ export interface ApartmentLease {
   initial_fees_paid?: boolean;
 }
 
-export interface ApartmentInspection {
-  id: string;
-  lease_id: string;
-  inspection_date: string;
-  has_damages: boolean;
-  damage_description: string | null;
-  repair_costs: number;
-  deposit_returned: number;
-  photo_urls: string[];
-  status: string;
-  type?: string;
-  created_at: string;
-  updated_at: string;
-}
-
 export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 export type DurationType = 'fixed' | 'month_to_month' | 'yearly';
 export type LeaseStatus = 'active' | 'expired' | 'terminated';
 export type PaymentType = 'upfront' | 'end_of_period';
-
-export interface ApartmentTenantReceipt {
-  tenant: {
-    first_name: string;
-    last_name: string;
-    phone_number: string;
-    agency_fees?: number;
-  };
-  isEndReceipt?: boolean;
-  lease?: ApartmentLease;
-}

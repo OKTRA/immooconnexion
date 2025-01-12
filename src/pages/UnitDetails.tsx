@@ -1,13 +1,11 @@
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Card } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
-import { UnitDetailsTab } from "@/components/apartment/unit/UnitDetailsTab"
-import { UnitTenantTab } from "@/components/apartment/unit/UnitTenantTab"
 import { UnitHeader } from "@/components/apartment/unit/UnitHeader"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ApartmentUnit, ApartmentUnitStatus } from "@/types/apartment"
+import { UnitDetailsTab } from "@/components/apartment/unit/UnitDetailsTab"
+import { AgencyLayout } from "@/components/agency/AgencyLayout"
+import { ApartmentUnit } from "@/types/apartment"
 
 export default function UnitDetails() {
   const { unitId } = useParams()
@@ -21,10 +19,9 @@ export default function UnitDetails() {
         .from("apartment_units")
         .select(`
           *,
-          apartment:apartments(
+          apartment:apartments (
             id,
-            name,
-            address
+            name
           )
         `)
         .eq("id", unitId)
@@ -39,50 +36,39 @@ export default function UnitDetails() {
         throw new Error("Unité non trouvée")
       }
 
-      return {
-        ...data,
-        status: data.status as ApartmentUnitStatus
-      } as ApartmentUnit & { apartment?: { name: string; address: string } }
+      return data as ApartmentUnit & { apartment?: { name: string } }
     },
     enabled: !!unitId
   })
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-48">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
+      <AgencyLayout>
+        <div className="flex justify-center items-center min-h-screen">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </AgencyLayout>
     )
   }
 
   if (!unit) {
     return (
-      <Card className="p-6">
-        <p className="text-center text-muted-foreground">
-          Unité non trouvée
-        </p>
-      </Card>
+      <AgencyLayout>
+        <div className="flex justify-center items-center min-h-screen">
+          <p className="text-muted-foreground">Unité non trouvée</p>
+        </div>
+      </AgencyLayout>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <UnitHeader unitNumber={unit.unit_number} apartmentName={unit.apartment?.name || ''} />
-      
-      <Tabs defaultValue="details" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="details">Détails</TabsTrigger>
-          <TabsTrigger value="tenant">Locataire</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="details">
+    <AgencyLayout>
+      <div className="container mx-auto py-6">
+        <UnitHeader unit={unit} />
+        <div className="mt-6">
           <UnitDetailsTab unit={unit} />
-        </TabsContent>
-
-        <TabsContent value="tenant">
-          <UnitTenantTab unitId={unit.id} apartmentId={unit.apartment_id} />
-        </TabsContent>
-      </Tabs>
-    </div>
+        </div>
+      </div>
+    </AgencyLayout>
   )
 }
