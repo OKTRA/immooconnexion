@@ -79,7 +79,6 @@ export interface ApartmentInspection {
   deposit_returned: number;
   photo_urls: string[];
   status: string;
-  type?: string;
   created_at: string;
   updated_at: string;
 }
