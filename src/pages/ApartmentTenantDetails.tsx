@@ -10,6 +10,7 @@ import { TenantInspectionsTab } from "@/components/apartment/tenant/tabs/TenantI
 import { TenantHeader } from "@/components/apartment/tenant/TenantHeader"
 import { useApartmentTenant } from "@/hooks/use-apartment-tenant"
 import { useToast } from "@/components/ui/use-toast"
+import { useEffect } from "react"
 
 export default function ApartmentTenantDetails() {
   const { tenantId } = useParams()
@@ -17,13 +18,15 @@ export default function ApartmentTenantDetails() {
   
   const { data: tenant, isLoading, error } = useApartmentTenant(tenantId!)
 
-  if (error) {
-    toast({
-      title: "Erreur",
-      description: "Impossible de charger les détails du locataire",
-      variant: "destructive",
-    })
-  }
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les détails du locataire",
+        variant: "destructive",
+      })
+    }
+  }, [error, toast])
 
   if (isLoading) {
     return (

@@ -20,6 +20,9 @@ export function useApartmentTenant(tenantId: string) {
           ),
           apartment_leases (
             id,
+            tenant_id,
+            unit_id,
+            agency_id,
             start_date,
             end_date,
             rent_amount,
@@ -32,7 +35,7 @@ export function useApartmentTenant(tenantId: string) {
           )
         `)
         .eq("id", tenantId)
-        .order('apartment_leases.created_at', { foreignTable: 'apartment_leases', ascending: false })
+        .order('created_at', { ascending: false })
         .maybeSingle()
 
       if (error) {
@@ -44,7 +47,7 @@ export function useApartmentTenant(tenantId: string) {
       return data as ApartmentTenant
     },
     enabled: !!tenantId,
-    staleTime: 5 * 60 * 1000, // Cache pendant 5 minutes
-    gcTime: 30 * 60 * 1000 // Garde en cache pendant 30 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000
   })
 }
