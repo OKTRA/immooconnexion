@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Loader2 } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function RecentActivities() {
-  // Récupérer d'abord le profil de l'utilisateur
   const { data: userProfile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
@@ -15,32 +15,24 @@ export function RecentActivities() {
 
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('agency_id')
         .eq('id', user.id)
         .maybeSingle()
 
-      if (error) {
-        console.error("Erreur lors de la récupération du profil:", error)
-        throw error
-      }
+      if (error) throw error
+      if (!profile) throw new Error("Profil non trouvé")
 
-      if (!profile) {
-        throw new Error("Profil non trouvé")
-      }
-
-      console.log("Profil complet:", profile)
       return profile
     },
+    staleTime: 30 * 60 * 1000, // Cache pendant 30 minutes
   })
 
-  // Utiliser le profil pour récupérer les contrats
   const { data: recentContracts, isLoading: isLoadingContracts } = useQuery({
-    queryKey: ["recent-activities", userProfile?.id],
+    queryKey: ["recent-activities", userProfile?.agency_id],
     queryFn: async () => {
       if (!userProfile?.agency_id) return []
       
-      console.log("Récupération des activités récentes pour le profil:", userProfile)
-      
+      // Optimisation: Sélection uniquement des champs nécessaires
       const { data: contracts, error } = await supabase
         .from("contracts")
         .select(`
@@ -48,61 +40,48 @@ export function RecentActivities() {
           montant,
           type,
           created_at,
-          tenant_id,
-          property_id,
-          agency_id
+          tenant_id (
+            nom,
+            prenom
+          ),
+          property_id (
+            bien
+          )
         `)
         .eq('agency_id', userProfile.agency_id)
         .order("created_at", { ascending: false })
         .limit(5)
 
-      if (error) {
-        console.error("Error fetching recent activities:", error)
-        throw error
-      }
-
-      console.log('Contracts before details:', contracts)
-
-      // Fetch related tenant and property information
-      const contractsWithDetails = await Promise.all(
-        (contracts || []).map(async (contract) => {
-          const [tenantResult, propertyResult] = await Promise.all([
-            contract.tenant_id
-              ? supabase
-                  .from('tenants')
-                  .select('nom, prenom')
-                  .eq('id', contract.tenant_id)
-                  .maybeSingle()
-              : { data: null },
-            contract.property_id
-              ? supabase
-                  .from('properties')
-                  .select('bien')
-                  .eq('id', contract.property_id)
-                  .maybeSingle()
-              : { data: null }
-          ])
-
-          return {
-            ...contract,
-            tenant_nom: tenantResult.data?.nom,
-            tenant_prenom: tenantResult.data?.prenom,
-            property_name: propertyResult.data?.bien
-          }
-        })
-      )
-
-      console.log("Recent activities data:", contractsWithDetails)
-      return contractsWithDetails
+      if (error) throw error
+      return contracts
     },
     enabled: !!userProfile?.agency_id,
+    staleTime: 1 * 60 * 1000, // Cache pendant 1 minute
   })
 
   if (isLoadingProfile || isLoadingContracts) {
     return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
+      <Card className="col-span-2">
+        <CardHeader>
+          <CardTitle>Activités Récentes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[150px]" />
+                  <Skeleton className="h-3 w-[100px]" />
+                </div>
+                <div className="text-right space-y-2">
+                  <Skeleton className="h-4 w-[100px]" />
+                  <Skeleton className="h-3 w-[80px]" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -120,13 +99,10 @@ export function RecentActivities() {
             >
               <div>
                 <p className="font-medium">
-                  {contract.tenant_nom && contract.tenant_prenom 
-                    ? `${contract.tenant_prenom} ${contract.tenant_nom}`
-                    : 'Non renseigné'
-                  }
+                  {contract.tenant_id?.prenom} {contract.tenant_id?.nom}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {contract.property_name || 'Non renseigné'} - {contract.type}
+                  {contract.property_id?.bien} - {contract.type}
                 </p>
               </div>
               <div className="text-right">
@@ -137,9 +113,7 @@ export function RecentActivities() {
                   }).format(contract.montant || 0)}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {contract.created_at
-                    ? format(new Date(contract.created_at), "PPP", { locale: fr })
-                    : "Date inconnue"}
+                  {format(new Date(contract.created_at), "PPP", { locale: fr })}
                 </p>
               </div>
             </div>
