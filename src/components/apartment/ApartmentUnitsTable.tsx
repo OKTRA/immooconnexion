@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button"
-import { Trash, Pencil, Eye } from "lucide-react"
+import { Trash, Pencil } from "lucide-react"
 import { ApartmentUnit } from "@/types/apartment"
-import { useNavigate } from "react-router-dom"
 
 interface ApartmentUnitsTableProps {
   units: ApartmentUnit[]
@@ -18,12 +17,6 @@ export function ApartmentUnitsTable({
   onEdit,
   onDelete
 }: ApartmentUnitsTableProps) {
-  const navigate = useNavigate()
-
-  const handleViewDetails = (unitId: string) => {
-    navigate(`/agence/apartments/${apartmentId}/units/${unitId}`)
-  }
-
   return (
     <div className="rounded-md border">
       <table className="w-full">
@@ -71,13 +64,6 @@ export function ApartmentUnitsTable({
               </td>
               <td className="p-4">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleViewDetails(unit.id)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
                   {onEdit && (
                     <Button
                       variant="ghost"

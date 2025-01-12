@@ -32,7 +32,6 @@ export default function ApartmentTenantDetails() {
           )
         `)
         .eq("id", tenantId)
-        .order('apartment_leases.created_at', { foreignTable: 'apartment_leases', ascending: false })
         .maybeSingle()
 
       if (error) throw error
