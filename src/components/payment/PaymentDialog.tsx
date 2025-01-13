@@ -2,19 +2,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useState } from "react"
-import { PaymentMethodSelector } from "./PaymentMethodSelector"
-import { CinetPayForm } from "./CinetPayForm"
-import { PaydunyaForm } from "./PaydunyaForm"
+import { PaymentMethodSelector } from "@/components/payment/PaymentMethodSelector"
+import { CinetPayForm } from "@/components/payment/CinetPayForm"
+import { PaydunyaForm } from "@/components/payment/PaydunyaForm"
+import { OrangeMoneyForm } from "@/components/payment/OrangeMoneyForm"
 import { useToast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
 import { PaymentDialogProps } from "./types"
-import { useForm } from "react-hook-form"
-import { PaymentFormFields } from "./PaymentFormFields"
-import { PaymentFormData, paymentFormSchema } from "./types"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Form } from "@/components/ui/form"
-import { FreeSignupForm } from "./FreeSignupForm"
-import { Loader2 } from "lucide-react"
 
 export function PaymentDialog({ 
   open, 
@@ -22,40 +16,24 @@ export function PaymentDialog({
   planId, 
   planName, 
   amount = 0,
-  isUpgrade = false,
-  agencyId
+  isUpgrade = false
 }: PaymentDialogProps) {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<string>("cinetpay")
-  const [step, setStep] = useState<'form' | 'payment'>(isUpgrade ? 'payment' : 'form')
-  const [isLoading, setIsLoading] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<string>("orange_money")
   const { toast } = useToast()
   const navigate = useNavigate()
 
-  const form = useForm<PaymentFormData>({
-    resolver: zodResolver(paymentFormSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      confirm_password: "",
-      agency_name: "",
-      agency_address: "",
-      country: "",
-      city: "",
-      first_name: "",
-      last_name: "",
-      phone_number: "",
-    }
-  })
+  console.log("PaymentDialog rendered with:", { planId, planName, amount, paymentMethod })
 
   const handleClose = () => {
     if (paymentSuccess) {
-      navigate('/agence/login')
+      navigate('/agence/dashboard')
     }
     onOpenChange(false)
   }
 
   const handlePaymentSuccess = () => {
+    console.log("Payment success callback triggered")
     setPaymentSuccess(true)
     toast({
       title: "Succès",
@@ -65,12 +43,22 @@ export function PaymentDialog({
     })
   }
 
-  const onSubmit = async (data: PaymentFormData) => {
-    if (amount === 0) {
-      setIsLoading(true)
-      return
-    }
-    setStep('payment')
+  const defaultFormData = {
+    email: "",
+    password: "",
+    confirm_password: "",
+    agency_name: "",
+    agency_address: "",
+    country: "",
+    city: "",
+    first_name: "",
+    last_name: "",
+    phone_number: "",
+  }
+
+  const handleMethodChange = (method: string) => {
+    console.log("Payment method changed to:", method)
+    setPaymentMethod(method)
   }
 
   return (
@@ -79,10 +67,10 @@ export function PaymentDialog({
         <DialogHeader>
           <DialogTitle>
             {paymentSuccess 
-              ? "Inscription réussie" 
+              ? "Paiement réussi" 
               : planName 
-                ? `${isUpgrade ? 'Mise à niveau -' : 'Inscription -'} Plan ${planName}` 
-                : 'Inscription'}
+                ? `Paiement - Plan ${planName}` 
+                : 'Paiement'}
           </DialogTitle>
         </DialogHeader>
         <Card className="p-6">
@@ -92,61 +80,43 @@ export function PaymentDialog({
                 <p className="text-sm text-gray-500">
                   {isUpgrade 
                     ? "Votre abonnement a été mis à jour avec succès."
-                    : "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter."}
+                    : "Votre paiement a été traité avec succès."}
                 </p>
                 <Button onClick={handleClose} className="w-full">
-                  {isUpgrade ? "Retour au tableau de bord" : "Aller à la page de connexion"}
+                  Retour au tableau de bord
                 </Button>
               </div>
-            ) : !isUpgrade && step === 'form' ? (
-              amount === 0 ? (
-                <FreeSignupForm 
-                  formData={form.getValues()}
-                  agencyId={agencyId || planId}
-                  onSuccess={() => {
-                    setPaymentSuccess(true)
-                    navigate('/agence/login')
-                  }}
-                />
-              ) : (
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <PaymentFormFields form={form} />
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Création en cours...
-                        </>
-                      ) : (
-                        "Continuer vers le paiement"
-                      )}
-                    </Button>
-                  </form>
-                </Form>
-              )
             ) : (
               <div className="space-y-4">
                 <PaymentMethodSelector 
                   selectedMethod={paymentMethod}
-                  onMethodChange={setPaymentMethod}
+                  onMethodChange={handleMethodChange}
                 />
+                {paymentMethod === "orange_money" && (
+                  <OrangeMoneyForm 
+                    amount={amount}
+                    description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
+                    agencyId={planId}
+                    onSuccess={handlePaymentSuccess}
+                    formData={defaultFormData}
+                  />
+                )}
                 {paymentMethod === "cinetpay" && (
                   <CinetPayForm 
                     amount={amount}
                     description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
-                    agencyId={agencyId || planId}
+                    agencyId={planId}
                     onSuccess={handlePaymentSuccess}
-                    formData={form.getValues()}
+                    formData={defaultFormData}
                   />
                 )}
                 {paymentMethod === "paydunya" && (
                   <PaydunyaForm 
                     amount={amount}
                     description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
-                    agencyId={agencyId || planId}
+                    agencyId={planId}
                     onSuccess={handlePaymentSuccess}
-                    formData={form.getValues()}
+                    formData={defaultFormData}
                   />
                 )}
               </div>

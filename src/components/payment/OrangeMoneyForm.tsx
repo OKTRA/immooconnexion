@@ -24,7 +24,10 @@ export function OrangeMoneyForm({
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
+  console.log("OrangeMoneyForm rendered with:", { amount, description, agencyId })
+
   const handlePayment = async () => {
+    console.log("handlePayment clicked")
     try {
       setIsLoading(true)
       console.log("Starting Orange Money payment process...", { amount, description, agencyId })
@@ -50,10 +53,11 @@ export function OrangeMoneyForm({
 
       console.log("Payment initialization response:", data)
       
-      if (data.payment_url) {
+      if (data?.payment_url) {
         console.log("Redirecting to payment URL:", data.payment_url)
         window.location.href = data.payment_url
       } else {
+        console.error("No payment URL received:", data)
         throw new Error('URL de paiement non reçue')
       }
 
