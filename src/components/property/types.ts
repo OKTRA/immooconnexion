@@ -15,31 +15,33 @@ export interface Property {
   created_at?: string;
   updated_at?: string;
   created_by_user_id?: string;
-  property_category: 'house' | 'duplex' | 'triplex';
+  property_category: 'house' | 'duplex' | 'triplex' | 'apartment';
   owner_name?: string;
   owner_phone?: string;
   country?: string;
   quartier?: string;
 }
 
-export interface PropertyFormData {
-  bien: string;
-  type: string;
-  chambres: string;
-  ville: string;
-  loyer: string;
-  taux_commission: string;
-  caution: string;
-  frais_agence: string;
-  property_category: 'house' | 'duplex' | 'triplex';
-  owner_name: string;
-  owner_phone: string;
-  country: string;
-  quartier: string;
+export interface PropertyUnit {
+  id: string;
+  property_id: string;
+  unit_number: string;
+  floor_number?: number;
+  area?: number;
+  rent_amount: number;
+  deposit_amount?: number;
+  status: 'available' | 'occupied' | 'maintenance' | 'reserved';
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export interface PropertyDialogProps {
-  property?: Property | null;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+export interface PropertyUnitFormData {
+  unit_number: string;
+  floor_number?: number;
+  area?: number;
+  rent_amount: number;
+  deposit_amount?: number;
+  status: 'available' | 'occupied' | 'maintenance' | 'reserved';
+  description?: string;
 }
