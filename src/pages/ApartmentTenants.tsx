@@ -9,16 +9,16 @@ import { ApartmentTenantDialog } from "@/components/apartment/tenant/ApartmentTe
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2 } from "lucide-react"
+import { ApartmentTenant } from "@/types/apartment"
 
 export default function ApartmentTenants() {
   const [open, setOpen] = useState(false)
-  const [selectedTenant, setSelectedTenant] = useState(null)
+  const [selectedTenant, setSelectedTenant] = useState<ApartmentTenant | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  const handleEdit = (tenant: any) => {
+  const handleEdit = (tenant: ApartmentTenant) => {
     setSelectedTenant(tenant)
     setOpen(true)
   }
