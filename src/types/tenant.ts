@@ -30,4 +30,5 @@ export interface TenantReceiptData {
   isInitialReceipt?: boolean;
   isEndReceipt?: boolean;
   contractId?: string;
+  inspection?: ApartmentInspection;
 }

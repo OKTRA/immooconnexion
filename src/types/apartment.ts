@@ -11,6 +11,17 @@ export interface Apartment {
   updated_at?: string;
 }
 
+export interface ApartmentUnitFormData {
+  unit_number: string;
+  floor_number?: number | null;
+  area?: number | null;
+  rent_amount: number;
+  deposit_amount?: number | null;
+  status: ApartmentUnitStatus;
+  description?: string | null;
+  commission_percentage?: number | null;
+}
+
 export interface ApartmentUnit {
   id: string;
   apartment_id: string;

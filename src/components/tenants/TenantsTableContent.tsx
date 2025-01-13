@@ -3,24 +3,16 @@ import { TenantTableRow } from "./TenantTableRow"
 import { TenantDisplay } from "@/types/tenant"
 
 interface TenantsTableContentProps {
-  tenants: TenantDisplay[]
-  onEdit: (tenant: TenantDisplay) => void
-  onDelete: (id: string) => Promise<void>
+  tenants: TenantDisplay[];
+  onEdit: (tenant: TenantDisplay) => void;
+  onDelete: (id: string) => Promise<void>;
 }
 
-export function TenantsTableContent({ tenants, onEdit, onDelete }: TenantsTableContentProps) {
-  if (tenants.length === 0) {
-    return (
-      <TableBody>
-        <tr>
-          <td colSpan={5} className="text-center py-4">
-            Aucun locataire trouvé
-          </td>
-        </tr>
-      </TableBody>
-    )
-  }
-
+export function TenantsTableContent({
+  tenants,
+  onEdit,
+  onDelete
+}: TenantsTableContentProps) {
   return (
     <TableBody>
       {tenants.map((tenant) => (
@@ -34,7 +26,7 @@ export function TenantsTableContent({ tenants, onEdit, onDelete }: TenantsTableC
             profession: tenant.profession
           }}
           onEdit={() => onEdit(tenant)}
-          onDelete={onDelete}
+          onDelete={() => onDelete(tenant.id)}
         />
       ))}
     </TableBody>
