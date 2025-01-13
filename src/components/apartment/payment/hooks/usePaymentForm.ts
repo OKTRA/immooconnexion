@@ -2,10 +2,12 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 
+export type PaymentMethod = "cash" | "bank_transfer" | "mobile_money"
+
 export interface PaymentFormData {
   leaseId: string
   amount: number
-  paymentMethod: "cash" | "bank_transfer" | "mobile_money"
+  paymentMethod: PaymentMethod
   paymentPeriods: string[]
 }
 
@@ -27,11 +29,29 @@ export interface LeaseData {
 }
 
 export function usePaymentForm(onSuccess?: () => void) {
+  const [selectedLeaseId, setSelectedLeaseId] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [selectedLeaseId, setSelectedLeaseId] = useState<string>("")
+
+  // Récupérer l'ID de l'agence de l'utilisateur connecté
+  const { data: profile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("User not found")
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("agency_id")
+        .eq("id", user.id)
+        .single()
+
+      if (error) throw error
+      return data
+    }
+  })
 
   const { data: leases = [], isLoading: isLoadingLeases } = useQuery({
-    queryKey: ["active-leases"],
+    queryKey: ["leases"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("apartment_leases")
@@ -68,10 +88,10 @@ export function usePaymentForm(onSuccess?: () => void) {
         .select("*")
         .eq("lease_id", selectedLeaseId)
         .eq("status", "pending")
-        .order("start_date", { ascending: true })
+        .order("start_date")
 
       if (error) throw error
-      return data || []
+      return data
     },
     enabled: !!selectedLeaseId
   })
@@ -84,6 +104,7 @@ export function usePaymentForm(onSuccess?: () => void) {
     selectedLeaseId,
     setSelectedLeaseId,
     isSubmitting,
-    setIsSubmitting
+    setIsSubmitting,
+    agencyId: profile?.agency_id
   }
 }

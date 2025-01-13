@@ -9,6 +9,7 @@ import { usePaymentForm, PaymentFormData } from "./hooks/usePaymentForm"
 import { LeaseSelect } from "./components/LeaseSelect"
 import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
 import { supabase } from "@/integrations/supabase/client"
+import { useQuery } from "@tanstack/react-query"
 
 export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
   const { toast } = useToast()
@@ -20,7 +21,8 @@ export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
     selectedLeaseId,
     setSelectedLeaseId,
     isSubmitting,
-    setIsSubmitting
+    setIsSubmitting,
+    agencyId
   } = usePaymentForm(onSuccess)
 
   const { register, handleSubmit, setValue, watch } = useForm<PaymentFormData>({
@@ -33,9 +35,17 @@ export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
   })
 
   const onSubmit = async (data: PaymentFormData) => {
+    if (!agencyId) {
+      toast({
+        title: "Erreur",
+        description: "ID de l'agence manquant",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsSubmitting(true)
     try {
-      // Create payment record
       const { error: paymentError } = await supabase
         .from("apartment_lease_payments")
         .insert({
@@ -44,12 +54,12 @@ export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
           payment_method: data.paymentMethod,
           status: "paid",
           payment_date: new Date().toISOString(),
-          due_date: new Date().toISOString() // This should be set based on the payment period
+          due_date: new Date().toISOString(),
+          agency_id: agencyId
         })
 
       if (paymentError) throw paymentError
 
-      // Update payment period status
       if (data.paymentPeriods.length > 0) {
         const { error: periodError } = await supabase
           .from("apartment_payment_periods")
@@ -159,4 +169,3 @@ export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
     </form>
   )
 }
-
