@@ -257,8 +257,11 @@ export type Database = {
           id: string
           late_fee_amount: number | null
           lease_id: string
+          monitoring_status: string | null
           payment_date: string | null
           payment_method: string | null
+          payment_period_end: string | null
+          payment_period_start: string | null
           status: string
           type: string | null
           updated_at: string | null
@@ -272,8 +275,11 @@ export type Database = {
           id?: string
           late_fee_amount?: number | null
           lease_id: string
+          monitoring_status?: string | null
           payment_date?: string | null
           payment_method?: string | null
+          payment_period_end?: string | null
+          payment_period_start?: string | null
           status?: string
           type?: string | null
           updated_at?: string | null
@@ -287,8 +293,11 @@ export type Database = {
           id?: string
           late_fee_amount?: number | null
           lease_id?: string
+          monitoring_status?: string | null
           payment_date?: string | null
           payment_method?: string | null
+          payment_period_end?: string | null
+          payment_period_start?: string | null
           status?: string
           type?: string | null
           updated_at?: string | null
@@ -394,6 +403,47 @@ export type Database = {
             columns: ["unit_id"]
             isOneToOne: false
             referencedRelation: "apartment_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apartment_payment_periods: {
+        Row: {
+          amount: number
+          created_at: string | null
+          end_date: string
+          id: string
+          lease_id: string | null
+          start_date: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          end_date: string
+          id?: string
+          lease_id?: string | null
+          start_date: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          end_date?: string
+          id?: string
+          lease_id?: string | null
+          start_date?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_payment_periods_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_leases"
             referencedColumns: ["id"]
           },
         ]
@@ -1408,6 +1458,10 @@ export type Database = {
         Returns: undefined
       }
       update_expired_apartment_leases: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_payment_period_statuses: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
