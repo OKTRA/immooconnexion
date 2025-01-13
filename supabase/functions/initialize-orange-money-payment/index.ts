@@ -5,7 +5,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-console.log("Orange Money Payment Function starting...")
+interface RequestBody {
+  amount: number
+  description: string
+  metadata?: {
+    agency_id?: string
+    customer_email?: string
+    customer_name?: string
+    customer_phone?: string
+  }
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -13,128 +22,87 @@ serve(async (req) => {
   }
 
   try {
-    const { amount, description, metadata } = await req.json()
-    console.log("Received request with:", { amount, description, metadata })
-
     const clientId = Deno.env.get('ORANGE_MONEY_CLIENT_ID')
     const clientSecret = Deno.env.get('ORANGE_MONEY_CLIENT_SECRET')
+    const authHeader = Deno.env.get('ORANGE_MONEY_AUTH_HEADER')
 
-    console.log("Checking environment variables:", {
-      hasClientId: !!clientId,
-      hasClientSecret: !!clientSecret
-    })
-
-    if (!clientId || !clientSecret) {
-      console.error("Missing Orange Money configuration")
-      throw new Error('Configuration Orange Money manquante')
+    if (!clientId || !clientSecret || !authHeader) {
+      throw new Error('Missing Orange Money configuration')
     }
 
-    // 1. Get access token
-    console.log("Requesting access token...")
-    const credentials = btoa(`${clientId}:${clientSecret}`)
-    console.log("Using credentials (first 10 chars):", credentials.substring(0, 10))
+    const { amount, description, metadata } = await req.json() as RequestBody
 
+    // Log the incoming request data
+    console.log('Request data:', { amount, description, metadata })
+
+    // Get access token
     const tokenResponse = await fetch('https://api.orange.com/oauth/v3/token', {
       method: 'POST',
       headers: {
+        'Authorization': `Basic ${authHeader}`,
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${credentials}`
+        'Accept': 'application/json'
       },
-      body: new URLSearchParams({
-        grant_type: 'client_credentials'
-      }).toString()
+      body: 'grant_type=client_credentials'
     })
 
-    console.log("Token response status:", tokenResponse.status)
     const tokenData = await tokenResponse.json()
-    
-    if (!tokenResponse.ok) {
-      console.error("Token error response:", tokenData)
-      throw new Error(`Error getting access token: ${JSON.stringify(tokenData)}`)
+    console.log('Token response:', tokenData)
+
+    if (!tokenData.access_token) {
+      throw new Error('Failed to get access token')
     }
 
-    const accessToken = tokenData.access_token
-    console.log("Access token obtained (first 10 chars):", accessToken.substring(0, 10))
-
-    const origin = req.headers.get('origin') || 'http://localhost:5173'
-    console.log("Using origin:", origin)
-
-    // 2. Initialize payment with access token
+    // Generate unique order ID
     const orderId = `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
+    // Clean and format merchant key
+    const cleanMerchantKey = clientId.trim().replace(/[\s\n\r]+/g, '')
+    
     const requestBody = {
-      merchant_key: clientId.trim().replace(/\s+/g, ''), // Remove all whitespace
+      merchant_key: cleanMerchantKey,
       currency: "OUV",
       order_id: orderId,
-      amount: amount.toString(), // Convert to string as required by the API
-      return_url: `${origin}/payment-success`,
-      cancel_url: `${origin}/payment-cancel`,
-      notif_url: `${origin}/api/orange-money-webhook`,
+      amount: amount.toString(),
+      return_url: "https://example.com/return",
+      cancel_url: "https://example.com/cancel",
+      notif_url: "https://example.com/notify",
       lang: "fr",
-      reference: description || "Payment Immoov",
-      metadata: JSON.stringify(metadata), // Ensure metadata is stringified
-      payment_mode: "test"
+      reference: orderId,
+      metadata: JSON.stringify(metadata || {})
     }
 
-    console.log("Sending request to Orange Money API:", {
-      ...requestBody,
-      merchant_key: '[REDACTED]'
-    })
+    console.log('Payment request body:', requestBody)
 
     const paymentResponse = await fetch('https://api.orange.com/orange-money-webpay/dev/v1/webpayment', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        'Authorization': `Bearer ${tokenData.access_token}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
       body: JSON.stringify(requestBody)
     })
 
-    const responseData = await paymentResponse.json()
-    console.log("Orange Money API response:", {
-      status: paymentResponse.status,
-      statusText: paymentResponse.statusText,
-      data: responseData
-    })
+    const paymentData = await paymentResponse.json()
+    console.log('Payment response:', paymentData)
 
     if (!paymentResponse.ok) {
-      console.error("Error response from Orange Money API:", responseData)
-      throw new Error(`Error from Orange Money API: ${JSON.stringify(responseData)}`)
+      throw new Error(`Error from Orange Money API: ${JSON.stringify(paymentData)}`)
     }
 
-    const testPaymentUrl = `https://webpayment-ow-sb.orange-money.com/payment/pay_token/${responseData.pay_token}`
-
-    return new Response(
-      JSON.stringify({
-        payment_url: testPaymentUrl,
-        pay_token: responseData.pay_token,
-        order_id: orderId
-      }),
-      { 
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-        status: 200
-      }
-    )
-  } catch (error) {
-    console.error("Detailed error in initialize-orange-money-payment function:", {
-      error: error.message,
-      stack: error.stack
+    return new Response(JSON.stringify(paymentData), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200
     })
-    
+
+  } catch (error) {
+    console.error('Error:', error)
     return new Response(
-      JSON.stringify({
-        error: error.message
-      }),
+      JSON.stringify({ error: error.message }),
       { 
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-        status: 500
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500 
       }
     )
   }
