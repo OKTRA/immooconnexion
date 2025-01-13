@@ -17,60 +17,36 @@ serve(async (req) => {
     const { amount, description, metadata } = await req.json()
     console.log("Received request with:", { amount, description, metadata })
 
-    // Validation des données requises
-    if (!amount || !description || !metadata) {
-      console.error("Missing required fields:", { amount, description, metadata })
-      return new Response(
-        JSON.stringify({
-          code: '400',
-          message: 'Amount, description and metadata are required'
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400
-        }
-      )
-    }
+    // Génération d'un ID de transaction unique
+    const orderId = `TRANS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    console.log("Generated order ID:", orderId)
 
     // Récupération des clés d'API depuis les variables d'environnement
-    const clientId = Deno.env.get('ORANGE_MONEY_CLIENT_ID')
-    const clientSecret = Deno.env.get('ORANGE_MONEY_CLIENT_SECRET')
+    const merchantKey = Deno.env.get('ORANGE_MONEY_CLIENT_ID')
     const authHeader = Deno.env.get('ORANGE_MONEY_AUTH_HEADER')
 
-    if (!clientId || !clientSecret || !authHeader) {
+    if (!merchantKey || !authHeader) {
       console.error("Missing Orange Money configuration")
-      return new Response(
-        JSON.stringify({
-          code: '500',
-          message: 'Configuration Orange Money manquante'
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500
-        }
-      )
+      throw new Error('Configuration Orange Money manquante')
     }
-
-    console.log("Orange Money configuration found")
-
-    // Génération d'un ID de transaction unique
-    const transId = `TRANS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    console.log("Generated transaction ID:", transId)
 
     // Construction du corps de la requête pour Orange Money
     const requestBody = {
-      merchant_key: clientId,
-      currency: "XOF",
-      order_id: transId,
+      merchant_key: merchantKey,
+      currency: "OUV",
+      order_id: orderId,
       amount: amount,
-      return_url: `${req.headers.get('origin')}/payment-return`,
+      return_url: `${req.headers.get('origin')}/payment-success`,
       cancel_url: `${req.headers.get('origin')}/payment-cancel`,
       notif_url: `${req.headers.get('origin')}/api/orange-money-webhook`,
-      metadata: metadata,
-      description: description
+      lang: "fr",
+      reference: description || "Payment Immoov",
+      metadata: metadata
     }
 
-    // Appel à l'API Orange Money pour initialiser le paiement
+    console.log("Sending request to Orange Money API:", requestBody)
+
+    // Appel à l'API Orange Money
     const response = await fetch('https://api.orange.com/orange-money-webpay/dev/v1/webpayment', {
       method: 'POST',
       headers: {
@@ -81,33 +57,18 @@ serve(async (req) => {
       body: JSON.stringify(requestBody)
     })
 
-    const paymentData = await response.json()
-    console.log("Orange Money API response:", paymentData)
+    const responseData = await response.json()
+    console.log("Orange Money API response:", responseData)
 
     if (!response.ok) {
-      console.error("Orange Money API error:", paymentData)
-      return new Response(
-        JSON.stringify({
-          code: '500',
-          message: 'Erreur lors de l\'initialisation du paiement',
-          details: paymentData
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500
-        }
-      )
+      throw new Error(`Error from Orange Money API: ${JSON.stringify(responseData)}`)
     }
-
-    console.log("Payment initialization successful:", { transId, paymentData })
 
     return new Response(
       JSON.stringify({
-        code: '201',
-        message: 'Paiement initialisé',
-        payment_url: paymentData.payment_url,
-        payment_token: paymentData.pay_token,
-        transaction_id: transId
+        payment_url: responseData.payment_url,
+        pay_token: responseData.pay_token,
+        order_id: orderId
       }),
       { 
         headers: { 
@@ -115,15 +76,14 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         status: 201
-      },
+      }
     )
   } catch (error) {
     console.error("Error in initialize-orange-money-payment function:", error)
     
     return new Response(
       JSON.stringify({
-        code: '500',
-        message: error.message || 'Une erreur est survenue'
+        error: error.message
       }),
       { 
         headers: { 
@@ -131,7 +91,7 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         status: 500
-      },
+      }
     )
   }
 })
