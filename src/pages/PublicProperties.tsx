@@ -4,7 +4,14 @@ import { PropertiesGrid } from "@/components/home/PropertiesGrid"
 import { SearchBar } from "@/components/home/SearchBar"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Property } from "@/types/property"
+import { Property } from "@/components/property/types"
+
+interface PropertyWithAgency extends Property {
+  agency: {
+    name: string
+    address: string
+  }
+}
 
 export default function PublicProperties() {
   const { data: properties = [] } = useQuery({
@@ -22,7 +29,7 @@ export default function PublicProperties() {
         .eq('statut', 'disponible')
       
       if (error) throw error
-      return data as Property[]
+      return data as PropertyWithAgency[]
     }
   })
 

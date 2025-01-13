@@ -1,47 +1,29 @@
-export interface Property {
-  id: string;
-  bien: string;
-  type: string;
-  chambres?: number;
-  ville?: string;
-  loyer?: number;
-  frais_agence?: number;
-  taux_commission?: number;
-  caution?: number;
-  photo_url?: string;
-  statut?: string;
-  user_id?: string;
-  agency_id?: string;
-  created_at?: string;
-  updated_at?: string;
-  created_by_user_id?: string;
-  property_category: 'house' | 'duplex' | 'triplex' | 'apartment';
-  owner_name?: string;
-  owner_phone?: string;
-  country?: string;
-  quartier?: string;
+import { Property as SupabaseProperty } from "@/integrations/supabase/types/properties"
+
+export interface Property extends Omit<SupabaseProperty, 'property_category'> {
+  property_category: 'house' | 'duplex' | 'triplex' | 'apartment'
 }
 
-export interface PropertyUnit {
-  id: string;
-  property_id: string;
-  unit_number: string;
-  floor_number?: number;
-  area?: number;
-  rent_amount: number;
-  deposit_amount?: number;
-  status: 'available' | 'occupied' | 'maintenance' | 'reserved';
-  description?: string;
-  created_at?: string;
-  updated_at?: string;
+export interface PropertyFormData {
+  bien: string
+  type: string
+  chambres?: number
+  ville?: string
+  loyer?: number
+  frais_agence?: number
+  taux_commission?: number
+  caution?: number
+  photo_url?: string
+  statut?: string
+  property_category: 'house' | 'duplex' | 'triplex' | 'apartment'
+  owner_name?: string
+  owner_phone?: string
+  country?: string
+  quartier?: string
 }
 
-export interface PropertyUnitFormData {
-  unit_number: string;
-  floor_number?: number;
-  area?: number;
-  rent_amount: number;
-  deposit_amount?: number;
-  status: 'available' | 'occupied' | 'maintenance' | 'reserved';
-  description?: string;
+export interface PropertyDialogProps {
+  property?: Property | null
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
