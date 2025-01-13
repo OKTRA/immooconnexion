@@ -27,15 +27,15 @@ serve(async (req) => {
     const authHeader = Deno.env.get('ORANGE_MONEY_AUTH_HEADER')
 
     if (!clientId || !clientSecret || !authHeader) {
+      console.error('Missing Orange Money configuration')
       throw new Error('Missing Orange Money configuration')
     }
 
     const { amount, description, metadata } = await req.json() as RequestBody
 
-    // Log the incoming request data
     console.log('Request data:', { amount, description, metadata })
 
-    // Get access token
+    // Get access token with proper error handling
     const tokenResponse = await fetch('https://api.orange.com/oauth/v3/token', {
       method: 'POST',
       headers: {
@@ -46,18 +46,24 @@ serve(async (req) => {
       body: 'grant_type=client_credentials'
     })
 
+    if (!tokenResponse.ok) {
+      const errorData = await tokenResponse.text()
+      console.error('Token response error:', errorData)
+      throw new Error(`Failed to get access token: ${errorData}`)
+    }
+
     const tokenData = await tokenResponse.json()
     console.log('Token response:', tokenData)
 
     if (!tokenData.access_token) {
-      throw new Error('Failed to get access token')
+      throw new Error('No access token in response')
     }
 
     // Generate unique order ID
     const orderId = `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
     // Clean and format merchant key
-    const cleanMerchantKey = clientId.trim().replace(/[\s\n\r]+/g, '')
+    const cleanMerchantKey = clientId.trim()
     
     const requestBody = {
       merchant_key: cleanMerchantKey,
@@ -84,12 +90,14 @@ serve(async (req) => {
       body: JSON.stringify(requestBody)
     })
 
+    if (!paymentResponse.ok) {
+      const errorData = await paymentResponse.text()
+      console.error('Payment API error:', errorData)
+      throw new Error(`Error from Orange Money API: ${errorData}`)
+    }
+
     const paymentData = await paymentResponse.json()
     console.log('Payment response:', paymentData)
-
-    if (!paymentResponse.ok) {
-      throw new Error(`Error from Orange Money API: ${JSON.stringify(paymentData)}`)
-    }
 
     return new Response(JSON.stringify(paymentData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
