@@ -46,7 +46,7 @@ export function usePaymentForm(onSuccess?: () => void) {
           ),
           apartment_units (
             unit_number,
-            apartment (
+            apartment:apartments (
               name
             )
           )

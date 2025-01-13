@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react"
 import { usePaymentForm, PaymentFormData } from "./hooks/usePaymentForm"
 import { LeaseSelect } from "./components/LeaseSelect"
 import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
+import { supabase } from "@/integrations/supabase/client"
 
 export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
   const { toast } = useToast()
@@ -158,3 +159,4 @@ export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
     </form>
   )
 }
+
