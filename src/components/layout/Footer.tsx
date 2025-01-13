@@ -12,15 +12,22 @@ export function Footer() {
           return
         }
 
-        const response = await fetch("https://api.github.com/repos/OKTRA/immoo/releases/latest")
+        const response = await fetch("https://api.github.com/repos/OKTRA/immoo/releases/latest", {
+          headers: {
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        })
+        
         if (!response.ok) {
-          throw new Error(`GitHub API error: ${response.status}`)
+          console.log("Using default version - GitHub API response not ok")
+          return
         }
+        
         const data = await response.json()
         setVersion(data.tag_name)
       } catch (error) {
         // Log the error but don't let it break the UI
-        console.log("Using default version since repository is not accessible")
+        console.log("Using default version - error fetching from GitHub:", error)
         // Keep using the default version set in state
       }
     }

@@ -1,55 +1,33 @@
-export type ApartmentUnitStatus = "available" | "occupied" | "maintenance" | "reserved";
-
-export interface ApartmentInspection {
-  id: string;
-  lease_id: string;
-  inspection_date: string;
-  has_damages: boolean;
-  damage_description: string | null;
-  repair_costs: number;
-  deposit_returned: number;
-  photo_urls: string[];
-  status: string;
-  type?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Apartment {
-  id: string;
-  agency_id: string;
-  name: string;
-  address: string;
-  total_units: number;
-  description?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+export type ApartmentUnitStatus = 'available' | 'occupied' | 'maintenance' | 'reserved';
 
 export interface ApartmentUnit {
   id: string;
   apartment_id: string;
   unit_number: string;
-  floor_number: number | null;
-  area: number | null;
+  floor_number?: number;
+  area?: number;
   rent_amount: number;
-  deposit_amount: number | null;
+  deposit_amount?: number;
   status: ApartmentUnitStatus;
-  description: string | null;
+  description?: string;
   created_at?: string;
   updated_at?: string;
-  commission_percentage?: number;
+  current_lease?: ApartmentLease;
 }
 
-export interface ApartmentUnitFormData {
-  unit_number: string;
-  floor_number: number | null;
-  area: number | null;
+export interface ApartmentLease {
+  id: string;
+  tenant_id: string;
+  unit_id: string;
+  start_date: string;
+  end_date?: string;
   rent_amount: number;
-  deposit_amount: number | null;
-  status: ApartmentUnitStatus;
-  description: string | null;
-  commission_percentage?: number;
+  deposit_amount?: number;
+  payment_frequency: string;
+  duration_type: string;
+  status: string;
+  payment_type?: string;
+  initial_fees_paid?: boolean;
 }
 
 export interface ApartmentTenant {
@@ -61,43 +39,34 @@ export interface ApartmentTenant {
   birth_date?: string;
   photo_id_url?: string;
   agency_id: string;
-  unit_id?: string;
-  agency_fees?: number;
-  profession?: string;
   created_at?: string;
   updated_at?: string;
-  apartment_units?: {
-    unit_number: string;
-    apartment: {
-      name: string;
-    };
-  };
+  unit_id?: string;
+  employer_name?: string;
+  employer_phone?: string;
+  employer_address?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  emergency_contact_relationship?: string;
+  additional_notes?: string;
+  bank_name?: string;
+  bank_account_number?: string;
+  agency_fees?: number;
+  profession?: string;
   apartment_leases?: ApartmentLease[];
 }
 
-export interface ApartmentLease {
+export interface ApartmentInspection {
   id: string;
-  tenant_id: string;
-  unit_id: string;
-  start_date: string;
-  end_date?: string;
-  rent_amount: number;
-  deposit_amount: number;
-  payment_frequency: PaymentFrequency;
-  duration_type: DurationType;
-  status: LeaseStatus;
-  payment_type: PaymentType;
-  agency_id: string;
-  created_at?: string;
-  updated_at?: string;
-  deposit_returned?: boolean;
-  deposit_return_date?: string;
-  deposit_return_amount?: number;
-  deposit_return_notes?: string;
-  initial_fees_paid?: boolean;
+  lease_id: string;
+  inspection_date: string;
+  has_damages: boolean;
+  damage_description?: string;
+  repair_costs: number;
+  deposit_returned: number;
+  photo_urls: string[];
+  status: string;
+  type: string;
+  created_at: string;
+  updated_at: string;
 }
-
-export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
-export type DurationType = 'fixed' | 'month_to_month' | 'yearly';
-export type LeaseStatus = 'active' | 'expired' | 'terminated';
-export type PaymentType = 'upfront' | 'end_of_period';

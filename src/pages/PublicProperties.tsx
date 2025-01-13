@@ -4,6 +4,7 @@ import { PropertiesGrid } from "@/components/home/PropertiesGrid"
 import { Footer } from "@/components/layout/Footer"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import { Property } from "@/components/property/types"
 
 export default function PublicProperties() {
   const { data: properties, isLoading } = useQuery({
@@ -21,7 +22,14 @@ export default function PublicProperties() {
         .eq('statut', 'disponible')
       
       if (error) throw error
-      return data
+
+      // Cast the property_category to the correct type
+      const typedData = data?.map(item => ({
+        ...item,
+        property_category: item.property_category as "house" | "duplex" | "triplex"
+      })) as (Property & { agency: { name: string; address: string } })[]
+
+      return typedData || []
     }
   })
 
