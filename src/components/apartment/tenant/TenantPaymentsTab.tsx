@@ -1,23 +1,27 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { useTenantPayments } from "@/hooks/use-tenant-payments";
-import { Loader2 } from "lucide-react";
+import { useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
+import { useTenantPayments } from "@/hooks/use-tenant-payments"
+import { Loader2, Plus } from "lucide-react"
+import { PaymentDialog } from "@/components/apartment/payment/PaymentDialog"
 
 interface TenantPaymentsTabProps {
-  tenantId: string;
+  tenantId: string
 }
 
 export function TenantPaymentsTab({ tenantId }: TenantPaymentsTabProps) {
-  const { data, isLoading } = useTenantPayments(tenantId);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false)
+  const { data, isLoading } = useTenantPayments(tenantId)
 
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
-    );
+    )
   }
 
   if (!data) {
@@ -25,11 +29,19 @@ export function TenantPaymentsTab({ tenantId }: TenantPaymentsTabProps) {
       <div className="text-center py-8 text-muted-foreground">
         Aucune donnée disponible
       </div>
-    );
+    )
   }
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Paiements</h2>
+        <Button onClick={() => setShowPaymentDialog(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nouveau paiement
+        </Button>
+      </div>
+
       {/* Payments Section */}
       <Card>
         <CardHeader>
@@ -102,45 +114,10 @@ export function TenantPaymentsTab({ tenantId }: TenantPaymentsTabProps) {
         </CardContent>
       </Card>
 
-      {/* Notifications Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Notifications</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {data.notifications.map((notification) => (
-              <div
-                key={notification.id}
-                className="flex items-center justify-between p-4 border rounded-lg"
-              >
-                <div>
-                  <p className="font-medium">
-                    {notification.type === "late_payment"
-                      ? "Retard de paiement"
-                      : "Notification de paiement"}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Montant: {notification.amount.toLocaleString()} FCFA
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Date d'échéance:{" "}
-                    {format(new Date(notification.due_date), "PP", { locale: fr })}
-                  </p>
-                </div>
-                <Badge variant={notification.is_read ? "secondary" : "default"}>
-                  {notification.is_read ? "Lu" : "Non lu"}
-                </Badge>
-              </div>
-            ))}
-            {data.notifications.length === 0 && (
-              <p className="text-center text-muted-foreground">
-                Aucune notification
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <PaymentDialog 
+        open={showPaymentDialog} 
+        onOpenChange={setShowPaymentDialog} 
+      />
     </div>
-  );
+  )
 }
