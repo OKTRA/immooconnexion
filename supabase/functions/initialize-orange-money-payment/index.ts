@@ -63,14 +63,15 @@ serve(async (req) => {
     const requestBody = {
       merchant_key: clientId,
       currency: "OUV",
-      order_id: `TRANS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      order_id: `TEST_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       amount: amount,
       return_url: `${origin}/payment-success`,
       cancel_url: `${origin}/payment-cancel`,
       notif_url: `${origin}/api/orange-money-webhook`,
       lang: "fr",
-      reference: description || "Payment Immoov",
-      metadata: metadata
+      reference: description || "Payment Immoov Test",
+      metadata: metadata,
+      payment_mode: "test" // Ajout du mode test
     }
 
     console.log("Sending request to Orange Money API:", {
@@ -100,9 +101,12 @@ serve(async (req) => {
       throw new Error(`Error from Orange Money API: ${JSON.stringify(responseData)}`)
     }
 
+    // Construire l'URL de redirection pour l'environnement de test
+    const testPaymentUrl = `https://webpayment-ow-sb.orange-money.com/payment/pay_token/${responseData.pay_token}`
+
     return new Response(
       JSON.stringify({
-        payment_url: responseData.payment_url,
+        payment_url: testPaymentUrl,
         pay_token: responseData.pay_token,
         order_id: requestBody.order_id
       }),
