@@ -22,6 +22,23 @@ interface PaymentFormData {
   paymentPeriods: string[]
 }
 
+interface LeaseData {
+  id: string
+  rent_amount: number
+  tenant_id: string
+  unit_id: string
+  apartment_tenants: {
+    first_name: string
+    last_name: string
+  }
+  apartment_units: {
+    unit_number: string
+    apartment: {
+      name: string
+    }
+  }
+}
+
 export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
@@ -52,7 +69,7 @@ export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
         .eq("status", "active")
 
       if (error) throw error
-      return data
+      return data as LeaseData[]
     }
   })
 
@@ -71,7 +88,7 @@ export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
         .order("start_date", { ascending: true })
 
       if (error) throw error
-      return data
+      return data || []
     },
     enabled: !!selectedLeaseId
   })

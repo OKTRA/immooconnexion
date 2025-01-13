@@ -1,4 +1,18 @@
-export type ApartmentUnitStatus = "available" | "occupied" | "maintenance" | "reserved";
+export type ApartmentUnitStatus = "available" | "occupied" | "maintenance";
+
+export interface ApartmentInspection {
+  id: string;
+  lease_id: string;
+  inspection_date: string;
+  has_damages: boolean;
+  damage_description: string | null;
+  repair_costs: number;
+  deposit_returned: number;
+  photo_urls: string[];
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface Apartment {
   id: string;
