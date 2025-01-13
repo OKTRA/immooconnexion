@@ -1,34 +1,35 @@
-import { TableBody } from "@/components/ui/table"
-import { TenantTableRow } from "./TenantTableRow"
-import { TenantDisplay } from "@/types/tenant"
+import { TableCell, TableRow } from "@/components/ui/table"
+import { TenantDisplay } from "@/hooks/use-tenants"
+import { TenantActionButtons } from "./TenantActionButtons"
 
 interface TenantsTableContentProps {
   tenants: TenantDisplay[];
   onEdit: (tenant: TenantDisplay) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => Promise<void>;
 }
 
 export function TenantsTableContent({
   tenants,
   onEdit,
-  onDelete
+  onDelete,
 }: TenantsTableContentProps) {
   return (
-    <TableBody>
+    <tbody>
       {tenants.map((tenant) => (
-        <TenantTableRow
-          key={tenant.id}
-          tenant={{
-            id: tenant.id,
-            nom: tenant.last_name,
-            prenom: tenant.first_name,
-            phone_number: tenant.phone_number,
-            profession: tenant.profession
-          }}
-          onEdit={() => onEdit(tenant)}
-          onDelete={() => onDelete(tenant.id)}
-        />
+        <TableRow key={tenant.id}>
+          <TableCell>{tenant.first_name}</TableCell>
+          <TableCell>{tenant.last_name}</TableCell>
+          <TableCell>{tenant.phone_number}</TableCell>
+          <TableCell>{tenant.profession || "-"}</TableCell>
+          <TableCell>
+            <TenantActionButtons
+              tenant={tenant}
+              onEdit={() => onEdit(tenant)}
+              onDelete={() => onDelete(tenant.id)}
+            />
+          </TableCell>
+        </TableRow>
       ))}
-    </TableBody>
-  )
+    </tbody>
+  );
 }
