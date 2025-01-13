@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -5,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PaymentStatusStats } from "./PaymentStatusStats"
 import { PaymentsList } from "./PaymentsList"
 import { PaymentFilters } from "./PaymentFilters"
-import { useState } from "react"
 
 export type PaymentPeriodFilter = "all" | "current" | "overdue" | "upcoming"
 export type PaymentStatusFilter = "all" | "pending" | "paid" | "late"
