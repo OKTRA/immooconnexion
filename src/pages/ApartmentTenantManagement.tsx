@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { ApartmentTenantsTab } from "@/components/apartment/tabs/ApartmentTenantsTab"
 import { Loader2 } from "lucide-react"
+import { ApartmentTenant } from "@/types/apartment"
 
 export default function ApartmentTenantManagement() {
   const { id: apartmentId } = useParams<{ id: string }>()
@@ -13,11 +14,27 @@ export default function ApartmentTenantManagement() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("apartment_tenants")
-        .select("*")
+        .select(`
+          *,
+          apartment_leases (
+            id,
+            tenant_id,
+            unit_id,
+            start_date,
+            end_date,
+            rent_amount,
+            deposit_amount,
+            payment_frequency,
+            duration_type,
+            status,
+            payment_type,
+            agency_id
+          )
+        `)
         .eq("apartment_id", apartmentId)
 
       if (error) throw error
-      return data || []
+      return data as ApartmentTenant[]
     },
     enabled: !!apartmentId
   })
@@ -39,7 +56,6 @@ export default function ApartmentTenantManagement() {
       <div className="container mx-auto py-6">
         <ApartmentTenantsTab
           apartmentId={apartmentId}
-          tenants={tenants}
           onDeleteTenant={async (id) => {
             await supabase
               .from("apartment_tenants")

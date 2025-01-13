@@ -6,7 +6,7 @@ export interface UnitTenantDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   unitId: string;
-  onSuccess?: (tenantId: string) => void;
+  onSuccess?: () => void;
 }
 
 export function UnitTenantDialog({
@@ -17,9 +17,9 @@ export function UnitTenantDialog({
 }: UnitTenantDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSuccess = (tenantId: string) => {
+  const handleSuccess = () => {
     if (onSuccess) {
-      onSuccess(tenantId)
+      onSuccess()
     }
     onOpenChange(false)
   }
