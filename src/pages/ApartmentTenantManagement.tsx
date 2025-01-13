@@ -1,13 +1,13 @@
-import { useParams } from "react-router-dom"
-import { AgencyLayout } from "@/components/agency/AgencyLayout"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { ApartmentTenantsTab } from "@/components/apartment/tabs/ApartmentTenantsTab"
-import { Loader2 } from "lucide-react"
-import { ApartmentTenant } from "@/types/apartment"
+import { useParams } from "react-router-dom";
+import { AgencyLayout } from "@/components/agency/AgencyLayout";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { ApartmentTenantsTab } from "@/components/apartment/tabs/ApartmentTenantsTab";
+import { Loader2 } from "lucide-react";
+import { ApartmentTenant } from "@/types/apartment";
 
 export default function ApartmentTenantManagement() {
-  const { id: apartmentId } = useParams<{ id: string }>()
+  const { id: apartmentId } = useParams<{ id: string }>();
 
   const { data: tenants = [], isLoading: tenantsLoading } = useQuery({
     queryKey: ["apartment-tenants", apartmentId],
@@ -31,24 +31,16 @@ export default function ApartmentTenantManagement() {
             agency_id
           )
         `)
-        .eq("apartment_id", apartmentId)
+        .eq("apartment_id", apartmentId);
 
-      if (error) throw error
-      return data as ApartmentTenant[]
+      if (error) throw error;
+      return data as ApartmentTenant[];
     },
     enabled: !!apartmentId
-  })
+  });
 
   if (!apartmentId) {
-    return <div>Apartment ID is required</div>
-  }
-
-  if (tenantsLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
+    return <div>Apartment ID is required</div>;
   }
 
   return (
@@ -60,11 +52,12 @@ export default function ApartmentTenantManagement() {
             await supabase
               .from("apartment_tenants")
               .delete()
-              .eq("id", id)
+              .eq("id", id);
           }}
           onEditTenant={() => {}}
+          isLoading={tenantsLoading}
         />
       </div>
     </AgencyLayout>
-  )
+  );
 }

@@ -1,5 +1,20 @@
 export type ApartmentUnitStatus = "available" | "occupied" | "maintenance";
 
+export interface ApartmentInspection {
+  id: string;
+  lease_id: string;
+  inspection_date: string;
+  has_damages: boolean;
+  damage_description: string | null;
+  repair_costs: number;
+  deposit_returned: number;
+  photo_urls: string[];
+  status: string;
+  type?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ApartmentUnit {
   id: string;
   apartment_id: string;
@@ -13,6 +28,26 @@ export interface ApartmentUnit {
   created_at?: string;
   updated_at?: string;
   commission_percentage: number | null;
+  current_lease?: {
+    tenant: {
+      id: string;
+      first_name: string;
+      last_name: string;
+      email: string;
+      phone_number: string;
+      birth_date: string;
+      profession: string;
+    };
+    id: string;
+    start_date: string;
+    end_date: string;
+    rent_amount: number;
+    deposit_amount: number;
+    status: string;
+  };
+  apartment?: {
+    name: string;
+  };
 }
 
 export interface ApartmentLease {
@@ -69,23 +104,56 @@ export interface ApartmentTenant {
   apartment_leases?: ApartmentLease[];
 }
 
-export interface ApartmentInspection {
-  id: string;
-  lease_id: string;
-  inspection_date: string;
-  has_damages: boolean;
-  damage_description: string | null;
-  repair_costs: number;
-  deposit_returned: number;
-  photo_urls: string[];
-  status: string;
-  created_at: string;
-  updated_at: string;
-}
-
 export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 export type DurationType = 'fixed' | 'month_to_month' | 'yearly';
 export type LeaseStatus = 'active' | 'expired' | 'terminated';
 export type PaymentType = 'upfront' | 'end_of_period';
 
-export interface ApartmentUnitFormData extends Omit<ApartmentUnit, 'id' | 'created_at' | 'updated_at' | 'apartment_id'> {}
+export interface TenantReceiptData {
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  agency_fees?: number;
+  property_id?: string;
+  profession?: string;
+  lease?: {
+    rent_amount: number;
+    deposit_amount: number;
+  };
+  isInitialReceipt?: boolean;
+  isEndReceipt?: boolean;
+  contractId?: string;
+}
+
+export interface Property {
+  id: string;
+  bien: string;
+  type: string;
+  chambres: number;
+  ville: string;
+  loyer: number;
+  frais_agence: number;
+  taux_commission: number;
+  caution: number;
+  photo_url?: string;
+  statut: string;
+  user_id: string;
+  agency_id: string;
+  created_at: string;
+  updated_at: string;
+  created_by_user_id?: string;
+  parent_property_id?: string;
+  rental_type?: string;
+  property_category: "house" | "apartment";
+  is_for_sale?: boolean;
+  sale_price?: number;
+  minimum_stay?: number;
+  maximum_stay?: number;
+  price_per_night?: number;
+  price_per_week?: number;
+  total_units?: number;
+  owner_name?: string;
+  owner_phone?: string;
+  country?: string;
+  quartier?: string;
+}
