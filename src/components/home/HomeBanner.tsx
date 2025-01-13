@@ -6,7 +6,7 @@ export function HomeBanner() {
   const navigate = useNavigate()
 
   return (
-    <div className="relative h-[600px] w-full mb-12 rounded-2xl overflow-hidden shadow-2xl">
+    <div className="relative h-[500px] w-full mb-12 rounded-2xl overflow-hidden shadow-2xl">
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 hover:scale-105"
         style={{ 
