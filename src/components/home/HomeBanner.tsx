@@ -24,7 +24,11 @@ export function HomeBanner() {
             Les meilleurs promoteurs et agences gèrent leurs biens sur Immoo. Découvrez des offres immobilières sélectionnées par des professionnels.
           </p>
           <div className="flex flex-wrap gap-4">
-            <Button size="lg" className="bg-primary hover:bg-primary/90">
+            <Button 
+              size="lg" 
+              className="bg-primary hover:bg-primary/90"
+              onClick={() => navigate("/properties")}
+            >
               <Building2 className="mr-2 h-5 w-5" />
               Explorer les biens
             </Button>
