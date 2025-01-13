@@ -27,6 +27,7 @@ export function OrangeMoneyForm({
   const handlePayment = async () => {
     try {
       setIsLoading(true)
+      console.log("Initializing Orange Money payment...")
 
       const { data, error } = await supabase.functions.invoke('initialize-orange-money-payment', {
         body: {
@@ -43,6 +44,7 @@ export function OrangeMoneyForm({
 
       if (error) throw error
 
+      console.log("Payment URL received:", data.payment_url)
       // Redirection vers la page de paiement Orange Money
       window.location.href = data.payment_url
 
@@ -79,7 +81,7 @@ export function OrangeMoneyForm({
       <Button
         onClick={handlePayment}
         disabled={isLoading}
-        className="w-full"
+        className="w-full bg-orange-500 hover:bg-orange-600"
       >
         {isLoading ? (
           <>
