@@ -82,6 +82,7 @@ serve(async (req) => {
     })
 
     const paymentData = await response.json()
+    console.log("Orange Money API response:", paymentData)
 
     if (!response.ok) {
       console.error("Orange Money API error:", paymentData)

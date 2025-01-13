@@ -42,11 +42,19 @@ export function OrangeMoneyForm({
         }
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Payment initialization error:', error)
+        throw error
+      }
 
       console.log("Payment URL received:", data.payment_url)
-      // Redirection vers la page de paiement Orange Money
-      window.location.href = data.payment_url
+      
+      if (data.payment_url) {
+        // Redirection vers la page de paiement Orange Money
+        window.location.href = data.payment_url
+      } else {
+        throw new Error('URL de paiement non reçue')
+      }
 
       onSuccess?.()
     } catch (error) {
