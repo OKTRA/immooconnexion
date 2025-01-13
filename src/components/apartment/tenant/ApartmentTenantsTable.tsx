@@ -3,6 +3,16 @@ import { Trash, Pencil, Eye } from "lucide-react"
 import { ApartmentTenant } from "@/types/apartment"
 import { useNavigate } from "react-router-dom"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/lib/supabase"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 interface ApartmentTenantsTableProps {
   apartmentId: string;

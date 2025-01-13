@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { ApartmentTenant } from "@/types/apartment";
 import { Loader2 } from "lucide-react";
 import { ApartmentTenantsTable } from "./ApartmentTenantsTable";
@@ -7,7 +7,7 @@ import { ApartmentTenantsTable } from "./ApartmentTenantsTable";
 export interface ApartmentTenantsTabProps {
   apartmentId: string;
   onDeleteTenant: (id: string) => Promise<void>;
-  onEditTenant: () => void;
+  onEditTenant: (tenant: ApartmentTenant) => void;
   isLoading?: boolean;
 }
 
@@ -65,7 +65,7 @@ export function ApartmentTenantsTab({
 
   return (
     <ApartmentTenantsTable
-      tenants={tenants}
+      apartmentId={apartmentId}
       onEdit={onEditTenant}
       onDelete={onDeleteTenant}
     />
