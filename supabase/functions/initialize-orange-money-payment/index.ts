@@ -25,12 +25,18 @@ serve(async (req) => {
     const merchantKey = Deno.env.get('ORANGE_MONEY_CLIENT_ID')
     const authHeader = Deno.env.get('ORANGE_MONEY_AUTH_HEADER')
 
+    console.log("Checking environment variables:", {
+      hasMerchantKey: !!merchantKey,
+      hasAuthHeader: !!authHeader
+    })
+
     if (!merchantKey || !authHeader) {
       console.error("Missing Orange Money configuration")
       throw new Error('Configuration Orange Money manquante')
     }
 
     const origin = req.headers.get('origin') || 'http://localhost:5173'
+    console.log("Using origin:", origin)
 
     // Construction du corps de la requête pour Orange Money
     const requestBody = {
@@ -46,7 +52,10 @@ serve(async (req) => {
       metadata: metadata
     }
 
-    console.log("Sending request to Orange Money API:", requestBody)
+    console.log("Sending request to Orange Money API:", {
+      ...requestBody,
+      merchant_key: '[REDACTED]'
+    })
 
     // Appel à l'API Orange Money
     const response = await fetch('https://api.orange.com/orange-money-webpay/dev/v1/webpayment', {
@@ -60,9 +69,14 @@ serve(async (req) => {
     })
 
     const responseData = await response.json()
-    console.log("Orange Money API response:", responseData)
+    console.log("Orange Money API response:", {
+      status: response.status,
+      statusText: response.statusText,
+      data: responseData
+    })
 
     if (!response.ok) {
+      console.error("Error response from Orange Money API:", responseData)
       throw new Error(`Error from Orange Money API: ${JSON.stringify(responseData)}`)
     }
 
@@ -81,7 +95,10 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error("Error in initialize-orange-money-payment function:", error)
+    console.error("Detailed error in initialize-orange-money-payment function:", {
+      error: error.message,
+      stack: error.stack
+    })
     
     return new Response(
       JSON.stringify({
