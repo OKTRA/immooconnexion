@@ -16,6 +16,16 @@ export function PaymentMethodSelector({ selectedMethod, onMethodChange }: Paymen
         className="grid gap-4"
       >
         <div className="flex items-center space-x-4 rounded-lg border p-4">
+          <RadioGroupItem value="orange_money" id="orange_money" />
+          <Label htmlFor="orange_money" className="flex flex-col">
+            <span className="font-semibold">Orange Money</span>
+            <span className="text-sm text-gray-500">
+              Paiement mobile rapide et sécurisé
+            </span>
+          </Label>
+        </div>
+        
+        <div className="flex items-center space-x-4 rounded-lg border p-4">
           <RadioGroupItem value="cinetpay" id="cinetpay" />
           <Label htmlFor="cinetpay" className="flex flex-col">
             <span className="font-semibold">CinetPay</span>
@@ -31,16 +41,6 @@ export function PaymentMethodSelector({ selectedMethod, onMethodChange }: Paymen
             <span className="font-semibold">PayDunya</span>
             <span className="text-sm text-gray-500">
               Wave, Orange Money, Free Money (International)
-            </span>
-          </Label>
-        </div>
-
-        <div className="flex items-center space-x-4 rounded-lg border p-4">
-          <RadioGroupItem value="orange-money" id="orange-money" />
-          <Label htmlFor="orange-money" className="flex flex-col">
-            <span className="font-semibold">Orange Money</span>
-            <span className="text-sm text-gray-500">
-              Paiement mobile local
             </span>
           </Label>
         </div>

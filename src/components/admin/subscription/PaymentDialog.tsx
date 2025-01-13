@@ -5,6 +5,7 @@ import { useState } from "react"
 import { PaymentMethodSelector } from "@/components/payment/PaymentMethodSelector"
 import { CinetPayForm } from "@/components/payment/CinetPayForm"
 import { PaydunyaForm } from "@/components/payment/PaydunyaForm"
+import { OrangeMoneyForm } from "@/components/payment/OrangeMoneyForm"
 import { useToast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
 import { PaymentDialogProps } from "./types"
@@ -18,7 +19,7 @@ export function PaymentDialog({
   isUpgrade = false
 }: PaymentDialogProps) {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<string>("cinetpay")
+  const [paymentMethod, setPaymentMethod] = useState<string>("orange_money")
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -83,6 +84,15 @@ export function PaymentDialog({
                   selectedMethod={paymentMethod}
                   onMethodChange={setPaymentMethod}
                 />
+                {paymentMethod === "orange_money" && (
+                  <OrangeMoneyForm 
+                    amount={amount}
+                    description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
+                    agencyId={planId}
+                    onSuccess={handlePaymentSuccess}
+                    formData={defaultFormData}
+                  />
+                )}
                 {paymentMethod === "cinetpay" && (
                   <CinetPayForm 
                     amount={amount}
