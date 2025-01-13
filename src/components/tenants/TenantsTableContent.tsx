@@ -26,6 +26,7 @@ export function TenantsTableContent({
               tenant={tenant}
               onEdit={() => onEdit(tenant)}
               onDelete={() => onDelete(tenant.id)}
+              onInspection={() => {}}
             />
           </TableCell>
         </TableRow>

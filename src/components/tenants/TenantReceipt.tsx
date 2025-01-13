@@ -1,17 +1,4 @@
-import { TenantReceiptData } from "@/types/tenant";
-
-export interface TenantReceiptProps {
-  tenant: TenantReceiptData;
-  isInitialReceipt?: boolean;
-  isEndReceipt?: boolean;
-  contractId?: string;
-  inspection?: {
-    has_damages: boolean;
-    damage_description?: string;
-    repair_costs: number;
-    deposit_returned: number;
-  };
-}
+import { TenantReceiptProps } from "@/types/tenant";
 
 export function TenantReceipt({ 
   tenant, 

@@ -71,8 +71,12 @@ export function TenantActionButtons({
     phone_number: tenant.phone_number,
     agency_fees: tenant.agency_fees || 0,
     profession: tenant.profession,
-    property_id: tenant.property_id
-  };
+    property_id: tenant.property_id,
+    lease: currentLease ? {
+      rent_amount: currentLease.rent_amount,
+      deposit_amount: currentLease.deposit_amount || 0
+    } : undefined
+  }
 
   return (
     <>
@@ -165,7 +169,7 @@ export function TenantActionButtons({
           <TenantReceipt 
             tenant={tenantReceiptData}
             isEndReceipt={true}
-            lease={currentLease}
+            inspection={currentLease?.inspection}
           />
         </DialogContent>
       </Dialog>
