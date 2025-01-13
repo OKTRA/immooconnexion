@@ -53,6 +53,8 @@ export function PaymentDialog({
     phone_number: "",
   }
 
+  console.log("Current payment method:", paymentMethod) // Debug log
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
