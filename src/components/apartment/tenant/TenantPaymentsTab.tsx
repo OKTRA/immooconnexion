@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useParams } from "react-router-dom"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -8,11 +9,8 @@ import { useTenantPayments } from "@/hooks/use-tenant-payments"
 import { Loader2, Plus } from "lucide-react"
 import { PaymentDialog } from "@/components/apartment/payment/PaymentDialog"
 
-interface TenantPaymentsTabProps {
-  tenantId: string
-}
-
-export function TenantPaymentsTab({ tenantId }: TenantPaymentsTabProps) {
+export function TenantPaymentsTab() {
+  const { tenantId } = useParams()
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   const { data, isLoading } = useTenantPayments(tenantId)
 

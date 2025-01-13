@@ -28,7 +28,7 @@ import ApartmentTenants from "@/pages/ApartmentTenants"
 import ApartmentTenantPayments from "@/pages/ApartmentTenantPayments"
 import ApartmentTenantLeases from "@/pages/ApartmentTenantLeases"
 import ApartmentTenantDetails from "@/pages/ApartmentTenantDetails"
-import TenantPaymentsTab from "@/components/apartment/tenant/TenantPaymentsTab"
+import { TenantPaymentsTab } from "@/components/apartment/tenant/TenantPaymentsTab"
 
 const queryClient = new QueryClient()
 
