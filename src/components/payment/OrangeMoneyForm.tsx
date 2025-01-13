@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/integrations/supabase/client"
 
 interface OrangeMoneyFormProps {
   amount: number
@@ -27,12 +27,7 @@ export function OrangeMoneyForm({
   const handlePayment = async () => {
     try {
       setIsLoading(true)
-      console.log("Initializing Orange Money payment with:", {
-        amount,
-        description,
-        agencyId,
-        formData
-      })
+      console.log("Initializing Orange Money payment...")
 
       const { data, error } = await supabase.functions.invoke('initialize-orange-money-payment', {
         body: {
@@ -52,9 +47,10 @@ export function OrangeMoneyForm({
         throw error
       }
 
-      console.log("Payment initialization response:", data)
+      console.log("Payment URL received:", data.payment_url)
       
       if (data.payment_url) {
+        // Redirection vers la page de paiement Orange Money
         window.location.href = data.payment_url
       } else {
         throw new Error('URL de paiement non reçue')

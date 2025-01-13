@@ -34,9 +34,10 @@ serve(async (req) => {
 
     // Récupération des clés d'API depuis les variables d'environnement
     const clientId = Deno.env.get('ORANGE_MONEY_CLIENT_ID')
+    const clientSecret = Deno.env.get('ORANGE_MONEY_CLIENT_SECRET')
     const authHeader = Deno.env.get('ORANGE_MONEY_AUTH_HEADER')
 
-    if (!clientId || !authHeader) {
+    if (!clientId || !clientSecret || !authHeader) {
       console.error("Missing Orange Money configuration")
       return new Response(
         JSON.stringify({
@@ -50,25 +51,24 @@ serve(async (req) => {
       )
     }
 
+    console.log("Orange Money configuration found")
+
     // Génération d'un ID de transaction unique
-    const orderId = `TRANS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    console.log("Generated order ID:", orderId)
+    const transId = `TRANS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    console.log("Generated transaction ID:", transId)
 
     // Construction du corps de la requête pour Orange Money
     const requestBody = {
       merchant_key: clientId,
-      currency: "OUV",
-      order_id: orderId,
+      currency: "XOF",
+      order_id: transId,
       amount: amount,
-      return_url: `${req.headers.get('origin')}/payment-success`,
+      return_url: `${req.headers.get('origin')}/payment-return`,
       cancel_url: `${req.headers.get('origin')}/payment-cancel`,
       notif_url: `${req.headers.get('origin')}/api/orange-money-webhook`,
-      lang: "fr",
-      reference: description,
-      metadata: metadata
+      metadata: metadata,
+      description: description
     }
-
-    console.log("Sending request to Orange Money API:", requestBody)
 
     // Appel à l'API Orange Money pour initialiser le paiement
     const response = await fetch('https://api.orange.com/orange-money-webpay/dev/v1/webpayment', {
@@ -99,13 +99,15 @@ serve(async (req) => {
       )
     }
 
+    console.log("Payment initialization successful:", { transId, paymentData })
+
     return new Response(
       JSON.stringify({
         code: '201',
         message: 'Paiement initialisé',
         payment_url: paymentData.payment_url,
         payment_token: paymentData.pay_token,
-        order_id: orderId
+        transaction_id: transId
       }),
       { 
         headers: { 
