@@ -8,7 +8,6 @@ const corsHeaders = {
 console.log("Orange Money Payment Function starting...")
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -17,24 +16,47 @@ serve(async (req) => {
     const { amount, description, metadata } = await req.json()
     console.log("Received request with:", { amount, description, metadata })
 
-    // Récupération des clés d'API depuis les variables d'environnement
     const clientId = Deno.env.get('ORANGE_MONEY_CLIENT_ID')
-    const authHeader = Deno.env.get('ORANGE_MONEY_AUTH_HEADER')
+    const clientSecret = Deno.env.get('ORANGE_MONEY_CLIENT_SECRET')
 
     console.log("Checking environment variables:", {
       hasClientId: !!clientId,
-      hasAuthHeader: !!authHeader
+      hasClientSecret: !!clientSecret
     })
 
-    if (!clientId || !authHeader) {
+    if (!clientId || !clientSecret) {
       console.error("Missing Orange Money configuration")
       throw new Error('Configuration Orange Money manquante')
     }
 
+    // 1. Obtenir le token d'accès
+    console.log("Requesting access token...")
+    const tokenResponse = await fetch('https://api.orange.com/oauth/v3/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${btoa(`${clientId}:${clientSecret}`)}`
+      },
+      body: new URLSearchParams({
+        grant_type: 'client_credentials'
+      })
+    })
+
+    const tokenData = await tokenResponse.json()
+    console.log("Token response status:", tokenResponse.status)
+    
+    if (!tokenResponse.ok) {
+      console.error("Token error response:", tokenData)
+      throw new Error(`Error getting access token: ${JSON.stringify(tokenData)}`)
+    }
+
+    const accessToken = tokenData.access_token
+    console.log("Access token obtained successfully")
+
     const origin = req.headers.get('origin') || 'http://localhost:5173'
     console.log("Using origin:", origin)
 
-    // Construction du corps de la requête pour Orange Money
+    // 2. Initialiser le paiement avec le token d'accès
     const requestBody = {
       merchant_key: clientId,
       currency: "OUV",
@@ -53,25 +75,24 @@ serve(async (req) => {
       merchant_key: '[REDACTED]'
     })
 
-    // Appel à l'API Orange Money avec le bon endpoint de test
-    const response = await fetch('https://api.orange.com/orange-money-webpay/dev/v1/webpayment', {
+    const paymentResponse = await fetch('https://api.orange.com/orange-money-webpay/dev/v1/webpayment', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${authHeader}`,
+        'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
       body: JSON.stringify(requestBody)
     })
 
-    const responseData = await response.json()
+    const responseData = await paymentResponse.json()
     console.log("Orange Money API response:", {
-      status: response.status,
-      statusText: response.statusText,
+      status: paymentResponse.status,
+      statusText: paymentResponse.statusText,
       data: responseData
     })
 
-    if (!response.ok) {
+    if (!paymentResponse.ok) {
       console.error("Error response from Orange Money API:", responseData)
       throw new Error(`Error from Orange Money API: ${JSON.stringify(responseData)}`)
     }
