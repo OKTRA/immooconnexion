@@ -18,15 +18,15 @@ serve(async (req) => {
     console.log("Received request with:", { amount, description, metadata })
 
     // Récupération des clés d'API depuis les variables d'environnement
-    const merchantKey = Deno.env.get('ORANGE_MONEY_CLIENT_ID')
+    const clientId = Deno.env.get('ORANGE_MONEY_CLIENT_ID')
     const authHeader = Deno.env.get('ORANGE_MONEY_AUTH_HEADER')
 
     console.log("Checking environment variables:", {
-      hasMerchantKey: !!merchantKey,
+      hasClientId: !!clientId,
       hasAuthHeader: !!authHeader
     })
 
-    if (!merchantKey || !authHeader) {
+    if (!clientId || !authHeader) {
       console.error("Missing Orange Money configuration")
       throw new Error('Configuration Orange Money manquante')
     }
@@ -36,7 +36,7 @@ serve(async (req) => {
 
     // Construction du corps de la requête pour Orange Money
     const requestBody = {
-      merchant_key: merchantKey,
+      merchant_key: clientId,
       currency: "OUV",
       order_id: `TRANS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       amount: amount,
@@ -53,7 +53,7 @@ serve(async (req) => {
       merchant_key: '[REDACTED]'
     })
 
-    // Appel à l'API Orange Money
+    // Appel à l'API Orange Money avec le bon endpoint de test
     const response = await fetch('https://api.orange.com/orange-money-webpay/dev/v1/webpayment', {
       method: 'POST',
       headers: {
