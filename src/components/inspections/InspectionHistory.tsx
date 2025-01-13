@@ -132,11 +132,11 @@ export function InspectionHistory({ contractId }: InspectionHistoryProps) {
           {selectedInspection && (
             <TenantReceipt 
               tenant={{
-                nom: selectedInspection.contract.tenant.nom,
-                prenom: selectedInspection.contract.tenant.prenom,
-                telephone: selectedInspection.contract.tenant.phone_number,
-                fraisAgence: selectedInspection.contract.tenant.agency_fees?.toString() || "0",
-                propertyId: selectedInspection.contract.property_id,
+                first_name: selectedInspection.contract.tenant.prenom,
+                last_name: selectedInspection.contract.tenant.nom,
+                phone_number: selectedInspection.contract.tenant.phone_number,
+                agency_fees: selectedInspection.contract.tenant.agency_fees?.toString() || "0",
+                property_id: selectedInspection.contract.property_id,
               }}
               contractId={contractId}
               isEndOfContract={true}

@@ -26,9 +26,15 @@ export function TenantsTableContent({ tenants, onEdit, onDelete }: TenantsTableC
       {tenants.map((tenant) => (
         <TenantTableRow
           key={tenant.id}
-          tenant={tenant}
+          tenant={{
+            id: tenant.id,
+            nom: tenant.last_name,
+            prenom: tenant.first_name,
+            phone_number: tenant.phone_number,
+            profession: tenant.profession
+          }}
           onEdit={() => onEdit(tenant)}
-          onDelete={() => onDelete(tenant.id)}
+          onDelete={onDelete}
         />
       ))}
     </TableBody>

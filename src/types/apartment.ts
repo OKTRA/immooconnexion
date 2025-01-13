@@ -25,17 +25,9 @@ export interface ApartmentUnit {
   created_at?: string;
   updated_at?: string;
   current_lease?: ApartmentLease;
-}
-
-export interface ApartmentUnitFormData {
-  unit_number: string;
-  floor_number: number | null;
-  area: number | null;
-  rent_amount: number;
-  deposit_amount: number | null;
-  status: ApartmentUnitStatus;
-  description: string | null;
-  commission_percentage: number | null;
+  apartment?: {
+    name: string;
+  };
 }
 
 export interface ApartmentLease {
@@ -45,13 +37,13 @@ export interface ApartmentLease {
   start_date: string;
   end_date?: string;
   rent_amount: number;
-  deposit_amount?: number;
+  deposit_amount: number;
   payment_frequency: string;
   duration_type: string;
   status: string;
-  payment_type?: string;
-  initial_fees_paid?: boolean;
+  payment_type: string;
   tenant?: ApartmentTenant;
+  initial_fees_paid?: boolean;
 }
 
 export interface ApartmentTenant {
@@ -68,22 +60,6 @@ export interface ApartmentTenant {
   profession?: string;
   created_at?: string;
   updated_at?: string;
-  additional_notes?: string;
-  bank_name?: string;
-  bank_account_number?: string;
-  employer_name?: string;
-  employer_phone?: string;
-  employer_address?: string;
-  emergency_contact_name?: string;
-  emergency_contact_phone?: string;
-  emergency_contact_relationship?: string;
-  apartment_units?: {
-    unit_number: string;
-    apartment: {
-      name: string;
-    };
-  };
-  apartment_leases?: ApartmentLease[];
 }
 
 export interface ApartmentInspection {
