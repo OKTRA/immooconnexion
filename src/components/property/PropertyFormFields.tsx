@@ -72,11 +72,15 @@ export function PropertyFormFields({
           <SelectTrigger>
             <SelectValue placeholder="Sélectionner le type" />
           </SelectTrigger>
+
           <SelectContent>
             <SelectItem value="maison">Maison</SelectItem>
             <SelectItem value="villa">Villa</SelectItem>
             <SelectItem value="studio">Studio</SelectItem>
+            <SelectItem value="duplex">Duplex</SelectItem>
+            <SelectItem value="triplex">Triplex</SelectItem>
           </SelectContent>
+
         </Select>
       </div>
 
@@ -191,3 +195,4 @@ export function PropertyFormFields({
     </div>
   )
 }
+

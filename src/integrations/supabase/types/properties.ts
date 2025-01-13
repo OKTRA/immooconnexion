@@ -15,7 +15,7 @@ export interface Property {
   created_at?: string;
   updated_at?: string;
   created_by_user_id?: string;
-  property_category: 'house' | 'apartment';
+  property_category: 'house' | 'duplex' | 'triplex';
   owner_name?: string;
   owner_phone?: string;
   country?: string;
