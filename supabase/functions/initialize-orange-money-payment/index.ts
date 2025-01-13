@@ -63,7 +63,7 @@ serve(async (req) => {
     const orderId = `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
     const requestBody = {
-      merchant_key: clientId.trim(), // Ensure the key is properly trimmed
+      merchant_key: clientId.trim().replace(/\s+/g, ''), // Remove all whitespace
       currency: "OUV",
       order_id: orderId,
       amount: amount.toString(), // Convert to string as required by the API
