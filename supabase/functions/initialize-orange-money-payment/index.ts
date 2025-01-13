@@ -31,19 +31,22 @@ serve(async (req) => {
 
     // 1. Obtenir le token d'accès
     console.log("Requesting access token...")
+    const credentials = btoa(`${clientId}:${clientSecret}`)
+    console.log("Using credentials (first 10 chars):", credentials.substring(0, 10))
+
     const tokenResponse = await fetch('https://api.orange.com/oauth/v3/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${btoa(`${clientId}:${clientSecret}`)}`
+        'Authorization': `Basic ${credentials}`
       },
       body: new URLSearchParams({
         grant_type: 'client_credentials'
-      })
+      }).toString()
     })
 
-    const tokenData = await tokenResponse.json()
     console.log("Token response status:", tokenResponse.status)
+    const tokenData = await tokenResponse.json()
     
     if (!tokenResponse.ok) {
       console.error("Token error response:", tokenData)
@@ -51,7 +54,7 @@ serve(async (req) => {
     }
 
     const accessToken = tokenData.access_token
-    console.log("Access token obtained successfully")
+    console.log("Access token obtained (first 10 chars):", accessToken.substring(0, 10))
 
     const origin = req.headers.get('origin') || 'http://localhost:5173'
     console.log("Using origin:", origin)
