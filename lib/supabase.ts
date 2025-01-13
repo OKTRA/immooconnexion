@@ -10,15 +10,20 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     storage: AsyncStorage,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
-  },
-  db: {
-    schema: 'public'
+    detectSessionInUrl: true, // Enable session detection in URL
   },
   global: {
     headers: {
       'X-Client-Info': 'supabase-js-web'
     }
+  }
+});
+
+// Add error handling for auth state changes
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+    // Delete all supabase data from storage on sign out
+    localStorage.removeItem('supabase.auth.token');
   }
 });
 
