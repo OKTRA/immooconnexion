@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
+import { ApartmentInspection } from "@/components/apartment/types"
 
 interface TenantInspectionsTabProps {
   tenant: {
@@ -23,7 +24,7 @@ export function TenantInspectionsTab({ tenant }: TenantInspectionsTabProps) {
         .order("inspection_date", { ascending: false })
 
       if (error) throw error
-      return data
+      return data as ApartmentInspection[]
     },
     enabled: !!tenant.apartment_leases?.[0]?.id
   })

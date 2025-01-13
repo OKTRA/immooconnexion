@@ -5,7 +5,7 @@ import { TenantDisplay } from "@/types/tenant"
 interface TenantsTableContentProps {
   tenants: TenantDisplay[];
   onEdit: (tenant: TenantDisplay) => void;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (id: string) => void;
 }
 
 export function TenantsTableContent({
