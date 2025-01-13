@@ -30,15 +30,17 @@ serve(async (req) => {
       throw new Error('Configuration Orange Money manquante')
     }
 
+    const origin = req.headers.get('origin') || 'http://localhost:5173'
+
     // Construction du corps de la requête pour Orange Money
     const requestBody = {
       merchant_key: merchantKey,
       currency: "OUV",
       order_id: orderId,
       amount: amount,
-      return_url: `${req.headers.get('origin')}/payment-success`,
-      cancel_url: `${req.headers.get('origin')}/payment-cancel`,
-      notif_url: `${req.headers.get('origin')}/api/orange-money-webhook`,
+      return_url: `${origin}/payment-success`,
+      cancel_url: `${origin}/payment-cancel`,
+      notif_url: `${origin}/api/orange-money-webhook`,
       lang: "fr",
       reference: description || "Payment Immoov",
       metadata: metadata
