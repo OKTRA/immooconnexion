@@ -17,10 +17,6 @@ serve(async (req) => {
     const { amount, description, metadata } = await req.json()
     console.log("Received request with:", { amount, description, metadata })
 
-    // Génération d'un ID de transaction unique
-    const orderId = `TRANS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    console.log("Generated order ID:", orderId)
-
     // Récupération des clés d'API depuis les variables d'environnement
     const merchantKey = Deno.env.get('ORANGE_MONEY_CLIENT_ID')
     const authHeader = Deno.env.get('ORANGE_MONEY_AUTH_HEADER')
@@ -42,7 +38,7 @@ serve(async (req) => {
     const requestBody = {
       merchant_key: merchantKey,
       currency: "OUV",
-      order_id: orderId,
+      order_id: `TRANS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       amount: amount,
       return_url: `${origin}/payment-success`,
       cancel_url: `${origin}/payment-cancel`,
@@ -84,14 +80,14 @@ serve(async (req) => {
       JSON.stringify({
         payment_url: responseData.payment_url,
         pay_token: responseData.pay_token,
-        order_id: orderId
+        order_id: requestBody.order_id
       }),
       { 
         headers: { 
           ...corsHeaders,
           'Content-Type': 'application/json',
         },
-        status: 201
+        status: 200
       }
     )
   } catch (error) {
