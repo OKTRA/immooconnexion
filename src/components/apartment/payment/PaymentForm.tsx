@@ -1,102 +1,39 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
-import { useToast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase"
+import { useToast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
-
-interface PaymentFormData {
-  leaseId: string
-  amount: number
-  paymentMethod: "cash" | "bank_transfer" | "mobile_money"
-  paymentPeriods: string[]
-}
-
-interface LeaseData {
-  id: string
-  rent_amount: number
-  tenant_id: string
-  unit_id: string
-  apartment_tenants: {
-    first_name: string
-    last_name: string
-  }
-  apartment_units: {
-    unit_number: string
-    apartment: {
-      name: string
-    }
-  }
-}
+import { usePaymentForm, PaymentFormData } from "./hooks/usePaymentForm"
+import { LeaseSelect } from "./components/LeaseSelect"
+import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
 
 export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
-  const { register, handleSubmit, watch, setValue } = useForm<PaymentFormData>()
+  const {
+    leases,
+    isLoadingLeases,
+    paymentPeriods,
+    isLoadingPeriods,
+    selectedLeaseId,
+    setSelectedLeaseId,
+    isSubmitting,
+    setIsSubmitting
+  } = usePaymentForm(onSuccess)
 
-  // Fetch active leases
-  const { data: leases = [], isLoading: isLoadingLeases } = useQuery({
-    queryKey: ["active-leases"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("apartment_leases")
-        .select(`
-          id,
-          rent_amount,
-          tenant_id,
-          unit_id,
-          apartment_tenants (
-            first_name,
-            last_name
-          ),
-          apartment_units (
-            unit_number,
-            apartment:apartments (
-              name
-            )
-          )
-        `)
-        .eq("status", "active")
-
-      if (error) throw error
-      return data as LeaseData[]
+  const { register, handleSubmit, setValue, watch } = useForm<PaymentFormData>({
+    defaultValues: {
+      leaseId: "",
+      amount: 0,
+      paymentMethod: "cash",
+      paymentPeriods: []
     }
-  })
-
-  // Fetch payment periods for selected lease
-  const selectedLeaseId = watch("leaseId")
-  const { data: paymentPeriods = [], isLoading: isLoadingPeriods } = useQuery({
-    queryKey: ["payment-periods", selectedLeaseId],
-    queryFn: async () => {
-      if (!selectedLeaseId) return []
-
-      const { data, error } = await supabase
-        .from("apartment_payment_periods")
-        .select("*")
-        .eq("lease_id", selectedLeaseId)
-        .eq("status", "pending")
-        .order("start_date", { ascending: true })
-
-      if (error) throw error
-      return data || []
-    },
-    enabled: !!selectedLeaseId
   })
 
   const onSubmit = async (data: PaymentFormData) => {
+    setIsSubmitting(true)
     try {
-      setIsSubmitting(true)
-
       // Create payment record
       const { error: paymentError } = await supabase
         .from("apartment_lease_payments")
@@ -151,20 +88,14 @@ export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-2">
         <Label>Contrat de location</Label>
-        <Select
-          onValueChange={(value) => setValue("leaseId", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Sélectionner un contrat" />
-          </SelectTrigger>
-          <SelectContent>
-            {leases.map((lease) => (
-              <SelectItem key={lease.id} value={lease.id}>
-                {lease.apartment_tenants.first_name} {lease.apartment_tenants.last_name} - {lease.apartment_units.apartment.name} (Unité {lease.apartment_units.unit_number})
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <LeaseSelect
+          leases={leases}
+          selectedLeaseId={selectedLeaseId}
+          onLeaseSelect={(value) => {
+            setSelectedLeaseId(value)
+            setValue("leaseId", value)
+          }}
+        />
       </div>
 
       {selectedLeaseId && (
@@ -206,20 +137,10 @@ export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
 
           <div className="space-y-2">
             <Label>Mode de paiement</Label>
-            <Select
-              onValueChange={(value: "cash" | "bank_transfer" | "mobile_money") => 
-                setValue("paymentMethod", value)
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un mode de paiement" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="cash">Espèces</SelectItem>
-                <SelectItem value="bank_transfer">Virement bancaire</SelectItem>
-                <SelectItem value="mobile_money">Mobile Money</SelectItem>
-              </SelectContent>
-            </Select>
+            <PaymentMethodSelect
+              value={watch("paymentMethod")}
+              onChange={(value) => setValue("paymentMethod", value)}
+            />
           </div>
 
           <Button type="submit" disabled={isSubmitting} className="w-full">
