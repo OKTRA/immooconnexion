@@ -29,7 +29,7 @@ serve(async (req) => {
       throw new Error('Configuration Orange Money manquante')
     }
 
-    // 1. Obtenir le token d'accès
+    // 1. Get access token
     console.log("Requesting access token...")
     const credentials = btoa(`${clientId}:${clientSecret}`)
     console.log("Using credentials (first 10 chars):", credentials.substring(0, 10))
@@ -59,19 +59,21 @@ serve(async (req) => {
     const origin = req.headers.get('origin') || 'http://localhost:5173'
     console.log("Using origin:", origin)
 
-    // 2. Initialiser le paiement avec le token d'accès
+    // 2. Initialize payment with access token
+    const orderId = `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    
     const requestBody = {
-      merchant_key: clientId,
+      merchant_key: clientId.trim(), // Ensure the key is properly trimmed
       currency: "OUV",
-      order_id: `TEST_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      amount: amount,
+      order_id: orderId,
+      amount: amount.toString(), // Convert to string as required by the API
       return_url: `${origin}/payment-success`,
       cancel_url: `${origin}/payment-cancel`,
       notif_url: `${origin}/api/orange-money-webhook`,
       lang: "fr",
-      reference: description || "Payment Immoov Test",
-      metadata: metadata,
-      payment_mode: "test" // Ajout du mode test
+      reference: description || "Payment Immoov",
+      metadata: JSON.stringify(metadata), // Ensure metadata is stringified
+      payment_mode: "test"
     }
 
     console.log("Sending request to Orange Money API:", {
@@ -101,14 +103,13 @@ serve(async (req) => {
       throw new Error(`Error from Orange Money API: ${JSON.stringify(responseData)}`)
     }
 
-    // Construire l'URL de redirection pour l'environnement de test
     const testPaymentUrl = `https://webpayment-ow-sb.orange-money.com/payment/pay_token/${responseData.pay_token}`
 
     return new Response(
       JSON.stringify({
         payment_url: testPaymentUrl,
         pay_token: responseData.pay_token,
-        order_id: requestBody.order_id
+        order_id: orderId
       }),
       { 
         headers: { 

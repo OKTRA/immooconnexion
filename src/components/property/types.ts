@@ -1,11 +1,21 @@
 import { Database } from "@/integrations/supabase/types/database.types"
 
-export type Property = Database["public"]["Tables"]["properties"]["Row"]
+export type Property = Database["public"]["Tables"]["properties"]["Row"] & {
+  property_category: "house" | "duplex" | "triplex"
+}
 
 export interface PropertyDialogProps {
-  property: Property
+  property?: Property | null
   open: boolean
   onOpenChange: (open: boolean) => void
+}
+
+export interface PropertyFormFieldsProps {
+  formData: PropertyFormData
+  setFormData: (data: PropertyFormData) => void
+  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  imagePreviewUrl?: string | string[]
+  propertyType?: "apartment" | "house"
 }
 
 export interface PropertyFormData {
@@ -19,18 +29,11 @@ export interface PropertyFormData {
   caution?: number
   photo_url?: string
   statut?: string
-  property_category: "house" | "duplex" | "triplex" | "apartment"
+  property_category: "house" | "duplex" | "triplex"
   owner_name?: string
   owner_phone?: string
   country?: string
   quartier?: string
-}
-
-export interface PropertyWithAgency extends Property {
-  agency: {
-    name: string
-    address: string
-  }
 }
 
 export type ApartmentUnitStatus = "available" | "occupied" | "maintenance" | "reserved"
@@ -39,15 +42,15 @@ export interface ApartmentUnit {
   id: string
   apartment_id: string
   unit_number: string
-  floor_number?: number
-  area?: number
+  floor_number?: number | null
+  area?: number | null
   rent_amount: number
-  deposit_amount?: number
+  deposit_amount?: number | null
   status: ApartmentUnitStatus
-  description?: string
+  description?: string | null
   created_at?: string
   updated_at?: string
-  commission_percentage?: number
+  commission_percentage?: number | null
   current_lease?: {
     tenant: {
       id: string
@@ -68,14 +71,4 @@ export interface ApartmentUnit {
   apartment?: {
     name: string
   }
-}
-
-export interface PropertyUnitFormData {
-  unit_number: string
-  floor_number?: number
-  area?: number
-  rent_amount: number
-  deposit_amount?: number
-  description?: string
-  commission_percentage?: number
 }
