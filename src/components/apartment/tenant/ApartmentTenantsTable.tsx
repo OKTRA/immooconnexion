@@ -1,10 +1,8 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Edit, Trash2 } from "lucide-react"
+import { Trash, Pencil, Eye } from "lucide-react"
 import { ApartmentTenant } from "@/types/apartment"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { Loader2 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface ApartmentTenantsTableProps {
   apartmentId: string;
@@ -12,7 +10,13 @@ interface ApartmentTenantsTableProps {
   onDelete: (id: string) => Promise<void>;
 }
 
-export function ApartmentTenantsTable({ apartmentId, onEdit, onDelete }: ApartmentTenantsTableProps) {
+export function ApartmentTenantsTable({ 
+  apartmentId,
+  onEdit,
+  onDelete
+}: ApartmentTenantsTableProps) {
+  const navigate = useNavigate()
+
   const { data: tenants = [], isLoading, error } = useQuery({
     queryKey: ["apartment-tenants", apartmentId],
     queryFn: async () => {
@@ -45,18 +49,32 @@ export function ApartmentTenantsTable({ apartmentId, onEdit, onDelete }: Apartme
 
   if (isLoading) {
     return (
-      <div className="flex justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-8 w-full" />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="text-center p-8 text-red-500">
+      <div className="text-center py-8 text-red-500">
         Une erreur est survenue lors du chargement des locataires
       </div>
     )
+  }
+
+  if (!tenants.length) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Aucun locataire trouvé
+      </div>
+    )
+  }
+
+  const handleViewDetails = (tenantId: string) => {
+    navigate(`/agence/apartment-tenants/${tenantId}`)
   }
 
   return (
@@ -71,41 +89,40 @@ export function ApartmentTenantsTable({ apartmentId, onEdit, onDelete }: Apartme
         </TableRow>
       </TableHeader>
       <TableBody>
-        {tenants.length === 0 ? (
-          <TableRow>
-            <TableCell colSpan={5} className="text-center">
-              Aucun locataire trouvé
+        {tenants.map((tenant) => (
+          <TableRow key={tenant.id}>
+            <TableCell>{tenant.last_name}</TableCell>
+            <TableCell>{tenant.first_name}</TableCell>
+            <TableCell>{tenant.email || "-"}</TableCell>
+            <TableCell>{tenant.phone_number || "-"}</TableCell>
+            <TableCell>
+              <div className="flex space-x-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleViewDetails(tenant.id)}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(tenant)}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onDelete(tenant.id)}
+                  className="text-red-500 hover:text-red-600"
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </div>
             </TableCell>
           </TableRow>
-        ) : (
-          tenants.map((tenant) => (
-            <TableRow key={tenant.id}>
-              <TableCell>{tenant.last_name}</TableCell>
-              <TableCell>{tenant.first_name}</TableCell>
-              <TableCell>{tenant.email || "-"}</TableCell>
-              <TableCell>{tenant.phone_number || "-"}</TableCell>
-              <TableCell>
-                <div className="flex space-x-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEdit(tenant)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDelete(tenant.id)}
-                    className="text-red-500 hover:text-red-600"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))
-        )}
+        ))}
       </TableBody>
     </Table>
   )
