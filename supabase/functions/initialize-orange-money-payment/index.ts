@@ -71,9 +71,10 @@ serve(async (req) => {
     // Generate unique order ID with timestamp and random string
     const orderId = `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
-    const returnUrl = `${origin}/payment-success`
-    const cancelUrl = `${origin}/payment-cancel`
-    const notifUrl = `${origin}/payment-notify`
+    // Configure URLs for production environment
+    const returnUrl = `${origin}/agence/dashboard`
+    const cancelUrl = `${origin}/agence/subscription`
+    const notifUrl = `${origin}/api/orange-money-webhook`
 
     console.log('URLs configured:', { returnUrl, cancelUrl, notifUrl })
     
