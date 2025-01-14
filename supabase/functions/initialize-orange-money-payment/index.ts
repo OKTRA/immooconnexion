@@ -13,6 +13,7 @@ interface RequestBody {
     customer_email?: string
     customer_name?: string
     customer_phone?: string
+    registration_data?: any
   }
 }
 
@@ -39,6 +40,13 @@ serve(async (req) => {
     const origin = req.headers.get('origin') || 'https://www.immoo.pro'
     console.log('Request origin:', origin)
 
+    // Configure URLs for production environment
+    const returnUrl = `${origin}/login`
+    const cancelUrl = `${origin}/pricing`
+    const notifUrl = `${origin}/api/orange-money-webhook`
+
+    console.log('URLs configured:', { returnUrl, cancelUrl, notifUrl })
+    
     // Get access token with proper error handling and logging
     console.log('Requesting access token...')
     const tokenResponse = await fetch('https://api.orange.com/oauth/v3/token', {
@@ -70,13 +78,6 @@ serve(async (req) => {
 
     // Generate unique order ID with timestamp and random string
     const orderId = `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    
-    // Configure URLs for production environment
-    const returnUrl = `${origin}/login`
-    const cancelUrl = `${origin}/pricing`
-    const notifUrl = `${origin}/api/orange-money-webhook`
-
-    console.log('URLs configured:', { returnUrl, cancelUrl, notifUrl })
     
     const requestBody = {
       merchant_key: merchantKey,

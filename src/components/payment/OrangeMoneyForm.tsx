@@ -24,14 +24,17 @@ export function OrangeMoneyForm({
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
-  console.log("OrangeMoneyForm rendered with:", { amount, description, agencyId })
+  console.log("OrangeMoneyForm rendered with:", { amount, description, agencyId, formData })
 
   const handlePayment = async () => {
-    console.log("handlePayment clicked")
     try {
       setIsLoading(true)
-      console.log("Starting Orange Money payment process...", { amount, description, agencyId })
-      console.log("Form data being sent:", formData)
+      console.log("Starting Orange Money payment process...")
+
+      // Ensure we have all required data
+      if (!formData.email || !formData.first_name || !formData.last_name) {
+        throw new Error("Informations utilisateur manquantes")
+      }
 
       const { data, error } = await supabase.functions.invoke('initialize-orange-money-payment', {
         body: {
@@ -41,7 +44,11 @@ export function OrangeMoneyForm({
             agency_id: agencyId,
             customer_email: formData.email,
             customer_name: `${formData.first_name} ${formData.last_name}`,
-            customer_phone: formData.phone_number
+            customer_phone: formData.phone_number,
+            registration_data: {
+              ...formData,
+              password: undefined // Don't send password in metadata
+            }
           }
         }
       })
@@ -57,15 +64,14 @@ export function OrangeMoneyForm({
         console.log("Redirecting to payment URL:", data.payment_url)
         window.location.href = data.payment_url
       } else {
-        console.error("No payment URL received:", data)
         throw new Error('URL de paiement non reçue')
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Detailed payment error:', error)
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'initialisation du paiement",
+        description: error.message || "Une erreur est survenue lors de l'initialisation du paiement",
         variant: "destructive",
       })
       onError?.(error)
