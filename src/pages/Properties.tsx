@@ -9,28 +9,8 @@ import { useToast } from "@/hooks/use-toast"
 const Properties = () => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [registrationOpen, setRegistrationOpen] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
   const { toast } = useToast()
-
-  const handleRegistrationSubmit = async (data: any) => {
-    setIsLoading(true)
-    try {
-      // Store the registration data in localStorage for the payment page
-      localStorage.setItem('agencyRegistration', JSON.stringify(data))
-      
-      // Navigate to pricing page
-      navigate('/pricing')
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   return (
     <AgencyLayout>
@@ -49,8 +29,6 @@ const Properties = () => {
         <AgencyRegistrationDialog
           open={registrationOpen}
           onOpenChange={setRegistrationOpen}
-          onSubmit={handleRegistrationSubmit}
-          isLoading={isLoading}
         />
       </div>
     </AgencyLayout>
