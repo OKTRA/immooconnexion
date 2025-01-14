@@ -67,8 +67,8 @@ serve(async (req) => {
     // Construct absolute URLs for callbacks
     const returnUrl = `${origin}/payment-success`
     const cancelUrl = `${origin}/payment-cancelled`
-    // Use Edge Function URL for webhook
-    const notifUrl = `${origin}/api/orange-money-webhook`
+    // Use the direct Supabase Edge Function URL for webhook
+    const notifUrl = `https://apidxwaaogboeoctlhtz.supabase.co/functions/v1/handle-orange-money-webhook`
 
     console.log('URLs configured:', { returnUrl, cancelUrl, notifUrl })
 
