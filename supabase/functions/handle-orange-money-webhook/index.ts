@@ -19,14 +19,6 @@ serve(async (req) => {
     const payload = await req.json()
     console.log('📦 Webhook payload:', payload)
 
-    // Verify webhook signature
-    const signature = req.headers.get('x-orange-money-signature')
-    if (!signature) {
-      console.error('❌ Missing webhook signature')
-      throw new Error('Missing webhook signature')
-    }
-    console.log('🔑 Webhook signature:', signature)
-
     // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -36,7 +28,7 @@ serve(async (req) => {
     // Parse metadata
     let metadata
     try {
-      metadata = JSON.parse(payload.metadata || '{}')
+      metadata = typeof payload.metadata === 'string' ? JSON.parse(payload.metadata) : payload.metadata
       console.log('📋 Parsed metadata:', metadata)
     } catch (e) {
       console.error('❌ Error parsing metadata:', e)
@@ -45,11 +37,12 @@ serve(async (req) => {
 
     // Validate required fields
     if (!payload.order_id || !payload.status) {
+      console.error('❌ Missing required fields in webhook payload')
       throw new Error('Missing required fields in webhook payload')
     }
 
     // Process payment status
-    const paymentStatus = payload.status === 'SUCCESSFUL' ? 'paid' : 'failed'
+    const paymentStatus = payload.status.toUpperCase() === 'SUCCESSFUL' ? 'success' : 'failed'
     console.log(`💰 Payment status: ${paymentStatus}`)
 
     // Update payment notification
@@ -63,7 +56,8 @@ serve(async (req) => {
           agency_id: metadata.agency_id,
           amount: parseInt(payload.amount),
           status: paymentStatus,
-          payment_method: 'orange_money'
+          payment_method: 'orange_money',
+          is_read: false
         })
 
       if (notificationError) {
@@ -71,8 +65,10 @@ serve(async (req) => {
         throw notificationError
       }
 
+      console.log('✅ Payment notification created successfully')
+
       // If payment successful and registration data present, create agency
-      if (paymentStatus === 'paid' && metadata.registration_data) {
+      if (paymentStatus === 'success' && metadata.registration_data) {
         console.log('✨ Processing successful registration payment')
         
         try {
@@ -114,7 +110,7 @@ serve(async (req) => {
               throw profileError
             }
 
-            console.log('👤 Admin profile created')
+            console.log('👤 Admin profile created successfully')
           }
         } catch (error) {
           console.error('❌ Error in agency/profile creation:', error)
