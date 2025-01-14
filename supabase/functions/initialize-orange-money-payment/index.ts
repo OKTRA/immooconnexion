@@ -23,31 +23,49 @@ serve(async (req) => {
   }
 
   try {
+    // Log request details
+    console.log('Request received:', {
+      method: req.method,
+      headers: Object.fromEntries(req.headers.entries()),
+    })
+
     const clientId = Deno.env.get('ORANGE_MONEY_CLIENT_ID')
     const clientSecret = Deno.env.get('ORANGE_MONEY_CLIENT_SECRET')
     const authHeader = Deno.env.get('ORANGE_MONEY_AUTH_HEADER')
     const merchantKey = '77bcbfa2'
 
+    // Log environment variables (without sensitive data)
+    console.log('Environment check:', {
+      hasClientId: !!clientId,
+      hasClientSecret: !!clientSecret,
+      hasAuthHeader: !!authHeader,
+      merchantKey
+    })
+
     if (!clientId || !clientSecret || !authHeader) {
-      console.error('Missing Orange Money configuration:', { clientId, clientSecret, authHeader })
       throw new Error('Configuration Orange Money manquante')
     }
 
     const { amount, description, metadata } = await req.json() as RequestBody
-    console.log('Request payload:', { amount, description, metadata })
+    console.log('Request payload:', { 
+      amount, 
+      description,
+      metadata: {
+        ...metadata,
+        registration_data: metadata?.registration_data ? 'PRESENT' : 'ABSENT'
+      }
+    })
 
-    // Get the origin from the request headers
     const origin = req.headers.get('origin') || 'https://www.immoo.pro'
     console.log('Request origin:', origin)
 
-    // Configure URLs for production environment
     const returnUrl = `${origin}/login`
     const cancelUrl = `${origin}/pricing`
     const notifUrl = `${origin}/api/orange-money-webhook`
 
     console.log('URLs configured:', { returnUrl, cancelUrl, notifUrl })
     
-    // Get access token with proper error handling and logging
+    // Get access token with detailed logging
     console.log('Requesting access token...')
     const tokenResponse = await fetch('https://api.orange.com/oauth/v3/token', {
       method: 'POST',
@@ -76,7 +94,6 @@ serve(async (req) => {
       throw new Error('Pas de token d\'accès dans la réponse')
     }
 
-    // Generate unique order ID with timestamp and random string
     const orderId = `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
     const requestBody = {
@@ -89,10 +106,20 @@ serve(async (req) => {
       notif_url: notifUrl,
       lang: "fr",
       reference: orderId,
-      metadata: JSON.stringify(metadata || {})
+      metadata: JSON.stringify({
+        ...metadata,
+        registration_data: metadata?.registration_data ? {
+          ...metadata.registration_data,
+          password: undefined,
+          confirm_password: undefined
+        } : undefined
+      })
     }
 
-    console.log('Payment request body:', requestBody)
+    console.log('Payment request body:', {
+      ...requestBody,
+      metadata: 'HIDDEN' // Don't log sensitive data
+    })
 
     const paymentResponse = await fetch('https://api.orange.com/orange-money-webpay/dev/v1/webpayment', {
       method: 'POST',
