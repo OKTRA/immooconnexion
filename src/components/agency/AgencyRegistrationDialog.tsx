@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -81,56 +82,28 @@ export function AgencyRegistrationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl p-0">
+        <DialogHeader className="p-6 pb-2">
           <DialogTitle>
             {showPaymentMethods ? "Choisissez votre méthode de paiement" : "Inscription de l'agence"}
           </DialogTitle>
         </DialogHeader>
         
-        {!showPaymentMethods ? (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="font-medium">Informations de l'agence</h3>
-                
-                <FormField
-                  control={form.control}
-                  name="agency_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nom de l'agence</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Mon Agence Immobilière" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="agency_address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Adresse</FormLabel>
-                      <FormControl>
-                        <Input placeholder="123 Rue Principale" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <ScrollArea className="max-h-[80vh] px-6 pb-6">
+          {!showPaymentMethods ? (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="font-medium">Informations de l'agence</h3>
+                  
                   <FormField
                     control={form.control}
-                    name="country"
+                    name="agency_name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Pays</FormLabel>
+                        <FormLabel>Nom de l'agence</FormLabel>
                         <FormControl>
-                          <Input placeholder="Côte d'Ivoire" {...field} />
+                          <Input placeholder="Mon Agence Immobilière" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -139,60 +112,56 @@ export function AgencyRegistrationDialog({
 
                   <FormField
                     control={form.control}
-                    name="city"
+                    name="agency_address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Ville</FormLabel>
+                        <FormLabel>Adresse</FormLabel>
                         <FormControl>
-                          <Input placeholder="Abidjan" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="agency_phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Téléphone de l'agence</FormLabel>
-                      <FormControl>
-                        <Input placeholder="+225 XX XX XX XX XX" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="font-medium">Informations de l'agent principal</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="first_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Prénom</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
+                          <Input placeholder="123 Rue Principale" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="country"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Pays</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Côte d'Ivoire" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Ville</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Abidjan" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
                   <FormField
                     control={form.control}
-                    name="last_name"
+                    name="agency_phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nom</FormLabel>
+                        <FormLabel>Téléphone de l'agence</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input placeholder="+225 XX XX XX XX XX" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -200,85 +169,119 @@ export function AgencyRegistrationDialog({
                   />
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input type="email" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                <div className="space-y-4">
+                  <h3 className="font-medium">Informations de l'agent principal</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="first_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Prénom</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="last_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nom</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="phone_number"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Téléphone</FormLabel>
+                        <FormControl>
+                          <Input placeholder="+225 XX XX XX XX XX" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Chargement...
+                    </>
+                  ) : (
+                    "Continuer vers le paiement"
                   )}
+                </Button>
+              </form>
+            </Form>
+          ) : (
+            <div className="space-y-6">
+              <PaymentMethodSelector
+                selectedMethod={paymentMethod}
+                onMethodChange={handlePaymentMethodChange}
+              />
+
+              {paymentMethod === "orange_money" && formData && (
+                <OrangeMoneyForm
+                  amount={amount}
+                  description={`Inscription - Plan ${planName}`}
+                  agencyId={planId}
+                  onSuccess={handlePaymentSuccess}
+                  formData={formData}
                 />
+              )}
 
-                <FormField
-                  control={form.control}
-                  name="phone_number"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Téléphone</FormLabel>
-                      <FormControl>
-                        <Input placeholder="+225 XX XX XX XX XX" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              {paymentMethod === "cinetpay" && formData && (
+                <CinetPayForm
+                  amount={amount}
+                  description={`Inscription - Plan ${planName}`}
+                  agencyId={planId}
+                  onSuccess={handlePaymentSuccess}
+                  formData={formData}
                 />
-              </div>
+              )}
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Chargement...
-                  </>
-                ) : (
-                  "Continuer vers le paiement"
-                )}
-              </Button>
-            </form>
-          </Form>
-        ) : (
-          <div className="space-y-6">
-            <PaymentMethodSelector
-              selectedMethod={paymentMethod}
-              onMethodChange={handlePaymentMethodChange}
-            />
-
-            {paymentMethod === "orange_money" && formData && (
-              <OrangeMoneyForm
-                amount={amount}
-                description={`Inscription - Plan ${planName}`}
-                agencyId={planId}
-                onSuccess={handlePaymentSuccess}
-                formData={formData}
-              />
-            )}
-
-            {paymentMethod === "cinetpay" && formData && (
-              <CinetPayForm
-                amount={amount}
-                description={`Inscription - Plan ${planName}`}
-                agencyId={planId}
-                onSuccess={handlePaymentSuccess}
-                formData={formData}
-              />
-            )}
-
-            {paymentMethod === "paydunya" && formData && (
-              <PaydunyaForm
-                amount={amount}
-                description={`Inscription - Plan ${planName}`}
-                agencyId={planId}
-                onSuccess={handlePaymentSuccess}
-                formData={formData}
-              />
-            )}
-          </div>
-        )}
+              {paymentMethod === "paydunya" && formData && (
+                <PaydunyaForm
+                  amount={amount}
+                  description={`Inscription - Plan ${planName}`}
+                  agencyId={planId}
+                  onSuccess={handlePaymentSuccess}
+                  formData={formData}
+                />
+              )}
+            </div>
+          )}
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   )
