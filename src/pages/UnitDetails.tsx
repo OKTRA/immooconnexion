@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react"
 import { UnitHeader } from "@/components/apartment/unit/UnitHeader"
 import { UnitDetailsTab } from "@/components/apartment/unit/UnitDetailsTab"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
-import { ApartmentUnit } from "@/components/apartment/types"
+import { ApartmentUnit, ApartmentUnitStatus } from "@/components/apartment/types"
 
 export default function UnitDetails() {
   const { unitId } = useParams()
