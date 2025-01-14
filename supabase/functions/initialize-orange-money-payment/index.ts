@@ -25,7 +25,7 @@ serve(async (req) => {
     const clientId = Deno.env.get('ORANGE_MONEY_CLIENT_ID')
     const clientSecret = Deno.env.get('ORANGE_MONEY_CLIENT_SECRET')
     const authHeader = Deno.env.get('ORANGE_MONEY_AUTH_HEADER')
-    const merchantKey = 'MerchantWP00247' // Code marchand fixe
+    const merchantKey = 'MP00247' // On enlève le préfixe "MerchantW"
 
     if (!clientId || !clientSecret || !authHeader) {
       console.error('Missing Orange Money configuration')
