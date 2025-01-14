@@ -195,7 +195,7 @@ export function AgencyRegistrationDialog({
                   <FormItem>
                     <FormLabel>Téléphone</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input placeholder="+225 XX XX XX XX XX" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
