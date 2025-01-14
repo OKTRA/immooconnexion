@@ -46,6 +46,16 @@ serve(async (req) => {
 
     const { amount, description, metadata } = await req.json() as RequestBody
     
+    console.log('Request payload:', {
+      amount,
+      description,
+      metadata: {
+        agency_id: metadata?.agency_id,
+        customer_email: metadata?.customer_email,
+        customer_phone: metadata?.customer_phone
+      }
+    })
+
     if (!amount || amount <= 0) {
       throw new Error('Montant invalide')
     }
@@ -59,11 +69,12 @@ serve(async (req) => {
 
     console.log('URLs configured:', { returnUrl, cancelUrl, notifUrl })
 
-    // Get access token
+    // Get access token with Basic auth
+    const credentials = btoa(`${clientId}:${clientSecret}`)
     const tokenResponse = await fetch('https://api.orange.com/oauth/v3/token', {
       method: 'POST',
       headers: {
-        'Authorization': authHeader,
+        'Authorization': `Basic ${credentials}`,
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json',
         'Cache-Control': 'no-cache'
@@ -75,16 +86,17 @@ serve(async (req) => {
     const tokenData = await tokenResponse.json()
     console.log('Token response:', {
       success: !!tokenData.access_token,
-      error: tokenData.error
+      error: tokenData.error,
+      status: tokenResponse.status
     })
 
     if (!tokenData.access_token) {
-      throw new Error('Échec de l\'authentification Orange Money')
+      throw new Error(`Échec de l'authentification Orange Money: ${JSON.stringify(tokenData)}`)
     }
 
     const orderId = `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
-    // Prepare payment request
+    // Prepare payment request with proper amount formatting
     const paymentRequest = {
       merchant_key: merchantKey,
       currency: "OUV",
@@ -122,11 +134,24 @@ serve(async (req) => {
     })
 
     console.log('Payment API response status:', paymentResponse.status)
-    const paymentData = await paymentResponse.json()
-    console.log('Payment API response:', paymentData)
+    const paymentResponseText = await paymentResponse.text()
+    console.log('Payment API raw response:', paymentResponseText)
+
+    let paymentData
+    try {
+      paymentData = JSON.parse(paymentResponseText)
+    } catch (e) {
+      console.error('Error parsing payment response:', e)
+      throw new Error('Réponse invalide du serveur Orange Money')
+    }
 
     if (!paymentResponse.ok) {
-      throw new Error(`Erreur de paiement Orange Money: ${paymentData.message || 'Erreur inconnue'}`)
+      console.error('Payment error details:', paymentData)
+      throw new Error(`Erreur de paiement Orange Money: ${paymentData.message || paymentResponseText}`)
+    }
+
+    if (!paymentData.payment_url) {
+      throw new Error('URL de paiement non reçue')
     }
 
     return new Response(JSON.stringify(paymentData), {
