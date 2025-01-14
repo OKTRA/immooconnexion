@@ -36,6 +36,11 @@ serve(async (req) => {
 
     console.log('Request data:', { amount, description, metadata })
 
+    // Get the origin from the request headers or URL
+    const url = new URL(req.url)
+    const origin = req.headers.get('origin') || `${url.protocol}//${url.hostname}`
+    console.log('Request origin:', origin)
+
     // Get access token with proper error handling
     const tokenResponse = await fetch('https://api.orange.com/oauth/v3/token', {
       method: 'POST',
@@ -63,18 +68,14 @@ serve(async (req) => {
     // Generate unique order ID
     const orderId = `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
-    // Get the current domain from the request URL
-    const url = new URL(req.url);
-    const domain = url.hostname;
-    
     const requestBody = {
       merchant_key: merchantKey,
       currency: "OUV",
       order_id: orderId,
       amount: amount.toString(),
-      return_url: `https://${domain}/payment-success`,
-      cancel_url: `https://${domain}/payment-cancel`,
-      notif_url: `https://${domain}/payment-notify`,
+      return_url: `${origin}/payment-success`,
+      cancel_url: `${origin}/payment-cancel`,
+      notif_url: `${origin}/payment-notify`,
       lang: "fr",
       reference: orderId,
       metadata: JSON.stringify(metadata || {})
