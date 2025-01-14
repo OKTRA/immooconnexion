@@ -22,7 +22,14 @@ const formSchema = z.object({
   first_name: z.string().min(2, "Le prénom est requis"),
   last_name: z.string().min(2, "Le nom est requis"),
   email: z.string().email("Email invalide"),
-  phone_number: z.string().min(8, "Numéro de téléphone invalide"),
+  password: z.string()
+    .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+    .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
+    .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre"),
+  confirm_password: z.string()
+}).refine((data) => data.password === data.confirm_password, {
+  message: "Les mots de passe ne correspondent pas",
+  path: ["confirm_password"],
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -30,8 +37,6 @@ type FormData = z.infer<typeof formSchema>
 interface AgencyRegistrationDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit?: (data: FormData) => void
-  isLoading?: boolean
   planId?: string
   planName?: string
   amount?: number
@@ -40,8 +45,6 @@ interface AgencyRegistrationDialogProps {
 export function AgencyRegistrationDialog({ 
   open, 
   onOpenChange,
-  onSubmit,
-  isLoading,
   planId,
   planName,
   amount = 0
@@ -61,7 +64,8 @@ export function AgencyRegistrationDialog({
       first_name: "",
       last_name: "",
       email: "",
-      phone_number: "",
+      password: "",
+      confirm_password: ""
     }
   })
 
@@ -72,12 +76,6 @@ export function AgencyRegistrationDialog({
 
   const handlePaymentMethodChange = (method: string) => {
     setPaymentMethod(method)
-  }
-
-  const handlePaymentSuccess = () => {
-    if (formData && onSubmit) {
-      onSubmit(formData)
-    }
   }
 
   return (
@@ -170,7 +168,7 @@ export function AgencyRegistrationDialog({
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="font-medium">Informations de l'agent principal</h3>
+                  <h3 className="font-medium">Informations de l'administrateur</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
@@ -218,12 +216,34 @@ export function AgencyRegistrationDialog({
 
                   <FormField
                     control={form.control}
-                    name="phone_number"
+                    name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Téléphone</FormLabel>
+                        <FormLabel>Mot de passe</FormLabel>
                         <FormControl>
-                          <Input placeholder="+225 XX XX XX XX XX" {...field} />
+                          <Input 
+                            type="password" 
+                            placeholder="8 caractères minimum, 1 majuscule, 1 chiffre"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="confirm_password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirmer le mot de passe</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="password"
+                            placeholder="Retapez votre mot de passe" 
+                            {...field} 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -231,15 +251,8 @@ export function AgencyRegistrationDialog({
                   />
                 </div>
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Chargement...
-                    </>
-                  ) : (
-                    "Continuer vers le paiement"
-                  )}
+                <Button type="submit" className="w-full">
+                  Continuer vers le paiement
                 </Button>
               </form>
             </Form>
@@ -255,7 +268,6 @@ export function AgencyRegistrationDialog({
                   amount={amount}
                   description={`Inscription - Plan ${planName}`}
                   agencyId={planId}
-                  onSuccess={handlePaymentSuccess}
                   formData={formData}
                 />
               )}
@@ -265,7 +277,6 @@ export function AgencyRegistrationDialog({
                   amount={amount}
                   description={`Inscription - Plan ${planName}`}
                   agencyId={planId}
-                  onSuccess={handlePaymentSuccess}
                   formData={formData}
                 />
               )}
@@ -275,7 +286,6 @@ export function AgencyRegistrationDialog({
                   amount={amount}
                   description={`Inscription - Plan ${planName}`}
                   agencyId={planId}
-                  onSuccess={handlePaymentSuccess}
                   formData={formData}
                 />
               )}
