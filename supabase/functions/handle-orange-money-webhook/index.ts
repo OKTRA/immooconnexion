@@ -7,14 +7,20 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Log every incoming request
+  console.log('🔔 Webhook received:', {
+    method: req.method,
+    url: req.url,
+    headers: Object.fromEntries(req.headers.entries())
+  })
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('👋 Handling CORS preflight request')
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    console.log('🔔 Webhook received from Orange Money')
-    
     // Get the webhook payload
     const payload = await req.json()
     console.log('📦 Webhook payload:', payload)
@@ -35,9 +41,17 @@ serve(async (req) => {
       metadata = {}
     }
 
+    // Log all available data for debugging
+    console.log('🔍 Available data:', {
+      orderId: payload.order_id,
+      status: payload.status,
+      amount: payload.amount,
+      metadata: metadata
+    })
+
     // Validate required fields
     if (!payload.order_id || !payload.status) {
-      console.error('❌ Missing required fields in webhook payload')
+      console.error('❌ Missing required fields:', payload)
       throw new Error('Missing required fields in webhook payload')
     }
 
@@ -47,7 +61,11 @@ serve(async (req) => {
 
     // Update payment notification
     if (metadata.agency_id) {
-      console.log('🏢 Updating payment status for agency:', metadata.agency_id)
+      console.log('🏢 Processing agency payment:', {
+        agencyId: metadata.agency_id,
+        amount: payload.amount,
+        status: paymentStatus
+      })
       
       const { error: notificationError } = await supabaseClient
         .from('admin_payment_notifications')
@@ -61,11 +79,11 @@ serve(async (req) => {
         })
 
       if (notificationError) {
-        console.error('❌ Error updating payment notification:', notificationError)
+        console.error('❌ Error creating payment notification:', notificationError)
         throw notificationError
       }
 
-      console.log('✅ Payment notification created successfully')
+      console.log('✅ Payment notification created')
 
       // If payment successful and registration data present, create agency
       if (paymentStatus === 'success' && metadata.registration_data) {
@@ -102,7 +120,10 @@ serve(async (req) => {
               .insert({
                 email: metadata.registration_data.email,
                 agency_id: agency.id,
-                role: 'admin'
+                role: 'admin',
+                first_name: metadata.registration_data.first_name,
+                last_name: metadata.registration_data.last_name,
+                phone_number: metadata.registration_data.phone_number
               })
 
             if (profileError) {
