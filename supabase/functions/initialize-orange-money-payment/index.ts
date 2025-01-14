@@ -28,13 +28,12 @@ serve(async (req) => {
     const merchantKey = '77bcbfa2'
 
     if (!clientId || !clientSecret || !authHeader) {
-      console.error('Missing Orange Money configuration')
+      console.error('Missing Orange Money configuration:', { clientId, clientSecret, authHeader })
       throw new Error('Configuration Orange Money manquante')
     }
 
     const { amount, description, metadata } = await req.json() as RequestBody
-
-    console.log('Request data:', { amount, description, metadata })
+    console.log('Request payload:', { amount, description, metadata })
 
     // Get the origin from the request headers
     const origin = req.headers.get('origin') || 'https://www.immoo.pro'
@@ -48,20 +47,21 @@ serve(async (req) => {
         'Authorization': `Basic ${authHeader}`,
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json',
-        'Cache-Control': 'no-cache'
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
       },
       body: 'grant_type=client_credentials'
     })
 
     console.log('Token response status:', tokenResponse.status)
+    const tokenResponseText = await tokenResponse.text()
+    console.log('Token response body:', tokenResponseText)
     
     if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text()
-      console.error('Token response error:', errorText)
-      throw new Error(`Échec de l'obtention du token: ${errorText}`)
+      throw new Error(`Échec de l'obtention du token: ${tokenResponseText}`)
     }
 
-    const tokenData = await tokenResponse.json()
+    const tokenData = JSON.parse(tokenResponseText)
     console.log('Token obtained successfully')
 
     if (!tokenData.access_token) {
@@ -98,27 +98,29 @@ serve(async (req) => {
         'Authorization': `Bearer ${tokenData.access_token}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Cache-Control': 'no-cache'
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
       },
       body: JSON.stringify(requestBody)
     })
 
     console.log('Payment API response status:', paymentResponse.status)
+    const paymentResponseText = await paymentResponse.text()
+    console.log('Payment API response body:', paymentResponseText)
 
     if (!paymentResponse.ok) {
-      const errorText = await paymentResponse.text()
-      console.error('Payment API error:', errorText)
-      throw new Error(`Erreur de l'API Orange Money: ${errorText}`)
+      throw new Error(`Erreur de l'API Orange Money: ${paymentResponseText}`)
     }
 
-    const paymentData = await paymentResponse.json()
-    console.log('Payment response:', paymentData)
+    const paymentData = JSON.parse(paymentResponseText)
+    console.log('Payment response parsed:', paymentData)
 
     return new Response(JSON.stringify(paymentData), {
       headers: { 
         ...corsHeaders, 
         'Content-Type': 'application/json',
-        'Cache-Control': 'no-store, no-cache, must-revalidate'
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache'
       },
       status: 200
     })
