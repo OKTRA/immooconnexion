@@ -25,7 +25,7 @@ serve(async (req) => {
     const clientId = Deno.env.get('ORANGE_MONEY_CLIENT_ID')
     const clientSecret = Deno.env.get('ORANGE_MONEY_CLIENT_SECRET')
     const authHeader = Deno.env.get('ORANGE_MONEY_AUTH_HEADER')
-    const merchantKey = '77bcbfa2' // Using the new merchant key
+    const merchantKey = '77bcbfa2'
 
     if (!clientId || !clientSecret || !authHeader) {
       console.error('Missing Orange Money configuration')
@@ -63,14 +63,18 @@ serve(async (req) => {
     // Generate unique order ID
     const orderId = `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
+    // Get the current domain from the request URL
+    const url = new URL(req.url);
+    const domain = url.hostname;
+    
     const requestBody = {
       merchant_key: merchantKey,
       currency: "OUV",
       order_id: orderId,
       amount: amount.toString(),
-      return_url: "https://example.com/return",
-      cancel_url: "https://example.com/cancel",
-      notif_url: "https://example.com/notify",
+      return_url: `https://${domain}/payment-success`,
+      cancel_url: `https://${domain}/payment-cancel`,
+      notif_url: `https://${domain}/payment-notify`,
       lang: "fr",
       reference: orderId,
       metadata: JSON.stringify(metadata || {})
