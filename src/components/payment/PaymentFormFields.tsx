@@ -121,20 +121,6 @@ export function PaymentFormFields({ form }: PaymentFormFieldsProps) {
 
         <FormField
           control={form.control}
-          name="phone_number"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Téléphone</FormLabel>
-              <FormControl>
-                <Input type="tel" placeholder="+225 XX XX XX XX XX" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
@@ -154,7 +140,7 @@ export function PaymentFormFields({ form }: PaymentFormFieldsProps) {
             <FormItem>
               <FormLabel>Mot de passe</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input type="password" placeholder="Votre mot de passe" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -168,7 +154,7 @@ export function PaymentFormFields({ form }: PaymentFormFieldsProps) {
             <FormItem>
               <FormLabel>Confirmer le mot de passe</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input type="password" placeholder="Confirmez votre mot de passe" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

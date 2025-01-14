@@ -72,8 +72,8 @@ serve(async (req) => {
     const orderId = `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
     // Configure URLs for production environment
-    const returnUrl = `${origin}/agence/dashboard`
-    const cancelUrl = `${origin}/agence/subscription`
+    const returnUrl = `${origin}/login`
+    const cancelUrl = `${origin}/pricing`
     const notifUrl = `${origin}/api/orange-money-webhook`
 
     console.log('URLs configured:', { returnUrl, cancelUrl, notifUrl })
