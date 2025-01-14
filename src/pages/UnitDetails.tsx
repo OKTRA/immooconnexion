@@ -54,8 +54,10 @@ export default function UnitDetails() {
         throw new Error("Unité non trouvée")
       }
 
-      const formattedData = {
+      // Ensure status is of type ApartmentUnitStatus
+      const formattedData: ApartmentUnit = {
         ...data,
+        status: data.status as ApartmentUnitStatus,
         current_lease: data.current_lease ? {
           ...data.current_lease[0],
           tenant: data.current_lease[0]?.tenant
