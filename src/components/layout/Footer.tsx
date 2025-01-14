@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Download, Apple } from "lucide-react"
 
 export function Footer() {
   const [version, setVersion] = useState("1.0.0")
@@ -6,7 +8,6 @@ export function Footer() {
   useEffect(() => {
     const fetchVersion = async () => {
       try {
-        // Only attempt to fetch if we're not in development
         if (import.meta.env.DEV) {
           console.log("Development mode - using default version")
           return
@@ -26,9 +27,7 @@ export function Footer() {
         const data = await response.json()
         setVersion(data.tag_name)
       } catch (error) {
-        // Log the error but don't let it break the UI
         console.log("Using default version - error fetching from GitHub:", error)
-        // Keep using the default version set in state
       }
     }
 
@@ -50,6 +49,58 @@ export function Footer() {
           </a>
           . Version {version}
         </p>
+
+        <div className="flex flex-col items-center gap-4 md:flex-row">
+          <p className="text-center text-sm text-muted-foreground">
+            Téléchargez notre application pour une meilleure expérience
+          </p>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="flex items-center gap-2"
+              asChild
+            >
+              <a href="https://github.com/OKTRA/immoo/releases/latest/download/Immoo.exe" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+              >
+                <Download className="w-4 h-4" />
+                Windows
+              </a>
+            </Button>
+            
+            <Button 
+              variant="outline"
+              size="sm" 
+              className="flex items-center gap-2"
+              asChild
+            >
+              <a href="https://github.com/OKTRA/immoo/releases/latest/download/Immoo.dmg" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+              >
+                <Apple className="w-4 h-4" />
+                MacOS
+              </a>
+            </Button>
+            
+            <Button 
+              variant="outline"
+              size="sm" 
+              className="flex items-center gap-2"
+              asChild
+            >
+              <a href="https://github.com/OKTRA/immoo/releases/latest/download/Immoo.AppImage" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+              >
+                <Download className="w-4 h-4" />
+                Linux
+              </a>
+            </Button>
+          </div>
+        </div>
       </div>
     </footer>
   )

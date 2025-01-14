@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button"
-import { Download, Apple } from "lucide-react"
 
 export function PricingHero() {
   return (
@@ -13,51 +12,6 @@ export function PricingHero() {
             Choisissez le plan qui correspond le mieux à votre activité. 
             Tous nos plans incluent une période d'essai de 14 jours.
           </p>
-
-          {/* Download Buttons */}
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-start">
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-2"
-              asChild
-            >
-              <a href="https://github.com/OKTRA/immoo/releases/latest/download/Immoo.exe" 
-                 target="_blank" 
-                 rel="noopener noreferrer"
-              >
-                <Download className="w-4 h-4" />
-                Windows
-              </a>
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-2"
-              asChild
-            >
-              <a href="https://github.com/OKTRA/immoo/releases/latest/download/Immoo.dmg" 
-                 target="_blank" 
-                 rel="noopener noreferrer"
-              >
-                <Apple className="w-4 h-4" />
-                MacOS
-              </a>
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-2"
-              asChild
-            >
-              <a href="https://github.com/OKTRA/immoo/releases/latest/download/Immoo.AppImage" 
-                 target="_blank" 
-                 rel="noopener noreferrer"
-              >
-                <Download className="w-4 h-4" />
-                Linux
-              </a>
-            </Button>
-          </div>
         </div>
       </div>
     </div>
