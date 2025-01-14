@@ -18,8 +18,11 @@ serve(async (req) => {
     // Vérification de la signature du webhook
     const signature = req.headers.get('x-orange-money-signature')
     if (!signature) {
+      console.error('Missing webhook signature')
       throw new Error('Missing webhook signature')
     }
+
+    console.log('Webhook signature:', signature)
 
     // Création du client Supabase
     const supabaseClient = createClient(
@@ -27,36 +30,58 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Mise à jour du statut du paiement dans la base de données
-    const { error: updateError } = await supabaseClient
-      .from('apartment_lease_payments')
-      .update({
-        status: payload.status === 'SUCCESSFUL' ? 'paid' : 'failed',
-        payment_date: new Date().toISOString(),
-        payment_method: 'orange_money'
-      })
-      .eq('id', payload.metadata.payment_id)
-
-    if (updateError) {
-      console.error('Error updating payment status:', updateError)
-      throw updateError
+    // Extraction des métadonnées
+    let metadata;
+    try {
+      metadata = JSON.parse(payload.metadata || '{}')
+      console.log('Parsed metadata:', metadata)
+    } catch (e) {
+      console.error('Error parsing metadata:', e)
+      metadata = {}
     }
 
-    // Création d'une notification de paiement
-    if (payload.status === 'SUCCESSFUL') {
-      const { error: notificationError } = await supabaseClient
-        .from('payment_notifications')
+    // Mise à jour du statut du paiement dans la base de données
+    if (metadata.agency_id) {
+      console.log('Updating payment status for agency:', metadata.agency_id)
+      
+      const { error: updateError } = await supabaseClient
+        .from('admin_payment_notifications')
         .insert({
-          tenant_id: payload.metadata.tenant_id,
-          lease_id: payload.metadata.lease_id,
-          type: 'payment_received',
-          amount: payload.amount,
-          due_date: new Date().toISOString()
+          payment_id: payload.order_id,
+          agency_id: metadata.agency_id,
+          amount: parseInt(payload.amount),
+          status: payload.status === 'SUCCESSFUL' ? 'paid' : 'failed',
+          payment_method: 'orange_money'
         })
 
-      if (notificationError) {
-        console.error('Error creating payment notification:', notificationError)
-        throw notificationError
+      if (updateError) {
+        console.error('Error updating payment status:', updateError)
+        throw updateError
+      }
+
+      // Si le paiement est réussi et qu'il y a des données d'inscription
+      if (payload.status === 'SUCCESSFUL' && metadata.registration_data) {
+        console.log('Processing successful registration payment')
+        
+        // Créer l'agence
+        const { data: agency, error: agencyError } = await supabaseClient
+          .from('agencies')
+          .insert({
+            name: metadata.registration_data.agency_name,
+            address: metadata.registration_data.agency_address,
+            country: metadata.registration_data.country,
+            city: metadata.registration_data.city,
+            status: 'active'
+          })
+          .select()
+          .single()
+
+        if (agencyError) {
+          console.error('Error creating agency:', agencyError)
+          throw agencyError
+        }
+
+        console.log('Agency created:', agency)
       }
     }
 

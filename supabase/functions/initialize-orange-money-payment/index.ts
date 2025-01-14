@@ -60,11 +60,14 @@ serve(async (req) => {
       throw new Error('Montant invalide')
     }
 
+    // Use request origin or fallback to production URL
     const origin = req.headers.get('origin') || 'https://www.immoo.pro'
     console.log('Request origin:', origin)
 
-    const returnUrl = `${origin}/login`
-    const cancelUrl = `${origin}/pricing`
+    // Construct absolute URLs for callbacks
+    const returnUrl = `${origin}/payment-success`
+    const cancelUrl = `${origin}/payment-cancelled`
+    // Use Edge Function URL for webhook
     const notifUrl = `${origin}/api/orange-money-webhook`
 
     console.log('URLs configured:', { returnUrl, cancelUrl, notifUrl })
@@ -140,6 +143,7 @@ serve(async (req) => {
     let paymentData
     try {
       paymentData = JSON.parse(paymentResponseText)
+      console.log('Parsed payment response:', paymentData)
     } catch (e) {
       console.error('Error parsing payment response:', e)
       throw new Error('Réponse invalide du serveur Orange Money')
