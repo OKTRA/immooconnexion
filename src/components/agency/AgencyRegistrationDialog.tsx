@@ -29,7 +29,7 @@ type FormData = z.infer<typeof formSchema>
 interface AgencyRegistrationDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (data: FormData) => void
+  onSubmit?: (data: FormData) => void
   isLoading?: boolean
   planId?: string
   planName?: string
@@ -74,7 +74,7 @@ export function AgencyRegistrationDialog({
   }
 
   const handlePaymentSuccess = () => {
-    if (formData) {
+    if (formData && onSubmit) {
       onSubmit(formData)
     }
   }
