@@ -1,39 +1,7 @@
-import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Download, Apple } from "lucide-react"
 
 export function Footer() {
-  const [version, setVersion] = useState("1.0.0")
-
-  useEffect(() => {
-    const fetchVersion = async () => {
-      try {
-        if (import.meta.env.DEV) {
-          console.log("Development mode - using default version")
-          return
-        }
-
-        const response = await fetch("https://api.github.com/repos/OKTRA/immoo/releases/latest", {
-          headers: {
-            'Accept': 'application/vnd.github.v3+json'
-          }
-        })
-        
-        if (!response.ok) {
-          console.log("Using default version - GitHub API response not ok")
-          return
-        }
-        
-        const data = await response.json()
-        setVersion(data.tag_name)
-      } catch (error) {
-        console.log("Using default version - error fetching from GitHub:", error)
-      }
-    }
-
-    fetchVersion()
-  }, [])
-
   return (
     <footer className="py-6 md:px-8 md:py-0">
       <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
@@ -47,7 +15,6 @@ export function Footer() {
           >
             OKTRA
           </a>
-          . Version {version}
         </p>
 
         <div className="flex flex-col items-center gap-4 md:flex-row">
