@@ -23,7 +23,6 @@ serve(async (req) => {
   }
 
   try {
-    // Log request details
     console.log('Request received:', {
       method: req.method,
       headers: Object.fromEntries(req.headers.entries()),
@@ -34,7 +33,6 @@ serve(async (req) => {
     const authHeader = Deno.env.get('ORANGE_MONEY_AUTH_HEADER')
     const merchantKey = '77bcbfa2'
 
-    // Log environment variables (without sensitive data)
     console.log('Environment check:', {
       hasClientId: !!clientId,
       hasClientSecret: !!clientSecret,
@@ -47,14 +45,10 @@ serve(async (req) => {
     }
 
     const { amount, description, metadata } = await req.json() as RequestBody
-    console.log('Request payload:', { 
-      amount, 
-      description,
-      metadata: {
-        ...metadata,
-        registration_data: metadata?.registration_data ? 'PRESENT' : 'ABSENT'
-      }
-    })
+    
+    if (!amount || amount <= 0) {
+      throw new Error('Montant invalide')
+    }
 
     const origin = req.headers.get('origin') || 'https://www.immoo.pro'
     console.log('Request origin:', origin)
@@ -64,39 +58,34 @@ serve(async (req) => {
     const notifUrl = `${origin}/api/orange-money-webhook`
 
     console.log('URLs configured:', { returnUrl, cancelUrl, notifUrl })
-    
-    // Get access token with detailed logging
-    console.log('Requesting access token...')
+
+    // Get access token
     const tokenResponse = await fetch('https://api.orange.com/oauth/v3/token', {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${authHeader}`,
+        'Authorization': authHeader,
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache'
+        'Cache-Control': 'no-cache'
       },
       body: 'grant_type=client_credentials'
     })
 
     console.log('Token response status:', tokenResponse.status)
-    const tokenResponseText = await tokenResponse.text()
-    console.log('Token response body:', tokenResponseText)
-    
-    if (!tokenResponse.ok) {
-      throw new Error(`Échec de l'obtention du token: ${tokenResponseText}`)
-    }
-
-    const tokenData = JSON.parse(tokenResponseText)
-    console.log('Token obtained successfully')
+    const tokenData = await tokenResponse.json()
+    console.log('Token response:', {
+      success: !!tokenData.access_token,
+      error: tokenData.error
+    })
 
     if (!tokenData.access_token) {
-      throw new Error('Pas de token d\'accès dans la réponse')
+      throw new Error('Échec de l\'authentification Orange Money')
     }
 
     const orderId = `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
-    const requestBody = {
+    // Prepare payment request
+    const paymentRequest = {
       merchant_key: merchantKey,
       currency: "OUV",
       order_id: orderId,
@@ -116,9 +105,9 @@ serve(async (req) => {
       })
     }
 
-    console.log('Payment request body:', {
-      ...requestBody,
-      metadata: 'HIDDEN' // Don't log sensitive data
+    console.log('Initiating payment request:', {
+      ...paymentRequest,
+      metadata: 'HIDDEN'
     })
 
     const paymentResponse = await fetch('https://api.orange.com/orange-money-webpay/dev/v1/webpayment', {
@@ -127,35 +116,29 @@ serve(async (req) => {
         'Authorization': `Bearer ${tokenData.access_token}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache'
+        'Cache-Control': 'no-cache'
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(paymentRequest)
     })
 
     console.log('Payment API response status:', paymentResponse.status)
-    const paymentResponseText = await paymentResponse.text()
-    console.log('Payment API response body:', paymentResponseText)
+    const paymentData = await paymentResponse.json()
+    console.log('Payment API response:', paymentData)
 
     if (!paymentResponse.ok) {
-      throw new Error(`Erreur de l'API Orange Money: ${paymentResponseText}`)
+      throw new Error(`Erreur de paiement Orange Money: ${paymentData.message || 'Erreur inconnue'}`)
     }
-
-    const paymentData = JSON.parse(paymentResponseText)
-    console.log('Payment response parsed:', paymentData)
 
     return new Response(JSON.stringify(paymentData), {
       headers: { 
         ...corsHeaders, 
         'Content-Type': 'application/json',
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-        'Pragma': 'no-cache'
-      },
-      status: 200
+        'Cache-Control': 'no-store'
+      }
     })
 
   } catch (error) {
-    console.error('Detailed error:', error)
+    console.error('Payment error:', error)
     return new Response(
       JSON.stringify({ 
         error: error.message,
