@@ -33,7 +33,7 @@ export function AgencyInfoFields({ form }: AgencyInfoFieldsProps) {
           <FormItem>
             <FormLabel>Adresse</FormLabel>
             <FormControl>
-              <Input placeholder="123 Rue Principale" {...field} />
+              <Input placeholder="123 Rue Bamako-Coura" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -48,7 +48,7 @@ export function AgencyInfoFields({ form }: AgencyInfoFieldsProps) {
             <FormItem>
               <FormLabel>Pays</FormLabel>
               <FormControl>
-                <Input placeholder="Côte d'Ivoire" {...field} />
+                <Input placeholder="Mali" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -62,7 +62,7 @@ export function AgencyInfoFields({ form }: AgencyInfoFieldsProps) {
             <FormItem>
               <FormLabel>Ville</FormLabel>
               <FormControl>
-                <Input placeholder="Abidjan" {...field} />
+                <Input placeholder="Bamako" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -77,7 +77,7 @@ export function AgencyInfoFields({ form }: AgencyInfoFieldsProps) {
           <FormItem>
             <FormLabel>Téléphone de l'agence</FormLabel>
             <FormControl>
-              <Input placeholder="+225 XX XX XX XX XX" {...field} />
+              <Input placeholder="+223 XX XX XX XX" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
