@@ -25,6 +25,7 @@ serve(async (req) => {
     const clientId = Deno.env.get('ORANGE_MONEY_CLIENT_ID')
     const clientSecret = Deno.env.get('ORANGE_MONEY_CLIENT_SECRET')
     const authHeader = Deno.env.get('ORANGE_MONEY_AUTH_HEADER')
+    const merchantKey = 'MerchantWP00247' // Code marchand fixe
 
     if (!clientId || !clientSecret || !authHeader) {
       console.error('Missing Orange Money configuration')
@@ -62,11 +63,8 @@ serve(async (req) => {
     // Generate unique order ID
     const orderId = `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
-    // Clean and format merchant key
-    const cleanMerchantKey = clientId.trim()
-    
     const requestBody = {
-      merchant_key: cleanMerchantKey,
+      merchant_key: merchantKey,
       currency: "OUV",
       order_id: orderId,
       amount: amount.toString(),
