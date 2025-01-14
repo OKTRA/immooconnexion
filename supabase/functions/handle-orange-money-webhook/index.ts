@@ -7,81 +7,119 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
+    console.log('🔔 Webhook received from Orange Money')
+    
+    // Get the webhook payload
     const payload = await req.json()
-    console.log('Received Orange Money webhook:', payload)
+    console.log('📦 Webhook payload:', payload)
 
-    // Vérification de la signature du webhook
+    // Verify webhook signature
     const signature = req.headers.get('x-orange-money-signature')
     if (!signature) {
-      console.error('Missing webhook signature')
+      console.error('❌ Missing webhook signature')
       throw new Error('Missing webhook signature')
     }
+    console.log('🔑 Webhook signature:', signature)
 
-    console.log('Webhook signature:', signature)
-
-    // Création du client Supabase
+    // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Extraction des métadonnées
-    let metadata;
+    // Parse metadata
+    let metadata
     try {
       metadata = JSON.parse(payload.metadata || '{}')
-      console.log('Parsed metadata:', metadata)
+      console.log('📋 Parsed metadata:', metadata)
     } catch (e) {
-      console.error('Error parsing metadata:', e)
+      console.error('❌ Error parsing metadata:', e)
       metadata = {}
     }
 
-    // Mise à jour du statut du paiement dans la base de données
+    // Validate required fields
+    if (!payload.order_id || !payload.status) {
+      throw new Error('Missing required fields in webhook payload')
+    }
+
+    // Process payment status
+    const paymentStatus = payload.status === 'SUCCESSFUL' ? 'paid' : 'failed'
+    console.log(`💰 Payment status: ${paymentStatus}`)
+
+    // Update payment notification
     if (metadata.agency_id) {
-      console.log('Updating payment status for agency:', metadata.agency_id)
+      console.log('🏢 Updating payment status for agency:', metadata.agency_id)
       
-      const { error: updateError } = await supabaseClient
+      const { error: notificationError } = await supabaseClient
         .from('admin_payment_notifications')
         .insert({
           payment_id: payload.order_id,
           agency_id: metadata.agency_id,
           amount: parseInt(payload.amount),
-          status: payload.status === 'SUCCESSFUL' ? 'paid' : 'failed',
+          status: paymentStatus,
           payment_method: 'orange_money'
         })
 
-      if (updateError) {
-        console.error('Error updating payment status:', updateError)
-        throw updateError
+      if (notificationError) {
+        console.error('❌ Error updating payment notification:', notificationError)
+        throw notificationError
       }
 
-      // Si le paiement est réussi et qu'il y a des données d'inscription
-      if (payload.status === 'SUCCESSFUL' && metadata.registration_data) {
-        console.log('Processing successful registration payment')
+      // If payment successful and registration data present, create agency
+      if (paymentStatus === 'paid' && metadata.registration_data) {
+        console.log('✨ Processing successful registration payment')
         
-        // Créer l'agence
-        const { data: agency, error: agencyError } = await supabaseClient
-          .from('agencies')
-          .insert({
-            name: metadata.registration_data.agency_name,
-            address: metadata.registration_data.agency_address,
-            country: metadata.registration_data.country,
-            city: metadata.registration_data.city,
-            status: 'active'
-          })
-          .select()
-          .single()
+        try {
+          // Create agency
+          const { data: agency, error: agencyError } = await supabaseClient
+            .from('agencies')
+            .insert({
+              name: metadata.registration_data.agency_name,
+              address: metadata.registration_data.agency_address,
+              phone: metadata.registration_data.agency_phone,
+              email: metadata.registration_data.email,
+              country: metadata.registration_data.country,
+              city: metadata.registration_data.city,
+              subscription_plan_id: metadata.plan_id,
+              status: 'active'
+            })
+            .select()
+            .single()
 
-        if (agencyError) {
-          console.error('Error creating agency:', agencyError)
-          throw agencyError
+          if (agencyError) {
+            console.error('❌ Error creating agency:', agencyError)
+            throw agencyError
+          }
+
+          console.log('✅ Agency created:', agency)
+
+          // Create admin user profile
+          if (agency) {
+            const { error: profileError } = await supabaseClient
+              .from('profiles')
+              .insert({
+                email: metadata.registration_data.email,
+                agency_id: agency.id,
+                role: 'admin'
+              })
+
+            if (profileError) {
+              console.error('❌ Error creating admin profile:', profileError)
+              throw profileError
+            }
+
+            console.log('👤 Admin profile created')
+          }
+        } catch (error) {
+          console.error('❌ Error in agency/profile creation:', error)
+          throw error
         }
-
-        console.log('Agency created:', agency)
       }
     }
 
@@ -92,10 +130,14 @@ serve(async (req) => {
         status: 200 
       }
     )
+
   } catch (error) {
-    console.error('Error processing webhook:', error)
+    console.error('❌ Error processing webhook:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.stack
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500 
