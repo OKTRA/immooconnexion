@@ -39,3 +39,32 @@ export interface PaymentDialogProps {
   onOpenChange: (open: boolean) => void;
   tenantId: string;
 }
+
+export interface PaymentFormProps {
+  onSuccess?: () => void;
+  tenantId: string;
+}
+
+export interface PaymentsListProps {
+  periodFilter: PaymentPeriodFilter;
+  statusFilter: PaymentStatusFilter;
+  tenantId: string;
+}
+
+export interface PeriodOption {
+  value: number;
+  label: string;
+}
+
+export interface FormData {
+  email: string;
+  password: string;
+  confirm_password: string;
+  agency_name: string;
+  agency_address: string;
+  agency_phone: string;
+  country: string;
+  city: string;
+  first_name: string;
+  last_name: string;
+}

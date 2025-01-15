@@ -50,9 +50,21 @@ export function usePaymentForm(onSuccess?: () => void) {
         `)
         .eq("agency_id", profile.agency_id)
         .eq("status", "active")
+        .single()
 
       if (error) throw error
-      return data as LeaseData[]
+      
+      // Transform the response to match LeaseData type
+      const transformedData = {
+        ...data,
+        apartment_tenants: data.apartment_tenants[0],
+        apartment_units: {
+          ...data.apartment_units[0],
+          apartment: data.apartment_units[0].apartment[0]
+        }
+      } as LeaseData
+
+      return [transformedData]
     },
     enabled: !!profile?.agency_id
   })

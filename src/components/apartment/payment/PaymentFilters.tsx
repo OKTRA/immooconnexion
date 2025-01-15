@@ -1,5 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { PaymentPeriodFilter, PaymentStatusFilter } from "./PaymentMonitoringDashboard"
+import { PaymentPeriodFilter, PaymentStatusFilter } from "./types"
 
 interface PaymentFiltersProps {
   periodFilter: PaymentPeriodFilter
