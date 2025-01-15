@@ -39,13 +39,13 @@ export function usePaymentForm(onSuccess?: () => void) {
           payment_frequency,
           deposit_amount,
           initial_payments_completed,
-          apartment_tenants!inner (
+          apartment_tenants (
             first_name,
             last_name
           ),
-          apartment_units!inner (
+          apartment_units (
             unit_number,
-            apartment:apartments!inner (
+            apartment (
               name
             )
           )
