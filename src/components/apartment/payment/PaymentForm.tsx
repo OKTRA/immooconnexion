@@ -11,6 +11,7 @@ import { supabase } from "@/lib/supabase";
 import { LeaseSelector } from "./components/LeaseSelector";
 import { PaymentDetails } from "./components/PaymentDetails";
 import { PeriodSelector } from "./components/PeriodSelector";
+import { InitialPaymentsForm } from "./components/InitialPaymentsForm";
 
 export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
   const { toast } = useToast();
@@ -108,7 +109,8 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
           status: "paid",
           payment_date: new Date().toISOString(),
           due_date: new Date().toISOString(),
-          agency_id: agencyId
+          agency_id: agencyId,
+          payment_type: "rent"
         });
 
       if (paymentError) throw paymentError;
@@ -142,7 +144,24 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
         isLoading={isLoadingLeases}
       />
 
-      {selectedLease && (
+      {selectedLease && !selectedLease.initial_payments_completed && (
+        <InitialPaymentsForm
+          leaseId={selectedLease.id}
+          depositAmount={selectedLease.deposit_amount}
+          rentAmount={selectedLease.rent_amount}
+          onSuccess={() => {
+            // Rafraîchir les données du bail
+            const lease = leases.find(l => l.id === selectedLeaseId);
+            if (lease) {
+              lease.initial_payments_completed = true;
+              setSelectedLease({ ...lease });
+            }
+          }}
+          agencyId={agencyId}
+        />
+      )}
+
+      {selectedLease && selectedLease.initial_payments_completed && (
         <>
           <PaymentDetails
             selectedLease={selectedLease}

@@ -15,6 +15,8 @@ export interface LeaseData {
   tenant_id: string;
   unit_id: string;
   payment_frequency: string;
+  deposit_amount: number;
+  initial_payments_completed: boolean;
   apartment_tenants: {
     first_name: string;
     last_name: string;
@@ -54,17 +56,4 @@ export interface PaymentsListProps {
 export interface PeriodOption {
   value: number;
   label: string;
-}
-
-export interface FormData {
-  email: string;
-  password: string;
-  confirm_password: string;
-  agency_name: string;
-  agency_address: string;
-  agency_phone: string;
-  country: string;
-  city: string;
-  first_name: string;
-  last_name: string;
 }
