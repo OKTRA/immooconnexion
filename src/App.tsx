@@ -29,6 +29,7 @@ import ApartmentTenantPayments from "@/pages/ApartmentTenantPayments"
 import ApartmentTenantLeases from "@/pages/ApartmentTenantLeases"
 import ApartmentTenantDetails from "@/pages/ApartmentTenantDetails"
 import { TenantPaymentsTab } from "@/components/apartment/tenant/TenantPaymentsTab"
+import PaymentSuccess from "@/pages/PaymentSuccess"
 
 const queryClient = new QueryClient()
 
@@ -44,6 +45,7 @@ export default function App() {
               <Route path="/super-admin/login" element={<SuperAdminLogin />} />
               <Route path="/super-admin/admin" element={<AdminDashboard />} />
               <Route path="/pricing" element={<Pricing />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/properties" element={<PublicProperties />} />
               <Route path="/terms" element={<TermsOfService />} />
               

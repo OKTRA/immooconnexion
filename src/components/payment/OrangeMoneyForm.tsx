@@ -9,107 +9,105 @@ interface OrangeMoneyFormProps {
   description: string
   agencyId?: string | null
   onSuccess?: () => void
-  onError?: (error: any) => void
-  formData: any
+  formData: {
+    email: string
+    agency_name: string
+    agency_address: string
+    country: string
+    city: string
+    first_name: string
+    last_name: string
+    phone_number: string
+  }
 }
 
-export function OrangeMoneyForm({
+export function OrangeMoneyForm({ 
   amount,
   description,
   agencyId,
   onSuccess,
-  onError,
   formData
 }: OrangeMoneyFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
-  console.log("OrangeMoneyForm rendered with:", { amount, description, agencyId, formData })
-
-  const handlePayment = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
     try {
       setIsLoading(true)
-      console.log("Starting Orange Money payment process...")
 
-      // Ensure we have all required data
-      if (!formData.email || !formData.first_name || !formData.last_name) {
-        throw new Error("Informations utilisateur manquantes")
-      }
+      // Sauvegarder la tentative de paiement
+      const { data: paymentAttempt, error: paymentError } = await supabase
+        .from('payment_attempts')
+        .insert([{
+          payment_method: 'orange_money',
+          amount,
+          agency_data: {
+            name: formData.agency_name,
+            address: formData.agency_address,
+            country: formData.country,
+            city: formData.city,
+            email: formData.email
+          },
+          subscription_plan_id: agencyId
+        }])
+        .select()
+        .single()
 
+      if (paymentError) throw paymentError
+
+      // Initialiser le paiement Orange Money
       const { data, error } = await supabase.functions.invoke('initialize-orange-money-payment', {
         body: {
           amount,
           description,
-          metadata: {
-            agency_id: agencyId,
-            customer_email: formData.email,
-            customer_name: `${formData.first_name} ${formData.last_name}`,
-            customer_phone: formData.phone_number,
-            registration_data: {
-              ...formData,
-              password: undefined // Don't send password in metadata
-            }
+          payment_id: paymentAttempt.id,
+          customer: {
+            email: formData.email,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            phone_number: formData.phone_number
           }
         }
       })
 
-      if (error) {
-        console.error('Payment initialization error:', error)
-        throw error
-      }
+      if (error) throw error
 
-      console.log("Payment initialization response:", data)
-      
+      // Rediriger vers l'URL de paiement Orange Money
       if (data?.payment_url) {
-        console.log("Redirecting to payment URL:", data.payment_url)
         window.location.href = data.payment_url
       } else {
-        throw new Error('URL de paiement non reçue')
+        throw new Error("URL de paiement non reçue")
       }
 
+      if (onSuccess) {
+        onSuccess()
+      }
     } catch (error: any) {
-      console.error('Detailed payment error:', error)
+      console.error('Error:', error)
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue lors de l'initialisation du paiement",
         variant: "destructive",
       })
-      onError?.(error)
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-lg border p-4">
-        <div className="flex justify-between items-center">
-          <div>
-            <p className="font-medium">Montant à payer</p>
-            <p className="text-2xl font-bold">{amount.toLocaleString()} FCFA</p>
-          </div>
-          <img 
-            src="/orange-money-logo.png" 
-            alt="Orange Money" 
-            className="h-12 w-auto"
-          />
-        </div>
-      </div>
-
-      <Button
-        onClick={handlePayment}
-        disabled={isLoading}
-        className="w-full bg-orange-500 hover:bg-orange-600"
-      >
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Traitement en cours...
+            Initialisation du paiement...
           </>
         ) : (
           "Payer avec Orange Money"
         )}
       </Button>
-    </div>
+    </form>
   )
 }

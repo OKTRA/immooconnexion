@@ -921,6 +921,42 @@ export type Database = {
           },
         ]
       }
+      payment_attempts: {
+        Row: {
+          agency_data: Json
+          amount: number
+          created_at: string | null
+          id: string
+          payment_id: string
+          payment_method: string
+          status: string
+          subscription_plan_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          agency_data: Json
+          amount: number
+          created_at?: string | null
+          id?: string
+          payment_id: string
+          payment_method: string
+          status?: string
+          subscription_plan_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          agency_data?: Json
+          amount?: number
+          created_at?: string | null
+          id?: string
+          payment_id?: string
+          payment_method?: string
+          status?: string
+          subscription_plan_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       payment_notifications: {
         Row: {
           amount: number
