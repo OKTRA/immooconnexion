@@ -39,11 +39,11 @@ export function usePaymentForm(onSuccess?: () => void) {
           payment_frequency,
           deposit_amount,
           initial_payments_completed,
-          apartment_tenants!apartment_leases_tenant_id_fkey (
+          apartment_tenants (
             first_name,
             last_name
           ),
-          apartment_units!apartment_leases_unit_id_fkey (
+          apartment_units (
             unit_number,
             apartment:apartments (
               name
@@ -55,11 +55,7 @@ export function usePaymentForm(onSuccess?: () => void) {
 
       if (error) throw error
       
-      return data.map(lease => ({
-        ...lease,
-        apartment_tenants: lease.apartment_tenants,
-        apartment_units: lease.apartment_units
-      })) as LeaseData[]
+      return data as LeaseData[]
     },
     enabled: !!profile?.agency_id
   })

@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { PaymentMethodSelect } from "./PaymentMethodSelect";
