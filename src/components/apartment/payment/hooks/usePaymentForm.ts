@@ -17,7 +17,7 @@ export function usePaymentForm(onSuccess?: () => void) {
         .from("profiles")
         .select("agency_id")
         .eq("id", user.id)
-        .single()
+        .maybeSingle()
 
       if (error) throw error
       return data
@@ -53,7 +53,6 @@ export function usePaymentForm(onSuccess?: () => void) {
 
       if (error) throw error
       
-      // Transform the response to match LeaseData type
       return data.map(lease => ({
         id: lease.id,
         rent_amount: lease.rent_amount,
