@@ -29,6 +29,8 @@ export function usePaymentForm(onSuccess?: () => void) {
     queryFn: async () => {
       if (!profile?.agency_id) return []
 
+      console.log("Fetching leases with agency_id:", profile.agency_id)
+
       const { data, error } = await supabase
         .from("apartment_leases")
         .select(`
@@ -51,7 +53,12 @@ export function usePaymentForm(onSuccess?: () => void) {
         .eq("agency_id", profile.agency_id)
         .eq("status", "active")
 
-      if (error) throw error
+      if (error) {
+        console.error("Error fetching leases:", error)
+        throw error
+      }
+
+      console.log("Fetched leases:", data)
       
       return data.map(lease => ({
         id: lease.id,
@@ -60,13 +67,13 @@ export function usePaymentForm(onSuccess?: () => void) {
         unit_id: lease.unit_id,
         payment_frequency: lease.payment_frequency,
         apartment_tenants: {
-          first_name: lease.apartment_tenants[0].first_name,
-          last_name: lease.apartment_tenants[0].last_name
+          first_name: lease.apartment_tenants?.first_name,
+          last_name: lease.apartment_tenants?.last_name
         },
         apartment_units: {
-          unit_number: lease.apartment_units[0].unit_number,
+          unit_number: lease.apartment_units?.unit_number,
           apartment: {
-            name: lease.apartment_units[0].apartment[0].name
+            name: lease.apartment_units?.apartment?.name
           }
         }
       })) as LeaseData[]
