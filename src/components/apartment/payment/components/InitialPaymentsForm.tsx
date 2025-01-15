@@ -39,13 +39,13 @@ export function InitialPaymentsForm({
   const form = useForm<InitialPaymentsFormData>({
     defaultValues: {
       paymentMethod: "cash",
-      agencyFees: rentAmount * 0.5, // 50% par défaut mais modifiable
+      agencyFees: rentAmount * 0.5,
     },
   });
 
   const onSubmit = async (data: InitialPaymentsFormData) => {
     try {
-      console.log("Début de la soumission des paiements initiaux");
+      console.log("Début de la soumission des paiements initiaux", { data, leaseId, agencyId });
 
       // Créer le paiement de la caution
       const { error: depositError } = await supabase
@@ -63,7 +63,7 @@ export function InitialPaymentsForm({
 
       if (depositError) {
         console.error("Erreur lors du paiement de la caution:", depositError);
-        throw depositError;
+        throw new Error(`Erreur lors du paiement de la caution: ${depositError.message}`);
       }
 
       console.log("Paiement de la caution enregistré");
@@ -84,7 +84,7 @@ export function InitialPaymentsForm({
 
       if (feesError) {
         console.error("Erreur lors du paiement des frais d'agence:", feesError);
-        throw feesError;
+        throw new Error(`Erreur lors du paiement des frais d'agence: ${feesError.message}`);
       }
 
       console.log("Paiement des frais d'agence enregistré");
@@ -100,7 +100,7 @@ export function InitialPaymentsForm({
 
       if (updateError) {
         console.error("Erreur lors de la mise à jour du statut:", updateError);
-        throw updateError;
+        throw new Error(`Erreur lors de la mise à jour du statut: ${updateError.message}`);
       }
 
       console.log("Statut des paiements initiaux mis à jour");
@@ -115,7 +115,7 @@ export function InitialPaymentsForm({
       console.error("Erreur complète:", error);
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors des paiements initiaux",
+        description: error.message || "Une erreur est survenue lors des paiements initiaux",
         variant: "destructive",
       });
     }
