@@ -8,6 +8,7 @@ interface OrangeMoneyFormProps {
   amount: number
   description: string
   planId?: string
+  agencyId?: string
   onSuccess?: () => void
   formData: FormData
 }
@@ -16,6 +17,7 @@ export function OrangeMoneyForm({
   amount, 
   description, 
   planId,
+  agencyId,
   onSuccess,
   formData 
 }: OrangeMoneyFormProps) {
@@ -33,7 +35,7 @@ export function OrangeMoneyForm({
       const agencyData = {
         name: formData.agency_name,
         address: formData.agency_address,
-        phone: formData.phone_number,
+        phone: formData.agency_phone,
         country: formData.country,
         city: formData.city,
         email: formData.email,
@@ -50,7 +52,7 @@ export function OrangeMoneyForm({
           payment_method: 'orange_money',
           amount,
           agency_data: agencyData,
-          subscription_plan_id: planId,
+          subscription_plan_id: planId || agencyId,
           status: 'pending'
         })
 
