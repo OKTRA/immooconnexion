@@ -1,13 +1,9 @@
 import { Table } from "@/components/ui/table"
 import { Loader2 } from "lucide-react"
-import { TenantsTableHeader } from "@/components/tenants/TenantsTableHeader"
-import { TenantsTableContent } from "@/components/tenants/TenantsTableContent"
-import { TenantDisplay } from "@/hooks/use-tenants"
-import { useToast } from "@/components/ui/use-toast"
-import { useEffect } from "react"
+import { useToast } from "@/hooks/use-toast"
+import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { TenantActionButtons } from "@/components/apartment/tenant/TenantActionButtons"
-import { useQuery } from "@tanstack/react-query"
 import {
   TableBody,
   TableCell,
@@ -27,7 +23,7 @@ export function ApartmentTenantsTable({
   apartmentId,
   onEdit,
   onDelete,
-  isLoading
+  isLoading: externalLoading
 }: ApartmentTenantsTableProps) {
   const { toast } = useToast()
 
@@ -59,7 +55,7 @@ export function ApartmentTenantsTable({
     }
   })
 
-  if (isLoading) {
+  if (externalLoading) {
     return (
       <div className="flex justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
