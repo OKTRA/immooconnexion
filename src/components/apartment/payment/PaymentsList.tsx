@@ -37,13 +37,13 @@ export function PaymentsList({ periodFilter, statusFilter, tenantId }: PaymentsL
       }
 
       if (periodFilter === "current") {
-        query = query.gte("start_date", new Date().toISOString().split("T")[0])
-          .lte("end_date", new Date().toISOString().split("T")[0]);
+        query = query.gte("payment_period_start", new Date().toISOString().split("T")[0])
+          .lte("payment_period_end", new Date().toISOString().split("T")[0]);
       } else if (periodFilter === "overdue") {
-        query = query.lt("end_date", new Date().toISOString().split("T")[0])
+        query = query.lt("payment_period_end", new Date().toISOString().split("T")[0])
           .neq("status", "paid");
       } else if (periodFilter === "upcoming") {
-        query = query.gt("start_date", new Date().toISOString().split("T")[0]);
+        query = query.gt("payment_period_start", new Date().toISOString().split("T")[0]);
       }
 
       const { data, error } = await query.order("due_date", { ascending: false });
