@@ -25,8 +25,10 @@ export function usePaymentForm(onSuccess?: () => void) {
   })
 
   const { data: leases = [], isLoading: isLoadingLeases } = useQuery({
-    queryKey: ["leases"],
+    queryKey: ["leases", profile?.agency_id],
     queryFn: async () => {
+      if (!profile?.agency_id) return []
+
       const { data, error } = await supabase
         .from("apartment_leases")
         .select(`
@@ -46,11 +48,13 @@ export function usePaymentForm(onSuccess?: () => void) {
             )
           )
         `)
+        .eq("agency_id", profile.agency_id)
         .eq("status", "active")
 
       if (error) throw error
       return data as LeaseData[]
-    }
+    },
+    enabled: !!profile?.agency_id
   })
 
   return {

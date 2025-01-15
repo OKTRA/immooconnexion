@@ -1,13 +1,17 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { LeaseData } from "../hooks/usePaymentForm"
+import { LeaseSelectProps } from "../types"
+import { Loader2 } from "lucide-react"
 
-interface LeaseSelectProps {
-  leases: LeaseData[]
-  selectedLeaseId: string
-  onLeaseSelect: (value: string) => void
-}
+export function LeaseSelect({ leases, selectedLeaseId, onLeaseSelect, isLoading }: LeaseSelectProps) {
+  if (isLoading) {
+    return (
+      <div className="flex items-center space-x-2">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span>Chargement des baux...</span>
+      </div>
+    )
+  }
 
-export function LeaseSelect({ leases, selectedLeaseId, onLeaseSelect }: LeaseSelectProps) {
   return (
     <Select value={selectedLeaseId} onValueChange={onLeaseSelect}>
       <SelectTrigger>

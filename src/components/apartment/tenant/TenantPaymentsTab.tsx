@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { useParams } from "react-router-dom"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -8,11 +7,14 @@ import { fr } from "date-fns/locale"
 import { useTenantPayments } from "@/hooks/use-tenant-payments"
 import { Loader2, Plus } from "lucide-react"
 import { PaymentDialog } from "@/components/apartment/payment/PaymentDialog"
+import { useParams } from "react-router-dom"
 
 export function TenantPaymentsTab() {
-  const { tenantId } = useParams()
+  const { tenantId } = useParams<{ tenantId: string }>()
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   const { data, isLoading } = useTenantPayments(tenantId)
+
+  if (!tenantId) return null
 
   if (isLoading) {
     return (
@@ -40,7 +42,6 @@ export function TenantPaymentsTab() {
         </Button>
       </div>
 
-      {/* Payments Section */}
       <Card>
         <CardHeader>
           <CardTitle>Historique des paiements</CardTitle>
@@ -76,7 +77,6 @@ export function TenantPaymentsTab() {
         </CardContent>
       </Card>
 
-      {/* Late Fees Section */}
       <Card>
         <CardHeader>
           <CardTitle>Pénalités de retard</CardTitle>
@@ -114,7 +114,8 @@ export function TenantPaymentsTab() {
 
       <PaymentDialog 
         open={showPaymentDialog} 
-        onOpenChange={setShowPaymentDialog} 
+        onOpenChange={setShowPaymentDialog}
+        tenantId={tenantId}
       />
     </div>
   )
