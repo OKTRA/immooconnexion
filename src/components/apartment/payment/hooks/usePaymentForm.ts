@@ -41,13 +41,13 @@ export function usePaymentForm(onSuccess?: () => void) {
           payment_frequency,
           deposit_amount,
           initial_payments_completed,
-          apartment_tenants!inner (
+          apartment_tenants (
             first_name,
             last_name
           ),
-          apartment_units!inner (
+          apartment_units (
             unit_number,
-            apartment:apartments!inner (
+            apartment:apartments (
               name
             )
           )
@@ -63,21 +63,15 @@ export function usePaymentForm(onSuccess?: () => void) {
       console.log("Fetched leases:", data)
 
       return data.map(lease => ({
-        id: lease.id,
-        rent_amount: lease.rent_amount,
-        tenant_id: lease.tenant_id,
-        unit_id: lease.unit_id,
-        payment_frequency: lease.payment_frequency,
-        deposit_amount: lease.deposit_amount,
-        initial_payments_completed: lease.initial_payments_completed,
+        ...lease,
         apartment_tenants: {
-          first_name: lease.apartment_tenants.first_name,
-          last_name: lease.apartment_tenants.last_name
+          first_name: lease.apartment_tenants?.first_name,
+          last_name: lease.apartment_tenants?.last_name
         },
         apartment_units: {
-          unit_number: lease.apartment_units.unit_number,
+          unit_number: lease.apartment_units?.unit_number,
           apartment: {
-            name: lease.apartment_units.apartment.name
+            name: lease.apartment_units?.apartment?.name
           }
         }
       })) as LeaseData[]
