@@ -3,20 +3,16 @@ import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { FormData } from "../agency/types"
 
 interface OrangeMoneyFormProps {
   amount: number
-  agencyData: {
-    name: string
-    address: string
-    country: string
-    city: string
-    email: string
-  }
-  subscriptionPlanId: string
+  description: string
+  planId: string
+  formData: FormData
 }
 
-export function OrangeMoneyForm({ amount, agencyData, subscriptionPlanId }: OrangeMoneyFormProps) {
+export function OrangeMoneyForm({ amount, description, planId, formData }: OrangeMoneyFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
   const navigate = useNavigate()
@@ -28,6 +24,16 @@ export function OrangeMoneyForm({ amount, agencyData, subscriptionPlanId }: Oran
       // Générer un ID de paiement unique
       const paymentId = `om_${Date.now()}_${Math.random().toString(36).substring(7)}`
 
+      // Préparer les données de l'agence
+      const agencyData = {
+        name: formData.agency_name,
+        address: formData.agency_address,
+        phone: formData.agency_phone,
+        country: formData.country,
+        city: formData.city,
+        email: formData.email
+      }
+
       // Sauvegarder la tentative de paiement
       const { error: saveError } = await supabase
         .from('payment_attempts')
@@ -36,7 +42,8 @@ export function OrangeMoneyForm({ amount, agencyData, subscriptionPlanId }: Oran
           payment_method: 'orange_money',
           amount,
           agency_data: agencyData,
-          subscription_plan_id: subscriptionPlanId
+          subscription_plan_id: planId,
+          status: 'pending'
         })
 
       if (saveError) throw saveError
@@ -53,13 +60,12 @@ export function OrangeMoneyForm({ amount, agencyData, subscriptionPlanId }: Oran
         }),
       })
 
-      const data = await response.json()
-
       if (!response.ok) {
+        const data = await response.json()
         throw new Error(data.message || 'Erreur lors de l\'initialisation du paiement')
       }
 
-      // Rediriger vers la page de paiement Orange Money
+      const data = await response.json()
       window.location.href = data.payment_url
 
     } catch (error: any) {
