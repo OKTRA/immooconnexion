@@ -47,7 +47,7 @@ export function InitialPaymentsForm({
     try {
       console.log("Début de la soumission des paiements initiaux", { data, leaseId, agencyId });
 
-      // Créer le paiement de la caution
+      // Commencer une transaction pour le dépôt
       const { error: depositError } = await supabase
         .from("apartment_lease_payments")
         .insert({
@@ -66,7 +66,7 @@ export function InitialPaymentsForm({
         throw new Error(`Erreur lors du paiement de la caution: ${depositError.message}`);
       }
 
-      console.log("Paiement de la caution enregistré");
+      console.log("Paiement de la caution enregistré avec succès");
 
       // Créer le paiement des frais d'agence
       const { error: feesError } = await supabase
@@ -87,7 +87,7 @@ export function InitialPaymentsForm({
         throw new Error(`Erreur lors du paiement des frais d'agence: ${feesError.message}`);
       }
 
-      console.log("Paiement des frais d'agence enregistré");
+      console.log("Paiement des frais d'agence enregistré avec succès");
 
       // Mettre à jour le statut des paiements initiaux
       const { error: updateError } = await supabase
@@ -103,7 +103,7 @@ export function InitialPaymentsForm({
         throw new Error(`Erreur lors de la mise à jour du statut: ${updateError.message}`);
       }
 
-      console.log("Statut des paiements initiaux mis à jour");
+      console.log("Statut des paiements initiaux mis à jour avec succès");
 
       toast({
         title: "Paiements initiaux effectués",
