@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
-import { LeaseData } from "../types"
+import { LeaseData } from "../types/lease"
 
 export function usePaymentForm(onSuccess?: () => void) {
   const [selectedLeaseId, setSelectedLeaseId] = useState("")
