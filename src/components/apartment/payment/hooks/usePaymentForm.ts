@@ -71,13 +71,13 @@ export function usePaymentForm(onSuccess?: () => void) {
         deposit_amount: lease.deposit_amount,
         initial_payments_completed: lease.initial_payments_completed,
         apartment_tenants: {
-          first_name: lease.apartment_tenants?.first_name,
-          last_name: lease.apartment_tenants?.last_name
+          first_name: lease.apartment_tenants?.first_name || null,
+          last_name: lease.apartment_tenants?.last_name || null
         },
         apartment_units: {
-          unit_number: lease.apartment_units?.unit_number,
+          unit_number: lease.apartment_units?.unit_number || "",
           apartment: {
-            name: lease.apartment_units?.apartments?.[0]?.name
+            name: lease.apartment_units?.apartments?.[0]?.name || ""
           }
         }
       })) as LeaseData[]
