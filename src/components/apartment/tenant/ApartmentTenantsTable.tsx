@@ -2,8 +2,8 @@ import { Table } from "@/components/ui/table"
 import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase"
-import { TenantActionButtons } from "@/components/apartment/tenant/TenantActionButtons"
+import { supabase } from "@/integrations/supabase/client"
+import { TenantActionButtons } from "./TenantActionButtons"
 import {
   TableBody,
   TableCell,
@@ -11,25 +11,29 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useNavigate } from "react-router-dom"
 
 interface ApartmentTenantsTableProps {
-  apartmentId: string;
-  onEdit: (tenant: any) => void;
-  onDelete: (id: string) => Promise<void>;
-  isLoading?: boolean;
+  apartmentId?: string
+  onEdit: (tenant: any) => void
+  onDelete: (tenant: any) => void
+  isLoading?: boolean
 }
 
-export function ApartmentTenantsTable({ 
+export function ApartmentTenantsTable({
   apartmentId,
   onEdit,
   onDelete,
   isLoading: externalLoading
 }: ApartmentTenantsTableProps) {
   const { toast } = useToast()
+  const navigate = useNavigate()
 
-  const { data: tenants = [], error } = useQuery({
+  const { data: tenants = [], isLoading } = useQuery({
     queryKey: ["apartment-tenants", apartmentId],
     queryFn: async () => {
+      console.log("Fetching tenants for apartment:", apartmentId)
+      
       let query = supabase
         .from("apartment_tenants")
         .select(`
@@ -41,21 +45,31 @@ export function ApartmentTenantsTable({
             deposit_amount
           )
         `)
-        .order('created_at', { ascending: false })
+        .order("created_at", { ascending: false })
 
-      // Only add the apartment_id filter if we're not looking for all tenants
-      if (apartmentId !== "all") {
-        query = query.eq("apartment_id", apartmentId)
+      if (apartmentId && apartmentId !== "all") {
+        query = query.eq("unit_id", apartmentId)
       }
 
       const { data, error } = await query
 
-      if (error) throw error
-      return data
-    }
+      if (error) {
+        console.error("Error fetching tenants:", error)
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les locataires",
+          variant: "destructive",
+        })
+        throw error
+      }
+
+      console.log("Tenants data:", data)
+      return data || []
+    },
+    enabled: !externalLoading
   })
 
-  if (externalLoading) {
+  if (externalLoading || isLoading) {
     return (
       <div className="flex justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -63,72 +77,53 @@ export function ApartmentTenantsTable({
     )
   }
 
-  if (error) {
-    return (
-      <div className="text-center py-8 text-red-500">
-        Une erreur est survenue lors du chargement des locataires
-      </div>
-    )
-  }
-
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>ID</TableHead>
-          <TableHead>Nom</TableHead>
-          <TableHead>Prénom</TableHead>
-          <TableHead>Email</TableHead>
-          <TableHead>Téléphone</TableHead>
-          <TableHead>Statut</TableHead>
-          <TableHead>Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {tenants.map((tenant) => (
-          <TableRow key={tenant.id}>
-            <TableCell className="font-mono text-sm">
-              {tenant.id.slice(0, 8)}...
-            </TableCell>
-            <TableCell>{tenant.last_name}</TableCell>
-            <TableCell>{tenant.first_name}</TableCell>
-            <TableCell>{tenant.email || "-"}</TableCell>
-            <TableCell>{tenant.phone_number || "-"}</TableCell>
-            <TableCell>
-              <span
-                className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                  tenant.apartment_leases?.[0]?.status === "active"
-                    ? "bg-green-50 text-green-700"
-                    : "bg-gray-100 text-gray-700"
-                }`}
-              >
-                {tenant.apartment_leases?.[0]?.status === "active" ? "Actif" : "Inactif"}
-              </span>
-            </TableCell>
-            <TableCell>
-              <TenantActionButtons
-                tenant={tenant}
-                currentLease={tenant.apartment_leases?.[0]}
-                onEdit={() => onEdit(tenant)}
-                onDelete={() => onDelete(tenant.id)}
-                onInspection={() => {
-                  toast({
-                    title: "Bientôt disponible",
-                    description: "Cette fonctionnalité sera disponible prochainement",
-                  })
-                }}
-              />
-            </TableCell>
-          </TableRow>
-        ))}
-        {tenants.length === 0 && (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
           <TableRow>
-            <TableCell colSpan={7} className="text-center py-4">
-              Aucun locataire trouvé
-            </TableCell>
+            <TableHead>Nom</TableHead>
+            <TableHead>Prénom</TableHead>
+            <TableHead>Téléphone</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Loyer</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
-        )}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {tenants.map((tenant) => (
+            <TableRow 
+              key={tenant.id}
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}`)}
+            >
+              <TableCell>{tenant.last_name}</TableCell>
+              <TableCell>{tenant.first_name}</TableCell>
+              <TableCell>{tenant.phone_number || "-"}</TableCell>
+              <TableCell>{tenant.email || "-"}</TableCell>
+              <TableCell>
+                {tenant.apartment_leases?.[0]?.rent_amount?.toLocaleString()} FCFA
+              </TableCell>
+              <TableCell onClick={(e) => e.stopPropagation()}>
+                <TenantActionButtons
+                  tenant={tenant}
+                  currentLease={tenant.apartment_leases?.[0]}
+                  onEdit={() => onEdit(tenant)}
+                  onDelete={() => onDelete(tenant)}
+                  onInspection={() => {}}
+                />
+              </TableCell>
+            </TableRow>
+          ))}
+          {tenants.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center py-4">
+                Aucun locataire trouvé
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
   )
 }

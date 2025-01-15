@@ -7,28 +7,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useState } from "react"
-import { TenantReceipt } from "@/components/tenants/TenantReceipt"
 
 interface TenantActionButtonsProps {
-  tenant: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    phone_number?: string;
-    agency_fees?: number;
-    profession?: string;
-  };
-  currentLease?: {
-    id: string;
-    status: string;
-    rent_amount: number;
-    deposit_amount: number;
-  };
-  onEdit: () => void;
-  onDelete: () => void;
-  onInspection: () => void;
+  tenant: any
+  currentLease?: any
+  onEdit: () => void
+  onDelete: () => void
+  onInspection: () => void
 }
 
 export function TenantActionButtons({ 
@@ -39,7 +24,6 @@ export function TenantActionButtons({
   onInspection 
 }: TenantActionButtonsProps) {
   const navigate = useNavigate()
-  const [showReceipt, setShowReceipt] = useState(false)
 
   return (
     <div className="flex items-center gap-2">
@@ -83,24 +67,7 @@ export function TenantActionButtons({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setShowReceipt(true)}
-            >
-              <Receipt className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Reçu de paiement</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(`/agence/apartments/tenants/${tenant.id}/payments`)}
+              onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}/payments`)}
             >
               <CreditCard className="h-4 w-4" />
             </Button>
@@ -117,7 +84,7 @@ export function TenantActionButtons({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate(`/agence/apartments/tenants/${tenant.id}/leases`)}
+              onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}/leases`)}
             >
               <ClipboardList className="h-4 w-4" />
             </Button>
@@ -164,27 +131,6 @@ export function TenantActionButtons({
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-
-      <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reçu de paiement</DialogTitle>
-          </DialogHeader>
-          <TenantReceipt 
-            tenant={{
-              first_name: tenant.first_name,
-              last_name: tenant.last_name,
-              phone_number: tenant.phone_number || '',
-              agency_fees: tenant.agency_fees,
-              profession: tenant.profession
-            }}
-            lease={currentLease && {
-              rent_amount: currentLease.rent_amount,
-              deposit_amount: currentLease.deposit_amount || 0
-            }}
-          />
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
