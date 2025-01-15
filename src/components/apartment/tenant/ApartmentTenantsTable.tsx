@@ -5,8 +5,9 @@ import { TenantsTableContent } from "@/components/tenants/TenantsTableContent"
 import { TenantDisplay } from "@/hooks/use-tenants"
 import { useToast } from "@/components/ui/use-toast"
 import { useEffect } from "react"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { TenantActionButtons } from "@/components/apartment/tenant/TenantActionButtons"
+import { useQuery } from "@tanstack/react-query"
 import {
   TableBody,
   TableCell,
@@ -109,7 +110,6 @@ export function ApartmentTenantsTable({
                 onEdit={() => onEdit(tenant)}
                 onDelete={() => onDelete(tenant.id)}
                 onInspection={() => {
-                  // Will be implemented in the next iteration
                   toast({
                     title: "Bientôt disponible",
                     description: "Cette fonctionnalité sera disponible prochainement",
