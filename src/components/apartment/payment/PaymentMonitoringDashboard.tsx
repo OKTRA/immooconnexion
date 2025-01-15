@@ -2,24 +2,32 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PaymentStatusStats } from "./PaymentStatusStats"
 import { PaymentsList } from "./PaymentsList"
 import { PaymentFilters } from "./PaymentFilters"
+import { Button } from "@/components/ui/button"
+import { Plus } from "lucide-react"
+import { PaymentDialog } from "./PaymentDialog"
 
 export type PaymentPeriodFilter = "all" | "current" | "overdue" | "upcoming"
 export type PaymentStatusFilter = "all" | "pending" | "paid" | "late"
 
-export function PaymentMonitoringDashboard() {
+interface PaymentMonitoringDashboardProps {
+  tenantId: string
+}
+
+export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashboardProps) {
   const [periodFilter, setPeriodFilter] = useState<PaymentPeriodFilter>("current")
   const [statusFilter, setStatusFilter] = useState<PaymentStatusFilter>("all")
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false)
 
   const { data: paymentStats } = useQuery({
-    queryKey: ["payment-stats"],
+    queryKey: ["payment-stats", tenantId],
     queryFn: async () => {
       const { data: periods } = await supabase
         .from("apartment_payment_periods")
         .select("status, amount")
+        .eq("tenant_id", tenantId)
       
       if (!periods) return null
 
@@ -36,9 +44,17 @@ export function PaymentMonitoringDashboard() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Suivi des Paiements</h1>
+        <Button onClick={() => setShowPaymentDialog(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nouveau paiement
+        </Button>
+      </div>
+
       <Card>
         <CardHeader>
-          <CardTitle>Monitoring des Paiements</CardTitle>
+          <CardTitle>Statistiques des Paiements</CardTitle>
         </CardHeader>
         <CardContent>
           <PaymentStatusStats stats={paymentStats} />
@@ -57,11 +73,18 @@ export function PaymentMonitoringDashboard() {
         </CardHeader>
         <CardContent>
           <PaymentsList
+            tenantId={tenantId}
             periodFilter={periodFilter}
             statusFilter={statusFilter}
           />
         </CardContent>
       </Card>
+
+      <PaymentDialog 
+        open={showPaymentDialog} 
+        onOpenChange={setShowPaymentDialog}
+        tenantId={tenantId}
+      />
     </div>
   )
 }

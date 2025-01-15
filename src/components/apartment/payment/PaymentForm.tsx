@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,22 +8,29 @@ import { Loader2 } from "lucide-react"
 import { usePaymentForm, PaymentFormData } from "./hooks/usePaymentForm"
 import { LeaseSelect } from "./components/LeaseSelect"
 import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
-import { supabase } from "@/integrations/supabase/client"
-import { useQuery } from "@tanstack/react-query"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { supabase } from "@/lib/supabase"
 
-export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
+interface PeriodOption {
+  value: number
+  label: string
+}
+
+export function PaymentForm({ onSuccess, tenantId }: { onSuccess?: () => void, tenantId: string }) {
   const { toast } = useToast()
   const {
     leases,
     isLoadingLeases,
-    paymentPeriods,
-    isLoadingPeriods,
     selectedLeaseId,
     setSelectedLeaseId,
     isSubmitting,
     setIsSubmitting,
     agencyId
   } = usePaymentForm(onSuccess)
+
+  const [selectedLease, setSelectedLease] = useState<any>(null)
+  const [periodOptions, setPeriodOptions] = useState<PeriodOption[]>([])
+  const [selectedPeriods, setSelectedPeriods] = useState<number>(1)
 
   const { register, handleSubmit, setValue, watch } = useForm<PaymentFormData>({
     defaultValues: {
@@ -34,11 +41,59 @@ export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
     }
   })
 
+  useEffect(() => {
+    if (selectedLeaseId) {
+      const lease = leases.find(l => l.id === selectedLeaseId)
+      setSelectedLease(lease)
+      if (lease) {
+        setValue("amount", lease.rent_amount)
+        generatePeriodOptions(lease.payment_frequency)
+      }
+    }
+  }, [selectedLeaseId, leases])
+
+  const generatePeriodOptions = (frequency: string) => {
+    let options: PeriodOption[] = []
+    switch (frequency) {
+      case 'daily':
+        options = Array.from({length: 31}, (_, i) => ({
+          value: i + 1,
+          label: `${i + 1} jour${i > 0 ? 's' : ''}`
+        }))
+        break
+      case 'weekly':
+        [1, 2, 3, 4].forEach(weeks => {
+          options.push({
+            value: weeks,
+            label: `${weeks} semaine${weeks > 1 ? 's' : ''}`
+          })
+        })
+        break
+      case 'monthly':
+        Array.from({length: 12}, (_, i) => {
+          options.push({
+            value: i + 1,
+            label: `${i + 1} mois`
+          })
+        })
+        break
+      case 'yearly':
+        [1, 2, 3, 4, 5].forEach(years => {
+          options.push({
+            value: years,
+            label: `${years} an${years > 1 ? 's' : ''}`
+          })
+        })
+        break
+    }
+    setPeriodOptions(options)
+  }
+
   const onSubmit = async (data: PaymentFormData) => {
-    if (!agencyId) {
+    if (!agencyId || !selectedLease) {
       toast({
         title: "Erreur",
-        description: "ID de l'agence manquant",
+        description: "Informations manquantes",
         variant: "destructive",
       })
       return
@@ -46,11 +101,13 @@ export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
 
     setIsSubmitting(true)
     try {
+      const totalAmount = selectedLease.rent_amount * selectedPeriods
+
       const { error: paymentError } = await supabase
         .from("apartment_lease_payments")
         .insert({
           lease_id: data.leaseId,
-          amount: data.amount,
+          amount: totalAmount,
           payment_method: data.paymentMethod,
           status: "paid",
           payment_date: new Date().toISOString(),
@@ -59,15 +116,6 @@ export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
         })
 
       if (paymentError) throw paymentError
-
-      if (data.paymentPeriods.length > 0) {
-        const { error: periodError } = await supabase
-          .from("apartment_payment_periods")
-          .update({ status: "paid" })
-          .in("id", data.paymentPeriods)
-
-        if (periodError) throw periodError
-      }
 
       toast({
         title: "Paiement effectué",
@@ -95,12 +143,14 @@ export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
     )
   }
 
+  const filteredLeases = leases.filter(lease => lease.tenant_id === tenantId)
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-2">
         <Label>Contrat de location</Label>
         <LeaseSelect
-          leases={leases}
+          leases={filteredLeases}
           selectedLeaseId={selectedLeaseId}
           onLeaseSelect={(value) => {
             setSelectedLeaseId(value)
@@ -109,40 +159,44 @@ export function PaymentForm({ onSuccess }: { onSuccess?: () => void }) {
         />
       </div>
 
-      {selectedLeaseId && (
+      {selectedLease && (
         <>
           <div className="space-y-2">
-            <Label>Périodes de paiement</Label>
-            {isLoadingPeriods ? (
-              <div className="flex justify-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {paymentPeriods.map((period) => (
-                  <label key={period.id} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      value={period.id}
-                      {...register("paymentPeriods")}
-                      className="rounded border-gray-300"
-                    />
-                    <span>
-                      {new Date(period.start_date).toLocaleDateString()} - {new Date(period.end_date).toLocaleDateString()} ({period.amount.toLocaleString()} FCFA)
-                    </span>
-                  </label>
-                ))}
-              </div>
-            )}
+            <Label>Montant du loyer</Label>
+            <Input
+              type="number"
+              value={selectedLease.rent_amount}
+              disabled
+              className="bg-gray-50"
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="amount">Montant</Label>
+            <Label>Nombre de périodes</Label>
+            <Select 
+              value={selectedPeriods.toString()} 
+              onValueChange={(value) => setSelectedPeriods(Number(value))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner le nombre de périodes" />
+              </SelectTrigger>
+              <SelectContent>
+                {periodOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value.toString()}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Montant total</Label>
             <Input
-              id="amount"
               type="number"
-              {...register("amount", { required: true, min: 0 })}
-              placeholder="Montant en FCFA"
+              value={selectedLease.rent_amount * selectedPeriods}
+              disabled
+              className="bg-gray-50"
             />
           </div>
 
