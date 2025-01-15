@@ -31,7 +31,7 @@ export interface LeaseSelectProps {
   leases: LeaseData[];
   selectedLeaseId: string;
   onLeaseSelect: (value: string) => void;
-  isLoading?: boolean;
+  isLoading: boolean;
 }
 
 export interface PaymentDialogProps {

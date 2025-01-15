@@ -45,18 +45,7 @@ export function AgencyRegistrationDialog({
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      confirm_password: "",
-      agency_name: "",
-      agency_address: "",
-      agency_phone: "",
-      country: "",
-      city: "",
-      first_name: "",
-      last_name: ""
-    }
+    defaultValues: formData
   })
 
   const handleSubmit = async (data: FormData) => {
