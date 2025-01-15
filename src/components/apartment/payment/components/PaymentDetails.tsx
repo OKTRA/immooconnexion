@@ -7,6 +7,21 @@ interface PaymentDetailsProps {
   selectedPeriods: number;
 }
 
+const getFrequencyLabel = (frequency: string): string => {
+  switch (frequency) {
+    case 'daily':
+      return 'Quotidien';
+    case 'weekly':
+      return 'Hebdomadaire';
+    case 'monthly':
+      return 'Mensuel';
+    case 'yearly':
+      return 'Annuel';
+    default:
+      return '';
+  }
+};
+
 export function PaymentDetails({ selectedLease, selectedPeriods }: PaymentDetailsProps) {
   if (!selectedLease) return null;
 
@@ -15,12 +30,7 @@ export function PaymentDetails({ selectedLease, selectedPeriods }: PaymentDetail
       <div className="space-y-2">
         <Label>Fréquence de paiement</Label>
         <Input
-          value={
-            selectedLease.payment_frequency === 'monthly' ? 'Mensuel' :
-            selectedLease.payment_frequency === 'weekly' ? 'Hebdomadaire' :
-            selectedLease.payment_frequency === 'daily' ? 'Quotidien' :
-            selectedLease.payment_frequency === 'yearly' ? 'Annuel' : ''
-          }
+          value={getFrequencyLabel(selectedLease.payment_frequency)}
           disabled
           className="bg-gray-50"
         />

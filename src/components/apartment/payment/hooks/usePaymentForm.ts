@@ -1,38 +1,12 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-
-export type PaymentMethod = "cash" | "bank_transfer" | "mobile_money"
-
-export interface PaymentFormData {
-  leaseId: string
-  amount: number
-  paymentMethod: PaymentMethod
-  paymentPeriods: string[]
-}
-
-export interface LeaseData {
-  id: string
-  rent_amount: number
-  tenant_id: string
-  unit_id: string
-  apartment_tenants: {
-    first_name: string
-    last_name: string
-  }
-  apartment_units: {
-    unit_number: string
-    apartment: {
-      name: string
-    }
-  }
-}
+import { supabase } from "@/lib/supabase"
+import { LeaseData } from "../types"
 
 export function usePaymentForm(onSuccess?: () => void) {
   const [selectedLeaseId, setSelectedLeaseId] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Récupérer l'ID de l'agence de l'utilisateur connecté
   const { data: profile } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
@@ -60,6 +34,7 @@ export function usePaymentForm(onSuccess?: () => void) {
           rent_amount,
           tenant_id,
           unit_id,
+          payment_frequency,
           apartment_tenants (
             first_name,
             last_name
@@ -78,29 +53,9 @@ export function usePaymentForm(onSuccess?: () => void) {
     }
   })
 
-  const { data: paymentPeriods = [], isLoading: isLoadingPeriods } = useQuery({
-    queryKey: ["payment-periods", selectedLeaseId],
-    queryFn: async () => {
-      if (!selectedLeaseId) return []
-
-      const { data, error } = await supabase
-        .from("apartment_payment_periods")
-        .select("*")
-        .eq("lease_id", selectedLeaseId)
-        .eq("status", "pending")
-        .order("start_date")
-
-      if (error) throw error
-      return data
-    },
-    enabled: !!selectedLeaseId
-  })
-
   return {
     leases,
     isLoadingLeases,
-    paymentPeriods,
-    isLoadingPeriods,
     selectedLeaseId,
     setSelectedLeaseId,
     isSubmitting,
