@@ -122,77 +122,79 @@ export function InitialPaymentsForm({
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Paiements initiaux requis</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4">
-              <div className="flex justify-between items-center">
-                <span>Caution</span>
-                <span className="font-semibold">{depositAmount.toLocaleString()} FCFA</span>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Paiements initiaux requis</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid gap-4">
+                <div className="flex justify-between items-center">
+                  <span>Caution</span>
+                  <span className="font-semibold">{depositAmount.toLocaleString()} FCFA</span>
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="agencyFees"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Frais d'agence (suggestion: {(rentAmount * 0.5).toLocaleString()} FCFA)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-between items-center border-t pt-2">
+                  <span className="font-semibold">Total</span>
+                  <span className="font-semibold">
+                    {(depositAmount + form.watch("agencyFees")).toLocaleString()} FCFA
+                  </span>
+                </div>
               </div>
-              
+
               <FormField
                 control={form.control}
-                name="agencyFees"
+                name="paymentMethod"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Frais d'agence (suggestion: {(rentAmount * 0.5).toLocaleString()} FCFA)</FormLabel>
+                    <FormLabel>Mode de paiement</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      <PaymentMethodSelect
+                        value={field.value}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                   </FormItem>
                 )}
               />
 
-              <div className="flex justify-between items-center border-t pt-2">
-                <span className="font-semibold">Total</span>
-                <span className="font-semibold">
-                  {(depositAmount + form.watch("agencyFees")).toLocaleString()} FCFA
-                </span>
-              </div>
-            </div>
-
-            <FormField
-              control={form.control}
-              name="paymentMethod"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mode de paiement</FormLabel>
-                  <FormControl>
-                    <PaymentMethodSelect
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Traitement en cours...
-                </>
-              ) : (
-                "Effectuer les paiements initiaux"
-              )}
-            </Button>
-          </CardContent>
-        </Card>
-      </form>
-    </Form>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Traitement en cours...
+                  </>
+                ) : (
+                  "Effectuer les paiements initiaux"
+                )}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
