@@ -1,6 +1,4 @@
 import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PaymentStatusStats } from "./PaymentStatusStats"
 import { PaymentsList } from "./PaymentsList"
@@ -8,12 +6,14 @@ import { PaymentFilters } from "./PaymentFilters"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { PaymentDialog } from "./PaymentDialog"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
 export type PaymentPeriodFilter = "all" | "current" | "overdue" | "upcoming"
 export type PaymentStatusFilter = "all" | "pending" | "paid" | "late"
 
 interface PaymentMonitoringDashboardProps {
-  tenantId: string
+  tenantId: string;
 }
 
 export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashboardProps) {
@@ -26,8 +26,13 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
     queryFn: async () => {
       const { data: periods } = await supabase
         .from("apartment_payment_periods")
-        .select("status, amount")
-        .eq("tenant_id", tenantId)
+        .select(`
+          *,
+          apartment_leases!inner (
+            tenant_id
+          )
+        `)
+        .eq("apartment_leases.tenant_id", tenantId)
       
       if (!periods) return null
 
