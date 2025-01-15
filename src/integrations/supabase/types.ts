@@ -262,6 +262,7 @@ export type Database = {
           payment_method: string | null
           payment_period_end: string | null
           payment_period_start: string | null
+          payment_type: string | null
           status: string
           type: string | null
           updated_at: string | null
@@ -280,6 +281,7 @@ export type Database = {
           payment_method?: string | null
           payment_period_end?: string | null
           payment_period_start?: string | null
+          payment_type?: string | null
           status?: string
           type?: string | null
           updated_at?: string | null
@@ -298,6 +300,7 @@ export type Database = {
           payment_method?: string | null
           payment_period_end?: string | null
           payment_period_start?: string | null
+          payment_type?: string | null
           status?: string
           type?: string | null
           updated_at?: string | null
@@ -332,6 +335,7 @@ export type Database = {
           end_date: string | null
           id: string
           initial_fees_paid: boolean | null
+          initial_payments_completed: boolean | null
           payment_frequency: string
           payment_type: string | null
           rent_amount: number
@@ -353,6 +357,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           initial_fees_paid?: boolean | null
+          initial_payments_completed?: boolean | null
           payment_frequency: string
           payment_type?: string | null
           rent_amount: number
@@ -374,6 +379,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           initial_fees_paid?: boolean | null
+          initial_payments_completed?: boolean | null
           payment_frequency?: string
           payment_type?: string | null
           rent_amount?: number

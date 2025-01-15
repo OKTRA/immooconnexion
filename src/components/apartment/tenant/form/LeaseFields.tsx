@@ -1,65 +1,28 @@
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { PaymentFrequency, DurationType, LeaseStatus } from "../../../apartment/lease/types"
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PaymentFrequency, DurationType } from "../../lease/types";
 
 interface LeaseFieldsProps {
   formData: {
-    rentAmount: string
-    depositAmount: string
-    agencyFees: string
-    startDate: string
-    endDate: string
-    paymentFrequency: PaymentFrequency
-    durationType: DurationType
-    status: LeaseStatus
-  }
-  setFormData: (data: any) => void
+    start_date: string;
+    end_date?: string;
+    payment_frequency: PaymentFrequency;
+    duration_type: DurationType;
+  };
+  setFormData: (data: any) => void;
 }
 
 export function LeaseFields({ formData, setFormData }: LeaseFieldsProps) {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="rentAmount">Montant du loyer</Label>
-          <Input
-            id="rentAmount"
-            type="number"
-            value={formData.rentAmount}
-            onChange={(e) => setFormData({ ...formData, rentAmount: e.target.value })}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="agencyFees">Frais d'agence</Label>
-          <Input
-            id="agencyFees"
-            type="number"
-            value={formData.agencyFees}
-            onChange={(e) => setFormData({ ...formData, agencyFees: e.target.value })}
-            required
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="depositAmount">Caution</Label>
-          <Input
-            id="depositAmount"
-            type="number"
-            value={formData.depositAmount}
-            onChange={(e) => setFormData({ ...formData, depositAmount: e.target.value })}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="paymentFrequency">Fréquence de paiement</Label>
+          <Label htmlFor="payment_frequency">Fréquence de paiement</Label>
           <Select
-            value={formData.paymentFrequency}
+            value={formData.payment_frequency}
             onValueChange={(value: PaymentFrequency) => 
-              setFormData({ ...formData, paymentFrequency: value })
+              setFormData({ ...formData, payment_frequency: value })
             }
           >
             <SelectTrigger>
@@ -74,15 +37,12 @@ export function LeaseFields({ formData, setFormData }: LeaseFieldsProps) {
             </SelectContent>
           </Select>
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="durationType">Type de durée</Label>
+          <Label htmlFor="duration_type">Type de durée</Label>
           <Select
-            value={formData.durationType}
+            value={formData.duration_type}
             onValueChange={(value: DurationType) => 
-              setFormData({ ...formData, durationType: value })
+              setFormData({ ...formData, duration_type: value })
             }
           >
             <SelectTrigger>
@@ -97,30 +57,30 @@ export function LeaseFields({ formData, setFormData }: LeaseFieldsProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="startDate">Date de début</Label>
+          <Label htmlFor="start_date">Date de début</Label>
           <Input
-            id="startDate"
+            id="start_date"
             type="date"
-            value={formData.startDate}
-            onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+            value={formData.start_date}
+            onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
             required
           />
         </div>
-        {formData.durationType === "fixed" && (
+        {formData.duration_type === "fixed" && (
           <div className="space-y-2">
-            <Label htmlFor="endDate">Date de fin</Label>
+            <Label htmlFor="end_date">Date de fin</Label>
             <Input
-              id="endDate"
+              id="end_date"
               type="date"
-              value={formData.endDate}
-              onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+              value={formData.end_date}
+              onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
               required
             />
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
