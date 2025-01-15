@@ -68,24 +68,27 @@ export function OrangeMoneyForm({
 
       if (saveError) throw saveError
 
-      // Initialiser le paiement Orange Money en utilisant l'URL complète de la fonction Edge
-      const response = await fetch('https://apidxwaaogboeoctlhtz.supabase.co/functions/v1/initialize-orange-money-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount,
-          payment_id: paymentId,
-        }),
-      })
+      // Get the access token for the authenticated user
+      const { data: { session } } = await supabase.auth.getSession()
+      const accessToken = session?.access_token
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.message || 'Erreur lors de l\'initialisation du paiement')
+      if (!accessToken) {
+        throw new Error('No access token available')
       }
 
-      const data = await response.json()
+      // Initialiser le paiement Orange Money en utilisant l'URL complète de la fonction Edge
+      const response = await supabase.functions.invoke('initialize-orange-money-payment', {
+        body: {
+          amount,
+          payment_id: paymentId,
+        }
+      })
+
+      if (response.error) {
+        throw new Error(response.error.message || 'Erreur lors de l\'initialisation du paiement')
+      }
+
+      const data = response.data
 
       if (onSuccess) {
         onSuccess()
