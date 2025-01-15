@@ -162,6 +162,18 @@ export function PaymentForm({ onSuccess, tenantId }: { onSuccess?: () => void, t
       {selectedLease && (
         <>
           <div className="space-y-2">
+            <Label>Fréquence de paiement</Label>
+            <Input
+              value={selectedLease.payment_frequency === 'monthly' ? 'Mensuel' :
+                     selectedLease.payment_frequency === 'weekly' ? 'Hebdomadaire' :
+                     selectedLease.payment_frequency === 'daily' ? 'Quotidien' :
+                     selectedLease.payment_frequency === 'yearly' ? 'Annuel' : ''}
+              disabled
+              className="bg-gray-50"
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label>Montant du loyer</Label>
             <Input
               type="number"

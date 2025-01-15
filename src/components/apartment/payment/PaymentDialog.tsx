@@ -17,7 +17,7 @@ export function PaymentDialog({ open, onOpenChange, tenantId }: PaymentDialogPro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Effectuer un paiement</DialogTitle>
+          <DialogTitle>Nouveau Paiement</DialogTitle>
         </DialogHeader>
         <PaymentForm 
           onSuccess={() => onOpenChange(false)} 
