@@ -30,7 +30,18 @@ export function AgencyRegistrationDialog({
 }: AgencyRegistrationDialogProps) {
   const [showPaymentMethods, setShowPaymentMethods] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<string>("orange_money")
-  const [formData, setFormData] = useState<FormData | null>(null)
+  const [formData, setFormData] = useState<FormData>({
+    email: "",
+    password: "",
+    confirm_password: "",
+    agency_name: "",
+    agency_address: "",
+    agency_phone: "",
+    country: "",
+    city: "",
+    first_name: "",
+    last_name: "",
+  })
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -80,7 +91,7 @@ export function AgencyRegistrationDialog({
                 onMethodChange={setPaymentMethod}
               />
 
-              {paymentMethod === "orange_money" && formData && (
+              {paymentMethod === "orange_money" && (
                 <OrangeMoneyForm
                   amount={amount}
                   description={`Inscription - Plan ${planName}`}
@@ -89,7 +100,7 @@ export function AgencyRegistrationDialog({
                 />
               )}
 
-              {paymentMethod === "cinetpay" && formData && (
+              {paymentMethod === "cinetpay" && (
                 <CinetPayForm
                   amount={amount}
                   description={`Inscription - Plan ${planName}`}
@@ -98,7 +109,7 @@ export function AgencyRegistrationDialog({
                 />
               )}
 
-              {paymentMethod === "paydunya" && formData && (
+              {paymentMethod === "paydunya" && (
                 <PaydunyaForm
                   amount={amount}
                   description={`Inscription - Plan ${planName}`}

@@ -46,14 +46,13 @@ export function PaymentDialog({
     confirm_password: "",
     agency_name: "",
     agency_address: "",
+    agency_phone: "", // Added this field
     country: "",
     city: "",
     first_name: "",
     last_name: "",
     phone_number: "",
   }
-
-  console.log("Current payment method:", paymentMethod)
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -90,7 +89,7 @@ export function PaymentDialog({
                   <OrangeMoneyForm 
                     amount={amount}
                     description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
-                    agencyId={planId}
+                    planId={planId}
                     onSuccess={handlePaymentSuccess}
                     formData={defaultFormData}
                   />
