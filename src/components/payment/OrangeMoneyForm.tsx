@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase"
@@ -9,7 +8,6 @@ interface OrangeMoneyFormProps {
   amount: number
   description: string
   planId?: string
-  agencyId?: string
   onSuccess?: () => void
   formData: FormData
 }
@@ -17,14 +15,12 @@ interface OrangeMoneyFormProps {
 export function OrangeMoneyForm({ 
   amount, 
   description, 
-  planId, 
-  agencyId,
+  planId,
   onSuccess,
   formData 
 }: OrangeMoneyFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
-  const navigate = useNavigate()
 
   const handlePayment = async () => {
     try {
@@ -37,7 +33,7 @@ export function OrangeMoneyForm({
       const agencyData = {
         name: formData.agency_name,
         address: formData.agency_address,
-        phone: formData.agency_phone,
+        phone: formData.phone_number,
         country: formData.country,
         city: formData.city,
         email: formData.email,
@@ -54,7 +50,7 @@ export function OrangeMoneyForm({
           payment_method: 'orange_money',
           amount,
           agency_data: agencyData,
-          subscription_plan_id: planId || agencyId,
+          subscription_plan_id: planId,
           status: 'pending'
         })
 
