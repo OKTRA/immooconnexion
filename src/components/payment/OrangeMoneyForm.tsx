@@ -8,11 +8,20 @@ import { FormData } from "../agency/types"
 interface OrangeMoneyFormProps {
   amount: number
   description: string
-  planId: string
+  planId?: string
+  agencyId?: string
+  onSuccess?: () => void
   formData: FormData
 }
 
-export function OrangeMoneyForm({ amount, description, planId, formData }: OrangeMoneyFormProps) {
+export function OrangeMoneyForm({ 
+  amount, 
+  description, 
+  planId, 
+  agencyId,
+  onSuccess,
+  formData 
+}: OrangeMoneyFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
   const navigate = useNavigate()
@@ -31,7 +40,10 @@ export function OrangeMoneyForm({ amount, description, planId, formData }: Orang
         phone: formData.agency_phone,
         country: formData.country,
         city: formData.city,
-        email: formData.email
+        email: formData.email,
+        password: formData.password,
+        first_name: formData.first_name,
+        last_name: formData.last_name
       }
 
       // Sauvegarder la tentative de paiement
@@ -42,7 +54,7 @@ export function OrangeMoneyForm({ amount, description, planId, formData }: Orang
           payment_method: 'orange_money',
           amount,
           agency_data: agencyData,
-          subscription_plan_id: planId,
+          subscription_plan_id: planId || agencyId,
           status: 'pending'
         })
 
@@ -66,6 +78,11 @@ export function OrangeMoneyForm({ amount, description, planId, formData }: Orang
       }
 
       const data = await response.json()
+
+      if (onSuccess) {
+        onSuccess()
+      }
+      
       window.location.href = data.payment_url
 
     } catch (error: any) {

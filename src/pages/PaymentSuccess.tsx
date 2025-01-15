@@ -48,11 +48,15 @@ export default function PaymentSuccess() {
         }
 
         // Créer l'agence
-        const agencyData = paymentAttempt.agency_data
         const { data: agency, error: agencyError } = await supabase
           .from('agencies')
           .insert([{
-            ...agencyData,
+            name: paymentAttempt.agency_data.name,
+            address: paymentAttempt.agency_data.address,
+            phone: paymentAttempt.agency_data.phone,
+            country: paymentAttempt.agency_data.country,
+            city: paymentAttempt.agency_data.city,
+            email: paymentAttempt.agency_data.email,
             subscription_plan_id: paymentAttempt.subscription_plan_id,
             status: 'active'
           }])
