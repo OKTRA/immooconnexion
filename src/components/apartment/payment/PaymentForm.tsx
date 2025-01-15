@@ -150,7 +150,6 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
           depositAmount={selectedLease.deposit_amount}
           rentAmount={selectedLease.rent_amount}
           onSuccess={() => {
-            // Rafraîchir les données du bail
             const lease = leases.find(l => l.id === selectedLeaseId);
             if (lease) {
               lease.initial_payments_completed = true;

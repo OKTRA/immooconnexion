@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { PaymentMethodSelect } from "./PaymentMethodSelect";
+import { PaymentMethod } from "../types";
 import {
   Form,
   FormControl,
@@ -22,7 +23,7 @@ interface InitialPaymentsFormProps {
 }
 
 interface InitialPaymentsFormData {
-  paymentMethod: string;
+  paymentMethod: PaymentMethod;
 }
 
 export function InitialPaymentsForm({

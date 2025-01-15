@@ -1,8 +1,9 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { PaymentMethod } from "../types"
 
 interface PaymentMethodSelectProps {
-  value: string
-  onChange: (value: "cash" | "bank_transfer" | "mobile_money") => void
+  value: PaymentMethod
+  onChange: (value: PaymentMethod) => void
 }
 
 export function PaymentMethodSelect({ value, onChange }: PaymentMethodSelectProps) {
