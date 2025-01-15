@@ -61,27 +61,13 @@ export default function PaymentSuccess() {
 
         if (agencyError) throw agencyError
 
-        // Mettre à jour le profil avec l'ID de l'agence
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) throw new Error("Utilisateur non authentifié")
-
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            agency_id: agency.id,
-            role: 'admin'
-          })
-          .eq('id', user.id)
-
-        if (profileError) throw profileError
-
         toast({
           title: "Succès",
-          description: "Votre agence a été créée avec succès",
+          description: "Votre agence a été créée avec succès. Veuillez vous connecter et lire nos conditions d'utilisation.",
         })
 
-        // Rediriger vers le tableau de bord
-        navigate('/agence/dashboard')
+        // Rediriger vers la page de connexion
+        navigate('/login')
       } catch (error: any) {
         console.error('Error:', error)
         toast({

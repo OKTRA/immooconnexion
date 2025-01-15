@@ -1,94 +1,72 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2 } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 
 interface OrangeMoneyFormProps {
   amount: number
-  description: string
-  agencyId?: string | null
-  onSuccess?: () => void
-  formData: {
-    email: string
-    agency_name: string
-    agency_address: string
+  agencyData: {
+    name: string
+    address: string
     country: string
     city: string
-    first_name: string
-    last_name: string
-    phone_number: string
+    email: string
   }
+  subscriptionPlanId: string
 }
 
-export function OrangeMoneyForm({ 
-  amount,
-  description,
-  agencyId,
-  onSuccess,
-  formData
-}: OrangeMoneyFormProps) {
+export function OrangeMoneyForm({ amount, agencyData, subscriptionPlanId }: OrangeMoneyFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
+  const navigate = useNavigate()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+  const handlePayment = async () => {
     try {
       setIsLoading(true)
 
+      // Générer un ID de paiement unique
+      const paymentId = `om_${Date.now()}_${Math.random().toString(36).substring(7)}`
+
       // Sauvegarder la tentative de paiement
-      const { data: paymentAttempt, error: paymentError } = await supabase
+      const { error: saveError } = await supabase
         .from('payment_attempts')
-        .insert([{
+        .insert({
+          payment_id: paymentId,
           payment_method: 'orange_money',
           amount,
-          agency_data: {
-            name: formData.agency_name,
-            address: formData.agency_address,
-            country: formData.country,
-            city: formData.city,
-            email: formData.email
-          },
-          subscription_plan_id: agencyId
-        }])
-        .select()
-        .single()
+          agency_data: agencyData,
+          subscription_plan_id: subscriptionPlanId
+        })
 
-      if (paymentError) throw paymentError
+      if (saveError) throw saveError
 
       // Initialiser le paiement Orange Money
-      const { data, error } = await supabase.functions.invoke('initialize-orange-money-payment', {
-        body: {
+      const response = await fetch('/api/initialize-orange-money-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           amount,
-          description,
-          payment_id: paymentAttempt.id,
-          customer: {
-            email: formData.email,
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            phone_number: formData.phone_number
-          }
-        }
+          payment_id: paymentId,
+        }),
       })
 
-      if (error) throw error
+      const data = await response.json()
 
-      // Rediriger vers l'URL de paiement Orange Money
-      if (data?.payment_url) {
-        window.location.href = data.payment_url
-      } else {
-        throw new Error("URL de paiement non reçue")
+      if (!response.ok) {
+        throw new Error(data.message || 'Erreur lors de l\'initialisation du paiement')
       }
 
-      if (onSuccess) {
-        onSuccess()
-      }
+      // Rediriger vers la page de paiement Orange Money
+      window.location.href = data.payment_url
+
     } catch (error: any) {
-      console.error('Error:', error)
+      console.error('Payment error:', error)
       toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'initialisation du paiement",
+        title: "Erreur de paiement",
+        description: error.message || "Une erreur est survenue lors du paiement",
         variant: "destructive",
       })
     } finally {
@@ -97,17 +75,12 @@ export function OrangeMoneyForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Initialisation du paiement...
-          </>
-        ) : (
-          "Payer avec Orange Money"
-        )}
-      </Button>
-    </form>
+    <Button 
+      onClick={handlePayment} 
+      disabled={isLoading}
+      className="w-full"
+    >
+      {isLoading ? "Traitement en cours..." : "Payer avec Orange Money"}
+    </Button>
   )
 }
