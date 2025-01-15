@@ -13,6 +13,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 interface InitialPaymentsFormProps {
   leaseId: string;
@@ -24,6 +25,7 @@ interface InitialPaymentsFormProps {
 
 interface InitialPaymentsFormData {
   paymentMethod: PaymentMethod;
+  agencyFees: number;
 }
 
 export function InitialPaymentsForm({
@@ -37,13 +39,14 @@ export function InitialPaymentsForm({
   const form = useForm<InitialPaymentsFormData>({
     defaultValues: {
       paymentMethod: "cash",
+      agencyFees: rentAmount * 0.5, // 50% par défaut mais modifiable
     },
   });
 
-  const agencyFees = rentAmount * 0.5; // 50% du loyer comme frais d'agence
-
   const onSubmit = async (data: InitialPaymentsFormData) => {
     try {
+      console.log("Début de la soumission des paiements initiaux");
+
       // Créer le paiement de la caution
       const { error: depositError } = await supabase
         .from("apartment_lease_payments")
@@ -58,14 +61,19 @@ export function InitialPaymentsForm({
           payment_type: "deposit",
         });
 
-      if (depositError) throw depositError;
+      if (depositError) {
+        console.error("Erreur lors du paiement de la caution:", depositError);
+        throw depositError;
+      }
+
+      console.log("Paiement de la caution enregistré");
 
       // Créer le paiement des frais d'agence
       const { error: feesError } = await supabase
         .from("apartment_lease_payments")
         .insert({
           lease_id: leaseId,
-          amount: agencyFees,
+          amount: data.agencyFees,
           payment_method: data.paymentMethod,
           status: "paid",
           payment_date: new Date().toISOString(),
@@ -74,15 +82,28 @@ export function InitialPaymentsForm({
           payment_type: "agency_fees",
         });
 
-      if (feesError) throw feesError;
+      if (feesError) {
+        console.error("Erreur lors du paiement des frais d'agence:", feesError);
+        throw feesError;
+      }
+
+      console.log("Paiement des frais d'agence enregistré");
 
       // Mettre à jour le statut des paiements initiaux
       const { error: updateError } = await supabase
         .from("apartment_leases")
-        .update({ initial_payments_completed: true })
+        .update({ 
+          initial_payments_completed: true,
+          initial_fees_paid: true 
+        })
         .eq("id", leaseId);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error("Erreur lors de la mise à jour du statut:", updateError);
+        throw updateError;
+      }
+
+      console.log("Statut des paiements initiaux mis à jour");
 
       toast({
         title: "Paiements initiaux effectués",
@@ -91,7 +112,7 @@ export function InitialPaymentsForm({
 
       onSuccess();
     } catch (error: any) {
-      console.error("Payment error:", error);
+      console.error("Erreur complète:", error);
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors des paiements initiaux",
@@ -113,14 +134,28 @@ export function InitialPaymentsForm({
                 <span>Caution</span>
                 <span className="font-semibold">{depositAmount.toLocaleString()} FCFA</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span>Frais d'agence</span>
-                <span className="font-semibold">{agencyFees.toLocaleString()} FCFA</span>
-              </div>
+              
+              <FormField
+                control={form.control}
+                name="agencyFees"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Frais d'agence (suggestion: {(rentAmount * 0.5).toLocaleString()} FCFA)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
               <div className="flex justify-between items-center border-t pt-2">
                 <span className="font-semibold">Total</span>
                 <span className="font-semibold">
-                  {(depositAmount + agencyFees).toLocaleString()} FCFA
+                  {(depositAmount + form.watch("agencyFees")).toLocaleString()} FCFA
                 </span>
               </div>
             </div>
