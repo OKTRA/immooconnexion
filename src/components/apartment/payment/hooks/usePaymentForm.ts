@@ -39,11 +39,11 @@ export function usePaymentForm(onSuccess?: () => void) {
           tenant_id,
           unit_id,
           payment_frequency,
-          apartment_tenants (
+          apartment_tenants!apartment_leases_tenant_id_fkey (
             first_name,
             last_name
           ),
-          apartment_units (
+          apartment_units!apartment_leases_unit_id_fkey (
             unit_number,
             apartment:apartments (
               name
@@ -67,13 +67,13 @@ export function usePaymentForm(onSuccess?: () => void) {
         unit_id: lease.unit_id,
         payment_frequency: lease.payment_frequency,
         apartment_tenants: {
-          first_name: lease.apartment_tenants?.first_name,
-          last_name: lease.apartment_tenants?.last_name
+          first_name: lease.apartment_tenants?.first_name || '',
+          last_name: lease.apartment_tenants?.last_name || ''
         },
         apartment_units: {
-          unit_number: lease.apartment_units?.unit_number,
+          unit_number: lease.apartment_units?.unit_number || '',
           apartment: {
-            name: lease.apartment_units?.apartment?.name
+            name: lease.apartment_units?.apartment?.name || ''
           }
         }
       })) as LeaseData[]
