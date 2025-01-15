@@ -1,3 +1,6 @@
+export type PaymentPeriodFilter = "all" | "current" | "overdue" | "upcoming";
+export type PaymentStatusFilter = "all" | "pending" | "paid" | "late";
+
 export interface LeaseData {
   id: string;
   rent_amount: number;
@@ -16,6 +19,13 @@ export interface LeaseData {
   };
 }
 
+export interface PaymentFormData {
+  leaseId: string;
+  amount: number;
+  paymentMethod: "cash" | "bank_transfer" | "mobile_money";
+  paymentPeriods: string[];
+}
+
 export interface PaymentFormProps {
   onSuccess?: () => void;
   tenantId: string;
@@ -31,4 +41,9 @@ export interface PaymentsListProps {
   periodFilter: PaymentPeriodFilter;
   statusFilter: PaymentStatusFilter;
   tenantId: string;
+}
+
+export interface PeriodOption {
+  value: number;
+  label: string;
 }

@@ -7,13 +7,11 @@ import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { PaymentDialog } from "./PaymentDialog"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-
-export type PaymentPeriodFilter = "all" | "current" | "overdue" | "upcoming"
-export type PaymentStatusFilter = "all" | "pending" | "paid" | "late"
+import { supabase } from "@/lib/supabase"
+import { PaymentPeriodFilter, PaymentStatusFilter } from "./types"
 
 interface PaymentMonitoringDashboardProps {
-  tenantId: string;
+  tenantId: string
 }
 
 export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashboardProps) {
