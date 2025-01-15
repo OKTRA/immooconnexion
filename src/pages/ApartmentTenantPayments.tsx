@@ -1,31 +1,31 @@
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Loader2 } from "lucide-react"
+import { Loader2, Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { PaymentMonitoringDashboard } from "@/components/apartment/payment/PaymentMonitoringDashboard"
+import { PaymentDialog } from "@/components/apartment/payment/PaymentDialog"
+import { useState } from "react"
 
 export default function ApartmentTenantPayments() {
   const { tenantId } = useParams()
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false)
 
-  const { data: payments, isLoading } = useQuery({
-    queryKey: ['apartment-tenant-payments', tenantId],
+  const { data: tenant, isLoading } = useQuery({
+    queryKey: ['apartment-tenant', tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('apartment_lease_payments')
+        .from('apartment_tenants')
         .select(`
           *,
           apartment_leases (
-            tenant_id,
-            unit_id,
-            apartment_units (
-              unit_number,
-              apartment_id,
-              apartments (
-                name
-              )
-            )
+            id,
+            rent_amount,
+            status
           )
         `)
-        .eq('apartment_leases.tenant_id', tenantId)
+        .eq('id', tenantId)
+        .single()
       
       if (error) throw error
       return data
@@ -40,50 +40,36 @@ export default function ApartmentTenantPayments() {
     )
   }
 
-  return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Historique des paiements</h1>
-      
-      <div className="rounded-md border">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b bg-muted/50">
-              <th className="p-4 text-left">Date</th>
-              <th className="p-4 text-left">Montant</th>
-              <th className="p-4 text-left">Statut</th>
-              <th className="p-4 text-left">Appartement</th>
-              <th className="p-4 text-left">Unité</th>
-            </tr>
-          </thead>
-          <tbody>
-            {payments?.map((payment) => (
-              <tr key={payment.id} className="border-b">
-                <td className="p-4">
-                  {new Date(payment.due_date).toLocaleDateString()}
-                </td>
-                <td className="p-4">
-                  {payment.amount.toLocaleString()} FCFA
-                </td>
-                <td className="p-4">
-                  <span className={`px-2 py-1 rounded-full text-sm ${
-                    payment.status === 'paid' 
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {payment.status === 'paid' ? 'Payé' : 'En attente'}
-                  </span>
-                </td>
-                <td className="p-4">
-                  {payment.apartment_leases?.apartment_units?.apartments?.name}
-                </td>
-                <td className="p-4">
-                  {payment.apartment_leases?.apartment_units?.unit_number}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+  if (!tenant) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Locataire non trouvé
       </div>
+    )
+  }
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">
+          Paiements - {tenant.first_name} {tenant.last_name}
+        </h1>
+        <Button 
+          onClick={() => setShowPaymentDialog(true)}
+          className="bg-primary hover:bg-primary/90"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Nouveau paiement
+        </Button>
+      </div>
+
+      <PaymentMonitoringDashboard />
+
+      <PaymentDialog
+        open={showPaymentDialog}
+        onOpenChange={setShowPaymentDialog}
+        onSuccess={() => setShowPaymentDialog(false)}
+      />
     </div>
   )
 }
