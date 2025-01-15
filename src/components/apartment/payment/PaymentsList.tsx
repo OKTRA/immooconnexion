@@ -1,23 +1,18 @@
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
-import { PaymentPeriodFilter, PaymentStatusFilter } from "./PaymentMonitoringDashboard"
-import { Loader2 } from "lucide-react"
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { PaymentPeriodFilter, PaymentStatusFilter, PaymentsListProps } from "./types";
+import { Loader2 } from "lucide-react";
 
-interface PaymentsListProps {
-  periodFilter: PaymentPeriodFilter
-  statusFilter: PaymentStatusFilter
-}
-
-export function PaymentsList({ periodFilter, statusFilter }: PaymentsListProps) {
+export function PaymentsList({ periodFilter, statusFilter, tenantId }: PaymentsListProps) {
   const { data: payments, isLoading } = useQuery({
-    queryKey: ["payments", periodFilter, statusFilter],
+    queryKey: ["payments", periodFilter, statusFilter, tenantId],
     queryFn: async () => {
       let query = supabase
-        .from("apartment_payment_periods")
+        .from("apartment_lease_payments")
         .select(`
           *,
           apartment_leases (
@@ -35,34 +30,34 @@ export function PaymentsList({ periodFilter, statusFilter }: PaymentsListProps) 
             )
           )
         `)
+        .eq("apartment_leases.tenant_id", tenantId);
 
-      // Apply filters
       if (statusFilter !== "all") {
-        query = query.eq("status", statusFilter)
+        query = query.eq("status", statusFilter);
       }
 
       if (periodFilter === "current") {
         query = query.gte("start_date", new Date().toISOString().split("T")[0])
-          .lte("end_date", new Date().toISOString().split("T")[0])
+          .lte("end_date", new Date().toISOString().split("T")[0]);
       } else if (periodFilter === "overdue") {
         query = query.lt("end_date", new Date().toISOString().split("T")[0])
-          .neq("status", "paid")
+          .neq("status", "paid");
       } else if (periodFilter === "upcoming") {
-        query = query.gt("start_date", new Date().toISOString().split("T")[0])
+        query = query.gt("start_date", new Date().toISOString().split("T")[0]);
       }
 
-      const { data, error } = await query.order("start_date", { ascending: false })
-      if (error) throw error
-      return data
+      const { data, error } = await query.order("due_date", { ascending: false });
+      if (error) throw error;
+      return data;
     }
-  })
+  });
 
   if (isLoading) {
     return (
       <div className="flex justify-center p-8">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
-    )
+    );
   }
 
   if (!payments?.length) {
@@ -70,7 +65,7 @@ export function PaymentsList({ periodFilter, statusFilter }: PaymentsListProps) 
       <div className="text-center py-8 text-muted-foreground">
         Aucun paiement trouvé
       </div>
-    )
+    );
   }
 
   return (
@@ -80,7 +75,7 @@ export function PaymentsList({ periodFilter, statusFilter }: PaymentsListProps) 
           <TableHead>Locataire</TableHead>
           <TableHead>Appartement</TableHead>
           <TableHead>Unité</TableHead>
-          <TableHead>Période</TableHead>
+          <TableHead>Date d'échéance</TableHead>
           <TableHead>Montant</TableHead>
           <TableHead>Statut</TableHead>
         </TableRow>
@@ -99,8 +94,7 @@ export function PaymentsList({ periodFilter, statusFilter }: PaymentsListProps) 
               {payment.apartment_leases?.apartment_units?.unit_number}
             </TableCell>
             <TableCell>
-              {format(new Date(payment.start_date), "d MMM yyyy", { locale: fr })} -{" "}
-              {format(new Date(payment.end_date), "d MMM yyyy", { locale: fr })}
+              {format(new Date(payment.due_date), "d MMM yyyy", { locale: fr })}
             </TableCell>
             <TableCell>
               {Number(payment.amount).toLocaleString()} FCFA
@@ -126,5 +120,5 @@ export function PaymentsList({ periodFilter, statusFilter }: PaymentsListProps) 
         ))}
       </TableBody>
     </Table>
-  )
+  );
 }

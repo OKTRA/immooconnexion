@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { usePaymentForm } from "./hooks/usePaymentForm";
 import { PaymentMethodSelect } from "./components/PaymentMethodSelect";
@@ -137,7 +138,6 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
       <LeaseSelector
         leases={filteredLeases}
         selectedLeaseId={selectedLeaseId}
-        form={form}
         onLeaseSelect={setSelectedLeaseId}
         isLoading={isLoadingLeases}
       />
