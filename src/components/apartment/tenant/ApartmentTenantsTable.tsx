@@ -1,16 +1,36 @@
+import { Table } from "@/components/ui/table"
+import { Loader2 } from "lucide-react"
+import { TenantsTableHeader } from "@/components/tenants/TenantsTableHeader"
+import { TenantsTableContent } from "@/components/tenants/TenantsTableContent"
+import { TenantDisplay } from "@/hooks/use-tenants"
+import { useToast } from "@/components/ui/use-toast"
+import { useEffect } from "react"
+import { supabase } from "@/lib/supabase"
+import { TenantActionButtons } from "@/components/apartment/tenant/TenantActionButtons"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
-import { Link } from "react-router-dom"
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 interface ApartmentTenantsTableProps {
-  apartmentId: string
+  apartmentId: string;
+  onEdit: (tenant: any) => void;
+  onDelete: (id: string) => Promise<void>;
+  isLoading?: boolean;
 }
 
-export function ApartmentTenantsTable({ apartmentId }: ApartmentTenantsTableProps) {
+export function ApartmentTenantsTable({ 
+  apartmentId,
+  onEdit,
+  onDelete,
+  isLoading
+}: ApartmentTenantsTableProps) {
+  const { toast } = useToast()
+
   const { data: tenants = [], error } = useQuery({
     queryKey: ["apartment-tenants", apartmentId],
     queryFn: async () => {
@@ -36,69 +56,83 @@ export function ApartmentTenantsTable({ apartmentId }: ApartmentTenantsTableProp
 
       if (error) throw error
       return data
-    },
-    enabled: !!apartmentId
+    }
   })
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
   if (error) {
-    console.error("Error fetching tenants:", error)
-    return <div>Error loading tenants</div>
+    return (
+      <div className="text-center py-8 text-red-500">
+        Une erreur est survenue lors du chargement des locataires
+      </div>
+    )
   }
 
   return (
-    <div className="rounded-md border">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b bg-muted/50">
-            <th className="p-4 text-left">Nom</th>
-            <th className="p-4 text-left">Contact</th>
-            <th className="p-4 text-left">Profession</th>
-            <th className="p-4 text-left">Statut</th>
-            <th className="p-4 text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tenants.map((tenant) => (
-            <tr key={tenant.id} className="border-b">
-              <td className="p-4">
-                {tenant.first_name} {tenant.last_name}
-              </td>
-              <td className="p-4">
-                <div className="space-y-1">
-                  <div>{tenant.phone_number}</div>
-                  <div className="text-sm text-muted-foreground">{tenant.email}</div>
-                </div>
-              </td>
-              <td className="p-4">{tenant.profession || '-'}</td>
-              <td className="p-4">
-                <Badge variant={tenant.apartment_leases?.[0]?.status === 'active' ? 'default' : 'secondary'}>
-                  {tenant.apartment_leases?.[0]?.status === 'active' ? 'Actif' : 'Inactif'}
-                </Badge>
-              </td>
-              <td className="p-4">
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    asChild
-                  >
-                    <Link to={`/agence/apartments/tenants/${tenant.id}`}>
-                      Voir détails
-                    </Link>
-                  </Button>
-                </div>
-              </td>
-            </tr>
-          ))}
-          {(!tenants || tenants.length === 0) && (
-            <tr>
-              <td colSpan={5} className="text-center py-4 text-muted-foreground">
-                Aucun locataire enregistré
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>ID</TableHead>
+          <TableHead>Nom</TableHead>
+          <TableHead>Prénom</TableHead>
+          <TableHead>Email</TableHead>
+          <TableHead>Téléphone</TableHead>
+          <TableHead>Statut</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {tenants.map((tenant) => (
+          <TableRow key={tenant.id}>
+            <TableCell className="font-mono text-sm">
+              {tenant.id.slice(0, 8)}...
+            </TableCell>
+            <TableCell>{tenant.last_name}</TableCell>
+            <TableCell>{tenant.first_name}</TableCell>
+            <TableCell>{tenant.email || "-"}</TableCell>
+            <TableCell>{tenant.phone_number || "-"}</TableCell>
+            <TableCell>
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                  tenant.apartment_leases?.[0]?.status === "active"
+                    ? "bg-green-50 text-green-700"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {tenant.apartment_leases?.[0]?.status === "active" ? "Actif" : "Inactif"}
+              </span>
+            </TableCell>
+            <TableCell>
+              <TenantActionButtons
+                tenant={tenant}
+                currentLease={tenant.apartment_leases?.[0]}
+                onEdit={() => onEdit(tenant)}
+                onDelete={() => onDelete(tenant.id)}
+                onInspection={() => {
+                  toast({
+                    title: "Bientôt disponible",
+                    description: "Cette fonctionnalité sera disponible prochainement",
+                  })
+                }}
+              />
+            </TableCell>
+          </TableRow>
+        ))}
+        {tenants.length === 0 && (
+          <TableRow>
+            <TableCell colSpan={7} className="text-center py-4">
+              Aucun locataire trouvé
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
   )
 }
