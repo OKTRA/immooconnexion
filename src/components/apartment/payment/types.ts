@@ -18,8 +18,8 @@ export interface LeaseData {
   deposit_amount: number;
   initial_payments_completed: boolean;
   apartment_tenants: {
-    first_name: string;
-    last_name: string;
+    first_name: string | null;
+    last_name: string | null;
   };
   apartment_units: {
     unit_number: string;
