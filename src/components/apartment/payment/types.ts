@@ -45,9 +45,9 @@ export interface LeaseData {
     last_name: string | null;
   };
   apartment_units: {
-    unit_number: string;
+    unit_number: string | null;
     apartment: {
-      name: string;
+      name: string | null;
     };
   };
 }

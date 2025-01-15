@@ -34,13 +34,7 @@ export function usePaymentForm(onSuccess?: () => void) {
       const { data, error } = await supabase
         .from("apartment_leases")
         .select(`
-          id,
-          rent_amount,
-          tenant_id,
-          unit_id,
-          payment_frequency,
-          deposit_amount,
-          initial_payments_completed,
+          *,
           apartment_tenants (
             first_name,
             last_name
@@ -65,13 +59,13 @@ export function usePaymentForm(onSuccess?: () => void) {
       return data.map(lease => ({
         ...lease,
         apartment_tenants: {
-          first_name: lease.apartment_tenants?.first_name,
-          last_name: lease.apartment_tenants?.last_name
+          first_name: lease.apartment_tenants?.first_name || null,
+          last_name: lease.apartment_tenants?.last_name || null
         },
         apartment_units: {
-          unit_number: lease.apartment_units?.unit_number,
+          unit_number: lease.apartment_units?.unit_number || null,
           apartment: {
-            name: lease.apartment_units?.apartment?.name
+            name: lease.apartment_units?.apartment?.name || null
           }
         }
       })) as LeaseData[]
