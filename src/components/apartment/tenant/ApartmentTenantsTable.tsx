@@ -34,7 +34,7 @@ export function ApartmentTenantsTable({
   const { data: tenants = [], error } = useQuery({
     queryKey: ["apartment-tenants", apartmentId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("apartment_tenants")
         .select(`
           *,
@@ -45,8 +45,14 @@ export function ApartmentTenantsTable({
             deposit_amount
           )
         `)
-        .eq(apartmentId !== "all" ? "apartment_id" : "id", apartmentId)
         .order('created_at', { ascending: false })
+
+      // Only add the apartment_id filter if we're not looking for all tenants
+      if (apartmentId !== "all") {
+        query = query.eq("apartment_id", apartmentId)
+      }
+
+      const { data, error } = await query
 
       if (error) throw error
       return data
