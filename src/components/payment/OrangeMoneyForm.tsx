@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { FormData } from "../agency/types"
 
 interface OrangeMoneyFormProps {
@@ -60,8 +60,8 @@ export function OrangeMoneyForm({
 
       if (saveError) throw saveError
 
-      // Initialiser le paiement Orange Money
-      const response = await fetch('/api/initialize-orange-money-payment', {
+      // Initialiser le paiement Orange Money en utilisant l'URL complète de la fonction Edge
+      const response = await fetch('https://apidxwaaogboeoctlhtz.supabase.co/functions/v1/initialize-orange-money-payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

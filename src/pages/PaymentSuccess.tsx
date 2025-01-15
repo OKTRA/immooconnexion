@@ -1,8 +1,27 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { Loader2 } from "lucide-react"
+
+interface AgencyData {
+  name: string
+  address: string
+  phone: string
+  country: string
+  city: string
+  email: string
+  password: string
+  first_name: string
+  last_name: string
+}
+
+interface PaymentAttempt {
+  payment_id: string
+  agency_data: AgencyData
+  subscription_plan_id: string
+  status: string
+}
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams()
@@ -35,7 +54,9 @@ export default function PaymentSuccess() {
           throw new Error("Paiement non trouvé")
         }
 
-        if (paymentAttempt.status === 'pending') {
+        const typedPaymentAttempt = paymentAttempt as PaymentAttempt
+
+        if (typedPaymentAttempt.status === 'pending') {
           // Attendre 5 secondes et réessayer
           setTimeout(() => {
             verifyPayment()
@@ -43,7 +64,7 @@ export default function PaymentSuccess() {
           return
         }
 
-        if (paymentAttempt.status !== 'success') {
+        if (typedPaymentAttempt.status !== 'success') {
           throw new Error("Le paiement n'a pas été complété avec succès")
         }
 
@@ -51,13 +72,13 @@ export default function PaymentSuccess() {
         const { data: agency, error: agencyError } = await supabase
           .from('agencies')
           .insert([{
-            name: paymentAttempt.agency_data.name,
-            address: paymentAttempt.agency_data.address,
-            phone: paymentAttempt.agency_data.phone,
-            country: paymentAttempt.agency_data.country,
-            city: paymentAttempt.agency_data.city,
-            email: paymentAttempt.agency_data.email,
-            subscription_plan_id: paymentAttempt.subscription_plan_id,
+            name: typedPaymentAttempt.agency_data.name,
+            address: typedPaymentAttempt.agency_data.address,
+            phone: typedPaymentAttempt.agency_data.phone,
+            country: typedPaymentAttempt.agency_data.country,
+            city: typedPaymentAttempt.agency_data.city,
+            email: typedPaymentAttempt.agency_data.email,
+            subscription_plan_id: typedPaymentAttempt.subscription_plan_id,
             status: 'active'
           }])
           .select()
