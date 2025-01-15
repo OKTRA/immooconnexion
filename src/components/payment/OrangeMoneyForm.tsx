@@ -2,7 +2,6 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase"
-import { FormData } from "../agency/types"
 
 interface OrangeMoneyFormProps {
   amount: number
@@ -10,7 +9,18 @@ interface OrangeMoneyFormProps {
   planId?: string
   agencyId?: string
   onSuccess?: () => void
-  formData: FormData
+  formData: {
+    agency_name?: string
+    agency_address?: string
+    agency_phone?: string
+    country?: string
+    city?: string
+    first_name?: string
+    last_name?: string
+    email?: string
+    password?: string
+    confirm_password?: string
+  }
 }
 
 export function OrangeMoneyForm({ 

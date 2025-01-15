@@ -1,5 +1,4 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useForm } from "react-hook-form"
@@ -53,10 +52,6 @@ export function AgencyRegistrationDialog({
     setShowPaymentMethods(true)
   }
 
-  const handlePaymentMethodChange = (method: string) => {
-    setPaymentMethod(method)
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl p-0">
@@ -81,14 +76,14 @@ export function AgencyRegistrationDialog({
             <div className="space-y-6">
               <PaymentMethodSelector
                 selectedMethod={paymentMethod}
-                onMethodChange={handlePaymentMethodChange}
+                onMethodChange={setPaymentMethod}
               />
 
               {paymentMethod === "orange_money" && formData && (
                 <OrangeMoneyForm
                   amount={amount}
                   description={`Inscription - Plan ${planName}`}
-                  agencyId={planId}
+                  planId={planId}
                   formData={formData}
                 />
               )}

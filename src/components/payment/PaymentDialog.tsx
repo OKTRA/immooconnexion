@@ -23,8 +23,6 @@ export function PaymentDialog({
   const { toast } = useToast()
   const navigate = useNavigate()
 
-  console.log("PaymentDialog rendered with:", { planId, planName, amount, paymentMethod })
-
   const handleClose = () => {
     if (paymentSuccess) {
       navigate('/agence/dashboard')
@@ -33,7 +31,6 @@ export function PaymentDialog({
   }
 
   const handlePaymentSuccess = () => {
-    console.log("Payment success callback triggered")
     setPaymentSuccess(true)
     toast({
       title: "Succès",
@@ -49,16 +46,11 @@ export function PaymentDialog({
     confirm_password: "",
     agency_name: "",
     agency_address: "",
+    agency_phone: "",
     country: "",
     city: "",
     first_name: "",
     last_name: "",
-    phone_number: "",
-  }
-
-  const handleMethodChange = (method: string) => {
-    console.log("Payment method changed to:", method)
-    setPaymentMethod(method)
   }
 
   return (
@@ -90,13 +82,13 @@ export function PaymentDialog({
               <div className="space-y-4">
                 <PaymentMethodSelector 
                   selectedMethod={paymentMethod}
-                  onMethodChange={handleMethodChange}
+                  onMethodChange={setPaymentMethod}
                 />
                 {paymentMethod === "orange_money" && (
                   <OrangeMoneyForm 
                     amount={amount}
                     description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
-                    agencyId={planId}
+                    planId={planId}
                     onSuccess={handlePaymentSuccess}
                     formData={defaultFormData}
                   />
