@@ -32,6 +32,9 @@ interface UnitHeaderProps {
 export function UnitHeader({ unit }: UnitHeaderProps) {
   if (!unit) return null;
 
+  const tenant = unit.current_lease?.tenant;
+  const tenantName = tenant ? `${tenant.first_name || ''} ${tenant.last_name || ''}`.trim() : 'Non assigné';
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -65,30 +68,30 @@ export function UnitHeader({ unit }: UnitHeaderProps) {
                 <div>
                   <p className="text-sm font-medium">Nom complet</p>
                   <p className="text-sm text-muted-foreground">
-                    {unit.current_lease.tenant.first_name || ''} {unit.current_lease.tenant.last_name || ''}
+                    {tenantName}
                   </p>
                 </div>
-                {unit.current_lease.tenant.phone_number && (
+                {tenant?.phone_number && (
                   <div>
                     <p className="text-sm font-medium">Téléphone</p>
                     <p className="text-sm text-muted-foreground">
-                      {unit.current_lease.tenant.phone_number}
+                      {tenant.phone_number}
                     </p>
                   </div>
                 )}
-                {unit.current_lease.tenant.email && (
+                {tenant?.email && (
                   <div>
                     <p className="text-sm font-medium">Email</p>
                     <p className="text-sm text-muted-foreground">
-                      {unit.current_lease.tenant.email}
+                      {tenant.email}
                     </p>
                   </div>
                 )}
-                {unit.current_lease.tenant.profession && (
+                {tenant?.profession && (
                   <div>
                     <p className="text-sm font-medium">Profession</p>
                     <p className="text-sm text-muted-foreground">
-                      {unit.current_lease.tenant.profession}
+                      {tenant.profession}
                     </p>
                   </div>
                 )}
