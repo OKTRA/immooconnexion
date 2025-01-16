@@ -54,13 +54,23 @@ export function ApartmentTenantForm({
 
       if (!profile?.agency_id) throw new Error("Agency ID not found")
 
-      // Prepare tenant data, ensuring birth_date is either null or a valid date
+      // Récupérer les informations de l'unité
+      const { data: unit, error: unitError } = await supabase
+        .from("apartment_units")
+        .select("rent_amount, deposit_amount")
+        .eq("id", formData.unit_id)
+        .single()
+
+      if (unitError) throw new Error("Erreur lors de la récupération des informations de l'unité")
+      if (!unit) throw new Error("Unité non trouvée")
+
+      // Prepare tenant data
       const tenantData = {
         first_name: formData.first_name,
         last_name: formData.last_name,
         email: formData.email,
         phone_number: formData.phone_number,
-        birth_date: formData.birth_date || null, // Convert empty string to null
+        birth_date: formData.birth_date || null,
         agency_id: profile.agency_id,
         unit_id: formData.unit_id
       }
@@ -74,7 +84,7 @@ export function ApartmentTenantForm({
 
       if (tenantError) throw tenantError
 
-      // Create lease
+      // Create lease with unit's rent and deposit amounts
       const { error: leaseError } = await supabase
         .from("apartment_leases")
         .insert({
@@ -82,6 +92,8 @@ export function ApartmentTenantForm({
           unit_id: formData.unit_id,
           start_date: formData.start_date,
           end_date: formData.duration_type === "fixed" ? formData.end_date : null,
+          rent_amount: unit.rent_amount,
+          deposit_amount: unit.deposit_amount,
           payment_frequency: formData.payment_frequency,
           duration_type: formData.duration_type,
           agency_id: profile.agency_id,
