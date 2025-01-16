@@ -3,21 +3,26 @@ import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { ApartmentUnit } from "@/types/apartment"
 
+// Helper function to validate UUID format
+const isValidUUID = (uuid: string) => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(uuid)
+}
+
 export function useApartmentUnits(apartmentId: string | undefined) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  // Helper function to validate UUID format
-  const isValidUUID = (uuid: string) => {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-    return uuidRegex.test(uuid)
-  }
-
   const query = useQuery({
     queryKey: ["apartment-units", apartmentId],
     queryFn: async () => {
-      if (!apartmentId || !isValidUUID(apartmentId)) {
-        console.error("Invalid or missing apartment ID:", apartmentId)
+      if (!apartmentId) {
+        console.error("No apartment ID provided")
+        return []
+      }
+
+      if (!isValidUUID(apartmentId)) {
+        console.error("Invalid apartment ID format:", apartmentId)
         return []
       }
 
@@ -73,12 +78,12 @@ export function useApartmentUnits(apartmentId: string | undefined) {
       // Transform the data to match ApartmentUnit type
       const transformedData = data.map(unit => ({
         ...unit,
-        current_lease: unit.current_lease?.[0] || undefined
-      }))
+        current_lease: unit.current_lease?.[0]
+      })) as ApartmentUnit[]
 
-      return transformedData as ApartmentUnit[]
+      return transformedData
     },
-    enabled: Boolean(apartmentId) && isValidUUID(apartmentId),
+    enabled: Boolean(apartmentId),
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000
   })
