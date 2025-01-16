@@ -1,14 +1,14 @@
 import { useState } from "react"
 import { ApartmentUnit } from "@/types/apartment"
-import { supabase } from "@/integrations/supabase/client"
+
+export type ApartmentUnitFormData = Omit<ApartmentUnit, 'id' | 'created_at' | 'updated_at'>
 
 export function useUnitForm(
   apartmentId: string,
   initialData?: ApartmentUnit,
   onSubmit?: (data: ApartmentUnit) => Promise<void>
 ) {
-  const [formData, setFormData] = useState<ApartmentUnit>({
-    id: initialData?.id || "",
+  const [formData, setFormData] = useState<ApartmentUnitFormData>({
     apartment_id: apartmentId,
     unit_number: initialData?.unit_number || "",
     floor_number: initialData?.floor_number || null,
@@ -29,8 +29,8 @@ export function useUnitForm(
     console.log("Submitting unit data:", formData)
 
     try {
-      // Si c'est une modification, on garde l'ID existant
       const unitData: ApartmentUnit = {
+        id: initialData?.id || "",
         ...formData,
         apartment_id: apartmentId,
       }

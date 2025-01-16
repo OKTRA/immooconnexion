@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button"
 import { useUnitForm } from "./unit-dialog/useUnitForm"
 import { UnitFormFields } from "./unit-dialog/UnitFormFields"
 import { ApartmentUnit } from "@/types/apartment"
+import { useState } from "react"
+import { Loader2 } from "lucide-react"
 
 interface ApartmentUnitDialogProps {
   open: boolean
@@ -22,6 +24,8 @@ export function ApartmentUnitDialog({
   onSubmit,
   isEditing = false,
 }: ApartmentUnitDialogProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
   const {
     formData,
     setFormData,
@@ -38,11 +42,16 @@ export function ApartmentUnitDialog({
   }
 
   const handleFormSubmit = async () => {
+    if (isSubmitting) return
+    
     try {
+      setIsSubmitting(true)
       await handleSubmit()
       onOpenChange(false)
     } catch (error) {
       console.error('Error submitting form:', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -63,11 +72,25 @@ export function ApartmentUnitDialog({
               imagePreviewUrls={previewUrls}
             />
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
+              >
                 Annuler
               </Button>
-              <Button onClick={handleFormSubmit}>
-                {isEditing ? "Modifier" : "Ajouter"}
+              <Button 
+                onClick={handleFormSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {isEditing ? "Modification..." : "Ajout..."}
+                  </>
+                ) : (
+                  isEditing ? "Modifier" : "Ajouter"
+                )}
               </Button>
             </div>
           </div>
