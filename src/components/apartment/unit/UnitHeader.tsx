@@ -13,8 +13,8 @@ interface UnitHeaderProps {
     }
     current_lease?: {
       tenant: {
-        first_name: string
-        last_name: string
+        first_name: string | null
+        last_name: string | null
         email?: string
         phone_number?: string
         birth_date?: string
@@ -63,7 +63,7 @@ export function UnitHeader({ unit }: UnitHeaderProps) {
                 <div>
                   <p className="text-sm font-medium">Nom complet</p>
                   <p className="text-sm text-muted-foreground">
-                    {unit.current_lease.tenant.first_name} {unit.current_lease.tenant.last_name}
+                    {unit.current_lease.tenant.first_name || ''} {unit.current_lease.tenant.last_name || ''}
                   </p>
                 </div>
                 {unit.current_lease.tenant.phone_number && (
