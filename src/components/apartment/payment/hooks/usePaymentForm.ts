@@ -24,7 +24,7 @@ export function usePaymentForm(onSuccess?: () => void) {
     }
   })
 
-  const { data: leases = [], isLoading: isLoadingLeases } = useQuery({
+  const { data: leases = [], isLoading: isLoadingLeases, refetch: refetchLeases } = useQuery({
     queryKey: ["leases", profile?.agency_id],
     queryFn: async () => {
       if (!profile?.agency_id) return []
@@ -80,6 +80,7 @@ export function usePaymentForm(onSuccess?: () => void) {
     setSelectedLeaseId,
     isSubmitting,
     setIsSubmitting,
-    agencyId: profile?.agency_id
+    agencyId: profile?.agency_id,
+    refetchLeases
   }
 }

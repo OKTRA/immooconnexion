@@ -12,9 +12,11 @@ import { LeaseSelector } from "./components/LeaseSelector";
 import { PaymentDetails } from "./components/PaymentDetails";
 import { PeriodSelector } from "./components/PeriodSelector";
 import { InitialPaymentsForm } from "./components/InitialPaymentsForm";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const {
     leases,
     isLoadingLeases,
@@ -22,7 +24,8 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
     setSelectedLeaseId,
     isSubmitting,
     setIsSubmitting,
-    agencyId
+    agencyId,
+    refetchLeases
   } = usePaymentForm(onSuccess);
 
   const [selectedLease, setSelectedLease] = useState<any>(null);
@@ -43,11 +46,12 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
       const lease = leases.find(l => l.id === selectedLeaseId);
       setSelectedLease(lease);
       if (lease) {
+        setValue("leaseId", lease.id);
         setValue("amount", lease.rent_amount);
         generatePeriodOptions(lease.payment_frequency);
       }
     }
-  }, [selectedLeaseId, leases]);
+  }, [selectedLeaseId, leases, setValue]);
 
   const generatePeriodOptions = (frequency: string) => {
     let options: PeriodOption[] = [];
@@ -115,6 +119,10 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
 
       if (paymentError) throw paymentError;
 
+      // Rafraîchir les données après le paiement
+      await queryClient.invalidateQueries({ queryKey: ["leases"] });
+      await refetchLeases();
+
       toast({
         title: "Paiement effectué",
         description: "Le paiement a été enregistré avec succès",
@@ -130,6 +138,16 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleInitialPaymentsSuccess = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["leases"] });
+    await refetchLeases();
+    const lease = leases.find(l => l.id === selectedLeaseId);
+    if (lease) {
+      lease.initial_payments_completed = true;
+      setSelectedLease({ ...lease });
     }
   };
 
@@ -149,13 +167,7 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
           leaseId={selectedLease.id}
           depositAmount={selectedLease.deposit_amount}
           rentAmount={selectedLease.rent_amount}
-          onSuccess={() => {
-            const lease = leases.find(l => l.id === selectedLeaseId);
-            if (lease) {
-              lease.initial_payments_completed = true;
-              setSelectedLease({ ...lease });
-            }
-          }}
+          onSuccess={handleInitialPaymentsSuccess}
           agencyId={agencyId}
         />
       )}
