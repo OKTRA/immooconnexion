@@ -12,7 +12,7 @@ interface UnitHeaderProps {
       name: string
     }
     current_lease?: {
-      tenant: {
+      tenant?: {
         first_name: string | null
         last_name: string | null
         email?: string
