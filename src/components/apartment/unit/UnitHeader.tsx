@@ -30,6 +30,8 @@ interface UnitHeaderProps {
 }
 
 export function UnitHeader({ unit }: UnitHeaderProps) {
+  if (!unit) return null;
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
