@@ -5,7 +5,7 @@ import { TenantsTableContent } from "./tenants/TenantsTableContent"
 import { TenantDisplay, useTenants } from "@/hooks/use-tenants"
 import { useToast } from "./ui/use-toast"
 import { useEffect, useState } from "react"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase } from "@/lib/supabase"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +28,7 @@ export function TenantsTable({ onEdit }: TenantsTableProps) {
 
   useEffect(() => {
     if (error) {
+      console.error('Tenant fetch error:', error)
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors du chargement des locataires. Veuillez réessayer.",
@@ -37,6 +38,7 @@ export function TenantsTable({ onEdit }: TenantsTableProps) {
   }, [error, toast])
 
   const handleDelete = async (id: string) => {
+    if (!id) return
     setTenantToDelete(id)
   }
 
