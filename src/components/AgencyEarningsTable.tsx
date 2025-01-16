@@ -3,20 +3,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { AgencyFeesTable } from "./earnings/AgencyFeesTable"
 import { RentalCommissionsTable } from "./earnings/RentalCommissionsTable"
 import { Skeleton } from "@/components/ui/skeleton"
-
-interface ContractWithProperties {
-  id: string
-  property_id: string
-  montant: number
-  type: string
-  created_at: string
-  agency_id: string | null
-  properties: {
-    bien: string
-    frais_agence: number | null
-    taux_commission: number | null
-  }
-}
+import type { ContractWithProperties } from "@/integrations/supabase/client"
 
 export function AgencyEarningsTable() {
   const { data: earnings, isLoading } = useQuery({
@@ -33,7 +20,6 @@ export function AgencyEarningsTable() {
 
       if (!profile?.agency_id) throw new Error("Agence non trouvée")
 
-      // Optimisation: Sélection uniquement des champs nécessaires
       const { data: contracts, error } = await supabase
         .from('contracts')
         .select(`
@@ -48,11 +34,10 @@ export function AgencyEarningsTable() {
         `)
         .eq('agency_id', profile.agency_id)
         .order('created_at', { ascending: false })
-        .limit(50)
+        .limit(50) as { data: ContractWithProperties[], error: any }
       
       if (error) throw error
 
-      // Optimisation: Traitement des données plus efficace
       const agencyFees = contracts
         .filter(contract => contract.type === 'frais_agence')
         .map(contract => ({
@@ -79,8 +64,8 @@ export function AgencyEarningsTable() {
 
       return { agencyFees, rentals }
     },
-    staleTime: 5 * 60 * 1000, // Cache pendant 5 minutes
-    gcTime: 30 * 60 * 1000, // Garde en cache pendant 30 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   })
 
   if (isLoading) {
