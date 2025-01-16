@@ -40,14 +40,11 @@ export function InitialPaymentForm({
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues
+    defaultValues,
   })
 
   const onSubmit = async (data: FormData) => {
-    const success = await handleInitialPayments({
-      deposit_amount: data.deposit_amount,
-      agency_fees: data.agency_fees
-    })
+    const success = await handleInitialPayments(data)
     if (success && onSuccess) {
       onSuccess()
     }

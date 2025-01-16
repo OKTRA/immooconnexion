@@ -4,18 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Skeleton } from "@/components/ui/skeleton"
-import type { Tenant } from "@/integrations/supabase/client"
-
-interface Contract {
-  id: string
-  montant: number
-  type: string
-  created_at: string
-  tenant_id: Tenant
-  property_id: {
-    bien: string
-  }
-}
 
 export function RecentActivities() {
   const { data: userProfile } = useQuery({
@@ -35,7 +23,7 @@ export function RecentActivities() {
 
       return profile
     },
-    staleTime: 30 * 60 * 1000,
+    staleTime: 30 * 60 * 1000, // Cache pendant 30 minutes
   })
 
   const { data: recentContracts, isLoading } = useQuery({
@@ -43,6 +31,7 @@ export function RecentActivities() {
     queryFn: async () => {
       if (!userProfile?.agency_id) return []
       
+      // Optimisation: Sélection uniquement des champs nécessaires
       const { data: contracts, error } = await supabase
         .from("contracts")
         .select(`
@@ -60,13 +49,13 @@ export function RecentActivities() {
         `)
         .eq('agency_id', userProfile.agency_id)
         .order("created_at", { ascending: false })
-        .limit(5) as { data: Contract[], error: any }
+        .limit(5)
 
       if (error) throw error
       return contracts
     },
     enabled: !!userProfile?.agency_id,
-    staleTime: 1 * 60 * 1000,
+    staleTime: 1 * 60 * 1000, // Cache pendant 1 minute
   })
 
   if (isLoading) {
