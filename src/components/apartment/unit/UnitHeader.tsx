@@ -1,9 +1,9 @@
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Edit } from "lucide-react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
 
 interface UnitHeaderProps {
   unit: {
@@ -33,7 +33,9 @@ export function UnitHeader({ unit }: UnitHeaderProps) {
   if (!unit) return null;
 
   const tenant = unit.current_lease?.tenant;
-  const tenantName = tenant ? `${tenant.first_name || ''} ${tenant.last_name || ''}`.trim() : 'Non assigné';
+  const tenantName = tenant 
+    ? `${tenant.first_name || ''} ${tenant.last_name || ''}`.trim() || 'Non assigné'
+    : 'Non assigné';
 
   return (
     <div className="space-y-6">
@@ -98,7 +100,7 @@ export function UnitHeader({ unit }: UnitHeaderProps) {
                 <div>
                   <p className="text-sm font-medium">Date de début</p>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(unit.current_lease.start_date), 'PP', { locale: fr })}
+                    {unit.current_lease.start_date ? format(new Date(unit.current_lease.start_date), 'PP', { locale: fr }) : 'Non définie'}
                   </p>
                 </div>
                 {unit.current_lease.end_date && (
