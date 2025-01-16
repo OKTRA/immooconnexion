@@ -21,9 +21,14 @@ export function usePropertyUnitForm(propertyId: string, initialData?: PropertyUn
 
   const handleSubmit = async () => {
     try {
+      if (!propertyId) {
+        throw new Error("Property ID is required")
+      }
+
       if (initialData?.id) {
         await updateUnit.mutateAsync({
           id: initialData.id,
+          property_id: propertyId,
           ...formData
         })
         toast({
@@ -31,7 +36,10 @@ export function usePropertyUnitForm(propertyId: string, initialData?: PropertyUn
           description: "L'unité a été mise à jour avec succès",
         })
       } else {
-        await addUnit.mutateAsync(formData)
+        await addUnit.mutateAsync({
+          ...formData,
+          property_id: propertyId
+        })
         toast({
           title: "Succès",
           description: "L'unité a été ajoutée avec succès",
@@ -39,9 +47,10 @@ export function usePropertyUnitForm(propertyId: string, initialData?: PropertyUn
       }
       return true
     } catch (error) {
+      console.error("Error submitting unit:", error)
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue",
+        description: "Une erreur est survenue lors de la sauvegarde",
         variant: "destructive",
       })
       return false

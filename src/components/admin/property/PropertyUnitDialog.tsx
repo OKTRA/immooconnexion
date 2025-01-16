@@ -23,11 +23,21 @@ export function PropertyUnitDialog({
   const { formData, setFormData, handleSubmit } = usePropertyUnitForm(propertyId, initialData)
 
   const handleFormSubmit = async () => {
+    if (!propertyId) {
+      console.error("Property ID is required")
+      return
+    }
+
     setIsSubmitting(true)
-    const success = await handleSubmit()
-    setIsSubmitting(false)
-    if (success) {
-      onOpenChange(false)
+    try {
+      const success = await handleSubmit()
+      if (success) {
+        onOpenChange(false)
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -53,6 +63,7 @@ export function PropertyUnitDialog({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
+            disabled={isSubmitting}
           >
             Annuler
           </Button>
