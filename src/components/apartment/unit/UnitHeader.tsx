@@ -114,13 +114,13 @@ export function UnitHeader({ unit }: UnitHeaderProps) {
                 <div>
                   <p className="text-sm font-medium">Loyer mensuel</p>
                   <p className="text-sm text-muted-foreground">
-                    {unit.current_lease.rent_amount.toLocaleString()} FCFA
+                    {unit.current_lease.rent_amount?.toLocaleString()} FCFA
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Caution</p>
                   <p className="text-sm text-muted-foreground">
-                    {unit.current_lease.deposit_amount.toLocaleString()} FCFA
+                    {unit.current_lease.deposit_amount?.toLocaleString()} FCFA
                   </p>
                 </div>
               </div>
