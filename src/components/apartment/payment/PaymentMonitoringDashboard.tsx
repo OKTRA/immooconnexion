@@ -60,7 +60,9 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
           <CardTitle>Statistiques des Paiements</CardTitle>
         </CardHeader>
         <CardContent>
-          <PaymentStatusStats stats={paymentStats} />
+          <div className="overflow-hidden">
+            <PaymentStatusStats stats={paymentStats} />
+          </div>
         </CardContent>
       </Card>
 
@@ -75,11 +77,13 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
           />
         </CardHeader>
         <CardContent>
-          <PaymentsList
-            tenantId={tenantId}
-            periodFilter={periodFilter}
-            statusFilter={statusFilter}
-          />
+          <div className="overflow-hidden">
+            <PaymentsList
+              tenantId={tenantId}
+              periodFilter={periodFilter}
+              statusFilter={statusFilter}
+            />
+          </div>
         </CardContent>
       </Card>
 
