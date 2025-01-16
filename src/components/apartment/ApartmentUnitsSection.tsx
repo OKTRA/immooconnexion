@@ -6,6 +6,7 @@ import { ApartmentUnitDialog } from "./ApartmentUnitDialog"
 import { ApartmentUnit } from "@/types/apartment"
 import { useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useToast } from "@/hooks/use-toast"
 
 interface ApartmentUnitsSectionProps {
   apartmentId: string
@@ -28,26 +29,47 @@ export function ApartmentUnitsSection({
 }: ApartmentUnitsSectionProps) {
   const [showDialog, setShowDialog] = useState(false)
   const [editingUnit, setEditingUnit] = useState<ApartmentUnit | undefined>()
+  const { toast } = useToast()
 
   const handleEdit = (unit: ApartmentUnit) => {
+    console.log("Editing unit:", unit)
     setEditingUnit(unit)
     setShowDialog(true)
     onEdit(unit)
   }
 
   const handleAdd = () => {
+    console.log("Adding new unit for apartment:", apartmentId)
     setEditingUnit(undefined)
     setShowDialog(true)
   }
 
   const handleSubmit = async (unitData: ApartmentUnit) => {
-    if (editingUnit) {
-      await onUpdateUnit(unitData)
-    } else {
-      await onCreateUnit(unitData)
+    try {
+      console.log("Handling unit submission:", unitData)
+      if (editingUnit) {
+        await onUpdateUnit(unitData)
+        toast({
+          title: "Succès",
+          description: "L'unité a été mise à jour avec succès"
+        })
+      } else {
+        await onCreateUnit(unitData)
+        toast({
+          title: "Succès",
+          description: "L'unité a été créée avec succès"
+        })
+      }
+      setShowDialog(false)
+      setEditingUnit(undefined)
+    } catch (error) {
+      console.error("Error handling unit submission:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'opération",
+        variant: "destructive"
+      })
     }
-    setShowDialog(false)
-    setEditingUnit(undefined)
   }
 
   if (isLoading) {
