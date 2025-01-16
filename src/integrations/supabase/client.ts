@@ -1,10 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
-import { Database } from './types';
+import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://apidxwaaogboeoctlhtz.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwaWR4d2Fhb2dib2VvY3RsaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUwNjgzMjIsImV4cCI6MjA1MDY0NDMyMn0.yMVZWGae0Wtkq1l49Na9kE02SCV0ul_oT91nspJ1dM0';
+const supabaseUrl = 'https://apidxwaaogboeoctlhtz.supabase.co'
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwaWR4d2Fhb2dib2VvY3RsaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDI5MjE1MTgsImV4cCI6MjAxODQ5NzUxOH0.xp6GWmGcTVgNJH-Qb_pu8KeQzrRBEVoqVGzXhPwUVXI'
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
@@ -20,10 +19,8 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
 
 // Add error handling for auth state changes
 supabase.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+  if (event === 'SIGNED_OUT') {
     // Delete all supabase data from storage on sign out
     localStorage.removeItem('sb-apidxwaaogboeoctlhtz-auth-token');
   }
 });
-
-export { supabaseUrl };
