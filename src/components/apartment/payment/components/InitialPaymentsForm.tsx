@@ -1,31 +1,16 @@
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
-import { PaymentMethodSelect } from "./PaymentMethodSelect";
-import { PaymentMethod } from "../types";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/hooks/use-toast"
+import { Loader2 } from "lucide-react"
+import { supabase } from "@/lib/supabase"
+import { useNavigate } from "react-router-dom"
 
 interface InitialPaymentsFormProps {
-  leaseId: string;
-  depositAmount: number;
-  rentAmount: number;
-  onSuccess: () => void;
-  agencyId: string;
-}
-
-interface InitialPaymentsFormData {
-  paymentMethod: PaymentMethod;
-  agencyFees: number;
+  leaseId: string
+  depositAmount: number
+  rentAmount: number
+  onSuccess?: () => void
+  agencyId?: string | null
 }
 
 export function InitialPaymentsForm({
@@ -33,170 +18,106 @@ export function InitialPaymentsForm({
   depositAmount,
   rentAmount,
   onSuccess,
-  agencyId,
+  agencyId
 }: InitialPaymentsFormProps) {
-  const { toast } = useToast();
-  const form = useForm<InitialPaymentsFormData>({
-    defaultValues: {
-      paymentMethod: "cash",
-      agencyFees: rentAmount * 0.5,
-    },
-  });
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { toast } = useToast()
+  const navigate = useNavigate()
 
-  const onSubmit = async (data: InitialPaymentsFormData) => {
+  const handleSubmit = async () => {
     try {
-      console.log("Début de la soumission des paiements initiaux", { data, leaseId, agencyId });
+      setIsSubmitting(true)
 
-      // Start a transaction for deposit payment
-      const { data: depositPayment, error: depositError } = await supabase
-        .from("apartment_lease_payments")
-        .insert({
-          lease_id: leaseId,
-          amount: depositAmount,
-          payment_method: data.paymentMethod,
-          status: "paid",
-          payment_date: new Date().toISOString(),
-          due_date: new Date().toISOString(),
-          agency_id: agencyId,
-          payment_type: "deposit",
-        })
-        .select()
-        .single();
+      // Calculer les frais d'agence (50% du loyer par défaut)
+      const agencyFees = rentAmount * 0.5
 
-      if (depositError) {
-        console.error("Erreur lors du paiement de la caution:", depositError);
-        throw new Error(`Erreur lors du paiement de la caution: ${depositError.message}`);
+      // Créer les paiements initiaux
+      const { error: paymentsError } = await supabase.rpc(
+        'handle_initial_payments',
+        {
+          p_lease_id: leaseId,
+          p_deposit_amount: depositAmount,
+          p_agency_fees: agencyFees
+        }
+      )
+
+      if (paymentsError) {
+        console.error('Erreur lors de la création des paiements:', paymentsError)
+        throw paymentsError
       }
 
-      console.log("Paiement de la caution enregistré avec succès", depositPayment);
-
-      // Create agency fees payment
-      const { error: feesError } = await supabase
-        .from("apartment_lease_payments")
-        .insert({
-          lease_id: leaseId,
-          amount: data.agencyFees,
-          payment_method: data.paymentMethod,
-          status: "paid",
-          payment_date: new Date().toISOString(),
-          due_date: new Date().toISOString(),
-          agency_id: agencyId,
-          payment_type: "agency_fees",
-        });
-
-      if (feesError) {
-        console.error("Erreur lors du paiement des frais d'agence:", feesError);
-        throw new Error(`Erreur lors du paiement des frais d'agence: ${feesError.message}`);
-      }
-
-      console.log("Paiement des frais d'agence enregistré avec succès");
-
-      // Update lease status
-      const { error: updateError } = await supabase
-        .from("apartment_leases")
-        .update({ 
+      // Mettre à jour le statut du bail
+      const { error: leaseError } = await supabase
+        .from('apartment_leases')
+        .update({
           initial_payments_completed: true,
-          initial_fees_paid: true 
+          initial_fees_paid: true
         })
-        .eq("id", leaseId);
+        .eq('id', leaseId)
 
-      if (updateError) {
-        console.error("Erreur lors de la mise à jour du statut:", updateError);
-        throw new Error(`Erreur lors de la mise à jour du statut: ${updateError.message}`);
+      if (leaseError) {
+        console.error('Erreur lors de la mise à jour du bail:', leaseError)
+        throw leaseError
       }
-
-      console.log("Statut des paiements initiaux mis à jour avec succès");
 
       toast({
-        title: "Paiements initiaux effectués",
-        description: "Les paiements de la caution et des frais d'agence ont été enregistrés",
-      });
+        title: "Paiements initiaux enregistrés",
+        description: "Les paiements initiaux ont été enregistrés avec succès",
+      })
 
-      onSuccess();
+      // Rediriger vers la même page sans paramètres
+      const currentPath = window.location.pathname
+      navigate(currentPath)
+
+      if (onSuccess) {
+        onSuccess()
+      }
     } catch (error: any) {
-      console.error("Erreur complète:", error);
+      console.error('Erreur:', error)
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors des paiements initiaux",
+        description: error.message || "Une erreur est survenue lors de l'enregistrement des paiements",
         variant: "destructive",
-      });
+      })
+    } finally {
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Paiements initiaux requis</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid gap-4">
-                <div className="flex justify-between items-center">
-                  <span>Caution</span>
-                  <span className="font-semibold">{depositAmount.toLocaleString()} FCFA</span>
-                </div>
-                
-                <FormField
-                  control={form.control}
-                  name="agencyFees"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Frais d'agence (suggestion: {(rentAmount * 0.5).toLocaleString()} FCFA)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+    <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+      <div className="space-y-2">
+        <h3 className="font-semibold">Paiements initiaux requis</h3>
+        <p className="text-sm text-muted-foreground">
+          Veuillez effectuer les paiements initiaux pour activer le bail
+        </p>
+      </div>
 
-                <div className="flex justify-between items-center border-t pt-2">
-                  <span className="font-semibold">Total</span>
-                  <span className="font-semibold">
-                    {(depositAmount + form.watch("agencyFees")).toLocaleString()} FCFA
-                  </span>
-                </div>
-              </div>
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm">
+          <span>Caution</span>
+          <span className="font-medium">{depositAmount?.toLocaleString()} FCFA</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span>Frais d'agence (50% du loyer)</span>
+          <span className="font-medium">{(rentAmount * 0.5)?.toLocaleString()} FCFA</span>
+        </div>
+      </div>
 
-              <FormField
-                control={form.control}
-                name="paymentMethod"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mode de paiement</FormLabel>
-                    <FormControl>
-                      <PaymentMethodSelect
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={form.formState.isSubmitting}
-              >
-                {form.formState.isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Traitement en cours...
-                  </>
-                ) : (
-                  "Effectuer les paiements initiaux"
-                )}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+      <Button 
+        onClick={handleSubmit} 
+        className="w-full"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Traitement en cours...
+          </>
+        ) : (
+          "Enregistrer les paiements initiaux"
+        )}
+      </Button>
     </div>
-  );
+  )
 }
