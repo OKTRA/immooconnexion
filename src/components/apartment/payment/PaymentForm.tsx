@@ -119,7 +119,6 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
 
       if (paymentError) throw paymentError;
 
-      // Rafraîchir les données après le paiement
       await queryClient.invalidateQueries({ queryKey: ["leases"] });
       await refetchLeases();
 
@@ -144,10 +143,15 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
   const handleInitialPaymentsSuccess = async () => {
     await queryClient.invalidateQueries({ queryKey: ["leases"] });
     await refetchLeases();
-    const lease = leases.find(l => l.id === selectedLeaseId);
-    if (lease) {
-      lease.initial_payments_completed = true;
-      setSelectedLease({ ...lease });
+    
+    // Force refresh of selected lease data
+    const updatedLease = leases.find(l => l.id === selectedLeaseId);
+    if (updatedLease) {
+      setSelectedLease({
+        ...updatedLease,
+        initial_payments_completed: true,
+        initial_fees_paid: true
+      });
     }
   };
 
