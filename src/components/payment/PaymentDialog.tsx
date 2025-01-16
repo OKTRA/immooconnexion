@@ -19,7 +19,7 @@ export function PaymentDialog({
   isUpgrade = false
 }: PaymentDialogProps) {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<string>("orange_money")
+  const [paymentMethod, setPaymentMethod] = useState<string>("cinetpay") // Changed default to cinetpay
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -51,6 +51,7 @@ export function PaymentDialog({
     city: "",
     first_name: "",
     last_name: "",
+    phone_number: "", // Added missing field
   }
 
   return (
