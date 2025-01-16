@@ -4,11 +4,12 @@ import { PaymentStatusStats } from "./PaymentStatusStats"
 import { PaymentsList } from "./PaymentsList"
 import { PaymentFilters } from "./PaymentFilters"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import { Plus, CreditCard } from "lucide-react"
 import { PaymentDialog } from "./PaymentDialog"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { PaymentPeriodFilter, PaymentStatusFilter } from "./types"
+import { InitialPaymentDialog } from "./components/InitialPaymentDialog"
 
 interface PaymentMonitoringDashboardProps {
   tenantId: string
@@ -18,6 +19,7 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
   const [periodFilter, setPeriodFilter] = useState<PaymentPeriodFilter>("current")
   const [statusFilter, setStatusFilter] = useState<PaymentStatusFilter>("all")
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
+  const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
 
   const { data: paymentStats } = useQuery({
     queryKey: ["payment-stats", tenantId],
@@ -45,14 +47,35 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
     }
   })
 
+  const { data: lease } = useQuery({
+    queryKey: ["tenant-lease", tenantId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("apartment_leases")
+        .select("*")
+        .eq("tenant_id", tenantId)
+        .single()
+      
+      return data
+    }
+  })
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Suivi des Paiements</h1>
-        <Button onClick={() => setShowPaymentDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouveau paiement
-        </Button>
+        <div className="flex gap-2">
+          {!lease?.initial_payments_completed && (
+            <Button onClick={() => setShowInitialPaymentDialog(true)} variant="secondary">
+              <CreditCard className="h-4 w-4 mr-2" />
+              Paiements Initiaux
+            </Button>
+          )}
+          <Button onClick={() => setShowPaymentDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Paiement de Loyer
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -90,6 +113,12 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
       <PaymentDialog 
         open={showPaymentDialog} 
         onOpenChange={setShowPaymentDialog}
+        tenantId={tenantId}
+      />
+
+      <InitialPaymentDialog
+        open={showInitialPaymentDialog}
+        onOpenChange={setShowInitialPaymentDialog}
         tenantId={tenantId}
       />
     </div>
