@@ -12,7 +12,7 @@ export function useApartmentUnits(apartmentId: string | undefined) {
     queryFn: async () => {
       if (!apartmentId) {
         console.error("No apartment ID provided")
-        throw new Error("Apartment ID is required")
+        return []
       }
 
       console.log("Fetching units for apartment ID:", apartmentId)
@@ -26,7 +26,25 @@ export function useApartmentUnits(apartmentId: string | undefined) {
           rent_amount,
           deposit_amount,
           status,
-          description
+          description,
+          created_at,
+          updated_at,
+          apartment_id,
+          current_lease:apartment_leases!apartment_leases_unit_id_fkey (
+            id,
+            start_date,
+            end_date,
+            rent_amount,
+            deposit_amount,
+            status,
+            tenant:apartment_tenants (
+              id,
+              first_name,
+              last_name,
+              email,
+              phone_number
+            )
+          )
         `)
         .eq("apartment_id", apartmentId)
         .order("unit_number")
@@ -43,9 +61,9 @@ export function useApartmentUnits(apartmentId: string | undefined) {
 
       return (data || []) as ApartmentUnit[]
     },
-    enabled: Boolean(apartmentId) && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(apartmentId),
-    staleTime: 5 * 60 * 1000, // Cache pendant 5 minutes
-    gcTime: 30 * 60 * 1000 // Garde en cache pendant 30 minutes
+    enabled: Boolean(apartmentId) && apartmentId !== "",
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000
   })
 
   const createUnit = useMutation({
