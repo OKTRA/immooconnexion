@@ -9,52 +9,67 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     detectSessionInUrl: false,
     storage: localStorage,
-    storageKey: 'sb-apidxwaaogboeoctlhtz-auth-token',
-    flowType: 'pkce'
-  },
-  global: {
-    headers: { 'x-client-info': 'supabase-js-web' }
+    storageKey: 'sb-apidxwaaogboeoctlhtz-auth-token'
   }
 })
 
 // Add error handling for auth state changes
 supabase.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_OUT') {
-    // Delete all supabase data from storage on sign out
     localStorage.removeItem('sb-apidxwaaogboeoctlhtz-auth-token')
   }
 })
 
-// Add proper TypeScript types for database schema
-export type Database = {
+// Define proper TypeScript interfaces for our database schema
+export interface Database {
   public: {
     Tables: {
       properties: {
         Row: {
+          id: string
           bien: string
           taux_commission: number
-          // ... other fields
+          type: string
+          statut: string
+          agency_id: string | null
         }
       }
       agencies: {
         Row: {
+          id: string
           name: string
-          address: string
-          // ... other fields
+          address: string | null
+          status: string
+          list_properties_on_site: boolean
         }
       }
       subscription_plans: {
         Row: {
+          id: string
+          name: string
           max_properties: number
           max_tenants: number
           max_users: number
-          name: string
-          // ... other fields
+          features: string[]
         }
       }
-      // ... other tables
+      profiles: {
+        Row: {
+          id: string
+          first_name: string | null
+          last_name: string | null
+          email: string | null
+          agency_id: string | null
+        }
+      }
+      tenants: {
+        Row: {
+          id: string
+          nom: string
+          prenom: string
+          agency_id: string | null
+        }
+      }
     }
   }
 }
-
-export type { Database }

@@ -1,114 +1,135 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Form } from "@/components/ui/form"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
-import { PaymentMethodSelector } from "@/components/payment/PaymentMethodSelector"
-import { OrangeMoneyForm } from "@/components/payment/OrangeMoneyForm"
-import { CinetPayForm } from "@/components/payment/CinetPayForm"
-import { PaydunyaForm } from "@/components/payment/PaydunyaForm"
-import { AgencyInfoFields } from "./registration/AgencyInfoFields"
-import { AdminAccountFields } from "./registration/AdminAccountFields"
-import { formSchema, FormData } from "./types"
+import { useState } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { AdminAccountFields } from '../pricing/agency-form/AdminAccountFields'
+import { AgencyInfoFields } from '../pricing/agency-form/AgencyInfoFields'
+import { Button } from '@/components/ui/button'
+import { useToast } from '@/hooks/use-toast'
+import { supabase } from '@/integrations/supabase/client'
+import { useNavigate } from 'react-router-dom'
 
-interface AgencyRegistrationDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  planId?: string
-  planName?: string
-  amount?: number
+interface FormData {
+  email: string
+  password: string
+  confirm_password: string
+  agency_name: string
+  agency_address: string
+  agency_phone: string
+  country: string
+  city: string
+  first_name: string
+  last_name: string
 }
 
-export function AgencyRegistrationDialog({ 
-  open, 
-  onOpenChange,
-  planId,
-  planName,
-  amount = 0
-}: AgencyRegistrationDialogProps) {
-  const [showPaymentMethods, setShowPaymentMethods] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<string>("orange_money")
+export function AgencyRegistrationDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [formData, setFormData] = useState<FormData>({
-    email: "",
-    password: "",
-    confirm_password: "",
-    agency_name: "",
-    agency_address: "",
-    agency_phone: "",
-    country: "",
-    city: "",
-    first_name: "",
-    last_name: ""
+    email: '',
+    password: '',
+    confirm_password: '',
+    agency_name: '',
+    agency_address: '',
+    agency_phone: '',
+    country: '',
+    city: '',
+    first_name: '',
+    last_name: ''
   })
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
+  const navigate = useNavigate()
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: formData
-  })
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
 
-  const handleSubmit = async (data: FormData) => {
-    setFormData(data)
-    setShowPaymentMethods(true)
+    try {
+      // Validate passwords match
+      if (formData.password !== formData.confirm_password) {
+        throw new Error("Les mots de passe ne correspondent pas")
+      }
+
+      // Create user account
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+      })
+
+      if (authError) throw authError
+
+      // Create agency
+      const { data: agency, error: agencyError } = await supabase
+        .from('agencies')
+        .insert([{
+          name: formData.agency_name,
+          address: formData.agency_address,
+          phone: formData.agency_phone,
+          country: formData.country,
+          city: formData.city,
+          status: 'pending',
+          subscription_plan_id: 'free'
+        }])
+        .select()
+        .single()
+
+      if (agencyError) throw agencyError
+
+      // Update user profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          agency_id: agency.id,
+          role: 'admin'
+        })
+        .eq('id', authData.user?.id)
+
+      if (profileError) throw profileError
+
+      toast({
+        title: "Inscription réussie",
+        description: "Votre compte a été créé avec succès. Vous allez être redirigé.",
+      })
+
+      setTimeout(() => {
+        onClose()
+        navigate('/login')
+      }, 2000)
+
+    } catch (error: any) {
+      console.error('Registration error:', error)
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de l'inscription",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0">
-        <DialogHeader className="p-6 pb-2">
-          <DialogTitle>
-            {showPaymentMethods ? "Choisissez votre méthode de paiement" : "Inscription de l'agence"}
-          </DialogTitle>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Créer votre compte agence</DialogTitle>
         </DialogHeader>
-        
-        <ScrollArea className="max-h-[80vh] px-6 pb-6">
-          {!showPaymentMethods ? (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                <AgencyInfoFields form={form} />
-                <AdminAccountFields form={form} />
-                <Button type="submit" className="w-full">
-                  Continuer vers le paiement
-                </Button>
-              </form>
-            </Form>
-          ) : (
-            <div className="space-y-6">
-              <PaymentMethodSelector
-                selectedMethod={paymentMethod}
-                onMethodChange={setPaymentMethod}
-              />
-
-              {paymentMethod === "orange_money" && (
-                <OrangeMoneyForm
-                  amount={amount}
-                  description={`Inscription - Plan ${planName}`}
-                  planId={planId}
-                  formData={formData}
-                />
-              )}
-
-              {paymentMethod === "cinetpay" && (
-                <CinetPayForm
-                  amount={amount}
-                  description={`Inscription - Plan ${planName}`}
-                  agencyId={planId}
-                  formData={formData}
-                />
-              )}
-
-              {paymentMethod === "paydunya" && (
-                <PaydunyaForm
-                  amount={amount}
-                  description={`Inscription - Plan ${planName}`}
-                  agencyId={planId}
-                  formData={formData}
-                />
-              )}
-            </div>
-          )}
-        </ScrollArea>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <AdminAccountFields 
+            form={{ 
+              getValues: () => formData, 
+              setValue: (field, value) => setFormData(prev => ({ ...prev, [field]: value })) 
+            }} 
+          />
+          <AgencyInfoFields 
+            form={{ 
+              getValues: () => formData, 
+              setValue: (field, value) => setFormData(prev => ({ ...prev, [field]: value })) 
+            }} 
+          />
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Création en cours..." : "Créer mon compte"}
+          </Button>
+        </form>
       </DialogContent>
     </Dialog>
   )

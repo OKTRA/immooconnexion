@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import type { Database } from "@/integrations/supabase/client"
+
+type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
 
 export function useSubscriptionLimits(agencyId?: string) {
   const { toast } = useToast()
