@@ -7,11 +7,17 @@ export function useApartmentUnits(apartmentId: string | undefined) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
+  // Helper function to validate UUID format
+  const isValidUUID = (uuid: string) => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    return uuidRegex.test(uuid)
+  }
+
   const query = useQuery({
     queryKey: ["apartment-units", apartmentId],
     queryFn: async () => {
-      if (!apartmentId) {
-        console.error("No apartment ID provided")
+      if (!apartmentId || !isValidUUID(apartmentId)) {
+        console.error("Invalid or missing apartment ID:", apartmentId)
         return []
       }
 
@@ -20,6 +26,7 @@ export function useApartmentUnits(apartmentId: string | undefined) {
         .from("apartment_units")
         .select(`
           id,
+          apartment_id,
           unit_number,
           floor_number,
           area,
@@ -29,9 +36,11 @@ export function useApartmentUnits(apartmentId: string | undefined) {
           description,
           created_at,
           updated_at,
-          apartment_id,
+          commission_percentage,
           current_lease:apartment_leases!apartment_leases_unit_id_fkey (
             id,
+            tenant_id,
+            unit_id,
             start_date,
             end_date,
             rent_amount,
@@ -42,7 +51,9 @@ export function useApartmentUnits(apartmentId: string | undefined) {
               first_name,
               last_name,
               email,
-              phone_number
+              phone_number,
+              birth_date,
+              profession
             )
           )
         `)
@@ -59,9 +70,9 @@ export function useApartmentUnits(apartmentId: string | undefined) {
         throw error
       }
 
-      return (data || []) as ApartmentUnit[]
+      return data as ApartmentUnit[]
     },
-    enabled: Boolean(apartmentId) && apartmentId !== "",
+    enabled: Boolean(apartmentId) && isValidUUID(apartmentId),
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000
   })
