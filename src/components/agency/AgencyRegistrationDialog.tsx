@@ -55,7 +55,7 @@ export function AgencyRegistrationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0">
+      <DialogContent className="max-w-2xl overflow-hidden p-0">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle>
             {showPaymentMethods ? "Choisissez votre méthode de paiement" : "Inscription de l'agence"}

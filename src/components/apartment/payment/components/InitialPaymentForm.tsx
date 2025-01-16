@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input"
 import { useInitialPayments } from "../hooks/useInitialPayments"
 import { z } from "zod"
 import { Loader2 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { useToast } from "@/hooks/use-toast"
 
 const formSchema = z.object({
   deposit_amount: z.number().min(0, "Le montant doit être positif"),
@@ -18,7 +20,7 @@ interface InitialPaymentFormProps {
   leaseId: string
   agencyId: string
   onSuccess?: () => void
-  defaultValues?: {
+  defaultValues: {
     deposit_amount: number
     agency_fees: number
   }
@@ -28,25 +30,50 @@ export function InitialPaymentForm({
   leaseId, 
   agencyId, 
   onSuccess,
-  defaultValues = {
-    deposit_amount: 0,
-    agency_fees: 0
-  }
+  defaultValues
 }: InitialPaymentFormProps) {
   const { handleInitialPayments, isSubmitting } = useInitialPayments({
     leaseId,
     agencyId,
   })
+  const navigate = useNavigate()
+  const { toast } = useToast()
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: {
+      deposit_amount: defaultValues.deposit_amount,
+      agency_fees: defaultValues.agency_fees
+    }
   })
 
   const onSubmit = async (data: FormData) => {
-    const success = await handleInitialPayments(data)
-    if (success && onSuccess) {
-      onSuccess()
+    try {
+      const success = await handleInitialPayments({
+        deposit_amount: data.deposit_amount,
+        agency_fees: data.agency_fees
+      })
+      
+      if (success) {
+        toast({
+          title: "Paiements initiaux enregistrés",
+          description: "Les paiements ont été enregistrés avec succès",
+        })
+        
+        if (onSuccess) {
+          onSuccess()
+        }
+        
+        // Rediriger vers la même page sans paramètres
+        const currentPath = window.location.pathname
+        navigate(currentPath)
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de l'enregistrement des paiements",
+        variant: "destructive",
+      })
     }
   }
 
