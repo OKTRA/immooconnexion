@@ -51,11 +51,7 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
     const updatedLease = leases.find(l => l.id === selectedLeaseId)
     if (updatedLease) {
       console.log("Updated lease found:", updatedLease)
-      setSelectedLease({
-        ...updatedLease,
-        initial_payments_completed: true,
-        initial_fees_paid: true
-      })
+      setSelectedLease(updatedLease)
     }
   }
 
