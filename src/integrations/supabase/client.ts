@@ -15,12 +15,46 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   global: {
     headers: { 'x-client-info': 'supabase-js-web' }
   }
-});
+})
 
 // Add error handling for auth state changes
 supabase.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_OUT') {
     // Delete all supabase data from storage on sign out
-    localStorage.removeItem('sb-apidxwaaogboeoctlhtz-auth-token');
+    localStorage.removeItem('sb-apidxwaaogboeoctlhtz-auth-token')
   }
-});
+})
+
+// Add proper TypeScript types for database schema
+export type Database = {
+  public: {
+    Tables: {
+      properties: {
+        Row: {
+          bien: string
+          taux_commission: number
+          // ... other fields
+        }
+      }
+      agencies: {
+        Row: {
+          name: string
+          address: string
+          // ... other fields
+        }
+      }
+      subscription_plans: {
+        Row: {
+          max_properties: number
+          max_tenants: number
+          max_users: number
+          name: string
+          // ... other fields
+        }
+      }
+      // ... other tables
+    }
+  }
+}
+
+export type { Database }
