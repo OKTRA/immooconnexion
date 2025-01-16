@@ -1,60 +1,30 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { LeaseData } from "../types";
+import { LeaseData } from "../types"
 
 interface PaymentDetailsProps {
-  selectedLease: LeaseData | null;
-  selectedPeriods: number;
+  selectedLease: LeaseData
+  selectedPeriods: number
 }
 
-const getFrequencyLabel = (frequency: string): string => {
-  switch (frequency) {
-    case 'daily':
-      return 'Quotidien';
-    case 'weekly':
-      return 'Hebdomadaire';
-    case 'monthly':
-      return 'Mensuel';
-    case 'yearly':
-      return 'Annuel';
-    default:
-      return '';
-  }
-};
-
 export function PaymentDetails({ selectedLease, selectedPeriods }: PaymentDetailsProps) {
-  if (!selectedLease) return null;
+  const totalAmount = selectedLease.rent_amount * selectedPeriods
 
   return (
-    <>
+    <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
       <div className="space-y-2">
-        <Label>Fréquence de paiement</Label>
-        <Input
-          value={getFrequencyLabel(selectedLease.payment_frequency)}
-          disabled
-          className="bg-gray-50"
-        />
+        <h3 className="font-semibold">Détails du paiement</h3>
+        <div className="flex justify-between text-sm">
+          <span>Loyer mensuel</span>
+          <span className="font-medium">{selectedLease.rent_amount.toLocaleString()} FCFA</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span>Nombre de périodes</span>
+          <span className="font-medium">{selectedPeriods}</span>
+        </div>
+        <div className="flex justify-between text-sm font-semibold">
+          <span>Montant total</span>
+          <span>{totalAmount.toLocaleString()} FCFA</span>
+        </div>
       </div>
-
-      <div className="space-y-2">
-        <Label>Montant du loyer</Label>
-        <Input
-          type="number"
-          value={selectedLease.rent_amount}
-          disabled
-          className="bg-gray-50"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Montant total</Label>
-        <Input
-          type="number"
-          value={selectedLease.rent_amount * selectedPeriods}
-          disabled
-          className="bg-gray-50"
-        />
-      </div>
-    </>
-  );
+    </div>
+  )
 }

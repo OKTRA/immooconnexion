@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
-import { LeaseData } from "../types/lease"
+import { LeaseData } from "../types"
 
 export function usePaymentForm(onSuccess?: () => void) {
   const [selectedLeaseId, setSelectedLeaseId] = useState("")
@@ -56,19 +56,7 @@ export function usePaymentForm(onSuccess?: () => void) {
       
       console.log("Fetched leases:", data)
 
-      return data.map(lease => ({
-        ...lease,
-        apartment_tenants: {
-          first_name: lease.apartment_tenants?.first_name || null,
-          last_name: lease.apartment_tenants?.last_name || null
-        },
-        apartment_units: {
-          unit_number: lease.apartment_units?.unit_number || null,
-          apartment: {
-            name: lease.apartment_units?.apartment?.name || null
-          }
-        }
-      })) as LeaseData[]
+      return data as LeaseData[]
     },
     enabled: !!profile?.agency_id
   })

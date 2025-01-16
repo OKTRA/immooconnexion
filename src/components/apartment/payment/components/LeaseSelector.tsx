@@ -1,13 +1,12 @@
-import { Label } from "@/components/ui/label";
-import { LeaseSelect } from "./LeaseSelect";
-import { PaymentFormData, LeaseData } from "../types";
-import { UseFormReturn } from "react-hook-form";
+import { Label } from "@/components/ui/label"
+import { LeaseSelect } from "./LeaseSelect"
+import { LeaseData } from "../types"
 
 interface LeaseSelectorProps {
-  leases: LeaseData[];
-  selectedLeaseId: string;
-  onLeaseSelect: (value: string) => void;
-  isLoading: boolean;
+  leases: LeaseData[]
+  selectedLeaseId: string
+  onLeaseSelect: (value: string) => void
+  isLoading: boolean
 }
 
 export function LeaseSelector({
@@ -26,5 +25,5 @@ export function LeaseSelector({
         isLoading={isLoading}
       />
     </div>
-  );
+  )
 }

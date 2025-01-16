@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
-import { useNavigate } from "react-router-dom"
 
 interface InitialPaymentsFormProps {
   leaseId: string
@@ -22,58 +21,35 @@ export function InitialPaymentsForm({
 }: InitialPaymentsFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
-  const navigate = useNavigate()
 
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true)
+      console.log("Submitting initial payments for lease:", leaseId)
 
-      // Calculer les frais d'agence (50% du loyer par défaut)
-      const agencyFees = rentAmount * 0.5
+      const { data, error } = await supabase.rpc('handle_initial_payments', {
+        p_lease_id: leaseId,
+        p_deposit_amount: depositAmount,
+        p_agency_fees: rentAmount * 0.5
+      })
 
-      // Créer les paiements initiaux
-      const { error: paymentsError } = await supabase.rpc(
-        'handle_initial_payments',
-        {
-          p_lease_id: leaseId,
-          p_deposit_amount: depositAmount,
-          p_agency_fees: agencyFees
-        }
-      )
-
-      if (paymentsError) {
-        console.error('Erreur lors de la création des paiements:', paymentsError)
-        throw paymentsError
+      if (error) {
+        console.error('Error handling initial payments:', error)
+        throw error
       }
 
-      // Mettre à jour le statut du bail
-      const { error: leaseError } = await supabase
-        .from('apartment_leases')
-        .update({
-          initial_payments_completed: true,
-          initial_fees_paid: true
-        })
-        .eq('id', leaseId)
-
-      if (leaseError) {
-        console.error('Erreur lors de la mise à jour du bail:', leaseError)
-        throw leaseError
-      }
+      console.log("Initial payments response:", data)
 
       toast({
         title: "Paiements initiaux enregistrés",
-        description: "Les paiements initiaux ont été enregistrés avec succès",
+        description: "Les paiements ont été enregistrés avec succès",
       })
-
-      // Rediriger vers la même page sans paramètres
-      const currentPath = window.location.pathname
-      navigate(currentPath)
 
       if (onSuccess) {
         onSuccess()
       }
     } catch (error: any) {
-      console.error('Erreur:', error)
+      console.error('Error:', error)
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue lors de l'enregistrement des paiements",

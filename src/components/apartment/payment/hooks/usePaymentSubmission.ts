@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
-import { useQueryClient } from "@tanstack/react-query";
-import { PaymentFormData, LeaseData } from "../types";
+import { useState } from "react"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/lib/supabase"
+import { useQueryClient } from "@tanstack/react-query"
+import { PaymentFormData, LeaseData } from "../types"
 
 export function usePaymentSubmission(onSuccess?: () => void) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
 
   const handleSubmit = async (
     data: PaymentFormData,
@@ -20,13 +20,15 @@ export function usePaymentSubmission(onSuccess?: () => void) {
         title: "Erreur",
         description: "Informations manquantes",
         variant: "destructive",
-      });
-      return;
+      })
+      return
     }
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
-      const totalAmount = selectedLease.rent_amount * selectedPeriods;
+      console.log("Submitting payment:", { data, selectedLease, selectedPeriods, agencyId })
+
+      const totalAmount = selectedLease.rent_amount * selectedPeriods
 
       const { error: paymentError } = await supabase
         .from("apartment_lease_payments")
@@ -39,32 +41,32 @@ export function usePaymentSubmission(onSuccess?: () => void) {
           due_date: new Date().toISOString(),
           agency_id: agencyId,
           payment_type: "rent"
-        });
+        })
 
-      if (paymentError) throw paymentError;
+      if (paymentError) throw paymentError
 
-      await queryClient.invalidateQueries({ queryKey: ["leases"] });
+      await queryClient.invalidateQueries({ queryKey: ["leases"] })
 
       toast({
         title: "Paiement effectué",
         description: "Le paiement a été enregistré avec succès",
-      });
+      })
 
-      onSuccess?.();
+      onSuccess?.()
     } catch (error: any) {
-      console.error("Payment error:", error);
+      console.error("Payment error:", error)
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors du paiement",
         variant: "destructive",
-      });
+      })
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return {
     isSubmitting,
     handleSubmit
-  };
+  }
 }

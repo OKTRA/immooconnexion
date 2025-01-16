@@ -1,16 +1,16 @@
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { usePaymentForm } from "./hooks/usePaymentForm";
-import { PaymentMethodSelect } from "./components/PaymentMethodSelect";
-import { PaymentFormData, PaymentFormProps } from "./types";
-import { LeaseSelector } from "./components/LeaseSelector";
-import { PaymentDetails } from "./components/PaymentDetails";
-import { PeriodSelector } from "./components/PeriodSelector";
-import { InitialPaymentsForm } from "./components/InitialPaymentsForm";
-import { useLeaseSelection } from "./hooks/useLeaseSelection";
-import { usePeriodManagement } from "./hooks/usePeriodManagement";
-import { usePaymentSubmission } from "./hooks/usePaymentSubmission";
+import { useForm } from "react-hook-form"
+import { Button } from "@/components/ui/button"
+import { Loader2 } from "lucide-react"
+import { usePaymentForm } from "./hooks/usePaymentForm"
+import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
+import { PaymentFormData, PaymentFormProps } from "./types"
+import { LeaseSelector } from "./components/LeaseSelector"
+import { PaymentDetails } from "./components/PaymentDetails"
+import { PeriodSelector } from "./components/PeriodSelector"
+import { InitialPaymentsForm } from "./components/InitialPaymentsForm"
+import { useLeaseSelection } from "./hooks/useLeaseSelection"
+import { usePeriodManagement } from "./hooks/usePeriodManagement"
+import { usePaymentSubmission } from "./hooks/usePaymentSubmission"
 
 export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
   const {
@@ -18,7 +18,7 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
     isLoadingLeases,
     agencyId,
     refetchLeases
-  } = usePaymentForm(onSuccess);
+  } = usePaymentForm(onSuccess)
 
   const { register, handleSubmit, setValue, watch } = useForm<PaymentFormData>({
     defaultValues: {
@@ -27,43 +27,45 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
       paymentMethod: "cash",
       paymentPeriods: []
     }
-  });
+  })
 
   const {
     selectedLeaseId,
     setSelectedLeaseId,
     selectedLease,
     setSelectedLease
-  } = useLeaseSelection(leases, setValue);
+  } = useLeaseSelection(leases, setValue)
 
   const {
     periodOptions,
     selectedPeriods,
     setSelectedPeriods,
     generatePeriodOptions
-  } = usePeriodManagement();
+  } = usePeriodManagement()
 
-  const { isSubmitting, handleSubmit: submitPayment } = usePaymentSubmission(onSuccess);
+  const { isSubmitting, handleSubmit: submitPayment } = usePaymentSubmission(onSuccess)
 
   const handleInitialPaymentsSuccess = async () => {
-    await refetchLeases();
-    const updatedLease = leases.find(l => l.id === selectedLeaseId);
+    console.log("Initial payments successful, refreshing data...")
+    await refetchLeases()
+    const updatedLease = leases.find(l => l.id === selectedLeaseId)
     if (updatedLease) {
+      console.log("Updated lease found:", updatedLease)
       setSelectedLease({
         ...updatedLease,
         initial_payments_completed: true,
         initial_fees_paid: true
-      });
+      })
     }
-  };
+  }
 
   const onSubmit = (data: PaymentFormData) => {
     if (selectedLease) {
-      submitPayment(data, selectedLease, selectedPeriods, agencyId);
+      submitPayment(data, selectedLease, selectedPeriods, agencyId)
     }
-  };
+  }
 
-  const filteredLeases = leases.filter(lease => lease.tenant_id === tenantId);
+  const filteredLeases = leases.filter(lease => lease.tenant_id === tenantId)
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -117,5 +119,5 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
         </>
       )}
     </form>
-  );
+  )
 }
