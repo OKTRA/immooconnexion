@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom"
 interface ApartmentTenantsTableProps {
   apartmentId?: string
   onEdit: (tenant: any) => void
-  onDelete: (tenant: any) => void
+  onDelete: (tenantId: string) => void
   isLoading?: boolean
 }
 
@@ -109,7 +109,7 @@ export function ApartmentTenantsTable({
                   tenant={tenant}
                   currentLease={tenant.apartment_leases?.[0]}
                   onEdit={() => onEdit(tenant)}
-                  onDelete={() => onDelete(tenant)}
+                  onDelete={() => onDelete(tenant.id)}
                   onInspection={() => {}}
                 />
               </TableCell>

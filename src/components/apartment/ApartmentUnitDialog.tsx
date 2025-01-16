@@ -55,6 +55,10 @@ export function ApartmentUnitDialog({
     }
   }
 
+  const handleFormDataChange = (data: typeof formData) => {
+    setFormData(data)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -67,7 +71,7 @@ export function ApartmentUnitDialog({
           <div className="space-y-6 py-4">
             <UnitFormFields
               formData={formData}
-              setFormData={setFormData}
+              setFormData={handleFormDataChange}
               handleImageChange={handleImageChange}
               imagePreviewUrls={previewUrls}
             />

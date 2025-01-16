@@ -49,7 +49,7 @@ export function AgencyRegistrationDialog({
   })
 
   const handleSubmit = async (data: FormData) => {
-    setFormData(data)
+    setFormData({ ...formData, ...data })
     setShowPaymentMethods(true)
   }
 
