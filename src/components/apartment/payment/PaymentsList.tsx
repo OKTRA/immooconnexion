@@ -98,11 +98,15 @@ export function PaymentsList({ periodFilter, statusFilter, tenantId }: PaymentsL
     );
   }
 
-  const hasInitialPayments = payments?.some(p => p.type === "deposit" || p.type === "agency_fees");
+  // Séparer les paiements initiaux et réguliers
+  const initialPayments = payments?.filter(p => p.type === "deposit" || p.type === "agency_fees") || [];
+  const regularPayments = payments?.filter(p => p.type !== "deposit" && p.type !== "agency_fees") || [];
+
+  const hasInitialPayments = initialPayments.length > 0;
   const hasLatePayments = payments?.some(p => p.late_payment_fees && p.late_payment_fees.length > 0);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {hasLatePayments && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -112,34 +116,23 @@ export function PaymentsList({ periodFilter, statusFilter, tenantId }: PaymentsL
         </Alert>
       )}
 
-      {!hasInitialPayments && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Les paiements initiaux (caution et frais d'agence) sont en attente.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Type</TableHead>
-            <TableHead>Date d'échéance</TableHead>
-            <TableHead>Montant</TableHead>
-            <TableHead>Pénalités</TableHead>
-            <TableHead>Statut</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {payments?.map((payment) => {
-            const isLate = payment.late_payment_fees && payment.late_payment_fees.length > 0;
-            const lateFee = isLate ? payment.late_payment_fees[0] : null;
-
-            return (
+      {/* Section des paiements initiaux */}
+      <div className="space-y-4">
+        <h3 className="font-medium">Paiements Initiaux</h3>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Type</TableHead>
+              <TableHead>Date d'échéance</TableHead>
+              <TableHead>Montant</TableHead>
+              <TableHead>Statut</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {initialPayments.map((payment) => (
               <TableRow key={payment.id}>
                 <TableCell className="font-medium">
-                  {getPaymentTypeLabel(payment.type || "rent")}
+                  {getPaymentTypeLabel(payment.type || "")}
                 </TableCell>
                 <TableCell>
                   {format(new Date(payment.due_date), "d MMM yyyy", { locale: fr })}
@@ -148,39 +141,87 @@ export function PaymentsList({ periodFilter, statusFilter, tenantId }: PaymentsL
                   {Number(payment.amount).toLocaleString()} FCFA
                 </TableCell>
                 <TableCell>
-                  {lateFee ? (
-                    <div className="text-sm text-red-600">
-                      +{Number(lateFee.amount).toLocaleString()} FCFA
-                      <br />
-                      <span className="text-xs">
-                        ({lateFee.days_late} jours de retard)
-                      </span>
-                    </div>
-                  ) : "-"}
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={getStatusBadgeVariant(payment.status, isLate)}
-                  >
-                    {payment.status === "paid"
-                      ? "Payé"
-                      : isLate
-                      ? "En retard"
-                      : "En attente"}
+                  <Badge variant={getStatusBadgeVariant(payment.status, false)}>
+                    {payment.status === "paid" ? "Payé" : "En attente"}
                   </Badge>
                 </TableCell>
               </TableRow>
-            )
-          })}
-          {(!payments || payments.length === 0) && (
+            ))}
+            {!hasInitialPayments && (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-4">
+                  Aucun paiement initial trouvé
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Section des paiements réguliers */}
+      <div className="space-y-4">
+        <h3 className="font-medium">Paiements de Loyer</h3>
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-4">
-                Aucun paiement trouvé
-              </TableCell>
+              <TableHead>Type</TableHead>
+              <TableHead>Date d'échéance</TableHead>
+              <TableHead>Montant</TableHead>
+              <TableHead>Pénalités</TableHead>
+              <TableHead>Statut</TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {regularPayments.map((payment) => {
+              const isLate = payment.late_payment_fees && payment.late_payment_fees.length > 0;
+              const lateFee = isLate ? payment.late_payment_fees[0] : null;
+
+              return (
+                <TableRow key={payment.id}>
+                  <TableCell className="font-medium">
+                    {getPaymentTypeLabel(payment.type || "rent")}
+                  </TableCell>
+                  <TableCell>
+                    {format(new Date(payment.due_date), "d MMM yyyy", { locale: fr })}
+                  </TableCell>
+                  <TableCell>
+                    {Number(payment.amount).toLocaleString()} FCFA
+                  </TableCell>
+                  <TableCell>
+                    {lateFee ? (
+                      <div className="text-sm text-red-600">
+                        +{Number(lateFee.amount).toLocaleString()} FCFA
+                        <br />
+                        <span className="text-xs">
+                          ({lateFee.days_late} jours de retard)
+                        </span>
+                      </div>
+                    ) : "-"}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={getStatusBadgeVariant(payment.status, isLate)}
+                    >
+                      {payment.status === "paid"
+                        ? "Payé"
+                        : isLate
+                        ? "En retard"
+                        : "En attente"}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+            {regularPayments.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-4">
+                  Aucun paiement de loyer trouvé
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
