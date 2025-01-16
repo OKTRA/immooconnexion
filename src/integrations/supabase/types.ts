@@ -1499,6 +1499,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      handle_initial_payments: {
+        Args: {
+          p_lease_id: string
+          p_deposit_amount: number
+          p_agency_fees: number
+        }
+        Returns: Json
+      }
       update_expired_apartment_leases: {
         Args: Record<PropertyKey, never>
         Returns: undefined
