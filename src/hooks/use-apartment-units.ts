@@ -70,7 +70,13 @@ export function useApartmentUnits(apartmentId: string | undefined) {
         throw error
       }
 
-      return data as ApartmentUnit[]
+      // Transform the data to match ApartmentUnit type
+      const transformedData = data.map(unit => ({
+        ...unit,
+        current_lease: unit.current_lease?.[0] || undefined
+      }))
+
+      return transformedData as ApartmentUnit[]
     },
     enabled: Boolean(apartmentId) && isValidUUID(apartmentId),
     staleTime: 5 * 60 * 1000,
