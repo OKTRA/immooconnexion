@@ -1,19 +1,19 @@
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { supabase } from "@/lib/supabase";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { ContactFields } from "./form/ContactFields";
-import { LeaseFields } from "./form/LeaseFields";
-import { UnitSelector } from "./form/UnitSelector";
-import { PaymentFrequency, DurationType } from "../lease/types";
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { supabase } from "@/lib/supabase"
+import { useState } from "react"
+import { useToast } from "@/hooks/use-toast"
+import { ContactFields } from "./form/ContactFields"
+import { LeaseFields } from "./form/LeaseFields"
+import { UnitSelector } from "./form/UnitSelector"
+import { PaymentFrequency, DurationType } from "../lease/types"
 
 export interface ApartmentTenantFormProps {
-  apartmentId: string;
-  onSuccess: () => void;
-  isSubmitting: boolean;
-  setIsSubmitting: (value: boolean) => void;
-  initialData?: any;
+  apartmentId: string
+  onSuccess: () => void
+  isSubmitting: boolean
+  setIsSubmitting: (value: boolean) => void
+  initialData?: any
 }
 
 export function ApartmentTenantForm({
@@ -23,53 +23,56 @@ export function ApartmentTenantForm({
   setIsSubmitting,
   initialData
 }: ApartmentTenantFormProps) {
-  const { toast } = useToast();
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
     email: "",
     phone_number: "",
     emergency_contact_phone: "",
-    birth_date: "",
+    birth_date: null as string | null,
     unit_id: "",
     start_date: "",
     end_date: "",
     payment_frequency: "monthly" as PaymentFrequency,
     duration_type: "fixed" as DurationType,
-  });
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+    e.preventDefault()
+    setIsSubmitting(true)
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
 
       const { data: profile } = await supabase
         .from("profiles")
         .select("agency_id")
         .eq("id", user.id)
-        .single();
+        .single()
 
-      if (!profile?.agency_id) throw new Error("Aucune agence associée à ce profil");
+      if (!profile?.agency_id) throw new Error("Agency ID not found")
+
+      // Prepare tenant data, ensuring birth_date is either null or a valid date
+      const tenantData = {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email,
+        phone_number: formData.phone_number,
+        birth_date: formData.birth_date || null, // Convert empty string to null
+        agency_id: profile.agency_id,
+        unit_id: formData.unit_id
+      }
 
       // Create tenant
       const { data: tenant, error: tenantError } = await supabase
         .from("apartment_tenants")
-        .insert({
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          email: formData.email,
-          phone_number: formData.phone_number,
-          birth_date: formData.birth_date,
-          agency_id: profile.agency_id,
-          unit_id: formData.unit_id
-        })
+        .insert(tenantData)
         .select()
-        .single();
+        .single()
 
-      if (tenantError) throw tenantError;
+      if (tenantError) throw tenantError
 
       // Create lease
       const { error: leaseError } = await supabase
@@ -83,27 +86,27 @@ export function ApartmentTenantForm({
           duration_type: formData.duration_type,
           agency_id: profile.agency_id,
           status: "active"
-        });
+        })
 
-      if (leaseError) throw leaseError;
+      if (leaseError) throw leaseError
 
       toast({
         title: "Succès",
         description: "Le locataire a été ajouté avec succès. Vous pouvez maintenant procéder aux paiements initiaux.",
-      });
+      })
 
-      onSuccess();
+      onSuccess()
     } catch (error: any) {
-      console.error("Error:", error);
+      console.error("Error:", error)
       toast({
         title: "Erreur",
         description: error.message,
         variant: "destructive",
-      });
+      })
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
     <div className="max-h-[600px] overflow-y-auto px-4">
@@ -126,5 +129,5 @@ export function ApartmentTenantForm({
         </div>
       </form>
     </div>
-  );
+  )
 }
