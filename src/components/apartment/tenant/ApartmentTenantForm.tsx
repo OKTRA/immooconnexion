@@ -7,6 +7,16 @@ import { ContactFields } from "./form/ContactFields"
 import { LeaseFields } from "./form/LeaseFields"
 import { UnitSelector } from "./form/UnitSelector"
 import { PaymentFrequency, DurationType } from "../lease/types"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export interface ApartmentTenantFormProps {
   apartmentId: string
@@ -38,8 +48,29 @@ export function ApartmentTenantForm({
     duration_type: "fixed" as DurationType,
   })
 
+  const isFormValid = () => {
+    return (
+      formData.first_name.trim() !== "" &&
+      formData.last_name.trim() !== "" &&
+      formData.phone_number.trim() !== "" &&
+      formData.unit_id !== "" &&
+      formData.start_date !== "" &&
+      (formData.duration_type !== "fixed" || formData.end_date !== "")
+    )
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!isFormValid()) {
+      toast({
+        title: "Formulaire incomplet",
+        description: "Veuillez remplir tous les champs obligatoires",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -94,15 +125,15 @@ export function ApartmentTenantForm({
           deposit_amount: unit.deposit_amount,
           payment_frequency: formData.payment_frequency,
           duration_type: formData.duration_type,
-          agency_id: profile.agency_id,
-          status: "active"
+          status: "active",
+          agency_id: profile.agency_id
         })
 
       if (leaseError) throw leaseError
 
       toast({
         title: "Succès",
-        description: "Le locataire a été ajouté avec succès. Vous pouvez maintenant procéder aux paiements initiaux.",
+        description: "Le locataire a été ajouté avec succès.",
       })
 
       onSuccess()
@@ -133,7 +164,11 @@ export function ApartmentTenantForm({
           <Button variant="outline" onClick={() => setIsSubmitting(false)} disabled={isSubmitting}>
             Annuler
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting || !isFormValid()}
+            className={!isFormValid() ? "opacity-50 cursor-not-allowed" : ""}
+          >
             {isSubmitting ? "Chargement..." : "Ajouter"}
           </Button>
         </div>

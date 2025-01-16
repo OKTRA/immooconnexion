@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react"
 import { TenantsTableHeader } from "./tenants/TenantsTableHeader"
 import { TenantsTableContent } from "./tenants/TenantsTableContent"
 import { TenantDisplay, useTenants } from "@/hooks/use-tenants"
-import { useToast } from "./ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import {
@@ -25,6 +25,7 @@ export function TenantsTable({ onEdit }: TenantsTableProps) {
   const { toast } = useToast()
   const { tenants, isLoading, error, session, refetch } = useTenants()
   const [tenantToDelete, setTenantToDelete] = useState<string | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   useEffect(() => {
     if (error) {
@@ -38,8 +39,8 @@ export function TenantsTable({ onEdit }: TenantsTableProps) {
   }, [error, toast])
 
   const handleDelete = async (id: string) => {
-    if (!id) return
     setTenantToDelete(id)
+    setShowDeleteConfirm(true)
   }
 
   const confirmDelete = async () => {
@@ -68,6 +69,7 @@ export function TenantsTable({ onEdit }: TenantsTableProps) {
       })
     } finally {
       setTenantToDelete(null)
+      setShowDeleteConfirm(false)
     }
   }
 
@@ -108,7 +110,7 @@ export function TenantsTable({ onEdit }: TenantsTableProps) {
         </Table>
       </div>
 
-      <AlertDialog open={!!tenantToDelete} onOpenChange={(open) => !open && setTenantToDelete(null)}>
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
@@ -117,8 +119,16 @@ export function TenantsTable({ onEdit }: TenantsTableProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setTenantToDelete(null)}>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-500 hover:bg-red-600">
+            <AlertDialogCancel onClick={() => {
+              setShowDeleteConfirm(false)
+              setTenantToDelete(null)
+            }}>
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-red-500 hover:bg-red-600"
+            >
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
