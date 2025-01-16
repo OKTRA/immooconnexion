@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/integrations/supabase/client"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { ContactFields } from "./form/ContactFields"
@@ -39,7 +39,6 @@ export function ApartmentTenantForm({
     last_name: "",
     email: "",
     phone_number: "",
-    emergency_contact_phone: "",
     birth_date: null as string | null,
     unit_id: "",
     start_date: "",
@@ -77,26 +76,27 @@ export function ApartmentTenantForm({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
-      // Get agency_id from profile
       const { data: profile } = await supabase
         .from("profiles")
         .select("agency_id")
         .eq("id", user.id)
-        .single()
+        .maybeSingle()
 
-      if (!profile?.agency_id) throw new Error("Agency ID not found")
+      if (!profile?.agency_id) {
+        throw new Error("Aucune agence associée à ce profil")
+      }
 
-      // Get unit information in a separate query
+      // First, get unit information
       const { data: unit, error: unitError } = await supabase
         .from("apartment_units")
         .select("rent_amount, deposit_amount")
         .eq("id", formData.unit_id)
-        .single()
+        .maybeSingle()
 
-      if (unitError) throw new Error("Erreur lors de la récupération des informations de l'unité")
+      if (unitError) throw unitError
       if (!unit) throw new Error("Unité non trouvée")
 
-      // Create tenant with basic information
+      // Create tenant first
       const { data: tenant, error: tenantError } = await supabase
         .from("apartment_tenants")
         .insert({
@@ -113,7 +113,7 @@ export function ApartmentTenantForm({
 
       if (tenantError) throw tenantError
 
-      // Create lease in a separate query
+      // Then create lease in a separate query
       const { error: leaseError } = await supabase
         .from("apartment_leases")
         .insert({
