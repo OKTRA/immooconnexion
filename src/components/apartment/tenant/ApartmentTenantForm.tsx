@@ -46,6 +46,7 @@ export function ApartmentTenantForm({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
+      // Get agency_id from profile
       const { data: profile } = await supabase
         .from("profiles")
         .select("agency_id")
@@ -54,7 +55,7 @@ export function ApartmentTenantForm({
 
       if (!profile?.agency_id) throw new Error("Agency ID not found")
 
-      // Récupérer les informations de l'unité
+      // Get unit information in a separate query
       const { data: unit, error: unitError } = await supabase
         .from("apartment_units")
         .select("rent_amount, deposit_amount")
@@ -64,27 +65,24 @@ export function ApartmentTenantForm({
       if (unitError) throw new Error("Erreur lors de la récupération des informations de l'unité")
       if (!unit) throw new Error("Unité non trouvée")
 
-      // Prepare tenant data
-      const tenantData = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email,
-        phone_number: formData.phone_number,
-        birth_date: formData.birth_date || null,
-        agency_id: profile.agency_id,
-        unit_id: formData.unit_id
-      }
-
-      // Create tenant
+      // Create tenant with basic information
       const { data: tenant, error: tenantError } = await supabase
         .from("apartment_tenants")
-        .insert(tenantData)
+        .insert({
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          email: formData.email,
+          phone_number: formData.phone_number,
+          birth_date: formData.birth_date,
+          agency_id: profile.agency_id,
+          unit_id: formData.unit_id
+        })
         .select()
         .single()
 
       if (tenantError) throw tenantError
 
-      // Create lease with unit's rent and deposit amounts
+      // Create lease in a separate query
       const { error: leaseError } = await supabase
         .from("apartment_leases")
         .insert({
