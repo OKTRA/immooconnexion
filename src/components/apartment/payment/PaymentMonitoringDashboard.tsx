@@ -50,12 +50,19 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
   const { data: lease } = useQuery({
     queryKey: ["tenant-lease", tenantId],
     queryFn: async () => {
-      const { data } = await supabase
+      console.log("Fetching lease for tenant:", tenantId)
+      const { data, error } = await supabase
         .from("apartment_leases")
         .select("*")
         .eq("tenant_id", tenantId)
-        .single()
+        .maybeSingle()
       
+      if (error) {
+        console.error("Error fetching lease:", error)
+        throw error
+      }
+      
+      console.log("Fetched lease:", data)
       return data
     }
   })
@@ -65,16 +72,18 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Suivi des Paiements</h1>
         <div className="flex gap-2">
-          {!lease?.initial_payments_completed && (
+          {lease && !lease.initial_payments_completed && (
             <Button onClick={() => setShowInitialPaymentDialog(true)} variant="secondary">
               <CreditCard className="h-4 w-4 mr-2" />
               Paiements Initiaux
             </Button>
           )}
-          <Button onClick={() => setShowPaymentDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Paiement de Loyer
-          </Button>
+          {lease && lease.initial_payments_completed && (
+            <Button onClick={() => setShowPaymentDialog(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Paiement de Loyer
+            </Button>
+          )}
         </div>
       </div>
 
