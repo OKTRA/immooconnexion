@@ -12,6 +12,7 @@ import { PaydunyaForm } from "@/components/payment/PaydunyaForm"
 import { AgencyInfoFields } from "./registration/AgencyInfoFields"
 import { AdminAccountFields } from "./registration/AdminAccountFields"
 import { formSchema, FormData } from "./types"
+import { PaymentFormData } from "@/components/payment/types"
 
 interface AgencyRegistrationDialogProps {
   open: boolean
@@ -30,7 +31,7 @@ export function AgencyRegistrationDialog({
 }: AgencyRegistrationDialogProps) {
   const [showPaymentMethods, setShowPaymentMethods] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<string>("orange_money")
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<PaymentFormData>({
     email: "",
     password: "",
     confirm_password: "",
@@ -49,7 +50,7 @@ export function AgencyRegistrationDialog({
   })
 
   const handleSubmit = async (data: FormData) => {
-    setFormData(data)
+    setFormData(data as PaymentFormData)
     setShowPaymentMethods(true)
   }
 

@@ -10,11 +10,11 @@ export function TestPayment() {
     confirm_password: "",
     agency_name: "",
     agency_address: "",
+    agency_phone: "",
     country: "",
     city: "",
     first_name: "",
     last_name: "",
-    phone_number: "",
   }
 
   return (

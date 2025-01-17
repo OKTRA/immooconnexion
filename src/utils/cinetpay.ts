@@ -1,44 +1,48 @@
+import { supabase } from "@/integrations/supabase/client"
+
+export interface CustomerInfo {
+  name: string
+  surname: string
+  email: string
+  phone: string
+}
+
 interface CinetPayInitParams {
-  amount: number;
-  description: string;
-  metadata: any;
+  amount: number
+  description: string
+  metadata: any
 }
 
 interface CinetPayInitResponse {
   data?: {
-    payment_token: string;
-    metadata: any;
-  };
-  error?: any;
+    payment_token: string
+    metadata: any
+  }
+  error?: any
 }
 
-export async function initializeCinetPay({ 
-  amount, 
-  description, 
-  metadata 
+export async function initializeCinetPay({
+  amount,
+  description,
+  metadata
 }: CinetPayInitParams): Promise<CinetPayInitResponse> {
   try {
-    const response = await fetch('https://apidxwaaogboeoctlhtz.supabase.co/functions/v1/initialize-payment', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    const { data, error } = await supabase.functions.invoke('initialize-payment', {
+      body: {
         amount,
         description,
-        metadata,
-        payment_method: 'cinetpay'
-      }),
+        metadata
+      }
     })
 
-    if (!response.ok) {
-      throw new Error('Payment initialization failed')
+    if (error) {
+      console.error("Error initializing CinetPay payment:", error)
+      throw error
     }
 
-    const data = await response.json()
     return { data }
   } catch (error) {
-    console.error('Error initializing CinetPay payment:', error)
+    console.error("Error in initializeCinetPay:", error)
     return { error }
   }
 }
