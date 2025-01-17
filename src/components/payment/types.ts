@@ -10,7 +10,7 @@ export const paymentFormSchema = z.object({
   city: z.string().min(2, "La ville est requise"),
   first_name: z.string().min(2, "Le prénom est requis"),
   last_name: z.string().min(2, "Le nom est requis"),
-  phone_number: z.string().min(8, "Numéro de téléphone invalide"),
+  agency_phone: z.string().min(8, "Numéro de téléphone invalide"),
 }).refine((data) => data.password === data.confirm_password, {
   message: "Les mots de passe ne correspondent pas",
   path: ["confirm_password"],

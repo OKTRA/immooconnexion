@@ -10,6 +10,12 @@ interface ExtendedCinetPayFormProps extends CinetPayFormProps {
   formData: PaymentFormData
 }
 
+declare global {
+  interface Window {
+    CinetPay: any
+  }
+}
+
 export function CinetPayForm({ 
   amount, 
   description, 
@@ -27,7 +33,7 @@ export function CinetPayForm({
       console.log("Initializing payment with:", { amount, description, formData })
 
       // Validate required fields
-      if (!formData.email || !formData.phone_number || !formData.country || !formData.first_name || !formData.last_name) {
+      if (!formData.email || !formData.agency_phone || !formData.country || !formData.first_name || !formData.last_name) {
         toast({
           title: "Erreur de validation",
           description: "Veuillez remplir tous les champs obligatoires",
@@ -37,12 +43,20 @@ export function CinetPayForm({
       }
 
       // Format phone number
-      const phoneNumber = formData.phone_number.startsWith('+') 
-        ? formData.phone_number 
-        : `+${formData.phone_number}`
+      const phoneNumber = formData.agency_phone.startsWith('+') 
+        ? formData.agency_phone 
+        : `+${formData.agency_phone}`
 
       // Get country code
       const countryCode = getCountryCode(formData.country)
+      if (!countryCode) {
+        toast({
+          title: "Erreur de validation",
+          description: "Pays non reconnu",
+          variant: "destructive",
+        })
+        return
+      }
 
       // Structure the metadata
       const metadata = {
