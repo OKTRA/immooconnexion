@@ -1,11 +1,9 @@
-import { useState } from 'react'
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
 import { initializeCinetPay } from "@/utils/cinetpay"
 import { Loader2 } from "lucide-react"
 import { PaymentFormData, CinetPayFormProps } from "./types"
-import { getCountryCode } from "@/utils/countryUtils"
 
 interface ExtendedCinetPayFormProps extends CinetPayFormProps {
   formData: PaymentFormData
@@ -14,57 +12,17 @@ interface ExtendedCinetPayFormProps extends CinetPayFormProps {
 export function CinetPayForm({ 
   amount, 
   description, 
-  onSuccess, 
-  onError, 
   agencyId,
+  onSuccess,
+  onError,
   formData 
 }: ExtendedCinetPayFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
-  const validateFormData = () => {
-    const errors = []
-
-    if (!formData.email?.trim()) {
-      errors.push("L'email est requis")
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.push("L'email n'est pas valide")
-    }
-
-    if (!formData.phone_number?.trim()) {
-      errors.push("Le numéro de téléphone est requis")
-    }
-
-    if (!formData.country?.trim()) {
-      errors.push("Le pays est requis")
-    }
-
-    if (!formData.first_name?.trim() || !formData.last_name?.trim()) {
-      errors.push("Le nom et le prénom sont requis")
-    }
-
-    return errors
-  }
-
-  const formatPhoneNumber = (phone: string) => {
-    // Ensure phone number starts with +
-    return phone.startsWith('+') ? phone : `+${phone}`
-  }
-
   const handlePayment = async () => {
     try {
       setIsLoading(true)
-      const validationErrors = validateFormData()
-      
-      if (validationErrors.length > 0) {
-        toast({
-          title: "Erreur de validation",
-          description: validationErrors.join('\n'),
-          variant: "destructive",
-        })
-        return
-      }
-
       console.log("Initializing payment with:", { amount, description, formData })
 
       // Structure the metadata
@@ -74,106 +32,95 @@ export function CinetPayForm({
           password: formData.password,
           first_name: formData.first_name,
           last_name: formData.last_name,
-          phone: formatPhoneNumber(formData.phone_number)
+          phone: formData.phone_number
         },
         agency_data: {
           name: formData.agency_name,
           address: formData.agency_address,
-          country: getCountryCode(formData.country),
+          country: formData.country,
           city: formData.city,
-          phone: formatPhoneNumber(formData.phone_number),
+          phone: formData.phone_number,
           email: formData.email
         },
         subscription_plan_id: agencyId
       }
 
-      console.log("Payment metadata:", metadata)
-
-      // Initialize payment
-      const { data, error } = await supabase.functions.invoke('initialize-payment', {
-        body: {
-          amount: Number(amount),
-          description: description.trim(),
-          metadata: JSON.stringify(metadata),
-          payment_method: 'cinetpay'
-        }
+      // Initialize payment attempt in database
+      const { data, error } = await initializeCinetPay({
+        amount,
+        description,
+        metadata
       })
 
       if (error) {
-        console.error('Payment initialization error:', error)
-        throw error
-      }
-
-      if (data.code === '201') {
-        const config = {
-          apikey: data.apikey,
-          site_id: data.site_id,
-          notify_url: data.notify_url,
-          return_url: data.return_url,
-          trans_id: data.trans_id,
-          amount: data.amount,
-          currency: 'XOF',
-          channels: 'ALL',
-          description: data.description,
-          customer_email: formData.email,
-          customer_name: formData.first_name,
-          customer_surname: formData.last_name,
-          customer_phone_number: formatPhoneNumber(formData.phone_number),
-          customer_address: formData.agency_address,
-          customer_city: formData.city,
-          customer_country: getCountryCode(formData.country),
-          mode: 'PRODUCTION' as const,
-          lang: 'fr',
-          metadata: data.metadata
-        }
-
-        console.log("Initializing CinetPay with config:", config);
-
-        initializeCinetPay(config, {
-          onClose: () => {
-            setIsLoading(false)
-            toast({
-              title: "Paiement annulé",
-              description: "Vous avez fermé la fenêtre de paiement",
-            })
-          },
-          onSuccess: () => {
-            setIsLoading(false)
-            console.log("Payment success")
-            onSuccess?.()
-          },
-          onError: (error: any) => {
-            setIsLoading(false)
-            console.error('CinetPay error:', error)
-            onError?.(error)
-            toast({
-              title: "Erreur de paiement",
-              description: error.message || "Une erreur est survenue lors du paiement",
-              variant: "destructive"
-            })
-          },
+        console.error("Error initializing payment:", error)
+        toast({
+          title: "Erreur",
+          description: "Une erreur est survenue lors de l'initialisation du paiement",
+          variant: "destructive",
         })
-      } else {
-        throw new Error(data.message || 'Error initializing payment')
+        onError?.(error)
+        return
       }
-    } catch (error: any) {
-      setIsLoading(false)
-      console.error('Payment error:', error)
+
+      if (!data?.payment_token) {
+        console.error("No payment token received")
+        toast({
+          title: "Erreur",
+          description: "Une erreur est survenue lors de l'initialisation du paiement",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Initialize CinetPay widget
+      const CinetPay = window.CinetPay
+      CinetPay.setConfig({
+        apikey: '12912847765bc0db748fdd44.40081707',
+        site_id: '445160',
+        notify_url: 'https://apidxwaaogboeoctlhtz.supabase.co/functions/v1/handle-payment-webhook',
+        mode: 'PRODUCTION',
+        return_url: window.location.origin + '/payment-success'
+      })
+
+      CinetPay.getCheckout({
+        transaction_id: data.payment_token,
+        amount,
+        currency: 'XOF',
+        channels: 'ALL',
+        description,
+        customer_email: formData.email,
+        customer_name: formData.first_name,
+        customer_surname: formData.last_name,
+        customer_phone_number: formData.phone_number,
+        customer_address: formData.agency_address,
+        customer_city: formData.city,
+        customer_country: formData.country,
+        mode: 'PRODUCTION' as const,
+        lang: 'fr',
+        metadata: data.metadata
+      })
+
+      onSuccess?.()
+    } catch (error) {
+      console.error("Payment error:", error)
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors du paiement",
-        variant: "destructive"
+        description: "Une erreur est survenue lors du paiement",
+        variant: "destructive",
       })
       onError?.(error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
     <div className="space-y-4">
       <Button 
-        onClick={handlePayment}
-        className="w-full" 
+        onClick={handlePayment} 
         disabled={isLoading}
+        className="w-full"
       >
         {isLoading ? (
           <>
@@ -181,7 +128,7 @@ export function CinetPayForm({
             Chargement...
           </>
         ) : (
-          `Payer ${amount.toLocaleString()} FCFA`
+          "Payer avec CinetPay"
         )}
       </Button>
     </div>
