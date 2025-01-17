@@ -1,4 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from '@supabase/supabase-js'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,6 +15,21 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authorization header
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({
+          code: 401,
+          message: 'Missing authorization header'
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401
+        }
+      )
+    }
+
     const { amount, description, metadata } = await req.json()
     console.log("Received request with:", { amount, description, metadata })
 
@@ -60,6 +76,7 @@ serve(async (req) => {
     const response = {
       code: '201',
       message: 'Paiement initialisé',
+      payment_token: transId,
       apikey: apiKey,
       site_id: siteId,
       notify_url: `${req.headers.get('origin')}/api/payment-webhook`,

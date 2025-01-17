@@ -27,11 +27,21 @@ export async function initializeCinetPay({
   metadata
 }: CinetPayInitParams): Promise<CinetPayInitResponse> {
   try {
+    // Get the current session
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session) {
+      throw new Error('No active session')
+    }
+
     const { data, error } = await supabase.functions.invoke('initialize-payment', {
       body: {
         amount,
         description,
         metadata
+      },
+      headers: {
+        Authorization: `Bearer ${session.access_token}`
       }
     })
 
