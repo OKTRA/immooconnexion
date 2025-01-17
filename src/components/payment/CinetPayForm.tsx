@@ -53,7 +53,8 @@ export function CinetPayForm({
         body: {
           amount: Number(amount),
           description: description.trim(),
-          metadata: JSON.stringify(metadata)
+          metadata: JSON.stringify(metadata),
+          payment_method: 'cinetpay'
         }
       })
 
@@ -85,6 +86,8 @@ export function CinetPayForm({
           metadata: data.metadata
         }
 
+        console.log("Initializing CinetPay with config:", config);
+
         initializeCinetPay(config, {
           onClose: () => {
             setIsLoading(false)
@@ -102,6 +105,11 @@ export function CinetPayForm({
             setIsLoading(false)
             console.error('CinetPay error:', error)
             onError?.(error)
+            toast({
+              title: "Erreur de paiement",
+              description: error.message || "Une erreur est survenue lors du paiement",
+              variant: "destructive"
+            })
           },
         })
       } else {
@@ -111,8 +119,8 @@ export function CinetPayForm({
       setIsLoading(false)
       console.error('Payment error:', error)
       toast({
-        title: "Error",
-        description: error.message || "An error occurred during payment",
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors du paiement",
         variant: "destructive"
       })
       onError?.(error)
@@ -129,10 +137,10 @@ export function CinetPayForm({
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Loading...
+            Chargement...
           </>
         ) : (
-          `Pay ${amount.toLocaleString()} FCFA`
+          `Payer ${amount.toLocaleString()} FCFA`
         )}
       </Button>
     </div>

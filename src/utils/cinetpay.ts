@@ -48,6 +48,16 @@ const waitForCinetPay = (): Promise<void> => {
       return;
     }
 
+    // Add script tag if not already present
+    if (!document.getElementById('cinetpay-script')) {
+      const script = document.createElement('script');
+      script.id = 'cinetpay-script';
+      script.src = 'https://cdn.cinetpay.com/seamless/latest/sdk.js';
+      script.async = true;
+      script.onload = () => resolve();
+      document.head.appendChild(script);
+    }
+
     const checkInterval = setInterval(() => {
       if (window.CinetPay) {
         clearInterval(checkInterval);
@@ -65,8 +75,12 @@ const waitForCinetPay = (): Promise<void> => {
 
 export const initializeCinetPay = async (config: CinetPayConfig, callbacks: CinetPayCallbacks) => {
   try {
+    console.log("Initializing CinetPay with config:", config);
+    
     // Wait for CinetPay SDK to be loaded
     await waitForCinetPay();
+    
+    console.log("CinetPay SDK loaded successfully");
 
     // Configuration initiale
     window.CinetPay.setConfig({
@@ -75,6 +89,8 @@ export const initializeCinetPay = async (config: CinetPayConfig, callbacks: Cine
       notify_url: config.notify_url,
       mode: config.mode || 'PRODUCTION'
     });
+
+    console.log("CinetPay config set, starting checkout");
 
     // Démarrage du checkout
     window.CinetPay.getCheckout({
@@ -92,10 +108,14 @@ export const initializeCinetPay = async (config: CinetPayConfig, callbacks: Cine
       customer_country: config.customer_country,
       customer_state: config.customer_state,
       customer_zip_code: config.customer_zip_code,
+      metadata: config.metadata
     });
+
+    console.log("CinetPay checkout initialized");
 
     // Gestion des réponses
     window.CinetPay.waitResponse((data: any) => {
+      console.log("CinetPay response received:", data);
       if (data.status === "REFUSED") {
         callbacks.onError(data);
       } else if (data.status === "ACCEPTED") {
@@ -104,13 +124,16 @@ export const initializeCinetPay = async (config: CinetPayConfig, callbacks: Cine
     });
 
     window.CinetPay.onError((error: any) => {
+      console.error("CinetPay error:", error);
       callbacks.onError(error);
     });
 
     window.CinetPay.onClose(() => {
+      console.log("CinetPay checkout closed");
       callbacks.onClose();
     });
   } catch (error) {
+    console.error("Error initializing CinetPay:", error);
     callbacks.onError(error);
   }
 }
