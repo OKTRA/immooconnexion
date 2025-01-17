@@ -34,24 +34,26 @@ export function ApartmentTenantsTable({
     queryFn: async () => {
       console.log("Fetching tenants for apartment:", apartmentId)
       
-      let query = supabase
+      if (!apartmentId || apartmentId === "all") {
+        return []
+      }
+
+      const { data: tenantData, error } = await supabase
         .from("apartment_tenants")
         .select(`
-          *,
+          id,
+          first_name,
+          last_name,
+          email,
+          phone_number,
           apartment_leases (
             id,
             status,
-            rent_amount,
-            deposit_amount
+            rent_amount
           )
         `)
+        .eq("unit_id", apartmentId)
         .order("created_at", { ascending: false })
-
-      if (apartmentId && apartmentId !== "all") {
-        query = query.eq("unit_id", apartmentId)
-      }
-
-      const { data, error } = await query
 
       if (error) {
         console.error("Error fetching tenants:", error)
@@ -63,10 +65,10 @@ export function ApartmentTenantsTable({
         throw error
       }
 
-      console.log("Tenants data:", data)
-      return data || []
+      console.log("Tenants data:", tenantData)
+      return tenantData || []
     },
-    enabled: !externalLoading
+    enabled: !externalLoading && !!apartmentId
   })
 
   if (externalLoading || isLoading) {
