@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { initializeCinetPay } from "@/utils/cinetpay"
 import { Loader2 } from "lucide-react"
 import { PaymentFormData, CinetPayFormProps } from "./types"
+import { getCountryCode } from "@/utils/countryUtils"
 
 interface ExtendedCinetPayFormProps extends CinetPayFormProps {
   formData: PaymentFormData
@@ -21,9 +22,49 @@ export function CinetPayForm({
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
+  const validateFormData = () => {
+    const errors = []
+
+    if (!formData.email?.trim()) {
+      errors.push("L'email est requis")
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.push("L'email n'est pas valide")
+    }
+
+    if (!formData.phone_number?.trim()) {
+      errors.push("Le numéro de téléphone est requis")
+    }
+
+    if (!formData.country?.trim()) {
+      errors.push("Le pays est requis")
+    }
+
+    if (!formData.first_name?.trim() || !formData.last_name?.trim()) {
+      errors.push("Le nom et le prénom sont requis")
+    }
+
+    return errors
+  }
+
+  const formatPhoneNumber = (phone: string) => {
+    // Ensure phone number starts with +
+    return phone.startsWith('+') ? phone : `+${phone}`
+  }
+
   const handlePayment = async () => {
     try {
       setIsLoading(true)
+      const validationErrors = validateFormData()
+      
+      if (validationErrors.length > 0) {
+        toast({
+          title: "Erreur de validation",
+          description: validationErrors.join('\n'),
+          variant: "destructive",
+        })
+        return
+      }
+
       console.log("Initializing payment with:", { amount, description, formData })
 
       // Structure the metadata
@@ -33,14 +74,14 @@ export function CinetPayForm({
           password: formData.password,
           first_name: formData.first_name,
           last_name: formData.last_name,
-          phone: formData.phone_number
+          phone: formatPhoneNumber(formData.phone_number)
         },
         agency_data: {
           name: formData.agency_name,
           address: formData.agency_address,
-          country: formData.country,
+          country: getCountryCode(formData.country),
           city: formData.city,
-          phone: formData.phone_number,
+          phone: formatPhoneNumber(formData.phone_number),
           email: formData.email
         },
         subscription_plan_id: agencyId
@@ -77,10 +118,10 @@ export function CinetPayForm({
           customer_email: formData.email,
           customer_name: formData.first_name,
           customer_surname: formData.last_name,
-          customer_phone_number: formData.phone_number,
+          customer_phone_number: formatPhoneNumber(formData.phone_number),
           customer_address: formData.agency_address,
           customer_city: formData.city,
-          customer_country: formData.country,
+          customer_country: getCountryCode(formData.country),
           mode: 'PRODUCTION' as const,
           lang: 'fr',
           metadata: data.metadata
