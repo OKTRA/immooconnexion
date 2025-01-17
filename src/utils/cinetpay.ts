@@ -1,15 +1,15 @@
+interface CinetPayInitParams {
+  amount: number;
+  description: string;
+  metadata: any;
+}
+
 interface CinetPayInitResponse {
   data?: {
     payment_token: string;
     metadata: any;
   };
   error?: any;
-}
-
-interface CinetPayInitParams {
-  amount: number;
-  description: string;
-  metadata: any;
 }
 
 export async function initializeCinetPay({ 

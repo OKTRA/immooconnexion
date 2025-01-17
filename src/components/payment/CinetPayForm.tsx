@@ -131,10 +131,25 @@ export function CinetPayForm({
         customer_country: countryCode,
         mode: 'PRODUCTION' as const,
         lang: 'fr',
-        metadata: response.data.metadata
+        metadata: response.data.metadata,
+        onClose: () => {
+          console.log("Widget closed")
+        },
+        onError: (error: any) => {
+          console.error("Payment error:", error)
+          toast({
+            title: "Erreur",
+            description: "Une erreur est survenue lors du paiement",
+            variant: "destructive",
+          })
+          onError?.(error)
+        },
+        onSuccess: (data: any) => {
+          console.log("Payment successful:", data)
+          onSuccess?.()
+        }
       })
 
-      onSuccess?.()
     } catch (error) {
       console.error("Payment error:", error)
       toast({
