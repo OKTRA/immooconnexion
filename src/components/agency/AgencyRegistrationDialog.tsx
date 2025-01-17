@@ -8,7 +8,6 @@ import { useState } from "react"
 import { PaymentMethodSelector } from "@/components/payment/PaymentMethodSelector"
 import { OrangeMoneyForm } from "@/components/payment/OrangeMoneyForm"
 import { CinetPayForm } from "@/components/payment/CinetPayForm"
-import { PaydunyaForm } from "@/components/payment/PaydunyaForm"
 import { AgencyInfoFields } from "./registration/AgencyInfoFields"
 import { AdminAccountFields } from "./registration/AdminAccountFields"
 import { formSchema, FormData } from "./types"
@@ -92,15 +91,6 @@ export function AgencyRegistrationDialog({
 
               {paymentMethod === "cinetpay" && (
                 <CinetPayForm
-                  amount={amount}
-                  description={`Inscription - Plan ${planName}`}
-                  agencyId={planId}
-                  formData={formData}
-                />
-              )}
-
-              {paymentMethod === "paydunya" && (
-                <PaydunyaForm
                   amount={amount}
                   description={`Inscription - Plan ${planName}`}
                   agencyId={planId}

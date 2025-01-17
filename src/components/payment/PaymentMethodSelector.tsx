@@ -34,16 +34,6 @@ export function PaymentMethodSelector({ selectedMethod, onMethodChange }: Paymen
             </span>
           </Label>
         </div>
-        
-        <div className="flex items-center space-x-4 rounded-lg border p-4">
-          <RadioGroupItem value="paydunya" id="paydunya" />
-          <Label htmlFor="paydunya" className="flex flex-col">
-            <span className="font-semibold">PayDunya</span>
-            <span className="text-sm text-gray-500">
-              Wave, Orange Money, Free Money (International)
-            </span>
-          </Label>
-        </div>
       </RadioGroup>
     </Card>
   )

@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card"
 import { useState } from "react"
 import { PaymentMethodSelector } from "@/components/payment/PaymentMethodSelector"
 import { CinetPayForm } from "@/components/payment/CinetPayForm"
-import { PaydunyaForm } from "@/components/payment/PaydunyaForm"
 import { OrangeMoneyForm } from "@/components/payment/OrangeMoneyForm"
 import { useToast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
@@ -19,7 +18,7 @@ export function PaymentDialog({
   isUpgrade = false
 }: PaymentDialogProps) {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<string>("cinetpay") // Changed default to cinetpay
+  const [paymentMethod, setPaymentMethod] = useState<string>("cinetpay")
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -51,7 +50,6 @@ export function PaymentDialog({
     city: "",
     first_name: "",
     last_name: "",
-    phone_number: "", // Added missing field
   }
 
   return (
@@ -96,15 +94,6 @@ export function PaymentDialog({
                 )}
                 {paymentMethod === "cinetpay" && (
                   <CinetPayForm 
-                    amount={amount}
-                    description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
-                    agencyId={planId}
-                    onSuccess={handlePaymentSuccess}
-                    formData={defaultFormData}
-                  />
-                )}
-                {paymentMethod === "paydunya" && (
-                  <PaydunyaForm 
                     amount={amount}
                     description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
                     agencyId={planId}
