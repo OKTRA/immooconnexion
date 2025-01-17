@@ -28,13 +28,6 @@ export interface PaymentDialogProps {
   agencyId?: string
 }
 
-export interface CustomerInfo {
-  name: string
-  surname: string
-  email: string
-  phone: string
-}
-
 export interface CinetPayFormProps {
   amount: number
   description: string

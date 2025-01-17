@@ -73,7 +73,7 @@ export function FreeSignupForm({
           id: agencyId,
           name: values.agency_name,
           address: values.agency_address,
-          phone: values.phone_number,
+          phone: values.agency_phone,
           email: values.email,
           country: values.country,
           city: values.city,
@@ -92,7 +92,7 @@ export function FreeSignupForm({
           role: 'admin',
           first_name: values.first_name,
           last_name: values.last_name,
-          phone_number: values.phone_number,
+          phone_number: values.agency_phone,
           status: 'active'
         })
         .eq('id', authData.user?.id)

@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card"
 import { useState } from "react"
 import { PaymentMethodSelector } from "@/components/payment/PaymentMethodSelector"
 import { CinetPayForm } from "@/components/payment/CinetPayForm"
-import { PaydunyaForm } from "@/components/payment/PaydunyaForm"
 import { OrangeMoneyForm } from "@/components/payment/OrangeMoneyForm"
 import { useToast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
@@ -46,12 +45,11 @@ export function PaymentDialog({
     confirm_password: "",
     agency_name: "",
     agency_address: "",
-    agency_phone: "", // Added this field
+    agency_phone: "",
     country: "",
     city: "",
     first_name: "",
     last_name: "",
-    phone_number: "",
   }
 
   return (
@@ -96,15 +94,6 @@ export function PaymentDialog({
                 )}
                 {paymentMethod === "cinetpay" && (
                   <CinetPayForm 
-                    amount={amount}
-                    description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
-                    agencyId={planId}
-                    onSuccess={handlePaymentSuccess}
-                    formData={defaultFormData}
-                  />
-                )}
-                {paymentMethod === "paydunya" && (
-                  <PaydunyaForm 
                     amount={amount}
                     description={`${isUpgrade ? "Mise à niveau vers" : "Paiement pour"} ${planName}`}
                     agencyId={planId}
