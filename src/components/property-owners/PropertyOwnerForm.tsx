@@ -68,7 +68,7 @@ export function PropertyOwnerForm({ owner, onSuccess }: PropertyOwnerFormProps) 
 
         if (error) throw error
       } else {
-        // Create new owner
+        // Create new owner and establish agency relationship in a transaction
         const { data: newOwner, error: ownerError } = await supabase
           .from('property_owners')
           .insert(values)
