@@ -38,13 +38,45 @@ export function PropertyUnitForm({ formData, onChange }: PropertyUnitFormProps) 
       </div>
 
       <div>
-        <Label htmlFor="area">Surface (m²)</Label>
+        <Label htmlFor="room_count">Nombre de pièces</Label>
         <Input
-          id="area"
+          id="room_count"
           type="number"
-          value={formData.area || ""}
-          onChange={(e) => onChange("area", e.target.value ? parseFloat(e.target.value) : null)}
+          value={formData.room_count || ""}
+          onChange={(e) => onChange("room_count", e.target.value ? parseInt(e.target.value) : null)}
         />
+      </div>
+
+      <div>
+        <Label htmlFor="has_water">Eau courante</Label>
+        <Select
+          value={formData.has_water ? "yes" : "no"}
+          onValueChange={(value) => onChange("has_water", value === "yes")}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Sélectionner" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="yes">Oui</SelectItem>
+            <SelectItem value="no">Non</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="has_electricity">Électricité</Label>
+        <Select
+          value={formData.has_electricity ? "yes" : "no"}
+          onValueChange={(value) => onChange("has_electricity", value === "yes")}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Sélectionner" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="yes">Oui</SelectItem>
+            <SelectItem value="no">Non</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div>
