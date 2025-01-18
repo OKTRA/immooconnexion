@@ -2,16 +2,15 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useState } from "react"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+import { Form } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useQueryClient } from "@tanstack/react-query"
-import { westafrikanCountries } from "@/utils/countryUtils"
+import { BasicInfoFields } from "./form/BasicInfoFields"
+import { LocationFields } from "./form/LocationFields"
+import { DescriptionField } from "./form/DescriptionField"
+import { PhotoUpload } from "./form/PhotoUpload"
 
 const apartmentFormSchema = z.object({
   name: z.string().min(1, "Le nom est requis"),
@@ -178,152 +177,10 @@ export function ApartmentForm({ onSuccess, initialData, isEditing = false, owner
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="owner_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Propriétaire</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner un propriétaire" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {owners.map((owner) => (
-                    <SelectItem key={owner.id} value={owner.id}>
-                      {owner.first_name} {owner.last_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom de l'appartement</FormLabel>
-              <FormControl>
-                <Input placeholder="Ex: Résidence Les Palmiers" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="country"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Pays</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner le pays" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {westafrikanCountries.map((country) => (
-                    <SelectItem key={country.code} value={country.code}>
-                      {country.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="city"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ville</FormLabel>
-              <FormControl>
-                <Input placeholder="Ex: Abidjan" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="neighborhood"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Quartier</FormLabel>
-              <FormControl>
-                <Input placeholder="Ex: Cocody" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Adresse</FormLabel>
-              <FormControl>
-                <Input placeholder="Ex: 123 Rue de la Paix" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Description de l'appartement..."
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="space-y-2">
-          <Label htmlFor="photos">Photos</Label>
-          <Input
-            id="photos"
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handlePhotoChange}
-            className="cursor-pointer"
-          />
-          {previewUrls.length > 0 && (
-            <div className="grid grid-cols-3 gap-4 mt-4">
-              {previewUrls.map((url, index) => (
-                <img
-                  key={index}
-                  src={url}
-                  alt={`Preview ${index + 1}`}
-                  className="w-full h-32 object-cover rounded-md"
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        <BasicInfoFields form={form} owners={owners} />
+        <LocationFields form={form} />
+        <DescriptionField form={form} />
+        <PhotoUpload onPhotoChange={handlePhotoChange} previewUrls={previewUrls} />
 
         <Button type="submit">
           {isEditing ? "Modifier" : "Créer"} l'appartement
