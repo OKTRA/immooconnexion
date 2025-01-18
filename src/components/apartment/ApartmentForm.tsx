@@ -7,6 +7,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAgencies } from "@/hooks/useAgencies";
@@ -15,22 +16,30 @@ const apartmentFormSchema = z.object({
   name: z.string().min(1, "Le nom est requis"),
   address: z.string().min(1, "L'adresse est requise"),
   description: z.string().optional(),
+  owner_id: z.string().min(1, "Le propriétaire est requis"),
 });
 
 type ApartmentFormData = z.infer<typeof apartmentFormSchema>;
 
-interface ApartmentFormProps {
+export interface ApartmentFormProps {
   onSuccess?: () => void;
   initialData?: {
     id?: string;
     name: string;
     address: string;
     description?: string;
+    owner_id?: string;
   };
   isEditing?: boolean;
+  owners: Array<{
+    id: string;
+    first_name: string;
+    last_name: string;
+    phone_number?: string;
+  }>;
 }
 
-export function ApartmentForm({ onSuccess, initialData, isEditing = false }: ApartmentFormProps) {
+export function ApartmentForm({ onSuccess, initialData, isEditing = false, owners }: ApartmentFormProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -42,6 +51,7 @@ export function ApartmentForm({ onSuccess, initialData, isEditing = false }: Apa
       name: "",
       address: "",
       description: "",
+      owner_id: "",
     },
   });
 
@@ -54,6 +64,7 @@ export function ApartmentForm({ onSuccess, initialData, isEditing = false }: Apa
             name: data.name,
             address: data.address,
             description: data.description,
+            owner_id: data.owner_id,
           })
           .eq("id", initialData.id);
 
@@ -71,6 +82,7 @@ export function ApartmentForm({ onSuccess, initialData, isEditing = false }: Apa
             address: data.address,
             description: data.description,
             agency_id: agencyId,
+            owner_id: data.owner_id,
           }]);
 
         if (error) throw error;
@@ -99,6 +111,31 @@ export function ApartmentForm({ onSuccess, initialData, isEditing = false }: Apa
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="owner_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Propriétaire</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un propriétaire" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {owners.map((owner) => (
+                    <SelectItem key={owner.id} value={owner.id}>
+                      {owner.first_name} {owner.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="name"
@@ -149,5 +186,5 @@ export function ApartmentForm({ onSuccess, initialData, isEditing = false }: Apa
         </Button>
       </form>
     </Form>
-  )
+  );
 }

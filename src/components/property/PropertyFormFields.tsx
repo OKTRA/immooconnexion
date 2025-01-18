@@ -5,20 +5,6 @@ import { PropertyFormData } from "./types"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { westafrikanCountries } from "@/utils/countryUtils"
 
-interface PropertyFormFieldsProps {
-  formData: PropertyFormData
-  setFormData: (data: PropertyFormData) => void
-  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  imagePreviewUrl?: string | string[]
-  propertyType?: "apartment" | "house"
-  owners?: Array<{
-    id: string
-    first_name: string
-    last_name: string
-    phone_number?: string
-  }>
-}
-
 export function PropertyFormFields({ 
   formData, 
   setFormData, 

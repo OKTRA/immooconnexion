@@ -16,6 +16,12 @@ export interface PropertyFormFieldsProps {
   handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   imagePreviewUrl?: string | string[]
   propertyType?: "apartment" | "house"
+  owners?: Array<{
+    id: string
+    first_name: string
+    last_name: string
+    phone_number?: string
+  }>
 }
 
 export interface PropertyFormData {
@@ -34,41 +40,5 @@ export interface PropertyFormData {
   owner_phone?: string
   country?: string
   quartier?: string
-}
-
-export type ApartmentUnitStatus = "available" | "occupied" | "maintenance" | "reserved"
-
-export interface ApartmentUnit {
-  id: string
-  apartment_id: string
-  unit_number: string
-  floor_number?: number | null
-  area?: number | null
-  rent_amount: number
-  deposit_amount?: number | null
-  status: ApartmentUnitStatus
-  description?: string | null
-  created_at?: string
-  updated_at?: string
-  commission_percentage?: number | null
-  current_lease?: {
-    tenant: {
-      id: string
-      first_name: string
-      last_name: string
-      email: string
-      phone_number: string
-      birth_date: string
-      profession: string
-    }
-    id: string
-    start_date: string
-    end_date: string
-    rent_amount: number
-    deposit_amount: number
-    status: string
-  }
-  apartment?: {
-    name: string
-  }
+  owner_id?: string
 }
