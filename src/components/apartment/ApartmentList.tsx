@@ -25,7 +25,7 @@ export function ApartmentList({ apartments, isLoading, onViewUnits }: ApartmentL
   }
 
   if (!apartments?.length) {
-    return <EmptyApartmentState />
+    return <EmptyApartmentState owners={[]} />
   }
 
   return (

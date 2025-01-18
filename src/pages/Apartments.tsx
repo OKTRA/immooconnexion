@@ -38,7 +38,12 @@ export default function Apartments() {
         .order("created_at", { ascending: false })
 
       if (error) throw error
-      return data
+      return data.map(apt => ({
+        id: apt.id,
+        name: apt.name,
+        address: apt.address || '',
+        unit_count: apt.total_units || 0
+      }))
     }
   })
 
@@ -84,7 +89,7 @@ export default function Apartments() {
   if (!apartments.length) {
     return (
       <AgencyLayout>
-        <EmptyApartmentState />
+        <EmptyApartmentState owners={owners} />
       </AgencyLayout>
     )
   }
@@ -100,7 +105,11 @@ export default function Apartments() {
           </Button>
         </div>
 
-        <ApartmentList apartments={apartments} />
+        <ApartmentList 
+          apartments={apartments}
+          isLoading={isLoading}
+          onViewUnits={() => {}}
+        />
 
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogContent>
