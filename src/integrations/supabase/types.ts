@@ -1469,6 +1469,7 @@ export type Database = {
       apartment_tenants_with_rent: {
         Row: {
           agency_id: string | null
+          created_at: string | null
           email: string | null
           first_name: string | null
           id: string | null
@@ -1479,6 +1480,7 @@ export type Database = {
         }
         Insert: {
           agency_id?: string | null
+          created_at?: string | null
           email?: string | null
           first_name?: string | null
           id?: string | null
@@ -1489,6 +1491,7 @@ export type Database = {
         }
         Update: {
           agency_id?: string | null
+          created_at?: string | null
           email?: string | null
           first_name?: string | null
           id?: string | null

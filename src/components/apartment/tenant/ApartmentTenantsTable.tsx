@@ -58,7 +58,6 @@ export function ApartmentTenantsTable({
           rent_amount
         `)
         .eq("agency_id", profile.agency_id)
-        .order('created_at', { ascending: false })
 
       if (tenantsError) {
         console.error("Error fetching tenants:", tenantsError)
