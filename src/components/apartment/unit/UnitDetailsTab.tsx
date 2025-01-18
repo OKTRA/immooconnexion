@@ -31,10 +31,24 @@ export function UnitDetailsTab({ unit }: UnitDetailsTabProps) {
     }
   })
 
+  const basicInfo = {
+    unit_number: unit.unit_number,
+    floor_number: unit.floor_number || 0,
+    area: unit.area || 0,
+    status: unit.status,
+    description: unit.description || ""
+  }
+
+  const financialInfo = {
+    rent_amount: unit.rent_amount,
+    deposit_amount: unit.deposit_amount || 0,
+    commission_percentage: unit.commission_percentage || 0
+  }
+
   return (
     <div className="space-y-6">
-      <UnitBasicInfo unit={unit} />
-      <UnitFinancialInfo unit={unit} />
+      <UnitBasicInfo unit={basicInfo} />
+      <UnitFinancialInfo unit={financialInfo} />
       <UnitLeaseInfo lease={currentLease} />
       <UnitPaymentHistory unitId={unit.id} />
     </div>

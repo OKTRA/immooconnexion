@@ -5,12 +5,11 @@ import { Loader2 } from "lucide-react"
 import { UnitHeader } from "@/components/apartment/unit/UnitHeader"
 import { UnitDetailsTab } from "@/components/apartment/unit/UnitDetailsTab"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
-import { ApartmentUnit, ApartmentUnitStatus } from "@/components/apartment/types"
+import { ApartmentUnit, ApartmentUnitStatus, ApartmentLease } from "@/components/apartment/types"
 
 export default function UnitDetails() {
   const { unitId } = useParams()
 
-  // First query: Get basic unit information
   const { data: unitBasicData, isLoading: isLoadingUnit } = useQuery({
     queryKey: ['unit-basic', unitId],
     queryFn: async () => {
@@ -42,7 +41,6 @@ export default function UnitDetails() {
     enabled: !!unitId
   })
 
-  // Second query: Get current lease information separately
   const { data: currentLease, isLoading: isLoadingLease } = useQuery({
     queryKey: ['unit-lease', unitId],
     queryFn: async () => {
@@ -52,6 +50,16 @@ export default function UnitDetails() {
         .from("apartment_leases")
         .select(`
           id,
+          tenant_id,
+          unit_id,
+          start_date,
+          end_date,
+          rent_amount,
+          deposit_amount,
+          payment_frequency,
+          duration_type,
+          status,
+          payment_type,
           tenant:apartment_tenants (
             id,
             first_name,
@@ -60,12 +68,7 @@ export default function UnitDetails() {
             phone_number,
             birth_date,
             profession
-          ),
-          start_date,
-          end_date,
-          rent_amount,
-          deposit_amount,
-          status
+          )
         `)
         .eq("unit_id", unitId)
         .eq("status", "active")
@@ -76,7 +79,7 @@ export default function UnitDetails() {
         return null
       }
 
-      return data
+      return data as ApartmentLease
     },
     enabled: !!unitId
   })
@@ -103,11 +106,10 @@ export default function UnitDetails() {
     )
   }
 
-  // Combine the data
   const unitData: ApartmentUnit = {
     ...unitBasicData,
     status: unitBasicData.status as ApartmentUnitStatus,
-    current_lease: currentLease
+    current_lease: currentLease || undefined
   }
 
   return (

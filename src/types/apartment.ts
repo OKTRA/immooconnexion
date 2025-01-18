@@ -26,13 +26,13 @@ export interface ApartmentUnit {
   id: string;
   apartment_id: string;
   unit_number: string;
-  floor_number?: number | null;
-  area?: number | null;
+  floor_number?: number;
+  area?: number;
   rent_amount: number;
-  deposit_amount?: number | null;
+  deposit_amount?: number;
   status: ApartmentUnitStatus;
-  description?: string | null;
-  commission_percentage?: number | null;
+  description?: string;
+  commission_percentage?: number;
   created_at?: string;
   updated_at?: string;
   current_lease?: ApartmentLease;
@@ -71,6 +71,7 @@ export interface ApartmentTenant {
   profession?: string;
   created_at?: string;
   updated_at?: string;
+  apartment_leases?: ApartmentLease[];
 }
 
 export interface ApartmentInspection {
