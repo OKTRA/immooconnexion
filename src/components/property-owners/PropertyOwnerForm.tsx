@@ -48,10 +48,14 @@ export function PropertyOwnerForm({ owner, onSuccess }: PropertyOwnerFormProps) 
 
   const onSubmit = async (values: any) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Non authentifié')
+
       const { data: profile } = await supabase
         .from('profiles')
         .select('agency_id')
-        .single()
+        .eq('id', user.id)
+        .maybeSingle()
 
       if (!profile?.agency_id) throw new Error('No agency found')
 
