@@ -11,6 +11,12 @@ interface PropertyFormFieldsProps {
   handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   imagePreviewUrl?: string | string[]
   propertyType?: "apartment" | "house"
+  owners?: Array<{
+    id: string
+    first_name: string
+    last_name: string
+    phone_number?: string
+  }>
 }
 
 export function PropertyFormFields({ 
@@ -18,11 +24,24 @@ export function PropertyFormFields({
   setFormData, 
   handleImageChange,
   imagePreviewUrl,
-  propertyType 
+  propertyType,
+  owners = []
 }: PropertyFormFieldsProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target
     setFormData({ ...formData, [id]: value })
+  }
+
+  const handleOwnerSelect = (ownerId: string) => {
+    const selectedOwner = owners.find(o => o.id === ownerId)
+    if (selectedOwner) {
+      setFormData({
+        ...formData,
+        owner_id: ownerId,
+        owner_name: `${selectedOwner.first_name} ${selectedOwner.last_name}`,
+        owner_phone: selectedOwner.phone_number || ''
+      })
+    }
   }
 
   const previewUrls = imagePreviewUrl 
@@ -33,6 +52,25 @@ export function PropertyFormFields({
 
   return (
     <div className="grid gap-4 py-4">
+      <div className="grid gap-2">
+        <Label htmlFor="owner">Propriétaire</Label>
+        <Select 
+          value={formData.owner_id} 
+          onValueChange={handleOwnerSelect}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Sélectionner un propriétaire" />
+          </SelectTrigger>
+          <SelectContent>
+            {owners.map((owner) => (
+              <SelectItem key={owner.id} value={owner.id}>
+                {owner.first_name} {owner.last_name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="grid gap-2">
         <Label htmlFor="bien">Nom du bien</Label>
         <Input 
@@ -195,4 +233,3 @@ export function PropertyFormFields({
     </div>
   )
 }
-
