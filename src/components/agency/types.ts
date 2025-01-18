@@ -1,16 +1,32 @@
-import { z } from "zod"
+export interface FormData {
+  email: string
+  password: string
+  confirm_password: string
+  agency_name: string
+  agency_address: string
+  agency_phone: string
+  country: string
+  city: string
+  first_name: string
+  last_name: string
+}
 
-export const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  confirm_password: z.string().min(6),
-  agency_name: z.string().min(2),
-  agency_address: z.string().min(2),
-  agency_phone: z.string().min(2),
-  country: z.string().min(2),
-  city: z.string().min(2),
-  first_name: z.string().min(2),
-  last_name: z.string().min(2)
-})
-
-export type FormData = z.infer<typeof formSchema>
+export interface Agency {
+  id: string
+  name: string
+  address: string | null
+  phone: string | null
+  email: string | null
+  subscription_plan_id: string | null
+  show_phone_on_site: boolean | null
+  list_properties_on_site: boolean | null
+  created_at: string | null
+  updated_at: string | null
+  logo_url: string | null
+  current_properties_count: number | null
+  current_tenants_count: number | null
+  current_profiles_count: number | null
+  status: string
+  country: string | null
+  city: string | null
+}

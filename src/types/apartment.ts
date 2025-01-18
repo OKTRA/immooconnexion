@@ -71,6 +71,13 @@ export interface ApartmentTenant {
   profession?: string;
   created_at?: string;
   updated_at?: string;
+  apartment_leases?: ApartmentLease[];
+  apartment_units?: {
+    unit_number: string;
+    apartment: {
+      name: string;
+    };
+  };
 }
 
 export interface ApartmentInspection {
