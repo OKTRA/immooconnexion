@@ -1,35 +1,35 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Form } from "@/components/ui/form"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
-import { PaymentMethodSelector } from "@/components/payment/PaymentMethodSelector"
-import { OrangeMoneyForm } from "@/components/payment/OrangeMoneyForm"
-import { CinetPayForm } from "@/components/payment/CinetPayForm"
-import { AgencyInfoFields } from "./registration/AgencyInfoFields"
-import { AdminAccountFields } from "./registration/AdminAccountFields"
-import { formSchema, FormData } from "./types"
-import { PaymentFormData } from "@/components/payment/types"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AdminAccountFields } from "./registration/AdminAccountFields";
+import { AgencyInfoFields } from "./registration/AgencyInfoFields";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface AgencyRegistrationDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  planId?: string
-  planName?: string
-  amount?: number
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function AgencyRegistrationDialog({ 
-  open, 
+type FormData = {
+  email: string;
+  password: string;
+  confirm_password: string;
+  agency_name: string;
+  agency_address: string;
+  agency_phone: string;
+  country: string;
+  city: string;
+  first_name: string;
+  last_name: string;
+}
+
+export function AgencyRegistrationDialog({
+  open,
   onOpenChange,
-  planId,
-  planName,
-  amount = 0
 }: AgencyRegistrationDialogProps) {
-  const [showPaymentMethods, setShowPaymentMethods] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<string>("orange_money")
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -41,66 +41,111 @@ export function AgencyRegistrationDialog({
     city: "",
     first_name: "",
     last_name: ""
-  })
+  });
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: formData
-  })
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-  const handleSubmit = async (data: FormData) => {
-    setFormData(data)
-    setShowPaymentMethods(true)
-  }
+    try {
+      if (formData.password !== formData.confirm_password) {
+        throw new Error("Les mots de passe ne correspondent pas");
+      }
+
+      // Create the agency first
+      const { data: agencyData, error: agencyError } = await supabase
+        .from('agencies')
+        .insert([
+          {
+            name: formData.agency_name,
+            address: formData.agency_address,
+            phone: formData.agency_phone,
+            country: formData.country,
+            city: formData.city,
+          }
+        ])
+        .select()
+        .single();
+
+      if (agencyError) throw agencyError;
+
+      // Create the user account
+      const { data: userData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+          }
+        }
+      });
+
+      if (authError) throw authError;
+
+      // Update the profile with agency_id and role
+      if (userData.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            agency_id: agencyData.id,
+            role: 'admin'
+          })
+          .eq('id', userData.user.id);
+
+        if (profileError) throw profileError;
+      }
+
+      toast({
+        title: "Inscription réussie",
+        description: "Veuillez vérifier votre email pour confirmer votre compte.",
+      });
+
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de l'inscription",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl overflow-hidden p-0">
-        <DialogHeader className="p-6 pb-2">
-          <DialogTitle>
-            {showPaymentMethods ? "Choisissez votre méthode de paiement" : "Inscription de l'agence"}
-          </DialogTitle>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Inscription de l'agence</DialogTitle>
         </DialogHeader>
-        
-        <ScrollArea className="max-h-[80vh] px-6 pb-6">
-          {!showPaymentMethods ? (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                <AgencyInfoFields form={form} />
-                <AdminAccountFields form={form} />
-                <Button type="submit" className="w-full">
-                  Continuer vers le paiement
-                </Button>
-              </form>
-            </Form>
-          ) : (
-            <div className="space-y-6">
-              <PaymentMethodSelector
-                selectedMethod={paymentMethod}
-                onMethodChange={setPaymentMethod}
-              />
-
-              {paymentMethod === "orange_money" && (
-                <OrangeMoneyForm
-                  amount={amount}
-                  description={`Inscription - Plan ${planName}`}
-                  planId={planId}
-                  formData={formData as PaymentFormData}
-                />
-              )}
-
-              {paymentMethod === "cinetpay" && (
-                <CinetPayForm
-                  amount={amount}
-                  description={`Inscription - Plan ${planName}`}
-                  agencyId={planId}
-                  formData={formData as PaymentFormData}
-                />
-              )}
-            </div>
-          )}
-        </ScrollArea>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <AdminAccountFields
+            formData={formData}
+            setFormData={setFormData}
+          />
+          <AgencyInfoFields
+            formData={formData}
+            setFormData={setFormData}
+          />
+          <div className="flex justify-end gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isLoading}
+            >
+              Annuler
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Chargement..." : "S'inscrire"}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
