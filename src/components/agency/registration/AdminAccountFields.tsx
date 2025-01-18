@@ -4,7 +4,7 @@ import { UseFormReturn } from "react-hook-form"
 import { FormData } from "../types"
 
 interface AdminAccountFieldsProps {
-  form: UseFormReturn<FormData>
+  form: UseFormReturn<FormData>;
 }
 
 export function AdminAccountFields({ form }: AdminAccountFieldsProps) {

@@ -4,7 +4,7 @@ import { UseFormReturn } from "react-hook-form"
 import { FormData } from "../types"
 
 interface AgencyInfoFieldsProps {
-  form: UseFormReturn<FormData>
+  form: UseFormReturn<FormData>;
 }
 
 export function AgencyInfoFields({ form }: AgencyInfoFieldsProps) {
