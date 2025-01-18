@@ -64,14 +64,24 @@ export function PropertyOwnerForm({ owner, onSuccess }: PropertyOwnerFormProps) 
 
         if (error) throw error
       } else {
-        // Start a transaction by using RPC
+        // Create new owner
         const { data: newOwner, error: ownerError } = await supabase
-          .rpc('create_property_owner', {
-            owner_data: values,
-            p_agency_id: profile.agency_id
-          })
+          .from('property_owners')
+          .insert(values)
+          .select()
+          .single()
 
         if (ownerError) throw ownerError
+
+        // Create agency-owner relationship
+        const { error: relationError } = await supabase
+          .from('agency_owners')
+          .insert({
+            owner_id: newOwner.id,
+            agency_id: profile.agency_id
+          })
+
+        if (relationError) throw relationError
       }
 
       toast({
