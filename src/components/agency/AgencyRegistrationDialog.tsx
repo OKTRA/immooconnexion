@@ -5,63 +5,52 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-interface AgencyRegistrationDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-type FormData = {
-  email: string;
-  password: string;
-  confirm_password: string;
-  agency_name: string;
-  agency_address: string;
-  agency_phone: string;
-  country: string;
-  city: string;
-  first_name: string;
-  last_name: string;
-}
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { FormData, formSchema, AgencyRegistrationDialogProps } from "./types";
+import { Form } from "@/components/ui/form";
 
 export function AgencyRegistrationDialog({
   open,
   onOpenChange,
+  planId,
+  planName,
+  amount
 }: AgencyRegistrationDialogProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
-    email: "",
-    password: "",
-    confirm_password: "",
-    agency_name: "",
-    agency_address: "",
-    agency_phone: "",
-    country: "",
-    city: "",
-    first_name: "",
-    last_name: ""
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirm_password: "",
+      agency_name: "",
+      agency_address: "",
+      agency_phone: "",
+      country: "",
+      city: "",
+      first_name: "",
+      last_name: ""
+    }
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: FormData) => {
     setIsLoading(true);
 
     try {
-      if (formData.password !== formData.confirm_password) {
-        throw new Error("Les mots de passe ne correspondent pas");
-      }
-
       // Create the agency first
       const { data: agencyData, error: agencyError } = await supabase
         .from('agencies')
         .insert([
           {
-            name: formData.agency_name,
-            address: formData.agency_address,
-            phone: formData.agency_phone,
-            country: formData.country,
-            city: formData.city,
+            name: data.agency_name,
+            address: data.agency_address,
+            phone: data.agency_phone,
+            country: data.country,
+            city: data.city,
+            subscription_plan_id: planId
           }
         ])
         .select()
@@ -71,12 +60,12 @@ export function AgencyRegistrationDialog({
 
       // Create the user account
       const { data: userData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
+        email: data.email,
+        password: data.password,
         options: {
           data: {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
+            first_name: data.first_name,
+            last_name: data.last_name,
           }
         }
       });
@@ -88,8 +77,8 @@ export function AgencyRegistrationDialog({
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
-            first_name: formData.first_name,
-            last_name: formData.last_name,
+            first_name: data.first_name,
+            last_name: data.last_name,
             agency_id: agencyData.id,
             role: 'admin'
           })
@@ -122,29 +111,25 @@ export function AgencyRegistrationDialog({
         <DialogHeader>
           <DialogTitle>Inscription de l'agence</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <AdminAccountFields
-            formData={formData}
-            setFormData={setFormData}
-          />
-          <AgencyInfoFields
-            formData={formData}
-            setFormData={setFormData}
-          />
-          <div className="flex justify-end gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isLoading}
-            >
-              Annuler
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Chargement..." : "S'inscrire"}
-            </Button>
-          </div>
-        </form>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <AdminAccountFields form={form} />
+            <AgencyInfoFields form={form} />
+            <div className="flex justify-end gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isLoading}
+              >
+                Annuler
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Chargement..." : "S'inscrire"}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

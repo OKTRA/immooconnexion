@@ -17,3 +17,11 @@ export const formSchema = z.object({
 })
 
 export type FormData = z.infer<typeof formSchema>
+
+export interface AgencyRegistrationDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  planId?: string;
+  planName?: string;
+  amount?: number;
+}
