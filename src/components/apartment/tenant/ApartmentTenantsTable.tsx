@@ -29,7 +29,7 @@ export function ApartmentTenantsTable({
   const { toast } = useToast()
   const navigate = useNavigate()
 
-  // Première requête pour obtenir les locataires
+  // Première requête pour obtenir les locataires avec des champs minimaux
   const { data: tenants = [], isLoading: tenantsLoading } = useQuery({
     queryKey: ["apartment-tenants-basic", apartmentId],
     queryFn: async () => {
@@ -80,9 +80,9 @@ export function ApartmentTenantsTable({
     enabled: !externalLoading
   })
 
-  // Deuxième requête pour obtenir les baux actifs
-  const { data: activeLeases = [] } = useQuery({
-    queryKey: ["active-leases", tenants],
+  // Deuxième requête simplifiée pour obtenir uniquement les montants des baux actifs
+  const { data: leaseAmounts = [] } = useQuery({
+    queryKey: ["active-lease-amounts", tenants],
     queryFn: async () => {
       if (!tenants.length) return []
 
@@ -93,7 +93,7 @@ export function ApartmentTenantsTable({
         .in('tenant_id', tenants.map(t => t.id))
 
       if (error) {
-        console.error("Error fetching leases:", error)
+        console.error("Error fetching lease amounts:", error)
         throw error
       }
 
@@ -102,10 +102,10 @@ export function ApartmentTenantsTable({
     enabled: tenants.length > 0
   })
 
-  // Combiner les données
-  const tenantsWithLeases = tenants.map(tenant => ({
+  // Combiner les données de manière simple
+  const tenantsWithRent = tenants.map(tenant => ({
     ...tenant,
-    apartment_leases: activeLeases.filter(lease => lease.tenant_id === tenant.id)
+    rent_amount: leaseAmounts.find(lease => lease.tenant_id === tenant.id)?.rent_amount
   }))
 
   if (externalLoading || tenantsLoading) {
@@ -130,7 +130,7 @@ export function ApartmentTenantsTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tenantsWithLeases.map((tenant) => (
+          {tenantsWithRent.map((tenant) => (
             <TableRow 
               key={tenant.id}
               className="cursor-pointer hover:bg-muted/50"
@@ -141,12 +141,11 @@ export function ApartmentTenantsTable({
               <TableCell>{tenant.phone_number || "-"}</TableCell>
               <TableCell>{tenant.email || "-"}</TableCell>
               <TableCell>
-                {tenant.apartment_leases?.[0]?.rent_amount?.toLocaleString()} FCFA
+                {tenant.rent_amount?.toLocaleString()} FCFA
               </TableCell>
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <TenantActionButtons
                   tenant={tenant}
-                  currentLease={tenant.apartment_leases?.[0]}
                   onEdit={() => onEdit(tenant)}
                   onDelete={() => onDelete(tenant.id)}
                   onInspection={() => {}}
@@ -154,7 +153,7 @@ export function ApartmentTenantsTable({
               </TableCell>
             </TableRow>
           ))}
-          {tenantsWithLeases.length === 0 && (
+          {tenantsWithRent.length === 0 && (
             <TableRow>
               <TableCell colSpan={6} className="text-center py-4">
                 Aucun locataire trouvé
