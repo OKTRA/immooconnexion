@@ -678,12 +678,13 @@ export type Database = {
           description: string | null
           floor_level: string | null
           floor_number: number | null
-          has_store: boolean | null
+          has_pool: boolean | null
           id: string
           kitchen_description: string | null
           living_rooms: number | null
           rent_amount: number
           status: string | null
+          store_count: number | null
           unit_name: string | null
           unit_number: string
           updated_at: string | null
@@ -698,12 +699,13 @@ export type Database = {
           description?: string | null
           floor_level?: string | null
           floor_number?: number | null
-          has_store?: boolean | null
+          has_pool?: boolean | null
           id?: string
           kitchen_description?: string | null
           living_rooms?: number | null
           rent_amount: number
           status?: string | null
+          store_count?: number | null
           unit_name?: string | null
           unit_number: string
           updated_at?: string | null
@@ -718,12 +720,13 @@ export type Database = {
           description?: string | null
           floor_level?: string | null
           floor_number?: number | null
-          has_store?: boolean | null
+          has_pool?: boolean | null
           id?: string
           kitchen_description?: string | null
           living_rooms?: number | null
           rent_amount?: number
           status?: string | null
+          store_count?: number | null
           unit_name?: string | null
           unit_number?: string
           updated_at?: string | null
