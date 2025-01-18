@@ -1,7 +1,6 @@
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { OverviewStats } from "@/components/reports/OverviewStats"
 import { OccupancyStatus } from "@/components/reports/OccupancyStatus"
-import { RevenueEvolution } from "@/components/reports/RevenueEvolution"
 import { PropertyAnalysisReport } from "@/components/reports/PropertyAnalysisReport"
 import { TenantPaymentsReport } from "@/components/reports/TenantPaymentsReport"
 
@@ -12,7 +11,6 @@ const Reports = () => {
       <div className="space-y-8">
         <OverviewStats />
         <OccupancyStatus />
-        <RevenueEvolution />
         <PropertyAnalysisReport />
         <TenantPaymentsReport />
       </div>
