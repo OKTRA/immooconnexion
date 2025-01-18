@@ -14,14 +14,12 @@ import {
 import { useNavigate } from "react-router-dom"
 
 interface ApartmentTenantsTableProps {
-  apartmentId?: string
   onEdit: (tenant: any) => void
   onDelete: (tenantId: string) => void
   isLoading?: boolean
 }
 
 export function ApartmentTenantsTable({
-  apartmentId,
   onEdit,
   onDelete,
   isLoading: externalLoading
@@ -30,10 +28,8 @@ export function ApartmentTenantsTable({
   const navigate = useNavigate()
 
   const { data: tenants = [], isLoading: tenantsLoading } = useQuery({
-    queryKey: ["apartment-tenants", apartmentId],
+    queryKey: ["apartment-tenants"],
     queryFn: async () => {
-      console.log("Fetching tenants for apartment:", apartmentId)
-      
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
@@ -47,7 +43,6 @@ export function ApartmentTenantsTable({
         throw new Error("Aucune agence associée")
       }
 
-      // Using the optimized view instead of complex joins
       const { data: tenantsData, error: tenantsError } = await supabase
         .from("apartment_tenants_with_rent")
         .select()

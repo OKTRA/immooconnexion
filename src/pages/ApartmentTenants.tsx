@@ -88,7 +88,6 @@ export default function ApartmentTenants() {
         <ApartmentTenantDialog
           open={open}
           onOpenChange={setOpen}
-          unitId={null}
           tenant={selectedTenant}
         />
       </div>
