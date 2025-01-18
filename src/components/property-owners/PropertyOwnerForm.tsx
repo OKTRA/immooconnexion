@@ -16,9 +16,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useQueryClient } from "@tanstack/react-query"
+import { useAgencies } from "@/hooks/useAgencies"
+import { Loader2 } from "lucide-react"
+import { useState } from "react"
 
 interface PropertyOwnerFormProps {
   owner?: {
@@ -35,6 +38,8 @@ interface PropertyOwnerFormProps {
 export function PropertyOwnerForm({ owner, onSuccess }: PropertyOwnerFormProps) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { agencyId } = useAgencies()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm({
     defaultValues: {
@@ -47,17 +52,17 @@ export function PropertyOwnerForm({ owner, onSuccess }: PropertyOwnerFormProps) 
   })
 
   const onSubmit = async (values: any) => {
+    if (!agencyId) {
+      toast({
+        title: "Erreur",
+        description: "ID de l'agence non trouvé",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Non authentifié')
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('agency_id')
-        .eq('id', user.id)
-        .maybeSingle()
-
-      if (!profile?.agency_id) throw new Error('No agency found')
+      setIsSubmitting(true)
 
       if (owner) {
         // Update existing owner
@@ -71,7 +76,13 @@ export function PropertyOwnerForm({ owner, onSuccess }: PropertyOwnerFormProps) 
         // Create new owner and establish agency relationship in a transaction
         const { data: newOwner, error: ownerError } = await supabase
           .from('property_owners')
-          .insert(values)
+          .insert({
+            first_name: values.first_name,
+            last_name: values.last_name,
+            email: values.email,
+            phone_number: values.phone_number,
+            status: values.status
+          })
           .select()
           .single()
 
@@ -82,7 +93,7 @@ export function PropertyOwnerForm({ owner, onSuccess }: PropertyOwnerFormProps) 
           .from('agency_owners')
           .insert({
             owner_id: newOwner.id,
-            agency_id: profile.agency_id
+            agency_id: agencyId
           })
 
         if (relationError) throw relationError
@@ -97,13 +108,15 @@ export function PropertyOwnerForm({ owner, onSuccess }: PropertyOwnerFormProps) 
 
       queryClient.invalidateQueries({ queryKey: ['property-owners'] })
       onSuccess()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error)
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue",
+        description: error.message || "Une erreur est survenue",
         variant: "destructive"
       })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -189,8 +202,15 @@ export function PropertyOwnerForm({ owner, onSuccess }: PropertyOwnerFormProps) 
         />
 
         <div className="flex justify-end gap-4">
-          <Button type="submit">
-            {owner ? 'Modifier' : 'Ajouter'}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {owner ? 'Modification...' : 'Ajout...'}
+              </>
+            ) : (
+              owner ? 'Modifier' : 'Ajouter'
+            )}
           </Button>
         </div>
       </form>
