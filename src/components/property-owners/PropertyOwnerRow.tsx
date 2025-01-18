@@ -1,13 +1,14 @@
 import { TableCell, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Edit, Trash } from "lucide-react"
+import { Edit, Trash, Eye } from "lucide-react"
 import { useState } from "react"
 import { PropertyOwnerDialog } from "./PropertyOwnerDialog"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useQueryClient } from "@tanstack/react-query"
 import { useQuery } from "@tanstack/react-query"
+import { useNavigate } from "react-router-dom"
 
 interface PropertyOwnerRowProps {
   owner: {
@@ -24,6 +25,7 @@ export function PropertyOwnerRow({ owner }: PropertyOwnerRowProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   // Fetch payment statuses for this owner
   const { data: paymentStatus } = useQuery({
@@ -36,14 +38,14 @@ export function PropertyOwnerRow({ owner }: PropertyOwnerRowProps) {
           *,
           apartment_leases!inner(
             apartment_units!inner(
-              apartment!inner(
+              apartments!inner(
                 owner_id
               )
             )
           )
         `)
         .eq('status', 'pending')
-        .eq('apartment_leases.apartment_units.apartment.owner_id', owner.id);
+        .eq('apartment_leases.apartment_units.apartments.owner_id', owner.id);
 
       if (pendingError) throw pendingError;
 
@@ -55,13 +57,13 @@ export function PropertyOwnerRow({ owner }: PropertyOwnerRowProps) {
           late_payment_fees!inner(*),
           apartment_leases!inner(
             apartment_units!inner(
-              apartment!inner(
+              apartments!inner(
                 owner_id
               )
             )
           )
         `)
-        .eq('apartment_leases.apartment_units.apartment.owner_id', owner.id)
+        .eq('apartment_leases.apartment_units.apartments.owner_id', owner.id)
         .not('late_payment_fees', 'is', null);
 
       if (lateError) throw lateError;
@@ -100,6 +102,10 @@ export function PropertyOwnerRow({ owner }: PropertyOwnerRowProps) {
     }
   }
 
+  const handleViewDetails = () => {
+    navigate(`/agence/property-owners/${owner.id}`)
+  }
+
   return (
     <>
       <TableRow>
@@ -129,6 +135,13 @@ export function PropertyOwnerRow({ owner }: PropertyOwnerRowProps) {
         </TableCell>
         <TableCell>
           <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleViewDetails}
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
             <Button
               variant="ghost"
               size="icon"
