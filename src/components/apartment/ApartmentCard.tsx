@@ -23,6 +23,7 @@ export function ApartmentCard({ apartment, onUpdate }: ApartmentCardProps) {
   const navigate = useNavigate()
   const { toast } = useToast()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [hasUnits, setHasUnits] = useState(false)
 
   // Fetch real-time unit count
   const { data: unitCount = 0 } = useQuery({
@@ -34,6 +35,9 @@ export function ApartmentCard({ apartment, onUpdate }: ApartmentCardProps) {
         .eq('apartment_id', apartment.id)
 
       if (error) throw error
+      
+      // Update hasUnits state based on count
+      setHasUnits(data?.length > 0)
       return data?.length || 0
     }
   })
@@ -123,6 +127,7 @@ export function ApartmentCard({ apartment, onUpdate }: ApartmentCardProps) {
                     e.stopPropagation()
                     setShowDeleteDialog(true)
                   }}
+                  disabled={hasUnits}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -146,12 +151,18 @@ export function ApartmentCard({ apartment, onUpdate }: ApartmentCardProps) {
             <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
             <AlertDialogDescription>
               Cette action est irréversible. L'appartement sera définitivement supprimé.
-              Note: Vous devez d'abord supprimer toutes les unités associées avant de pouvoir supprimer l'appartement.
+              {hasUnits && (
+                <p className="mt-2 text-destructive">
+                  Vous devez d'abord supprimer toutes les unités associées avant de pouvoir supprimer l'appartement.
+                </p>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Supprimer</AlertDialogAction>
+            {!hasUnits && (
+              <AlertDialogAction onClick={handleDelete}>Supprimer</AlertDialogAction>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
