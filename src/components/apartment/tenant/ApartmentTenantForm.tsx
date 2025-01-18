@@ -1,178 +1,168 @@
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { supabase } from "@/integrations/supabase/client"
-import { useState } from "react"
-import { useToast } from "@/hooks/use-toast"
-import { ContactFields } from "./form/ContactFields"
-import { LeaseFields } from "./form/LeaseFields"
-import { UnitSelector } from "./form/UnitSelector"
-import { PaymentFrequency, DurationType } from "../lease/types"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/lib/supabase";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { ContactFields } from "./form/ContactFields";
+import { LeaseFields } from "./form/LeaseFields";
+import { PhotoUpload } from "./form/PhotoUpload";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export interface ApartmentTenantFormProps {
-  apartmentId: string
-  onSuccess: () => void
-  isSubmitting: boolean
-  setIsSubmitting: (value: boolean) => void
-  initialData?: any
+  unitId: string;
+  onSuccess: () => void;
+  isSubmitting: boolean;
+  setIsSubmitting: (value: boolean) => void;
+  initialData?: any;
 }
 
 export function ApartmentTenantForm({
-  apartmentId,
+  unitId,
   onSuccess,
   isSubmitting,
   setIsSubmitting,
   initialData
 }: ApartmentTenantFormProps) {
-  const { toast } = useToast()
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone_number: "",
-    birth_date: null as string | null,
-    unit_id: "",
-    start_date: "",
-    end_date: "",
-    payment_frequency: "monthly" as PaymentFrequency,
-    duration_type: "fixed" as DurationType,
-  })
-
-  const isFormValid = () => {
-    return (
-      formData.first_name.trim() !== "" &&
-      formData.last_name.trim() !== "" &&
-      formData.phone_number.trim() !== "" &&
-      formData.unit_id !== "" &&
-      formData.start_date !== "" &&
-      (formData.duration_type !== "fixed" || formData.end_date !== "")
-    )
-  }
+    firstName: initialData?.first_name || "",
+    lastName: initialData?.last_name || "",
+    email: initialData?.email || "",
+    phoneNumber: initialData?.phone_number || "",
+    birthDate: initialData?.birth_date || "",
+    profession: initialData?.profession || "",
+    rentAmount: "",
+    depositAmount: "",
+    startDate: "",
+    endDate: "",
+    paymentFrequency: "monthly",
+    durationType: "fixed",
+    photos: null as FileList | null
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!isFormValid()) {
-      toast({
-        title: "Formulaire incomplet",
-        description: "Veuillez remplir tous les champs obligatoires",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Non authentifié")
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifié");
 
       const { data: profile } = await supabase
         .from("profiles")
         .select("agency_id")
         .eq("id", user.id)
-        .maybeSingle()
+        .single();
 
-      if (!profile?.agency_id) {
-        throw new Error("Aucune agence associée à ce profil")
+      if (!profile?.agency_id) throw new Error("Agency ID not found");
+
+      // Upload photos if provided
+      let photoUrls: string[] = [];
+      if (formData.photos) {
+        for (let i = 0; i < formData.photos.length; i++) {
+          const file = formData.photos[i];
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Math.random()}.${fileExt}`;
+          
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('tenant_photos')
+            .upload(fileName, file);
+
+          if (uploadError) throw uploadError;
+          if (uploadData) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('tenant_photos')
+              .getPublicUrl(uploadData.path);
+            photoUrls.push(publicUrl);
+          }
+        }
       }
 
-      // First, get unit information
-      const { data: unit, error: unitError } = await supabase
-        .from("apartment_units")
-        .select("rent_amount, deposit_amount")
-        .eq("id", formData.unit_id)
-        .maybeSingle()
-
-      if (unitError) throw unitError
-      if (!unit) throw new Error("Unité non trouvée")
-
-      // Create tenant first
+      // Create tenant with optimized query
       const { data: tenant, error: tenantError } = await supabase
         .from("apartment_tenants")
         .insert({
-          first_name: formData.first_name,
-          last_name: formData.last_name,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
           email: formData.email,
-          phone_number: formData.phone_number,
-          birth_date: formData.birth_date,
+          phone_number: formData.phoneNumber,
+          birth_date: formData.birthDate,
+          photo_id_url: photoUrls.length > 0 ? photoUrls[0] : null,
+          profession: formData.profession,
           agency_id: profile.agency_id,
-          unit_id: formData.unit_id
+          unit_id: unitId
         })
         .select()
-        .single()
+        .single();
 
-      if (tenantError) throw tenantError
+      if (tenantError) throw tenantError;
 
-      // Then create lease in a separate query
+      // Create lease with simplified query
       const { error: leaseError } = await supabase
         .from("apartment_leases")
         .insert({
           tenant_id: tenant.id,
-          unit_id: formData.unit_id,
-          start_date: formData.start_date,
-          end_date: formData.duration_type === "fixed" ? formData.end_date : null,
-          rent_amount: unit.rent_amount,
-          deposit_amount: unit.deposit_amount,
-          payment_frequency: formData.payment_frequency,
-          duration_type: formData.duration_type,
+          unit_id: unitId,
+          start_date: formData.startDate,
+          end_date: formData.durationType === "fixed" ? formData.endDate : null,
+          rent_amount: parseInt(formData.rentAmount),
+          deposit_amount: parseInt(formData.depositAmount),
+          payment_frequency: formData.paymentFrequency,
+          duration_type: formData.durationType,
           status: "active",
           agency_id: profile.agency_id
-        })
+        });
 
-      if (leaseError) throw leaseError
+      if (leaseError) throw leaseError;
 
       toast({
         title: "Succès",
-        description: "Le locataire a été ajouté avec succès.",
-      })
+        description: "Le locataire a été ajouté avec succès",
+      });
 
-      onSuccess()
+      onSuccess();
     } catch (error: any) {
-      console.error("Error:", error)
+      console.error("Error:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error.message || "Une erreur est survenue",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="max-h-[600px] overflow-y-auto px-4">
       <form onSubmit={handleSubmit} className="space-y-8">
         <ContactFields formData={formData} setFormData={setFormData} />
-        <UnitSelector
-          apartmentId={apartmentId}
-          value={formData.unit_id}
-          onChange={(value) => setFormData({ ...formData, unit_id: value })}
-        />
+        
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="profession">Profession</Label>
+            <Input
+              id="profession"
+              value={formData.profession}
+              onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
+              placeholder="Profession du locataire"
+            />
+          </div>
+        </div>
+
+        <PhotoUpload onPhotosSelected={(files) => setFormData({ ...formData, photos: files })} />
         <LeaseFields formData={formData} setFormData={setFormData} />
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={() => setIsSubmitting(false)} disabled={isSubmitting}>
             Annuler
           </Button>
-          <Button 
-            type="submit" 
-            disabled={isSubmitting || !isFormValid()}
-            className={!isFormValid() ? "opacity-50 cursor-not-allowed" : ""}
-          >
+          <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Chargement..." : "Ajouter"}
           </Button>
         </div>
       </form>
     </div>
-  )
+  );
 }
