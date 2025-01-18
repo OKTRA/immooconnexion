@@ -42,12 +42,13 @@ export function ApartmentTenantsTable({
         .from('profiles')
         .select('agency_id')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
 
       if (!profile?.agency_id) {
         throw new Error("Aucune agence associée")
       }
 
+      // Première requête pour obtenir les locataires
       let query = supabase
         .from("apartment_tenants")
         .select(`
@@ -55,17 +56,11 @@ export function ApartmentTenantsTable({
           first_name,
           last_name,
           email,
-          phone_number,
-          apartment_leases (
-            id,
-            status,
-            rent_amount
-          )
+          phone_number
         `)
         .eq("agency_id", profile.agency_id)
         .order("created_at", { ascending: false })
 
-      // If a specific apartment unit is selected, filter by unit_id
       if (apartmentId && apartmentId !== "all") {
         query = query.eq("unit_id", apartmentId)
       }
@@ -82,8 +77,26 @@ export function ApartmentTenantsTable({
         throw error
       }
 
-      console.log("Tenants data:", tenantData)
-      return tenantData || []
+      // Deuxième requête pour obtenir les baux actifs
+      const { data: leases, error: leaseError } = await supabase
+        .from("apartment_leases")
+        .select("tenant_id, rent_amount, status")
+        .eq("status", "active")
+        .in("tenant_id", tenantData?.map(t => t.id) || [])
+
+      if (leaseError) {
+        console.error("Error fetching leases:", leaseError)
+        throw leaseError
+      }
+
+      // Combiner les données
+      const tenantsWithLeases = tenantData?.map(tenant => ({
+        ...tenant,
+        apartment_leases: leases?.filter(l => l.tenant_id === tenant.id) || []
+      }))
+
+      console.log("Tenants data:", tenantsWithLeases)
+      return tenantsWithLeases || []
     },
     enabled: !externalLoading
   })
