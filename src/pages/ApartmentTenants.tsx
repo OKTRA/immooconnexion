@@ -79,7 +79,6 @@ export default function ApartmentTenants() {
         <Card>
           <CardContent className="p-0">
             <ApartmentTenantsTable
-              apartmentId="all"
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
@@ -89,7 +88,7 @@ export default function ApartmentTenants() {
         <ApartmentTenantDialog
           open={open}
           onOpenChange={setOpen}
-          unitId="all"
+          unitId={null}
           tenant={selectedTenant}
         />
       </div>
