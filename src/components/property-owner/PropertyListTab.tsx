@@ -38,11 +38,6 @@ export function PropertyListTab({ ownerId }: PropertyListTabProps) {
               nom,
               prenom
             )
-          ),
-          property_inspections(
-            status,
-            has_damages,
-            updated_at
           )
         `)
         .eq('owner_id', ownerId)
@@ -62,7 +57,23 @@ export function PropertyListTab({ ownerId }: PropertyListTabProps) {
       const { data, error } = await query
 
       if (error) throw error
-      return data
+      
+      // Get property inspections in a separate query
+      const { data: inspections, error: inspectionsError } = await supabase
+        .from('property_inspections')
+        .select('*')
+        .in('contract_id', data?.flatMap(p => p.contracts?.map(c => c.id) || []) || [])
+        .order('inspection_date', { ascending: false })
+      
+      if (inspectionsError) throw inspectionsError
+
+      // Merge inspections data with properties
+      return data?.map(property => ({
+        ...property,
+        property_inspections: inspections.filter(
+          inspection => property.contracts?.some(contract => contract.id === inspection.contract_id)
+        )
+      })) || []
     }
   })
 
@@ -179,12 +190,14 @@ export function PropertyListTab({ ownerId }: PropertyListTabProps) {
                       <span className="font-medium">Loyer:</span>{' '}
                       {property.contracts?.[0]?.montant?.toLocaleString()} FCFA
                     </p>
-                    <p>
-                      <span className="font-medium">État:</span>{' '}
-                      <Badge variant={maintenanceStatus === 'attention' ? 'destructive' : 'default'}>
-                        {maintenanceStatus === 'attention' ? 'Nécessite attention' : 'Bon état'}
-                      </Badge>
-                    </p>
+                    {latestInspection && (
+                      <p>
+                        <span className="font-medium">État:</span>{' '}
+                        <Badge variant={maintenanceStatus === 'attention' ? 'destructive' : 'default'}>
+                          {maintenanceStatus === 'attention' ? 'Nécessite attention' : 'Bon état'}
+                        </Badge>
+                      </p>
+                    )}
                     <div className="flex justify-between pt-2">
                       <span>Contrats: {property.total_contracts}</span>
                       <span>Revenue: {property.total_revenue?.toLocaleString()} FCFA</span>
