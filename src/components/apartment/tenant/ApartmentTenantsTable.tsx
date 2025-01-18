@@ -29,12 +29,12 @@ export function ApartmentTenantsTable({
   const { toast } = useToast()
   const navigate = useNavigate()
 
-  const { data: tenants = [], isLoading } = useQuery({
-    queryKey: ["apartment-tenants", apartmentId],
+  // Première requête pour obtenir les locataires
+  const { data: tenants = [], isLoading: tenantsLoading } = useQuery({
+    queryKey: ["apartment-tenants-basic", apartmentId],
     queryFn: async () => {
       console.log("Fetching tenants for apartment:", apartmentId)
       
-      // Get the current user's profile to get their agency_id
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
@@ -48,7 +48,6 @@ export function ApartmentTenantsTable({
         throw new Error("Aucune agence associée")
       }
 
-      // Première requête pour obtenir les locataires
       let query = supabase
         .from("apartment_tenants")
         .select(`
@@ -59,13 +58,12 @@ export function ApartmentTenantsTable({
           phone_number
         `)
         .eq("agency_id", profile.agency_id)
-        .order("created_at", { ascending: false })
 
       if (apartmentId && apartmentId !== "all") {
         query = query.eq("unit_id", apartmentId)
       }
 
-      const { data: tenantData, error } = await query
+      const { data, error } = await query
 
       if (error) {
         console.error("Error fetching tenants:", error)
@@ -77,31 +75,40 @@ export function ApartmentTenantsTable({
         throw error
       }
 
-      // Deuxième requête pour obtenir les baux actifs
-      const { data: leases, error: leaseError } = await supabase
-        .from("apartment_leases")
-        .select("tenant_id, rent_amount, status")
-        .eq("status", "active")
-        .in("tenant_id", tenantData?.map(t => t.id) || [])
-
-      if (leaseError) {
-        console.error("Error fetching leases:", leaseError)
-        throw leaseError
-      }
-
-      // Combiner les données
-      const tenantsWithLeases = tenantData?.map(tenant => ({
-        ...tenant,
-        apartment_leases: leases?.filter(l => l.tenant_id === tenant.id) || []
-      }))
-
-      console.log("Tenants data:", tenantsWithLeases)
-      return tenantsWithLeases || []
+      return data || []
     },
     enabled: !externalLoading
   })
 
-  if (externalLoading || isLoading) {
+  // Deuxième requête pour obtenir les baux actifs
+  const { data: activeLeases = [] } = useQuery({
+    queryKey: ["active-leases", tenants],
+    queryFn: async () => {
+      if (!tenants.length) return []
+
+      const { data, error } = await supabase
+        .from("apartment_leases")
+        .select('tenant_id, rent_amount')
+        .eq('status', 'active')
+        .in('tenant_id', tenants.map(t => t.id))
+
+      if (error) {
+        console.error("Error fetching leases:", error)
+        throw error
+      }
+
+      return data || []
+    },
+    enabled: tenants.length > 0
+  })
+
+  // Combiner les données
+  const tenantsWithLeases = tenants.map(tenant => ({
+    ...tenant,
+    apartment_leases: activeLeases.filter(lease => lease.tenant_id === tenant.id)
+  }))
+
+  if (externalLoading || tenantsLoading) {
     return (
       <div className="flex justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -123,7 +130,7 @@ export function ApartmentTenantsTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tenants.map((tenant) => (
+          {tenantsWithLeases.map((tenant) => (
             <TableRow 
               key={tenant.id}
               className="cursor-pointer hover:bg-muted/50"
@@ -147,7 +154,7 @@ export function ApartmentTenantsTable({
               </TableCell>
             </TableRow>
           ))}
-          {tenants.length === 0 && (
+          {tenantsWithLeases.length === 0 && (
             <TableRow>
               <TableCell colSpan={6} className="text-center py-4">
                 Aucun locataire trouvé
