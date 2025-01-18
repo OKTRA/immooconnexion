@@ -31,53 +31,73 @@ export function ApartmentTenantsTable({
   const { data: tenants = [], isLoading: tenantsLoading } = useQuery({
     queryKey: ["apartment-tenants"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Non authentifié")
+      try {
+        // First get the authenticated user
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        if (authError || !user) {
+          throw new Error("Non authentifié")
+        }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('agency_id')
-        .eq('id', user.id)
-        .maybeSingle()
+        // Get the user's profile to get their agency_id
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('agency_id')
+          .eq('id', user.id)
+          .maybeSingle()
 
-      if (!profile?.agency_id) {
-        throw new Error("Aucune agence associée")
-      }
+        if (profileError) {
+          throw profileError
+        }
 
-      const { data: tenantsData, error: tenantsError } = await supabase
-        .from("apartment_tenants")
-        .select(`
-          *,
-          apartment_leases (
-            id,
-            tenant_id,
-            unit_id,
-            start_date,
-            end_date,
-            rent_amount,
-            deposit_amount,
-            payment_frequency,
-            duration_type,
-            status,
-            payment_type,
-            agency_id
-          ),
-          apartment_units!apartment_tenants_unit_id_fkey (
-            unit_number,
-            apartment:apartments (
-              name
+        if (!profile?.agency_id) {
+          throw new Error("Aucune agence associée")
+        }
+
+        // Now fetch tenants for this agency
+        const { data: tenantsData, error: tenantsError } = await supabase
+          .from("apartment_tenants")
+          .select(`
+            *,
+            apartment_leases (
+              id,
+              tenant_id,
+              unit_id,
+              start_date,
+              end_date,
+              rent_amount,
+              deposit_amount,
+              payment_frequency,
+              duration_type,
+              status,
+              payment_type,
+              agency_id
+            ),
+            apartment_units!apartment_tenants_unit_id_fkey (
+              unit_number,
+              apartment:apartments (
+                name
+              )
             )
-          )
-        `)
-        .eq("agency_id", profile.agency_id)
+          `)
+          .eq("agency_id", profile.agency_id)
 
-      if (tenantsError) {
-        console.error("Error fetching tenants:", tenantsError)
-        throw tenantsError
+        if (tenantsError) {
+          console.error("Error fetching tenants:", tenantsError)
+          throw tenantsError
+        }
+
+        return tenantsData as ApartmentTenant[]
+      } catch (error: any) {
+        console.error("Error in tenant query:", error)
+        toast({
+          title: "Erreur",
+          description: error.message || "Impossible de charger les locataires",
+          variant: "destructive",
+        })
+        return []
       }
-
-      return tenantsData as ApartmentTenant[]
-    }
+    },
+    retry: false
   })
 
   const isLoading = externalLoading || tenantsLoading
