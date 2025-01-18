@@ -19,7 +19,7 @@ interface ApartmentCardProps {
   onUpdate?: (apartmentId: string) => void
 }
 
-export function ApartmentCard({ apartment, onViewUnits, onUpdate }: ApartmentCardProps) {
+export function ApartmentCard({ apartment, onUpdate }: ApartmentCardProps) {
   const navigate = useNavigate()
   const { toast } = useToast()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -40,11 +40,7 @@ export function ApartmentCard({ apartment, onViewUnits, onUpdate }: ApartmentCar
 
   const handleViewUnits = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (onViewUnits) {
-      onViewUnits(apartment.id)
-    } else {
-      navigate(`/agence/apartments/${apartment.id}/units`)
-    }
+    navigate(`/agence/apartments/${apartment.id}/units`)
   }
 
   const handleUpdate = (e: React.MouseEvent) => {
@@ -66,7 +62,7 @@ export function ApartmentCard({ apartment, onViewUnits, onUpdate }: ApartmentCar
 
       if (units && units.length > 0) {
         toast({
-          title: "Action impossible",
+          title: "Suppression impossible",
           description: "Vous devez d'abord supprimer toutes les unités de cet appartement avant de pouvoir le supprimer.",
           variant: "destructive"
         })
