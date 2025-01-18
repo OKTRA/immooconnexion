@@ -5,20 +5,18 @@ import { Loader2 } from "lucide-react";
 import { ApartmentTenantsTable } from "./ApartmentTenantsTable";
 
 export interface ApartmentTenantsTabProps {
-  apartmentId: string;
   onDeleteTenant: (id: string) => Promise<void>;
   onEditTenant: (tenant: ApartmentTenant) => void;
   isLoading?: boolean;
 }
 
 export function ApartmentTenantsTab({ 
-  apartmentId,
   onDeleteTenant,
   onEditTenant,
   isLoading: externalLoading
 }: ApartmentTenantsTabProps) {
   const { data: tenants = [], isLoading: queryLoading } = useQuery({
-    queryKey: ["apartment-tenants", apartmentId],
+    queryKey: ["apartment-tenants"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("apartment_tenants")
@@ -44,13 +42,11 @@ export function ApartmentTenantsTab({
               name
             )
           )
-        `)
-        .eq("apartment_id", apartmentId);
+        `);
 
       if (error) throw error;
       return data as ApartmentTenant[];
-    },
-    enabled: !!apartmentId
+    }
   });
 
   const isLoading = externalLoading || queryLoading;
@@ -65,9 +61,9 @@ export function ApartmentTenantsTab({
 
   return (
     <ApartmentTenantsTable
-      apartmentId={apartmentId}
       onEdit={onEditTenant}
       onDelete={onDeleteTenant}
+      isLoading={isLoading}
     />
   );
 }
