@@ -41,16 +41,25 @@ export function ApartmentCard({ apartment, onViewUnits, onUpdate }: ApartmentCar
 
   const handleDelete = async () => {
     try {
-      const { error } = await supabase
+      // First delete all associated units
+      const { error: unitsError } = await supabase
+        .from('apartment_units')
+        .delete()
+        .eq('apartment_id', apartment.id)
+
+      if (unitsError) throw unitsError
+
+      // Then delete the apartment
+      const { error: apartmentError } = await supabase
         .from('apartments')
         .delete()
         .eq('id', apartment.id)
 
-      if (error) throw error
+      if (apartmentError) throw apartmentError
 
       toast({
         title: "Appartement supprimé",
-        description: "L'appartement a été supprimé avec succès"
+        description: "L'appartement et ses unités ont été supprimés avec succès"
       })
       
       // Refresh the page to update the list
