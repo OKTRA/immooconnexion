@@ -89,6 +89,7 @@ export default function ApartmentTenants() {
           open={open}
           onOpenChange={setOpen}
           tenant={selectedTenant}
+          unitId={selectedTenant?.unit_id || undefined}
         />
       </div>
     </AgencyLayout>

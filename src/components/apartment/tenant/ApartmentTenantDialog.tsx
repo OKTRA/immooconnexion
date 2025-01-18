@@ -2,12 +2,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ApartmentTenantForm } from "./ApartmentTenantForm"
 import { useState } from "react"
+import { ApartmentTenant } from "@/types/apartment"
 
 interface ApartmentTenantDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  unitId: string;
-  tenant?: any;
+  unitId?: string;
+  tenant?: ApartmentTenant;
 }
 
 export function ApartmentTenantDialog({
@@ -32,7 +33,7 @@ export function ApartmentTenantDialog({
         </DialogHeader>
         <ScrollArea className="h-[calc(90vh-120px)] pr-4">
           <ApartmentTenantForm
-            unitId={unitId}
+            unitId={unitId || ""}
             onSuccess={handleSuccess}
             isSubmitting={isSubmitting}
             setIsSubmitting={setIsSubmitting}
