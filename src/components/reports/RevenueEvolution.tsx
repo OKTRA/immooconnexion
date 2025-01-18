@@ -2,56 +2,47 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { startOfMonth, format, subMonths } from 'date-fns'
+import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import { Loader2 } from "lucide-react"
 
-export function RevenueEvolution() {
-  const { data: revenueData } = useQuery({
-    queryKey: ['revenue-evolution'],
+interface RevenueEvolutionProps {
+  ownerId: string
+}
+
+export function RevenueEvolution({ ownerId }: RevenueEvolutionProps) {
+  const { data: revenueData, isLoading } = useQuery({
+    queryKey: ['owner-monthly-revenue', ownerId],
     queryFn: async () => {
-      // Get current user's profile to check agency
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Non authentifié")
+      const { data, error } = await supabase
+        .from('owner_monthly_revenue')
+        .select('*')
+        .eq('owner_id', ownerId)
+        .order('month', { ascending: true })
+        .limit(6)
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('agency_id')
-        .eq('id', user.id)
-        .maybeSingle()
+      if (error) throw error
 
-      if (!profile?.agency_id) throw new Error("Agence non trouvée")
-
-      // Get last 6 months
-      const months = Array.from({ length: 6 }, (_, i) => {
-        const date = subMonths(new Date(), i)
-        return {
-          start: startOfMonth(date),
-          month: format(date, 'MMM', { locale: fr })
-        }
-      }).reverse()
-
-      const { data: contracts } = await supabase
-        .from('contracts')
-        .select('montant, created_at')
-        .eq('type', 'loyer')
-        .eq('agency_id', profile.agency_id)
-
-      return months.map(({ start, month }) => {
-        const monthlyRevenue = contracts?.reduce((sum, contract) => {
-          const contractDate = new Date(contract.created_at)
-          if (contractDate >= start && contractDate < new Date(start.getFullYear(), start.getMonth() + 1, 1)) {
-            return sum + (contract.montant || 0)
-          }
-          return sum
-        }, 0) || 0
-
-        return {
-          month,
-          revenue: monthlyRevenue
-        }
-      })
+      return data.map(item => ({
+        month: format(new Date(item.month), 'MMM yyyy', { locale: fr }),
+        revenue: item.total_revenue,
+        net: item.net_revenue
+      }))
     }
   })
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Évolution des Revenus</CardTitle>
+        </CardHeader>
+        <CardContent className="flex justify-center items-center h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card>
@@ -66,7 +57,8 @@ export function RevenueEvolution() {
               <XAxis dataKey="month" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="revenue" fill="#0088FE" />
+              <Bar name="Revenus Bruts" dataKey="revenue" fill="#0088FE" />
+              <Bar name="Revenus Nets" dataKey="net" fill="#00C49F" />
             </BarChart>
           </ResponsiveContainer>
         </div>

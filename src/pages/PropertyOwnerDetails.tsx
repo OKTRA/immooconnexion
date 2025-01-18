@@ -2,12 +2,14 @@ import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2 } from "lucide-react"
+import { Loader2, Building2, Users, Receipt, ArrowUpDown, Home } from "lucide-react"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { OwnerHeader } from "@/components/property-owner/OwnerHeader"
 import { RevenuesTab } from "@/components/property-owner/RevenuesTab"
 import { ExpensesTab } from "@/components/property-owner/ExpensesTab"
 import { StatementsTab } from "@/components/property-owner/StatementsTab"
+import { StatCard } from "@/components/StatCard"
+import { RevenueEvolution } from "@/components/reports/RevenueEvolution"
 
 type PropertyRevenue = {
   owner_id: string
@@ -41,6 +43,14 @@ type ApartmentRevenue = {
 
 type Revenue = PropertyRevenue | ApartmentRevenue
 
+type OwnerDashboardStats = {
+  total_properties: number
+  total_apartments: number
+  property_occupancy_rate: number
+  current_month_revenue: number
+  current_month_expenses: number
+}
+
 export default function PropertyOwnerDetails() {
   const { ownerId } = useParams()
 
@@ -55,6 +65,20 @@ export default function PropertyOwnerDetails() {
 
       if (error) throw error
       return data
+    }
+  })
+
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ['owner-dashboard-stats', ownerId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('owner_dashboard_stats')
+        .select('*')
+        .eq('owner_id', ownerId)
+        .single()
+
+      if (error) throw error
+      return data as OwnerDashboardStats
     }
   })
 
@@ -75,7 +99,6 @@ export default function PropertyOwnerDetails() {
 
       if (propertyError || apartmentError) throw propertyError || apartmentError
       
-      // Type assertion to ensure correct types
       const typedPropertyRevenues = (propertyRevenues || []) as PropertyRevenue[]
       const typedApartmentRevenues = (apartmentRevenues || []) as ApartmentRevenue[]
       
@@ -111,7 +134,7 @@ export default function PropertyOwnerDetails() {
     }
   })
 
-  if (ownerLoading) {
+  if (ownerLoading || statsLoading) {
     return (
       <AgencyLayout>
         <div className="flex items-center justify-center h-screen">
@@ -134,6 +157,34 @@ export default function PropertyOwnerDetails() {
       <div className="container mx-auto py-6 space-y-6">
         <OwnerHeader owner={owner} />
 
+        {/* Dashboard Stats */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            title="Propriétés"
+            value={stats?.total_properties || 0}
+            icon={Home}
+          />
+          <StatCard
+            title="Appartements"
+            value={stats?.total_apartments || 0}
+            icon={Building2}
+          />
+          <StatCard
+            title="Revenus du mois"
+            value={`${stats?.current_month_revenue?.toLocaleString() || 0} FCFA`}
+            icon={Receipt}
+          />
+          <StatCard
+            title="Taux d'occupation"
+            value={`${Math.round(stats?.property_occupancy_rate || 0)}%`}
+            icon={ArrowUpDown}
+          />
+        </div>
+
+        {/* Revenue Evolution Chart */}
+        <RevenueEvolution ownerId={ownerId} />
+
+        {/* Tabs */}
         <Tabs defaultValue="revenues">
           <TabsList>
             <TabsTrigger value="revenues">Revenus</TabsTrigger>

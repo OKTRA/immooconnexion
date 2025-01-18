@@ -238,7 +238,21 @@ export type Database = {
             foreignKeyName: "agency_owners_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
+            referencedRelation: "owner_dashboard_stats"
+            referencedColumns: ["owner_id"]
+          },
+          {
+            foreignKeyName: "agency_owners_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
             referencedRelation: "owner_expenses_view"
+            referencedColumns: ["owner_id"]
+          },
+          {
+            foreignKeyName: "agency_owners_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owner_late_payments"
             referencedColumns: ["owner_id"]
           },
           {
@@ -766,7 +780,21 @@ export type Database = {
             foreignKeyName: "apartments_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
+            referencedRelation: "owner_dashboard_stats"
+            referencedColumns: ["owner_id"]
+          },
+          {
+            foreignKeyName: "apartments_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
             referencedRelation: "owner_expenses_view"
+            referencedColumns: ["owner_id"]
+          },
+          {
+            foreignKeyName: "apartments_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owner_late_payments"
             referencedColumns: ["owner_id"]
           },
           {
@@ -835,6 +863,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "agencies"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_late_payments"
+            referencedColumns: ["property_id"]
+          },
+          {
+            foreignKeyName: "bookings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties_details"
+            referencedColumns: ["property_id"]
           },
           {
             foreignKeyName: "bookings_property_id_fkey"
@@ -921,6 +963,20 @@ export type Database = {
             foreignKeyName: "contracts_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_late_payments"
+            referencedColumns: ["property_id"]
+          },
+          {
+            foreignKeyName: "contracts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties_details"
+            referencedColumns: ["property_id"]
+          },
+          {
+            foreignKeyName: "contracts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "owner_property_revenues"
             referencedColumns: ["property_id"]
           },
@@ -988,6 +1044,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_late_payments"
+            referencedColumns: ["property_id"]
+          },
+          {
+            foreignKeyName: "expenses_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties_details"
+            referencedColumns: ["property_id"]
           },
           {
             foreignKeyName: "expenses_property_id_fkey"
@@ -1108,7 +1178,21 @@ export type Database = {
             foreignKeyName: "owner_statements_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
+            referencedRelation: "owner_dashboard_stats"
+            referencedColumns: ["owner_id"]
+          },
+          {
+            foreignKeyName: "owner_statements_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
             referencedRelation: "owner_expenses_view"
+            referencedColumns: ["owner_id"]
+          },
+          {
+            foreignKeyName: "owner_statements_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owner_late_payments"
             referencedColumns: ["owner_id"]
           },
           {
@@ -1393,7 +1477,21 @@ export type Database = {
             foreignKeyName: "properties_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
+            referencedRelation: "owner_dashboard_stats"
+            referencedColumns: ["owner_id"]
+          },
+          {
+            foreignKeyName: "properties_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
             referencedRelation: "owner_expenses_view"
+            referencedColumns: ["owner_id"]
+          },
+          {
+            foreignKeyName: "properties_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owner_late_payments"
             referencedColumns: ["owner_id"]
           },
           {
@@ -1409,6 +1507,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_owners"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_parent_property_id_fkey"
+            columns: ["parent_property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_late_payments"
+            referencedColumns: ["property_id"]
+          },
+          {
+            foreignKeyName: "properties_parent_property_id_fkey"
+            columns: ["parent_property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties_details"
+            referencedColumns: ["property_id"]
           },
           {
             foreignKeyName: "properties_parent_property_id_fkey"
@@ -1473,6 +1585,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "contracts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_inspections_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "owner_late_payments"
+            referencedColumns: ["contract_id"]
           },
           {
             foreignKeyName: "property_inspections_contract_id_fkey"
@@ -1571,6 +1690,20 @@ export type Database = {
             foreignKeyName: "property_sales_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_late_payments"
+            referencedColumns: ["property_id"]
+          },
+          {
+            foreignKeyName: "property_sales_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties_details"
+            referencedColumns: ["property_id"]
+          },
+          {
+            foreignKeyName: "property_sales_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "owner_property_revenues"
             referencedColumns: ["property_id"]
           },
@@ -1624,6 +1757,20 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "property_units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_late_payments"
+            referencedColumns: ["property_id"]
+          },
+          {
+            foreignKeyName: "property_units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties_details"
+            referencedColumns: ["property_id"]
+          },
           {
             foreignKeyName: "property_units_property_id_fkey"
             columns: ["property_id"]
@@ -1797,6 +1944,17 @@ export type Database = {
         }
         Relationships: []
       }
+      owner_dashboard_stats: {
+        Row: {
+          current_month_expenses: number | null
+          current_month_revenue: number | null
+          owner_id: string | null
+          property_occupancy_rate: number | null
+          total_apartments: number | null
+          total_properties: number | null
+        }
+        Relationships: []
+      }
       owner_expenses_view: {
         Row: {
           amount: number | null
@@ -1810,6 +1968,94 @@ export type Database = {
           source_type: string | null
         }
         Relationships: []
+      }
+      owner_late_payments: {
+        Row: {
+          amount: number | null
+          contract_id: string | null
+          end_date: string | null
+          owner_id: string | null
+          property_id: string | null
+          property_name: string | null
+          start_date: string | null
+          tenant_firstname: string | null
+          tenant_name: string | null
+          tenant_phone: string | null
+        }
+        Relationships: []
+      }
+      owner_monthly_revenue: {
+        Row: {
+          month: string | null
+          net_revenue: number | null
+          owner_id: string | null
+          payment_count: number | null
+          source_type: string | null
+          total_commission: number | null
+          total_revenue: number | null
+        }
+        Relationships: []
+      }
+      owner_properties_details: {
+        Row: {
+          city: string | null
+          inspection_photos: string[] | null
+          name: string | null
+          neighborhood: string | null
+          owner_id: string | null
+          photo_url: string | null
+          property_category: string | null
+          property_id: string | null
+          status: string | null
+          total_contracts: number | null
+          total_inspections: number | null
+          total_revenue: number | null
+          type: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owner_apartment_revenues"
+            referencedColumns: ["owner_id"]
+          },
+          {
+            foreignKeyName: "properties_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owner_dashboard_stats"
+            referencedColumns: ["owner_id"]
+          },
+          {
+            foreignKeyName: "properties_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owner_expenses_view"
+            referencedColumns: ["owner_id"]
+          },
+          {
+            foreignKeyName: "properties_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owner_late_payments"
+            referencedColumns: ["owner_id"]
+          },
+          {
+            foreignKeyName: "properties_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owner_property_revenues"
+            referencedColumns: ["owner_id"]
+          },
+          {
+            foreignKeyName: "properties_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "property_owners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       owner_property_revenues: {
         Row: {
