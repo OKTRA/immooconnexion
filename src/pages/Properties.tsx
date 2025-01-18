@@ -1,38 +1,31 @@
-import { PropertyTable } from "@/components/PropertyTable"
-import { PropertyDialog } from "@/components/PropertyDialog"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
-import { AgencyRegistrationDialog } from "@/components/agency/AgencyRegistrationDialog"
+import { PropertyDialog } from "@/components/PropertyDialog"
+import { PropertyTable } from "@/components/PropertyTable"
+import { Button } from "@/components/ui/button"
+import { Plus } from "lucide-react"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { useToast } from "@/hooks/use-toast"
 
-const Properties = () => {
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [registrationOpen, setRegistrationOpen] = useState(true)
-  const navigate = useNavigate()
-  const { toast } = useToast()
+export default function Properties() {
+  const [open, setOpen] = useState(false)
 
   return (
     <AgencyLayout>
-      <div className="w-full max-w-full">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold">Gestion des Biens</h1>
-          <PropertyDialog 
-            open={dialogOpen} 
-            onOpenChange={setDialogOpen}
-          />
-        </div>
-        <div className="w-full overflow-hidden">
-          <PropertyTable />
+      <div className="container mx-auto py-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Propriétés</h1>
+          <Button onClick={() => setOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Ajouter une propriété
+          </Button>
         </div>
 
-        <AgencyRegistrationDialog
-          open={registrationOpen}
-          onOpenChange={setRegistrationOpen}
+        <PropertyTable />
+
+        <PropertyDialog 
+          open={open} 
+          onOpenChange={setOpen}
         />
       </div>
     </AgencyLayout>
   )
 }
-
-export default Properties
