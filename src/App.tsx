@@ -8,6 +8,7 @@ import Login from "@/pages/Login"
 import Properties from "@/pages/Properties"
 import PropertyDetails from "@/pages/PropertyDetails"
 import PropertyOwners from "@/pages/PropertyOwners"
+import PropertyOwnerDetails from "@/pages/PropertyOwnerDetails"
 import Tenants from "@/pages/Tenants"
 import TenantContracts from "@/pages/TenantContracts"
 import Expenses from "@/pages/Expenses"
@@ -54,6 +55,7 @@ export default function App() {
                 <Route path="dashboard" element={<AgencyDashboard />} />
                 <Route path="properties" element={<Properties />} />
                 <Route path="property-owners" element={<PropertyOwners />} />
+                <Route path="property-owners/:ownerId" element={<PropertyOwnerDetails />} />
                 <Route path="properties/:id" element={<PropertyDetails />} />
                 <Route path="tenants" element={<Tenants />} />
                 <Route path="contracts" element={<TenantContracts />} />
