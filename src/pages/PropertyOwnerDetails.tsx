@@ -1,11 +1,43 @@
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Loader2 } from "lucide-react"
+
+type PropertyRevenue = {
+  amount: number
+  commission_amount: number
+  commission_rate: number
+  first_name: string
+  last_name: string
+  net_amount: number
+  owner_id: string
+  payment_date: string
+  payment_type: string
+  property_id: string
+  property_name: string
+  source_type: 'property'
+}
+
+type ApartmentRevenue = {
+  amount: number
+  commission_amount: number
+  commission_rate: number
+  first_name: string
+  last_name: string
+  net_amount: number
+  owner_id: string
+  payment_date: string
+  payment_type: string
+  apartment_id: string
+  apartment_name: string
+  source_type: 'apartment'
+}
+
+type Revenue = PropertyRevenue | ApartmentRevenue
 
 export default function PropertyOwnerDetails() {
   const { ownerId } = useParams()
@@ -40,7 +72,7 @@ export default function PropertyOwnerDetails() {
         .order('payment_date', { ascending: false })
 
       if (propertyError || apartmentError) throw propertyError || apartmentError
-      return [...(propertyRevenues || []), ...(apartmentRevenues || [])]
+      return [...(propertyRevenues || []), ...(apartmentRevenues || [])] as Revenue[]
     }
   })
 
@@ -84,6 +116,14 @@ export default function PropertyOwnerDetails() {
     return <div>Propriétaire non trouvé</div>
   }
 
+  const getSourceName = (revenue: Revenue) => {
+    if (revenue.source_type === 'property') {
+      return `Propriété: ${revenue.property_name}`
+    } else {
+      return `Appartement: ${revenue.apartment_name}`
+    }
+  }
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <Card>
@@ -122,12 +162,12 @@ export default function PropertyOwnerDetails() {
             </Card>
           ) : revenues?.length ? (
             revenues.map((revenue) => (
-              <Card key={`${revenue.source_type}-${revenue.source_id}-${revenue.payment_date}`}>
+              <Card key={`${revenue.source_type}-${revenue.payment_date}`}>
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-medium">
-                        {revenue.source_type === 'property' ? 'Propriété' : 'Appartement'}: {revenue.property_name || revenue.apartment_name}
+                        {getSourceName(revenue)}
                       </h3>
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(revenue.payment_date), 'PPP', { locale: fr })}
