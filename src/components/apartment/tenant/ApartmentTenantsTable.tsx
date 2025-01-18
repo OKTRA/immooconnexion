@@ -47,15 +47,15 @@ export function ApartmentTenantsTable({
         throw new Error("Aucune agence associée")
       }
 
-      // Fetch tenants first
       const { data: tenantsData, error: tenantsError } = await supabase
-        .from("apartment_tenants")
+        .from("apartment_tenants_with_rent")
         .select(`
           id,
           first_name,
           last_name,
           email,
-          phone_number
+          phone_number,
+          rent_amount
         `)
         .eq("agency_id", profile.agency_id)
         .order('created_at', { ascending: false })
@@ -65,18 +65,7 @@ export function ApartmentTenantsTable({
         throw tenantsError
       }
 
-      // Then fetch active leases in a separate query
-      const { data: leases } = await supabase
-        .from("apartment_leases")
-        .select('tenant_id, rent_amount')
-        .eq('status', 'active')
-        .in('tenant_id', tenantsData.map(t => t.id))
-
-      // Combine the data
-      return tenantsData.map(tenant => ({
-        ...tenant,
-        rent_amount: leases?.find(lease => lease.tenant_id === tenant.id)?.rent_amount || 0
-      }))
+      return tenantsData
     },
     enabled: !externalLoading
   })

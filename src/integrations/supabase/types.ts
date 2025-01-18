@@ -405,6 +405,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "apartment_leases_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_tenants_with_rent"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "apartment_leases_unit_id_fkey"
             columns: ["unit_id"]
             isOneToOne: false
@@ -1459,6 +1466,61 @@ export type Database = {
       }
     }
     Views: {
+      apartment_tenants_with_rent: {
+        Row: {
+          agency_id: string | null
+          email: string | null
+          first_name: string | null
+          id: string | null
+          last_name: string | null
+          phone_number: string | null
+          rent_amount: number | null
+          unit_id: string | null
+        }
+        Insert: {
+          agency_id?: string | null
+          email?: string | null
+          first_name?: string | null
+          id?: string | null
+          last_name?: string | null
+          phone_number?: string | null
+          rent_amount?: never
+          unit_id?: string | null
+        }
+        Update: {
+          agency_id?: string | null
+          email?: string | null
+          first_name?: string | null
+          id?: string | null
+          last_name?: string | null
+          phone_number?: string | null
+          rent_amount?: never
+          unit_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_tenants_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_tenants_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_apartment_tenant_unit"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_history_with_tenant: {
         Row: {
           agency_id: string | null
