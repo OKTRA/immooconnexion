@@ -1944,6 +1944,23 @@ export type Database = {
         }
         Relationships: []
       }
+      owner_combined_assets: {
+        Row: {
+          asset_id: string | null
+          asset_type: string | null
+          city: string | null
+          name: string | null
+          neighborhood: string | null
+          owner_id: string | null
+          photo_url: string | null
+          rent_amount: number | null
+          status: string | null
+          total_revenue: number | null
+          total_units: number | null
+          type: string | null
+        }
+        Relationships: []
+      }
       owner_dashboard_stats: {
         Row: {
           current_month_expenses: number | null
