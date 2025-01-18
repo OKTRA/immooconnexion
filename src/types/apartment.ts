@@ -18,8 +18,9 @@ export interface ApartmentUnitFormData {
   living_rooms?: number;
   bedrooms?: number;
   bathrooms?: number;
-  has_store?: boolean;
+  store_count?: number;
   kitchen_description?: string;
+  has_pool?: boolean;
   rent_amount: number;
   deposit_amount?: number | null;
   status: ApartmentUnitStatus;
@@ -36,8 +37,9 @@ export interface ApartmentUnit {
   living_rooms?: number;
   bedrooms?: number;
   bathrooms?: number;
-  has_store?: boolean;
+  store_count?: number;
   kitchen_description?: string;
+  has_pool?: boolean;
   rent_amount: number;
   deposit_amount?: number;
   status: ApartmentUnitStatus;
