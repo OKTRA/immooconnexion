@@ -11,6 +11,9 @@ export const formSchema = z.object({
   city: z.string().min(2),
   first_name: z.string().min(2),
   last_name: z.string().min(2)
+}).refine((data) => data.password === data.confirm_password, {
+  message: "Passwords don't match",
+  path: ["confirm_password"],
 })
 
 export type FormData = z.infer<typeof formSchema>
