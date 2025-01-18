@@ -30,24 +30,26 @@ export function AgencyRegistrationDialog({
 }: AgencyRegistrationDialogProps) {
   const [showPaymentMethods, setShowPaymentMethods] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<string>("orange_money")
-  
+  const [formData, setFormData] = useState<FormData>({
+    email: "",
+    password: "",
+    confirm_password: "",
+    agency_name: "",
+    agency_address: "",
+    agency_phone: "",
+    country: "",
+    city: "",
+    first_name: "",
+    last_name: ""
+  })
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      confirm_password: "",
-      agency_name: "",
-      agency_address: "",
-      agency_phone: "",
-      country: "",
-      city: "",
-      first_name: "",
-      last_name: ""
-    }
+    defaultValues: formData
   })
 
   const handleSubmit = async (data: FormData) => {
+    setFormData(data)
     setShowPaymentMethods(true)
   }
 
@@ -83,7 +85,7 @@ export function AgencyRegistrationDialog({
                   amount={amount}
                   description={`Inscription - Plan ${planName}`}
                   planId={planId}
-                  formData={form.getValues() as PaymentFormData}
+                  formData={formData as PaymentFormData}
                 />
               )}
 
@@ -92,7 +94,7 @@ export function AgencyRegistrationDialog({
                   amount={amount}
                   description={`Inscription - Plan ${planName}`}
                   agencyId={planId}
-                  formData={form.getValues() as PaymentFormData}
+                  formData={formData as PaymentFormData}
                 />
               )}
             </div>
