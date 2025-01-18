@@ -3,6 +3,7 @@ import { PropertyListTab } from "./PropertyListTab"
 import { RevenuesTab } from "./RevenuesTab"
 import { ExpensesTab } from "./ExpensesTab"
 import { StatementsTab } from "./StatementsTab"
+import { ApartmentsTab } from "./ApartmentsTab"
 
 interface PropertyOwnerTabsProps {
   ownerId: string
@@ -12,17 +13,18 @@ interface PropertyOwnerTabsProps {
   isLoading?: boolean
 }
 
-export function PropertyOwnerTabs({ 
-  ownerId, 
-  revenues, 
-  expenses, 
+export function PropertyOwnerTabs({
+  ownerId,
+  revenues,
+  expenses,
   statements,
-  isLoading 
+  isLoading
 }: PropertyOwnerTabsProps) {
   return (
-    <Tabs defaultValue="properties">
+    <Tabs defaultValue="properties" className="w-full">
       <TabsList>
         <TabsTrigger value="properties">Propriétés</TabsTrigger>
+        <TabsTrigger value="apartments">Appartements</TabsTrigger>
         <TabsTrigger value="revenues">Revenus</TabsTrigger>
         <TabsTrigger value="expenses">Dépenses</TabsTrigger>
         <TabsTrigger value="statements">États financiers</TabsTrigger>
@@ -30,6 +32,10 @@ export function PropertyOwnerTabs({
 
       <TabsContent value="properties">
         <PropertyListTab ownerId={ownerId} />
+      </TabsContent>
+
+      <TabsContent value="apartments">
+        <ApartmentsTab ownerId={ownerId} />
       </TabsContent>
 
       <TabsContent value="revenues">
