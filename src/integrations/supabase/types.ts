@@ -670,43 +670,61 @@ export type Database = {
       apartment_units: {
         Row: {
           apartment_id: string
-          area: number | null
+          bathrooms: number | null
+          bedrooms: number | null
           commission_percentage: number | null
           created_at: string | null
           deposit_amount: number | null
           description: string | null
+          floor_level: string | null
           floor_number: number | null
+          has_store: boolean | null
           id: string
+          kitchen_description: string | null
+          living_rooms: number | null
           rent_amount: number
           status: string | null
+          unit_name: string | null
           unit_number: string
           updated_at: string | null
         }
         Insert: {
           apartment_id: string
-          area?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
           commission_percentage?: number | null
           created_at?: string | null
           deposit_amount?: number | null
           description?: string | null
+          floor_level?: string | null
           floor_number?: number | null
+          has_store?: boolean | null
           id?: string
+          kitchen_description?: string | null
+          living_rooms?: number | null
           rent_amount: number
           status?: string | null
+          unit_name?: string | null
           unit_number: string
           updated_at?: string | null
         }
         Update: {
           apartment_id?: string
-          area?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
           commission_percentage?: number | null
           created_at?: string | null
           deposit_amount?: number | null
           description?: string | null
+          floor_level?: string | null
           floor_number?: number | null
+          has_store?: boolean | null
           id?: string
+          kitchen_description?: string | null
+          living_rooms?: number | null
           rent_amount?: number
           status?: string | null
+          unit_name?: string | null
           unit_number?: string
           updated_at?: string | null
         }
