@@ -5,10 +5,9 @@ interface ContactFieldsProps {
   formData: {
     first_name: string;
     last_name: string;
-    email?: string;
+    email: string;
     phone_number: string;
-    emergency_contact_phone?: string;
-    birth_date?: string;
+    birth_date: string | null;
   };
   setFormData: (data: any) => void;
 }
@@ -39,26 +38,6 @@ export function ContactFields({ formData, setFormData }: ContactFieldsProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="phone_number">Téléphone</Label>
-          <Input
-            id="phone_number"
-            value={formData.phone_number}
-            onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="emergency_contact_phone">Téléphone d'urgence</Label>
-          <Input
-            id="emergency_contact_phone"
-            value={formData.emergency_contact_phone}
-            onChange={(e) => setFormData({ ...formData, emergency_contact_phone: e.target.value })}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
@@ -68,14 +47,24 @@ export function ContactFields({ formData, setFormData }: ContactFieldsProps) {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="birth_date">Date de naissance</Label>
+          <Label htmlFor="phone_number">Téléphone</Label>
           <Input
-            id="birth_date"
-            type="date"
-            value={formData.birth_date}
-            onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+            id="phone_number"
+            value={formData.phone_number}
+            onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+            required
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="birth_date">Date de naissance</Label>
+        <Input
+          id="birth_date"
+          type="date"
+          value={formData.birth_date || ""}
+          onChange={(e) => setFormData({ ...formData, birth_date: e.target.value || null })}
+        />
       </div>
     </div>
   );

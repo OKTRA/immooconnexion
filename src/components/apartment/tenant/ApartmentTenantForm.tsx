@@ -26,18 +26,18 @@ export function ApartmentTenantForm({
 }: ApartmentTenantFormProps) {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    firstName: initialData?.first_name || "",
-    lastName: initialData?.last_name || "",
+    first_name: initialData?.first_name || "",
+    last_name: initialData?.last_name || "",
     email: initialData?.email || "",
-    phoneNumber: initialData?.phone_number || "",
-    birthDate: initialData?.birth_date || "",
+    phone_number: initialData?.phone_number || "",
+    birth_date: initialData?.birth_date || null,
     profession: initialData?.profession || "",
-    rentAmount: "",
-    depositAmount: "",
-    startDate: "",
-    endDate: "",
-    paymentFrequency: "monthly",
-    durationType: "fixed",
+    rent_amount: initialData?.rent_amount?.toString() || "",
+    deposit_amount: initialData?.deposit_amount?.toString() || "",
+    start_date: initialData?.start_date || "",
+    end_date: initialData?.end_date || "",
+    payment_frequency: initialData?.payment_frequency || "monthly",
+    duration_type: initialData?.duration_type || "fixed",
     photos: null as FileList | null
   });
 
@@ -79,40 +79,44 @@ export function ApartmentTenantForm({
         }
       }
 
-      // Create tenant with optimized query
+      // Create tenant with proper date handling
+      const tenantData = {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email || null,
+        phone_number: formData.phone_number,
+        birth_date: formData.birth_date || null,
+        photo_id_url: photoUrls.length > 0 ? photoUrls[0] : null,
+        profession: formData.profession || null,
+        agency_id: profile.agency_id,
+        unit_id: unitId
+      };
+
       const { data: tenant, error: tenantError } = await supabase
         .from("apartment_tenants")
-        .insert({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          email: formData.email,
-          phone_number: formData.phoneNumber,
-          birth_date: formData.birthDate,
-          photo_id_url: photoUrls.length > 0 ? photoUrls[0] : null,
-          profession: formData.profession,
-          agency_id: profile.agency_id,
-          unit_id: unitId
-        })
+        .insert(tenantData)
         .select()
         .single();
 
       if (tenantError) throw tenantError;
 
-      // Create lease with simplified query
+      // Create lease with proper date handling
+      const leaseData = {
+        tenant_id: tenant.id,
+        unit_id: unitId,
+        start_date: formData.start_date || null,
+        end_date: formData.duration_type === "fixed" ? formData.end_date || null : null,
+        rent_amount: parseInt(formData.rent_amount) || 0,
+        deposit_amount: parseInt(formData.deposit_amount) || 0,
+        payment_frequency: formData.payment_frequency,
+        duration_type: formData.duration_type,
+        status: "active",
+        agency_id: profile.agency_id
+      };
+
       const { error: leaseError } = await supabase
         .from("apartment_leases")
-        .insert({
-          tenant_id: tenant.id,
-          unit_id: unitId,
-          start_date: formData.startDate,
-          end_date: formData.durationType === "fixed" ? formData.endDate : null,
-          rent_amount: parseInt(formData.rentAmount),
-          deposit_amount: parseInt(formData.depositAmount),
-          payment_frequency: formData.paymentFrequency,
-          duration_type: formData.durationType,
-          status: "active",
-          agency_id: profile.agency_id
-        });
+        .insert(leaseData);
 
       if (leaseError) throw leaseError;
 
