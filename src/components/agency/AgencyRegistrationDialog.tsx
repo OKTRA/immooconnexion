@@ -30,7 +30,7 @@ export function AgencyRegistrationDialog({
 }: AgencyRegistrationDialogProps) {
   const [showPaymentMethods, setShowPaymentMethods] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<string>("orange_money")
-  const [formData, setFormData] = useState<PaymentFormData>({
+  const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
     confirm_password: "",
@@ -49,7 +49,7 @@ export function AgencyRegistrationDialog({
   })
 
   const handleSubmit = async (data: FormData) => {
-    setFormData(data as PaymentFormData)
+    setFormData(data)
     setShowPaymentMethods(true)
   }
 
@@ -85,7 +85,7 @@ export function AgencyRegistrationDialog({
                   amount={amount}
                   description={`Inscription - Plan ${planName}`}
                   planId={planId}
-                  formData={formData}
+                  formData={formData as PaymentFormData}
                 />
               )}
 
@@ -94,7 +94,7 @@ export function AgencyRegistrationDialog({
                   amount={amount}
                   description={`Inscription - Plan ${planName}`}
                   agencyId={planId}
-                  formData={formData}
+                  formData={formData as PaymentFormData}
                 />
               )}
             </div>

@@ -47,8 +47,8 @@ export function ApartmentTenantsTable({
         throw new Error("Aucune agence associée")
       }
 
-      // Requête simplifiée sans jointure complexe
-      let query = supabase
+      // Fetch tenants first
+      const { data: tenantsData, error: tenantsError } = await supabase
         .from("apartment_tenants")
         .select(`
           id,
@@ -58,33 +58,24 @@ export function ApartmentTenantsTable({
           phone_number
         `)
         .eq("agency_id", profile.agency_id)
-
-      if (apartmentId && apartmentId !== "all") {
-        query = query.eq("unit_id", apartmentId)
-      }
-
-      const { data: tenantsData, error: tenantsError } = await query
+        .order('created_at', { ascending: false })
 
       if (tenantsError) {
         console.error("Error fetching tenants:", tenantsError)
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les locataires",
-          variant: "destructive",
-        })
         throw tenantsError
       }
 
-      // Récupérer les loyers dans une requête séparée
+      // Then fetch active leases in a separate query
       const { data: leases } = await supabase
         .from("apartment_leases")
-        .select("tenant_id, rent_amount")
-        .eq("status", "active")
+        .select('tenant_id, rent_amount')
+        .eq('status', 'active')
+        .in('tenant_id', tenantsData.map(t => t.id))
 
-      // Combiner les données
+      // Combine the data
       return tenantsData.map(tenant => ({
         ...tenant,
-        rent_amount: leases?.find(lease => lease.tenant_id === tenant.id)?.rent_amount
+        rent_amount: leases?.find(lease => lease.tenant_id === tenant.id)?.rent_amount || 0
       }))
     },
     enabled: !externalLoading
