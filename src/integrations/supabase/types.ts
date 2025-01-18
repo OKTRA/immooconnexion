@@ -731,10 +731,13 @@ export type Database = {
         Row: {
           address: string | null
           agency_id: string
+          city: string | null
+          country: string | null
           created_at: string | null
           description: string | null
           id: string
           name: string
+          neighborhood: string | null
           owner_id: string | null
           total_units: number | null
           updated_at: string | null
@@ -742,10 +745,13 @@ export type Database = {
         Insert: {
           address?: string | null
           agency_id: string
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
           name: string
+          neighborhood?: string | null
           owner_id?: string | null
           total_units?: number | null
           updated_at?: string | null
@@ -753,10 +759,13 @@ export type Database = {
         Update: {
           address?: string | null
           agency_id?: string
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
           name?: string
+          neighborhood?: string | null
           owner_id?: string | null
           total_units?: number | null
           updated_at?: string | null
