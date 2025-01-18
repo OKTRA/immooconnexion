@@ -12,9 +12,10 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useNavigate } from "react-router-dom"
+import { ApartmentTenant } from "@/types/apartment"
 
 interface ApartmentTenantsTableProps {
-  onEdit: (tenant: any) => void
+  onEdit: (tenant: ApartmentTenant) => void
   onDelete: (tenantId: string) => void
   isLoading?: boolean
 }
@@ -44,8 +45,30 @@ export function ApartmentTenantsTable({
       }
 
       const { data: tenantsData, error: tenantsError } = await supabase
-        .from("apartment_tenants_with_rent")
-        .select()
+        .from("apartment_tenants")
+        .select(`
+          *,
+          apartment_leases (
+            id,
+            tenant_id,
+            unit_id,
+            start_date,
+            end_date,
+            rent_amount,
+            deposit_amount,
+            payment_frequency,
+            duration_type,
+            status,
+            payment_type,
+            agency_id
+          ),
+          apartment_units!apartment_tenants_unit_id_fkey (
+            unit_number,
+            apartment:apartments (
+              name
+            )
+          )
+        `)
         .eq("agency_id", profile.agency_id)
 
       if (tenantsError) {
@@ -53,9 +76,8 @@ export function ApartmentTenantsTable({
         throw tenantsError
       }
 
-      return tenantsData
-    },
-    enabled: !externalLoading
+      return tenantsData as ApartmentTenant[]
+    }
   })
 
   if (externalLoading || tenantsLoading) {
@@ -91,7 +113,7 @@ export function ApartmentTenantsTable({
               <TableCell>{tenant.phone_number || "-"}</TableCell>
               <TableCell>{tenant.email || "-"}</TableCell>
               <TableCell>
-                {tenant.rent_amount?.toLocaleString()} FCFA
+                {tenant.apartment_leases?.[0]?.rent_amount?.toLocaleString()} FCFA
               </TableCell>
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <TenantActionButtons
