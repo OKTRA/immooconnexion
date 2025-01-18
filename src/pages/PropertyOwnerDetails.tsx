@@ -9,6 +9,38 @@ import { RevenuesTab } from "@/components/property-owner/RevenuesTab"
 import { ExpensesTab } from "@/components/property-owner/ExpensesTab"
 import { StatementsTab } from "@/components/property-owner/StatementsTab"
 
+type PropertyRevenue = {
+  owner_id: string
+  first_name: string
+  last_name: string
+  property_id: string
+  property_name: string
+  source_type: "property"
+  amount: number
+  payment_type: string
+  payment_date: string
+  commission_rate: number
+  commission_amount: number
+  net_amount: number
+}
+
+type ApartmentRevenue = {
+  owner_id: string
+  first_name: string
+  last_name: string
+  apartment_id: string
+  apartment_name: string
+  source_type: "apartment"
+  amount: number
+  payment_type: string
+  payment_date: string
+  commission_rate: number
+  commission_amount: number
+  net_amount: number
+}
+
+type Revenue = PropertyRevenue | ApartmentRevenue
+
 export default function PropertyOwnerDetails() {
   const { ownerId } = useParams()
 
@@ -42,7 +74,12 @@ export default function PropertyOwnerDetails() {
         .order('payment_date', { ascending: false })
 
       if (propertyError || apartmentError) throw propertyError || apartmentError
-      return [...(propertyRevenues || []), ...(apartmentRevenues || [])]
+      
+      // Type assertion to ensure correct types
+      const typedPropertyRevenues = (propertyRevenues || []) as PropertyRevenue[]
+      const typedApartmentRevenues = (apartmentRevenues || []) as ApartmentRevenue[]
+      
+      return [...typedPropertyRevenues, ...typedApartmentRevenues] as Revenue[]
     }
   })
 
