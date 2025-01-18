@@ -10,8 +10,9 @@ import { ApartmentUnit, ApartmentUnitStatus } from "@/components/apartment/types
 export default function UnitDetails() {
   const { unitId } = useParams()
 
-  const { data: unitData, isLoading } = useQuery({
-    queryKey: ['unit-details', unitId],
+  // First query: Get basic unit information
+  const { data: unitBasicData, isLoading: isLoadingUnit } = useQuery({
+    queryKey: ['unit-basic', unitId],
     queryFn: async () => {
       if (!unitId) throw new Error("ID de l'unité manquant")
 
@@ -22,27 +23,9 @@ export default function UnitDetails() {
           apartment:apartments (
             id,
             name
-          ),
-          current_lease:apartment_leases!apartment_leases_unit_id_fkey (
-            id,
-            tenant:apartment_tenants (
-              id,
-              first_name,
-              last_name,
-              email,
-              phone_number,
-              birth_date,
-              profession
-            ),
-            start_date,
-            end_date,
-            rent_amount,
-            deposit_amount,
-            status
           )
         `)
         .eq("id", unitId)
-        .eq("apartment_leases.status", "active")
         .maybeSingle()
 
       if (error) {
@@ -54,20 +37,51 @@ export default function UnitDetails() {
         throw new Error("Unité non trouvée")
       }
 
-      // Ensure status is of type ApartmentUnitStatus
-      const formattedData: ApartmentUnit = {
-        ...data,
-        status: data.status as ApartmentUnitStatus,
-        current_lease: data.current_lease ? {
-          ...data.current_lease[0],
-          tenant: data.current_lease[0]?.tenant
-        } : undefined
-      }
-
-      return formattedData
+      return data
     },
     enabled: !!unitId
   })
+
+  // Second query: Get current lease information separately
+  const { data: currentLease, isLoading: isLoadingLease } = useQuery({
+    queryKey: ['unit-lease', unitId],
+    queryFn: async () => {
+      if (!unitId) return null
+
+      const { data, error } = await supabase
+        .from("apartment_leases")
+        .select(`
+          id,
+          tenant:apartment_tenants (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone_number,
+            birth_date,
+            profession
+          ),
+          start_date,
+          end_date,
+          rent_amount,
+          deposit_amount,
+          status
+        `)
+        .eq("unit_id", unitId)
+        .eq("status", "active")
+        .maybeSingle()
+
+      if (error) {
+        console.error('Error fetching lease:', error)
+        return null
+      }
+
+      return data
+    },
+    enabled: !!unitId
+  })
+
+  const isLoading = isLoadingUnit || isLoadingLease
 
   if (isLoading) {
     return (
@@ -79,7 +93,7 @@ export default function UnitDetails() {
     )
   }
 
-  if (!unitData) {
+  if (!unitBasicData) {
     return (
       <AgencyLayout>
         <div className="flex justify-center items-center min-h-screen">
@@ -87,6 +101,13 @@ export default function UnitDetails() {
         </div>
       </AgencyLayout>
     )
+  }
+
+  // Combine the data
+  const unitData: ApartmentUnit = {
+    ...unitBasicData,
+    status: unitBasicData.status as ApartmentUnitStatus,
+    current_lease: currentLease
   }
 
   return (
