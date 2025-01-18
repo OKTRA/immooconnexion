@@ -1,19 +1,16 @@
 import { z } from "zod"
 
 export const formSchema = z.object({
-  email: z.string().email("Email invalide"),
-  password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
-  confirm_password: z.string(),
-  agency_name: z.string().min(2, "Le nom de l'agence doit contenir au moins 2 caractères"),
-  agency_address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
-  agency_phone: z.string().min(8, "Numéro de téléphone invalide"),
-  country: z.string().min(2, "Le pays est requis"),
-  city: z.string().min(2, "La ville est requise"),
-  first_name: z.string().min(2, "Le prénom est requis"),
-  last_name: z.string().min(2, "Le nom est requis")
-}).refine((data) => data.password === data.confirm_password, {
-  message: "Les mots de passe ne correspondent pas",
-  path: ["confirm_password"],
+  email: z.string().email(),
+  password: z.string().min(8),
+  confirm_password: z.string().min(8),
+  agency_name: z.string().min(2),
+  agency_address: z.string().min(2),
+  agency_phone: z.string().min(8),
+  country: z.string().min(2),
+  city: z.string().min(2),
+  first_name: z.string().min(2),
+  last_name: z.string().min(2)
 })
 
 export type FormData = z.infer<typeof formSchema>
