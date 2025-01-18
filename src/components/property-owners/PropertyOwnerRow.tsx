@@ -36,14 +36,14 @@ export function PropertyOwnerRow({ owner }: PropertyOwnerRowProps) {
           *,
           apartment_leases!inner(
             apartment_units!inner(
-              apartments!inner(
+              apartment!inner(
                 owner_id
               )
             )
           )
         `)
         .eq('status', 'pending')
-        .eq('apartment_leases.apartment_units.apartments.owner_id', owner.id);
+        .eq('apartment_leases.apartment_units.apartment.owner_id', owner.id);
 
       if (pendingError) throw pendingError;
 
@@ -55,13 +55,13 @@ export function PropertyOwnerRow({ owner }: PropertyOwnerRowProps) {
           late_payment_fees!inner(*),
           apartment_leases!inner(
             apartment_units!inner(
-              apartments!inner(
+              apartment!inner(
                 owner_id
               )
             )
           )
         `)
-        .eq('apartment_leases.apartment_units.apartments.owner_id', owner.id)
+        .eq('apartment_leases.apartment_units.apartment.owner_id', owner.id)
         .not('late_payment_fees', 'is', null);
 
       if (lateError) throw lateError;
