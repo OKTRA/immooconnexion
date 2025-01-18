@@ -47,7 +47,7 @@ export function ApartmentTenantsTable({
         throw new Error("Aucune agence associée")
       }
 
-      // Requête modifiée pour utiliser LEFT JOIN au lieu de INNER JOIN
+      // Requête simplifiée sans jointure complexe
       let query = supabase
         .from("apartment_tenants")
         .select(`
@@ -55,10 +55,7 @@ export function ApartmentTenantsTable({
           first_name,
           last_name,
           email,
-          phone_number,
-          apartment_leases (
-            rent_amount
-          )
+          phone_number
         `)
         .eq("agency_id", profile.agency_id)
 
@@ -66,23 +63,29 @@ export function ApartmentTenantsTable({
         query = query.eq("unit_id", apartmentId)
       }
 
-      const { data, error } = await query
+      const { data: tenantsData, error: tenantsError } = await query
 
-      if (error) {
-        console.error("Error fetching tenants:", error)
+      if (tenantsError) {
+        console.error("Error fetching tenants:", tenantsError)
         toast({
           title: "Erreur",
           description: "Impossible de charger les locataires",
           variant: "destructive",
         })
-        throw error
+        throw tenantsError
       }
 
-      // Formater les données pour n'avoir qu'un montant de loyer par locataire
-      return data.map(tenant => ({
+      // Récupérer les loyers dans une requête séparée
+      const { data: leases } = await supabase
+        .from("apartment_leases")
+        .select("tenant_id, rent_amount")
+        .eq("status", "active")
+
+      // Combiner les données
+      return tenantsData.map(tenant => ({
         ...tenant,
-        rent_amount: tenant.apartment_leases?.[0]?.rent_amount
-      })) || []
+        rent_amount: leases?.find(lease => lease.tenant_id === tenant.id)?.rent_amount
+      }))
     },
     enabled: !externalLoading
   })
