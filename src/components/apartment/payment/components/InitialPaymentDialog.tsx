@@ -1,94 +1,49 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { PaymentFormFields } from "../PaymentFormFields"
-import { useState } from "react"
-import { PaymentFormData } from "../types"
-import { supabase } from "@/integrations/supabase/client"
-import { useToast } from "@/hooks/use-toast"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { InitialPaymentsForm } from "./InitialPaymentsForm"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/lib/supabase"
 
 interface InitialPaymentDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSuccess: () => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  tenantId: string
 }
 
-export function InitialPaymentDialog({
-  open,
-  onOpenChange,
-  onSuccess
-}: InitialPaymentDialogProps) {
-  const [formData, setFormData] = useState<PaymentFormData>({
-    email: "",
-    password: "",
-    confirm_password: "",
-    agency_name: "",
-    agency_address: "",
-    agency_phone: "",
-    country: "",
-    city: "",
-    first_name: "",
-    last_name: ""
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            agency_name: formData.agency_name,
-            agency_address: formData.agency_address,
-            agency_phone: formData.agency_phone,
-            country: formData.country,
-            city: formData.city
-          }
-        }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Inscription réussie",
-        description: "Votre compte a été créé avec succès.",
-      });
-
-      onSuccess();
-      onOpenChange(false);
-    } catch (error: any) {
-      console.error('Error:', error);
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'inscription",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+export function InitialPaymentDialog({ open, onOpenChange, tenantId }: InitialPaymentDialogProps) {
+  const { data: lease } = useQuery({
+    queryKey: ["tenant-lease", tenantId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("apartment_leases")
+        .select("*")
+        .eq("tenant_id", tenantId)
+        .single()
+      
+      return data
     }
-  };
+  })
+
+  if (!lease) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl h-[90vh]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Inscription de l'agence</DialogTitle>
+          <DialogTitle>Paiements Initiaux</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-[calc(90vh-120px)] pr-4">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <PaymentFormFields formData={formData} setFormData={setFormData} />
-            <button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Inscription en cours..." : "S'inscrire"}
-            </button>
-          </form>
-        </ScrollArea>
+        <InitialPaymentsForm
+          leaseId={lease.id}
+          depositAmount={lease.deposit_amount}
+          rentAmount={lease.rent_amount}
+          onSuccess={() => onOpenChange(false)}
+          agencyId={lease.agency_id}
+        />
       </DialogContent>
     </Dialog>
-  );
+  )
 }

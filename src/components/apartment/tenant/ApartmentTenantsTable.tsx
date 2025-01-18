@@ -1,85 +1,139 @@
-import { ApartmentTenant } from "@/types/apartment"
-import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Table } from "@/components/ui/table"
+import { Loader2 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { TenantForm } from "@/components/tenant/TenantForm"
-import { TenantTable } from "@/components/tenant/TenantTable"
-import { Skeleton } from "@/components/ui/skeleton"
+import { TenantActionButtons } from "./TenantActionButtons"
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { useNavigate } from "react-router-dom"
+import { ApartmentTenant } from "@/types/apartment"
 
-export interface ApartmentTenantsTabProps {
-  apartmentId: string
-  isLoading: boolean
-  onDeleteTenant: (id: string) => Promise<void>
-  onEditTenant: () => void
-  onInspection: () => void
+interface ApartmentTenantsTableProps {
+  onEdit: (tenant: ApartmentTenant) => void
+  onDelete: (tenantId: string) => void
+  isLoading?: boolean
 }
 
-export function ApartmentTenantsTab({
-  apartmentId,
-  isLoading,
-  onDeleteTenant,
-  onEditTenant,
-  onInspection
-}: ApartmentTenantsTabProps) {
+export function ApartmentTenantsTable({
+  onEdit,
+  onDelete,
+  isLoading: externalLoading
+}: ApartmentTenantsTableProps) {
+  const { toast } = useToast()
+  const navigate = useNavigate()
+
   const { data: tenants = [], isLoading: tenantsLoading } = useQuery({
-    queryKey: ["apartment-tenants", apartmentId],
+    queryKey: ["apartment-tenants"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('agency_id')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (!profile?.agency_id) {
+        throw new Error("Aucune agence associée")
+      }
+
+      const { data: tenantsData, error: tenantsError } = await supabase
         .from("apartment_tenants")
         .select(`
-          id,
-          first_name,
-          last_name,
-          phone_number,
-          birth_date,
-          photo_id_url,
-          agency_fees,
-          profession
+          *,
+          apartment_leases (
+            id,
+            tenant_id,
+            unit_id,
+            start_date,
+            end_date,
+            rent_amount,
+            deposit_amount,
+            payment_frequency,
+            duration_type,
+            status,
+            payment_type,
+            agency_id
+          ),
+          apartment_units!apartment_tenants_unit_id_fkey (
+            unit_number,
+            apartment:apartments (
+              name
+            )
+          )
         `)
-        .eq("apartment_id", apartmentId)
+        .eq("agency_id", profile.agency_id)
 
-      if (error) throw error
-      return data as ApartmentTenant[]
+      if (tenantsError) {
+        console.error("Error fetching tenants:", tenantsError)
+        throw tenantsError
+      }
+
+      return tenantsData as ApartmentTenant[]
     }
   })
 
-  if (isLoading || tenantsLoading) {
+  if (externalLoading || tenantsLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-64 w-full" />
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Locataires</h2>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Nouveau locataire
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Ajouter un locataire</DialogTitle>
-            </DialogHeader>
-            <TenantForm apartmentId={apartmentId} />
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <TenantTable
-        tenants={tenants}
-        onDelete={onDeleteTenant}
-        onEdit={onEditTenant}
-        onInspection={onInspection}
-      />
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nom</TableHead>
+            <TableHead>Prénom</TableHead>
+            <TableHead>Téléphone</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Loyer</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {tenants.map((tenant) => (
+            <TableRow 
+              key={tenant.id}
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}`)}
+            >
+              <TableCell>{tenant.last_name}</TableCell>
+              <TableCell>{tenant.first_name}</TableCell>
+              <TableCell>{tenant.phone_number || "-"}</TableCell>
+              <TableCell>{tenant.email || "-"}</TableCell>
+              <TableCell>
+                {tenant.apartment_leases?.[0]?.rent_amount?.toLocaleString()} FCFA
+              </TableCell>
+              <TableCell onClick={(e) => e.stopPropagation()}>
+                <TenantActionButtons
+                  tenant={tenant}
+                  onEdit={() => onEdit(tenant)}
+                  onDelete={() => onDelete(tenant.id)}
+                  onInspection={() => {}}
+                />
+              </TableCell>
+            </TableRow>
+          ))}
+          {tenants.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center py-4">
+                Aucun locataire trouvé
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </div>
   )
 }

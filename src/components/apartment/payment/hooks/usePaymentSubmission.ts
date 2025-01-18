@@ -1,61 +1,72 @@
-import { useMutation } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { PaymentFormData } from "../types"
+import { useState } from "react"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/lib/supabase"
+import { useQueryClient } from "@tanstack/react-query"
+import { PaymentFormData, LeaseData } from "../types"
 
-export function usePaymentSubmission() {
-  return useMutation(async (data: PaymentFormData) => {
-    const { email, password, agency_name, agency_address, agency_phone, country, city, first_name, last_name } = data
+export function usePaymentSubmission(onSuccess?: () => void) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
 
-    // Create auth user
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          first_name,
-          last_name,
-        }
-      }
-    })
-
-    if (signUpError) throw signUpError
-
-    if (!authData.user) {
-      throw new Error("Erreur lors de la création du compte")
+  const handleSubmit = async (
+    data: PaymentFormData,
+    selectedLease: LeaseData,
+    selectedPeriods: number,
+    agencyId: string | null
+  ) => {
+    if (!agencyId || !selectedLease) {
+      toast({
+        title: "Erreur",
+        description: "Informations manquantes",
+        variant: "destructive",
+      })
+      return
     }
 
-    // Create agency
-    const { data: agency, error: agencyError } = await supabase
-      .from('agencies')
-      .insert([{
-        name: agency_name,
-        address: agency_address,
-        phone: agency_phone,
-        email,
-        country,
-        city,
-        status: 'active'
-      }])
-      .select()
-      .single()
+    setIsSubmitting(true)
+    try {
+      console.log("Submitting payment:", { data, selectedLease, selectedPeriods, agencyId })
 
-    if (agencyError) throw agencyError
+      const totalAmount = selectedLease.rent_amount * selectedPeriods
 
-    // Update user profile with agency_id
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .update({
-        agency_id: agency.id,
-        role: 'admin',
-        first_name,
-        last_name,
-        phone_number: agency_phone,
-        status: 'active'
+      const { error: paymentError } = await supabase
+        .from("apartment_lease_payments")
+        .insert({
+          lease_id: data.leaseId,
+          amount: totalAmount,
+          payment_method: data.paymentMethod,
+          status: "paid",
+          payment_date: new Date().toISOString(),
+          due_date: new Date().toISOString(),
+          agency_id: agencyId,
+          payment_type: "rent"
+        })
+
+      if (paymentError) throw paymentError
+
+      await queryClient.invalidateQueries({ queryKey: ["leases"] })
+
+      toast({
+        title: "Paiement effectué",
+        description: "Le paiement a été enregistré avec succès",
       })
-      .eq('id', authData.user?.id)
 
-    if (profileError) throw profileError
+      onSuccess?.()
+    } catch (error: any) {
+      console.error("Payment error:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors du paiement",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
-    return { user: authData.user, agency }
-  })
+  return {
+    isSubmitting,
+    handleSubmit
+  }
 }
