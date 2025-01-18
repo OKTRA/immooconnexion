@@ -1,5 +1,3 @@
-import 'react-native-url-polyfill/auto';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
@@ -8,20 +6,15 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
     persistSession: true,
+    autoRefreshToken: true,
     detectSessionInUrl: false
-  },
-  global: {
-    headers: { 'X-Client-Info': 'supabase-js-web' }
   }
 });
 
 // Add error handling for auth state changes
-supabase.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
-    // Delete all supabase data from storage on sign out
+supabase.auth.onAuthStateChange((event) => {
+  if (event === 'SIGNED_OUT') {
     localStorage.removeItem('supabase.auth.token');
   }
 });

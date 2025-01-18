@@ -1,108 +1,85 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Loader2 } from "lucide-react"
+import { ApartmentTenant } from "@/types/apartment"
+import { Button } from "@/components/ui/button"
+import { Plus } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { TenantActionButtons } from "./TenantActionButtons"
-import { ApartmentTenantsTableProps, ApartmentTenantWithLease } from "./types"
+import { TenantForm } from "@/components/tenant/TenantForm"
+import { TenantTable } from "@/components/tenant/TenantTable"
+import { Skeleton } from "@/components/ui/skeleton"
 
-export function ApartmentTenantsTable({
-  onEdit,
-  onDelete,
-  isLoading: externalLoading
-}: ApartmentTenantsTableProps) {
-  const { data: tenants = [], isLoading: queryLoading } = useQuery({
-    queryKey: ["apartment-tenants"],
+export interface ApartmentTenantsTabProps {
+  apartmentId: string
+  isLoading: boolean
+  onDeleteTenant: (id: string) => Promise<void>
+  onEditTenant: () => void
+  onInspection: () => void
+}
+
+export function ApartmentTenantsTab({
+  apartmentId,
+  isLoading,
+  onDeleteTenant,
+  onEditTenant,
+  onInspection
+}: ApartmentTenantsTabProps) {
+  const { data: tenants = [], isLoading: tenantsLoading } = useQuery({
+    queryKey: ["apartment-tenants", apartmentId],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Not authenticated")
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('agency_id')
-        .eq('id', user.id)
-        .single()
-
-      if (!profile?.agency_id) {
-        throw new Error("No agency associated")
-      }
-
       const { data, error } = await supabase
         .from("apartment_tenants")
         .select(`
-          *,
-          apartment_leases (
-            id,
-            tenant_id,
-            unit_id,
-            start_date,
-            end_date,
-            rent_amount,
-            deposit_amount,
-            payment_frequency,
-            duration_type,
-            status,
-            payment_type
-          )
+          id,
+          first_name,
+          last_name,
+          phone_number,
+          birth_date,
+          photo_id_url,
+          agency_fees,
+          profession
         `)
-        .eq("agency_id", profile.agency_id)
+        .eq("apartment_id", apartmentId)
 
       if (error) throw error
-      return data as ApartmentTenantWithLease[]
+      return data as ApartmentTenant[]
     }
   })
 
-  const isLoading = externalLoading || queryLoading
-
-  if (isLoading) {
+  if (isLoading || tenantsLoading) {
     return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
-  }
-
-  if (!tenants.length) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        Aucun locataire trouvé
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-64 w-full" />
       </div>
     )
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nom</TableHead>
-            <TableHead>Prénom</TableHead>
-            <TableHead>Téléphone</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Loyer</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {tenants.map((tenant) => (
-            <TableRow key={tenant.id}>
-              <TableCell>{tenant.last_name}</TableCell>
-              <TableCell>{tenant.first_name}</TableCell>
-              <TableCell>{tenant.phone_number || "-"}</TableCell>
-              <TableCell>{tenant.email || "-"}</TableCell>
-              <TableCell>
-                {tenant.apartment_leases?.[0]?.rent_amount?.toLocaleString()} FCFA
-              </TableCell>
-              <TableCell>
-                <TenantActionButtons
-                  tenant={tenant}
-                  onEdit={() => onEdit(tenant)}
-                  onDelete={() => onDelete(tenant.id)}
-                />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Locataires</h2>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Nouveau locataire
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Ajouter un locataire</DialogTitle>
+            </DialogHeader>
+            <TenantForm apartmentId={apartmentId} />
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <TenantTable
+        tenants={tenants}
+        onDelete={onDeleteTenant}
+        onEdit={onEditTenant}
+        onInspection={onInspection}
+      />
     </div>
   )
 }
