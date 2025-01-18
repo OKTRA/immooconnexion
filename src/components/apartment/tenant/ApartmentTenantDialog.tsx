@@ -4,23 +4,23 @@ import { ApartmentTenantForm } from "./ApartmentTenantForm"
 import { useState } from "react"
 
 interface ApartmentTenantDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  apartmentId: string
-  tenant?: any
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  unitId: string;
+  tenant?: any;
 }
 
 export function ApartmentTenantDialog({
   open,
   onOpenChange,
-  apartmentId,
+  unitId,
   tenant
 }: ApartmentTenantDialogProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSuccess = () => {
-    onOpenChange(false)
-  }
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -32,7 +32,7 @@ export function ApartmentTenantDialog({
         </DialogHeader>
         <ScrollArea className="h-[calc(90vh-120px)] pr-4">
           <ApartmentTenantForm
-            apartmentId={apartmentId}
+            unitId={unitId}
             onSuccess={handleSuccess}
             isSubmitting={isSubmitting}
             setIsSubmitting={setIsSubmitting}
@@ -41,5 +41,5 @@ export function ApartmentTenantDialog({
         </ScrollArea>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

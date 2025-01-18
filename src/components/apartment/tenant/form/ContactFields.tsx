@@ -1,15 +1,10 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TenantFormData } from "../ApartmentTenantForm";
 
 interface ContactFieldsProps {
-  formData: {
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone_number: string;
-    birth_date: string | null;
-  };
-  setFormData: (data: any) => void;
+  formData: TenantFormData;
+  setFormData: (data: TenantFormData) => void;
 }
 
 export function ContactFields({ formData, setFormData }: ContactFieldsProps) {

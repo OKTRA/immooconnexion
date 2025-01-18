@@ -9,6 +9,22 @@ import { PhotoUpload } from "./form/PhotoUpload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+export interface TenantFormData {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  birth_date: string | null;
+  profession: string;
+  rent_amount: string;
+  deposit_amount: string;
+  start_date: string;
+  end_date: string;
+  payment_frequency: "monthly" | "weekly" | "daily" | "quarterly" | "yearly";
+  duration_type: "fixed" | "month_to_month" | "yearly";
+  photos: FileList | null;
+}
+
 export interface ApartmentTenantFormProps {
   unitId: string;
   onSuccess: () => void;
@@ -16,6 +32,22 @@ export interface ApartmentTenantFormProps {
   setIsSubmitting: (value: boolean) => void;
   initialData?: any;
 }
+
+const initialFormData: TenantFormData = {
+  first_name: "",
+  last_name: "",
+  email: "",
+  phone_number: "",
+  birth_date: null,
+  profession: "",
+  rent_amount: "",
+  deposit_amount: "",
+  start_date: "",
+  end_date: "",
+  payment_frequency: "monthly",
+  duration_type: "fixed",
+  photos: null
+};
 
 export function ApartmentTenantForm({
   unitId,
@@ -25,20 +57,9 @@ export function ApartmentTenantForm({
   initialData
 }: ApartmentTenantFormProps) {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    first_name: initialData?.first_name || "",
-    last_name: initialData?.last_name || "",
-    email: initialData?.email || "",
-    phone_number: initialData?.phone_number || "",
-    birth_date: initialData?.birth_date || null,
-    profession: initialData?.profession || "",
-    rent_amount: initialData?.rent_amount?.toString() || "",
-    deposit_amount: initialData?.deposit_amount?.toString() || "",
-    start_date: initialData?.start_date || "",
-    end_date: initialData?.end_date || "",
-    payment_frequency: initialData?.payment_frequency || "monthly",
-    duration_type: initialData?.duration_type || "fixed",
-    photos: null as FileList | null
+  const [formData, setFormData] = useState<TenantFormData>({
+    ...initialFormData,
+    ...initialData
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,36 +78,32 @@ export function ApartmentTenantForm({
 
       if (!profile?.agency_id) throw new Error("Agency ID not found");
 
-      // Upload photos if provided
-      let photoUrls: string[] = [];
-      if (formData.photos) {
-        for (let i = 0; i < formData.photos.length; i++) {
-          const file = formData.photos[i];
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${Math.random()}.${fileExt}`;
-          
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('tenant_photos')
-            .upload(fileName, file);
+      let photoUrl: string | null = null;
+      if (formData.photos?.length) {
+        const file = formData.photos[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('tenant_photos')
+          .upload(fileName, file);
 
-          if (uploadError) throw uploadError;
-          if (uploadData) {
-            const { data: { publicUrl } } = supabase.storage
-              .from('tenant_photos')
-              .getPublicUrl(uploadData.path);
-            photoUrls.push(publicUrl);
-          }
+        if (uploadError) throw uploadError;
+        if (uploadData) {
+          const { data: { publicUrl } } = supabase.storage
+            .from('tenant_photos')
+            .getPublicUrl(uploadData.path);
+          photoUrl = publicUrl;
         }
       }
 
-      // Create tenant with proper date handling
       const tenantData = {
         first_name: formData.first_name,
         last_name: formData.last_name,
         email: formData.email || null,
         phone_number: formData.phone_number,
         birth_date: formData.birth_date || null,
-        photo_id_url: photoUrls.length > 0 ? photoUrls[0] : null,
+        photo_id_url: photoUrl,
         profession: formData.profession || null,
         agency_id: profile.agency_id,
         unit_id: unitId
@@ -100,7 +117,6 @@ export function ApartmentTenantForm({
 
       if (tenantError) throw tenantError;
 
-      // Create lease with proper date handling
       const leaseData = {
         tenant_id: tenant.id,
         unit_id: unitId,
@@ -159,7 +175,7 @@ export function ApartmentTenantForm({
         <LeaseFields formData={formData} setFormData={setFormData} />
 
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => setIsSubmitting(false)} disabled={isSubmitting}>
+          <Button variant="outline" type="button" onClick={() => onSuccess()} disabled={isSubmitting}>
             Annuler
           </Button>
           <Button type="submit" disabled={isSubmitting}>
