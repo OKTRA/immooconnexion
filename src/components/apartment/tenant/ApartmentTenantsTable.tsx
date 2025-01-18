@@ -34,11 +34,21 @@ export function ApartmentTenantsTable({
     queryFn: async () => {
       console.log("Fetching tenants for apartment:", apartmentId)
       
-      if (!apartmentId || apartmentId === "all") {
-        return []
+      // Get the current user's profile to get their agency_id
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('agency_id')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile?.agency_id) {
+        throw new Error("Aucune agence associée")
       }
 
-      const { data: tenantData, error } = await supabase
+      let query = supabase
         .from("apartment_tenants")
         .select(`
           id,
@@ -52,8 +62,15 @@ export function ApartmentTenantsTable({
             rent_amount
           )
         `)
-        .eq("unit_id", apartmentId)
+        .eq("agency_id", profile.agency_id)
         .order("created_at", { ascending: false })
+
+      // If a specific apartment unit is selected, filter by unit_id
+      if (apartmentId && apartmentId !== "all") {
+        query = query.eq("unit_id", apartmentId)
+      }
+
+      const { data: tenantData, error } = await query
 
       if (error) {
         console.error("Error fetching tenants:", error)
@@ -68,7 +85,7 @@ export function ApartmentTenantsTable({
       console.log("Tenants data:", tenantData)
       return tenantData || []
     },
-    enabled: !externalLoading && !!apartmentId
+    enabled: !externalLoading
   })
 
   if (externalLoading || isLoading) {
