@@ -29,9 +29,9 @@ export function ApartmentTenantsTable({
   const { toast } = useToast()
   const navigate = useNavigate()
 
-  // Première requête pour obtenir les locataires avec des champs minimaux
+  // Requête unique simplifiée pour obtenir les locataires avec leurs loyers
   const { data: tenants = [], isLoading: tenantsLoading } = useQuery({
-    queryKey: ["apartment-tenants-basic", apartmentId],
+    queryKey: ["apartment-tenants", apartmentId],
     queryFn: async () => {
       console.log("Fetching tenants for apartment:", apartmentId)
       
@@ -48,6 +48,7 @@ export function ApartmentTenantsTable({
         throw new Error("Aucune agence associée")
       }
 
+      // Requête simplifiée avec jointure simple
       let query = supabase
         .from("apartment_tenants")
         .select(`
@@ -55,9 +56,13 @@ export function ApartmentTenantsTable({
           first_name,
           last_name,
           email,
-          phone_number
+          phone_number,
+          apartment_leases!inner (
+            rent_amount
+          )
         `)
         .eq("agency_id", profile.agency_id)
+        .eq("apartment_leases.status", "active")
 
       if (apartmentId && apartmentId !== "all") {
         query = query.eq("unit_id", apartmentId)
@@ -75,38 +80,14 @@ export function ApartmentTenantsTable({
         throw error
       }
 
-      return data || []
+      // Formater les données pour n'avoir qu'un montant de loyer par locataire
+      return data.map(tenant => ({
+        ...tenant,
+        rent_amount: tenant.apartment_leases?.[0]?.rent_amount
+      })) || []
     },
     enabled: !externalLoading
   })
-
-  // Deuxième requête simplifiée pour obtenir uniquement les montants des baux actifs
-  const { data: leaseAmounts = [] } = useQuery({
-    queryKey: ["active-lease-amounts", tenants],
-    queryFn: async () => {
-      if (!tenants.length) return []
-
-      const { data, error } = await supabase
-        .from("apartment_leases")
-        .select('tenant_id, rent_amount')
-        .eq('status', 'active')
-        .in('tenant_id', tenants.map(t => t.id))
-
-      if (error) {
-        console.error("Error fetching lease amounts:", error)
-        throw error
-      }
-
-      return data || []
-    },
-    enabled: tenants.length > 0
-  })
-
-  // Combiner les données de manière simple
-  const tenantsWithRent = tenants.map(tenant => ({
-    ...tenant,
-    rent_amount: leaseAmounts.find(lease => lease.tenant_id === tenant.id)?.rent_amount
-  }))
 
   if (externalLoading || tenantsLoading) {
     return (
@@ -130,7 +111,7 @@ export function ApartmentTenantsTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tenantsWithRent.map((tenant) => (
+          {tenants.map((tenant) => (
             <TableRow 
               key={tenant.id}
               className="cursor-pointer hover:bg-muted/50"
@@ -153,7 +134,7 @@ export function ApartmentTenantsTable({
               </TableCell>
             </TableRow>
           ))}
-          {tenantsWithRent.length === 0 && (
+          {tenants.length === 0 && (
             <TableRow>
               <TableCell colSpan={6} className="text-center py-4">
                 Aucun locataire trouvé
