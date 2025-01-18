@@ -41,15 +41,25 @@ export function ApartmentCard({ apartment, onViewUnits, onUpdate }: ApartmentCar
 
   const handleDelete = async () => {
     try {
-      // First delete all associated units
-      const { error: unitsError } = await supabase
+      // First check if there are any units
+      const { data: units, error: checkError } = await supabase
         .from('apartment_units')
-        .delete()
+        .select('id')
         .eq('apartment_id', apartment.id)
 
-      if (unitsError) throw unitsError
+      if (checkError) throw checkError
 
-      // Then delete the apartment
+      if (units && units.length > 0) {
+        toast({
+          title: "Action impossible",
+          description: "Vous devez d'abord supprimer toutes les unités de cet appartement avant de pouvoir le supprimer.",
+          variant: "destructive"
+        })
+        setShowDeleteDialog(false)
+        return
+      }
+
+      // If no units, proceed with apartment deletion
       const { error: apartmentError } = await supabase
         .from('apartments')
         .delete()
@@ -59,7 +69,7 @@ export function ApartmentCard({ apartment, onViewUnits, onUpdate }: ApartmentCar
 
       toast({
         title: "Appartement supprimé",
-        description: "L'appartement et ses unités ont été supprimés avec succès"
+        description: "L'appartement a été supprimé avec succès"
       })
       
       // Refresh the page to update the list
@@ -124,7 +134,8 @@ export function ApartmentCard({ apartment, onViewUnits, onUpdate }: ApartmentCar
           <AlertDialogHeader>
             <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est irréversible. Cela supprimera définitivement l'appartement et toutes ses unités.
+              Cette action est irréversible. L'appartement sera définitivement supprimé.
+              Note: Vous devez d'abord supprimer toutes les unités associées avant de pouvoir supprimer l'appartement.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
