@@ -1,19 +1,19 @@
-import { AgencyLayout } from "@/components/agency/AgencyLayout"
-import { ApartmentHeader } from "@/components/apartment/ApartmentHeader"
-import { ApartmentList } from "@/components/apartment/ApartmentList"
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { useNavigate } from "react-router-dom"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ApartmentForm } from "@/components/apartment/ApartmentForm"
+import { EmptyApartmentState } from "@/components/apartment/EmptyApartmentState"
+import { ApartmentList } from "@/components/apartment/ApartmentList"
 
 export default function Apartments() {
-  const navigate = useNavigate()
-  
+  const [showAddDialog, setShowAddDialog] = useState(false)
+
   const { data: apartments = [], isLoading } = useQuery({
-    queryKey: ["apartments"],
+    queryKey: ['apartments'],
     queryFn: async () => {
       const { data: profile } = await supabase.auth.getUser()
       
@@ -33,51 +33,83 @@ export default function Apartments() {
 
       const { data, error } = await supabase
         .from("apartments")
+        .select("*")
+        .eq("agency_id", userProfile.agency_id)
+        .order("created_at", { ascending: false })
+
+      if (error) throw error
+      return data
+    }
+  })
+
+  const { data: owners = [] } = useQuery({
+    queryKey: ['property-owners'],
+    queryFn: async () => {
+      const { data: profile } = await supabase.auth.getUser()
+      
+      if (!profile.user) {
+        throw new Error("Non authentifié")
+      }
+
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("agency_id")
+        .eq("id", profile.user.id)
+        .single()
+
+      if (!userProfile?.agency_id) {
+        throw new Error("Aucune agence associée")
+      }
+
+      const { data: agencyOwners } = await supabase
+        .from("agency_owners")
         .select(`
-          id,
-          name,
-          address,
-          total_units
+          owner:property_owners (
+            id,
+            first_name,
+            last_name,
+            phone_number
+          )
         `)
         .eq("agency_id", userProfile.agency_id)
 
-      if (error) throw error
-
-      return data.map(apartment => ({
-        id: apartment.id,
-        name: apartment.name,
-        address: apartment.address,
-        unit_count: apartment.total_units
-      }))
+      return agencyOwners?.map(ao => ao.owner) || []
     }
   })
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (!apartments.length) {
+    return (
+      <AgencyLayout>
+        <EmptyApartmentState />
+      </AgencyLayout>
+    )
+  }
 
   return (
     <AgencyLayout>
       <div className="container mx-auto py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Appartements</h1>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Nouvel appartement
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Ajouter un appartement</DialogTitle>
-              </DialogHeader>
-              <ApartmentForm />
-            </DialogContent>
-          </Dialog>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Appartements</h1>
+          <Button onClick={() => setShowAddDialog(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nouvel Appartement
+          </Button>
         </div>
-        
-        <ApartmentList 
-          apartments={apartments}
-          isLoading={isLoading}
-          onViewUnits={(id) => navigate(`/agence/apartments/${id}/units`)}
-        />
+
+        <ApartmentList apartments={apartments} />
+
+        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Ajouter un appartement</DialogTitle>
+            </DialogHeader>
+            <ApartmentForm owners={owners} onSuccess={() => setShowAddDialog(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
     </AgencyLayout>
   )
