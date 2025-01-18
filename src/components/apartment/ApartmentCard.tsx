@@ -6,6 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { useQuery } from "@tanstack/react-query"
 
 interface ApartmentCardProps {
   apartment: {
@@ -23,12 +24,26 @@ export function ApartmentCard({ apartment, onViewUnits, onUpdate }: ApartmentCar
   const { toast } = useToast()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
+  // Fetch real-time unit count
+  const { data: unitCount = 0 } = useQuery({
+    queryKey: ['apartment-units-count', apartment.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('apartment_units')
+        .select('id', { count: 'exact' })
+        .eq('apartment_id', apartment.id)
+
+      if (error) throw error
+      return data?.length || 0
+    }
+  })
+
   const handleViewUnits = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (onViewUnits) {
       onViewUnits(apartment.id)
     } else {
-      navigate(`/agence/appartements/${apartment.id}/details`)
+      navigate(`/agence/apartments/${apartment.id}/units`)
     }
   }
 
@@ -95,7 +110,7 @@ export function ApartmentCard({ apartment, onViewUnits, onUpdate }: ApartmentCar
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                {apartment.unit_count} {apartment.unit_count === 1 ? "unité" : "unités"}
+                {unitCount} {unitCount === 1 ? "unité" : "unités"}
               </span>
               <div className="flex gap-2">
                 <Button 
