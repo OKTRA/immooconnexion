@@ -197,6 +197,45 @@ export type Database = {
           },
         ]
       }
+      agency_owners: {
+        Row: {
+          agency_id: string | null
+          created_at: string | null
+          id: string
+          owner_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          agency_id?: string | null
+          created_at?: string | null
+          id?: string
+          owner_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          agency_id?: string | null
+          created_at?: string | null
+          id?: string
+          owner_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_owners_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_owners_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "property_owners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       apartment_inspections: {
         Row: {
           created_at: string | null
@@ -654,6 +693,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          owner_id: string | null
           total_units: number | null
           updated_at: string | null
         }
@@ -664,6 +704,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          owner_id?: string | null
           total_units?: number | null
           updated_at?: string | null
         }
@@ -674,6 +715,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          owner_id?: string | null
           total_units?: number | null
           updated_at?: string | null
         }
@@ -683,6 +725,13 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartments_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "property_owners"
             referencedColumns: ["id"]
           },
         ]
@@ -1089,6 +1138,7 @@ export type Database = {
           loyer: number | null
           maximum_stay: number | null
           minimum_stay: number | null
+          owner_id: string | null
           owner_name: string | null
           owner_phone: string | null
           parent_property_id: string | null
@@ -1121,6 +1171,7 @@ export type Database = {
           loyer?: number | null
           maximum_stay?: number | null
           minimum_stay?: number | null
+          owner_id?: string | null
           owner_name?: string | null
           owner_phone?: string | null
           parent_property_id?: string | null
@@ -1153,6 +1204,7 @@ export type Database = {
           loyer?: number | null
           maximum_stay?: number | null
           minimum_stay?: number | null
+          owner_id?: string | null
           owner_name?: string | null
           owner_phone?: string | null
           parent_property_id?: string | null
@@ -1184,6 +1236,13 @@ export type Database = {
             columns: ["created_by_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "property_owners"
             referencedColumns: ["id"]
           },
           {
@@ -1251,6 +1310,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      property_owners: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          phone_number: string | null
+          status: Database["public"]["Enums"]["owner_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          phone_number?: string | null
+          status?: Database["public"]["Enums"]["owner_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          phone_number?: string | null
+          status?: Database["public"]["Enums"]["owner_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       property_sales: {
         Row: {
@@ -1560,6 +1652,7 @@ export type Database = {
       }
     }
     Enums: {
+      owner_status: "active" | "inactive"
       property_unit_status:
         | "available"
         | "occupied"

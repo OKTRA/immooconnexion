@@ -7,6 +7,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import Login from "@/pages/Login"
 import Properties from "@/pages/Properties"
 import PropertyDetails from "@/pages/PropertyDetails"
+import PropertyOwners from "@/pages/PropertyOwners"
 import Tenants from "@/pages/Tenants"
 import TenantContracts from "@/pages/TenantContracts"
 import Expenses from "@/pages/Expenses"
@@ -52,6 +53,7 @@ export default function App() {
               <Route path="/agence" element={<ProtectedRoute />}>
                 <Route path="dashboard" element={<AgencyDashboard />} />
                 <Route path="properties" element={<Properties />} />
+                <Route path="property-owners" element={<PropertyOwners />} />
                 <Route path="properties/:id" element={<PropertyDetails />} />
                 <Route path="tenants" element={<Tenants />} />
                 <Route path="contracts" element={<TenantContracts />} />

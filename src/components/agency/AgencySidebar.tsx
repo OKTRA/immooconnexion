@@ -7,7 +7,8 @@ import {
   BarChart2,
   FileText,
   CreditCard,
-  Building
+  Building,
+  UserSquare2
 } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { cn } from "@/lib/utils"
@@ -29,6 +30,11 @@ const menuItems = [
     title: "Biens",
     href: "/agence/properties",
     icon: Building2,
+  },
+  {
+    title: "Propriétaires",
+    href: "/agence/property-owners",
+    icon: UserSquare2,
   },
   {
     title: "Appartements",
