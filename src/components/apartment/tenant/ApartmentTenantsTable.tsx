@@ -29,7 +29,6 @@ export function ApartmentTenantsTable({
   const { toast } = useToast()
   const navigate = useNavigate()
 
-  // Requête unique simplifiée pour obtenir les locataires avec leurs loyers
   const { data: tenants = [], isLoading: tenantsLoading } = useQuery({
     queryKey: ["apartment-tenants", apartmentId],
     queryFn: async () => {
@@ -48,7 +47,7 @@ export function ApartmentTenantsTable({
         throw new Error("Aucune agence associée")
       }
 
-      // Requête simplifiée avec jointure simple
+      // Requête modifiée pour utiliser LEFT JOIN au lieu de INNER JOIN
       let query = supabase
         .from("apartment_tenants")
         .select(`
@@ -57,12 +56,11 @@ export function ApartmentTenantsTable({
           last_name,
           email,
           phone_number,
-          apartment_leases!inner (
+          apartment_leases (
             rent_amount
           )
         `)
         .eq("agency_id", profile.agency_id)
-        .eq("apartment_leases.status", "active")
 
       if (apartmentId && apartmentId !== "all") {
         query = query.eq("unit_id", apartmentId)
