@@ -47,16 +47,10 @@ export function ApartmentTenantsTable({
         throw new Error("Aucune agence associée")
       }
 
+      // Using the optimized view instead of complex joins
       const { data: tenantsData, error: tenantsError } = await supabase
         .from("apartment_tenants_with_rent")
-        .select(`
-          id,
-          first_name,
-          last_name,
-          email,
-          phone_number,
-          rent_amount
-        `)
+        .select()
         .eq("agency_id", profile.agency_id)
 
       if (tenantsError) {

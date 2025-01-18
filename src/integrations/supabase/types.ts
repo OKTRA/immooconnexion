@@ -1478,28 +1478,6 @@ export type Database = {
           rent_amount: number | null
           unit_id: string | null
         }
-        Insert: {
-          agency_id?: string | null
-          created_at?: string | null
-          email?: string | null
-          first_name?: string | null
-          id?: string | null
-          last_name?: string | null
-          phone_number?: string | null
-          rent_amount?: never
-          unit_id?: string | null
-        }
-        Update: {
-          agency_id?: string | null
-          created_at?: string | null
-          email?: string | null
-          first_name?: string | null
-          id?: string | null
-          last_name?: string | null
-          phone_number?: string | null
-          rent_amount?: never
-          unit_id?: string | null
-        }
         Relationships: [
           {
             foreignKeyName: "apartment_tenants_agency_id_fkey"
