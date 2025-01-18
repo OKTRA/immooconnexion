@@ -47,6 +47,7 @@ export function PropertyOwnersTable() {
             <TableHead>Email</TableHead>
             <TableHead>Téléphone</TableHead>
             <TableHead>Statut</TableHead>
+            <TableHead>Statut des paiements</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>

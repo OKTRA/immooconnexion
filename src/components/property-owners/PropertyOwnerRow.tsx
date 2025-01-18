@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button"
 import { Edit, Trash } from "lucide-react"
 import { useState } from "react"
 import { PropertyOwnerDialog } from "./PropertyOwnerDialog"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 
 interface PropertyOwnerRowProps {
   owner: {
@@ -23,6 +24,56 @@ export function PropertyOwnerRow({ owner }: PropertyOwnerRowProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  // Fetch payment statuses for this owner
+  const { data: paymentStatus } = useQuery({
+    queryKey: ['owner-payments', owner.id],
+    queryFn: async () => {
+      // Fetch pending payments
+      const { data: pendingPayments, error: pendingError } = await supabase
+        .from('apartment_lease_payments')
+        .select(`
+          *,
+          apartment_leases!inner(
+            apartment_units!inner(
+              apartment!inner(
+                owner_id
+              )
+            )
+          )
+        `)
+        .eq('status', 'pending')
+        .eq('apartment_leases.apartment_units.apartment.owner_id', owner.id);
+
+      if (pendingError) throw pendingError;
+
+      // Fetch late payments
+      const { data: latePayments, error: lateError } = await supabase
+        .from('apartment_lease_payments')
+        .select(`
+          *,
+          late_payment_fees!inner(*),
+          apartment_leases!inner(
+            apartment_units!inner(
+              apartment!inner(
+                owner_id
+              )
+            )
+          )
+        `)
+        .eq('apartment_leases.apartment_units.apartment.owner_id', owner.id)
+        .not('late_payment_fees', 'is', null);
+
+      if (lateError) throw lateError;
+
+      return {
+        pendingCount: pendingPayments?.length || 0,
+        lateCount: latePayments?.length || 0,
+        totalPendingAmount: pendingPayments?.reduce((sum, payment) => sum + payment.amount, 0) || 0,
+        totalLateAmount: latePayments?.reduce((sum, payment) => sum + payment.amount, 0) || 0,
+      };
+    }
+  });
 
   const handleDelete = async () => {
     try {
@@ -59,6 +110,22 @@ export function PropertyOwnerRow({ owner }: PropertyOwnerRowProps) {
           <Badge variant={owner.status === 'active' ? 'default' : 'secondary'}>
             {owner.status === 'active' ? 'Actif' : 'Inactif'}
           </Badge>
+        </TableCell>
+        <TableCell>
+          <div className="flex flex-col gap-1">
+            {paymentStatus?.pendingCount > 0 && (
+              <Badge variant="warning" className="w-fit">
+                {paymentStatus.pendingCount} paiements en attente
+                ({paymentStatus.totalPendingAmount.toLocaleString()} FCFA)
+              </Badge>
+            )}
+            {paymentStatus?.lateCount > 0 && (
+              <Badge variant="destructive" className="w-fit">
+                {paymentStatus.lateCount} paiements en retard
+                ({paymentStatus.totalLateAmount.toLocaleString()} FCFA)
+              </Badge>
+            )}
+          </div>
         </TableCell>
         <TableCell>
           <div className="flex gap-2">
