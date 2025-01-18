@@ -1,55 +1,12 @@
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, Building2, Users, Receipt, ArrowUpDown, Home } from "lucide-react"
+import { Loader2, Building2, Home, Receipt, ArrowUpDown } from "lucide-react"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { OwnerHeader } from "@/components/property-owner/OwnerHeader"
-import { RevenuesTab } from "@/components/property-owner/RevenuesTab"
-import { ExpensesTab } from "@/components/property-owner/ExpensesTab"
-import { StatementsTab } from "@/components/property-owner/StatementsTab"
 import { StatCard } from "@/components/StatCard"
 import { RevenueEvolution } from "@/components/reports/RevenueEvolution"
-
-type PropertyRevenue = {
-  owner_id: string
-  first_name: string
-  last_name: string
-  property_id: string
-  property_name: string
-  source_type: "property"
-  amount: number
-  payment_type: string
-  payment_date: string
-  commission_rate: number
-  commission_amount: number
-  net_amount: number
-}
-
-type ApartmentRevenue = {
-  owner_id: string
-  first_name: string
-  last_name: string
-  apartment_id: string
-  apartment_name: string
-  source_type: "apartment"
-  amount: number
-  payment_type: string
-  payment_date: string
-  commission_rate: number
-  commission_amount: number
-  net_amount: number
-}
-
-type Revenue = PropertyRevenue | ApartmentRevenue
-
-type OwnerDashboardStats = {
-  total_properties: number
-  total_apartments: number
-  property_occupancy_rate: number
-  current_month_revenue: number
-  current_month_expenses: number
-}
+import { PropertyOwnerTabs } from "@/components/property-owner/PropertyOwnerTabs"
 
 export default function PropertyOwnerDetails() {
   const { ownerId } = useParams()
@@ -78,7 +35,7 @@ export default function PropertyOwnerDetails() {
         .single()
 
       if (error) throw error
-      return data as OwnerDashboardStats
+      return data
     }
   })
 
@@ -98,11 +55,7 @@ export default function PropertyOwnerDetails() {
         .order('payment_date', { ascending: false })
 
       if (propertyError || apartmentError) throw propertyError || apartmentError
-      
-      const typedPropertyRevenues = (propertyRevenues || []) as PropertyRevenue[]
-      const typedApartmentRevenues = (apartmentRevenues || []) as ApartmentRevenue[]
-      
-      return [...typedPropertyRevenues, ...typedApartmentRevenues] as Revenue[]
+      return [...(propertyRevenues || []), ...(apartmentRevenues || [])]
     }
   })
 
@@ -157,7 +110,6 @@ export default function PropertyOwnerDetails() {
       <div className="container mx-auto py-6 space-y-6">
         <OwnerHeader owner={owner} />
 
-        {/* Dashboard Stats */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Propriétés"
@@ -181,29 +133,15 @@ export default function PropertyOwnerDetails() {
           />
         </div>
 
-        {/* Revenue Evolution Chart */}
-        <RevenueEvolution ownerId={ownerId} />
+        <RevenueEvolution ownerId={ownerId || ''} />
 
-        {/* Tabs */}
-        <Tabs defaultValue="revenues">
-          <TabsList>
-            <TabsTrigger value="revenues">Revenus</TabsTrigger>
-            <TabsTrigger value="expenses">Dépenses</TabsTrigger>
-            <TabsTrigger value="statements">États financiers</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="revenues">
-            <RevenuesTab revenues={revenues} isLoading={revenuesLoading} />
-          </TabsContent>
-
-          <TabsContent value="expenses">
-            <ExpensesTab expenses={expenses} />
-          </TabsContent>
-
-          <TabsContent value="statements">
-            <StatementsTab statements={statements} />
-          </TabsContent>
-        </Tabs>
+        <PropertyOwnerTabs
+          ownerId={ownerId || ''}
+          revenues={revenues}
+          expenses={expenses}
+          statements={statements}
+          isLoading={revenuesLoading}
+        />
       </div>
     </AgencyLayout>
   )
