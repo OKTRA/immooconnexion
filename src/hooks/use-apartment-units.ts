@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { ApartmentUnit, ApartmentUnitFormData } from "@/types/apartment"
+import { ApartmentUnit } from "@/types/apartment"
 
 export function useApartmentUnits(apartmentId: string) {
   const queryClient = useQueryClient()
@@ -20,11 +20,11 @@ export function useApartmentUnits(apartmentId: string) {
   })
 
   const createUnit = useMutation({
-    mutationFn: async (unit: Omit<ApartmentUnitFormData, 'id'>) => {
+    mutationFn: async (unit: Omit<ApartmentUnit, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
         .from('apartment_units')
         .insert([{
-          apartment_id: unit.apartment_id,
+          apartment_id: apartmentId,
           unit_number: unit.unit_number,
           floor_level: unit.floor_level,
           area: unit.area,

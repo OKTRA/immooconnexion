@@ -7,7 +7,6 @@ export function useUnitForm(
   onSubmit?: (data: ApartmentUnit) => Promise<void>
 ) {
   const [formData, setFormData] = useState<ApartmentUnitFormData>({
-    apartment_id: apartmentId,
     unit_number: initialData?.unit_number || "",
     floor_level: initialData?.floor_level || null,
     area: initialData?.area || null,

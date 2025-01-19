@@ -117,6 +117,6 @@ export interface ApartmentInspection {
   photo_urls?: string[];
   status?: string;
   type?: string;
-  created_at?: string;
-  updated_at?: string;
+  created_at: string;
+  updated_at: string;
 }
