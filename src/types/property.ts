@@ -36,22 +36,22 @@ export interface PropertyUnit {
   id: string;
   property_id: string;
   unit_number: string;
-  floor_level?: number;
-  area?: number;
+  floor_level?: number | null;
+  area?: number | null;
   rent_amount: number;
-  deposit_amount?: number;
+  deposit_amount?: number | null;
   status: 'available' | 'occupied' | 'maintenance' | 'reserved';
-  description?: string;
+  description?: string | null;
   created_at: string;
   updated_at: string;
 }
 
 export interface PropertyUnitFormData {
   unit_number: string;
-  floor_level?: number;
-  area?: number;
+  floor_level?: number | null;
+  area?: number | null;
   rent_amount: number;
-  deposit_amount?: number;
+  deposit_amount?: number | null;
   status: 'available' | 'occupied' | 'maintenance' | 'reserved';
-  description?: string;
+  description?: string | null;
 }
