@@ -38,6 +38,7 @@ export interface ApartmentUnit {
 }
 
 export interface ApartmentUnitFormData {
+  apartment_id: string;
   unit_number: string;
   floor_level?: string | null;
   area?: number | null;

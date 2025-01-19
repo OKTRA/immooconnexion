@@ -24,7 +24,7 @@ export function useApartmentUnits(apartmentId: string) {
       const { data, error } = await supabase
         .from('apartment_units')
         .insert([{
-          apartment_id: apartmentId,
+          apartment_id: unit.apartment_id,
           unit_number: unit.unit_number,
           floor_level: unit.floor_level,
           area: unit.area,

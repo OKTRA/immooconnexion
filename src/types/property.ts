@@ -55,6 +55,7 @@ export interface PropertyUnit {
   created_at: string;
   updated_at: string;
   kitchen_description?: string | null;
+  unit_name?: string | null;
 }
 
 export interface PropertyUnitFormData {
@@ -66,6 +67,7 @@ export interface PropertyUnitFormData {
   status: PropertyUnitStatus;
   description?: string | null;
   kitchen_description?: string | null;
+  unit_name?: string | null;
 }
 
 export type { DBProperty as Property };
