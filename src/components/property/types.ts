@@ -21,24 +21,9 @@ export interface Property {
   country?: string;
   quartier?: string;
   owner_id?: string;
-  agency?: {
-    name: string;
-    address: string;
-  };
-}
-
-export interface PropertyFormFieldsProps {
-  formData: PropertyFormData;
-  setFormData: (data: PropertyFormData) => void;
-  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  imagePreviewUrl?: string | string[];
-  propertyType?: "apartment" | "house";
-  owners?: Array<{
-    id: string;
-    first_name: string;
-    last_name: string;
-    phone_number?: string;
-  }>;
+  store_count?: number;
+  kitchen_count?: number;
+  has_pool?: boolean;
 }
 
 export interface PropertyFormData {
@@ -55,10 +40,7 @@ export interface PropertyFormData {
   country?: string;
   quartier?: string;
   owner_id?: string;
-}
-
-export interface PropertyDialogProps {
-  property?: Property | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  store_count?: number;
+  kitchen_count?: number;
+  has_pool?: boolean;
 }

@@ -680,7 +680,7 @@ export type Database = {
           floor_number: number | null
           has_pool: boolean | null
           id: string
-          kitchen_description: string | null
+          kitchen_count: number | null
           living_rooms: number | null
           rent_amount: number
           status: string | null
@@ -701,7 +701,7 @@ export type Database = {
           floor_number?: number | null
           has_pool?: boolean | null
           id?: string
-          kitchen_description?: string | null
+          kitchen_count?: number | null
           living_rooms?: number | null
           rent_amount: number
           status?: string | null
@@ -722,7 +722,7 @@ export type Database = {
           floor_number?: number | null
           has_pool?: boolean | null
           id?: string
-          kitchen_description?: string | null
+          kitchen_count?: number | null
           living_rooms?: number | null
           rent_amount?: number
           status?: string | null
