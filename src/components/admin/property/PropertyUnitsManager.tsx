@@ -13,13 +13,13 @@ interface PropertyUnitsManagerProps {
 export function PropertyUnitsManager({ propertyId }: PropertyUnitsManagerProps) {
   const [showDialog, setShowDialog] = useState(false)
   const [editingUnit, setEditingUnit] = useState<PropertyUnitFormData | undefined>()
-  const { units, isLoading } = usePropertyUnits(propertyId)
+  const { data: units, isLoading } = usePropertyUnits(propertyId)
 
   const handleEdit = (unit: PropertyUnit) => {
     const formData: PropertyUnitFormData = {
       property_id: unit.property_id,
       unit_number: unit.unit_number,
-      floor_level: unit.floor_level,
+      floor_number: unit.floor_number,
       area: unit.area,
       rent_amount: unit.rent_amount,
       deposit_amount: unit.deposit_amount,

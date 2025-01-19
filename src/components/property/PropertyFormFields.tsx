@@ -4,7 +4,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PropertyFormData, PropertyFormFieldsProps } from "./types"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { westafrikanCountries } from "@/utils/countryUtils"
-import { Switch } from "@/components/ui/switch"
 
 export function PropertyFormFields({ 
   formData, 
@@ -109,38 +108,6 @@ export function PropertyFormFields({
         </Select>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="store_count">Nombre de magasins</Label>
-          <Input 
-            id="store_count" 
-            type="number" 
-            min="0"
-            value={formData.store_count || 0}
-            onChange={(e) => setFormData({ ...formData, store_count: parseInt(e.target.value) })}
-          />
-        </div>
-        <div>
-          <Label htmlFor="kitchen_count">Nombre de cuisines</Label>
-          <Input 
-            id="kitchen_count" 
-            type="number"
-            min="0" 
-            value={formData.kitchen_count || 0}
-            onChange={(e) => setFormData({ ...formData, kitchen_count: parseInt(e.target.value) })}
-          />
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="has_pool"
-          checked={formData.has_pool || false}
-          onCheckedChange={(checked) => setFormData({ ...formData, has_pool: checked })}
-        />
-        <Label htmlFor="has_pool">Piscine</Label>
-      </div>
-
       <div className="grid gap-2">
         <Label htmlFor="chambres">Nombre de chambres</Label>
         <Input 
@@ -219,16 +186,6 @@ export function PropertyFormFields({
           id="caution" 
           type="number"
           value={formData.caution}
-          onChange={handleInputChange}
-        />
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="description">Description supplémentaire</Label>
-        <Input 
-          id="description" 
-          placeholder="Informations additionnelles" 
-          value={formData.description || ''}
           onChange={handleInputChange}
         />
       </div>

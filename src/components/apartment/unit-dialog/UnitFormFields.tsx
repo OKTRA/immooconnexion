@@ -3,8 +3,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Switch } from "@/components/ui/switch"
-import { ApartmentUnitFormData } from "@/types/apartment"
+import { ApartmentUnitFormData, ApartmentUnitStatus } from "@/types/apartment"
 
 interface UnitFormFieldsProps {
   formData: ApartmentUnitFormData;
@@ -22,125 +21,84 @@ export function UnitFormFields({
   return (
     <ScrollArea className="h-[calc(100vh-300px)] pr-4">
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="unit_number">Numéro d'unité</Label>
-            <Input
-              id="unit_number"
-              value={formData.unit_number}
-              onChange={(e) =>
-                setFormData({ ...formData, unit_number: e.target.value })
-              }
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="unit_name">Nom de l'unité</Label>
-            <Input
-              id="unit_name"
-              value={formData.unit_name || ''}
-              onChange={(e) =>
-                setFormData({ ...formData, unit_name: e.target.value })
-              }
-            />
-          </div>
+        <div>
+          <Label htmlFor="unit_number">Numéro d'unité</Label>
+          <Input
+            id="unit_number"
+            value={formData.unit_number}
+            onChange={(e) =>
+              setFormData({ ...formData, unit_number: e.target.value })
+            }
+          />
         </div>
 
         <div>
-          <Label htmlFor="floor_level">Niveau/Étage</Label>
+          <Label htmlFor="floor_number">Étage</Label>
           <Input
-            id="floor_level"
-            value={formData.floor_level || ''}
+            id="floor_number"
+            type="number"
+            value={formData.floor_number || ''}
             onChange={(e) =>
-              setFormData({ ...formData, floor_level: e.target.value ? Number(e.target.value) : null })
-            }
-            placeholder="ex: 1, 2, etc."
-          />
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <Label htmlFor="living_rooms">Nombre de salons</Label>
-            <Input
-              id="living_rooms"
-              type="number"
-              min="0"
-              value={formData.living_rooms || 0}
-              onChange={(e) =>
-                setFormData({ ...formData, living_rooms: Number(e.target.value) })
-              }
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="bedrooms">Nombre de chambres</Label>
-            <Input
-              id="bedrooms"
-              type="number"
-              min="0"
-              value={formData.bedrooms || 0}
-              onChange={(e) =>
-                setFormData({ ...formData, bedrooms: Number(e.target.value) })
-              }
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="bathrooms">Nombre de toilettes</Label>
-            <Input
-              id="bathrooms"
-              type="number"
-              min="0"
-              value={formData.bathrooms || 0}
-              onChange={(e) =>
-                setFormData({ ...formData, bathrooms: Number(e.target.value) })
-              }
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="has_pool"
-            checked={formData.has_pool || false}
-            onCheckedChange={(checked) =>
-              setFormData({ ...formData, has_pool: checked })
+              setFormData({ ...formData, floor_number: e.target.value ? Number(e.target.value) : null })
             }
           />
-          <Label htmlFor="has_pool">Piscine</Label>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="rent_amount">Loyer</Label>
-            <Input
-              id="rent_amount"
-              type="number"
-              value={formData.rent_amount}
-              onChange={(e) =>
-                setFormData({ ...formData, rent_amount: Number(e.target.value) })
-              }
-            />
-          </div>
+        <div>
+          <Label htmlFor="area">Surface (m²)</Label>
+          <Input
+            id="area"
+            type="number"
+            value={formData.area || ''}
+            onChange={(e) => 
+              setFormData({ ...formData, area: e.target.value ? Number(e.target.value) : null })
+            }
+          />
+        </div>
 
-          <div>
-            <Label htmlFor="deposit_amount">Caution</Label>
-            <Input
-              id="deposit_amount"
-              type="number"
-              value={formData.deposit_amount || ''}
-              onChange={(e) =>
-                setFormData({ ...formData, deposit_amount: e.target.value ? Number(e.target.value) : null })
-              }
-            />
-          </div>
+        <div>
+          <Label htmlFor="rent_amount">Loyer de base</Label>
+          <Input
+            id="rent_amount"
+            type="number"
+            value={formData.rent_amount}
+            onChange={(e) =>
+              setFormData({ ...formData, rent_amount: Number(e.target.value) })
+            }
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="deposit_amount">Caution</Label>
+          <Input
+            id="deposit_amount"
+            type="number"
+            value={formData.deposit_amount || ''}
+            onChange={(e) =>
+              setFormData({ ...formData, deposit_amount: e.target.value ? Number(e.target.value) : null })
+            }
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="commission_percentage">Commission (%)</Label>
+          <Input
+            id="commission_percentage"
+            type="number"
+            min="5"
+            max="25"
+            value={formData.commission_percentage || 10}
+            onChange={(e) =>
+              setFormData({ ...formData, commission_percentage: Number(e.target.value) })
+            }
+          />
         </div>
 
         <div>
           <Label htmlFor="status">Statut</Label>
           <Select
             value={formData.status}
-            onValueChange={(value: any) => 
+            onValueChange={(value: ApartmentUnitStatus) => 
               setFormData({ ...formData, status: value })
             }
           >
@@ -164,7 +122,6 @@ export function UnitFormFields({
             onChange={(e) =>
               setFormData({ ...formData, description: e.target.value })
             }
-            placeholder="Description de l'unité..."
           />
         </div>
 

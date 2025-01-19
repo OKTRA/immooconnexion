@@ -1,107 +1,132 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { ApartmentUnit, ApartmentUnitFormData } from "@/types/apartment"
+import { useToast } from "@/hooks/use-toast"
+import { ApartmentUnit } from "@/types/apartment"
 
-export function useApartmentUnits(apartmentId: string) {
+export function useApartmentUnits(apartmentId: string | undefined) {
+  const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  const { data: units = [], isLoading } = useQuery({
-    queryKey: ['apartment-units', apartmentId],
+  const query = useQuery({
+    queryKey: ["apartment-units", apartmentId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('apartment_units')
-        .select('*')
-        .eq('apartment_id', apartmentId)
-        .order('unit_number', { ascending: true })
+      if (!apartmentId) {
+        console.error("No apartment ID provided")
+        return []
+      }
 
-      if (error) throw error
+      console.log("Fetching units for apartment ID:", apartmentId)
+      const { data, error } = await supabase
+        .from("apartment_units")
+        .select(`
+          id,
+          apartment_id,
+          unit_number,
+          floor_number,
+          area,
+          rent_amount,
+          deposit_amount,
+          status,
+          description,
+          commission_percentage,
+          created_at,
+          updated_at
+        `)
+        .eq("apartment_id", apartmentId)
+        .order("unit_number")
+
+      if (error) {
+        console.error("Error fetching units:", error)
+        throw error
+      }
+
       return data as ApartmentUnit[]
-    }
+    },
+    enabled: Boolean(apartmentId)
   })
 
   const createUnit = useMutation({
-    mutationFn: async (unit: Omit<ApartmentUnitFormData, 'id'>) => {
+    mutationFn: async (newUnit: Omit<ApartmentUnit, "id" | "created_at" | "updated_at">) => {
+      console.log("Creating new unit:", newUnit)
       const { data, error } = await supabase
-        .from('apartment_units')
-        .insert([{
-          apartment_id: unit.apartment_id,
-          unit_number: unit.unit_number,
-          floor_level: unit.floor_level,
-          area: unit.area,
-          rent_amount: unit.rent_amount,
-          deposit_amount: unit.deposit_amount,
-          status: unit.status,
-          description: unit.description,
-          commission_percentage: unit.commission_percentage,
-          unit_name: unit.unit_name,
-          living_rooms: unit.living_rooms,
-          bedrooms: unit.bedrooms,
-          bathrooms: unit.bathrooms,
-          store_count: unit.store_count,
-          has_pool: unit.has_pool,
-          kitchen_count: unit.kitchen_count
-        }])
+        .from("apartment_units")
+        .insert({
+          apartment_id: apartmentId,
+          unit_number: newUnit.unit_number,
+          floor_number: newUnit.floor_number,
+          area: newUnit.area,
+          rent_amount: newUnit.rent_amount,
+          deposit_amount: newUnit.deposit_amount,
+          status: newUnit.status,
+          description: newUnit.description,
+          commission_percentage: newUnit.commission_percentage
+        })
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error("Error creating unit:", error)
+        throw error
+      }
+
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apartment-units', apartmentId] })
+      queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] })
     }
   })
 
   const updateUnit = useMutation({
-    mutationFn: async (unit: ApartmentUnit) => {
+    mutationFn: async (updatedUnit: ApartmentUnit) => {
+      console.log("Updating unit:", updatedUnit)
       const { data, error } = await supabase
-        .from('apartment_units')
+        .from("apartment_units")
         .update({
-          unit_number: unit.unit_number,
-          floor_level: unit.floor_level,
-          area: unit.area,
-          rent_amount: unit.rent_amount,
-          deposit_amount: unit.deposit_amount,
-          status: unit.status,
-          description: unit.description,
-          commission_percentage: unit.commission_percentage,
-          unit_name: unit.unit_name,
-          living_rooms: unit.living_rooms,
-          bedrooms: unit.bedrooms,
-          bathrooms: unit.bathrooms,
-          store_count: unit.store_count,
-          has_pool: unit.has_pool,
-          kitchen_count: unit.kitchen_count
+          unit_number: updatedUnit.unit_number,
+          floor_number: updatedUnit.floor_number,
+          area: updatedUnit.area,
+          rent_amount: updatedUnit.rent_amount,
+          deposit_amount: updatedUnit.deposit_amount,
+          status: updatedUnit.status,
+          description: updatedUnit.description,
+          commission_percentage: updatedUnit.commission_percentage
         })
-        .eq('id', unit.id)
+        .eq("id", updatedUnit.id)
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error("Error updating unit:", error)
+        throw error
+      }
+
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apartment-units', apartmentId] })
+      queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] })
     }
   })
 
   const deleteUnit = useMutation({
     mutationFn: async (unitId: string) => {
+      console.log("Deleting unit:", unitId)
       const { error } = await supabase
-        .from('apartment_units')
+        .from("apartment_units")
         .delete()
-        .eq('id', unitId)
+        .eq("id", unitId)
 
-      if (error) throw error
+      if (error) {
+        console.error("Error deleting unit:", error)
+        throw error
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apartment-units', apartmentId] })
+      queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] })
     }
   })
 
   return {
-    units,
-    isLoading,
+    ...query,
     createUnit,
     updateUnit,
     deleteUnit

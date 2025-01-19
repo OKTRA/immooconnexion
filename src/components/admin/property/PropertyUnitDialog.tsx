@@ -7,10 +7,10 @@ import { Loader2 } from "lucide-react"
 import { useState } from "react"
 
 interface PropertyUnitDialogProps {
-  propertyId: string;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  initialData?: PropertyUnitFormData;
+  propertyId: string
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  initialData?: PropertyUnitFormData
 }
 
 export function PropertyUnitDialog({
