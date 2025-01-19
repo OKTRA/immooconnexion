@@ -22,7 +22,7 @@ export function useApartmentUnits(apartmentId: string | undefined) {
           id,
           apartment_id,
           unit_number,
-          floor_number,
+          floor_level,
           area,
           rent_amount,
           deposit_amount,
@@ -53,7 +53,7 @@ export function useApartmentUnits(apartmentId: string | undefined) {
         .insert({
           apartment_id: apartmentId,
           unit_number: newUnit.unit_number,
-          floor_number: newUnit.floor_number,
+          floor_level: newUnit.floor_level,
           area: newUnit.area,
           rent_amount: newUnit.rent_amount,
           deposit_amount: newUnit.deposit_amount,
@@ -83,7 +83,7 @@ export function useApartmentUnits(apartmentId: string | undefined) {
         .from("apartment_units")
         .update({
           unit_number: updatedUnit.unit_number,
-          floor_number: updatedUnit.floor_number,
+          floor_level: updatedUnit.floor_level,
           area: updatedUnit.area,
           rent_amount: updatedUnit.rent_amount,
           deposit_amount: updatedUnit.deposit_amount,
@@ -107,28 +107,9 @@ export function useApartmentUnits(apartmentId: string | undefined) {
     }
   })
 
-  const deleteUnit = useMutation({
-    mutationFn: async (unitId: string) => {
-      console.log("Deleting unit:", unitId)
-      const { error } = await supabase
-        .from("apartment_units")
-        .delete()
-        .eq("id", unitId)
-
-      if (error) {
-        console.error("Error deleting unit:", error)
-        throw error
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] })
-    }
-  })
-
   return {
     ...query,
     createUnit,
-    updateUnit,
-    deleteUnit
+    updateUnit
   }
 }

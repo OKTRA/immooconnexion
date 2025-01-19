@@ -1,25 +1,14 @@
 export type ApartmentUnitStatus = 'available' | 'occupied' | 'maintenance' | 'reserved';
 
-export interface Apartment {
-  id: string;
-  agency_id: string;
-  name: string;
-  address?: string;
-  total_units?: number;
-  description?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
 export interface ApartmentUnitFormData {
   unit_number: string;
-  unit_name?: string;
-  floor_level?: string;
+  unit_name?: string | null;
+  floor_level?: string | null;
   living_rooms?: number;
   bedrooms?: number;
   bathrooms?: number;
   store_count?: number;
-  kitchen_description?: string;
+  kitchen_description?: string | null;
   has_pool?: boolean;
   rent_amount: number;
   deposit_amount?: number | null;
@@ -33,23 +22,23 @@ export interface ApartmentUnit {
   id: string;
   apartment_id: string;
   unit_number: string;
-  unit_name?: string;
-  floor_level?: string;
+  unit_name?: string | null;
+  floor_level?: string | null;
   living_rooms?: number;
   bedrooms?: number;
   bathrooms?: number;
   store_count?: number;
-  kitchen_description?: string;
+  kitchen_description?: string | null;
   has_pool?: boolean;
   rent_amount: number;
-  deposit_amount?: number;
+  deposit_amount?: number | null;
   status: ApartmentUnitStatus;
-  description?: string;
-  commission_percentage?: number;
-  created_at?: string;
-  updated_at?: string;
-  current_lease?: ApartmentLease;
+  description?: string | null;
+  commission_percentage?: number | null;
   area?: number | null;
+  created_at: string;
+  updated_at: string;
+  current_lease?: ApartmentLease;
   apartment?: {
     name: string;
   };

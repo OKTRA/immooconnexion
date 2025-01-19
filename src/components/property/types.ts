@@ -1,29 +1,21 @@
-export interface Property {
-  id: string;
-  bien: string;
-  type: string;
-  chambres?: number;
-  ville?: string;
-  loyer?: number;
-  frais_agence?: number;
-  taux_commission?: number;
-  caution?: number;
-  photo_url?: string;
-  statut?: string;
-  user_id?: string;
-  agency_id?: string;
-  created_at?: string;
-  updated_at?: string;
-  created_by_user_id?: string;
-  property_category: 'house' | 'duplex' | 'triplex';
-  owner_name?: string;
-  owner_phone?: string;
-  country?: string;
-  quartier?: string;
-  owner_id?: string;
-  store_count?: number;
-  kitchen_count?: number;
-  has_pool?: boolean;
+import { Property } from "@/types/property"
+
+export interface PropertyDialogProps {
+  property?: Property;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export interface PropertyFormFieldsProps {
+  formData: PropertyFormData;
+  setFormData: (data: PropertyFormData) => void;
+  handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  owners: Array<{
+    id: string;
+    first_name: string;
+    last_name: string;
+    phone_number?: string;
+  }>;
 }
 
 export interface PropertyFormData {
@@ -40,7 +32,4 @@ export interface PropertyFormData {
   country?: string;
   quartier?: string;
   owner_id?: string;
-  store_count?: number;
-  kitchen_count?: number;
-  has_pool?: boolean;
 }
