@@ -1,38 +1,56 @@
-import { useParams } from "react-router-dom"
+import { useParams, Navigate } from "react-router-dom"
+import { AgencyLayout } from "@/components/agency/AgencyLayout"
+import { ApartmentHeader } from "@/components/apartment/ApartmentHeader"
+import { ApartmentUnitsSection } from "@/components/apartment/ApartmentUnitsSection"
 import { useApartment } from "@/hooks/use-apartment"
 import { useApartmentUnits } from "@/hooks/use-apartment-units"
-import { ApartmentUnitsSection } from "@/components/apartment/ApartmentUnitsSection"
 
 export default function ApartmentUnits() {
   const { id } = useParams<{ id: string }>()
   
-  const {
-    data: apartment,
-    isLoading: apartmentLoading,
-    error: apartmentError
-  } = useApartment(id || '')
+  // Validate ID format (basic UUID validation)
+  const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+  
+  if (!isValidUUID) {
+    return <Navigate to="/agence/apartments" replace />
+  }
 
   const {
-    units,
+    data: apartment,
+    isLoading: apartmentLoading
+  } = useApartment(id)
+
+  const {
+    data: units = [],
     isLoading: unitsLoading,
     createUnit,
     updateUnit,
     deleteUnit
-  } = useApartmentUnits(id || null)
-
-  if (!id) {
-    return <div>ID d'appartement manquant</div>
-  }
+  } = useApartmentUnits(id)
 
   return (
-    <ApartmentUnitsSection
-      apartmentId={id}
-      units={units}
-      isLoading={unitsLoading || apartmentLoading}
-      onCreateUnit={createUnit.mutateAsync}
-      onUpdateUnit={updateUnit.mutateAsync}
-      onDeleteUnit={deleteUnit.mutateAsync}
-      onEdit={() => {}}
-    />
+    <AgencyLayout>
+      <ApartmentHeader 
+        apartment={apartment}
+        isLoading={apartmentLoading}
+      />
+      <div className="container mx-auto py-6">
+        <ApartmentUnitsSection
+          apartmentId={id}
+          units={units}
+          isLoading={unitsLoading}
+          onCreateUnit={async (data) => {
+            await createUnit.mutateAsync(data)
+          }}
+          onUpdateUnit={async (data) => {
+            await updateUnit.mutateAsync(data)
+          }}
+          onDeleteUnit={async (unitId) => {
+            await deleteUnit.mutateAsync(unitId)
+          }}
+          onEdit={() => {}}
+        />
+      </div>
+    </AgencyLayout>
   )
 }
