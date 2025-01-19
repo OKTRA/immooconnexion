@@ -1,82 +1,93 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { PropertyUnit, PropertyUnitFormData } from "@/types/property"
+import { PropertyUnit } from "@/components/admin/property/types/propertyUnit"
 
 export function usePropertyUnits(propertyId: string) {
   const queryClient = useQueryClient()
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["property-units", propertyId],
+  const { data: units = [], isLoading } = useQuery({
+    queryKey: ['property-units', propertyId],
     queryFn: async () => {
-      if (!propertyId) {
-        console.error("Property ID is required")
-        return []
-      }
-
       const { data, error } = await supabase
-        .from("property_units")
-        .select("*")
-        .eq("property_id", propertyId)
-        .order("unit_number")
+        .from('property_units')
+        .select('*')
+        .eq('property_id', propertyId)
+        .order('unit_number', { ascending: true })
 
-      if (error) {
-        console.error("Error fetching units:", error)
-        throw error
-      }
-
+      if (error) throw error
       return data as PropertyUnit[]
-    },
-    enabled: Boolean(propertyId)
+    }
   })
 
   const addUnit = useMutation({
-    mutationFn: async (formData: Omit<PropertyUnitFormData, 'id'> & { property_id: string }) => {
-      console.log("Adding unit with data:", formData)
+    mutationFn: async (unit: Omit<PropertyUnit, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
-        .from("property_units")
+        .from('property_units')
         .insert([{
-          ...formData,
-          property_id: propertyId
+          property_id: unit.property_id,
+          unit_number: unit.unit_number,
+          floor_level: unit.floor_level,
+          area: unit.area,
+          rent_amount: unit.rent_amount,
+          deposit_amount: unit.deposit_amount,
+          status: unit.status,
+          description: unit.description
         }])
         .select()
         .single()
 
-      if (error) {
-        console.error("Error adding unit:", error)
-        throw error
-      }
+      if (error) throw error
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["property-units", propertyId] })
+      queryClient.invalidateQueries({ queryKey: ['property-units', propertyId] })
     }
   })
 
   const updateUnit = useMutation({
-    mutationFn: async (unit: PropertyUnitFormData & { property_id: string; id: string }) => {
-      console.log("Updating unit with data:", unit)
+    mutationFn: async (unit: PropertyUnit) => {
       const { data, error } = await supabase
-        .from("property_units")
-        .update(unit)
-        .eq("id", unit.id)
+        .from('property_units')
+        .update({
+          unit_number: unit.unit_number,
+          floor_level: unit.floor_level,
+          area: unit.area,
+          rent_amount: unit.rent_amount,
+          deposit_amount: unit.deposit_amount,
+          status: unit.status,
+          description: unit.description
+        })
+        .eq('id', unit.id)
         .select()
         .single()
 
-      if (error) {
-        console.error("Error updating unit:", error)
-        throw error
-      }
+      if (error) throw error
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["property-units", propertyId] })
+      queryClient.invalidateQueries({ queryKey: ['property-units', propertyId] })
+    }
+  })
+
+  const deleteUnit = useMutation({
+    mutationFn: async (unitId: string) => {
+      const { error } = await supabase
+        .from('property_units')
+        .delete()
+        .eq('id', unitId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['property-units', propertyId] })
     }
   })
 
   return {
-    data: data || [],
+    units,
     isLoading,
     addUnit,
-    updateUnit
+    updateUnit,
+    deleteUnit
   }
 }

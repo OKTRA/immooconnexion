@@ -39,17 +39,30 @@ export function PropertyUnitForm({ formData, onChange }: PropertyUnitFormProps) 
         </div>
       </div>
 
-      <div>
-        <Label htmlFor="floor_level">Niveau/Étage</Label>
-        <Input
-          id="floor_level"
-          value={formData.floor_level || ''}
-          onChange={(e) => onChange("floor_level", e.target.value)}
-          placeholder="Ex: RDC, 1er étage, etc."
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="floor_level">Niveau/Étage</Label>
+          <Input
+            id="floor_level"
+            value={formData.floor_level || ''}
+            onChange={(e) => onChange("floor_level", e.target.value)}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="area">Surface (m²)</Label>
+          <Input
+            id="area"
+            type="number"
+            min="0"
+            step="0.01"
+            value={formData.area || ''}
+            onChange={(e) => onChange("area", e.target.value ? parseFloat(e.target.value) : null)}
+          />
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <div>
           <Label htmlFor="living_rooms">Nombre de salons</Label>
           <Input
@@ -82,17 +95,26 @@ export function PropertyUnitForm({ formData, onChange }: PropertyUnitFormProps) 
             onChange={(e) => onChange("bathrooms", parseInt(e.target.value))}
           />
         </div>
+      </div>
 
-        <div>
-          <Label htmlFor="kitchen_count">Nombre de cuisines</Label>
-          <Input
-            id="kitchen_count"
-            type="number"
-            min="0"
-            value={formData.kitchen_count || 0}
-            onChange={(e) => onChange("kitchen_count", parseInt(e.target.value))}
-          />
-        </div>
+      <div>
+        <Label htmlFor="store_count">Nombre de magasins</Label>
+        <Input
+          id="store_count"
+          type="number"
+          min="0"
+          value={formData.store_count || 0}
+          onChange={(e) => onChange("store_count", parseInt(e.target.value))}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="kitchen_description">Description de la cuisine</Label>
+        <Textarea
+          id="kitchen_description"
+          value={formData.kitchen_description || ''}
+          onChange={(e) => onChange("kitchen_description", e.target.value)}
+        />
       </div>
 
       <div className="flex items-center space-x-2">
@@ -139,13 +161,12 @@ export function PropertyUnitForm({ formData, onChange }: PropertyUnitFormProps) 
             <SelectItem value="available">Disponible</SelectItem>
             <SelectItem value="occupied">Occupé</SelectItem>
             <SelectItem value="maintenance">En maintenance</SelectItem>
-            <SelectItem value="reserved">Réservé</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <div>
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">Description supplémentaire</Label>
         <Textarea
           id="description"
           value={formData.description || ''}
