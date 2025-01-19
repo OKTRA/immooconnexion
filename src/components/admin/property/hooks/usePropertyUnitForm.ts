@@ -10,19 +10,12 @@ export function usePropertyUnitForm(propertyId: string, initialData?: PropertyUn
     initialData || {
       property_id: propertyId,
       unit_number: "",
-      floor_level: null,
+      floor_number: null,
       area: null,
       rent_amount: 0,
       deposit_amount: null,
       status: "available",
-      description: null,
-      living_rooms: 0,
-      bedrooms: 0,
-      bathrooms: 0,
-      store_count: 0,
-      kitchen_description: null,
-      has_pool: false,
-      unit_name: null
+      description: null
     }
   )
 

@@ -4,15 +4,18 @@ import { ApartmentHeader } from "@/components/apartment/ApartmentHeader"
 import { ApartmentUnitsSection } from "@/components/apartment/ApartmentUnitsSection"
 import { useApartment } from "@/hooks/use-apartment"
 import { useApartmentUnits } from "@/hooks/use-apartment-units"
+import { useState } from "react"
+import { ApartmentUnit } from "@/types/apartment"
 
 export default function ApartmentUnits() {
   const { id } = useParams<{ id: string }>()
+  const [selectedUnit, setSelectedUnit] = useState<ApartmentUnit | null>(null)
   
   // Validate ID format (basic UUID validation)
   const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
   
   if (!isValidUUID) {
-    return <Navigate to="/agence/apartments" replace />
+    return <Navigate to="/agence/appartements" replace />
   }
 
   const {
@@ -48,7 +51,9 @@ export default function ApartmentUnits() {
           onDeleteUnit={async (unitId) => {
             await deleteUnit.mutateAsync(unitId)
           }}
-          onEdit={() => {}}
+          onEdit={(unit) => {
+            setSelectedUnit(unit)
+          }}
         />
       </div>
     </AgencyLayout>
