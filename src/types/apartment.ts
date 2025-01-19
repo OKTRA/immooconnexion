@@ -26,6 +26,7 @@ export interface ApartmentUnitFormData {
   status: ApartmentUnitStatus;
   description?: string | null;
   commission_percentage?: number | null;
+  area?: number | null;
 }
 
 export interface ApartmentUnit {
@@ -48,6 +49,7 @@ export interface ApartmentUnit {
   created_at?: string;
   updated_at?: string;
   current_lease?: ApartmentLease;
+  area?: number | null;
   apartment?: {
     name: string;
   };

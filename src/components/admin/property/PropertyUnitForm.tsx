@@ -39,13 +39,27 @@ export function PropertyUnitForm({ formData, onChange }: PropertyUnitFormProps) 
         </div>
       </div>
 
-      <div>
-        <Label htmlFor="floor_level">Niveau/Étage</Label>
-        <Input
-          id="floor_level"
-          value={formData.floor_level || ''}
-          onChange={(e) => onChange("floor_level", e.target.value)}
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="floor_level">Niveau/Étage</Label>
+          <Input
+            id="floor_level"
+            value={formData.floor_level || ''}
+            onChange={(e) => onChange("floor_level", e.target.value)}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="area">Surface (m²)</Label>
+          <Input
+            id="area"
+            type="number"
+            min="0"
+            step="0.01"
+            value={formData.area || ''}
+            onChange={(e) => onChange("area", e.target.value ? parseFloat(e.target.value) : null)}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">

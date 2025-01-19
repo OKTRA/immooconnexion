@@ -670,6 +670,7 @@ export type Database = {
       apartment_units: {
         Row: {
           apartment_id: string
+          area: number | null
           bathrooms: number | null
           bedrooms: number | null
           commission_percentage: number | null
@@ -691,6 +692,7 @@ export type Database = {
         }
         Insert: {
           apartment_id: string
+          area?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
           commission_percentage?: number | null
@@ -712,6 +714,7 @@ export type Database = {
         }
         Update: {
           apartment_id?: string
+          area?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
           commission_percentage?: number | null
