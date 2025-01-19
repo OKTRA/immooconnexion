@@ -12,13 +12,20 @@ export function useUnitMutations(apartmentId: string) {
         .insert({
           apartment_id: apartmentId,
           unit_number: unitData.unit_number,
-          floor_number: unitData.floor_number,
+          floor_level: unitData.floor_level,
           area: unitData.area,
           rent_amount: unitData.rent_amount,
           deposit_amount: unitData.deposit_amount,
           status: unitData.status,
           description: unitData.description,
-          commission_percentage: unitData.commission_percentage
+          commission_percentage: unitData.commission_percentage,
+          unit_name: unitData.unit_name,
+          living_rooms: unitData.living_rooms,
+          bedrooms: unitData.bedrooms,
+          bathrooms: unitData.bathrooms,
+          store_count: unitData.store_count,
+          has_pool: unitData.has_pool,
+          kitchen_count: unitData.kitchen_count
         })
 
       if (error) throw error
@@ -34,13 +41,20 @@ export function useUnitMutations(apartmentId: string) {
         .from("apartment_units")
         .update({
           unit_number: unitData.unit_number,
-          floor_number: unitData.floor_number,
+          floor_level: unitData.floor_level,
           area: unitData.area,
           rent_amount: unitData.rent_amount,
           deposit_amount: unitData.deposit_amount,
           status: unitData.status,
           description: unitData.description,
-          commission_percentage: unitData.commission_percentage
+          commission_percentage: unitData.commission_percentage,
+          unit_name: unitData.unit_name,
+          living_rooms: unitData.living_rooms,
+          bedrooms: unitData.bedrooms,
+          bathrooms: unitData.bathrooms,
+          store_count: unitData.store_count,
+          has_pool: unitData.has_pool,
+          kitchen_count: unitData.kitchen_count
         })
         .eq("id", unitData.id)
 
@@ -51,8 +65,23 @@ export function useUnitMutations(apartmentId: string) {
     }
   })
 
+  const deleteUnit = useMutation({
+    mutationFn: async (unitId: string) => {
+      const { error } = await supabase
+        .from("apartment_units")
+        .delete()
+        .eq("id", unitId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["apartment-units", apartmentId] })
+    }
+  })
+
   return {
     createUnit,
-    updateUnit
+    updateUnit,
+    deleteUnit
   }
 }

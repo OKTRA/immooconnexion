@@ -52,9 +52,9 @@ export function UnitFormFields({
             id="floor_level"
             value={formData.floor_level || ''}
             onChange={(e) =>
-              setFormData({ ...formData, floor_level: e.target.value })
+              setFormData({ ...formData, floor_level: e.target.value ? Number(e.target.value) : null })
             }
-            placeholder="ex: Rez-de-chaussée, 1er étage, etc."
+            placeholder="ex: 1, 2, etc."
           />
         </div>
 
@@ -101,25 +101,13 @@ export function UnitFormFields({
 
         <div className="flex items-center space-x-2">
           <Switch
-            id="has_store"
-            checked={formData.has_store || false}
+            id="has_pool"
+            checked={formData.has_pool || false}
             onCheckedChange={(checked) =>
-              setFormData({ ...formData, has_store: checked })
+              setFormData({ ...formData, has_pool: checked })
             }
           />
-          <Label htmlFor="has_store">Magasin</Label>
-        </div>
-
-        <div>
-          <Label htmlFor="kitchen_description">Description de la cuisine</Label>
-          <Textarea
-            id="kitchen_description"
-            value={formData.kitchen_description || ''}
-            onChange={(e) =>
-              setFormData({ ...formData, kitchen_description: e.target.value })
-            }
-            placeholder="Description de la cuisine..."
-          />
+          <Label htmlFor="has_pool">Piscine</Label>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -166,6 +154,18 @@ export function UnitFormFields({
               <SelectItem value="reserved">Réservé</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            value={formData.description || ''}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
+            placeholder="Description de l'unité..."
+          />
         </div>
 
         <div>

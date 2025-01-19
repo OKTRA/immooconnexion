@@ -4,7 +4,7 @@ export interface PropertyUnitFormData {
   id?: string;
   property_id: string;
   unit_number: string;
-  floor_level?: string | null;
+  floor_level?: number | null;
   area?: number | null;
   rent_amount: number;
   deposit_amount?: number | null;
@@ -14,7 +14,7 @@ export interface PropertyUnitFormData {
   bedrooms?: number;
   bathrooms?: number;
   store_count?: number;
-  kitchen_description?: string | null;
+  kitchen_count?: number;
   has_pool?: boolean;
   unit_name?: string | null;
 }
@@ -23,7 +23,7 @@ export interface PropertyUnit {
   id: string;
   property_id: string;
   unit_number: string;
-  floor_level?: string | null;
+  floor_level?: number | null;
   area?: number | null;
   rent_amount: number;
   deposit_amount?: number | null;
