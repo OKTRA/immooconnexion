@@ -3,16 +3,19 @@ import { supabase } from "@/integrations/supabase/client"
 import { ApartmentUnit } from "@/types/apartment"
 import { useToast } from "@/hooks/use-toast"
 
-export function useApartmentUnits(apartmentId: string) {
+export function useApartmentUnits(apartmentId: string | null) {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+
+  // Validate UUID format
+  const isValidUUID = apartmentId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(apartmentId)
 
   const { data: units = [], isLoading } = useQuery({
     queryKey: ['apartment-units', apartmentId],
     queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        throw new Error('Not authenticated')
+      if (!apartmentId || !isValidUUID) {
+        console.error('Invalid apartment ID:', apartmentId)
+        return []
       }
 
       const { data, error } = await supabase
@@ -33,15 +36,13 @@ export function useApartmentUnits(apartmentId: string) {
 
       return data as ApartmentUnit[]
     },
-    retry: 1,
-    enabled: Boolean(apartmentId)
+    enabled: Boolean(apartmentId) && isValidUUID
   })
 
   const createUnit = useMutation({
     mutationFn: async (unit: Omit<ApartmentUnit, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        throw new Error('Not authenticated')
+      if (!apartmentId || !isValidUUID) {
+        throw new Error('Invalid apartment ID')
       }
 
       const { data, error } = await supabase
@@ -75,9 +76,8 @@ export function useApartmentUnits(apartmentId: string) {
 
   const updateUnit = useMutation({
     mutationFn: async (unit: ApartmentUnit) => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        throw new Error('Not authenticated')
+      if (!apartmentId || !isValidUUID) {
+        throw new Error('Invalid apartment ID')
       }
 
       const { data, error } = await supabase
@@ -109,9 +109,8 @@ export function useApartmentUnits(apartmentId: string) {
 
   const deleteUnit = useMutation({
     mutationFn: async (unitId: string) => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        throw new Error('Not authenticated')
+      if (!apartmentId || !isValidUUID) {
+        throw new Error('Invalid apartment ID')
       }
 
       const { error } = await supabase

@@ -24,7 +24,7 @@ export default function ApartmentUnits() {
   } = useApartment(id)
 
   const {
-    data: units = [],
+    units,
     isLoading: unitsLoading,
     createUnit,
     updateUnit,
