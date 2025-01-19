@@ -16,33 +16,39 @@ export interface Property {
   updated_at?: string;
   created_by_user_id?: string;
   property_category: 'house' | 'duplex' | 'triplex' | 'apartment';
+  owner_id?: string;
   owner_name?: string;
   owner_phone?: string;
   country?: string;
   quartier?: string;
-  agency?: {
-    name: string;
-    address: string;
-  };
+  parent_property_id?: string;
+  rental_type?: string;
+  is_for_sale?: boolean;
+  sale_price?: number;
+  minimum_stay?: number;
+  maximum_stay?: number;
+  price_per_night?: number;
+  price_per_week?: number;
+  total_units?: number;
 }
 
 export interface PropertyUnit {
   id: string;
   property_id: string;
   unit_number: string;
-  floor_number?: number;
+  floor_level?: number;
   area?: number;
   rent_amount: number;
   deposit_amount?: number;
   status: 'available' | 'occupied' | 'maintenance' | 'reserved';
   description?: string;
-  created_at?: string;
-  updated_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface PropertyUnitFormData {
   unit_number: string;
-  floor_number?: number;
+  floor_level?: number;
   area?: number;
   rent_amount: number;
   deposit_amount?: number;
