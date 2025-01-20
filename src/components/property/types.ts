@@ -21,10 +21,11 @@ export interface Property {
   country?: string;
   quartier?: string;
   owner_id?: string;
-  agency?: {
-    name: string;
-    address: string;
-  };
+  living_rooms?: number;
+  bathrooms?: number;
+  store_count?: number;
+  has_pool?: boolean;
+  kitchen_count?: number;
 }
 
 export interface PropertyFormFieldsProps {
@@ -55,6 +56,11 @@ export interface PropertyFormData {
   country?: string;
   quartier?: string;
   owner_id?: string;
+  living_rooms?: number;
+  bathrooms?: number;
+  store_count?: number;
+  has_pool?: boolean;
+  kitchen_count?: number;
 }
 
 export interface PropertyDialogProps {

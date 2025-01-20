@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PropertyFormData, PropertyFormFieldsProps } from "./types"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { westafrikanCountries } from "@/utils/countryUtils"
+import { Switch } from "@/components/ui/switch"
 
 export function PropertyFormFields({ 
   formData, 
@@ -14,8 +15,15 @@ export function PropertyFormFields({
   owners = []
 }: PropertyFormFieldsProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target
-    setFormData({ ...formData, [id]: value })
+    const { id, value, type } = e.target
+    setFormData({ 
+      ...formData, 
+      [id]: type === 'number' ? (value ? parseInt(value) : undefined) : value 
+    })
+  }
+
+  const handleSwitchChange = (checked: boolean) => {
+    setFormData({ ...formData, has_pool: checked })
   }
 
   const handleOwnerSelect = (ownerId: string) => {
@@ -96,7 +104,6 @@ export function PropertyFormFields({
           <SelectTrigger>
             <SelectValue placeholder="Sélectionner le type" />
           </SelectTrigger>
-
           <SelectContent>
             <SelectItem value="maison">Maison</SelectItem>
             <SelectItem value="villa">Villa</SelectItem>
@@ -104,7 +111,6 @@ export function PropertyFormFields({
             <SelectItem value="duplex">Duplex</SelectItem>
             <SelectItem value="triplex">Triplex</SelectItem>
           </SelectContent>
-
         </Select>
       </div>
 
@@ -113,10 +119,63 @@ export function PropertyFormFields({
         <Input 
           id="chambres" 
           type="number" 
-          min="1" 
+          min="0" 
           value={formData.chambres}
           onChange={handleInputChange}
         />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="living_rooms">Nombre de salons</Label>
+        <Input 
+          id="living_rooms" 
+          type="number" 
+          min="0" 
+          value={formData.living_rooms}
+          onChange={handleInputChange}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="bathrooms">Nombre de salles de bain</Label>
+        <Input 
+          id="bathrooms" 
+          type="number" 
+          min="0" 
+          value={formData.bathrooms}
+          onChange={handleInputChange}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="kitchen_count">Nombre de cuisines</Label>
+        <Input 
+          id="kitchen_count" 
+          type="number" 
+          min="0" 
+          value={formData.kitchen_count}
+          onChange={handleInputChange}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="store_count">Nombre de magasins</Label>
+        <Input 
+          id="store_count" 
+          type="number" 
+          min="0" 
+          value={formData.store_count}
+          onChange={handleInputChange}
+        />
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Switch
+          id="has_pool"
+          checked={formData.has_pool || false}
+          onCheckedChange={handleSwitchChange}
+        />
+        <Label htmlFor="has_pool">Piscine</Label>
       </div>
 
       <div className="grid gap-2">

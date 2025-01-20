@@ -23,7 +23,12 @@ export function PropertyDialog({
     owner_phone: property?.owner_phone || '',
     country: property?.country || '',
     quartier: property?.quartier || '',
-    owner_id: property?.owner_id || ''
+    owner_id: property?.owner_id || '',
+    living_rooms: property?.living_rooms || 0,
+    bathrooms: property?.bathrooms || 0,
+    store_count: property?.store_count || 0,
+    has_pool: property?.has_pool || false,
+    kitchen_count: property?.kitchen_count || 0
   })
 
   const { data: owners = [] } = useQuery({

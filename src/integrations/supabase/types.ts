@@ -1387,6 +1387,7 @@ export type Database = {
       properties: {
         Row: {
           agency_id: string | null
+          bathrooms: number | null
           bien: string
           caution: number | null
           chambres: number | null
@@ -1394,8 +1395,11 @@ export type Database = {
           created_at: string | null
           created_by_user_id: string | null
           frais_agence: number | null
+          has_pool: boolean | null
           id: string
           is_for_sale: boolean | null
+          kitchen_count: number | null
+          living_rooms: number | null
           loyer: number | null
           maximum_stay: number | null
           minimum_stay: number | null
@@ -1411,6 +1415,7 @@ export type Database = {
           rental_type: string | null
           sale_price: number | null
           statut: string | null
+          store_count: number | null
           taux_commission: number | null
           total_units: number | null
           type: string
@@ -1420,6 +1425,7 @@ export type Database = {
         }
         Insert: {
           agency_id?: string | null
+          bathrooms?: number | null
           bien: string
           caution?: number | null
           chambres?: number | null
@@ -1427,8 +1433,11 @@ export type Database = {
           created_at?: string | null
           created_by_user_id?: string | null
           frais_agence?: number | null
+          has_pool?: boolean | null
           id?: string
           is_for_sale?: boolean | null
+          kitchen_count?: number | null
+          living_rooms?: number | null
           loyer?: number | null
           maximum_stay?: number | null
           minimum_stay?: number | null
@@ -1444,6 +1453,7 @@ export type Database = {
           rental_type?: string | null
           sale_price?: number | null
           statut?: string | null
+          store_count?: number | null
           taux_commission?: number | null
           total_units?: number | null
           type: string
@@ -1453,6 +1463,7 @@ export type Database = {
         }
         Update: {
           agency_id?: string | null
+          bathrooms?: number | null
           bien?: string
           caution?: number | null
           chambres?: number | null
@@ -1460,8 +1471,11 @@ export type Database = {
           created_at?: string | null
           created_by_user_id?: string | null
           frais_agence?: number | null
+          has_pool?: boolean | null
           id?: string
           is_for_sale?: boolean | null
+          kitchen_count?: number | null
+          living_rooms?: number | null
           loyer?: number | null
           maximum_stay?: number | null
           minimum_stay?: number | null
@@ -1477,6 +1491,7 @@ export type Database = {
           rental_type?: string | null
           sale_price?: number | null
           statut?: string | null
+          store_count?: number | null
           taux_commission?: number | null
           total_units?: number | null
           type?: string
