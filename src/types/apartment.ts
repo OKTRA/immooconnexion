@@ -23,6 +23,7 @@ export interface ApartmentUnitFormData {
   commission_percentage?: number | null;
   store_count?: number;
   kitchen_count?: number;
+  bathroom_count?: number;
   has_pool?: boolean;
   living_rooms?: number;
   bedrooms?: number;
@@ -42,6 +43,7 @@ export interface ApartmentUnit {
   commission_percentage?: number;
   store_count?: number;
   kitchen_count?: number;
+  bathroom_count?: number;
   has_pool?: boolean;
   living_rooms?: number;
   bedrooms?: number;
