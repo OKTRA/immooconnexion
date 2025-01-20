@@ -20,19 +20,24 @@ export interface ApartmentUnitFormData {
   status: ApartmentUnitStatus;
   description?: string | null;
   commission_percentage?: number | null;
+  store_count?: number;
+  kitchen_count?: number;
+  has_pool?: boolean;
+  living_rooms?: number;
+  bedrooms?: number;
 }
 
 export interface ApartmentUnit {
   id: string;
   apartment_id: string;
   unit_number: string;
-  floor_number?: number | null;
-  area?: number | null;
+  floor_number?: number;
+  area?: number;
   rent_amount: number;
-  deposit_amount?: number | null;
+  deposit_amount?: number;
   status: ApartmentUnitStatus;
-  description?: string | null;
-  commission_percentage?: number | null;
+  description?: string;
+  commission_percentage?: number;
   created_at?: string;
   updated_at?: string;
   current_lease?: ApartmentLease;
@@ -71,22 +76,7 @@ export interface ApartmentTenant {
   profession?: string;
   created_at?: string;
   updated_at?: string;
-  additional_notes?: string;
-  bank_name?: string;
-  bank_account_number?: string;
-  employer_name?: string;
-  employer_phone?: string;
-  employer_address?: string;
-  emergency_contact_name?: string;
-  emergency_contact_phone?: string;
-  emergency_contact_relationship?: string;
   apartment_leases?: ApartmentLease[];
-  apartment_units?: {
-    unit_number: string;
-    apartment: {
-      name: string;
-    };
-  };
 }
 
 export interface ApartmentInspection {

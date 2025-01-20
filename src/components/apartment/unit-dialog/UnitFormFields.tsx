@@ -59,6 +59,33 @@ export function UnitFormFields({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
+            <Label htmlFor="living_rooms">Nombre de salons</Label>
+            <Input
+              id="living_rooms"
+              type="number"
+              min="0"
+              value={formData.living_rooms || 0}
+              onChange={(e) =>
+                setFormData({ ...formData, living_rooms: Number(e.target.value) })
+              }
+            />
+          </div>
+          <div>
+            <Label htmlFor="bedrooms">Nombre de chambres</Label>
+            <Input
+              id="bedrooms"
+              type="number"
+              min="0"
+              value={formData.bedrooms || 0}
+              onChange={(e) =>
+                setFormData({ ...formData, bedrooms: Number(e.target.value) })
+              }
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
             <Label htmlFor="store_count">Nombre de magasins</Label>
             <Input
               id="store_count"
