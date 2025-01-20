@@ -2,7 +2,7 @@ import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Plus, Search } from "lucide-react"
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { Input } from "@/components/ui/input"
 import { ApartmentTenantsTable } from "@/components/apartment/tenant/ApartmentTenantsTable"
 import { ApartmentTenantDialog } from "@/components/apartment/tenant/ApartmentTenantDialog"
@@ -10,6 +10,13 @@ import { useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { ApartmentTenant } from "@/types/apartment"
+import { Loader2 } from "lucide-react"
+
+const TableLoader = () => (
+  <div className="flex justify-center p-8">
+    <Loader2 className="h-8 w-8 animate-spin" />
+  </div>
+)
 
 export default function ApartmentTenants() {
   const [open, setOpen] = useState(false)
@@ -78,10 +85,12 @@ export default function ApartmentTenants() {
 
         <Card>
           <CardContent className="p-0">
-            <ApartmentTenantsTable
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+            <Suspense fallback={<TableLoader />}>
+              <ApartmentTenantsTable
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            </Suspense>
           </CardContent>
         </Card>
 

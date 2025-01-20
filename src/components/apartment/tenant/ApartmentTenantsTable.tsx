@@ -32,18 +32,16 @@ export function ApartmentTenantsTable({
     queryKey: ["apartment-tenants"],
     queryFn: async () => {
       try {
-        // First get the authenticated user
         const { data: { user }, error: authError } = await supabase.auth.getUser()
         if (authError || !user) {
           throw new Error("Non authentifié")
         }
 
-        // Get the user's profile to get their agency_id
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('agency_id')
           .eq('id', user.id)
-          .maybeSingle()
+          .single()
 
         if (profileError) {
           throw profileError
@@ -53,33 +51,22 @@ export function ApartmentTenantsTable({
           throw new Error("Aucune agence associée")
         }
 
-        // Now fetch tenants for this agency
+        // Optimisation : Sélection uniquement des colonnes nécessaires
         const { data: tenantsData, error: tenantsError } = await supabase
           .from("apartment_tenants")
           .select(`
-            *,
+            id,
+            first_name,
+            last_name,
+            email,
+            phone_number,
             apartment_leases (
-              id,
-              tenant_id,
-              unit_id,
-              start_date,
-              end_date,
-              rent_amount,
-              deposit_amount,
-              payment_frequency,
-              duration_type,
-              status,
-              payment_type,
-              agency_id
-            ),
-            apartment_units!apartment_tenants_unit_id_fkey (
-              unit_number,
-              apartment:apartments (
-                name
-              )
+              rent_amount
             )
           `)
           .eq("agency_id", profile.agency_id)
+          .order('created_at', { ascending: false })
+          .limit(50) // Pagination initiale
 
         if (tenantsError) {
           console.error("Error fetching tenants:", tenantsError)
@@ -97,7 +84,9 @@ export function ApartmentTenantsTable({
         return []
       }
     },
-    retry: false
+    staleTime: 30000, // Cache pendant 30 secondes
+    cacheTime: 5 * 60 * 1000, // Garde en cache pendant 5 minutes
+    retry: 1
   })
 
   const isLoading = externalLoading || tenantsLoading
