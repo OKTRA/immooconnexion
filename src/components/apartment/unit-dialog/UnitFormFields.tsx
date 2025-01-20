@@ -34,6 +34,17 @@ export function UnitFormFields({
         </div>
 
         <div>
+          <Label htmlFor="unit_name">Nom de l'unité</Label>
+          <Input
+            id="unit_name"
+            value={formData.unit_name || ''}
+            onChange={(e) =>
+              setFormData({ ...formData, unit_name: e.target.value })
+            }
+          />
+        </div>
+
+        <div>
           <Label htmlFor="floor_number">Étage</Label>
           <Input
             id="floor_number"
