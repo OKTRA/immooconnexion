@@ -75,7 +75,7 @@ export function UnitFormFields({
               id="living_rooms"
               type="number"
               min="0"
-              value={formData.living_rooms || 0}
+              value={formData.living_rooms || ''}
               onChange={(e) =>
                 setFormData({ ...formData, living_rooms: Number(e.target.value) })
               }
@@ -87,7 +87,7 @@ export function UnitFormFields({
               id="bedrooms"
               type="number"
               min="0"
-              value={formData.bedrooms || 0}
+              value={formData.bedrooms || ''}
               onChange={(e) =>
                 setFormData({ ...formData, bedrooms: Number(e.target.value) })
               }
@@ -102,7 +102,7 @@ export function UnitFormFields({
               id="store_count"
               type="number"
               min="0"
-              value={formData.store_count || 0}
+              value={formData.store_count || ''}
               onChange={(e) =>
                 setFormData({ ...formData, store_count: Number(e.target.value) })
               }
@@ -114,7 +114,7 @@ export function UnitFormFields({
               id="kitchen_count"
               type="number"
               min="0"
-              value={formData.kitchen_count || 0}
+              value={formData.kitchen_count || ''}
               onChange={(e) =>
                 setFormData({ ...formData, kitchen_count: Number(e.target.value) })
               }
@@ -126,7 +126,7 @@ export function UnitFormFields({
               id="bathroom_count"
               type="number"
               min="0"
-              value={formData.bathroom_count || 0}
+              value={formData.bathroom_count || ''}
               onChange={(e) =>
                 setFormData({ ...formData, bathroom_count: Number(e.target.value) })
               }
