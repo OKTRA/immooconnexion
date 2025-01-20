@@ -9,10 +9,11 @@ import { SubscriptionPlansGrid } from "./SubscriptionPlansGrid"
 import { FreePlanInfo } from "./FreePlanInfo"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertTriangle } from "lucide-react"
+import { SubscriptionPlan } from "@/components/admin/subscription/types"
 
 export function SubscriptionUpgradeTab() {
   const { toast } = useToast()
-  const [selectedPlan, setSelectedPlan] = useState<any>(null)
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null)
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
 
   const { data: currentAgency, isError: isAgencyError } = useQuery({
@@ -44,7 +45,9 @@ export function SubscriptionUpgradeTab() {
             max_properties,
             max_tenants,
             max_users,
-            features
+            features,
+            created_at,
+            updated_at
           )
         `)
         .eq('id', profile.agency_id)
@@ -64,7 +67,7 @@ export function SubscriptionUpgradeTab() {
         .order('price', { ascending: true })
       
       if (error) throw error
-      return data
+      return data as SubscriptionPlan[]
     }
   })
 
@@ -97,7 +100,9 @@ export function SubscriptionUpgradeTab() {
     max_properties: 1,
     max_tenants: 1,
     max_users: 1,
-    features: []
+    features: [],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }
 
   const isAtLimit = currentAgency.current_properties_count >= currentPlan.max_properties || 
@@ -146,6 +151,12 @@ export function SubscriptionUpgradeTab() {
           onPlanSelect={(plan) => {
             setSelectedPlan(plan)
             setShowUpgradeDialog(true)
+          }}
+          canDowngrade={(plan) => {
+            if (plan.price >= currentPlan.price) return true
+            return currentAgency.current_properties_count <= plan.max_properties &&
+                   currentAgency.current_tenants_count <= plan.max_tenants &&
+                   currentAgency.current_profiles_count <= plan.max_users
           }}
         />
       </div>
