@@ -1,13 +1,19 @@
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { AgencyLayout } from "@/components/agency/AgencyLayout"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import { Plus, Loader2 } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ApartmentForm } from "@/components/apartment/ApartmentForm"
 import { EmptyApartmentState } from "@/components/apartment/EmptyApartmentState"
 import { ApartmentList } from "@/components/apartment/ApartmentList"
+
+const LoadingState = () => (
+  <div className="flex justify-center items-center min-h-[200px]">
+    <Loader2 className="h-8 w-8 animate-spin" />
+  </div>
+)
 
 export default function Apartments() {
   const [showAddDialog, setShowAddDialog] = useState(false)
@@ -31,11 +37,19 @@ export default function Apartments() {
         throw new Error("Aucune agence associée")
       }
 
+      // Optimisation : Sélection uniquement des colonnes nécessaires
       const { data, error } = await supabase
         .from("apartments")
-        .select("*")
+        .select(`
+          id,
+          name,
+          address,
+          total_units,
+          created_at
+        `)
         .eq("agency_id", userProfile.agency_id)
         .order("created_at", { ascending: false })
+        .limit(20) // Pagination initiale
 
       if (error) throw error
       return data.map(apt => ({
@@ -44,7 +58,9 @@ export default function Apartments() {
         address: apt.address || '',
         unit_count: apt.total_units || 0
       }))
-    }
+    },
+    staleTime: 30 * 1000, // Cache pendant 30 secondes
+    gcTime: 5 * 60 * 1000 // Garde en cache pendant 5 minutes
   })
 
   const { data: owners = [] } = useQuery({
@@ -66,33 +82,23 @@ export default function Apartments() {
         throw new Error("Aucune agence associée")
       }
 
+      // Optimisation : Sélection uniquement des colonnes nécessaires
       const { data: agencyOwners } = await supabase
         .from("agency_owners")
         .select(`
           owner:property_owners (
             id,
             first_name,
-            last_name,
-            phone_number
+            last_name
           )
         `)
         .eq("agency_id", userProfile.agency_id)
 
       return agencyOwners?.map(ao => ao.owner) || []
-    }
+    },
+    staleTime: 60 * 1000, // Cache pendant 1 minute
+    gcTime: 5 * 60 * 1000 // Garde en cache pendant 5 minutes
   })
-
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
-
-  if (!apartments.length) {
-    return (
-      <AgencyLayout>
-        <EmptyApartmentState owners={owners} />
-      </AgencyLayout>
-    )
-  }
 
   return (
     <AgencyLayout>
@@ -105,11 +111,17 @@ export default function Apartments() {
           </Button>
         </div>
 
-        <ApartmentList 
-          apartments={apartments}
-          isLoading={isLoading}
-          onViewUnits={() => {}}
-        />
+        <Suspense fallback={<LoadingState />}>
+          {!apartments.length && !isLoading ? (
+            <EmptyApartmentState owners={owners} />
+          ) : (
+            <ApartmentList 
+              apartments={apartments}
+              isLoading={isLoading}
+              onViewUnits={() => {}}
+            />
+          )}
+        </Suspense>
 
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogContent>
