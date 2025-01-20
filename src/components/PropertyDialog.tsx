@@ -4,6 +4,8 @@ import { useState } from "react"
 import { PropertyDialogProps, PropertyFormData } from "./property/types"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import { Button } from "@/components/ui/button"
+import { usePropertyForm } from "./property/usePropertyForm"
 
 export function PropertyDialog({ 
   property,
@@ -29,6 +31,10 @@ export function PropertyDialog({
     store_count: property?.store_count || 0,
     has_pool: property?.has_pool || false,
     kitchen_count: property?.kitchen_count || 0
+  })
+
+  const { handleSubmit } = usePropertyForm(property || null, () => {
+    onOpenChange(false)
   })
 
   const { data: owners = [] } = useQuery({
@@ -73,12 +79,25 @@ export function PropertyDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <PropertyFormFields 
-          formData={formData}
-          setFormData={setFormData}
-          handleImageChange={handleImageChange}
-          owners={owners}
-        />
+        <form onSubmit={(e) => {
+          e.preventDefault()
+          handleSubmit()
+        }}>
+          <PropertyFormFields 
+            formData={formData}
+            setFormData={setFormData}
+            handleImageChange={handleImageChange}
+            owners={owners}
+          />
+          <div className="mt-6 flex justify-end">
+            <Button 
+              type="submit" 
+              className="bg-primary text-white hover:bg-primary/90"
+            >
+              {property ? 'Mettre à jour' : 'Ajouter le bien'}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   )
