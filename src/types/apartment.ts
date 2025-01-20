@@ -13,6 +13,7 @@ export interface Apartment {
 
 export interface ApartmentUnitFormData {
   unit_number: string;
+  unit_name?: string;
   floor_number?: number | null;
   area?: number | null;
   rent_amount: number;
@@ -20,12 +21,18 @@ export interface ApartmentUnitFormData {
   status: ApartmentUnitStatus;
   description?: string | null;
   commission_percentage?: number | null;
+  store_count?: number;
+  kitchen_count?: number;
+  has_pool?: boolean;
+  living_rooms?: number;
+  bedrooms?: number;
 }
 
 export interface ApartmentUnit {
   id: string;
   apartment_id: string;
   unit_number: string;
+  unit_name?: string;
   floor_number?: number;
   area?: number;
   rent_amount: number;
@@ -33,6 +40,11 @@ export interface ApartmentUnit {
   status: ApartmentUnitStatus;
   description?: string;
   commission_percentage?: number;
+  store_count?: number;
+  kitchen_count?: number;
+  has_pool?: boolean;
+  living_rooms?: number;
+  bedrooms?: number;
   created_at?: string;
   updated_at?: string;
   current_lease?: ApartmentLease;
