@@ -17,7 +17,10 @@ export function useUnitForm(
     deposit_amount: initialData?.deposit_amount || null,
     status: initialData?.status || "available",
     description: initialData?.description || null,
-    commission_percentage: initialData?.commission_percentage || null
+    commission_percentage: initialData?.commission_percentage || null,
+    store_count: initialData?.store_count || 0,
+    kitchen_count: initialData?.kitchen_count || 0,
+    has_pool: initialData?.has_pool || false
   })
 
   const [images, setImages] = useState<File[]>([])

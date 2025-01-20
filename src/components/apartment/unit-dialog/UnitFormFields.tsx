@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Switch } from "@/components/ui/switch"
 import { ApartmentUnitFormData, ApartmentUnitStatus } from "@/types/apartment"
 
 interface UnitFormFieldsProps {
@@ -54,6 +55,44 @@ export function UnitFormFields({
               setFormData({ ...formData, area: e.target.value ? Number(e.target.value) : null })
             }
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="store_count">Nombre de magasins</Label>
+            <Input
+              id="store_count"
+              type="number"
+              min="0"
+              value={formData.store_count || 0}
+              onChange={(e) =>
+                setFormData({ ...formData, store_count: Number(e.target.value) })
+              }
+            />
+          </div>
+          <div>
+            <Label htmlFor="kitchen_count">Nombre de cuisines</Label>
+            <Input
+              id="kitchen_count"
+              type="number"
+              min="0"
+              value={formData.kitchen_count || 0}
+              onChange={(e) =>
+                setFormData({ ...formData, kitchen_count: Number(e.target.value) })
+              }
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="has_pool"
+            checked={formData.has_pool || false}
+            onCheckedChange={(checked) =>
+              setFormData({ ...formData, has_pool: checked })
+            }
+          />
+          <Label htmlFor="has_pool">Piscine</Label>
         </div>
 
         <div>
