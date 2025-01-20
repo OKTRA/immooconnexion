@@ -97,6 +97,30 @@ export function PropertyTable({ type }: PropertyTableProps) {
     if (!selectedProperty) return
 
     try {
+      // Vérifier les limites du plan d'abonnement
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('agency_id')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (!profile?.agency_id) throw new Error("Agence non trouvée")
+
+      const { data: agency } = await supabase
+        .from('agencies')
+        .select(`
+          current_properties_count,
+          subscription_plans (
+            max_properties
+          )
+        `)
+        .eq('id', profile.agency_id)
+        .single()
+
+      // Supprimer la propriété
       const { error } = await supabase
         .from('properties')
         .delete()
@@ -104,17 +128,17 @@ export function PropertyTable({ type }: PropertyTableProps) {
 
       if (error) throw error
 
-      queryClient.invalidateQueries({ queryKey: ['properties'] })
+      await queryClient.invalidateQueries({ queryKey: ['properties'] })
 
       toast({
         title: "Bien supprimé",
         description: "Le bien a été supprimé avec succès",
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error)
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la suppression",
+        description: error.message || "Une erreur est survenue lors de la suppression",
         variant: "destructive",
       })
     } finally {
