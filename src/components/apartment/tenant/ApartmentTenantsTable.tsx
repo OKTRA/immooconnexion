@@ -1,150 +1,145 @@
-import { Table } from "@/components/ui/table"
-import { Loader2 } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { TenantActionButtons } from "./TenantActionButtons"
-import {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { useNavigate } from "react-router-dom"
 import { ApartmentTenant } from "@/types/apartment"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
+import { Button } from "@/components/ui/button"
+import { Eye, Pencil, Trash2 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { useToast } from "@/hooks/use-toast"
 
 interface ApartmentTenantsTableProps {
-  onEdit: (tenant: ApartmentTenant) => void
-  onDelete: (tenantId: string) => void
+  onEdit?: (tenant: ApartmentTenant) => void
+  onDelete?: (id: string) => void
   isLoading?: boolean
 }
 
-export function ApartmentTenantsTable({
-  onEdit,
-  onDelete,
-  isLoading: externalLoading
-}: ApartmentTenantsTableProps) {
-  const { toast } = useToast()
+export function ApartmentTenantsTable({ onEdit, onDelete, isLoading }: ApartmentTenantsTableProps) {
   const navigate = useNavigate()
-
-  const { data: tenants = [], isLoading: tenantsLoading } = useQuery({
+  const { toast } = useToast()
+  
+  const { data: tenants = [] } = useQuery({
     queryKey: ["apartment-tenants"],
     queryFn: async () => {
-      try {
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-        if (authError || !user) {
-          throw new Error("Non authentifié")
-        }
-
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('agency_id')
-          .eq('id', user.id)
-          .single()
-
-        if (profileError) {
-          throw profileError
-        }
-
-        if (!profile?.agency_id) {
-          throw new Error("Aucune agence associée")
-        }
-
-        // Optimisation : Sélection uniquement des colonnes nécessaires
-        const { data: tenantsData, error: tenantsError } = await supabase
-          .from("apartment_tenants")
-          .select(`
-            id,
-            first_name,
-            last_name,
-            email,
-            phone_number,
-            apartment_leases (
-              rent_amount
+      const { data, error } = await supabase
+        .from("apartment_tenants")
+        .select(`
+          *,
+          apartment_units!apartment_tenants_unit_id_fkey (
+            unit_number,
+            apartment:apartments (
+              name
             )
-          `)
-          .eq("agency_id", profile.agency_id)
-          .order('created_at', { ascending: false })
-          .limit(50) // Pagination initiale
+          ),
+          apartment_leases (
+            id,
+            tenant_id,
+            unit_id,
+            start_date,
+            end_date,
+            rent_amount,
+            deposit_amount,
+            status,
+            payment_frequency,
+            duration_type,
+            payment_type
+          )
+        `)
+        .order("created_at", { ascending: false })
 
-        if (tenantsError) {
-          console.error("Error fetching tenants:", tenantsError)
-          throw tenantsError
-        }
-
-        return tenantsData as ApartmentTenant[]
-      } catch (error: any) {
-        console.error("Error in tenant query:", error)
-        toast({
-          title: "Erreur",
-          description: error.message || "Impossible de charger les locataires",
-          variant: "destructive",
-        })
-        return []
+      if (error) {
+        console.error("Error fetching tenants:", error)
+        throw error
       }
+
+      return data as ApartmentTenant[]
     },
-    staleTime: 30000, // Cache pendant 30 secondes
-    gcTime: 5 * 60 * 1000, // Garde en cache pendant 5 minutes
-    retry: 1
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
   })
 
-  const isLoading = externalLoading || tenantsLoading
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("apartment_tenants")
+        .delete()
+        .eq("id", id)
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
+      if (error) throw error
+
+      toast({
+        title: "Succès",
+        description: "Le locataire a été supprimé avec succès",
+      })
+
+      onDelete?.(id)
+    } catch (error) {
+      console.error("Error deleting tenant:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suppression du locataire",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nom</TableHead>
-            <TableHead>Prénom</TableHead>
-            <TableHead>Téléphone</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Loyer</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {tenants.map((tenant) => (
-            <TableRow 
-              key={tenant.id}
-              className="cursor-pointer hover:bg-muted/50"
-              onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}`)}
-            >
-              <TableCell>{tenant.last_name}</TableCell>
-              <TableCell>{tenant.first_name}</TableCell>
-              <TableCell>{tenant.phone_number || "-"}</TableCell>
-              <TableCell>{tenant.email || "-"}</TableCell>
-              <TableCell>
-                {tenant.apartment_leases?.[0]?.rent_amount?.toLocaleString()} FCFA
-              </TableCell>
-              <TableCell onClick={(e) => e.stopPropagation()}>
-                <TenantActionButtons
-                  tenant={tenant}
-                  onEdit={() => onEdit(tenant)}
-                  onDelete={() => onDelete(tenant.id)}
-                  onInspection={() => {}}
-                />
-              </TableCell>
-            </TableRow>
-          ))}
-          {tenants.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center py-4">
-                Aucun locataire trouvé
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+    <ResponsiveTable>
+      <ResponsiveTable.Header>
+        <ResponsiveTable.Row>
+          <ResponsiveTable.Head>Nom</ResponsiveTable.Head>
+          <ResponsiveTable.Head>Email</ResponsiveTable.Head>
+          <ResponsiveTable.Head>Téléphone</ResponsiveTable.Head>
+          <ResponsiveTable.Head>Unité</ResponsiveTable.Head>
+          <ResponsiveTable.Head>Statut</ResponsiveTable.Head>
+          <ResponsiveTable.Head className="text-right">Actions</ResponsiveTable.Head>
+        </ResponsiveTable.Row>
+      </ResponsiveTable.Header>
+      <ResponsiveTable.Body>
+        {tenants.map((tenant) => (
+          <ResponsiveTable.Row key={tenant.id}>
+            <ResponsiveTable.Cell>
+              {tenant.first_name} {tenant.last_name}
+            </ResponsiveTable.Cell>
+            <ResponsiveTable.Cell>{tenant.email}</ResponsiveTable.Cell>
+            <ResponsiveTable.Cell>{tenant.phone_number}</ResponsiveTable.Cell>
+            <ResponsiveTable.Cell>
+              {tenant.apartment_units?.apartment?.name} - Unité {tenant.apartment_units?.unit_number}
+            </ResponsiveTable.Cell>
+            <ResponsiveTable.Cell>
+              {tenant.apartment_leases?.[0]?.status || "Inactif"}
+            </ResponsiveTable.Cell>
+            <ResponsiveTable.Cell className="text-right">
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate(`/agence/tenants/${tenant.id}`)}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+                {onEdit && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onEdit(tenant)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                )}
+                {onDelete && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDelete(tenant.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </ResponsiveTable.Cell>
+          </ResponsiveTable.Row>
+        ))}
+      </ResponsiveTable.Body>
+    </ResponsiveTable>
   )
 }

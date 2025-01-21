@@ -18,6 +18,23 @@ interface ContractWithProperties {
   }
 }
 
+interface AgencyFee {
+  id: string
+  bien: string
+  montant: number
+  datePerception: string
+}
+
+interface RentalCommission {
+  id: string
+  bien: string
+  loyer: number
+  tauxCommission: number
+  commissionMensuelle: number
+  gainProprietaire: number
+  datePerception: string
+}
+
 export function AgencyEarningsTable() {
   const { data: earnings, isLoading } = useQuery({
     queryKey: ['agency-earnings'],
@@ -33,7 +50,6 @@ export function AgencyEarningsTable() {
 
       if (!profile?.agency_id) throw new Error("Agence non trouvée")
 
-      // Optimisation: Sélection uniquement des champs nécessaires
       const { data: contracts, error } = await supabase
         .from('contracts')
         .select(`
@@ -48,11 +64,12 @@ export function AgencyEarningsTable() {
         `)
         .eq('agency_id', profile.agency_id)
         .order('created_at', { ascending: false })
-        .limit(50)
+        .limit(50) as { data: ContractWithProperties[] | null, error: any }
       
       if (error) throw error
 
-      // Optimisation: Traitement des données plus efficace
+      if (!contracts) return { agencyFees: [], rentals: [] }
+
       const agencyFees = contracts
         .filter(contract => contract.type === 'frais_agence')
         .map(contract => ({
@@ -79,8 +96,8 @@ export function AgencyEarningsTable() {
 
       return { agencyFees, rentals }
     },
-    staleTime: 5 * 60 * 1000, // Cache pendant 5 minutes
-    gcTime: 30 * 60 * 1000, // Garde en cache pendant 30 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   })
 
   if (isLoading) {
