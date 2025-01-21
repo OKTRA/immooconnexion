@@ -85,7 +85,7 @@ export function ApartmentTenantsTable({
       }
     },
     staleTime: 30000, // Cache pendant 30 secondes
-    cacheTime: 5 * 60 * 1000, // Garde en cache pendant 5 minutes
+    gcTime: 5 * 60 * 1000, // Garde en cache pendant 5 minutes
     retry: 1
   })
 

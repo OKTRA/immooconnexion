@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { SubscriptionPlan } from "@/types/subscription"
 
 export function useSubscriptionLimits(agencyId?: string) {
   const { toast } = useToast()
@@ -10,7 +11,6 @@ export function useSubscriptionLimits(agencyId?: string) {
     queryFn: async () => {
       console.log("Fetching limits for agency:", agencyId)
       
-      // Get agency data with current counts and subscription plan limits
       const { data: agency, error } = await supabase
         .from("agencies")
         .select(`
@@ -36,12 +36,12 @@ export function useSubscriptionLimits(agencyId?: string) {
         throw new Error("No subscription plan found")
       }
 
-      console.log("Agency data:", agency)
+      const plan = agency.subscription_plans as SubscriptionPlan
 
       return {
-        max_properties: agency.subscription_plans.max_properties,
-        max_tenants: agency.subscription_plans.max_tenants,
-        max_users: agency.subscription_plans.max_users,
+        max_properties: plan.max_properties,
+        max_tenants: plan.max_tenants,
+        max_users: plan.max_users,
         current_properties: agency.current_properties_count || 0,
         current_tenants: agency.current_tenants_count || 0,
         current_users: agency.current_profiles_count || 0
@@ -53,7 +53,7 @@ export function useSubscriptionLimits(agencyId?: string) {
   const checkLimitReached = async (type: 'property' | 'tenant' | 'user') => {
     if (!limits) {
       console.log("No limits data available")
-      return true // Block operation if limits are not available
+      return true
     }
 
     console.log("Checking limit for type:", type, "Current limits:", limits)
@@ -74,23 +74,13 @@ export function useSubscriptionLimits(agencyId?: string) {
       }
     })()
 
-    console.log("Limit reached?", isLimitReached)
-
     if (isLimitReached) {
       const typeLabel = type === 'property' ? 'propriétés' : 
         type === 'tenant' ? 'locataires' : 'utilisateurs'
       
-      const currentValue = type === 'property' ? limits.current_properties :
-        type === 'tenant' ? limits.current_tenants :
-        limits.current_users
-
-      const maxValue = type === 'property' ? limits.max_properties :
-        type === 'tenant' ? limits.max_tenants :
-        limits.max_users
-      
       toast({
         title: "Limite atteinte",
-        description: `Vous avez atteint la limite de ${typeLabel} pour votre plan actuel (${currentValue}/${maxValue}). Veuillez mettre à niveau votre abonnement pour en ajouter davantage.`,
+        description: `Vous avez atteint la limite de ${typeLabel} pour votre plan actuel.`,
         variant: "destructive"
       })
       return true
@@ -99,40 +89,8 @@ export function useSubscriptionLimits(agencyId?: string) {
     return false
   }
 
-  const checkDowngradeEligibility = (planLimits: {
-    max_properties: number
-    max_tenants: number
-    max_users: number
-  }) => {
-    if (!limits) {
-      console.log("No limits data available")
-      return false
-    }
-
-    console.log("Checking downgrade eligibility:", {
-      planLimits,
-      currentLimits: limits
-    })
-
-    // For unlimited plans (-1), always allow
-    const exceedsProperties = planLimits.max_properties !== -1 && 
-      limits.current_properties > planLimits.max_properties
-    
-    const exceedsTenants = planLimits.max_tenants !== -1 && 
-      limits.current_tenants > planLimits.max_tenants
-    
-    const exceedsUsers = planLimits.max_users !== -1 && 
-      limits.current_users > planLimits.max_users
-
-    const canDowngrade = !exceedsProperties && !exceedsTenants && !exceedsUsers
-    console.log("Can downgrade?", canDowngrade)
-
-    return canDowngrade
-  }
-
   return {
     limits,
-    checkDowngradeEligibility,
     checkLimitReached
   }
 }

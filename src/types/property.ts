@@ -14,38 +14,11 @@ export interface Property {
   agency_id?: string;
   created_at?: string;
   updated_at?: string;
-  created_by_user_id?: string;
-  property_category: 'house' | 'duplex' | 'triplex' | 'apartment';
-  owner_name?: string;
-  owner_phone?: string;
-  country?: string;
-  quartier?: string;
-  agency?: {
-    name: string;
-    address: string;
-  };
 }
 
-export interface PropertyUnit {
+export interface PropertyOwner {
   id: string;
-  property_id: string;
-  unit_number: string;
-  floor_number?: number;
-  area?: number;
-  rent_amount: number;
-  deposit_amount?: number;
-  status: 'available' | 'occupied' | 'maintenance' | 'reserved';
-  description?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface PropertyUnitFormData {
-  unit_number: string;
-  floor_number?: number;
-  area?: number;
-  rent_amount: number;
-  deposit_amount?: number;
-  status: 'available' | 'occupied' | 'maintenance' | 'reserved';
-  description?: string;
+  first_name: string;
+  last_name: string;
+  phone_number?: string;
 }

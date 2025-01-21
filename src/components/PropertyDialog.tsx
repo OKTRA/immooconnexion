@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Button } from "@/components/ui/button"
 import { usePropertyForm } from "./property/usePropertyForm"
+import { PropertyOwner } from "@/types/property"
 
 export function PropertyDialog({ 
   property,
@@ -68,13 +69,9 @@ export function PropertyDialog({
         `)
         .eq("agency_id", userProfile.agency_id)
 
-      return agencyOwners?.map(ao => ao.owner) || []
+      return (agencyOwners?.map(ao => ao.owner) || []) as PropertyOwner[]
     }
   })
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Image handling logic here
-  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -86,7 +83,7 @@ export function PropertyDialog({
           <PropertyFormFields 
             formData={formData}
             setFormData={setFormData}
-            handleImageChange={handleImageChange}
+            handleImageChange={() => {}}
             owners={owners}
           />
           <div className="mt-6 flex justify-end">
