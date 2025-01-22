@@ -1,59 +1,34 @@
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase"
 import { useState } from "react"
-import { useToast } from "@/hooks/use-toast"
-import { ContactFields } from "./form/ContactFields"
-import { LeaseFields } from "./form/LeaseFields"
 import { PhotoUpload } from "./form/PhotoUpload"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { PersonalInfoFields } from "./form/PersonalInfoFields"
+import { EmergencyContactsField } from "./form/EmergencyContactsField"
 import { UnitSearchField } from "./form/UnitSearchField"
+import { Loader2 } from "lucide-react"
 
-export interface TenantFormData {
+interface TenantFormData {
   firstName: string
   lastName: string
   email: string
   phoneNumber: string
-  birth_date: string | null
+  birthDate: string
   profession: string
-  rent_amount: string
-  deposit_amount: string
-  start_date: string
-  end_date: string
-  payment_frequency: "monthly" | "weekly" | "daily" | "quarterly" | "yearly"
-  duration_type: "fixed" | "month_to_month" | "yearly"
-  photos: FileList | null
-  emergency_contacts?: Array<{
+  photoId: File | null
+  emergency_contacts: Array<{
     name: string
     phone: string
     relationship: string
   }>
 }
 
-export interface ApartmentTenantFormProps {
+interface ApartmentTenantFormProps {
   unitId: string
   onSuccess: () => void
   isSubmitting: boolean
   setIsSubmitting: (value: boolean) => void
   initialData?: any
-}
-
-const initialFormData: TenantFormData = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  phoneNumber: "",
-  birth_date: null,
-  profession: "",
-  rent_amount: "",
-  deposit_amount: "",
-  start_date: "",
-  end_date: "",
-  payment_frequency: "monthly",
-  duration_type: "fixed",
-  photos: null,
-  emergency_contacts: []
 }
 
 export function ApartmentTenantForm({
@@ -65,9 +40,19 @@ export function ApartmentTenantForm({
 }: ApartmentTenantFormProps) {
   const { toast } = useToast()
   const [formData, setFormData] = useState<TenantFormData>({
-    ...initialFormData,
-    ...initialData
+    firstName: initialData?.first_name || "",
+    lastName: initialData?.last_name || "",
+    email: initialData?.email || "",
+    phoneNumber: initialData?.phone_number || "",
+    birthDate: initialData?.birth_date || "",
+    profession: initialData?.profession || "",
+    photoId: null,
+    emergency_contacts: initialData?.emergency_contacts || []
   })
+
+  const handleFieldChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -86,14 +71,13 @@ export function ApartmentTenantForm({
       if (!profile?.agency_id) throw new Error("Agency ID not found")
 
       let photoUrl: string | null = null
-      if (formData.photos?.length) {
-        const file = formData.photos[0]
-        const fileExt = file.name.split('.').pop()
+      if (formData.photoId) {
+        const fileExt = formData.photoId.name.split('.').pop()
         const fileName = `${Math.random()}.${fileExt}`
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('tenant_photos')
-          .upload(fileName, file)
+          .upload(fileName, formData.photoId)
 
         if (uploadError) throw uploadError
         if (uploadData) {
@@ -107,46 +91,34 @@ export function ApartmentTenantForm({
       const tenantData = {
         first_name: formData.firstName,
         last_name: formData.lastName,
-        email: formData.email || null,
+        email: formData.email,
         phone_number: formData.phoneNumber,
-        birth_date: formData.birth_date || null,
+        birth_date: formData.birthDate,
         photo_id_url: photoUrl,
-        profession: formData.profession || null,
-        emergency_contacts: formData.emergency_contacts || [],
+        profession: formData.profession,
+        emergency_contacts: formData.emergency_contacts,
         agency_id: profile.agency_id,
         unit_id: unitId
       }
 
-      const { data: tenant, error: tenantError } = await supabase
-        .from("apartment_tenants")
-        .insert(tenantData)
-        .select()
-        .single()
+      if (initialData?.id) {
+        const { error } = await supabase
+          .from("apartment_tenants")
+          .update(tenantData)
+          .eq("id", initialData.id)
 
-      if (tenantError) throw tenantError
+        if (error) throw error
+      } else {
+        const { error } = await supabase
+          .from("apartment_tenants")
+          .insert([tenantData])
 
-      const leaseData = {
-        tenant_id: tenant.id,
-        unit_id: unitId,
-        start_date: formData.start_date || null,
-        end_date: formData.duration_type === "fixed" ? formData.end_date || null : null,
-        rent_amount: parseInt(formData.rent_amount) || 0,
-        deposit_amount: parseInt(formData.deposit_amount) || 0,
-        payment_frequency: formData.payment_frequency,
-        duration_type: formData.duration_type,
-        status: "active",
-        agency_id: profile.agency_id
+        if (error) throw error
       }
-
-      const { error: leaseError } = await supabase
-        .from("apartment_leases")
-        .insert(leaseData)
-
-      if (leaseError) throw leaseError
 
       toast({
         title: "Succès",
-        description: "Le locataire a été ajouté avec succès",
+        description: initialData ? "Locataire modifié avec succès" : "Locataire ajouté avec succès",
       })
 
       onSuccess()
@@ -154,7 +126,7 @@ export function ApartmentTenantForm({
       console.error("Error:", error)
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue",
+        description: error.message,
         variant: "destructive",
       })
     } finally {
@@ -163,45 +135,41 @@ export function ApartmentTenantForm({
   }
 
   return (
-    <div className="max-h-[600px] overflow-y-auto px-4">
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-6">
-            <ContactFields formData={formData} setFormData={setFormData} />
-            
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="profession">Profession</Label>
-                <Input
-                  id="profession"
-                  value={formData.profession}
-                  onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
-                  placeholder="Profession du locataire"
-                />
-              </div>
-            </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <PersonalInfoFields
+        firstName={formData.firstName}
+        lastName={formData.lastName}
+        email={formData.email}
+        phoneNumber={formData.phoneNumber}
+        birthDate={formData.birthDate}
+        profession={formData.profession}
+        onChange={handleFieldChange}
+      />
 
-            <PhotoUpload onPhotosSelected={(files) => setFormData({ ...formData, photos: files })} />
-          </div>
+      <EmergencyContactsField
+        contacts={formData.emergency_contacts}
+        onChange={(contacts) => setFormData(prev => ({ ...prev, emergency_contacts: contacts }))}
+      />
 
-          <div className="space-y-6">
-            <UnitSearchField
-              unitId={unitId}
-              onChange={(id) => setFormData({ ...formData, unit_id: id })}
-            />
-            <LeaseFields formData={formData} setFormData={setFormData} />
-          </div>
-        </div>
+      <PhotoUpload
+        onPhotosSelected={(files) => setFormData(prev => ({ ...prev, photoId: files[0] }))}
+      />
 
-        <div className="flex justify-end gap-2 pt-4">
-          <Button variant="outline" type="button" onClick={() => onSuccess()} disabled={isSubmitting}>
-            Annuler
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Chargement..." : "Ajouter"}
-          </Button>
-        </div>
-      </form>
-    </div>
+      <UnitSearchField
+        unitId={unitId}
+        onChange={(id) => setFormData(prev => ({ ...prev, unit_id: id }))}
+      />
+
+      <div className="flex justify-end gap-2">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Chargement...
+            </>
+          ) : initialData ? "Modifier" : "Ajouter"}
+        </Button>
+      </div>
+    </form>
   )
 }
