@@ -18,16 +18,16 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 
 interface UnitSearchFieldProps {
-  unitId?: string;
-  onChange: (unitId: string) => void;
+  unitId?: string
+  onChange: (unitId: string) => void
 }
 
 interface ApartmentUnit {
-  id: string;
-  unit_number: string;
+  id: string
+  unit_number: string
   apartment: {
-    name: string;
-  } | null;
+    name: string
+  }
 }
 
 export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
@@ -46,13 +46,10 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
           )
         `)
         .eq("status", "available")
-        .maybeSingle()
 
       if (error) throw error
       
-      // Ensure we return an array even if data is null
-      const unitsArray = data ? [data] : []
-      return unitsArray as ApartmentUnit[]
+      return (data || []) as ApartmentUnit[]
     }
   })
 
@@ -69,7 +66,7 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
             className="w-full justify-between"
           >
             {selectedUnit ? 
-              `${selectedUnit.unit_number} ${selectedUnit.apartment?.name || ''}` 
+              `${selectedUnit.unit_number} - ${selectedUnit.apartment?.name || ''}` 
               : "Sélectionner une unité..."
             }
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -84,8 +81,8 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
                 <CommandItem
                   key={unit.id}
                   value={unit.id}
-                  onSelect={(currentValue) => {
-                    onChange(currentValue)
+                  onSelect={() => {
+                    onChange(unit.id)
                     setOpen(false)
                   }}
                 >
