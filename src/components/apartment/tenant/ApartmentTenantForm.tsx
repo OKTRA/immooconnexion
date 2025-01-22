@@ -5,7 +5,7 @@ import { useState } from "react"
 import { PhotoUpload } from "../form/PhotoUpload"
 import { PersonalInfoFields } from "./form/PersonalInfoFields"
 import { EmergencyContactsField } from "./form/EmergencyContactsField"
-import { UnitSearchField } from "./form/UnitSearchField"
+import { SimpleUnitSelector } from "./form/SimpleUnitSelector"
 import { Loader2 } from "lucide-react"
 
 interface TenantFormData {
@@ -19,6 +19,7 @@ interface TenantFormData {
   emergency_contact_name: string
   emergency_contact_phone: string
   emergency_contact_relationship: string
+  unit_id?: string
 }
 
 interface ApartmentTenantFormProps {
@@ -47,7 +48,8 @@ export function ApartmentTenantForm({
     photoId: null,
     emergency_contact_name: initialData?.emergency_contact_name || "",
     emergency_contact_phone: initialData?.emergency_contact_phone || "",
-    emergency_contact_relationship: initialData?.emergency_contact_relationship || ""
+    emergency_contact_relationship: initialData?.emergency_contact_relationship || "",
+    unit_id: unitId || initialData?.unit_id || ""
   })
 
   const handleFieldChange = (field: string, value: string) => {
@@ -100,7 +102,7 @@ export function ApartmentTenantForm({
         emergency_contact_phone: formData.emergency_contact_phone,
         emergency_contact_relationship: formData.emergency_contact_relationship,
         agency_id: profile.agency_id,
-        unit_id: unitId
+        unit_id: formData.unit_id
       }
 
       if (initialData?.id) {
@@ -165,9 +167,9 @@ export function ApartmentTenantForm({
         previewUrls={[]}
       />
 
-      <UnitSearchField
-        unitId={unitId}
-        onChange={(id) => setFormData(prev => ({ ...prev, unit_id: id }))}
+      <SimpleUnitSelector
+        value={formData.unit_id || ""}
+        onValueChange={(value) => setFormData(prev => ({ ...prev, unit_id: value }))}
       />
 
       <div className="flex justify-end gap-2">
