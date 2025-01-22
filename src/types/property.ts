@@ -14,6 +14,17 @@ export interface Property {
   agency_id?: string;
   created_at?: string;
   updated_at?: string;
+  property_category: 'house' | 'duplex' | 'triplex';
+  owner_name?: string;
+  owner_phone?: string;
+  country?: string;
+  quartier?: string;
+  owner_id?: string;
+  living_rooms?: number;
+  bathrooms?: number;
+  store_count?: number;
+  has_pool?: boolean;
+  kitchen_count?: number;
 }
 
 export interface PropertyOwner {
