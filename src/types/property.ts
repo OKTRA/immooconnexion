@@ -35,6 +35,7 @@ export interface PropertyUnit {
   description?: string;
   created_at?: string;
   updated_at?: string;
+  bathrooms?: number;
 }
 
 export interface PropertyUnitFormData {
