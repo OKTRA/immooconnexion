@@ -26,25 +26,13 @@ export interface ApartmentUnitFormData {
   has_pool?: boolean;
   living_rooms?: number;
   bedrooms?: number;
+  bathrooms?: number;
 }
 
-export interface ApartmentUnit {
+export interface ApartmentUnit extends Omit<ApartmentUnitFormData, 'status'> {
   id: string;
   apartment_id: string;
-  unit_number: string;
-  unit_name?: string;
-  floor_number?: number;
-  area?: number;
-  rent_amount: number;
-  deposit_amount?: number;
   status: ApartmentUnitStatus;
-  description?: string;
-  commission_percentage?: number;
-  store_count?: number;
-  kitchen_count?: number;
-  has_pool?: boolean;
-  living_rooms?: number;
-  bedrooms?: number;
   created_at?: string;
   updated_at?: string;
   current_lease?: ApartmentLease;

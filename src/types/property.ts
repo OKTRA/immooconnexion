@@ -44,4 +44,5 @@ export interface PropertyUnitFormData {
   rent_amount: number;
   deposit_amount?: number;
   description?: string;
+  bathrooms?: number;
 }
