@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase"
 import { useState } from "react"
-import { PhotoUpload } from "./form/PhotoUpload"
+import { PhotoUpload } from "../form/PhotoUpload"
 import { PersonalInfoFields } from "./form/PersonalInfoFields"
 import { EmergencyContactsField } from "./form/EmergencyContactsField"
 import { UnitSearchField } from "./form/UnitSearchField"
@@ -16,11 +16,9 @@ interface TenantFormData {
   birthDate: string
   profession: string
   photoId: File | null
-  emergency_contacts: Array<{
-    name: string
-    phone: string
-    relationship: string
-  }>
+  emergency_contact_name: string
+  emergency_contact_phone: string
+  emergency_contact_relationship: string
 }
 
 interface ApartmentTenantFormProps {
@@ -47,7 +45,9 @@ export function ApartmentTenantForm({
     birthDate: initialData?.birth_date || "",
     profession: initialData?.profession || "",
     photoId: null,
-    emergency_contacts: initialData?.emergency_contacts || []
+    emergency_contact_name: initialData?.emergency_contact_name || "",
+    emergency_contact_phone: initialData?.emergency_contact_phone || "",
+    emergency_contact_relationship: initialData?.emergency_contact_relationship || ""
   })
 
   const handleFieldChange = (field: string, value: string) => {
@@ -96,7 +96,9 @@ export function ApartmentTenantForm({
         birth_date: formData.birthDate,
         photo_id_url: photoUrl,
         profession: formData.profession,
-        emergency_contacts: formData.emergency_contacts,
+        emergency_contact_name: formData.emergency_contact_name,
+        emergency_contact_phone: formData.emergency_contact_phone,
+        emergency_contact_relationship: formData.emergency_contact_relationship,
         agency_id: profile.agency_id,
         unit_id: unitId
       }
@@ -147,12 +149,20 @@ export function ApartmentTenantForm({
       />
 
       <EmergencyContactsField
-        contacts={formData.emergency_contacts}
-        onChange={(contacts) => setFormData(prev => ({ ...prev, emergency_contacts: contacts }))}
+        contactName={formData.emergency_contact_name}
+        contactPhone={formData.emergency_contact_phone}
+        contactRelationship={formData.emergency_contact_relationship}
+        onChange={handleFieldChange}
       />
 
       <PhotoUpload
-        onPhotosSelected={(files) => setFormData(prev => ({ ...prev, photoId: files[0] }))}
+        onPhotoChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) {
+            setFormData(prev => ({ ...prev, photoId: file }))
+          }
+        }}
+        previewUrls={[]}
       />
 
       <UnitSearchField

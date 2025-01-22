@@ -16,6 +16,8 @@ import {
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 interface UnitSearchFieldProps {
   unitId?: string
@@ -33,7 +35,7 @@ interface ApartmentUnit {
 export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
   const [open, setOpen] = useState(false)
   
-  const { data: units = [], isLoading } = useQuery<ApartmentUnit[]>({
+  const { data: units = [], isLoading } = useQuery({
     queryKey: ["available-units"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -49,7 +51,6 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
 
       if (error) throw error
       
-      // Ensure we return an array of properly formatted units
       return (data || []).map(unit => ({
         id: unit.id,
         unit_number: unit.unit_number,
@@ -63,54 +64,65 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
   const selectedUnit = units.find((unit) => unit.id === unitId)
 
   return (
-    <div className="space-y-2">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-full justify-between"
-          >
-            {selectedUnit ? 
-              `${selectedUnit.unit_number} - ${selectedUnit.apartment?.name || ''}` 
-              : "Sélectionner une unité..."
-            }
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[400px] p-0">
-          <Command>
-            <CommandInput placeholder="Rechercher une unité..." />
-            <CommandEmpty>Aucune unité trouvée.</CommandEmpty>
-            <CommandGroup>
-              {units.map((unit) => (
-                <CommandItem
-                  key={unit.id}
-                  value={unit.id}
-                  onSelect={() => {
-                    onChange(unit.id)
-                    setOpen(false)
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      unitId === unit.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {unit.unit_number} {unit.apartment?.name && `- ${unit.apartment.name}`}
-                </CommandItem>
-              ))}
-              {!isLoading && units.length === 0 && (
-                <CommandItem value="" disabled>
-                  Aucune unité disponible
-                </CommandItem>
-              )}
-            </CommandGroup>
-          </Command>
-        </PopoverContent>
-      </Popover>
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Sélectionner une unité</Label>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                className="w-full justify-between"
+              >
+                {selectedUnit ? 
+                  `Unité ${selectedUnit.unit_number}` 
+                  : "Sélectionner une unité..."
+                }
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0">
+              <Command>
+                <CommandInput placeholder="Rechercher une unité..." />
+                <CommandEmpty>Aucune unité trouvée.</CommandEmpty>
+                <CommandGroup>
+                  {units.map((unit) => (
+                    <CommandItem
+                      key={unit.id}
+                      value={unit.id}
+                      onSelect={() => {
+                        onChange(unit.id)
+                        setOpen(false)
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          unitId === unit.id ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      Unité {unit.unit_number}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+        
+        {selectedUnit && (
+          <div className="space-y-2">
+            <Label>Appartement</Label>
+            <Input
+              value={selectedUnit.apartment.name}
+              readOnly
+              className="bg-muted"
+            />
+          </div>
+        )}
+      </div>
     </div>
   )
 }
