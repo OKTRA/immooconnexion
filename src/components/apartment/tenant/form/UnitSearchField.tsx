@@ -26,8 +26,8 @@ interface UnitSearchFieldProps {
 interface ApartmentUnit {
   id: string
   unit_number: string
-  area?: number
-  floor_number?: number
+  area?: number | null
+  floor_number?: number | null
   apartment: {
     name: string
   }
@@ -39,6 +39,17 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
   const { data: units = [], isLoading } = useQuery({
     queryKey: ["available-units"],
     queryFn: async () => {
+      const { data: profile } = await supabase.auth.getUser()
+      if (!profile.user) throw new Error("Non authentifié")
+
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("agency_id")
+        .eq("id", profile.user.id)
+        .single()
+
+      if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
+
       const { data, error } = await supabase
         .from("apartment_units")
         .select(`
@@ -51,13 +62,22 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
           )
         `)
         .eq("status", "available")
+        .eq("apartments.agency_id", userProfile.agency_id)
 
       if (error) {
         console.error("Error fetching units:", error)
         return []
       }
       
-      return data as ApartmentUnit[]
+      return (data || []).map(unit => ({
+        id: unit.id,
+        unit_number: unit.unit_number,
+        area: unit.area,
+        floor_number: unit.floor_number,
+        apartment: {
+          name: unit.apartment?.name || ''
+        }
+      })) as ApartmentUnit[]
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   })
@@ -82,8 +102,7 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
             >
               {selectedUnit ? 
                 `Unité ${selectedUnit.unit_number} - ${selectedUnit.apartment.name}` 
-                : "Sélectionner une unité..."
-              }
+                : "Sélectionner une unité..."}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
