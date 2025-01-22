@@ -7,6 +7,7 @@ import { PersonalInfoFields } from "./form/PersonalInfoFields"
 import { EmergencyContactsField } from "./form/EmergencyContactsField"
 import { SimpleUnitSelector } from "./form/SimpleUnitSelector"
 import { Loader2 } from "lucide-react"
+import { useQueryClient } from "@tanstack/react-query"
 
 interface TenantFormData {
   firstName: string
@@ -38,6 +39,7 @@ export function ApartmentTenantForm({
   initialData
 }: ApartmentTenantFormProps) {
   const { toast } = useToast()
+  const queryClient = useQueryClient()
   const [formData, setFormData] = useState<TenantFormData>({
     firstName: initialData?.first_name || "",
     lastName: initialData?.last_name || "",
@@ -90,6 +92,7 @@ export function ApartmentTenantForm({
         }
       }
 
+      // Créer le locataire
       const tenantData = {
         first_name: formData.firstName,
         last_name: formData.lastName,
@@ -105,24 +108,42 @@ export function ApartmentTenantForm({
         unit_id: formData.unit_id
       }
 
+      let tenantId: string
       if (initialData?.id) {
-        const { error } = await supabase
+        const { error: updateError } = await supabase
           .from("apartment_tenants")
           .update(tenantData)
           .eq("id", initialData.id)
 
-        if (error) throw error
+        if (updateError) throw updateError
+        tenantId = initialData.id
       } else {
-        const { error } = await supabase
+        const { data: tenant, error: insertError } = await supabase
           .from("apartment_tenants")
           .insert([tenantData])
+          .select()
+          .single()
 
-        if (error) throw error
+        if (insertError) throw insertError
+        if (!tenant) throw new Error("No tenant data returned")
+        tenantId = tenant.id
       }
 
+      // Mettre à jour le statut de l'unité
+      const { error: unitError } = await supabase
+        .from("apartment_units")
+        .update({ status: "occupied" })
+        .eq("id", formData.unit_id)
+
+      if (unitError) throw unitError
+
+      // Invalider les caches pour forcer le rafraîchissement
+      queryClient.invalidateQueries({ queryKey: ["apartment-tenants"] })
+      queryClient.invalidateQueries({ queryKey: ["apartment-units"] })
+
       toast({
-        title: "Succès",
-        description: initialData ? "Locataire modifié avec succès" : "Locataire ajouté avec succès",
+        title: initialData ? "Locataire modifié" : "Locataire ajouté",
+        description: "Les informations ont été enregistrées avec succès.",
       })
 
       onSuccess()
