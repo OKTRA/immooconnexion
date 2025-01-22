@@ -1,13 +1,12 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { Card, CardContent } from "@/components/ui/card"
-import { AdminLoginHeader } from "./AdminLoginHeader"
-import { verifyAdminAccess } from "./useAdminAuth"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 
 export function AdminLoginForm() {
   const [email, setEmail] = useState("")
@@ -53,43 +52,91 @@ export function AdminLoginForm() {
     setIsLoading(true)
 
     try {
-      // First check if there's an existing session
-      const { data: { session: existingSession } } = await supabase.auth.getSession()
+      // First clear any existing session
+      await supabase.auth.signOut()
       
-      if (existingSession) {
-        try {
-          // Verify if the existing session is for a super admin
-          const adminData = await verifyAdminAccess(existingSession.user.id)
-          if (adminData.is_super_admin) {
-            // If verification passes, use existing session
-            toast({
-              title: "Session active",
-              description: "Utilisation de la session existante",
-            })
-            navigate("/super-admin/admin")
-            return
-          }
-        } catch (error) {
-          // Only sign out if verification fails
-          console.log("Existing session is not a super admin, proceeding with login")
-        }
-      }
-
-      // If no valid existing session, proceed with login
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       })
 
       if (signInError) {
-        throw new Error('Login failed')
+        console.error('Login error:', signInError)
+        toast({
+          title: "Échec de la connexion",
+          description: "Email ou mot de passe incorrect",
+          variant: "destructive",
+        })
+        return
       }
 
       if (!data.user) {
-        throw new Error('No user data returned')
+        toast({
+          title: "Échec de la connexion",
+          description: "Email ou mot de passe incorrect",
+          variant: "destructive",
+        })
+        return
       }
 
-      await verifyAdminAccess(data.user.id)
+      // Check if the user is a super admin in the administrators table
+      const { data: adminData, error: adminError } = await supabase
+        .from('administrators')
+        .select('is_super_admin, agency_id')
+        .eq('id', data.user.id)
+        .single()
+
+      if (adminError || !adminData) {
+        console.error('Admin verification error:', adminError)
+        toast({
+          title: "Accès refusé",
+          description: "Email ou mot de passe incorrect",
+          variant: "destructive",
+        })
+        await supabase.auth.signOut()
+        return
+      }
+
+      // If not a super admin, check agency status
+      if (!adminData.is_super_admin && adminData.agency_id) {
+        const { data: agencyData, error: agencyError } = await supabase
+          .from('agencies')
+          .select('status')
+          .eq('id', adminData.agency_id)
+          .single()
+
+        if (agencyError || !agencyData) {
+          console.error('Agency verification error:', agencyError)
+          toast({
+            title: "Erreur de vérification",
+            description: "Impossible de vérifier le statut de l'agence",
+            variant: "destructive",
+          })
+          await supabase.auth.signOut()
+          return
+        }
+
+        if (agencyData.status === 'blocked') {
+          toast({
+            title: "Accès refusé",
+            description: "Votre agence est actuellement bloquée. Veuillez contacter l'administrateur.",
+            variant: "destructive",
+          })
+          await supabase.auth.signOut()
+          return
+        }
+      }
+
+      if (!adminData.is_super_admin) {
+        console.error('User is not a super admin')
+        toast({
+          title: "Accès refusé",
+          description: "Email ou mot de passe incorrect",
+          variant: "destructive",
+        })
+        await supabase.auth.signOut()
+        return
+      }
 
       toast({
         title: "Connexion réussie",
@@ -98,14 +145,12 @@ export function AdminLoginForm() {
 
       navigate("/super-admin/admin")
     } catch (error: any) {
-      console.error('Login error:', error)
+      console.error('General error:', error)
       toast({
         title: "Erreur de connexion",
         description: "Email ou mot de passe incorrect",
         variant: "destructive",
       })
-      // Only sign out if there was an error during login
-      await supabase.auth.signOut()
     } finally {
       setIsLoading(false)
     }
@@ -119,7 +164,15 @@ export function AdminLoginForm() {
       }}
     >
       <Card className="w-full max-w-md shadow-xl bg-white/95 backdrop-blur-sm">
-        <AdminLoginHeader />
+        <CardHeader className="space-y-2">
+          <div className="flex items-center justify-center text-primary mb-4">
+            <Shield className="h-12 w-12" />
+          </div>
+          <CardTitle className="text-2xl font-bold text-center">Super Admin</CardTitle>
+          <CardDescription className="text-center">
+            Accès réservé aux super administrateurs
+          </CardDescription>
+        </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
