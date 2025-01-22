@@ -1,5 +1,11 @@
+import { PublicNavbar } from "@/components/home/PublicNavbar"
 import { LoginFormContainer } from "@/components/auth/LoginFormContainer"
 
 export default function Login() {
-  return <LoginFormContainer />
+  return (
+    <>
+      <PublicNavbar />
+      <LoginFormContainer />
+    </>
+  )
 }
