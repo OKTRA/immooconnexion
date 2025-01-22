@@ -18,11 +18,6 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { Label } from "@/components/ui/label"
 
-interface UnitSearchFieldProps {
-  unitId?: string
-  onChange: (unitId: string) => void
-}
-
 interface ApartmentUnit {
   id: string
   unit_number: string
@@ -33,56 +28,81 @@ interface ApartmentUnit {
   }
 }
 
+interface UnitSearchFieldProps {
+  unitId?: string
+  onChange: (unitId: string) => void
+}
+
 export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
   const [open, setOpen] = useState(false)
   
   const { data: units = [], isLoading } = useQuery({
     queryKey: ["available-units"],
     queryFn: async () => {
-      const { data: profile } = await supabase.auth.getUser()
-      if (!profile.user) throw new Error("Non authentifié")
+      try {
+        const { data: profile } = await supabase.auth.getUser()
+        if (!profile.user) throw new Error("Non authentifié")
 
-      const { data: userProfile } = await supabase
-        .from("profiles")
-        .select("agency_id")
-        .eq("id", profile.user.id)
-        .single()
+        const { data: userProfile } = await supabase
+          .from("profiles")
+          .select("agency_id")
+          .eq("id", profile.user.id)
+          .maybeSingle()
 
-      if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
+        if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
 
-      const { data, error } = await supabase
-        .from("apartment_units")
-        .select(`
-          id,
-          unit_number,
-          area,
-          floor_number,
-          apartment:apartments (
-            name
-          )
-        `)
-        .eq("status", "available")
-        .eq("apartments.agency_id", userProfile.agency_id)
+        console.log("Fetching units for agency:", userProfile.agency_id)
 
-      if (error) {
-        console.error("Error fetching units:", error)
+        const { data, error } = await supabase
+          .from("apartment_units")
+          .select(`
+            id,
+            unit_number,
+            area,
+            floor_number,
+            apartment:apartments (
+              name
+            )
+          `)
+          .eq("status", "available")
+          .eq("apartments.agency_id", userProfile.agency_id)
+
+        if (error) {
+          console.error("Error fetching units:", error)
+          throw error
+        }
+
+        console.log("Fetched units:", data)
+        
+        if (!data) return []
+
+        return data.map(unit => ({
+          id: unit.id,
+          unit_number: unit.unit_number,
+          area: unit.area,
+          floor_number: unit.floor_number,
+          apartment: {
+            name: unit.apartment?.name || ''
+          }
+        })) as ApartmentUnit[]
+      } catch (error) {
+        console.error("Error in useQuery:", error)
         return []
       }
-      
-      return (data || []).map(unit => ({
-        id: unit.id,
-        unit_number: unit.unit_number,
-        area: unit.area,
-        floor_number: unit.floor_number,
-        apartment: {
-          name: unit.apartment?.name || ''
-        }
-      })) as ApartmentUnit[]
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   })
 
   const selectedUnit = units.find((unit) => unit.id === unitId)
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center space-x-2">
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary" />
+        <span>Chargement des unités...</span>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
