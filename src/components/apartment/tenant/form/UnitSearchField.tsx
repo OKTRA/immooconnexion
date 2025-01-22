@@ -17,16 +17,7 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { Label } from "@/components/ui/label"
-
-interface ApartmentUnit {
-  id: string
-  unit_number: string
-  area?: number | null
-  floor_number?: number | null
-  apartment: {
-    name: string
-  }
-}
+import { ApartmentUnit } from "@/types/apartment"
 
 interface UnitSearchFieldProps {
   unitId?: string
@@ -74,8 +65,6 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
 
         console.log("Fetched units:", data)
         
-        if (!data) return []
-
         return data.map(unit => ({
           id: unit.id,
           unit_number: unit.unit_number,
@@ -121,7 +110,7 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
               }}
             >
               {selectedUnit ? 
-                `Unité ${selectedUnit.unit_number} - ${selectedUnit.apartment.name}` 
+                `${selectedUnit.apartment.name} - Unité ${selectedUnit.unit_number}` 
                 : "Sélectionner une unité..."}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
@@ -148,7 +137,7 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
                     />
                     <div className="flex flex-col">
                       <div>
-                        Unité {unit.unit_number} - {unit.apartment.name}
+                        {unit.apartment.name} - Unité {unit.unit_number}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {unit.area && `${unit.area}m² | `}
