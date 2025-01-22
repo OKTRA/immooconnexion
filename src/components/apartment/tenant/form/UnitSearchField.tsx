@@ -60,7 +60,7 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
             unit_number,
             area,
             floor_number,
-            apartment:apartments (
+            apartment:apartments!inner (
               name
             )
           `)
@@ -84,7 +84,7 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
           apartment: {
             name: unit.apartment?.name || ''
           }
-        })) as ApartmentUnit[]
+        }))
       } catch (error) {
         console.error("Error in useQuery:", error)
         return []
