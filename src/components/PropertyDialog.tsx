@@ -69,13 +69,12 @@ export function PropertyDialog({
         `)
         .eq("agency_id", userProfile.agency_id)
 
-      // Map the nested owner data to match PropertyOwner type
-      return (agencyOwners?.map(ao => ({
+      return (agencyOwners || []).map(ao => ({
         id: ao.owner.id,
         first_name: ao.owner.first_name,
         last_name: ao.owner.last_name,
         phone_number: ao.owner.phone_number
-      })) || []) as PropertyOwner[]
+      })) as PropertyOwner[]
     }
   })
 

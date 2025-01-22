@@ -5,6 +5,20 @@ import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Skeleton } from "@/components/ui/skeleton"
 
+interface Contract {
+  id: string;
+  montant: number;
+  type: string;
+  created_at: string;
+  tenant_id: {
+    nom: string;
+    prenom: string;
+  };
+  property_id: {
+    bien: string;
+  };
+}
+
 export function RecentActivities() {
   const { data: userProfile } = useQuery({
     queryKey: ["user-profile"],
@@ -16,7 +30,7 @@ export function RecentActivities() {
         .from('profiles')
         .select('agency_id')
         .eq('id', user.id)
-        .maybeSingle()
+        .single()
 
       if (error) throw error
       if (!profile) throw new Error("Profil non trouvé")
@@ -31,7 +45,6 @@ export function RecentActivities() {
     queryFn: async () => {
       if (!userProfile?.agency_id) return []
       
-      // Optimisation: Sélection uniquement des champs nécessaires
       const { data: contracts, error } = await supabase
         .from("contracts")
         .select(`
@@ -52,7 +65,7 @@ export function RecentActivities() {
         .limit(5)
 
       if (error) throw error
-      return contracts
+      return contracts as Contract[]
     },
     enabled: !!userProfile?.agency_id,
     staleTime: 1 * 60 * 1000, // Cache pendant 1 minute

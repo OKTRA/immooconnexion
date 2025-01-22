@@ -26,9 +26,13 @@ export function useSubscriptionLimits() {
           current_tenants_count,
           current_profiles_count,
           subscription_plan:subscription_plans (
+            id,
+            name,
+            price,
             max_properties,
             max_tenants,
-            max_users
+            max_users,
+            features
           )
         `)
         .eq('id', profile.agency_id)
@@ -64,19 +68,8 @@ export function useSubscriptionLimits() {
     }
   };
 
-  const checkDowngradeEligibility = (newPlan: SubscriptionPlan) => {
-    if (!limits) return false;
-
-    return (
-      (newPlan.max_properties === -1 || limits.current_properties <= newPlan.max_properties) &&
-      (newPlan.max_tenants === -1 || limits.current_tenants <= newPlan.max_tenants) &&
-      (newPlan.max_users === -1 || limits.current_users <= newPlan.max_users)
-    );
-  };
-
   return {
     limits,
-    checkLimitReached,
-    checkDowngradeEligibility
+    checkLimitReached
   };
 }
