@@ -1,11 +1,5 @@
-import { PublicNavbar } from "@/components/home/PublicNavbar"
-import { LoginForm } from "@/components/auth/LoginForm"
+import { LoginFormContainer } from "@/components/auth/LoginFormContainer"
 
 export default function Login() {
-  return (
-    <>
-      <PublicNavbar />
-      <LoginForm />
-    </>
-  )
+  return <LoginFormContainer />
 }
