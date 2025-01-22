@@ -8,6 +8,7 @@ import { LeaseFields } from "./form/LeaseFields";
 import { PhotoUpload } from "./form/PhotoUpload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { UnitSearchField } from "./form/UnitSearchField";
 
 export interface TenantFormData {
   first_name: string;
@@ -23,6 +24,7 @@ export interface TenantFormData {
   payment_frequency: "monthly" | "weekly" | "daily" | "quarterly" | "yearly";
   duration_type: "fixed" | "month_to_month" | "yearly";
   photos: FileList | null;
+  emergency_contact_phone?: string;
 }
 
 export interface ApartmentTenantFormProps {
@@ -46,7 +48,8 @@ const initialFormData: TenantFormData = {
   end_date: "",
   payment_frequency: "monthly",
   duration_type: "fixed",
-  photos: null
+  photos: null,
+  emergency_contact_phone: ""
 };
 
 export function ApartmentTenantForm({
@@ -105,6 +108,7 @@ export function ApartmentTenantForm({
         birth_date: formData.birth_date || null,
         photo_id_url: photoUrl,
         profession: formData.profession || null,
+        emergency_contact_phone: formData.emergency_contact_phone || null,
         agency_id: profile.agency_id,
         unit_id: unitId
       };
@@ -157,24 +161,46 @@ export function ApartmentTenantForm({
   return (
     <div className="max-h-[600px] overflow-y-auto px-4">
       <form onSubmit={handleSubmit} className="space-y-8">
-        <ContactFields formData={formData} setFormData={setFormData} />
-        
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="profession">Profession</Label>
-            <Input
-              id="profession"
-              value={formData.profession}
-              onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
-              placeholder="Profession du locataire"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <ContactFields formData={formData} setFormData={setFormData} />
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="profession">Profession</Label>
+                <Input
+                  id="profession"
+                  value={formData.profession}
+                  onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
+                  placeholder="Profession du locataire"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="emergency_contact_phone">Numéro d'urgence</Label>
+                <Input
+                  id="emergency_contact_phone"
+                  value={formData.emergency_contact_phone}
+                  onChange={(e) => setFormData({ ...formData, emergency_contact_phone: e.target.value })}
+                  placeholder="Numéro à contacter en cas d'urgence"
+                  type="tel"
+                />
+              </div>
+            </div>
+
+            <PhotoUpload onPhotosSelected={(files) => setFormData({ ...formData, photos: files })} />
+          </div>
+
+          <div className="space-y-6">
+            <UnitSearchField
+              unitId={unitId}
+              onChange={(id) => setFormData({ ...formData, unit_id: id })}
             />
+            <LeaseFields formData={formData} setFormData={setFormData} />
           </div>
         </div>
 
-        <PhotoUpload onPhotosSelected={(files) => setFormData({ ...formData, photos: files })} />
-        <LeaseFields formData={formData} setFormData={setFormData} />
-
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 pt-4">
           <Button variant="outline" type="button" onClick={() => onSuccess()} disabled={isSubmitting}>
             Annuler
           </Button>
