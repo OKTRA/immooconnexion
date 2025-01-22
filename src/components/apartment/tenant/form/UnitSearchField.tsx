@@ -33,7 +33,7 @@ interface ApartmentUnit {
 export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
   const [open, setOpen] = useState(false)
   
-  const { data: units = [] } = useQuery<ApartmentUnit[]>({
+  const { data: units = [], isLoading } = useQuery<ApartmentUnit[]>({
     queryKey: ["available-units"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -46,9 +46,13 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
           )
         `)
         .eq("status", "available")
+        .maybeSingle()
 
       if (error) throw error
-      return data as ApartmentUnit[]
+      
+      // Ensure we return an array even if data is null
+      const unitsArray = data ? [data] : []
+      return unitsArray as ApartmentUnit[]
     }
   })
 
@@ -65,7 +69,7 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
             className="w-full justify-between"
           >
             {selectedUnit ? 
-              `${selectedUnit.unit_number} - ${selectedUnit.apartment?.name || ''}` 
+              `${selectedUnit.unit_number} ${selectedUnit.apartment?.name || ''}` 
               : "Sélectionner une unité..."
             }
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -94,6 +98,11 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
                   {unit.unit_number} {unit.apartment?.name && `- ${unit.apartment.name}`}
                 </CommandItem>
               ))}
+              {!isLoading && units.length === 0 && (
+                <CommandItem value="" disabled>
+                  Aucune unité disponible
+                </CommandItem>
+              )}
             </CommandGroup>
           </Command>
         </PopoverContent>
