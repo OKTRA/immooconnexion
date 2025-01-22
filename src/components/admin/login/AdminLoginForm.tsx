@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { Card, CardContent } from "@/components/ui/card"
 import { AdminLoginHeader } from "./AdminLoginHeader"
-import { verifyAdminAccess } from "./useAdminAuth"
 
 export function AdminLoginForm() {
   const [email, setEmail] = useState("")
@@ -53,43 +52,48 @@ export function AdminLoginForm() {
     setIsLoading(true)
 
     try {
-      // First check if there's an existing session
-      const { data: { session: existingSession } } = await supabase.auth.getSession()
+      await supabase.auth.signOut()
       
-      if (existingSession) {
-        try {
-          // Verify if the existing session is for a super admin
-          const adminData = await verifyAdminAccess(existingSession.user.id)
-          if (adminData.is_super_admin) {
-            // If verification passes, use existing session
-            toast({
-              title: "Session active",
-              description: "Utilisation de la session existante",
-            })
-            navigate("/super-admin/admin")
-            return
-          }
-        } catch (error) {
-          // Only sign out if verification fails
-          console.log("Existing session is not a super admin, proceeding with login")
-        }
-      }
-
-      // If no valid existing session, proceed with login
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       })
 
-      if (signInError) {
-        throw new Error('Login failed')
-      }
+      if (signInError) throw signInError
 
       if (!data.user) {
-        throw new Error('No user data returned')
+        throw new Error("No user data returned")
       }
 
-      await verifyAdminAccess(data.user.id)
+      const { data: adminData, error: adminError } = await supabase
+        .from('administrators')
+        .select('is_super_admin, agency_id')
+        .eq('id', data.user.id)
+        .single()
+
+      if (adminError || !adminData) {
+        throw new Error("Admin verification failed")
+      }
+
+      if (!adminData.is_super_admin) {
+        throw new Error("Not a super admin")
+      }
+
+      if (!adminData.is_super_admin && adminData.agency_id) {
+        const { data: agencyData, error: agencyError } = await supabase
+          .from('agencies')
+          .select('status')
+          .eq('id', adminData.agency_id)
+          .single()
+
+        if (agencyError || !agencyData) {
+          throw new Error("Agency verification failed")
+        }
+
+        if (agencyData.status === 'blocked') {
+          throw new Error("Agency is blocked")
+        }
+      }
 
       toast({
         title: "Connexion réussie",
@@ -104,7 +108,6 @@ export function AdminLoginForm() {
         description: "Email ou mot de passe incorrect",
         variant: "destructive",
       })
-      // Only sign out if there was an error during login
       await supabase.auth.signOut()
     } finally {
       setIsLoading(false)
