@@ -8,4 +8,5 @@ export interface SubscriptionPlan {
   features: string[];
   created_at?: string;
   updated_at?: string;
+  duration_months?: number;
 }

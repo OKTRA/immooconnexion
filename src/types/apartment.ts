@@ -23,7 +23,6 @@ export interface ApartmentUnitFormData {
   commission_percentage?: number | null;
   store_count?: number;
   kitchen_count?: number;
-  bathroom_count?: number;
   has_pool?: boolean;
   living_rooms?: number;
   bedrooms?: number;
@@ -43,7 +42,6 @@ export interface ApartmentUnit {
   commission_percentage?: number;
   store_count?: number;
   kitchen_count?: number;
-  bathroom_count?: number;
   has_pool?: boolean;
   living_rooms?: number;
   bedrooms?: number;
@@ -86,6 +84,15 @@ export interface ApartmentTenant {
   created_at?: string;
   updated_at?: string;
   apartment_leases?: ApartmentLease[];
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  emergency_contact_relationship?: string;
+  apartment_units?: {
+    unit_number: string;
+    apartment: {
+      name: string;
+    };
+  };
 }
 
 export interface ApartmentInspection {
