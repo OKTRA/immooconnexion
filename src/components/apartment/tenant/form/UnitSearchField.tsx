@@ -29,7 +29,7 @@ interface ApartmentUnit {
   unit_number: string
   apartment: {
     name: string
-  }
+  } | null
 }
 
 export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
@@ -49,14 +49,15 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
         `)
         .eq("status", "available")
 
-      if (error) throw error
+      if (error) {
+        console.error("Error fetching units:", error)
+        throw error
+      }
       
       return (data || []).map(unit => ({
         id: unit.id,
         unit_number: unit.unit_number,
-        apartment: {
-          name: unit.apartment?.name || ''
-        }
+        apartment: unit.apartment
       })) as ApartmentUnit[]
     }
   })
@@ -116,7 +117,7 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
           <div className="space-y-2">
             <Label>Appartement</Label>
             <Input
-              value={selectedUnit.apartment.name}
+              value={selectedUnit.apartment?.name || "Non spécifié"}
               readOnly
               className="bg-muted"
             />
