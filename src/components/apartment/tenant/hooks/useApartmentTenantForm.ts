@@ -79,25 +79,20 @@ export function useApartmentTenantForm({
         emergency_contact_phone: formData.emergency_contact_phone,
         emergency_contact_relationship: formData.emergency_contact_relationship,
         agency_id: profile.agency_id,
-        unit_id: formData.unit_id
+        unit_id: formData.unit_id,
+        status: 'active'
       }
 
-      if (initialData?.id) {
-        const { error: updateError } = await supabase
-          .from("apartment_tenants")
-          .update(tenantData)
-          .eq("id", initialData.id)
+      // Start a transaction using multiple operations
+      const { data: tenant, error: tenantError } = await supabase
+        .from("apartment_tenants")
+        .upsert(initialData?.id ? { id: initialData.id, ...tenantData } : tenantData)
+        .select()
+        .single()
 
-        if (updateError) throw updateError
-      } else {
-        const { error: insertError } = await supabase
-          .from("apartment_tenants")
-          .insert([tenantData])
+      if (tenantError) throw tenantError
 
-        if (insertError) throw insertError
-      }
-
-      // Mettre à jour le statut de l'unité
+      // Update unit status to occupied
       const { error: unitError } = await supabase
         .from("apartment_units")
         .update({ status: "occupied" })
