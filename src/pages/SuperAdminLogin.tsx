@@ -1,4 +1,4 @@
-import { AdminLoginForm } from "@/components/admin/AdminLoginForm"
+import { AdminLoginForm } from "@/components/admin/login/AdminLoginForm"
 import { PublicNavbar } from "@/components/home/PublicNavbar"
 
 const SuperAdminLogin = () => {
