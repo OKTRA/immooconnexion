@@ -22,10 +22,18 @@ interface UnitSearchFieldProps {
   onChange: (unitId: string) => void;
 }
 
+interface ApartmentUnit {
+  id: string;
+  unit_number: string;
+  apartment: {
+    name: string;
+  } | null;
+}
+
 export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
   const [open, setOpen] = useState(false)
   
-  const { data: units = [] } = useQuery({
+  const { data: units = [] } = useQuery<ApartmentUnit[]>({
     queryKey: ["available-units"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -40,7 +48,7 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
         .eq("status", "available")
 
       if (error) throw error
-      return data || []
+      return data as ApartmentUnit[]
     }
   })
 
@@ -63,7 +71,7 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
+        <PopoverContent className="w-[400px] p-0">
           <Command>
             <CommandInput placeholder="Rechercher une unité..." />
             <CommandEmpty>Aucune unité trouvée.</CommandEmpty>
@@ -72,8 +80,8 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
                 <CommandItem
                   key={unit.id}
                   value={unit.id}
-                  onSelect={() => {
-                    onChange(unit.id)
+                  onSelect={(currentValue) => {
+                    onChange(currentValue)
                     setOpen(false)
                   }}
                 >
