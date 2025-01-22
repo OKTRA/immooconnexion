@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/popover"
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase } from "@/lib/supabase"
 
 interface UnitSearchFieldProps {
   unitId?: string
@@ -49,7 +49,14 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
 
       if (error) throw error
       
-      return (data || []) as ApartmentUnit[]
+      // Ensure we return an array of properly formatted units
+      return (data || []).map(unit => ({
+        id: unit.id,
+        unit_number: unit.unit_number,
+        apartment: {
+          name: unit.apartment?.name || ''
+        }
+      })) as ApartmentUnit[]
     }
   })
 
