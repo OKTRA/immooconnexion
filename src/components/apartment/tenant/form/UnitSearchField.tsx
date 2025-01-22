@@ -16,7 +16,6 @@ import {
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 interface UnitSearchFieldProps {
@@ -52,14 +51,13 @@ export function UnitSearchField({ unitId, onChange }: UnitSearchFieldProps) {
           )
         `)
         .eq("status", "available")
-        .single()
 
       if (error) {
         console.error("Error fetching units:", error)
         return []
       }
       
-      return data ? [data] as ApartmentUnit[] : []
+      return data as ApartmentUnit[]
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   })
