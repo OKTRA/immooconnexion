@@ -23,9 +23,9 @@ export default function UnitDetails() {
             id,
             name
           ),
-          current_lease:apartment_leases!inner (
+          current_lease:apartment_leases (
             id,
-            tenant:apartment_tenants!inner (
+            tenant:apartment_tenants (
               id,
               first_name,
               last_name,
@@ -42,7 +42,7 @@ export default function UnitDetails() {
           )
         `)
         .eq("id", unitId)
-        .eq("apartment_leases.status", "active")
+        .eq("current_lease.status", "active")
         .maybeSingle()
 
       if (error) {
@@ -54,6 +54,7 @@ export default function UnitDetails() {
         throw new Error("Unité non trouvée")
       }
 
+      console.log("Unit data fetched:", data)
       return data
     },
     enabled: !!unitId
