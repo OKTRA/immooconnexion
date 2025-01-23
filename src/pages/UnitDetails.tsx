@@ -42,7 +42,6 @@ export default function UnitDetails() {
           )
         `)
         .eq("id", unitId)
-        .eq("current_lease.status", "active")
         .maybeSingle()
 
       if (error) {
