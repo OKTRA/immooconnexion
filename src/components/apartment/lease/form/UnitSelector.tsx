@@ -13,25 +13,30 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { UseFormReturn } from "react-hook-form"
-import { ApartmentUnitFormData } from "../../unit-dialog/types"
 
 interface UnitSelectorProps {
   form: UseFormReturn<any>
-  units: {
+  units?: {
     id: string
     unit_number: string
     rent_amount: number
+    status?: string
     apartment: {
       id: string
       name: string
     }
   }[]
-  isLoading: boolean
+  isLoading?: boolean
 }
 
 export function UnitSelector({ form, units = [], isLoading }: UnitSelectorProps) {
   // Filter to only show available units
   const availableUnits = units.filter(unit => unit.status === 'available')
+
+  if (!form) {
+    console.error("Form object is missing in UnitSelector")
+    return null
+  }
 
   return (
     <FormField

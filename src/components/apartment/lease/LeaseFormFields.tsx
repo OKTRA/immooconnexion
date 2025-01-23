@@ -3,6 +3,7 @@ import { DateFields } from "./form/DateFields"
 import { PaymentFields } from "./form/PaymentFields"
 import { FrequencyFields } from "./form/FrequencyFields"
 import { UnitSelector } from "./form/UnitSelector"
+import { useForm } from "react-hook-form"
 
 interface LeaseFormFieldsProps {
   formData: {
@@ -30,45 +31,22 @@ export function LeaseFormFields({
   onCancel,
   disabled = false
 }: LeaseFormFieldsProps) {
+  const form = useForm({
+    defaultValues: formData
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     await onSubmit()
-  }
-
-  const isFormValid = () => {
-    // Ajout de logs pour déboguer
-    console.log("Form validation check:", {
-      unit_id: formData.unit_id,
-      start_date: formData.start_date,
-      rent_amount: formData.rent_amount,
-      deposit_amount: formData.deposit_amount,
-      payment_frequency: formData.payment_frequency,
-      duration_type: formData.duration_type,
-      payment_type: formData.payment_type,
-      end_date: formData.end_date,
-    });
-
-    const valid = !!(
-      formData.unit_id &&
-      formData.start_date &&
-      formData.rent_amount &&
-      formData.deposit_amount >= 0 &&
-      formData.payment_frequency &&
-      formData.duration_type &&
-      formData.payment_type &&
-      (formData.duration_type !== 'fixed' || formData.end_date)
-    );
-
-    console.log("Form is valid:", valid);
-    return valid;
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {!formData.unit_id && (
         <UnitSelector
-          value={formData.unit_id}
-          onChange={(value) => setFormData({ ...formData, unit_id: value })}
+          form={form}
+          units={[]} // You'll need to pass your units data here
+          isLoading={false}
         />
       )}
       
@@ -97,7 +75,7 @@ export function LeaseFormFields({
         </Button>
         <Button 
           type="submit" 
-          disabled={disabled}
+          disabled={disabled || isSubmitting}
         >
           {isSubmitting ? "Chargement..." : "Créer le bail"}
         </Button>
