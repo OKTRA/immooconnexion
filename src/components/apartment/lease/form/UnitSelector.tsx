@@ -1,5 +1,3 @@
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
 import {
   Select,
   SelectContent,
@@ -26,7 +24,7 @@ interface UnitSelectorProps {
   isLoading: boolean;
 }
 
-export function UnitSelector({ value, onChange, units, isLoading }: UnitSelectorProps) {
+export function UnitSelector({ value, onChange, units = [], isLoading }: UnitSelectorProps) {
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -47,7 +45,7 @@ export function UnitSelector({ value, onChange, units, isLoading }: UnitSelector
           <SelectValue placeholder="Sélectionner une unité disponible" />
         </SelectTrigger>
         <SelectContent>
-          {units.length === 0 ? (
+          {(!units || units.length === 0) ? (
             <SelectItem value="" disabled>
               Aucune unité disponible
             </SelectItem>
