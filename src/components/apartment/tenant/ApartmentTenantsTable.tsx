@@ -2,9 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { ApartmentTenant } from "@/types/apartment"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
-import { Button } from "@/components/ui/button"
-import { Eye, Pencil, Trash2 } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { TenantActionButtons } from "@/components/apartment/tenant/TenantActionButtons"
 import { useToast } from "@/hooks/use-toast"
 
 interface ApartmentTenantsTableProps {
@@ -14,7 +12,6 @@ interface ApartmentTenantsTableProps {
 }
 
 export function ApartmentTenantsTable({ onEdit, onDelete, isLoading }: ApartmentTenantsTableProps) {
-  const navigate = useNavigate()
   const { toast } = useToast()
   
   const { data: tenants = [] } = useQuery({
@@ -82,6 +79,11 @@ export function ApartmentTenantsTable({ onEdit, onDelete, isLoading }: Apartment
     }
   }
 
+  const handleInspection = (tenant: ApartmentTenant) => {
+    // Cette fonction sera implémentée plus tard pour gérer les inspections
+    console.log("Inspection for tenant:", tenant)
+  }
+
   return (
     <ResponsiveTable>
       <ResponsiveTable.Header>
@@ -95,50 +97,34 @@ export function ApartmentTenantsTable({ onEdit, onDelete, isLoading }: Apartment
         </ResponsiveTable.Row>
       </ResponsiveTable.Header>
       <ResponsiveTable.Body>
-        {tenants.map((tenant) => (
-          <ResponsiveTable.Row key={tenant.id}>
-            <ResponsiveTable.Cell>
-              {tenant.first_name} {tenant.last_name}
-            </ResponsiveTable.Cell>
-            <ResponsiveTable.Cell>{tenant.email}</ResponsiveTable.Cell>
-            <ResponsiveTable.Cell>{tenant.phone_number}</ResponsiveTable.Cell>
-            <ResponsiveTable.Cell>
-              {tenant.apartment_units?.apartment?.name} - Unité {tenant.apartment_units?.unit_number}
-            </ResponsiveTable.Cell>
-            <ResponsiveTable.Cell>
-              {tenant.apartment_leases?.[0]?.status || "Inactif"}
-            </ResponsiveTable.Cell>
-            <ResponsiveTable.Cell className="text-right">
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => navigate(`/agence/tenants/${tenant.id}`)}
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-                {onEdit && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEdit(tenant)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                )}
-                {onDelete && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(tenant.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </ResponsiveTable.Cell>
-          </ResponsiveTable.Row>
-        ))}
+        {tenants.map((tenant) => {
+          const currentLease = tenant.apartment_leases?.find(lease => lease.status === 'active')
+          
+          return (
+            <ResponsiveTable.Row key={tenant.id}>
+              <ResponsiveTable.Cell>
+                {tenant.first_name} {tenant.last_name}
+              </ResponsiveTable.Cell>
+              <ResponsiveTable.Cell>{tenant.email}</ResponsiveTable.Cell>
+              <ResponsiveTable.Cell>{tenant.phone_number}</ResponsiveTable.Cell>
+              <ResponsiveTable.Cell>
+                {tenant.apartment_units?.apartment?.name} - Unité {tenant.apartment_units?.unit_number}
+              </ResponsiveTable.Cell>
+              <ResponsiveTable.Cell>
+                {currentLease?.status || "Inactif"}
+              </ResponsiveTable.Cell>
+              <ResponsiveTable.Cell className="text-right">
+                <TenantActionButtons
+                  tenant={tenant}
+                  currentLease={currentLease}
+                  onEdit={() => onEdit?.(tenant)}
+                  onDelete={() => handleDelete(tenant.id)}
+                  onInspection={() => handleInspection(tenant)}
+                />
+              </ResponsiveTable.Cell>
+            </ResponsiveTable.Row>
+          )
+        })}
       </ResponsiveTable.Body>
     </ResponsiveTable>
   )
