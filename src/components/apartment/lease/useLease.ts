@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { LeaseFormData, PaymentFrequency, DurationType, LeaseStatus, PaymentType } from "./types"
+import { LeaseFormData } from "./types"
 
 export function useLease(unitId: string | undefined, tenantId: string | undefined) {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -52,16 +52,14 @@ export function useLease(unitId: string | undefined, tenantId: string | undefine
         throw new Error("Aucune agence associée à ce profil")
       }
 
-      const endDate = formData.duration_type === "fixed" ? formData.end_date : null
-
-      // Create the lease
+      // Create the lease with a simplified query
       const { data: lease, error: leaseError } = await supabase
         .from('apartment_leases')
         .insert({
           tenant_id: tenantId,
           unit_id: unitId,
           start_date: formData.start_date,
-          end_date: endDate,
+          end_date: formData.duration_type === "fixed" ? formData.end_date : null,
           rent_amount: formData.rent_amount,
           deposit_amount: formData.deposit_amount,
           payment_frequency: formData.payment_frequency,
@@ -71,7 +69,7 @@ export function useLease(unitId: string | undefined, tenantId: string | undefine
           agency_id: profile.agency_id,
           initial_fees_paid: false
         })
-        .select()
+        .select('id')
         .single()
 
       if (leaseError) throw leaseError
@@ -80,6 +78,8 @@ export function useLease(unitId: string | undefined, tenantId: string | undefine
         title: "Succès",
         description: "Le bail a été créé avec succès",
       })
+
+      return lease
     } catch (error: any) {
       console.error('Error:', error)
       toast({
@@ -87,6 +87,7 @@ export function useLease(unitId: string | undefined, tenantId: string | undefine
         description: error.message || "Une erreur est survenue lors de la création du bail",
         variant: "destructive",
       })
+      throw error
     } finally {
       setIsSubmitting(false)
     }
