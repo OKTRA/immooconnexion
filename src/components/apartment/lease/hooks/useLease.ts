@@ -3,7 +3,7 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { LeaseFormData } from "../types"
 
-export function useLease(unitId: string | undefined, tenantId: string) {
+export function useLease(unitId: string | undefined, tenantId: string | undefined) {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<LeaseFormData>({
@@ -19,25 +19,31 @@ export function useLease(unitId: string | undefined, tenantId: string) {
 
   const handleSubmit = async () => {
     try {
-      // Validate required UUIDs
-      if (!tenantId || !formData.unit_id) {
-        throw new Error("Tenant ID and Unit ID are required")
+      // Validation des UUIDs requis
+      if (!tenantId?.trim()) {
+        throw new Error("ID du locataire manquant")
+      }
+
+      if (!formData.unit_id?.trim()) {
+        throw new Error("ID de l'unité manquant")
+      }
+
+      // Récupérer l'agency_id de l'utilisateur connecté
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Utilisateur non authentifié")
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("agency_id")
+        .eq("id", user.id)
+        .maybeSingle()
+
+      if (!profile?.agency_id) {
+        throw new Error("Agency ID non trouvé")
       }
 
       setIsSubmitting(true)
 
-      const { data: profile } = await supabase.auth.getUser()
-      if (!profile.user) throw new Error("Non authentifié")
-
-      const { data: userProfile } = await supabase
-        .from("profiles")
-        .select("agency_id")
-        .eq("id", profile.user.id)
-        .maybeSingle()
-
-      if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
-
-      // Create the lease
       const { data: lease, error: leaseError } = await supabase
         .from("apartment_leases")
         .insert([
@@ -51,7 +57,7 @@ export function useLease(unitId: string | undefined, tenantId: string) {
             payment_frequency: formData.payment_frequency,
             duration_type: formData.duration_type,
             payment_type: formData.payment_type,
-            agency_id: userProfile.agency_id,
+            agency_id: profile.agency_id,
             status: "active"
           }
         ])
@@ -60,26 +66,13 @@ export function useLease(unitId: string | undefined, tenantId: string) {
 
       if (leaseError) throw leaseError
 
-      // Update the unit status
+      // Mettre à jour le statut de l'unité
       const { error: unitError } = await supabase
         .from("apartment_units")
         .update({ status: "occupied" })
         .eq("id", formData.unit_id)
 
       if (unitError) throw unitError
-
-      // Create tenant_units association
-      const { error: tenantUnitError } = await supabase
-        .from("tenant_units")
-        .insert([
-          {
-            tenant_id: tenantId,
-            unit_id: formData.unit_id,
-            status: "active"
-          }
-        ])
-
-      if (tenantUnitError) throw tenantUnitError
 
       toast({
         title: "Bail créé",
@@ -92,7 +85,7 @@ export function useLease(unitId: string | undefined, tenantId: string) {
       console.error("Error:", error)
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error.message || "Une erreur est survenue",
         variant: "destructive"
       })
     } finally {
