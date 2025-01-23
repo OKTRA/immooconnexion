@@ -15,7 +15,10 @@ import {
 import { UseFormReturn } from "react-hook-form"
 
 interface UnitSelectorProps {
-  form: UseFormReturn<any>
+  form: UseFormReturn<{
+    unit_id: string;
+    [key: string]: any;
+  }>;
   units?: {
     id: string
     unit_number: string
@@ -33,11 +36,6 @@ export function UnitSelector({ form, units = [], isLoading }: UnitSelectorProps)
   // Filter to only show available units
   const availableUnits = units.filter(unit => unit.status === 'available')
 
-  if (!form) {
-    console.error("Form object is missing in UnitSelector")
-    return null
-  }
-
   return (
     <FormField
       control={form.control}
@@ -45,7 +43,7 @@ export function UnitSelector({ form, units = [], isLoading }: UnitSelectorProps)
       render={({ field }) => (
         <FormItem>
           <FormLabel>Unité</FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <Select onValueChange={field.onChange} value={field.value}>
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner une unité" />

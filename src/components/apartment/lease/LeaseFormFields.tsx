@@ -4,6 +4,8 @@ import { PaymentFields } from "./form/PaymentFields"
 import { FrequencyFields } from "./form/FrequencyFields"
 import { UnitSelector } from "./form/UnitSelector"
 import { useForm } from "react-hook-form"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
 interface LeaseFormFieldsProps {
   formData: {
@@ -35,6 +37,41 @@ export function LeaseFormFields({
     defaultValues: formData
   });
 
+  const { data: units = [], isLoading: unitsLoading } = useQuery({
+    queryKey: ['available-units'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("agency_id")
+        .eq("id", user.id)
+        .single()
+
+      if (!profile?.agency_id) throw new Error("Agency ID not found")
+
+      const { data, error } = await supabase
+        .from("apartment_units")
+        .select(`
+          id,
+          unit_number,
+          rent_amount,
+          status,
+          apartment:apartments (
+            id,
+            name
+          )
+        `)
+        .eq("status", "available")
+        .eq("apartments.agency_id", profile.agency_id)
+        .order('unit_number', { ascending: true })
+
+      if (error) throw error
+      return data
+    }
+  })
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     await onSubmit()
@@ -45,8 +82,8 @@ export function LeaseFormFields({
       {!formData.unit_id && (
         <UnitSelector
           form={form}
-          units={[]} // You'll need to pass your units data here
-          isLoading={false}
+          units={units}
+          isLoading={unitsLoading}
         />
       )}
       
