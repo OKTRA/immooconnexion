@@ -1,22 +1,22 @@
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
-import { Button } from "@/components/ui/button"
-import { Edit, Trash2 } from "lucide-react"
-import { ApartmentTenant } from "@/types/apartment"
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2 } from "lucide-react";
+import { ApartmentTenant } from "@/types/apartment";
 
 interface ApartmentTenantsTableProps {
-  onEdit: (tenant: ApartmentTenant) => void
-  onDelete: (id: string) => void
+  onEdit: (tenant: ApartmentTenant) => void;
+  onDelete: (id: string) => void;
 }
 
 export function ApartmentTenantsTable({ onEdit, onDelete }: ApartmentTenantsTableProps) {
   const { data: tenants = [], isLoading } = useQuery({
     queryKey: ["apartment-tenants"],
     queryFn: async () => {
-      console.log("Fetching tenants...")
+      console.log("Fetching tenants...");
       const { data, error } = await supabase
         .from("apartment_tenants")
         .select(`
@@ -31,20 +31,20 @@ export function ApartmentTenantsTable({ onEdit, onDelete }: ApartmentTenantsTabl
             status
           )
         `)
-        .order("created_at", { ascending: false })
+        .order("created_at", { ascending: false });
 
       if (error) {
-        console.error("Error fetching tenants:", error)
-        throw error
+        console.error("Error fetching tenants:", error);
+        throw error;
       }
 
-      console.log("Fetched tenants:", data)
-      return data as ApartmentTenant[]
+      console.log("Fetched tenants:", data);
+      return data as ApartmentTenant[];
     }
-  })
+  });
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   const handleDelete = async (id: string) => {
@@ -54,17 +54,17 @@ export function ApartmentTenantsTable({ onEdit, onDelete }: ApartmentTenantsTabl
         .from("tenant_units")
         .update({ status: "inactive" })
         .eq("tenant_id", id)
-        .eq("status", "active")
+        .eq("status", "active");
 
-      if (unitError) throw unitError
+      if (unitError) throw unitError;
 
       // Then delete the tenant
-      await onDelete(id)
+      await onDelete(id);
     } catch (error) {
-      console.error("Error deleting tenant:", error)
-      throw error
+      console.error("Error deleting tenant:", error);
+      throw error;
     }
-  }
+  };
 
   return (
     <Table>
@@ -121,5 +121,5 @@ export function ApartmentTenantsTable({ onEdit, onDelete }: ApartmentTenantsTabl
         )}
       </TableBody>
     </Table>
-  )
+  );
 }
