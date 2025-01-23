@@ -2,29 +2,24 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { SplitLeaseFormFields } from "./form/SplitLeaseFormFields"
 import { useLease } from "./hooks/useLease"
-
-interface SplitLeaseDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  tenantId: string
-  unitId?: string
-}
+import { SplitLeaseDialogProps } from "./types"
 
 export function SplitLeaseDialog({
   open,
   onOpenChange,
   tenantId,
-  unitId: initialUnitId
+  unitId
 }: SplitLeaseDialogProps) {
   const {
     formData,
     setFormData,
     handleSubmit,
     isSubmitting
-  } = useLease({ 
-    initialUnitId,
+  } = useLease({
+    initialUnitId: unitId,
     tenantId,
-    onSuccess: () => onOpenChange(false)
+    onSuccess: () => onOpenChange(false),
+    isSplitLease: true
   })
 
   return (
