@@ -12,3 +12,10 @@ export interface LeaseFormData {
   duration_type: DurationType;
   payment_type: PaymentType;
 }
+
+export interface CreateLeaseDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  tenantId: string;
+  unitId?: string;
+}

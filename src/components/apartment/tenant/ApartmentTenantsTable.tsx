@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, FileText, CreditCard, ClipboardCheck, FileSignature } from "lucide-react";
+import { Edit, Trash2, FileText, CreditCard, ClipboardCheck, FileSignature, Split } from "lucide-react";
 import { ApartmentTenant } from "@/types/apartment";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LeaseDialog } from "../lease/LeaseDialog";
+import { SplitLeaseDialog } from "../lease/SplitLeaseDialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface ApartmentTenantsTableProps {
@@ -20,6 +20,7 @@ interface ApartmentTenantsTableProps {
 export function ApartmentTenantsTable({ onEdit, onDelete }: ApartmentTenantsTableProps) {
   const [tenantToDelete, setTenantToDelete] = useState<string | null>(null);
   const [showLeaseDialog, setShowLeaseDialog] = useState(false);
+  const [showSplitLeaseDialog, setShowSplitLeaseDialog] = useState(false);
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -56,16 +57,6 @@ export function ApartmentTenantsTable({ onEdit, onDelete }: ApartmentTenantsTabl
 
   const handleDelete = async (id: string) => {
     try {
-      // First update any active tenant_units to inactive
-      const { error: unitError } = await supabase
-        .from("tenant_units")
-        .update({ status: "inactive" })
-        .eq("tenant_id", id)
-        .eq("status", "active");
-
-      if (unitError) throw unitError;
-
-      // Then delete the tenant
       await onDelete(id);
       setTenantToDelete(null);
       
@@ -86,6 +77,11 @@ export function ApartmentTenantsTable({ onEdit, onDelete }: ApartmentTenantsTabl
   const handleCreateLease = (tenantId: string) => {
     setSelectedTenantId(tenantId);
     setShowLeaseDialog(true);
+  };
+
+  const handleCreateSplitLease = (tenantId: string) => {
+    setSelectedTenantId(tenantId);
+    setShowSplitLeaseDialog(true);
   };
 
   if (isLoading) {
@@ -148,6 +144,16 @@ export function ApartmentTenantsTable({ onEdit, onDelete }: ApartmentTenantsTabl
                     <Button
                       variant="ghost"
                       size="icon"
+                      onClick={() => handleCreateSplitLease(tenant.id)}
+                      title="Créer un bail partagé (A/B)"
+                      className="text-blue-500 hover:text-blue-600"
+                    >
+                      <Split className="h-4 w-4" />
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}/payments`)}
                       title="Paiements"
                     >
@@ -201,11 +207,18 @@ export function ApartmentTenantsTable({ onEdit, onDelete }: ApartmentTenantsTabl
       </AlertDialog>
 
       {selectedTenantId && (
-        <LeaseDialog
-          open={showLeaseDialog}
-          onOpenChange={setShowLeaseDialog}
-          tenantId={selectedTenantId}
-        />
+        <>
+          <LeaseDialog
+            open={showLeaseDialog}
+            onOpenChange={setShowLeaseDialog}
+            tenantId={selectedTenantId}
+          />
+          <SplitLeaseDialog
+            open={showSplitLeaseDialog}
+            onOpenChange={setShowSplitLeaseDialog}
+            tenantId={selectedTenantId}
+          />
+        </>
       )}
     </>
   );
