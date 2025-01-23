@@ -67,6 +67,15 @@ export function useApartmentTenantForm({
         }
       }
 
+      // Get unit details for lease creation
+      const { data: unitData, error: unitError } = await supabase
+        .from('apartment_units')
+        .select('rent_amount, deposit_amount')
+        .eq('id', formData.unit_id)
+        .single()
+
+      if (unitError) throw unitError
+
       const tenantData = {
         first_name: formData.firstName,
         last_name: formData.lastName,
@@ -83,7 +92,7 @@ export function useApartmentTenantForm({
         status: 'active'
       }
 
-      // Start a transaction using multiple operations
+      // Create tenant
       const { data: tenant, error: tenantError } = await supabase
         .from("apartment_tenants")
         .upsert(initialData?.id ? { id: initialData.id, ...tenantData } : tenantData)
@@ -93,12 +102,12 @@ export function useApartmentTenantForm({
       if (tenantError) throw tenantError
 
       // Update unit status to occupied
-      const { error: unitError } = await supabase
+      const { error: unitUpdateError } = await supabase
         .from("apartment_units")
         .update({ status: "occupied" })
         .eq("id", formData.unit_id)
 
-      if (unitError) throw unitError
+      if (unitUpdateError) throw unitUpdateError
 
       await queryClient.invalidateQueries({ queryKey: ["apartment-tenants"] })
       await queryClient.invalidateQueries({ queryKey: ["apartment-units"] })
