@@ -4,13 +4,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, FileText, CreditCard, ClipboardCheck } from "lucide-react";
+import { Edit, Trash2, FileText, CreditCard, ClipboardCheck, FileSignature } from "lucide-react";
 import { ApartmentTenant } from "@/types/apartment";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LeaseDialog } from "./LeaseDialog";
-import { useToast } from "@/components/ui/use-toast";
+import { LeaseDialog } from "../lease/LeaseDialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface ApartmentTenantsTableProps {
   onEdit: (tenant: ApartmentTenant) => void;
@@ -140,8 +140,9 @@ export function ApartmentTenantsTable({ onEdit, onDelete }: ApartmentTenantsTabl
                       size="icon"
                       onClick={() => handleCreateLease(tenant.id)}
                       title="Créer un bail"
+                      className="text-green-500 hover:text-green-600"
                     >
-                      <FileText className="h-4 w-4" />
+                      <FileSignature className="h-4 w-4" />
                     </Button>
 
                     <Button
