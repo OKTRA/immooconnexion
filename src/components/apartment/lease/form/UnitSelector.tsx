@@ -46,7 +46,7 @@ export function UnitSelector({ value, onChange, units = [], isLoading }: UnitSel
         </SelectTrigger>
         <SelectContent>
           {(!units || units.length === 0) ? (
-            <SelectItem value="" disabled>
+            <SelectItem value="no-units" disabled>
               Aucune unité disponible
             </SelectItem>
           ) : (
