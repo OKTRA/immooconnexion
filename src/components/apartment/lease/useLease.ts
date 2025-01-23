@@ -15,14 +15,14 @@ export function useLease(unitId: string, tenantId?: string) {
     deposit_amount: 0,
     payment_frequency: "monthly",
     duration_type: "fixed",
-    status: "active",
+    status: "pending",
     payment_type: "upfront",
     deposit_returned: false,
     deposit_return_date: "",
     deposit_return_amount: "",
     deposit_return_notes: "",
-    agency_fees_percentage: 50, // Par défaut 50% du loyer
-    commission_percentage: 10, // Par défaut 10%
+    agency_fees_percentage: 50,
+    commission_percentage: 10,
   })
 
   const handleSubmit = async () => {
