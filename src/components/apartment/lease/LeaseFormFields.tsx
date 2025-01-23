@@ -78,6 +78,7 @@ export function LeaseFormFields({
           id,
           unit_number,
           rent_amount,
+          status,
           apartment:apartments (
             id,
             name

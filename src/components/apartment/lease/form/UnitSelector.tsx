@@ -18,7 +18,6 @@ interface Unit {
   id: string;
   unit_number: string;
   rent_amount: number;
-  status?: string;
   apartment: {
     id: string;
     name: string;
