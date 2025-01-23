@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { supabase } from "@/integrations/supabase/client"
 import { TenantFormData, TenantReceiptData } from "@/types/tenant"
+import { LeaseDialog } from "@/components/apartment/tenant/LeaseDialog"
 
 interface TenantActionButtonsProps {
   tenant: TenantFormData;
@@ -29,6 +30,7 @@ export function TenantActionButtons({
   const [showReceipt, setShowReceipt] = useState(false)
   const [showEndReceipt, setShowEndReceipt] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showLeaseDialog, setShowLeaseDialog] = useState(false)
 
   const handleEndContract = async () => {
     try {
@@ -100,7 +102,7 @@ export function TenantActionButtons({
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}/lease`)}
+          onClick={() => setShowLeaseDialog(true)}
           title="Créer un bail"
         >
           <FileText className="h-4 w-4" />
@@ -190,6 +192,12 @@ export function TenantActionButtons({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <LeaseDialog
+        open={showLeaseDialog}
+        onOpenChange={setShowLeaseDialog}
+        tenantId={tenant.id}
+      />
     </>
   )
 }
