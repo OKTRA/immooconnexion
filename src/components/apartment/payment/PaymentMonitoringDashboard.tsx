@@ -4,12 +4,13 @@ import { PaymentStatusStats } from "./PaymentStatusStats"
 import { PaymentsList } from "./PaymentsList"
 import { PaymentFilters } from "./PaymentFilters"
 import { Button } from "@/components/ui/button"
-import { Plus, CreditCard } from "lucide-react"
+import { Plus, CreditCard, AlertCircle } from "lucide-react"
 import { PaymentDialog } from "./PaymentDialog"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { PaymentPeriodFilter, PaymentStatusFilter } from "./types"
 import { InitialPaymentDialog } from "./components/InitialPaymentDialog"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface PaymentMonitoringDashboardProps {
   tenantId: string
@@ -55,7 +56,7 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
     }
   })
 
-  const { data: lease, isLoading: isLoadingLease } = useQuery({
+  const { data: lease, isLoading: isLoadingLease, error: leaseError } = useQuery({
     queryKey: ["tenant-lease", tenantId],
     queryFn: async () => {
       console.log("Fetching lease for tenant:", tenantId)
@@ -63,6 +64,7 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
         .from("apartment_leases")
         .select("*, apartment_tenants(first_name, last_name)")
         .eq("tenant_id", tenantId)
+        .eq("status", "active")
         .maybeSingle()
       
       if (error) {
@@ -77,6 +79,28 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
 
   if (isLoadingLease) {
     return <div>Chargement...</div>
+  }
+
+  if (leaseError) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Une erreur est survenue lors du chargement des données du bail
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
+  if (!lease) {
+    return (
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Aucun bail actif n'a été trouvé pour ce locataire
+        </AlertDescription>
+      </Alert>
+    )
   }
 
   return (
