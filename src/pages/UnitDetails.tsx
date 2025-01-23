@@ -10,11 +10,13 @@ import { ApartmentUnit, ApartmentUnitStatus, ApartmentLease } from "@/components
 export default function UnitDetails() {
   const { unitId } = useParams()
 
+  // Première requête : informations de base de l'unité
   const { data: unitBasicData, isLoading: isLoadingUnit } = useQuery({
     queryKey: ['unit-basic', unitId],
     queryFn: async () => {
       if (!unitId) throw new Error("ID de l'unité manquant")
 
+      console.log("Fetching unit basic data for ID:", unitId)
       const { data, error } = await supabase
         .from("apartment_units")
         .select(`
@@ -22,23 +24,6 @@ export default function UnitDetails() {
           apartment:apartments (
             id,
             name
-          ),
-          current_lease:apartment_leases (
-            id,
-            tenant:apartment_tenants (
-              id,
-              first_name,
-              last_name,
-              email,
-              phone_number,
-              birth_date,
-              profession
-            ),
-            start_date,
-            end_date,
-            rent_amount,
-            deposit_amount,
-            status
           )
         `)
         .eq("id", unitId)
@@ -53,17 +38,19 @@ export default function UnitDetails() {
         throw new Error("Unité non trouvée")
       }
 
-      console.log("Unit data fetched:", data)
+      console.log("Unit basic data fetched:", data)
       return data
     },
     enabled: !!unitId
   })
 
+  // Deuxième requête : bail actif
   const { data: currentLease, isLoading: isLoadingLease } = useQuery({
-    queryKey: ['unit-lease', unitId],
+    queryKey: ['unit-active-lease', unitId],
     queryFn: async () => {
       if (!unitId) return null
 
+      console.log("Fetching active lease for unit:", unitId)
       const { data, error } = await supabase
         .from("apartment_leases")
         .select(`
@@ -97,6 +84,7 @@ export default function UnitDetails() {
         return null
       }
 
+      console.log("Active lease data fetched:", data)
       return data as ApartmentLease
     },
     enabled: !!unitId
