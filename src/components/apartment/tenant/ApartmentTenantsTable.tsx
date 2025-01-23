@@ -2,23 +2,25 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Edit, Eye, Trash2, Plus, CreditCard, ClipboardList } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { ApartmentTenant } from "@/types/apartment"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { LeaseDialog } from "../lease/LeaseDialog"
 import { useState } from "react"
 import { DeleteConfirmDialog } from "./actions/DeleteConfirmDialog"
+import { ApartmentTenant } from "@/types/apartment"
 
 interface ApartmentTenantsTableProps {
-  onEdit: (tenant: ApartmentTenant) => void;
-  onDelete: (id: string) => Promise<void>;
-  isLoading?: boolean;
+  tenants: ApartmentTenant[]
+  onEdit: (tenant: ApartmentTenant) => void
+  onDelete: (id: string) => Promise<void>
+  isLoading?: boolean
 }
 
 export function ApartmentTenantsTable({ 
+  tenants,
   onEdit,
   onDelete,
-  isLoading
+  isLoading 
 }: ApartmentTenantsTableProps) {
   const navigate = useNavigate()
   const [showLeaseDialog, setShowLeaseDialog] = useState(false)
