@@ -19,6 +19,11 @@ export function useLease(unitId: string | undefined, tenantId: string) {
 
   const handleSubmit = async () => {
     try {
+      // Validate required UUIDs
+      if (!tenantId || !formData.unit_id) {
+        throw new Error("Tenant ID and Unit ID are required")
+      }
+
       setIsSubmitting(true)
 
       const { data: profile } = await supabase.auth.getUser()
