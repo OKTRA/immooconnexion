@@ -1,21 +1,20 @@
-import { Button } from "@/components/ui/button"
-import { Edit, Eye, Trash2, Receipt, CreditCard, ClipboardList, FileCheck, FileText } from "lucide-react"
-import { useNavigate } from "react-router-dom"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { useState } from "react"
-import { TenantReceipt } from "./TenantReceipt"
+import { useNavigate } from "react-router-dom"
+import { Edit, Eye, Trash2, Receipt, CreditCard, ClipboardList, FileCheck, FileText } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
-import { supabase } from "@/integrations/supabase/client"
-import { TenantFormData, TenantReceiptData } from "@/types/tenant"
+import { supabase } from "@/lib/supabase"
+import { TenantFormData } from "@/types/tenant"
 import { LeaseDialog } from "@/components/apartment/tenant/LeaseDialog"
+import { ReceiptDialogs } from "./actions/ReceiptDialogs"
+import { DeleteConfirmDialog } from "./actions/DeleteConfirmDialog"
 
 interface TenantActionButtonsProps {
-  tenant: TenantFormData;
-  currentLease?: any;
-  onEdit: () => void;
-  onDelete: () => void;
-  onInspection: () => void;
+  tenant: TenantFormData
+  currentLease?: any
+  onEdit: () => void
+  onDelete: () => void
+  onInspection: () => void
 }
 
 export function TenantActionButtons({ 
@@ -58,16 +57,7 @@ export function TenantActionButtons({
     }
   }
 
-  const handleDelete = () => {
-    setShowDeleteConfirm(true)
-  }
-
-  const confirmDelete = async () => {
-    onDelete()
-    setShowDeleteConfirm(false)
-  }
-
-  const tenantReceiptData: TenantReceiptData = {
+  const tenantReceiptData = {
     first_name: tenant.first_name,
     last_name: tenant.last_name,
     phone_number: tenant.phone_number,
@@ -82,7 +72,7 @@ export function TenantActionButtons({
 
   return (
     <>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex gap-2">
         <Button
           variant="ghost"
           size="icon"
@@ -146,52 +136,30 @@ export function TenantActionButtons({
         <Button
           variant="ghost"
           size="icon"
-          onClick={handleDelete}
+          onClick={() => setShowDeleteConfirm(true)}
         >
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
 
-      <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
-        <DialogContent className="max-w-3xl">
-          <TenantReceipt 
-            tenant={tenantReceiptData}
-            isInitialReceipt={true}
-          />
-        </DialogContent>
-      </Dialog>
+      <ReceiptDialogs
+        showReceipt={showReceipt}
+        setShowReceipt={setShowReceipt}
+        showEndReceipt={showEndReceipt}
+        setShowEndReceipt={setShowEndReceipt}
+        tenant={tenantReceiptData}
+        currentLease={currentLease}
+      />
 
-      <Dialog open={showEndReceipt} onOpenChange={setShowEndReceipt}>
-        <DialogContent className="max-w-3xl">
-          <TenantReceipt 
-            tenant={tenantReceiptData}
-            isEndReceipt={true}
-            inspection={currentLease?.inspection}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer ce locataire ? Cette action est irréversible.
-              {currentLease?.status === 'active' && (
-                <p className="mt-2 text-red-500">
-                  Attention : Ce locataire a un bail actif. La suppression mettra fin à tous les contrats associés.
-                </p>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-500 hover:bg-red-600">
-              Supprimer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={() => {
+          onDelete()
+          setShowDeleteConfirm(false)
+        }}
+        hasActiveLease={currentLease?.status === 'active'}
+      />
 
       <LeaseDialog
         open={showLeaseDialog}
