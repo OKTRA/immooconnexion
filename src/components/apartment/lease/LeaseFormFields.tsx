@@ -1,13 +1,11 @@
 import { Button } from "@/components/ui/button"
-import { Form } from "@/components/ui/form"
-import { DateFields } from "./form/DateFields"
-import { PaymentFields } from "./form/PaymentFields"
-import { FrequencyFields } from "./form/FrequencyFields"
-import { UnitSelector } from "./form/UnitSelector"
-import { useForm } from "react-hook-form"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import { UnitSelector } from "./form/UnitSelector"
+import { DateFields } from "./form/DateFields"
+import { FrequencyFields } from "./form/FrequencyFields"
 import { Card, CardContent } from "@/components/ui/card"
+import { Loader2 } from "lucide-react"
 
 interface LeaseFormFieldsProps {
   formData: {
@@ -37,11 +35,6 @@ export function LeaseFormFields({
   disabled = false,
   tenantId
 }: LeaseFormFieldsProps) {
-  const form = useForm({
-    defaultValues: formData
-  });
-
-  // Récupérer les informations du locataire
   const { data: tenant } = useQuery({
     queryKey: ['tenant', tenantId],
     queryFn: async () => {
@@ -57,103 +50,71 @@ export function LeaseFormFields({
     enabled: !!tenantId
   })
 
-  // Récupérer les unités disponibles
-  const { data: units = [], isLoading: unitsLoading } = useQuery({
-    queryKey: ['available-units'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Non authentifié")
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("agency_id")
-        .eq("id", user.id)
-        .single()
-
-      if (!profile?.agency_id) throw new Error("Agency ID not found")
-
-      const { data, error } = await supabase
-        .from("apartment_units")
-        .select(`
-          id,
-          unit_number,
-          rent_amount,
-          status,
-          apartment:apartments (
-            id,
-            name
-          )
-        `)
-        .eq("status", "available")
-        .eq("apartments.agency_id", profile.agency_id)
-
-      if (error) throw error
-      return data
-    }
-  })
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     await onSubmit()
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {tenant && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Locataire</label>
-                  <p className="mt-1">{tenant.first_name} {tenant.last_name}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Téléphone</label>
-                  <p className="mt-1">{tenant.phone_number || 'Non renseigné'}</p>
-                </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {tenant && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Locataire</label>
+                <p className="mt-1">{tenant.first_name} {tenant.last_name}</p>
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <div>
+                <label className="text-sm font-medium">Téléphone</label>
+                <p className="mt-1">{tenant.phone_number || 'Non renseigné'}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        <UnitSelector
-          form={form}
-          units={units}
-          isLoading={unitsLoading}
-        />
-        
-        <DateFields formData={formData} setFormData={setFormData} />
-        <PaymentFields formData={formData} setFormData={setFormData} />
-        <FrequencyFields 
-          formData={formData} 
-          setFormData={setFormData}
-          onDurationTypeChange={(value) => {
-            setFormData({ 
-              ...formData, 
-              duration_type: value,
-              end_date: value === 'fixed' ? formData.end_date : undefined 
-            })
-          }}
-        />
-        
-        <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={isSubmitting}
-          >
-            Annuler
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Chargement..." : "Créer le bail"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+      <UnitSelector
+        value={formData.unit_id}
+        onChange={(value) => setFormData({ ...formData, unit_id: value })}
+      />
+      
+      <DateFields formData={formData} setFormData={setFormData} />
+      <FrequencyFields 
+        formData={formData} 
+        setFormData={setFormData}
+        onDurationTypeChange={(value) => {
+          setFormData({ 
+            ...formData, 
+            duration_type: value,
+            end_date: value === 'fixed' ? formData.end_date : undefined 
+          })
+        }}
+      />
+      
+      <div className="flex justify-end gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
+          Annuler
+        </Button>
+        <Button 
+          type="submit" 
+          disabled={disabled || isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Création en cours...
+            </>
+          ) : (
+            "Créer le bail"
+          )}
+        </Button>
+      </div>
+    </form>
   )
 }

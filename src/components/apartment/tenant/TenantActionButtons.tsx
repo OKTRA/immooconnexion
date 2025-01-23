@@ -1,107 +1,49 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Edit, Eye, Trash2, Receipt, CreditCard, ClipboardList, FileCheck, FileSignature } from "lucide-react"
-import { ActionButton } from "./actions/ActionButton"
+import { Button } from "@/components/ui/button"
+import { FileText, Trash2, Edit, Plus } from "lucide-react"
 import { DeleteAction } from "./actions/DeleteAction"
-import { LeaseDialog } from "./LeaseDialog"
-import { ApartmentLease } from "@/types/apartment"
+import { useState } from "react"
+import { LeaseDialog } from "../lease/LeaseDialog"
 
 interface TenantActionButtonsProps {
-  tenant: {
-    id: string
-  }
-  currentLease?: ApartmentLease
-  onEdit: () => void
-  onDelete: () => void
-  onInspection: () => void
+  tenantId: string;
+  onEdit: () => void;
+  onDelete: () => void;
 }
 
-export function TenantActionButtons({ 
-  tenant, 
-  currentLease, 
-  onEdit, 
-  onDelete,
-  onInspection 
-}: TenantActionButtonsProps) {
-  const navigate = useNavigate()
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+export function TenantActionButtons({ tenantId, onEdit, onDelete }: TenantActionButtonsProps) {
   const [showLeaseDialog, setShowLeaseDialog] = useState(false)
 
-  const handleDelete = () => {
-    setShowDeleteDialog(true)
-  }
-
   return (
-    <>
-      <div className="flex gap-2">
-        <ActionButton
-          icon={Eye}
-          onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}`)}
-          title="Voir les détails"
-        />
-
-        <ActionButton
-          icon={Edit}
-          onClick={onEdit}
-          title="Modifier"
-        />
-
-        <ActionButton
-          icon={FileSignature}
-          onClick={() => setShowLeaseDialog(true)}
-          title="Créer un bail"
-          className="text-green-500 hover:text-green-600"
-        />
-
-        <ActionButton
-          icon={CreditCard}
-          onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}/payments`)}
-          title="Paiements"
-        />
-
-        <ActionButton
-          icon={ClipboardList}
-          onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}/leases`)}
-          title="Liste des baux"
-        />
-
-        {currentLease?.status === 'active' && (
-          <>
-            <ActionButton
-              icon={FileCheck}
-              onClick={onInspection}
-              title="Inspection"
-            />
-            <ActionButton
-              icon={Receipt}
-              onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}/receipt`)}
-              title="Reçu"
-            />
-          </>
-        )}
-
-        <ActionButton
-          icon={Trash2}
-          onClick={handleDelete}
-          title="Supprimer"
-        />
-      </div>
-
-      <DeleteAction
-        isOpen={showDeleteDialog}
-        onClose={() => setShowDeleteDialog(false)}
-        onConfirm={() => {
-          onDelete()
-          setShowDeleteDialog(false)
-        }}
-        hasActiveLease={currentLease?.status === 'active'}
-      />
+    <div className="flex items-center gap-2">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setShowLeaseDialog(true)}
+        className="text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+      >
+        <Plus className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onEdit}
+      >
+        <Edit className="h-4 w-4" />
+      </Button>
+      <DeleteAction onConfirm={onDelete} />
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => window.location.href = `/agence/apartment-tenant-leases/${tenantId}`}
+      >
+        <FileText className="h-4 w-4" />
+      </Button>
 
       <LeaseDialog
         open={showLeaseDialog}
         onOpenChange={setShowLeaseDialog}
-        tenantId={tenant.id}
+        tenantId={tenantId}
       />
-    </>
+    </div>
   )
 }
