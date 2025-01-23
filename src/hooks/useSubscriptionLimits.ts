@@ -68,8 +68,25 @@ export function useSubscriptionLimits() {
     }
   };
 
+  const checkDowngradeEligibility = (newPlan: SubscriptionPlan) => {
+    if (!limits) return false;
+
+    // Si le max est -1, c'est illimité donc toujours éligible
+    const isPropertiesEligible = newPlan.max_properties === -1 || 
+      limits.current_properties <= newPlan.max_properties;
+    
+    const isTenantsEligible = newPlan.max_tenants === -1 || 
+      limits.current_tenants <= newPlan.max_tenants;
+    
+    const isUsersEligible = newPlan.max_users === -1 || 
+      limits.current_users <= newPlan.max_users;
+
+    return isPropertiesEligible && isTenantsEligible && isUsersEligible;
+  };
+
   return {
     limits,
-    checkLimitReached
+    checkLimitReached,
+    checkDowngradeEligibility
   };
 }

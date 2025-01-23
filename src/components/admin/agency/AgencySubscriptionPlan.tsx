@@ -26,7 +26,7 @@ export function AgencySubscriptionPlan({ agency, onPlanChange }: AgencySubscript
     },
   })
 
-  const { checkDowngradeEligibility } = useSubscriptionLimits(agency.id)
+  const { checkDowngradeEligibility } = useSubscriptionLimits()
   const selectedPlan = plans.find(p => p.id === agency.subscription_plan_id)
   const showDowngradeWarning = selectedPlan && !checkDowngradeEligibility(selectedPlan)
 
