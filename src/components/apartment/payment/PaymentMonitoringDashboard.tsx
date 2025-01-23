@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Plus, CreditCard } from "lucide-react"
 import { PaymentDialog } from "./PaymentDialog"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/integrations/supabase/client"
 import { PaymentPeriodFilter, PaymentStatusFilter } from "./types"
 import { InitialPaymentDialog } from "./components/InitialPaymentDialog"
 
@@ -20,6 +20,35 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
   const [statusFilter, setStatusFilter] = useState<PaymentStatusFilter>("all")
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
+
+  const { data: paymentStats } = useQuery({
+    queryKey: ["payment-stats", tenantId],
+    queryFn: async () => {
+      const { data: periods } = await supabase
+        .from("apartment_payment_periods")
+        .select(`
+          *,
+          apartment_leases!inner (
+            tenant_id
+          )
+        `)
+        .eq("apartment_leases.tenant_id", tenantId)
+      
+      if (!periods) return {
+        total: 0,
+        paid: 0,
+        pending: 0,
+        late: 0
+      }
+
+      return {
+        total: periods.reduce((sum, p) => sum + Number(p.amount), 0),
+        paid: periods.filter(p => p.status === "paid").reduce((sum, p) => sum + Number(p.amount), 0),
+        pending: periods.filter(p => p.status === "pending").reduce((sum, p) => sum + Number(p.amount), 0),
+        late: periods.filter(p => p.status === "late").reduce((sum, p) => sum + Number(p.amount), 0),
+      }
+    }
+  })
 
   const { data: lease, isLoading: isLoadingLease } = useQuery({
     queryKey: ["tenant-lease", tenantId],
