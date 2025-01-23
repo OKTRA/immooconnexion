@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button"
 import { DateFields } from "./DateFields"
-import { PaymentFields } from "./PaymentFields"
 import { FrequencyFields } from "./FrequencyFields"
 import { UnitSelector } from "./UnitSelector"
 import { Card, CardContent } from "@/components/ui/card"
@@ -81,7 +80,6 @@ export function LeaseFormFields({
       />
       
       <DateFields formData={formData} setFormData={setFormData} />
-      <PaymentFields formData={formData} setFormData={setFormData} />
       <FrequencyFields 
         formData={formData} 
         setFormData={setFormData}
