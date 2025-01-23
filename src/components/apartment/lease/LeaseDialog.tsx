@@ -21,7 +21,11 @@ export function LeaseDialog({
     setFormData,
     handleSubmit,
     isSubmitting
-  } = useLease(initialUnitId, tenantId)
+  } = useLease({ 
+    initialUnitId,
+    tenantId,
+    onSuccess: () => onOpenChange(false)
+  })
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
