@@ -91,7 +91,6 @@ export function ApartmentTenantsTable({
                     <Edit className="h-4 w-4" />
                   </Button>
 
-                  {/* Nouveau bouton de création de bail */}
                   <Button
                     variant="ghost"
                     size="icon"
