@@ -48,11 +48,17 @@ export function UnitSelector({ value, onChange, units = [], isLoading }: UnitSel
           <SelectValue placeholder="Sélectionner une unité" />
         </SelectTrigger>
         <SelectContent>
-          {units.map((unit) => (
-            <SelectItem key={unit.id} value={unit.id}>
-              {unit.apartment?.name} - Unité {unit.unit_number} ({unit.rent_amount.toLocaleString()} FCFA)
+          {units.length === 0 ? (
+            <SelectItem value="no-units" disabled>
+              Chargement des unités...
             </SelectItem>
-          ))}
+          ) : (
+            units.map((unit) => (
+              <SelectItem key={unit.id} value={unit.id}>
+                {unit.apartment?.name} - Unité {unit.unit_number} ({unit.rent_amount.toLocaleString()} FCFA)
+              </SelectItem>
+            ))
+          )}
         </SelectContent>
       </Select>
     </div>

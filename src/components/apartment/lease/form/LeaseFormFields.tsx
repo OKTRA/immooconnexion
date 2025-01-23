@@ -55,11 +55,12 @@ export function LeaseFormFields({
           rent_amount,
           apartment:apartments (
             id,
-            name
+            name,
+            agency_id
           )
         `)
         .eq("status", "available")
-        .order('unit_number')
+        .eq("apartments.agency_id", profile.agency_id)
 
       if (error) {
         console.error("Error fetching units:", error)
@@ -91,7 +92,7 @@ export function LeaseFormFields({
     const valid = !!(
       formData.unit_id &&
       formData.start_date &&
-      formData.rent_amount > 0 &&
+      formData.rent_amount &&
       formData.deposit_amount >= 0 &&
       formData.payment_frequency &&
       formData.duration_type &&
@@ -137,7 +138,7 @@ export function LeaseFormFields({
         </Button>
         <Button 
           type="submit" 
-          disabled={isSubmitting || !isFormValid()}
+          disabled={disabled || !isFormValid() || isSubmitting}
         >
           {isSubmitting ? "Chargement..." : "Créer le bail"}
         </Button>
