@@ -30,7 +30,6 @@ export function CreateLeaseDialog({ open, onOpenChange, tenantId }: CreateLeaseD
     payment_type: "upfront" as const
   })
 
-  // Récupérer les unités disponibles
   const { data: availableUnits = [], isLoading: unitsLoading } = useQuery({
     queryKey: ["available-units"],
     queryFn: async () => {
@@ -300,4 +299,5 @@ export function CreateLeaseDialog({ open, onOpenChange, tenantId }: CreateLeaseD
         </ScrollArea>
       </DialogContent>
     </Dialog>
-  </form>
+  )
+}
