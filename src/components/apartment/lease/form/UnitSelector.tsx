@@ -13,7 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { UseFormReturn } from "react-hook-form"
-import { Unit } from "../types"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
 interface UnitSelectorProps {
   form: UseFormReturn<{
@@ -22,7 +23,7 @@ interface UnitSelectorProps {
     deposit_amount: number;
     [key: string]: any;
   }>;
-  units?: Unit[];
+  units?: any[];
   isLoading?: boolean;
 }
 
@@ -46,11 +47,16 @@ export function UnitSelector({ form, units = [], isLoading }: UnitSelectorProps)
           <FormLabel>Unité</FormLabel>
           <Select 
             onValueChange={(value) => {
-              field.onChange(value)
               const selectedUnit = availableUnits.find(unit => unit.id === value)
               if (selectedUnit) {
+                // Mettre à jour les montants dans le formulaire
+                form.setValue('unit_id', value)
                 form.setValue('rent_amount', selectedUnit.rent_amount)
                 form.setValue('deposit_amount', selectedUnit.deposit_amount || selectedUnit.rent_amount)
+                
+                // Log pour debug
+                console.log('Selected unit:', selectedUnit)
+                console.log('Updated form values:', form.getValues())
               }
             }} 
             value={field.value}
