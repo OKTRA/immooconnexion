@@ -7,19 +7,21 @@ interface LeaseDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   tenantId: string
+  unitId?: string
 }
 
 export function LeaseDialog({
   open,
   onOpenChange,
-  tenantId
+  tenantId,
+  unitId
 }: LeaseDialogProps) {
   const {
     formData,
     setFormData,
     handleSubmit,
     isSubmitting
-  } = useLease(undefined, tenantId)
+  } = useLease(unitId, tenantId)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

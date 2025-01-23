@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { Edit, Eye, Trash2, Receipt, CreditCard, ClipboardList, FileCheck, FileText } from "lucide-react"
 import { ActionButton } from "./actions/ActionButton"
 import { DeleteAction } from "./actions/DeleteAction"
+import { LeaseDialog } from "./LeaseDialog"
 import { ApartmentLease } from "@/types/apartment"
 
 interface TenantActionButtonsProps {
@@ -24,14 +25,10 @@ export function TenantActionButtons({
 }: TenantActionButtonsProps) {
   const navigate = useNavigate()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showLeaseDialog, setShowLeaseDialog] = useState(false)
 
   const handleDelete = () => {
     setShowDeleteDialog(true)
-  }
-
-  const handleConfirmDelete = () => {
-    onDelete()
-    setShowDeleteDialog(false)
   }
 
   return (
@@ -51,7 +48,7 @@ export function TenantActionButtons({
 
         <ActionButton
           icon={FileText}
-          onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}/lease`)}
+          onClick={() => setShowLeaseDialog(true)}
           title="Créer un bail"
         />
 
@@ -92,8 +89,17 @@ export function TenantActionButtons({
       <DeleteAction
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
-        onConfirm={handleConfirmDelete}
+        onConfirm={() => {
+          onDelete()
+          setShowDeleteDialog(false)
+        }}
         hasActiveLease={currentLease?.status === 'active'}
+      />
+
+      <LeaseDialog
+        open={showLeaseDialog}
+        onOpenChange={setShowLeaseDialog}
+        tenantId={tenant.id}
       />
     </>
   )
