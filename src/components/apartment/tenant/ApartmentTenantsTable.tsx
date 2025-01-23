@@ -9,6 +9,8 @@ import { ApartmentTenant } from "@/types/apartment";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { LeaseDialog } from "./LeaseDialog";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ApartmentTenantsTableProps {
   onEdit: (tenant: ApartmentTenant) => void;
@@ -17,7 +19,10 @@ interface ApartmentTenantsTableProps {
 
 export function ApartmentTenantsTable({ onEdit, onDelete }: ApartmentTenantsTableProps) {
   const [tenantToDelete, setTenantToDelete] = useState<string | null>(null);
+  const [showLeaseDialog, setShowLeaseDialog] = useState(false);
+  const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const { data: tenants = [], isLoading } = useQuery({
     queryKey: ["apartment-tenants"],
@@ -49,10 +54,6 @@ export function ApartmentTenantsTable({ onEdit, onDelete }: ApartmentTenantsTabl
     }
   });
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   const handleDelete = async (id: string) => {
     try {
       // First update any active tenant_units to inactive
@@ -67,11 +68,29 @@ export function ApartmentTenantsTable({ onEdit, onDelete }: ApartmentTenantsTabl
       // Then delete the tenant
       await onDelete(id);
       setTenantToDelete(null);
+      
+      toast({
+        title: "Succès",
+        description: "Le locataire a été supprimé avec succès",
+      });
     } catch (error) {
       console.error("Error deleting tenant:", error);
-      throw error;
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suppression",
+        variant: "destructive",
+      });
     }
   };
+
+  const handleCreateLease = (tenantId: string) => {
+    setSelectedTenantId(tenantId);
+    setShowLeaseDialog(true);
+  };
+
+  if (isLoading) {
+    return <div>Chargement...</div>;
+  }
 
   return (
     <>
@@ -119,7 +138,7 @@ export function ApartmentTenantsTable({ onEdit, onDelete }: ApartmentTenantsTabl
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}/leases`)}
+                      onClick={() => handleCreateLease(tenant.id)}
                       title="Créer un bail"
                     >
                       <FileText className="h-4 w-4" />
@@ -179,6 +198,14 @@ export function ApartmentTenantsTable({ onEdit, onDelete }: ApartmentTenantsTabl
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {selectedTenantId && (
+        <LeaseDialog
+          open={showLeaseDialog}
+          onOpenChange={setShowLeaseDialog}
+          tenantId={selectedTenantId}
+        />
+      )}
     </>
   );
 }
