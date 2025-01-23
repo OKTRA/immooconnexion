@@ -26,6 +26,7 @@ interface UnitHeaderProps {
       deposit_amount: number
       status: string
     }
+    status: string
   }
 }
 
@@ -36,6 +37,19 @@ export function UnitHeader({ unit }: UnitHeaderProps) {
   const tenantName = tenant 
     ? `${tenant.first_name || ''} ${tenant.last_name || ''}`.trim() || 'Non assigné'
     : 'Non assigné';
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'available':
+        return <Badge className="bg-green-500">Disponible</Badge>
+      case 'occupied':
+        return <Badge className="bg-blue-500">Occupé</Badge>
+      case 'maintenance':
+        return <Badge className="bg-yellow-500">En maintenance</Badge>
+      default:
+        return <Badge>{status}</Badge>
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -52,6 +66,7 @@ export function UnitHeader({ unit }: UnitHeaderProps) {
           <Button variant="outline" size="icon">
             <Edit className="h-4 w-4" />
           </Button>
+          {getStatusBadge(unit.status)}
         </div>
       </div>
 

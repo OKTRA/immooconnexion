@@ -22,9 +22,27 @@ export default function UnitDetails() {
           apartment:apartments (
             id,
             name
+          ),
+          current_lease:apartment_leases!inner (
+            id,
+            tenant:apartment_tenants!inner (
+              id,
+              first_name,
+              last_name,
+              email,
+              phone_number,
+              birth_date,
+              profession
+            ),
+            start_date,
+            end_date,
+            rent_amount,
+            deposit_amount,
+            status
           )
         `)
         .eq("id", unitId)
+        .eq("apartment_leases.status", "active")
         .maybeSingle()
 
       if (error) {
