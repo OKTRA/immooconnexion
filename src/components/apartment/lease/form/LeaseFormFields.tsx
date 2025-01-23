@@ -5,6 +5,7 @@ import { FrequencyFields } from "./FrequencyFields"
 import { UnitSelector } from "./UnitSelector"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import { Unit } from "./UnitSelector"
 
 interface LeaseFormFieldsProps {
   formData: {
@@ -47,6 +48,8 @@ export function LeaseFormFields({
 
       if (!profile?.agency_id) throw new Error("Agency ID not found")
 
+      console.log("Fetching units for agency:", profile.agency_id)
+
       const { data, error } = await supabase
         .from("apartment_units")
         .select(`
@@ -55,8 +58,7 @@ export function LeaseFormFields({
           rent_amount,
           apartment:apartments (
             id,
-            name,
-            agency_id
+            name
           )
         `)
         .eq("status", "available")
@@ -68,7 +70,7 @@ export function LeaseFormFields({
       }
       
       console.log("Available units:", data)
-      return data || []
+      return data as Unit[]
     }
   })
 

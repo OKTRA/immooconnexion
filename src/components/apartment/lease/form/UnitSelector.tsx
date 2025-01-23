@@ -8,7 +8,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 
-interface Unit {
+export interface Unit {
   id: string;
   unit_number: string;
   rent_amount: number;
@@ -50,7 +50,7 @@ export function UnitSelector({ value, onChange, units = [], isLoading }: UnitSel
         <SelectContent>
           {units.length === 0 ? (
             <SelectItem value="no-units" disabled>
-              Chargement des unités...
+              Aucune unité disponible
             </SelectItem>
           ) : (
             units.map((unit) => (
