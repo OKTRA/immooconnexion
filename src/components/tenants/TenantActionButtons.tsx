@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { FileText, Printer, ClipboardCheck, Edit, Trash2, CreditCard } from "lucide-react"
+import { Edit, Eye, Trash2, Receipt, CreditCard, ClipboardList, FileCheck, FileText } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { useState } from "react"
@@ -82,76 +82,71 @@ export function TenantActionButtons({
     <>
       <div className="flex flex-wrap gap-2">
         <Button
-          variant="outline"
-          size="sm"
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}`)}
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={onEdit}
-          className="flex items-center gap-2"
         >
           <Edit className="h-4 w-4" />
-          <span className="hidden md:inline">Modifier</span>
         </Button>
 
         <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowReceipt(true)}
-          className="flex items-center gap-2"
-        >
-          <Printer className="h-4 w-4" />
-          <span className="hidden md:inline">Reçu</span>
-        </Button>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate(`/agence/locataires/${tenant.id}/paiements`)}
-          className="flex items-center gap-2"
-        >
-          <CreditCard className="h-4 w-4" />
-          <span className="hidden md:inline">Paiements</span>
-        </Button>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate(`/agence/locataires/${tenant.id}/contrats`)}
-          className="flex items-center gap-2"
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}/lease`)}
+          title="Créer un bail"
         >
           <FileText className="h-4 w-4" />
-          <span className="hidden md:inline">Contrats</span>
         </Button>
 
-        {currentLease && currentLease.status === 'active' && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}/payments`)}
+        >
+          <CreditCard className="h-4 w-4" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}/leases`)}
+        >
+          <ClipboardList className="h-4 w-4" />
+        </Button>
+
+        {currentLease?.status === 'active' && (
           <>
             <Button
-              variant="outline"
-              size="sm"
+              variant="ghost"
+              size="icon"
               onClick={onInspection}
-              className="flex items-center gap-2"
             >
-              <ClipboardCheck className="h-4 w-4" />
-              <span className="hidden md:inline">Fin de contrat</span>
+              <FileCheck className="h-4 w-4" />
             </Button>
             <Button
-              variant="outline"
-              size="sm"
+              variant="ghost"
+              size="icon"
               onClick={handleEndContract}
-              className="flex items-center gap-2"
             >
-              <FileText className="h-4 w-4" />
-              <span className="hidden md:inline">Reçu de fin</span>
+              <Receipt className="h-4 w-4" />
             </Button>
           </>
         )}
 
         <Button
-          variant="destructive"
-          size="sm"
+          variant="ghost"
+          size="icon"
           onClick={handleDelete}
-          className="flex items-center gap-2"
         >
           <Trash2 className="h-4 w-4" />
-          <span className="hidden md:inline">Supprimer</span>
         </Button>
       </div>
 
@@ -180,6 +175,11 @@ export function TenantActionButtons({
             <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
             <AlertDialogDescription>
               Êtes-vous sûr de vouloir supprimer ce locataire ? Cette action est irréversible.
+              {currentLease?.status === 'active' && (
+                <p className="mt-2 text-red-500">
+                  Attention : Ce locataire a un bail actif. La suppression mettra fin à tous les contrats associés.
+                </p>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
