@@ -1,41 +1,23 @@
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { ApartmentTenant } from "@/components/apartment/types"
+import { supabase } from "@/lib/supabase"
+import { ApartmentTenant, ApartmentLease } from "@/types/apartment"
 
 export function useApartmentTenant(tenantId: string) {
-  return useQuery({
+  const { data: tenant, isLoading: isLoadingTenant } = useQuery({
     queryKey: ["apartment-tenant", tenantId],
     queryFn: async () => {
-      console.log("Fetching tenant details for ID:", tenantId)
-
       const { data, error } = await supabase
         .from("apartment_tenants")
         .select(`
           *,
-          apartment_units!apartment_tenants_unit_id_fkey (
+          apartment_units (
             unit_number,
             apartment:apartments (
               name
             )
-          ),
-          apartment_leases (
-            id,
-            tenant_id,
-            unit_id,
-            agency_id,
-            start_date,
-            end_date,
-            rent_amount,
-            deposit_amount,
-            status,
-            payment_frequency,
-            duration_type,
-            payment_type,
-            initial_fees_paid
           )
         `)
         .eq("id", tenantId)
-        .order('created_at', { ascending: false })
         .maybeSingle()
 
       if (error) {
@@ -43,9 +25,36 @@ export function useApartmentTenant(tenantId: string) {
         throw error
       }
 
-      console.log("Tenant data:", data)
+      console.log("Fetched tenant:", data)
       return data as ApartmentTenant
     },
     enabled: !!tenantId
   })
+
+  const { data: currentLease, isLoading: isLoadingLease } = useQuery({
+    queryKey: ["tenant-lease", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("apartment_leases")
+        .select("*")
+        .eq("tenant_id", tenantId)
+        .eq("status", "active")
+        .maybeSingle()
+
+      if (error) {
+        console.error("Error fetching lease:", error)
+        throw error
+      }
+
+      console.log("Fetched lease:", data)
+      return data as ApartmentLease | null
+    },
+    enabled: !!tenantId
+  })
+
+  return {
+    tenant,
+    currentLease,
+    isLoading: isLoadingTenant || isLoadingLease
+  }
 }
