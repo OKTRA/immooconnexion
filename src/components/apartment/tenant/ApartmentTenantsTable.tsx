@@ -21,13 +21,14 @@ export function ApartmentTenantsTable({
   const { data: tenants = [] } = useQuery({
     queryKey: ["apartment-tenants"],
     queryFn: async () => {
+      console.log("Fetching tenants data...")
       const { data, error } = await supabase
         .from("apartment_tenants")
         .select(`
           *,
-          tenant_units!inner (
+          tenant_units (
             unit_id,
-            apartment_units!inner (
+            apartment_units (
               unit_number,
               apartment:apartments (
                 name
@@ -48,13 +49,14 @@ export function ApartmentTenantsTable({
             payment_type
           )
         `)
-        .order("created_at", { ascending: false })
+        .order('created_at', { ascending: false })
 
       if (error) {
         console.error("Error fetching tenants:", error)
         throw error
       }
 
+      console.log("Tenants data:", data)
       return data as ApartmentTenant[]
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -74,7 +76,7 @@ export function ApartmentTenantsTable({
         title: "Succès",
         description: "Le locataire a été supprimé avec succès",
       })
-
+      
       onDelete?.(id)
     } catch (error) {
       console.error("Error:", error)
