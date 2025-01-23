@@ -48,7 +48,18 @@ export function UnitSelector({ form, units = [], isLoading }: UnitSelectorProps)
       render={({ field }) => (
         <FormItem>
           <FormLabel>Unité</FormLabel>
-          <Select onValueChange={field.onChange} value={field.value}>
+          <Select 
+            onValueChange={(value) => {
+              field.onChange(value);
+              // Find the selected unit
+              const selectedUnit = availableUnits.find(unit => unit.id === value);
+              if (selectedUnit) {
+                // Update rent amount in form
+                form.setValue('rent_amount', selectedUnit.rent_amount);
+              }
+            }} 
+            value={field.value}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner une unité" />

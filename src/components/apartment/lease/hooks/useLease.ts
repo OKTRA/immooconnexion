@@ -25,7 +25,7 @@ export function useLease(unitId: string | undefined, tenantId: string | undefine
       }
 
       if (!formData.unit_id?.trim()) {
-        throw new Error("ID de l'unité manquant")
+        throw new Error("Veuillez sélectionner une unité")
       }
 
       // Récupérer l'agency_id de l'utilisateur connecté
@@ -73,6 +73,18 @@ export function useLease(unitId: string | undefined, tenantId: string | undefine
         .eq("id", formData.unit_id)
 
       if (unitError) throw unitError
+
+      // Créer l'association tenant_units
+      const { error: tenantUnitError } = await supabase
+        .from("tenant_units")
+        .insert([
+          {
+            tenant_id: tenantId,
+            unit_id: formData.unit_id
+          }
+        ])
+
+      if (tenantUnitError) throw tenantUnitError
 
       toast({
         title: "Bail créé",
