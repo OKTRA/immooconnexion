@@ -21,32 +21,6 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
 
-  const { data: paymentStats } = useQuery({
-    queryKey: ["payment-stats", tenantId],
-    queryFn: async () => {
-      const { data: periods } = await supabase
-        .from("apartment_payment_periods")
-        .select(`
-          *,
-          apartment_leases!inner (
-            tenant_id
-          )
-        `)
-        .eq("apartment_leases.tenant_id", tenantId)
-      
-      if (!periods) return null
-
-      const stats = {
-        total: periods.reduce((sum, p) => sum + Number(p.amount), 0),
-        paid: periods.filter(p => p.status === "paid").reduce((sum, p) => sum + Number(p.amount), 0),
-        pending: periods.filter(p => p.status === "pending").reduce((sum, p) => sum + Number(p.amount), 0),
-        late: periods.filter(p => p.status === "late").reduce((sum, p) => sum + Number(p.amount), 0),
-      }
-
-      return stats
-    }
-  })
-
   const { data: lease, isLoading: isLoadingLease } = useQuery({
     queryKey: ["tenant-lease", tenantId],
     queryFn: async () => {
