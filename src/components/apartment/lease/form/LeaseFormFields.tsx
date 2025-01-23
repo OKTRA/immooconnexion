@@ -3,13 +3,15 @@ import { DateFields } from "./DateFields"
 import { PaymentFields } from "./PaymentFields"
 import { FrequencyFields } from "./FrequencyFields"
 import { UnitSelector } from "./UnitSelector"
+import { LeaseFormData } from "../types"
 
 interface LeaseFormFieldsProps {
-  formData: any
-  setFormData: (data: any) => void
-  onSubmit: () => Promise<void>
-  isSubmitting: boolean
-  onCancel: () => void
+  formData: LeaseFormData;
+  setFormData: (data: LeaseFormData) => void;
+  onSubmit: () => Promise<void>;
+  isSubmitting: boolean;
+  onCancel: () => void;
+  disabled?: boolean;
 }
 
 export function LeaseFormFields({
@@ -17,7 +19,8 @@ export function LeaseFormFields({
   setFormData,
   onSubmit,
   isSubmitting,
-  onCancel
+  onCancel,
+  disabled = false
 }: LeaseFormFieldsProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,7 +61,7 @@ export function LeaseFormFields({
         </Button>
         <Button 
           type="submit" 
-          disabled={isSubmitting || !formData.unit_id}
+          disabled={isSubmitting || disabled || !formData.unit_id}
         >
           {isSubmitting ? "Chargement..." : "Créer le bail"}
         </Button>

@@ -1,23 +1,17 @@
-export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
-export type DurationType = 'fixed' | 'month_to_month' | 'yearly';
-export type LeaseStatus = 'active' | 'expired' | 'terminated';
-export type PaymentType = 'upfront' | 'end_of_period';
-
 export interface LeaseFormData {
-  tenant_id: string;
   unit_id: string;
   start_date: string;
   end_date?: string;
   rent_amount: number;
-  deposit_amount?: number;
-  payment_frequency: PaymentFrequency;
-  duration_type: DurationType;
-  status: LeaseStatus;
-  payment_type: PaymentType;
-  deposit_returned?: boolean;
-  deposit_return_date?: string;
-  deposit_return_amount?: string;
-  deposit_return_notes?: string;
-  agency_fees_percentage: number;
-  commission_percentage: number;
+  deposit_amount: number;
+  payment_frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  duration_type: 'fixed' | 'month_to_month' | 'yearly';
+  payment_type: 'upfront' | 'end_of_period';
+}
+
+export interface CreateLeaseDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  tenantId: string;
+  unitId?: string;
 }
