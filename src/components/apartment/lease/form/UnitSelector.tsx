@@ -13,23 +13,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { UseFormReturn } from "react-hook-form"
-
-interface Unit {
-  id: string;
-  unit_number: string;
-  rent_amount: number;
-  apartment: {
-    id: string;
-    name: string;
-  };
-}
+import { Unit } from "../types"
 
 interface UnitSelectorProps {
   form: UseFormReturn<{
     unit_id: string;
     [key: string]: any;
   }>;
-  units: Unit[];
+  units?: Unit[];
   isLoading?: boolean;
 }
 
@@ -40,6 +31,10 @@ export function UnitSelector({ form, units = [], isLoading }: UnitSelectorProps)
 
   // Filter to only show available units
   const availableUnits = units.filter(unit => unit.status === 'available')
+
+  if (availableUnits.length === 0) {
+    return <div>Aucune unité disponible</div>
+  }
 
   return (
     <FormField
@@ -56,9 +51,10 @@ export function UnitSelector({ form, units = [], isLoading }: UnitSelectorProps)
               if (selectedUnit) {
                 // Update rent amount in form
                 form.setValue('rent_amount', selectedUnit.rent_amount);
+                form.setValue('deposit_amount', selectedUnit.deposit_amount || 0);
               }
             }} 
-            value={field.value}
+            value={field.value || ""}
           >
             <FormControl>
               <SelectTrigger>
@@ -66,17 +62,11 @@ export function UnitSelector({ form, units = [], isLoading }: UnitSelectorProps)
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {availableUnits.length === 0 ? (
-                <SelectItem value="no-units" disabled>
-                  Aucune unité disponible
+              {availableUnits.map((unit) => (
+                <SelectItem key={unit.id} value={unit.id}>
+                  {unit.apartment?.name} - Unité {unit.unit_number} ({unit.rent_amount.toLocaleString()} FCFA)
                 </SelectItem>
-              ) : (
-                availableUnits.map((unit) => (
-                  <SelectItem key={unit.id} value={unit.id}>
-                    {unit.apartment.name} - Unité {unit.unit_number} ({unit.rent_amount.toLocaleString()} FCFA)
-                  </SelectItem>
-                ))
-              )}
+              ))}
             </SelectContent>
           </Select>
           <FormMessage />
@@ -85,5 +75,3 @@ export function UnitSelector({ form, units = [], isLoading }: UnitSelectorProps)
     />
   )
 }
-
-export type { Unit };

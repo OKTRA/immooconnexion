@@ -3,46 +3,55 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { LeaseFormData } from "../types"
 
-export function useLease(unitId: string | undefined, tenantId: string | undefined) {
+interface UseTenantFormProps {
+  onSuccess?: () => void
+  initialData?: LeaseFormData
+  tenantId: string | undefined
+}
+
+export function useLease({ onSuccess, initialData, tenantId }: UseTenantFormProps) {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
+
   const [formData, setFormData] = useState<LeaseFormData>({
-    unit_id: unitId || "",
-    start_date: "",
-    end_date: "",
-    rent_amount: 0,
-    deposit_amount: 0,
-    payment_frequency: "monthly",
-    duration_type: "month_to_month",
-    payment_type: "upfront"
+    unit_id: initialData?.unit_id || "",
+    start_date: initialData?.start_date || "",
+    end_date: initialData?.end_date || "",
+    rent_amount: initialData?.rent_amount || 0,
+    deposit_amount: initialData?.deposit_amount || 0,
+    payment_frequency: initialData?.payment_frequency || "monthly",
+    duration_type: initialData?.duration_type || "month_to_month",
+    payment_type: initialData?.payment_type || "upfront"
   })
 
   const handleSubmit = async () => {
     try {
-      // Validation des UUIDs requis
-      if (!tenantId?.trim()) {
+      if (!tenantId) {
         throw new Error("ID du locataire manquant")
       }
 
-      if (!formData.unit_id?.trim()) {
-        throw new Error("Veuillez sélectionner une unité")
+      // Vérification explicite de l'unité sélectionnée
+      if (!formData.unit_id) {
+        toast({
+          title: "Erreur",
+          description: "Veuillez sélectionner une unité",
+          variant: "destructive",
+        })
+        return
       }
 
-      // Récupérer l'agency_id de l'utilisateur connecté
+      setIsSubmitting(true)
+
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Utilisateur non authentifié")
+      if (!user) throw new Error("Non authentifié")
 
       const { data: profile } = await supabase
         .from("profiles")
         .select("agency_id")
         .eq("id", user.id)
-        .maybeSingle()
+        .single()
 
-      if (!profile?.agency_id) {
-        throw new Error("Agency ID non trouvé")
-      }
-
-      setIsSubmitting(true)
+      if (!profile?.agency_id) throw new Error("Aucune agence associée")
 
       const { data: lease, error: leaseError } = await supabase
         .from("apartment_leases")
@@ -80,16 +89,21 @@ export function useLease(unitId: string | undefined, tenantId: string | undefine
         .insert([
           {
             tenant_id: tenantId,
-            unit_id: formData.unit_id
+            unit_id: formData.unit_id,
+            status: "active"
           }
         ])
 
       if (tenantUnitError) throw tenantUnitError
 
       toast({
-        title: "Bail créé",
+        title: "Succès",
         description: "Le bail a été créé avec succès"
       })
+
+      if (onSuccess) {
+        onSuccess()
+      }
 
       return lease
 
@@ -97,7 +111,7 @@ export function useLease(unitId: string | undefined, tenantId: string | undefine
       console.error("Error:", error)
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue",
+        description: error.message,
         variant: "destructive"
       })
     } finally {
