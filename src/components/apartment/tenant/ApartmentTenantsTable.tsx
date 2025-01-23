@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { ApartmentTenant } from "@/types/apartment"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { TenantActionButtons } from "@/components/apartment/tenant/TenantActionButtons"
@@ -11,7 +11,11 @@ interface ApartmentTenantsTableProps {
   isLoading?: boolean
 }
 
-export function ApartmentTenantsTable({ onEdit, onDelete, isLoading }: ApartmentTenantsTableProps) {
+export function ApartmentTenantsTable({ 
+  onEdit, 
+  onDelete, 
+  isLoading 
+}: ApartmentTenantsTableProps) {
   const { toast } = useToast()
   
   const { data: tenants = [] } = useQuery({
@@ -21,10 +25,13 @@ export function ApartmentTenantsTable({ onEdit, onDelete, isLoading }: Apartment
         .from("apartment_tenants")
         .select(`
           *,
-          apartment_units!apartment_tenants_unit_id_fkey (
-            unit_number,
-            apartment:apartments (
-              name
+          tenant_units!inner (
+            unit_id,
+            apartment_units!inner (
+              unit_number,
+              apartment:apartments (
+                name
+              )
             )
           ),
           apartment_leases (
@@ -70,18 +77,13 @@ export function ApartmentTenantsTable({ onEdit, onDelete, isLoading }: Apartment
 
       onDelete?.(id)
     } catch (error) {
-      console.error("Error deleting tenant:", error)
+      console.error("Error:", error)
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la suppression du locataire",
+        description: "Une erreur est survenue lors de la suppression",
         variant: "destructive",
       })
     }
-  }
-
-  const handleInspection = (tenant: ApartmentTenant) => {
-    // Cette fonction sera implémentée plus tard pour gérer les inspections
-    console.log("Inspection for tenant:", tenant)
   }
 
   return (
@@ -99,6 +101,7 @@ export function ApartmentTenantsTable({ onEdit, onDelete, isLoading }: Apartment
       <ResponsiveTable.Body>
         {tenants.map((tenant) => {
           const currentLease = tenant.apartment_leases?.find(lease => lease.status === 'active')
+          const unit = tenant.tenant_units?.[0]?.apartment_units
           
           return (
             <ResponsiveTable.Row key={tenant.id}>
@@ -108,7 +111,7 @@ export function ApartmentTenantsTable({ onEdit, onDelete, isLoading }: Apartment
               <ResponsiveTable.Cell>{tenant.email}</ResponsiveTable.Cell>
               <ResponsiveTable.Cell>{tenant.phone_number}</ResponsiveTable.Cell>
               <ResponsiveTable.Cell>
-                {tenant.apartment_units?.apartment?.name} - Unité {tenant.apartment_units?.unit_number}
+                {unit?.apartment?.name} - Unité {unit?.unit_number}
               </ResponsiveTable.Cell>
               <ResponsiveTable.Cell>
                 {currentLease?.status || "Inactif"}
@@ -119,7 +122,7 @@ export function ApartmentTenantsTable({ onEdit, onDelete, isLoading }: Apartment
                   currentLease={currentLease}
                   onEdit={() => onEdit?.(tenant)}
                   onDelete={() => handleDelete(tenant.id)}
-                  onInspection={() => handleInspection(tenant)}
+                  onInspection={() => {}}
                 />
               </ResponsiveTable.Cell>
             </ResponsiveTable.Row>

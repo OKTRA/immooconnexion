@@ -66,7 +66,6 @@ export interface ApartmentTenant {
   birth_date?: string;
   photo_id_url?: string;
   agency_id: string;
-  unit_id?: string;
   agency_fees?: number;
   profession?: string;
   created_at?: string;
@@ -75,12 +74,15 @@ export interface ApartmentTenant {
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
   emergency_contact_relationship?: string;
-  apartment_units?: {
-    unit_number: string;
-    apartment: {
-      name: string;
+  tenant_units?: {
+    unit_id: string;
+    apartment_units: {
+      unit_number: string;
+      apartment: {
+        name: string;
+      };
     };
-  };
+  }[];
 }
 
 export interface ApartmentInspection {

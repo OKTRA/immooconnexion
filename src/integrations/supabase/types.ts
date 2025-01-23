@@ -558,7 +558,6 @@ export type Database = {
           photo_id_url: string | null
           profession: string | null
           status: string
-          unit_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -583,7 +582,6 @@ export type Database = {
           photo_id_url?: string | null
           profession?: string | null
           status?: string
-          unit_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -608,7 +606,6 @@ export type Database = {
           photo_id_url?: string | null
           profession?: string | null
           status?: string
-          unit_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -617,20 +614,6 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "agencies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "apartment_tenants_unit_id_fkey"
-            columns: ["unit_id"]
-            isOneToOne: false
-            referencedRelation: "apartment_units"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_apartment_tenant_unit"
-            columns: ["unit_id"]
-            isOneToOne: false
-            referencedRelation: "apartment_units"
             referencedColumns: ["id"]
           },
         ]
@@ -1877,6 +1860,55 @@ export type Database = {
         }
         Relationships: []
       }
+      tenant_units: {
+        Row: {
+          created_at: string | null
+          id: string
+          status: string | null
+          tenant_id: string
+          unit_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          tenant_id: string
+          unit_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          tenant_id?: string
+          unit_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_units_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_units_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_tenants_with_rent"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_units_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           agency_fees: number | null
@@ -1963,14 +1995,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "apartment_tenants_unit_id_fkey"
-            columns: ["unit_id"]
-            isOneToOne: false
-            referencedRelation: "apartment_units"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_apartment_tenant_unit"
+            foreignKeyName: "tenant_units_unit_id_fkey"
             columns: ["unit_id"]
             isOneToOne: false
             referencedRelation: "apartment_units"
