@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit, Eye, Trash2, Receipt, CreditCard, ClipboardList, FileCheck, FileText } from "lucide-react"
+import { Edit, Eye, Trash2, Receipt, CreditCard, ClipboardList, FileCheck, FileSignature } from "lucide-react"
 import { ActionButton } from "./actions/ActionButton"
 import { DeleteAction } from "./actions/DeleteAction"
 import { LeaseDialog } from "./LeaseDialog"
@@ -47,9 +47,10 @@ export function TenantActionButtons({
         />
 
         <ActionButton
-          icon={FileText}
+          icon={FileSignature}
           onClick={() => setShowLeaseDialog(true)}
           title="Créer un bail"
+          className="text-green-500 hover:text-green-600"
         />
 
         <ActionButton
