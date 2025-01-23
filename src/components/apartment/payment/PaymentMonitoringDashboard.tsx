@@ -21,7 +21,12 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
 
-  const { data: paymentStats } = useQuery({
+  const { data: paymentStats = {
+    total: 0,
+    paid: 0,
+    pending: 0,
+    late: 0
+  }} = useQuery({
     queryKey: ["payment-stats", tenantId],
     queryFn: async () => {
       const { data: periods } = await supabase
