@@ -23,18 +23,25 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
     payment_type: "upfront"
   })
 
+  console.log("useLease - Current formData:", formData)
+  console.log("useLease - initialUnitId:", initialUnitId)
+
   const handleSubmit = async () => {
+    console.log("handleSubmit - Attempting submission with unit_id:", formData.unit_id)
+    
     try {
-      if (!formData.unit_id) {
+      if (!formData.unit_id || formData.unit_id.trim() === "") {
+        console.log("handleSubmit - No unit_id found")
         toast({
-          title: "Erreur",
-          description: "Veuillez sélectionner une unité",
+          title: "Erreur de validation",
+          description: "Veuillez sélectionner une unité avant de continuer",
           variant: "destructive",
         })
         return
       }
 
       setIsSubmitting(true)
+      console.log("handleSubmit - Starting submission process")
 
       const { data: profile } = await supabase.auth.getUser()
       if (!profile.user) throw new Error("Non authentifié")
@@ -47,7 +54,13 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
 
       if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
 
-      // Créer le bail
+      console.log("handleSubmit - Creating lease with data:", {
+        tenant_id: tenantId,
+        unit_id: formData.unit_id,
+        agency_id: userProfile.agency_id,
+        ...formData
+      })
+
       const { data: lease, error: leaseError } = await supabase
         .from("apartment_leases")
         .insert([
@@ -70,7 +83,6 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
 
       if (leaseError) throw leaseError
 
-      // Mettre à jour le statut de l'unité
       const { error: unitError } = await supabase
         .from("apartment_units")
         .update({ status: "occupied" })
@@ -78,7 +90,6 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
 
       if (unitError) throw unitError
 
-      // Créer l'association tenant_units
       const { error: tenantUnitError } = await supabase
         .from("tenant_units")
         .insert([
@@ -90,6 +101,8 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
         ])
 
       if (tenantUnitError) throw tenantUnitError
+
+      console.log("handleSubmit - Lease created successfully:", lease)
 
       toast({
         title: "Succès",
@@ -103,10 +116,10 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
       return lease
 
     } catch (error: any) {
-      console.error("Error:", error)
+      console.error("Error in handleSubmit:", error)
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error.message || "Une erreur est survenue lors de la création du bail",
         variant: "destructive"
       })
     } finally {
