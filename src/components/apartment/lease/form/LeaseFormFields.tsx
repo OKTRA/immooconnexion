@@ -56,7 +56,7 @@ export function LeaseFormFields({
           id,
           unit_number,
           rent_amount,
-          apartment:apartments (
+          apartment:apartments!inner (
             id,
             name
           )
