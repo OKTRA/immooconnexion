@@ -2,11 +2,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 interface PaymentFieldsProps {
-  formData: any
+  formData: {
+    rent_amount: number;
+    deposit_amount: number;
+  }
   setFormData: (data: any) => void
 }
 
-export function PaymentFields({ formData }: PaymentFieldsProps) {
+export function PaymentFields({ formData, setFormData }: PaymentFieldsProps) {
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">

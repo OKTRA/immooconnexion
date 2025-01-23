@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { useQuery } from "@tanstack/react-query"
 
 interface UseLeaseProps {
   initialUnitId?: string;
@@ -22,17 +23,37 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
     payment_type: "upfront" as const
   })
 
+  // Récupérer les informations de l'unité sélectionnée
+  const { data: selectedUnit } = useQuery({
+    queryKey: ['unit', formData.unit_id],
+    queryFn: async () => {
+      if (!formData.unit_id) return null
+      
+      const { data, error } = await supabase
+        .from('apartment_units')
+        .select('*')
+        .eq('id', formData.unit_id)
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    enabled: !!formData.unit_id
+  })
+
+  // Mettre à jour les montants quand l'unité change
+  useEffect(() => {
+    if (selectedUnit) {
+      setFormData(prev => ({
+        ...prev,
+        rent_amount: selectedUnit.rent_amount,
+        deposit_amount: selectedUnit.deposit_amount || selectedUnit.rent_amount
+      }))
+    }
+  }, [selectedUnit])
+
   const handleSubmit = async () => {
     try {
-      if (!formData.unit_id || formData.unit_id.trim() === "") {
-        toast({
-          title: "Erreur de validation",
-          description: "Veuillez sélectionner une unité avant de continuer",
-          variant: "destructive",
-        })
-        return
-      }
-
       setIsSubmitting(true)
 
       const { data: profile } = await supabase.auth.getUser()
