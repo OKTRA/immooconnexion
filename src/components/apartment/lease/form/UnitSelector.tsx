@@ -14,25 +14,31 @@ import {
 } from "@/components/ui/select"
 import { UseFormReturn } from "react-hook-form"
 
+interface Unit {
+  id: string;
+  unit_number: string;
+  rent_amount: number;
+  status?: string;
+  apartment: {
+    id: string;
+    name: string;
+  };
+}
+
 interface UnitSelectorProps {
   form: UseFormReturn<{
     unit_id: string;
     [key: string]: any;
   }>;
-  units?: {
-    id: string
-    unit_number: string
-    rent_amount: number
-    status?: string
-    apartment: {
-      id: string
-      name: string
-    }
-  }[]
-  isLoading?: boolean
+  units: Unit[];
+  isLoading?: boolean;
 }
 
 export function UnitSelector({ form, units = [], isLoading }: UnitSelectorProps) {
+  if (isLoading) {
+    return <div>Chargement des unités...</div>
+  }
+
   // Filter to only show available units
   const availableUnits = units.filter(unit => unit.status === 'available')
 
@@ -69,3 +75,5 @@ export function UnitSelector({ form, units = [], isLoading }: UnitSelectorProps)
     />
   )
 }
+
+export type { Unit };
