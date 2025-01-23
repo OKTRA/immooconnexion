@@ -1,10 +1,5 @@
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/lib/supabase"
 import {
   Select,
   SelectContent,
@@ -12,71 +7,84 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { UseFormReturn } from "react-hook-form"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface UnitSelectorProps {
-  form: UseFormReturn<{
-    unit_id: string;
-    rent_amount: number;
-    deposit_amount: number;
-    [key: string]: any;
-  }>;
-  units?: any[];
-  isLoading?: boolean;
+  value: string
+  onChange: (value: string) => void
 }
 
-export function UnitSelector({ form, units = [], isLoading }: UnitSelectorProps) {
+export function UnitSelector({ value, onChange }: UnitSelectorProps) {
+  const { data: units = [], isLoading } = useQuery({
+    queryKey: ["available-units"],
+    queryFn: async () => {
+      console.log("Fetching available units...")
+      
+      const { data: profile } = await supabase.auth.getUser()
+      if (!profile.user) throw new Error("Non authentifié")
+
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("agency_id")
+        .eq("id", profile.user.id)
+        .single()
+
+      if (!userProfile?.agency_id) {
+        console.log("No agency found for user")
+        return []
+      }
+
+      const { data, error } = await supabase
+        .from("apartment_units")
+        .select(`
+          id,
+          unit_number,
+          rent_amount,
+          apartment:apartments (
+            id,
+            name
+          )
+        `)
+        .eq("status", "available")
+        .eq("apartments.agency_id", userProfile.agency_id)
+
+      if (error) {
+        console.error("Error fetching units:", error)
+        throw error
+      }
+
+      console.log("Available units:", data)
+      return data || []
+    },
+  })
+
   if (isLoading) {
-    return <div>Chargement des unités...</div>
+    return <Skeleton className="h-10 w-full" />
   }
 
-  const availableUnits = units.filter(unit => unit.status === 'available')
-
-  if (availableUnits.length === 0) {
-    return <div>Aucune unité disponible</div>
+  if (!units.length) {
+    return (
+      <Select disabled>
+        <SelectTrigger>
+          <SelectValue placeholder="Aucune unité disponible" />
+        </SelectTrigger>
+      </Select>
+    )
   }
 
   return (
-    <FormField
-      control={form.control}
-      name="unit_id"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Unité</FormLabel>
-          <Select 
-            onValueChange={(value) => {
-              const selectedUnit = availableUnits.find(unit => unit.id === value)
-              if (selectedUnit) {
-                // Mettre à jour les montants dans le formulaire
-                form.setValue('unit_id', value)
-                form.setValue('rent_amount', selectedUnit.rent_amount)
-                form.setValue('deposit_amount', selectedUnit.deposit_amount || selectedUnit.rent_amount)
-                
-                // Log pour debug
-                console.log('Selected unit:', selectedUnit)
-                console.log('Updated form values:', form.getValues())
-              }
-            }} 
-            value={field.value}
-          >
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner une unité" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {availableUnits.map((unit) => (
-                <SelectItem key={unit.id} value={unit.id}>
-                  {unit.apartment?.name} - Unité {unit.unit_number} ({unit.rent_amount.toLocaleString()} FCFA)
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger>
+        <SelectValue placeholder="Sélectionner une unité" />
+      </SelectTrigger>
+      <SelectContent>
+        {units.map((unit) => (
+          <SelectItem key={unit.id} value={unit.id}>
+            {unit.apartment?.name} - Unité {unit.unit_number} (
+            {unit.rent_amount?.toLocaleString()} FCFA)
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }
