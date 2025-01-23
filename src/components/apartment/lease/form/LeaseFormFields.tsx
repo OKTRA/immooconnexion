@@ -67,7 +67,15 @@ export function LeaseFormFields({
         throw error
       }
 
-      return data as Unit[]
+      return data.map(unit => ({
+        id: unit.id,
+        unit_number: unit.unit_number,
+        rent_amount: unit.rent_amount,
+        apartment: {
+          id: unit.apartment.id,
+          name: unit.apartment.name
+        }
+      })) as Unit[]
     },
     enabled: true
   })
