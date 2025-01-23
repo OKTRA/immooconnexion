@@ -41,7 +41,39 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
     }
   })
 
-  if (isLoadingLease) {
+  const { data: payments, isLoading: isLoadingPayments } = useQuery({
+    queryKey: ["tenant-payments", tenantId],
+    queryFn: async () => {
+      if (!lease) return null
+      
+      const { data, error } = await supabase
+        .from("apartment_lease_payments")
+        .select("*")
+        .eq("lease_id", lease.id)
+      
+      if (error) throw error
+      return data
+    },
+    enabled: !!lease
+  })
+
+  // Calculate payment stats
+  const paymentStats = payments ? {
+    total: payments.reduce((sum, payment) => sum + payment.amount, 0),
+    paid: payments.filter(p => p.status === 'paid')
+      .reduce((sum, payment) => sum + payment.amount, 0),
+    pending: payments.filter(p => p.status === 'pending')
+      .reduce((sum, payment) => sum + payment.amount, 0),
+    late: payments.filter(p => p.status === 'late')
+      .reduce((sum, payment) => sum + payment.amount, 0)
+  } : {
+    total: 0,
+    paid: 0,
+    pending: 0,
+    late: 0
+  }
+
+  if (isLoadingLease || isLoadingPayments) {
     return <div>Chargement...</div>
   }
 
