@@ -69,7 +69,10 @@ export function PropertyDialog({
         `)
         .eq("agency_id", userProfile.agency_id)
 
-      return (agencyOwners || []).map(ao => ({
+      if (!agencyOwners) return []
+
+      // Properly map the nested owner data to match PropertyOwner interface
+      return agencyOwners.map(ao => ({
         id: ao.owner.id,
         first_name: ao.owner.first_name,
         last_name: ao.owner.last_name,
