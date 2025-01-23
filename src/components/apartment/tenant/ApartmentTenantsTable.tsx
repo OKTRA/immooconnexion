@@ -1,27 +1,28 @@
+import { Button } from "@/components/ui/button"
+import { Trash, Pencil, FileText } from "lucide-react"
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase"
-import { ApartmentTenant } from "@/types/apartment"
-import { ResponsiveTable } from "@/components/ui/responsive-table"
-import { TenantActionButtons } from "@/components/apartment/tenant/TenantActionButtons"
-import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
+import { CreateLeaseDialog } from "../lease/CreateLeaseDialog"
 
 interface ApartmentTenantsTableProps {
-  onEdit?: (tenant: ApartmentTenant) => void
+  onEdit?: (tenant: any) => void
   onDelete?: (id: string) => void
   isLoading?: boolean
 }
 
-export function ApartmentTenantsTable({ 
-  onEdit, 
-  onDelete, 
-  isLoading 
+export function ApartmentTenantsTable({
+  onEdit,
+  onDelete,
+  isLoading
 }: ApartmentTenantsTableProps) {
-  const { toast } = useToast()
-  
+  const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null)
+  const [showLeaseDialog, setShowLeaseDialog] = useState(false)
+
   const { data: tenants = [] } = useQuery({
     queryKey: ["apartment-tenants"],
     queryFn: async () => {
-      console.log("Fetching tenants data...")
+      console.log("Fetching tenants...")
       const { data, error } = await supabase
         .from("apartment_tenants")
         .select(`
@@ -49,88 +50,92 @@ export function ApartmentTenantsTable({
             payment_type
           )
         `)
-        .order('created_at', { ascending: false })
+        .order("created_at", { ascending: false })
 
       if (error) {
         console.error("Error fetching tenants:", error)
         throw error
       }
 
-      console.log("Tenants data:", data)
-      return data as ApartmentTenant[]
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 30, // 30 minutes
+      console.log("Fetched tenants:", data)
+      return data
+    }
   })
 
-  const handleDelete = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from("apartment_tenants")
-        .delete()
-        .eq("id", id)
-
-      if (error) throw error
-
-      toast({
-        title: "Succès",
-        description: "Le locataire a été supprimé avec succès",
-      })
-      
-      onDelete?.(id)
-    } catch (error) {
-      console.error("Error:", error)
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la suppression",
-        variant: "destructive",
-      })
-    }
+  if (isLoading) {
+    return <div>Chargement...</div>
   }
 
   return (
-    <ResponsiveTable>
-      <ResponsiveTable.Header>
-        <ResponsiveTable.Row>
-          <ResponsiveTable.Head>Nom</ResponsiveTable.Head>
-          <ResponsiveTable.Head>Email</ResponsiveTable.Head>
-          <ResponsiveTable.Head>Téléphone</ResponsiveTable.Head>
-          <ResponsiveTable.Head>Unité</ResponsiveTable.Head>
-          <ResponsiveTable.Head>Statut</ResponsiveTable.Head>
-          <ResponsiveTable.Head className="text-right">Actions</ResponsiveTable.Head>
-        </ResponsiveTable.Row>
-      </ResponsiveTable.Header>
-      <ResponsiveTable.Body>
-        {tenants.map((tenant) => {
-          const currentLease = tenant.apartment_leases?.find(lease => lease.status === 'active')
-          const unit = tenant.tenant_units?.[0]?.apartment_units
-          
-          return (
-            <ResponsiveTable.Row key={tenant.id}>
-              <ResponsiveTable.Cell>
+    <div className="rounded-md border">
+      <table className="w-full">
+        <thead>
+          <tr className="border-b bg-muted/50">
+            <th className="p-4 text-left">Nom</th>
+            <th className="p-4 text-left">Email</th>
+            <th className="p-4 text-left">Téléphone</th>
+            <th className="p-4 text-left">Unité</th>
+            <th className="p-4 text-left">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tenants.map((tenant) => (
+            <tr key={tenant.id} className="border-b">
+              <td className="p-4">
                 {tenant.first_name} {tenant.last_name}
-              </ResponsiveTable.Cell>
-              <ResponsiveTable.Cell>{tenant.email}</ResponsiveTable.Cell>
-              <ResponsiveTable.Cell>{tenant.phone_number}</ResponsiveTable.Cell>
-              <ResponsiveTable.Cell>
-                {unit?.apartment?.name} - Unité {unit?.unit_number}
-              </ResponsiveTable.Cell>
-              <ResponsiveTable.Cell>
-                {currentLease?.status || "Inactif"}
-              </ResponsiveTable.Cell>
-              <ResponsiveTable.Cell className="text-right">
-                <TenantActionButtons
-                  tenant={tenant}
-                  currentLease={currentLease}
-                  onEdit={() => onEdit?.(tenant)}
-                  onDelete={() => handleDelete(tenant.id)}
-                  onInspection={() => {}}
-                />
-              </ResponsiveTable.Cell>
-            </ResponsiveTable.Row>
-          )
-        })}
-      </ResponsiveTable.Body>
-    </ResponsiveTable>
+              </td>
+              <td className="p-4">{tenant.email || "-"}</td>
+              <td className="p-4">{tenant.phone_number || "-"}</td>
+              <td className="p-4">
+                {tenant.tenant_units?.[0]?.apartment_units?.apartment?.name} 
+                {tenant.tenant_units?.[0]?.apartment_units?.unit_number 
+                  ? ` - Unité ${tenant.tenant_units[0].apartment_units.unit_number}`
+                  : "-"}
+              </td>
+              <td className="p-4">
+                <div className="flex items-center gap-2">
+                  {onEdit && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEdit(tenant)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {onDelete && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDelete(tenant.id)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setSelectedTenantId(tenant.id)
+                      setShowLeaseDialog(true)
+                    }}
+                  >
+                    <FileText className="h-4 w-4" />
+                  </Button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {selectedTenantId && (
+        <CreateLeaseDialog
+          open={showLeaseDialog}
+          onOpenChange={setShowLeaseDialog}
+          tenantId={selectedTenantId}
+        />
+      )}
+    </div>
   )
 }
