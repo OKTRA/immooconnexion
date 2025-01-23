@@ -54,10 +54,12 @@ export function LeaseFormFields({
           unit_number,
           rent_amount,
           apartment:apartments (
+            id,
             name
           )
         `)
         .eq("status", "available")
+        .order('unit_number')
 
       if (error) {
         console.error("Error fetching units:", error)

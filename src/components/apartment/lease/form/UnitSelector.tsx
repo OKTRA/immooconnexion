@@ -13,6 +13,7 @@ interface Unit {
   unit_number: string;
   rent_amount: number;
   apartment: {
+    id: string;
     name: string;
   };
 }
@@ -25,6 +26,8 @@ interface UnitSelectorProps {
 }
 
 export function UnitSelector({ value, onChange, units = [], isLoading }: UnitSelectorProps) {
+  console.log("UnitSelector received units:", units)
+
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -42,20 +45,14 @@ export function UnitSelector({ value, onChange, units = [], isLoading }: UnitSel
         onValueChange={onChange}
       >
         <SelectTrigger id="unit" className="w-full">
-          <SelectValue placeholder="Sélectionner une unité disponible" />
+          <SelectValue placeholder="Sélectionner une unité" />
         </SelectTrigger>
         <SelectContent>
-          {(!units || units.length === 0) ? (
-            <SelectItem value="no-units" disabled>
-              Aucune unité disponible
+          {units.map((unit) => (
+            <SelectItem key={unit.id} value={unit.id}>
+              {unit.apartment?.name} - Unité {unit.unit_number} ({unit.rent_amount.toLocaleString()} FCFA)
             </SelectItem>
-          ) : (
-            units.map((unit) => (
-              <SelectItem key={unit.id} value={unit.id}>
-                {unit.apartment?.name} - Unité {unit.unit_number} ({unit.rent_amount.toLocaleString()} FCFA)
-              </SelectItem>
-            ))
-          )}
+          ))}
         </SelectContent>
       </Select>
     </div>
