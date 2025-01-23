@@ -36,7 +36,6 @@ export function LeaseFormFields({
   const { data: units = [], isLoading: unitsLoading } = useQuery({
     queryKey: ['available-units'],
     queryFn: async () => {
-      console.log("Fetching available units...")
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Non authentifié")
 
@@ -48,30 +47,29 @@ export function LeaseFormFields({
 
       if (!profile?.agency_id) throw new Error("Agency ID not found")
 
-      console.log("Fetching units for agency:", profile.agency_id)
-
       const { data, error } = await supabase
         .from("apartment_units")
         .select(`
           id,
           unit_number,
           rent_amount,
-          apartment:apartments!inner (
+          apartment:apartments (
             id,
             name
           )
         `)
         .eq("status", "available")
         .eq("apartments.agency_id", profile.agency_id)
+        .order('unit_number', { ascending: true })
 
       if (error) {
         console.error("Error fetching units:", error)
         throw error
       }
-      
-      console.log("Available units:", data)
+
       return data as Unit[]
-    }
+    },
+    enabled: true
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,17 +78,6 @@ export function LeaseFormFields({
   }
 
   const isFormValid = () => {
-    console.log("Form validation check:", {
-      unit_id: formData.unit_id,
-      start_date: formData.start_date,
-      rent_amount: formData.rent_amount,
-      deposit_amount: formData.deposit_amount,
-      payment_frequency: formData.payment_frequency,
-      duration_type: formData.duration_type,
-      payment_type: formData.payment_type,
-      end_date: formData.end_date,
-    });
-
     const valid = !!(
       formData.unit_id &&
       formData.start_date &&
@@ -102,7 +89,6 @@ export function LeaseFormFields({
       (formData.duration_type !== 'fixed' || formData.end_date)
     );
 
-    console.log("Form is valid:", valid);
     return valid;
   }
 
