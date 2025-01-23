@@ -127,13 +127,13 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Suivi des Paiements</h1>
         <div className="flex gap-2">
-          {lease && !lease.initial_payments_completed && (
+          {lease && lease.status === "pending_initial_payment" && (
             <Button onClick={() => setShowInitialPaymentDialog(true)} variant="secondary">
               <CreditCard className="h-4 w-4 mr-2" />
               Paiements Initiaux
             </Button>
           )}
-          {lease && lease.initial_payments_completed && (
+          {lease && lease.status === "active" && lease.initial_payments_completed && (
             <Button onClick={() => setShowPaymentDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Paiement de Loyer
