@@ -1,8 +1,5 @@
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PaymentStatusStats } from "./PaymentStatusStats"
-import { PaymentsList } from "./PaymentsList"
-import { PaymentFilters } from "./PaymentFilters"
+import { useState, Suspense } from "react"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Plus, CreditCard, AlertCircle } from "lucide-react"
 import { PaymentDialog } from "./PaymentDialog"
@@ -11,6 +8,9 @@ import { supabase } from "@/integrations/supabase/client"
 import { PaymentPeriodFilter, PaymentStatusFilter } from "./types"
 import { InitialPaymentDialog } from "./components/InitialPaymentDialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { PaymentStatusStats } from "./PaymentStatusStats"
+import { PaymentsList } from "./PaymentsList"
+import { PaymentFilters } from "./PaymentFilters"
 
 interface PaymentMonitoringDashboardProps {
   tenantId: string
@@ -62,7 +62,18 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
       console.log("Fetching lease for tenant:", tenantId)
       const { data, error } = await supabase
         .from("apartment_leases")
-        .select("*, apartment_tenants(first_name, last_name)")
+        .select(`
+          *,
+          tenant:apartment_tenants!inner (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone_number,
+            birth_date,
+            profession
+          )
+        `)
         .eq("tenant_id", tenantId)
         .eq("status", "active")
         .maybeSingle()
@@ -72,9 +83,17 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
         throw error
       }
       
-      console.log("Fetched lease:", data)
-      return data
-    }
+      if (!data) {
+        return null
+      }
+
+      console.log("Lease data fetched:", data)
+      return {
+        ...data,
+        tenant: data.tenant
+      }
+    },
+    enabled: !!tenantId
   })
 
   if (isLoadingLease) {
@@ -108,13 +127,13 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Suivi des Paiements</h1>
         <div className="flex gap-2">
-          {lease && lease.initial_payments_completed === false && (
+          {lease && !lease.initial_payments_completed && (
             <Button onClick={() => setShowInitialPaymentDialog(true)} variant="secondary">
               <CreditCard className="h-4 w-4 mr-2" />
               Paiements Initiaux
             </Button>
           )}
-          {lease && lease.initial_payments_completed === true && (
+          {lease && lease.initial_payments_completed && (
             <Button onClick={() => setShowPaymentDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Paiement de Loyer
@@ -124,9 +143,6 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Statistiques des Paiements</CardTitle>
-        </CardHeader>
         <CardContent>
           <div className="overflow-hidden">
             <PaymentStatusStats stats={paymentStats} />
@@ -135,16 +151,13 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
       </Card>
 
       <Card>
-        <CardHeader className="space-y-6">
-          <CardTitle>Liste des Paiements</CardTitle>
+        <CardContent className="space-y-6">
           <PaymentFilters
             periodFilter={periodFilter}
             statusFilter={statusFilter}
             onPeriodFilterChange={setPeriodFilter}
             onStatusFilterChange={setStatusFilter}
           />
-        </CardHeader>
-        <CardContent>
           <div className="overflow-hidden">
             <PaymentsList
               tenantId={tenantId}
