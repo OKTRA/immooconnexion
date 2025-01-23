@@ -6,7 +6,6 @@ import { SimpleUnitSelector } from "./form/SimpleUnitSelector"
 import { Loader2 } from "lucide-react"
 import { useApartmentTenantForm } from "./hooks/useApartmentTenantForm"
 import { ApartmentTenant } from "@/types/apartment"
-import { LeaseFields } from "./form/LeaseFields"
 
 interface ApartmentTenantFormProps {
   unitId: string
@@ -53,11 +52,6 @@ export function ApartmentTenantForm({
         contactPhone={formData.emergency_contact_phone}
         contactRelationship={formData.emergency_contact_relationship}
         onChange={handleFieldChange}
-      />
-
-      <LeaseFields
-        formData={formData}
-        setFormData={setFormData}
       />
 
       <PhotoUpload

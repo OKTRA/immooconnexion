@@ -2207,11 +2207,6 @@ export type Database = {
       }
     }
     Enums: {
-      lease_status:
-        | "active"
-        | "expired"
-        | "terminated"
-        | "pending_initial_payment"
       owner_status: "active" | "inactive"
       property_unit_status:
         | "available"
