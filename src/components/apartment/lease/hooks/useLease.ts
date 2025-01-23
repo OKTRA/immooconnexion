@@ -1,24 +1,30 @@
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { LeaseFormData, PaymentFrequency, DurationType, PaymentType } from "../types"
 
-export function useLease(unitId: string | undefined, tenantId: string) {
+interface UseLeaseProps {
+  initialUnitId?: string;
+  tenantId: string;
+  onSuccess?: () => void;
+}
+
+export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState<LeaseFormData>({
-    unit_id: unitId || "",
+  const [formData, setFormData] = useState({
+    unit_id: initialUnitId || "",
     start_date: "",
     end_date: "",
     rent_amount: 0,
     deposit_amount: 0,
-    payment_frequency: "monthly" as PaymentFrequency,
-    duration_type: "month_to_month" as DurationType,
-    payment_type: "upfront" as PaymentType
+    payment_frequency: "monthly" as const,
+    duration_type: "month_to_month" as const,
+    payment_type: "upfront" as const
   })
 
   const handleSubmit = async () => {
     try {
+      console.log("Starting lease creation with tenant:", tenantId)
       setIsSubmitting(true)
 
       const { data: profile } = await supabase.auth.getUser()
@@ -31,6 +37,13 @@ export function useLease(unitId: string | undefined, tenantId: string) {
         .single()
 
       if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
+
+      console.log("Creating lease with data:", {
+        tenant_id: tenantId,
+        unit_id: formData.unit_id,
+        agency_id: userProfile.agency_id,
+        ...formData
+      })
 
       // Créer le bail
       const { data: lease, error: leaseError } = await supabase
@@ -53,7 +66,10 @@ export function useLease(unitId: string | undefined, tenantId: string) {
         .select()
         .single()
 
-      if (leaseError) throw leaseError
+      if (leaseError) {
+        console.error("Lease creation error:", leaseError)
+        throw leaseError
+      }
 
       // Mettre à jour le statut de l'unité
       const { error: unitError } = await supabase
@@ -79,6 +95,10 @@ export function useLease(unitId: string | undefined, tenantId: string) {
         title: "Bail créé",
         description: "Le bail a été créé avec succès"
       })
+
+      if (onSuccess) {
+        onSuccess()
+      }
 
       return lease
 
