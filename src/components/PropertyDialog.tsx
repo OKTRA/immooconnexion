@@ -71,13 +71,12 @@ export function PropertyDialog({
 
       if (!agencyOwners) return []
 
-      // Transformer les données imbriquées pour correspondre à l'interface PropertyOwner
       return agencyOwners.map(ao => ({
         id: ao.owner.id,
         first_name: ao.owner.first_name,
         last_name: ao.owner.last_name,
         phone_number: ao.owner.phone_number
-      })) satisfies PropertyOwner[]
+      } as PropertyOwner))
     }
   })
 
