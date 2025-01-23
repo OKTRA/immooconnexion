@@ -1,10 +1,9 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { LeaseFormData } from "../types"
 
 interface DateFieldsProps {
-  formData: LeaseFormData;
-  setFormData: (data: LeaseFormData) => void;
+  formData: any
+  setFormData: (data: any) => void
 }
 
 export function DateFields({ formData, setFormData }: DateFieldsProps) {
@@ -17,9 +16,10 @@ export function DateFields({ formData, setFormData }: DateFieldsProps) {
           type="date"
           value={formData.start_date}
           onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+          required
         />
       </div>
-      {formData.duration_type === 'fixed' && (
+      {formData.duration_type === "fixed" && (
         <div className="space-y-2">
           <Label htmlFor="end_date">Date de fin</Label>
           <Input
@@ -27,6 +27,7 @@ export function DateFields({ formData, setFormData }: DateFieldsProps) {
             type="date"
             value={formData.end_date}
             onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+            required
           />
         </div>
       )}
