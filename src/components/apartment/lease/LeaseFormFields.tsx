@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { DateFields } from "./form/DateFields"
 import { PaymentFields } from "./form/PaymentFields"
 import { FrequencyFields } from "./form/FrequencyFields"
+import { UnitSelector } from "./form/UnitSelector"
 
 interface LeaseFormFieldsProps {
   formData: any
@@ -27,9 +28,17 @@ export function LeaseFormFields({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <UnitSelector 
+        value={formData.unit_id || ""}
+        onChange={(value) => setFormData({ ...formData, unit_id: value })}
+      />
       <DateFields formData={formData} setFormData={setFormData} />
       <PaymentFields formData={formData} setFormData={setFormData} />
-      <FrequencyFields formData={formData} setFormData={setFormData} />
+      <FrequencyFields 
+        formData={formData} 
+        setFormData={setFormData}
+        onDurationTypeChange={(value) => setFormData({ ...formData, duration_type: value })}
+      />
       
       <div className="flex justify-end gap-2">
         <Button
