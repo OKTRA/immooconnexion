@@ -3,11 +3,19 @@ import { DateFields } from "./form/DateFields"
 import { PaymentFields } from "./form/PaymentFields"
 import { FrequencyFields } from "./form/FrequencyFields"
 import { UnitSelector } from "./form/UnitSelector"
-import { LeaseFormData } from "../types"
 
 interface LeaseFormFieldsProps {
-  formData: LeaseFormData;
-  setFormData: (data: LeaseFormData) => void;
+  formData: {
+    unit_id: string;
+    start_date: string;
+    end_date?: string;
+    rent_amount: number;
+    deposit_amount: number;
+    payment_frequency: string;
+    duration_type: string;
+    payment_type: string;
+  };
+  setFormData: (data: any) => void;
   onSubmit: () => Promise<void>;
   isSubmitting: boolean;
   onCancel: () => void;
@@ -28,16 +36,31 @@ export function LeaseFormFields({
   }
 
   const isFormValid = () => {
-    return (
+    // Ajout de logs pour déboguer
+    console.log("Form validation check:", {
+      unit_id: formData.unit_id,
+      start_date: formData.start_date,
+      rent_amount: formData.rent_amount,
+      deposit_amount: formData.deposit_amount,
+      payment_frequency: formData.payment_frequency,
+      duration_type: formData.duration_type,
+      payment_type: formData.payment_type,
+      end_date: formData.end_date,
+    });
+
+    const valid = !!(
       formData.unit_id &&
       formData.start_date &&
-      formData.rent_amount > 0 &&
+      formData.rent_amount &&
       formData.deposit_amount >= 0 &&
       formData.payment_frequency &&
       formData.duration_type &&
       formData.payment_type &&
       (formData.duration_type !== 'fixed' || formData.end_date)
-    )
+    );
+
+    console.log("Form is valid:", valid);
+    return valid;
   }
 
   return (
@@ -74,7 +97,7 @@ export function LeaseFormFields({
         </Button>
         <Button 
           type="submit" 
-          disabled={isSubmitting || disabled || !isFormValid()}
+          disabled={disabled}
         >
           {isSubmitting ? "Chargement..." : "Créer le bail"}
         </Button>
