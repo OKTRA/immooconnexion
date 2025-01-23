@@ -1,64 +1,68 @@
 import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
-import { Skeleton } from "@/components/ui/skeleton"
-
-export interface Unit {
-  id: string;
-  unit_number: string;
-  rent_amount: number;
-  apartment: {
-    id: string;
-    name: string;
-  };
-}
+import { UseFormReturn } from "react-hook-form"
+import { ApartmentUnitFormData } from "../../unit-dialog/types"
 
 interface UnitSelectorProps {
-  value: string;
-  onChange: (value: string) => void;
-  units: Unit[];
-  isLoading: boolean;
+  form: UseFormReturn<any>
+  units: {
+    id: string
+    unit_number: string
+    rent_amount: number
+    apartment: {
+      id: string
+      name: string
+    }
+  }[]
+  isLoading: boolean
 }
 
-export function UnitSelector({ value, onChange, units = [], isLoading }: UnitSelectorProps) {
-  if (isLoading) {
-    return (
-      <div className="space-y-2">
-        <Label>Unité d'appartement</Label>
-        <Skeleton className="h-10 w-full" />
-      </div>
-    )
-  }
+export function UnitSelector({ form, units = [], isLoading }: UnitSelectorProps) {
+  // Filter to only show available units
+  const availableUnits = units.filter(unit => unit.status === 'available')
 
   return (
-    <div className="space-y-2">
-      <Label htmlFor="unit">Unité d'appartement</Label>
-      <Select
-        value={value}
-        onValueChange={onChange}
-      >
-        <SelectTrigger id="unit" className="w-full">
-          <SelectValue placeholder="Sélectionner une unité" />
-        </SelectTrigger>
-        <SelectContent>
-          {units.length === 0 ? (
-            <SelectItem value="no-units" disabled>
-              Aucune unité disponible
-            </SelectItem>
-          ) : (
-            units.map((unit) => (
-              <SelectItem key={unit.id} value={unit.id}>
-                {unit.apartment.name} - Unité {unit.unit_number} ({unit.rent_amount.toLocaleString()} FCFA)
-              </SelectItem>
-            ))
-          )}
-        </SelectContent>
-      </Select>
-    </div>
+    <FormField
+      control={form.control}
+      name="unit_id"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Unité</FormLabel>
+          <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner une unité" />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {availableUnits.length === 0 ? (
+                <SelectItem value="no-units" disabled>
+                  Aucune unité disponible
+                </SelectItem>
+              ) : (
+                availableUnits.map((unit) => (
+                  <SelectItem key={unit.id} value={unit.id}>
+                    {unit.apartment.name} - Unité {unit.unit_number} ({unit.rent_amount.toLocaleString()} FCFA)
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   )
 }
