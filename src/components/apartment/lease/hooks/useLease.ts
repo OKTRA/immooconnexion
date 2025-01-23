@@ -1,37 +1,30 @@
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { LeaseFormData } from "../types"
 
 interface UseLeaseProps {
-  initialUnitId?: string
-  tenantId: string
-  onSuccess?: () => void
+  initialUnitId?: string;
+  tenantId: string;
+  onSuccess?: () => void;
 }
 
 export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState<LeaseFormData>({
+  const [formData, setFormData] = useState({
     unit_id: initialUnitId || "",
     start_date: "",
     end_date: "",
     rent_amount: 0,
     deposit_amount: 0,
-    payment_frequency: "monthly",
-    duration_type: "month_to_month",
-    payment_type: "upfront"
+    payment_frequency: "monthly" as const,
+    duration_type: "month_to_month" as const,
+    payment_type: "upfront" as const
   })
 
-  console.log("useLease - Current formData:", formData)
-  console.log("useLease - initialUnitId:", initialUnitId)
-
   const handleSubmit = async () => {
-    console.log("handleSubmit - Attempting submission with unit_id:", formData.unit_id)
-    
     try {
       if (!formData.unit_id || formData.unit_id.trim() === "") {
-        console.log("handleSubmit - No unit_id found")
         toast({
           title: "Erreur de validation",
           description: "Veuillez sélectionner une unité avant de continuer",
@@ -41,7 +34,6 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
       }
 
       setIsSubmitting(true)
-      console.log("handleSubmit - Starting submission process")
 
       const { data: profile } = await supabase.auth.getUser()
       if (!profile.user) throw new Error("Non authentifié")
@@ -53,13 +45,6 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
         .single()
 
       if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
-
-      console.log("handleSubmit - Creating lease with data:", {
-        tenant_id: tenantId,
-        unit_id: formData.unit_id,
-        agency_id: userProfile.agency_id,
-        ...formData
-      })
 
       const { data: lease, error: leaseError } = await supabase
         .from("apartment_leases")
@@ -102,8 +87,6 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
 
       if (tenantUnitError) throw tenantUnitError
 
-      console.log("handleSubmit - Lease created successfully:", lease)
-
       toast({
         title: "Succès",
         description: "Le bail a été créé avec succès"
@@ -116,10 +99,10 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
       return lease
 
     } catch (error: any) {
-      console.error("Error in handleSubmit:", error)
+      console.error("Error:", error)
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de la création du bail",
+        description: error.message,
         variant: "destructive"
       })
     } finally {

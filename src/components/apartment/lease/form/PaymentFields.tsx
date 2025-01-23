@@ -6,7 +6,7 @@ interface PaymentFieldsProps {
   setFormData: (data: any) => void
 }
 
-export function PaymentFields({ formData, setFormData }: PaymentFieldsProps) {
+export function PaymentFields({ formData }: PaymentFieldsProps) {
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
@@ -15,8 +15,8 @@ export function PaymentFields({ formData, setFormData }: PaymentFieldsProps) {
           id="rent_amount"
           type="number"
           value={formData.rent_amount}
-          onChange={(e) => setFormData({ ...formData, rent_amount: Number(e.target.value) })}
-          required
+          readOnly
+          className="bg-muted"
         />
       </div>
       <div className="space-y-2">
@@ -25,8 +25,8 @@ export function PaymentFields({ formData, setFormData }: PaymentFieldsProps) {
           id="deposit_amount"
           type="number"
           value={formData.deposit_amount}
-          onChange={(e) => setFormData({ ...formData, deposit_amount: Number(e.target.value) })}
-          required
+          readOnly
+          className="bg-muted"
         />
       </div>
     </div>
