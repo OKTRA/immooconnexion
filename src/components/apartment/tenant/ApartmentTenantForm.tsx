@@ -6,6 +6,7 @@ import { SimpleUnitSelector } from "./form/SimpleUnitSelector"
 import { Loader2 } from "lucide-react"
 import { useApartmentTenantForm } from "./hooks/useApartmentTenantForm"
 import { ApartmentTenant } from "@/types/apartment"
+import { format, parse } from "date-fns"
 
 interface ApartmentTenantFormProps {
   unitId: string
@@ -32,7 +33,26 @@ export function ApartmentTenantForm({
   })
 
   const handleFieldChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    // Format date fields to YYYY-MM-DD
+    if (field === "birthDate" && value) {
+      try {
+        // If the value is already in YYYY-MM-DD format, keep it
+        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+          setFormData(prev => ({ ...prev, [field]: value }))
+        } else {
+          // Otherwise, try to parse and format the date
+          const parsedDate = parse(value, "yyyy-MM-dd", new Date())
+          const formattedDate = format(parsedDate, "yyyy-MM-dd")
+          setFormData(prev => ({ ...prev, [field]: formattedDate }))
+        }
+      } catch (error) {
+        console.error("Date parsing error:", error)
+        // If there's an error parsing the date, don't update the field
+        return
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }))
+    }
   }
 
   return (
