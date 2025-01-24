@@ -8,6 +8,7 @@ import { ApartmentLease } from "@/types/apartment"
 import { DateFields } from "./form/DateFields"
 import { PaymentFields } from "./form/PaymentFields"
 import { FrequencyFields } from "./form/FrequencyFields"
+import { TenantUnitFields } from "./form/TenantUnitFields"
 import { LeaseFormData } from "./types"
 
 interface LeaseFormProps {
@@ -175,6 +176,14 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <TenantUnitFields 
+        tenants={tenants}
+        units={units}
+        formData={formData}
+        onUnitChange={handleUnitChange}
+        setValue={setValue}
+      />
+      
       <DateFields 
         formData={formData} 
         setFormData={(data) => {
