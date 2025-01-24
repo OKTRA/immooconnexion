@@ -32,7 +32,7 @@ export function useLease(unitId: string | undefined, tenantId: string) {
 
       if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
 
-      // Create the lease
+      // Créer le bail
       const { data: lease, error: leaseError } = await supabase
         .from("apartment_leases")
         .insert([
@@ -55,7 +55,7 @@ export function useLease(unitId: string | undefined, tenantId: string) {
 
       if (leaseError) throw leaseError
 
-      // Update the unit status
+      // Mettre à jour le statut de l'unité
       const { error: unitError } = await supabase
         .from("apartment_units")
         .update({ status: "occupied" })
@@ -63,14 +63,13 @@ export function useLease(unitId: string | undefined, tenantId: string) {
 
       if (unitError) throw unitError
 
-      // Create tenant_units association
+      // Créer l'association tenant_units
       const { error: tenantUnitError } = await supabase
         .from("tenant_units")
         .insert([
           {
             tenant_id: tenantId,
-            unit_id: formData.unit_id,
-            status: "active"
+            unit_id: formData.unit_id
           }
         ])
 
