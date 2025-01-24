@@ -2207,6 +2207,21 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_lease_with_periods: {
+        Args: {
+          p_tenant_id: string
+          p_unit_id: string
+          p_start_date: string
+          p_end_date: string
+          p_rent_amount: number
+          p_deposit_amount: number
+          p_payment_frequency: string
+          p_duration_type: string
+          p_payment_type: string
+          p_agency_id: string
+        }
+        Returns: string
+      }
       generate_monthly_owner_statements: {
         Args: {
           year: number

@@ -57,80 +57,39 @@ export function useLeaseForm(initialData?: ApartmentLease, onSuccess?: () => voi
     }
   })
 
-  const generatePaymentPeriods = (leaseData: LeaseFormData) => {
-    const periods = []
-    let periodInterval: number
-    
-    switch (leaseData.payment_frequency) {
-      case 'daily': periodInterval = 1; break;
-      case 'weekly': periodInterval = 7; break;
-      case 'monthly': periodInterval = 30; break;
-      case 'quarterly': periodInterval = 90; break;
-      case 'yearly': periodInterval = 365; break;
-      default: periodInterval = 30;
-    }
-
-    let currentStart = new Date(leaseData.start_date)
-    const endDate = leaseData.end_date ? new Date(leaseData.end_date) : new Date(currentStart.getTime() + 365 * 24 * 60 * 60 * 1000)
-    
-    while (currentStart < endDate) {
-      const periodEnd = new Date(currentStart.getTime() + (periodInterval * 24 * 60 * 60 * 1000))
-      
-      periods.push({
-        start_date: currentStart.toISOString().split('T')[0],
-        end_date: periodEnd.toISOString().split('T')[0],
-        amount: leaseData.rent_amount,
-        status: 'pending'
-      })
-      
-      currentStart = new Date(periodEnd.getTime() + 24 * 60 * 60 * 1000)
-    }
-
-    return periods
-  }
-
   const createLease = useMutation({
     mutationFn: async (data: LeaseFormData) => {
       if (!data.start_date) {
         throw new Error("La date de début est requise")
       }
 
-      const leaseData = {
-        ...data,
-        end_date: data.duration_type === "fixed" ? data.end_date : null,
-        status: "active",
-        agency_id: (await supabase.auth.getUser()).data.user?.id
-      }
+      const { data: profile } = await supabase.auth.getUser()
+      if (!profile.user) throw new Error("Non authentifié")
 
-      // Insérer le bail
-      const { data: lease, error: leaseError } = await supabase
-        .from("apartment_leases")
-        .insert([leaseData])
-        .select()
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("agency_id")
+        .eq("id", profile.user.id)
         .single()
 
-      if (leaseError) throw leaseError
+      if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
 
-      // Générer et insérer les périodes de paiement
-      const paymentPeriods = generatePaymentPeriods(data).map(period => ({
-        ...period,
-        lease_id: lease.id
-      }))
+      // Utiliser la nouvelle fonction create_lease_with_periods
+      const { data: lease, error } = await supabase
+        .rpc('create_lease_with_periods', {
+          p_tenant_id: data.tenant_id,
+          p_unit_id: data.unit_id,
+          p_start_date: data.start_date,
+          p_end_date: data.duration_type === "fixed" ? data.end_date : null,
+          p_rent_amount: data.rent_amount,
+          p_deposit_amount: data.deposit_amount,
+          p_payment_frequency: data.payment_frequency,
+          p_duration_type: data.duration_type,
+          p_payment_type: data.payment_type,
+          p_agency_id: userProfile.agency_id
+        })
 
-      const { error: periodsError } = await supabase
-        .from("apartment_payment_periods")
-        .insert(paymentPeriods)
-
-      if (periodsError) throw periodsError
-
-      // Mettre à jour le statut de l'unité
-      const { error: unitError } = await supabase
-        .from("apartment_units")
-        .update({ status: "occupied" })
-        .eq("id", data.unit_id)
-
-      if (unitError) throw unitError
-
+      if (error) throw error
       return lease
     },
     onSuccess: () => {
