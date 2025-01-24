@@ -2,13 +2,11 @@ import { Button } from "@/components/ui/button"
 import { PersonalInfoFields } from "./form/PersonalInfoFields"
 import { EmergencyFields } from "./form/EmergencyFields"
 import { PhotoUpload } from "../form/PhotoUpload"
-import { SimpleUnitSelector } from "./form/SimpleUnitSelector"
 import { Loader2 } from "lucide-react"
 import { useApartmentTenantForm } from "./hooks/useApartmentTenantForm"
 import { ApartmentTenant } from "@/types/apartment"
 
 interface ApartmentTenantFormProps {
-  unitId: string
   onSuccess: () => void
   isSubmitting: boolean
   setIsSubmitting: (value: boolean) => void
@@ -16,7 +14,6 @@ interface ApartmentTenantFormProps {
 }
 
 export function ApartmentTenantForm({
-  unitId,
   onSuccess,
   initialData
 }: ApartmentTenantFormProps) {
@@ -26,7 +23,6 @@ export function ApartmentTenantForm({
     isSubmitting,
     handleSubmit
   } = useApartmentTenantForm({
-    unitId,
     onSuccess,
     initialData
   })
@@ -62,11 +58,6 @@ export function ApartmentTenantForm({
           }
         }}
         previewUrls={[]}
-      />
-
-      <SimpleUnitSelector
-        value={formData.unit_id}
-        onValueChange={(value) => setFormData(prev => ({ ...prev, unit_id: value }))}
       />
 
       <div className="flex justify-end gap-2">

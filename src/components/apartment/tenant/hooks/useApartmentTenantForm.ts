@@ -5,13 +5,11 @@ import { useQueryClient } from "@tanstack/react-query"
 import { ApartmentTenant } from "@/types/apartment"
 
 interface UseApartmentTenantFormProps {
-  unitId: string
   onSuccess: () => void
   initialData?: ApartmentTenant
 }
 
 export function useApartmentTenantForm({
-  unitId,
   onSuccess,
   initialData
 }: UseApartmentTenantFormProps) {
@@ -29,8 +27,7 @@ export function useApartmentTenantForm({
     photoId: null as File | null,
     emergency_contact_name: initialData?.emergency_contact_name || "",
     emergency_contact_phone: initialData?.emergency_contact_phone || "",
-    emergency_contact_relationship: initialData?.emergency_contact_relationship || "",
-    unit_id: unitId || initialData?.unit_id || ""
+    emergency_contact_relationship: initialData?.emergency_contact_relationship || ""
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -79,11 +76,9 @@ export function useApartmentTenantForm({
         emergency_contact_phone: formData.emergency_contact_phone,
         emergency_contact_relationship: formData.emergency_contact_relationship,
         agency_id: profile.agency_id,
-        unit_id: formData.unit_id,
         status: 'active'
       }
 
-      // Start a transaction using multiple operations
       const { data: tenant, error: tenantError } = await supabase
         .from("apartment_tenants")
         .upsert(initialData?.id ? { id: initialData.id, ...tenantData } : tenantData)
@@ -92,16 +87,7 @@ export function useApartmentTenantForm({
 
       if (tenantError) throw tenantError
 
-      // Update unit status to occupied
-      const { error: unitError } = await supabase
-        .from("apartment_units")
-        .update({ status: "occupied" })
-        .eq("id", formData.unit_id)
-
-      if (unitError) throw unitError
-
       await queryClient.invalidateQueries({ queryKey: ["apartment-tenants"] })
-      await queryClient.invalidateQueries({ queryKey: ["apartment-units"] })
 
       toast({
         title: initialData ? "Locataire modifié" : "Locataire ajouté",
