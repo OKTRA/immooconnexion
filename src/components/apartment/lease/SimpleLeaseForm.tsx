@@ -6,6 +6,9 @@ import { supabase } from "@/lib/supabase"
 import { toast } from "@/components/ui/use-toast"
 import { TenantUnitFields } from "./form/TenantUnitFields"
 import { LeaseFormData } from "./types"
+import { PaymentFields } from "./form/PaymentFields"
+import { FrequencyFields } from "./form/FrequencyFields"
+import { DateFields } from "./form/DateFields"
 
 interface SimpleLeaseFormProps {
   onSuccess?: () => void
@@ -18,6 +21,7 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
       tenant_id: "",
       unit_id: "",
       start_date: new Date().toISOString().split('T')[0],
+      end_date: "",
       rent_amount: 0,
       deposit_amount: 0,
       payment_frequency: "monthly",
@@ -30,9 +34,23 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
   const { data: tenants = [], isLoading: isLoadingTenants } = useQuery({
     queryKey: ["apartment-tenants"],
     queryFn: async () => {
+      const { data: profile } = await supabase.auth.getUser()
+      if (!profile.user) throw new Error("Non authentifié")
+
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('agency_id')
+        .eq('id', profile.user.id)
+        .single()
+
+      if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
+
       const { data, error } = await supabase
         .from("apartment_tenants")
         .select("*")
+        .eq("agency_id", userProfile.agency_id)
+        .eq("status", "active")
+
       if (error) throw error
       return data
     }
@@ -51,6 +69,7 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
           )
         `)
         .eq("status", "available")
+
       if (error) throw error
       return data
     }
@@ -74,9 +93,9 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
           p_tenant_id: data.tenant_id,
           p_unit_id: data.unit_id,
           p_start_date: data.start_date,
-          p_end_date: null,
+          p_end_date: data.end_date || null,
           p_rent_amount: data.rent_amount,
-          p_deposit_amount: data.deposit_amount || data.rent_amount,
+          p_deposit_amount: data.deposit_amount,
           p_payment_frequency: data.payment_frequency,
           p_duration_type: data.duration_type,
           p_payment_type: data.payment_type,
@@ -122,14 +141,50 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
     )
   }
 
+  const formData = watch()
+
   return (
     <form onSubmit={handleSubmit(data => createLease.mutateAsync(data))} className="space-y-6">
       <TenantUnitFields 
         tenants={tenants}
         units={units}
-        formData={watch()}
+        formData={formData}
         onUnitChange={handleUnitChange}
         setValue={setValue}
+      />
+
+      <PaymentFields 
+        formData={formData}
+        setFormData={(data) => {
+          Object.entries(data).forEach(([key, value]) => {
+            setValue(key as keyof LeaseFormData, value)
+          })
+        }}
+        selectedUnitId={formData.unit_id}
+      />
+
+      <FrequencyFields 
+        formData={formData}
+        setFormData={(data) => {
+          Object.entries(data).forEach(([key, value]) => {
+            setValue(key as keyof LeaseFormData, value)
+          })
+        }}
+        onDurationTypeChange={(value) => {
+          setValue("duration_type", value)
+          if (value !== "fixed") {
+            setValue("end_date", "")
+          }
+        }}
+      />
+
+      <DateFields 
+        formData={formData}
+        setFormData={(data) => {
+          Object.entries(data).forEach(([key, value]) => {
+            setValue(key as keyof LeaseFormData, value)
+          })
+        }}
       />
 
       <div className="flex justify-end gap-2">
