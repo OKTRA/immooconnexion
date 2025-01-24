@@ -88,7 +88,38 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
 
       if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
 
-      const { data: lease, error } = await supabase
+      // Vérifier si une association tenant_units existe déjà
+      const { data: existingTenantUnit } = await supabase
+        .from('tenant_units')
+        .select('*')
+        .eq('tenant_id', data.tenant_id)
+        .eq('unit_id', data.unit_id)
+        .single()
+
+      // Si l'association existe, la mettre à jour
+      if (existingTenantUnit) {
+        const { error: updateError } = await supabase
+          .from('tenant_units')
+          .update({ status: 'active' })
+          .eq('tenant_id', data.tenant_id)
+          .eq('unit_id', data.unit_id)
+
+        if (updateError) throw updateError
+      } else {
+        // Sinon, créer une nouvelle association
+        const { error: tenantUnitError } = await supabase
+          .from('tenant_units')
+          .insert({
+            tenant_id: data.tenant_id,
+            unit_id: data.unit_id,
+            status: 'active'
+          })
+
+        if (tenantUnitError) throw tenantUnitError
+      }
+
+      // Créer le bail
+      const { data: lease, error: leaseError } = await supabase
         .from('apartment_leases')
         .insert({
           tenant_id: data.tenant_id,
@@ -106,25 +137,15 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
         .select()
         .single()
 
-      if (error) throw error
+      if (leaseError) throw leaseError
 
-      // Update unit status
+      // Mettre à jour le statut de l'unité
       const { error: unitError } = await supabase
         .from('apartment_units')
         .update({ status: 'occupied' })
         .eq('id', data.unit_id)
 
       if (unitError) throw unitError
-
-      // Create tenant_units association
-      const { error: tenantUnitError } = await supabase
-        .from('tenant_units')
-        .insert({
-          tenant_id: data.tenant_id,
-          unit_id: data.unit_id
-        })
-
-      if (tenantUnitError) throw tenantUnitError
 
       return lease
     },
@@ -137,7 +158,7 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
       })
       onSuccess?.()
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Error creating lease:", error)
       toast({
         title: "Erreur",
