@@ -28,8 +28,8 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
       unit_id: "",
       start_date: "",
       end_date: "",
-      rent_amount: "",
-      deposit_amount: "",
+      rent_amount: 0,
+      deposit_amount: 0,
       payment_frequency: "monthly",
       duration_type: "month_to_month",
       payment_type: "upfront",
@@ -37,6 +37,7 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
   })
 
   const selectedUnitId = watch("unit_id")
+  const durationType = watch("duration_type")
 
   const { data: tenants = [], isLoading: isLoadingTenants } = useQuery({
     queryKey: ["apartment-tenants"],
@@ -70,7 +71,6 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
     }
   })
 
-  // Mettre à jour automatiquement les montants lors de la sélection d'une unité
   const handleUnitChange = (unitId: string) => {
     const selectedUnit = units.find(unit => unit.id === unitId)
     if (selectedUnit) {
@@ -82,13 +82,22 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
 
   const createLease = useMutation({
     mutationFn: async (data: any) => {
+      // Ensure we have valid dates
+      if (!data.start_date) {
+        throw new Error("La date de début est requise")
+      }
+
+      // Only include end_date if duration_type is "fixed"
+      const leaseData = {
+        ...data,
+        end_date: data.duration_type === "fixed" ? data.end_date : null,
+        status: "active",
+        agency_id: (await supabase.auth.getUser()).data.user?.id
+      }
+
       const { error: leaseError } = await supabase
         .from("apartment_leases")
-        .insert([{
-          ...data,
-          status: "active",
-          agency_id: (await supabase.auth.getUser()).data.user?.id
-        }])
+        .insert([leaseData])
 
       if (leaseError) throw leaseError
 
@@ -120,9 +129,20 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
 
   const updateLease = useMutation({
     mutationFn: async (data: any) => {
+      // Ensure we have valid dates
+      if (!data.start_date) {
+        throw new Error("La date de début est requise")
+      }
+
+      // Only include end_date if duration_type is "fixed"
+      const leaseData = {
+        ...data,
+        end_date: data.duration_type === "fixed" ? data.end_date : null
+      }
+
       const { error } = await supabase
         .from("apartment_leases")
-        .update(data)
+        .update(leaseData)
         .eq("id", initialData?.id)
 
       if (error) throw error
