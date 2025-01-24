@@ -1,16 +1,14 @@
 import { useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { ApartmentTenant } from "@/types/apartment"
 
 interface UseApartmentTenantFormProps {
-  unitId: string
   onSuccess: () => void
   initialData?: ApartmentTenant
 }
 
 export function useApartmentTenantForm({
-  unitId,
   onSuccess,
   initialData
 }: UseApartmentTenantFormProps) {
@@ -21,13 +19,12 @@ export function useApartmentTenantForm({
     last_name: initialData?.last_name || "",
     email: initialData?.email || "",
     phone_number: initialData?.phone_number || "",
-    birth_date: initialData?.birth_date || null,
+    birth_date: initialData?.birth_date || "",
     profession: initialData?.profession || "",
     emergency_contact_name: initialData?.emergency_contact_name || "",
     emergency_contact_phone: initialData?.emergency_contact_phone || "",
     emergency_contact_relationship: initialData?.emergency_contact_relationship || "",
-    photoId: null as File | null,
-    unit_id: unitId || initialData?.unit_id || ""
+    photoId: null as File | null
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
