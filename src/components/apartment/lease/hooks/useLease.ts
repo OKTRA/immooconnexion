@@ -34,7 +34,12 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
         .eq("id", formData.unit_id)
         .single()
 
-      if (unitError) throw unitError
+      if (unitError) {
+        console.error("Error fetching unit data:", unitError)
+        throw unitError
+      }
+
+      console.log("Unit data:", unitData)
 
       const { data: profile } = await supabase.auth.getUser()
       if (!profile.user) throw new Error("Non authentifié")
