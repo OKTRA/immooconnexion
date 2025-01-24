@@ -46,24 +46,13 @@ export function ApartmentTenantsTab({
           .from("apartment_tenants")
           .select(`
             *,
-            apartment_leases (
-              id,
-              tenant_id,
+            tenant_units (
               unit_id,
-              start_date,
-              end_date,
-              rent_amount,
-              deposit_amount,
-              payment_frequency,
-              duration_type,
-              status,
-              payment_type,
-              agency_id
-            ),
-            apartment_units!apartment_tenants_unit_id_fkey (
-              unit_number,
-              apartment:apartments (
-                name
+              apartment_units:apartment_units!apartment_tenants_unit_id_fkey (
+                unit_number,
+                apartment:apartments (
+                  name
+                )
               )
             )
           `)

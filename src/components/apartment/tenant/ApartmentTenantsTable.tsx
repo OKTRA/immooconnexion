@@ -61,7 +61,7 @@ export function ApartmentTenantsTable({
           <TableRow>
             <TableHead>Nom</TableHead>
             <TableHead>Prénom</TableHead>
-            <TableHead>Date de naissance</TableHead>
+            <TableHead>Unité</TableHead>
             <TableHead>Téléphone</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
@@ -72,7 +72,10 @@ export function ApartmentTenantsTable({
               <TableCell>{tenant.last_name}</TableCell>
               <TableCell>{tenant.first_name}</TableCell>
               <TableCell>
-                {tenant.birth_date ? format(new Date(tenant.birth_date), 'PP', { locale: fr }) : '-'}
+                {tenant.tenant_units?.[0]?.apartment_units?.unit_number || '-'}
+                {tenant.tenant_units?.[0]?.apartment_units?.apartment?.name && 
+                  ` (${tenant.tenant_units[0].apartment_units.apartment.name})`
+                }
               </TableCell>
               <TableCell>{tenant.phone_number || '-'}</TableCell>
               <TableCell>
