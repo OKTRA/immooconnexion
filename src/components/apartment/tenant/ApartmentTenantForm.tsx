@@ -33,8 +33,13 @@ export function ApartmentTenantForm({
   })
 
   const handleFieldChange = (field: string, value: string) => {
-    // Format date fields to YYYY-MM-DD
-    if (field === "birthDate" && value) {
+    if (field === "birth_date") {
+      // If empty, set to null
+      if (!value) {
+        setFormData(prev => ({ ...prev, [field]: null }))
+        return
+      }
+
       try {
         // If the value is already in YYYY-MM-DD format, keep it
         if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -47,8 +52,8 @@ export function ApartmentTenantForm({
         }
       } catch (error) {
         console.error("Date parsing error:", error)
-        // If there's an error parsing the date, don't update the field
-        return
+        // If there's an error parsing the date, set to null
+        setFormData(prev => ({ ...prev, [field]: null }))
       }
     } else {
       setFormData(prev => ({ ...prev, [field]: value }))
@@ -58,11 +63,11 @@ export function ApartmentTenantForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <PersonalInfoFields
-        firstName={formData.firstName}
-        lastName={formData.lastName}
+        first_name={formData.first_name}
+        last_name={formData.last_name}
         email={formData.email}
-        phoneNumber={formData.phoneNumber}
-        birthDate={formData.birthDate}
+        phone_number={formData.phone_number}
+        birth_date={formData.birth_date || ""}
         profession={formData.profession}
         onChange={handleFieldChange}
       />
