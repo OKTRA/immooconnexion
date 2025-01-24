@@ -60,49 +60,22 @@ export function useLeaseForm(initialData?: ApartmentLease, onSuccess?: () => voi
   const createLease = useMutation({
     mutationFn: async (data: LeaseFormData) => {
       const { data: lease, error } = await supabase
-        .from("apartment_leases")
-        .insert({
-          tenant_id: data.tenant_id,
-          unit_id: data.unit_id,
-          start_date: data.start_date,
-          end_date: data.duration_type === "fixed" ? data.end_date : null,
-          rent_amount: data.rent_amount,
-          deposit_amount: data.deposit_amount,
-          payment_frequency: data.payment_frequency,
-          duration_type: data.duration_type,
-          payment_type: data.payment_type,
-          status: "active"
+        .rpc('create_lease_with_periods', {
+          p_tenant_id: data.tenant_id,
+          p_unit_id: data.unit_id,
+          p_start_date: data.start_date,
+          p_end_date: data.duration_type === "fixed" ? data.end_date : null,
+          p_rent_amount: data.rent_amount,
+          p_deposit_amount: data.deposit_amount,
+          p_payment_frequency: data.payment_frequency,
+          p_duration_type: data.duration_type,
+          p_payment_type: data.payment_type,
+          p_agency_id: units.find(unit => unit.id === data.unit_id)?.apartment?.agency_id
         })
-        .select()
-        .single()
 
       if (error) {
         console.error("Error creating lease:", error)
         throw error
-      }
-
-      // Update unit status
-      const { error: unitError } = await supabase
-        .from("apartment_units")
-        .update({ status: "occupied" })
-        .eq("id", data.unit_id)
-
-      if (unitError) {
-        console.error("Error updating unit status:", unitError)
-        throw unitError
-      }
-
-      // Create tenant_units association
-      const { error: tenantUnitError } = await supabase
-        .from("tenant_units")
-        .insert({
-          tenant_id: data.tenant_id,
-          unit_id: data.unit_id
-        })
-
-      if (tenantUnitError) {
-        console.error("Error creating tenant_units association:", tenantUnitError)
-        throw tenantUnitError
       }
 
       return lease
@@ -112,7 +85,7 @@ export function useLeaseForm(initialData?: ApartmentLease, onSuccess?: () => voi
       queryClient.invalidateQueries({ queryKey: ["available-units"] })
       toast({
         title: "Bail créé",
-        description: "Le bail a été créé avec succès. Vous pouvez maintenant générer les périodes de paiement.",
+        description: "Le bail a été créé avec succès.",
       })
       onSuccess?.()
     },
