@@ -45,18 +45,18 @@ export function RecentActivities() {
     queryFn: async () => {
       if (!userProfile?.agency_id) return []
       
-      const { data: contracts, error } = await supabase
+      const { data, error } = await supabase
         .from("contracts")
         .select(`
           id,
           montant,
           type,
           created_at,
-          tenant_id (
+          tenant_id:tenants!contracts_tenant_id_fkey (
             nom,
             prenom
           ),
-          property_id (
+          property_id:properties!contracts_property_id_fkey (
             bien
           )
         `)
@@ -65,7 +65,13 @@ export function RecentActivities() {
         .limit(5)
 
       if (error) throw error
-      return contracts as Contract[]
+      
+      // Transform the data to match the Contract interface
+      return (data || []).map(contract => ({
+        ...contract,
+        tenant_id: contract.tenant_id?.[0] || { nom: '', prenom: '' },
+        property_id: contract.property_id?.[0] || { bien: '' }
+      })) as Contract[]
     },
     enabled: !!userProfile?.agency_id,
     staleTime: 1 * 60 * 1000, // Cache pendant 1 minute
