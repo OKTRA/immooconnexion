@@ -74,39 +74,75 @@ export function useLeaseForm(initialData?: ApartmentLease, onSuccess?: () => voi
 
       if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
 
-      console.log("Calling create_lease_with_periods with data:", {
-        p_tenant_id: data.tenant_id,
-        p_unit_id: data.unit_id,
-        p_start_date: data.start_date,
-        p_end_date: data.duration_type === "fixed" ? data.end_date : null,
-        p_rent_amount: data.rent_amount,
-        p_deposit_amount: data.deposit_amount,
-        p_payment_frequency: data.payment_frequency,
-        p_duration_type: data.duration_type,
-        p_payment_type: data.payment_type,
-        p_agency_id: userProfile.agency_id
-      })
+      // First, create the lease
+      const { data: lease, error: leaseError } = await supabase
+        .from("apartment_leases")
+        .insert({
+          tenant_id: data.tenant_id,
+          unit_id: data.unit_id,
+          start_date: data.start_date,
+          end_date: data.duration_type === "fixed" ? data.end_date : null,
+          rent_amount: data.rent_amount,
+          deposit_amount: data.deposit_amount,
+          payment_frequency: data.payment_frequency,
+          duration_type: data.duration_type,
+          payment_type: data.payment_type,
+          agency_id: userProfile.agency_id,
+          status: "active"
+        })
+        .select()
+        .single()
 
-      const { data: lease, error } = await supabase
-        .rpc('create_lease_with_periods', {
-          p_tenant_id: data.tenant_id,
-          p_unit_id: data.unit_id,
+      if (leaseError) {
+        console.error("Error creating lease:", leaseError)
+        throw leaseError
+      }
+
+      if (!lease) {
+        throw new Error("Failed to create lease")
+      }
+
+      // Then, generate payment periods
+      const { error: periodsError } = await supabase
+        .rpc('generate_lease_payment_periods', {
+          p_lease_id: lease.id,
           p_start_date: data.start_date,
           p_end_date: data.duration_type === "fixed" ? data.end_date : null,
           p_rent_amount: data.rent_amount,
-          p_deposit_amount: data.deposit_amount,
-          p_payment_frequency: data.payment_frequency,
-          p_duration_type: data.duration_type,
-          p_payment_type: data.payment_type,
-          p_agency_id: userProfile.agency_id
+          p_payment_frequency: data.payment_frequency
         })
 
-      if (error) {
-        console.error("Error creating lease:", error)
-        throw error
+      if (periodsError) {
+        console.error("Error generating periods:", periodsError)
+        throw periodsError
       }
 
-      console.log("Lease created successfully:", lease)
+      // Update unit status
+      const { error: unitError } = await supabase
+        .from("apartment_units")
+        .update({ status: "occupied" })
+        .eq("id", data.unit_id)
+
+      if (unitError) {
+        console.error("Error updating unit:", unitError)
+        throw unitError
+      }
+
+      // Create tenant_units association
+      const { error: tenantUnitError } = await supabase
+        .from("tenant_units")
+        .insert({
+          tenant_id: data.tenant_id,
+          unit_id: data.unit_id
+        })
+        .select()
+        .single()
+
+      if (tenantUnitError && tenantUnitError.code !== '23505') { // Ignore unique constraint violations
+        console.error("Error creating tenant_unit:", tenantUnitError)
+        throw tenantUnitError
+      }
+
       return lease
     },
     onSuccess: () => {
@@ -118,11 +154,11 @@ export function useLeaseForm(initialData?: ApartmentLease, onSuccess?: () => voi
       })
       onSuccess?.()
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Error creating lease:", error)
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la création du bail",
+        description: error.message || "Une erreur est survenue lors de la création du bail",
         variant: "destructive",
       })
     }
@@ -154,11 +190,11 @@ export function useLeaseForm(initialData?: ApartmentLease, onSuccess?: () => voi
       })
       onSuccess?.()
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Error updating lease:", error)
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la modification du bail",
+        description: error.message || "Une erreur est survenue lors de la modification du bail",
         variant: "destructive",
       })
     }
