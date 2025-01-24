@@ -26,7 +26,6 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
     isLoadingUnits,
     isSubmitting,
     createLease,
-    updateLease
   } = useLeaseForm(initialData, onSuccess)
 
   const handleUnitChange = (unitId: string) => {
@@ -39,11 +38,7 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
   }
 
   const onSubmit = async (data: LeaseFormData) => {
-    if (initialData) {
-      await updateLease.mutateAsync(data)
-    } else {
-      await createLease.mutateAsync(data)
-    }
+    await createLease.mutateAsync(data)
   }
 
   if (isLoadingTenants || isLoadingUnits) {
