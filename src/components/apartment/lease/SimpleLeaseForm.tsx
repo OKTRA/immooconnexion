@@ -252,11 +252,11 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
         <div className="mt-4 flex justify-center">
           <Button
             type="button"
-            onClick={() => generatePaymentPeriods.mutateAsync(createLease.data.id)}
-            disabled={generatePaymentPeriods.isLoading}
+            onClick={() => generatePaymentPeriods.mutate(createLease.data.id)}
+            disabled={generatePaymentPeriods.isPending}
             variant="secondary"
           >
-            {generatePaymentPeriods.isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {generatePaymentPeriods.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Générer les périodes de paiement
           </Button>
         </div>
