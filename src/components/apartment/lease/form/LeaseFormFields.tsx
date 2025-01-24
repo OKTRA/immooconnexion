@@ -2,17 +2,7 @@ import { Button } from "@/components/ui/button"
 import { DateFields } from "./DateFields"
 import { PaymentFields } from "./PaymentFields"
 import { FrequencyFields } from "./FrequencyFields"
-import { UnitSelector } from "./UnitSelector"
-import { LeaseFormData } from "../types"
-
-interface LeaseFormFieldsProps {
-  formData: LeaseFormData;
-  setFormData: (data: LeaseFormData) => void;
-  onSubmit: () => Promise<void>;
-  isSubmitting: boolean;
-  onCancel: () => void;
-  disabled?: boolean;
-}
+import { LeaseFormData, DurationType, LeaseFormFieldsProps } from "../types"
 
 export function LeaseFormFields({
   formData,
@@ -29,19 +19,21 @@ export function LeaseFormFields({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {!formData.unit_id && (
-        <UnitSelector
-          value={formData.unit_id}
-          onChange={(value) => setFormData({ ...formData, unit_id: value })}
-        />
-      )}
+      <DateFields 
+        formData={formData} 
+        setFormData={setFormData}
+      />
       
-      <DateFields formData={formData} setFormData={setFormData} />
-      <PaymentFields formData={formData} setFormData={setFormData} />
+      <PaymentFields 
+        formData={formData} 
+        setFormData={setFormData}
+        selectedUnitId={formData.unit_id}
+      />
+      
       <FrequencyFields 
         formData={formData} 
         setFormData={setFormData}
-        onDurationTypeChange={(value) => {
+        onDurationTypeChange={(value: DurationType) => {
           setFormData({ 
             ...formData, 
             duration_type: value,

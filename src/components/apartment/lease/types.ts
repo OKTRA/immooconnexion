@@ -32,3 +32,12 @@ export interface DateFieldsProps {
   formData: LeaseFormData;
   setFormData: (data: LeaseFormData) => void;
 }
+
+export interface LeaseFormFieldsProps {
+  formData: LeaseFormData;
+  setFormData: (data: LeaseFormData) => void;
+  onSubmit: () => Promise<void>;
+  isSubmitting: boolean;
+  onCancel: () => void;
+  disabled?: boolean;
+}

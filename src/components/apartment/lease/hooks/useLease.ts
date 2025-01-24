@@ -7,6 +7,7 @@ export function useLease(unitId: string | undefined, tenantId: string) {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<LeaseFormData>({
+    tenant_id: tenantId,
     unit_id: unitId || "",
     start_date: "",
     end_date: "",
@@ -14,7 +15,8 @@ export function useLease(unitId: string | undefined, tenantId: string) {
     deposit_amount: 0,
     payment_frequency: "monthly",
     duration_type: "month_to_month",
-    payment_type: "upfront"
+    payment_type: "upfront",
+    status: "active"
   })
 
   const handleSubmit = async () => {
@@ -47,7 +49,7 @@ export function useLease(unitId: string | undefined, tenantId: string) {
             duration_type: formData.duration_type,
             payment_type: formData.payment_type,
             agency_id: userProfile.agency_id,
-            status: "active"
+            status: formData.status
           }
         ])
         .select()
