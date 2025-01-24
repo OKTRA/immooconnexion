@@ -1,10 +1,10 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
-import { Pencil, Trash2, AlertCircle } from "lucide-react"
+import { Pencil, Trash2, CalendarRange } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,13 +16,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useState } from "react"
-import { toast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 import { EditLeaseDialog } from "./EditLeaseDialog"
 
 export function ApartmentLeasesTable() {
   const [leaseToDelete, setLeaseToDelete] = useState<string | null>(null)
   const [leaseToEdit, setLeaseToEdit] = useState<any | null>(null)
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
 
   const { data: leases = [], isLoading, refetch } = useQuery({
     queryKey: ["apartment-leases"],
@@ -57,6 +59,48 @@ export function ApartmentLeasesTable() {
     },
   })
 
+  const generatePaymentPeriods = useMutation({
+    mutationFn: async (leaseId: string) => {
+      // Générer les périodes de paiement
+      const lease = leases.find(l => l.id === leaseId)
+      if (!lease) throw new Error("Bail non trouvé")
+
+      const { data: periods, error: periodsError } = await supabase.rpc('generate_lease_payment_periods', {
+        p_lease_id: leaseId,
+        p_start_date: lease.start_date,
+        p_end_date: lease.end_date || null,
+        p_rent_amount: lease.rent_amount,
+        p_payment_frequency: lease.payment_frequency
+      })
+
+      if (periodsError) throw periodsError
+
+      // Mettre à jour le statut du bail à "active"
+      const { error: updateError } = await supabase
+        .from('apartment_leases')
+        .update({ status: 'active' })
+        .eq('id', leaseId)
+
+      if (updateError) throw updateError
+
+      return periods
+    },
+    onSuccess: () => {
+      toast({
+        title: "Succès",
+        description: "Les périodes de paiement ont été générées et le bail est maintenant actif",
+      })
+      queryClient.invalidateQueries({ queryKey: ["apartment-leases"] })
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de la génération des périodes",
+        variant: "destructive",
+      })
+    }
+  })
+
   const handleDelete = async () => {
     if (!leaseToDelete) return
 
@@ -68,7 +112,6 @@ export function ApartmentLeasesTable() {
 
       if (leaseError) throw leaseError
 
-      // Update unit status to available
       const lease = leases.find(l => l.id === leaseToDelete)
       if (lease?.unit_id) {
         const { error: unitError } = await supabase
@@ -173,6 +216,20 @@ export function ApartmentLeasesTable() {
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
+                    {lease.status === 'pending' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => generatePaymentPeriods.mutate(lease.id)}
+                        disabled={generatePaymentPeriods.isPending}
+                      >
+                        {generatePaymentPeriods.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <CalendarRange className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
