@@ -27,6 +27,15 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
       console.log("Starting lease creation with tenant:", tenantId)
       setIsSubmitting(true)
 
+      // Récupérer les informations de l'unité pour le loyer
+      const { data: unitData, error: unitError } = await supabase
+        .from("apartment_units")
+        .select("rent_amount, deposit_amount")
+        .eq("id", formData.unit_id)
+        .single()
+
+      if (unitError) throw unitError
+
       const { data: profile } = await supabase.auth.getUser()
       if (!profile.user) throw new Error("Non authentifié")
 
@@ -42,10 +51,12 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
         tenant_id: tenantId,
         unit_id: formData.unit_id,
         agency_id: userProfile.agency_id,
+        rent_amount: unitData.rent_amount,
+        deposit_amount: unitData.deposit_amount || unitData.rent_amount * 2,
         ...formData
       })
 
-      // Créer le bail
+      // Créer le bail avec les montants de l'unité
       const { data: lease, error: leaseError } = await supabase
         .from("apartment_leases")
         .insert([
@@ -54,8 +65,8 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
             unit_id: formData.unit_id,
             start_date: formData.start_date,
             end_date: formData.end_date || null,
-            rent_amount: formData.rent_amount,
-            deposit_amount: formData.deposit_amount,
+            rent_amount: unitData.rent_amount,
+            deposit_amount: unitData.deposit_amount || unitData.rent_amount * 2,
             payment_frequency: formData.payment_frequency,
             duration_type: formData.duration_type,
             payment_type: formData.payment_type,
@@ -72,12 +83,12 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
       }
 
       // Mettre à jour le statut de l'unité
-      const { error: unitError } = await supabase
+      const { error: unitUpdateError } = await supabase
         .from("apartment_units")
         .update({ status: "occupied" })
         .eq("id", formData.unit_id)
 
-      if (unitError) throw unitError
+      if (unitUpdateError) throw unitUpdateError
 
       // Créer l'association tenant_units
       const { error: tenantUnitError } = await supabase
