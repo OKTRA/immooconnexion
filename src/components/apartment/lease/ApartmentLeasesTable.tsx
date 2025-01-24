@@ -210,8 +210,8 @@ export function ApartmentLeasesTable() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => generatePaymentPeriods.mutateAsync(lease.id)}
-                      disabled={generatePaymentPeriods.isLoading}
+                      onClick={() => generatePaymentPeriods.mutate(lease.id)}
+                      disabled={generatePaymentPeriods.isPending}
                     >
                       <Send className="h-4 w-4" />
                     </Button>
