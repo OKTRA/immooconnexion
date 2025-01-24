@@ -10,23 +10,44 @@ import {
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 
-interface Unit {
-  id: string;
-  unit_number: string;
-  rent_amount: number;
-  apartment: {
-    name: string;
-  };
-}
-
 interface UnitSelectorProps {
-  value: string;
-  onChange: (value: string) => void;
-  units: Unit[];
-  isLoading: boolean;
+  value: string
+  onChange: (value: string) => void
 }
 
-export function UnitSelector({ value, onChange, units, isLoading }: UnitSelectorProps) {
+export function UnitSelector({ value, onChange }: UnitSelectorProps) {
+  const { data: units = [], isLoading } = useQuery({
+    queryKey: ["available-units"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("agency_id")
+        .eq("id", user.id)
+        .single()
+
+      if (!profile?.agency_id) throw new Error("Agency ID not found")
+
+      const { data, error } = await supabase
+        .from("apartment_units")
+        .select(`
+          id,
+          unit_number,
+          rent_amount,
+          apartment:apartments (
+            name,
+            address
+          )
+        `)
+        .eq("status", "available")
+
+      if (error) throw error
+      return data || []
+    }
+  })
+
   if (isLoading) {
     return (
       <div className="space-y-2">
