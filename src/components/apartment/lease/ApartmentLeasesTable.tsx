@@ -1,10 +1,10 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
-import { Pencil, Trash2, AlertCircle } from "lucide-react"
+import { Pencil, Trash2, AlertCircle, Calendar } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,11 +23,13 @@ import { EditLeaseDialog } from "./EditLeaseDialog"
 export function ApartmentLeasesTable() {
   const [leaseToDelete, setLeaseToDelete] = useState<string | null>(null)
   const [leaseToEdit, setLeaseToEdit] = useState<any | null>(null)
+  const [generatingPeriods, setGeneratingPeriods] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
   const { data: leases = [], isLoading, refetch } = useQuery({
     queryKey: ["apartment-leases"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: leasesData, error: leasesError } = await supabase
         .from("apartment_leases")
         .select(`
           *,
@@ -44,17 +46,46 @@ export function ApartmentLeasesTable() {
               id,
               name
             )
-          )
+          ),
+          payment_periods:apartment_payment_periods(count)
         `)
         .order("created_at", { ascending: false })
 
-      if (error) {
-        console.error("Error fetching leases:", error)
-        throw error
-      }
+      if (leasesError) throw leasesError
+      return leasesData
+    },
+  })
 
+  const generatePeriods = useMutation({
+    mutationFn: async (lease: any) => {
+      const { data, error } = await supabase.rpc('generate_lease_payment_periods', {
+        p_lease_id: lease.id,
+        p_start_date: lease.start_date,
+        p_end_date: lease.end_date,
+        p_rent_amount: lease.rent_amount,
+        p_payment_frequency: lease.payment_frequency
+      })
+
+      if (error) throw error
       return data
     },
+    onSuccess: (_, lease) => {
+      toast({
+        title: "Périodes générées",
+        description: "Les périodes de paiement ont été générées avec succès",
+      })
+      queryClient.invalidateQueries({ queryKey: ["apartment-leases"] })
+      setGeneratingPeriods(null)
+    },
+    onError: (error) => {
+      console.error("Error generating periods:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la génération des périodes",
+        variant: "destructive",
+      })
+      setGeneratingPeriods(null)
+    }
   })
 
   const handleDelete = async () => {
@@ -159,6 +190,23 @@ export function ApartmentLeasesTable() {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
+                    {(!lease.payment_periods?.[0]?.count || lease.payment_periods?.[0]?.count === 0) && (
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => {
+                          setGeneratingPeriods(lease.id)
+                          generatePeriods.mutate(lease)
+                        }}
+                        disabled={generatingPeriods === lease.id}
+                      >
+                        {generatingPeriods === lease.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Calendar className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"
