@@ -26,6 +26,8 @@ interface UnitSelectorProps {
 }
 
 export function UnitSelector({ value, onChange, units = [], isLoading }: UnitSelectorProps) {
+  console.log("UnitSelector received units:", units)
+
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -53,7 +55,7 @@ export function UnitSelector({ value, onChange, units = [], isLoading }: UnitSel
           ) : (
             units.map((unit) => (
               <SelectItem key={unit.id} value={unit.id}>
-                {unit.apartment.name} - Unité {unit.unit_number} ({unit.rent_amount.toLocaleString()} FCFA)
+                {unit.apartment?.name} - Unité {unit.unit_number} ({unit.rent_amount.toLocaleString()} FCFA)
               </SelectItem>
             ))
           )}
