@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "@/hooks/use-toast"
 import { TenantUnitFields } from "./form/TenantUnitFields"
 import { LeaseFormData } from "./types"
 import { PaymentFields } from "./form/PaymentFields"
@@ -88,7 +88,6 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
 
       if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
 
-      // Simple direct insert into apartment_leases table only
       const { data: lease, error } = await supabase
         .from('apartment_leases')
         .insert({
@@ -143,6 +142,37 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de la création du bail",
+        variant: "destructive",
+      })
+    }
+  })
+
+  const generatePaymentPeriods = useMutation({
+    mutationFn: async (leaseId: string) => {
+      const formData = watch()
+      const { data, error } = await supabase.rpc('generate_lease_payment_periods', {
+        p_lease_id: leaseId,
+        p_start_date: formData.start_date,
+        p_end_date: formData.end_date || null,
+        p_rent_amount: formData.rent_amount,
+        p_payment_frequency: formData.payment_frequency
+      })
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      toast({
+        title: "Périodes générées",
+        description: "Les périodes de paiement ont été générées avec succès",
+      })
+      queryClient.invalidateQueries({ queryKey: ["apartment-leases"] })
+    },
+    onError: (error) => {
+      console.error("Error generating payment periods:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la génération des périodes de paiement",
         variant: "destructive",
       })
     }
@@ -217,6 +247,20 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
           Créer le bail
         </Button>
       </div>
+
+      {createLease.data && (
+        <div className="mt-4 flex justify-center">
+          <Button
+            type="button"
+            onClick={() => generatePaymentPeriods.mutateAsync(createLease.data.id)}
+            disabled={generatePaymentPeriods.isLoading}
+            variant="secondary"
+          >
+            {generatePaymentPeriods.isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Générer les périodes de paiement
+          </Button>
+        </div>
+      )}
     </form>
   )
 }
