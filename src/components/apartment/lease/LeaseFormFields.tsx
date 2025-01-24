@@ -2,14 +2,15 @@ import { Button } from "@/components/ui/button"
 import { DateFields } from "./form/DateFields"
 import { PaymentFields } from "./form/PaymentFields"
 import { FrequencyFields } from "./form/FrequencyFields"
+import { LeaseFormData, DurationType } from "./types"
 
 interface LeaseFormFieldsProps {
-  formData: any
-  setFormData: (data: any) => void
-  onSubmit: () => Promise<void>
-  isSubmitting: boolean
-  onCancel: () => void
-  disabled?: boolean
+  formData: LeaseFormData;
+  setFormData: (data: LeaseFormData) => void;
+  onSubmit: () => Promise<void>;
+  isSubmitting: boolean;
+  onCancel: () => void;
+  disabled?: boolean;
 }
 
 export function LeaseFormFields({
@@ -27,9 +28,28 @@ export function LeaseFormFields({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <DateFields formData={formData} setFormData={setFormData} />
-      <PaymentFields formData={formData} setFormData={setFormData} />
-      <FrequencyFields formData={formData} setFormData={setFormData} />
+      <DateFields 
+        formData={formData} 
+        setFormData={setFormData}
+      />
+      
+      <PaymentFields 
+        formData={formData} 
+        setFormData={setFormData}
+        selectedUnitId={formData.unit_id}
+      />
+      
+      <FrequencyFields 
+        formData={formData} 
+        setFormData={setFormData}
+        onDurationTypeChange={(value: DurationType) => {
+          setFormData({ 
+            ...formData, 
+            duration_type: value,
+            end_date: value === 'fixed' ? formData.end_date : undefined 
+          })
+        }}
+      />
       
       <div className="flex justify-end gap-2">
         <Button
@@ -42,7 +62,7 @@ export function LeaseFormFields({
         </Button>
         <Button 
           type="submit" 
-          disabled={isSubmitting || disabled}
+          disabled={isSubmitting || disabled || !formData.unit_id}
         >
           {isSubmitting ? "Chargement..." : "Créer le bail"}
         </Button>
