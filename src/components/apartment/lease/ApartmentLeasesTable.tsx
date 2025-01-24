@@ -1,10 +1,10 @@
+import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { Button } from "@/components/ui/button"
-import { Pencil, Trash2, AlertCircle } from "lucide-react"
+import { Pencil, Trash2, Send } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +23,7 @@ import { EditLeaseDialog } from "./EditLeaseDialog"
 export function ApartmentLeasesTable() {
   const [leaseToDelete, setLeaseToDelete] = useState<string | null>(null)
   const [leaseToEdit, setLeaseToEdit] = useState<any | null>(null)
+  const queryClient = useQueryClient()
 
   const { data: leases = [], isLoading, refetch } = useQuery({
     queryKey: ["apartment-leases"],
@@ -55,6 +56,39 @@ export function ApartmentLeasesTable() {
 
       return data
     },
+  })
+
+  const generatePaymentPeriods = useMutation({
+    mutationFn: async (leaseId: string) => {
+      const lease = leases.find(l => l.id === leaseId)
+      if (!lease) throw new Error("Bail non trouvé")
+
+      const { data, error } = await supabase.rpc('generate_lease_payment_periods', {
+        p_lease_id: leaseId,
+        p_start_date: lease.start_date,
+        p_end_date: lease.end_date || null,
+        p_rent_amount: lease.rent_amount,
+        p_payment_frequency: lease.payment_frequency
+      })
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["apartment-leases"] })
+      toast({
+        title: "Succès",
+        description: "Les périodes de paiement ont été générées avec succès",
+      })
+    },
+    onError: (error) => {
+      console.error("Error generating payment periods:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la génération des périodes de paiement",
+        variant: "destructive",
+      })
+    }
   })
 
   const handleDelete = async () => {
@@ -172,6 +206,14 @@ export function ApartmentLeasesTable() {
                       onClick={() => setLeaseToDelete(lease.id)}
                     >
                       <Trash2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => generatePaymentPeriods.mutateAsync(lease.id)}
+                      disabled={generatePaymentPeriods.isLoading}
+                    >
+                      <Send className="h-4 w-4" />
                     </Button>
                   </div>
                 </TableCell>
