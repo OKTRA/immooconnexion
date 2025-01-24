@@ -1,45 +1,25 @@
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { LeaseFormData } from "../types"
 
-interface UseLeaseProps {
-  initialUnitId?: string;
-  tenantId: string;
-  onSuccess?: () => void;
-}
-
-export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) {
+export function useLease(unitId: string | undefined, tenantId: string) {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState({
-    unit_id: initialUnitId || "",
+  const [formData, setFormData] = useState<LeaseFormData>({
+    unit_id: unitId || "",
     start_date: "",
     end_date: "",
     rent_amount: 0,
     deposit_amount: 0,
-    payment_frequency: "monthly" as const,
-    duration_type: "month_to_month" as const,
-    payment_type: "upfront" as const
+    payment_frequency: "monthly",
+    duration_type: "month_to_month",
+    payment_type: "upfront"
   })
 
   const handleSubmit = async () => {
     try {
-      console.log("Starting lease creation with tenant:", tenantId)
       setIsSubmitting(true)
-
-      // Récupérer les informations de l'unité pour le loyer
-      const { data: unitData, error: unitError } = await supabase
-        .from("apartment_units")
-        .select("rent_amount, deposit_amount")
-        .eq("id", formData.unit_id)
-        .single()
-
-      if (unitError) {
-        console.error("Error fetching unit data:", unitError)
-        throw unitError
-      }
-
-      console.log("Unit data:", unitData)
 
       const { data: profile } = await supabase.auth.getUser()
       if (!profile.user) throw new Error("Non authentifié")
@@ -48,20 +28,11 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
         .from("profiles")
         .select("agency_id")
         .eq("id", profile.user.id)
-        .single()
+        .maybeSingle()
 
       if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
 
-      console.log("Creating lease with data:", {
-        tenant_id: tenantId,
-        unit_id: formData.unit_id,
-        agency_id: userProfile.agency_id,
-        rent_amount: unitData.rent_amount,
-        deposit_amount: unitData.deposit_amount || unitData.rent_amount * 2,
-        ...formData
-      })
-
-      // Créer le bail avec les montants de l'unité
+      // Create the lease
       const { data: lease, error: leaseError } = await supabase
         .from("apartment_leases")
         .insert([
@@ -70,8 +41,8 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
             unit_id: formData.unit_id,
             start_date: formData.start_date,
             end_date: formData.end_date || null,
-            rent_amount: unitData.rent_amount,
-            deposit_amount: unitData.deposit_amount || unitData.rent_amount * 2,
+            rent_amount: formData.rent_amount,
+            deposit_amount: formData.deposit_amount,
             payment_frequency: formData.payment_frequency,
             duration_type: formData.duration_type,
             payment_type: formData.payment_type,
@@ -82,26 +53,24 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
         .select()
         .single()
 
-      if (leaseError) {
-        console.error("Lease creation error:", leaseError)
-        throw leaseError
-      }
+      if (leaseError) throw leaseError
 
-      // Mettre à jour le statut de l'unité
-      const { error: unitUpdateError } = await supabase
+      // Update the unit status
+      const { error: unitError } = await supabase
         .from("apartment_units")
         .update({ status: "occupied" })
         .eq("id", formData.unit_id)
 
-      if (unitUpdateError) throw unitUpdateError
+      if (unitError) throw unitError
 
-      // Créer l'association tenant_units
+      // Create tenant_units association
       const { error: tenantUnitError } = await supabase
         .from("tenant_units")
         .insert([
           {
             tenant_id: tenantId,
-            unit_id: formData.unit_id
+            unit_id: formData.unit_id,
+            status: "active"
           }
         ])
 
@@ -111,10 +80,6 @@ export function useLease({ initialUnitId, tenantId, onSuccess }: UseLeaseProps) 
         title: "Bail créé",
         description: "Le bail a été créé avec succès"
       })
-
-      if (onSuccess) {
-        onSuccess()
-      }
 
       return lease
 

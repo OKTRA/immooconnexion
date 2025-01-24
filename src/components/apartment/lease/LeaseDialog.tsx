@@ -1,31 +1,27 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { LeaseFormFields } from "./LeaseFormFields"
-import { useLease } from "./hooks/useLease"
+import { useLease } from "./useLease"
 
 interface LeaseDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  tenantId: string;
-  unitId?: string;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  unitId: string
+  tenantId?: string
 }
 
 export function LeaseDialog({
   open,
   onOpenChange,
-  tenantId,
-  unitId: initialUnitId
+  unitId,
+  tenantId
 }: LeaseDialogProps) {
   const {
     formData,
     setFormData,
     handleSubmit,
     isSubmitting
-  } = useLease({ 
-    initialUnitId,
-    tenantId,
-    onSuccess: () => onOpenChange(false)
-  })
+  } = useLease(unitId, tenantId)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -40,8 +36,6 @@ export function LeaseDialog({
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
             onCancel={() => onOpenChange(false)}
-            disabled={!formData.unit_id}
-            tenantId={tenantId}
           />
         </ScrollArea>
       </DialogContent>

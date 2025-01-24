@@ -23,15 +23,11 @@ export function useLease(unitId: string | undefined, tenantId: string) {
       const { data: profile } = await supabase.auth.getUser()
       if (!profile.user) throw new Error("Non authentifié")
 
-      console.log("User profile:", profile)
-
       const { data: userProfile } = await supabase
         .from("profiles")
         .select("agency_id")
         .eq("id", profile.user.id)
         .single()
-
-      console.log("User agency profile:", userProfile)
 
       if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
 
@@ -56,9 +52,6 @@ export function useLease(unitId: string | undefined, tenantId: string) {
         .select()
         .single()
 
-      console.log("Created lease:", lease)
-      console.log("Lease error if any:", leaseError)
-
       if (leaseError) throw leaseError
 
       // Mettre à jour le statut de l'unité
@@ -66,8 +59,6 @@ export function useLease(unitId: string | undefined, tenantId: string) {
         .from("apartment_units")
         .update({ status: "occupied" })
         .eq("id", formData.unit_id)
-
-      console.log("Unit update error if any:", unitError)
 
       if (unitError) throw unitError
 
@@ -81,8 +72,6 @@ export function useLease(unitId: string | undefined, tenantId: string) {
           }
         ])
 
-      console.log("Tenant unit error if any:", tenantUnitError)
-
       if (tenantUnitError) throw tenantUnitError
 
       toast({
@@ -93,7 +82,7 @@ export function useLease(unitId: string | undefined, tenantId: string) {
       return lease
 
     } catch (error: any) {
-      console.error("Error in handleSubmit:", error)
+      console.error("Error:", error)
       toast({
         title: "Erreur",
         description: error.message,

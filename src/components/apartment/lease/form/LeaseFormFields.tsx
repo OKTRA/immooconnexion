@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button"
 import { DateFields } from "./DateFields"
+import { PaymentFields } from "./PaymentFields"
 import { FrequencyFields } from "./FrequencyFields"
 import { UnitSelector } from "./UnitSelector"
-import { Card, CardContent } from "@/components/ui/card"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import { Unit } from "./UnitSelector"
 
 interface LeaseFormFieldsProps {
   formData: {
@@ -22,7 +23,6 @@ interface LeaseFormFieldsProps {
   isSubmitting: boolean;
   onCancel: () => void;
   disabled?: boolean;
-  tenantId: string;
 }
 
 export function LeaseFormFields({
@@ -31,23 +31,53 @@ export function LeaseFormFields({
   onSubmit,
   isSubmitting,
   onCancel,
-  disabled = false,
-  tenantId
+  disabled = false
 }: LeaseFormFieldsProps) {
-  // Récupérer les informations du locataire
-  const { data: tenant } = useQuery({
-    queryKey: ['tenant', tenantId],
+  const { data: units = [], isLoading: unitsLoading } = useQuery({
+    queryKey: ['available-units'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('apartment_tenants')
-        .select('*')
-        .eq('id', tenantId)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Non authentifié")
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("agency_id")
+        .eq("id", user.id)
         .single()
 
-      if (error) throw error
-      return data
+      if (!profile?.agency_id) throw new Error("Agency ID not found")
+
+      const { data, error } = await supabase
+        .from("apartment_units")
+        .select(`
+          id,
+          unit_number,
+          rent_amount,
+          apartment:apartments (
+            id,
+            name
+          )
+        `)
+        .eq("status", "available")
+        .eq("apartments.agency_id", profile.agency_id)
+        .order('unit_number', { ascending: true })
+
+      if (error) {
+        console.error("Error fetching units:", error)
+        throw error
+      }
+
+      return data.map(unit => ({
+        id: unit.id,
+        unit_number: unit.unit_number,
+        rent_amount: unit.rent_amount,
+        apartment: {
+          id: unit.apartment.id,
+          name: unit.apartment.name
+        }
+      })) as Unit[]
     },
-    enabled: !!tenantId
+    enabled: true
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,31 +85,32 @@ export function LeaseFormFields({
     await onSubmit()
   }
 
+  const isFormValid = () => {
+    const valid = !!(
+      formData.unit_id &&
+      formData.start_date &&
+      formData.rent_amount &&
+      formData.deposit_amount >= 0 &&
+      formData.payment_frequency &&
+      formData.duration_type &&
+      formData.payment_type &&
+      (formData.duration_type !== 'fixed' || formData.end_date)
+    );
+
+    return valid;
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {tenant && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Locataire</label>
-                <p className="mt-1">{tenant.first_name} {tenant.last_name}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Téléphone</label>
-                <p className="mt-1">{tenant.phone_number || 'Non renseigné'}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       <UnitSelector
         value={formData.unit_id}
         onChange={(value) => setFormData({ ...formData, unit_id: value })}
+        units={units}
+        isLoading={unitsLoading}
       />
       
       <DateFields formData={formData} setFormData={setFormData} />
+      <PaymentFields formData={formData} setFormData={setFormData} />
       <FrequencyFields 
         formData={formData} 
         setFormData={setFormData}
@@ -103,7 +134,7 @@ export function LeaseFormFields({
         </Button>
         <Button 
           type="submit" 
-          disabled={disabled || !formData.unit_id || isSubmitting}
+          disabled={disabled || !isFormValid() || isSubmitting}
         >
           {isSubmitting ? "Chargement..." : "Créer le bail"}
         </Button>

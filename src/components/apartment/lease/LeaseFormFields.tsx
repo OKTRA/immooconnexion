@@ -1,11 +1,8 @@
 import { Button } from "@/components/ui/button"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { UnitSelector } from "./form/UnitSelector"
 import { DateFields } from "./form/DateFields"
+import { PaymentFields } from "./form/PaymentFields"
 import { FrequencyFields } from "./form/FrequencyFields"
-import { Card, CardContent } from "@/components/ui/card"
-import { Loader2 } from "lucide-react"
+import { UnitSelector } from "./form/UnitSelector"
 
 interface LeaseFormFieldsProps {
   formData: {
@@ -23,7 +20,6 @@ interface LeaseFormFieldsProps {
   isSubmitting: boolean;
   onCancel: () => void;
   disabled?: boolean;
-  tenantId: string;
 }
 
 export function LeaseFormFields({
@@ -32,54 +28,52 @@ export function LeaseFormFields({
   onSubmit,
   isSubmitting,
   onCancel,
-  disabled = false,
-  tenantId
+  disabled = false
 }: LeaseFormFieldsProps) {
-  const { data: tenant } = useQuery({
-    queryKey: ['tenant', tenantId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('apartment_tenants')
-        .select('*')
-        .eq('id', tenantId)
-        .single()
-
-      if (error) throw error
-      return data
-    },
-    enabled: !!tenantId
-  })
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     await onSubmit()
   }
 
+  const isFormValid = () => {
+    // Ajout de logs pour déboguer
+    console.log("Form validation check:", {
+      unit_id: formData.unit_id,
+      start_date: formData.start_date,
+      rent_amount: formData.rent_amount,
+      deposit_amount: formData.deposit_amount,
+      payment_frequency: formData.payment_frequency,
+      duration_type: formData.duration_type,
+      payment_type: formData.payment_type,
+      end_date: formData.end_date,
+    });
+
+    const valid = !!(
+      formData.unit_id &&
+      formData.start_date &&
+      formData.rent_amount &&
+      formData.deposit_amount >= 0 &&
+      formData.payment_frequency &&
+      formData.duration_type &&
+      formData.payment_type &&
+      (formData.duration_type !== 'fixed' || formData.end_date)
+    );
+
+    console.log("Form is valid:", valid);
+    return valid;
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {tenant && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Locataire</label>
-                <p className="mt-1">{tenant.first_name} {tenant.last_name}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Téléphone</label>
-                <p className="mt-1">{tenant.phone_number || 'Non renseigné'}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {!formData.unit_id && (
+        <UnitSelector
+          value={formData.unit_id}
+          onChange={(value) => setFormData({ ...formData, unit_id: value })}
+        />
       )}
-
-      <UnitSelector
-        value={formData.unit_id}
-        onChange={(value) => setFormData({ ...formData, unit_id: value })}
-      />
       
       <DateFields formData={formData} setFormData={setFormData} />
+      <PaymentFields formData={formData} setFormData={setFormData} />
       <FrequencyFields 
         formData={formData} 
         setFormData={setFormData}
@@ -103,16 +97,9 @@ export function LeaseFormFields({
         </Button>
         <Button 
           type="submit" 
-          disabled={disabled || isSubmitting}
+          disabled={disabled}
         >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Création en cours...
-            </>
-          ) : (
-            "Créer le bail"
-          )}
+          {isSubmitting ? "Chargement..." : "Créer le bail"}
         </Button>
       </div>
     </form>

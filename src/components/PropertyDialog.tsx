@@ -60,7 +60,7 @@ export function PropertyDialog({
       const { data: agencyOwners } = await supabase
         .from("agency_owners")
         .select(`
-          owner:property_owners!inner (
+          owner:property_owners (
             id,
             first_name,
             last_name,
@@ -71,13 +71,12 @@ export function PropertyDialog({
 
       if (!agencyOwners) return []
 
-      // Transform the data to match the PropertyOwner type
       return agencyOwners.map(ao => ({
         id: ao.owner.id,
         first_name: ao.owner.first_name,
         last_name: ao.owner.last_name,
         phone_number: ao.owner.phone_number
-      })) as PropertyOwner[]
+      } as PropertyOwner))
     }
   })
 

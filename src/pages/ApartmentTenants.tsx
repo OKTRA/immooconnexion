@@ -11,7 +11,6 @@ import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { ApartmentTenant } from "@/types/apartment"
 import { Loader2 } from "lucide-react"
-import { useQuery } from "@tanstack/react-query"
 
 const TableLoader = () => (
   <div className="flex justify-center p-8">
@@ -25,32 +24,6 @@ export default function ApartmentTenants() {
   const [searchQuery, setSearchQuery] = useState("")
   const { toast } = useToast()
   const queryClient = useQueryClient()
-
-  const { data: tenants = [], isLoading } = useQuery({
-    queryKey: ['apartment-tenants'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Non authentifié")
-
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('agency_id')
-        .eq('id', user.id)
-        .single()
-
-      if (!profileData?.agency_id) {
-        return []
-      }
-
-      const { data, error } = await supabase
-        .from('apartment_tenants')
-        .select('*')
-        .eq('agency_id', profileData.agency_id)
-
-      if (error) throw error
-      return data
-    }
-  })
 
   const handleEdit = (tenant: ApartmentTenant) => {
     setSelectedTenant(tenant)
@@ -114,10 +87,8 @@ export default function ApartmentTenants() {
           <CardContent className="p-0">
             <Suspense fallback={<TableLoader />}>
               <ApartmentTenantsTable
-                tenants={tenants}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                isLoading={isLoading}
               />
             </Suspense>
           </CardContent>
@@ -127,6 +98,7 @@ export default function ApartmentTenants() {
           open={open}
           onOpenChange={setOpen}
           tenant={selectedTenant}
+          unitId={selectedTenant?.unit_id || undefined}
         />
       </div>
     </AgencyLayout>

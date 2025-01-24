@@ -1,30 +1,36 @@
 import { useState } from "react"
-import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/lib/supabase"
+import { useQueryClient } from "@tanstack/react-query"
 import { ApartmentTenant } from "@/types/apartment"
 
 interface UseApartmentTenantFormProps {
+  unitId: string
   onSuccess: () => void
   initialData?: ApartmentTenant
 }
 
 export function useApartmentTenantForm({
+  unitId,
   onSuccess,
   initialData
 }: UseApartmentTenantFormProps) {
   const { toast } = useToast()
+  const queryClient = useQueryClient()
   const [isSubmitting, setIsSubmitting] = useState(false)
+
   const [formData, setFormData] = useState({
-    first_name: initialData?.first_name || "",
-    last_name: initialData?.last_name || "",
+    firstName: initialData?.first_name || "",
+    lastName: initialData?.last_name || "",
     email: initialData?.email || "",
-    phone_number: initialData?.phone_number || "",
-    birth_date: initialData?.birth_date || "",
+    phoneNumber: initialData?.phone_number || "",
+    birthDate: initialData?.birth_date || "",
     profession: initialData?.profession || "",
+    photoId: null as File | null,
     emergency_contact_name: initialData?.emergency_contact_name || "",
     emergency_contact_phone: initialData?.emergency_contact_phone || "",
     emergency_contact_relationship: initialData?.emergency_contact_relationship || "",
-    photoId: null as File | null
+    unit_id: unitId || initialData?.unit_id || ""
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,61 +47,65 @@ export function useApartmentTenantForm({
         .eq("id", user.id)
         .single()
 
-      if (!profile?.agency_id) {
-        throw new Error("Aucune agence associée")
-      }
+      if (!profile?.agency_id) throw new Error("Agency ID not found")
 
-      let photo_id_url = initialData?.photo_id_url
+      let photoUrl: string | null = null
       if (formData.photoId) {
         const fileExt = formData.photoId.name.split('.').pop()
         const fileName = `${Math.random()}.${fileExt}`
         
-        const { error: uploadError, data } = await supabase.storage
-          .from("tenant_photos")
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('tenant_photos')
           .upload(fileName, formData.photoId)
 
         if (uploadError) throw uploadError
-
-        if (data) {
+        if (uploadData) {
           const { data: { publicUrl } } = supabase.storage
-            .from("tenant_photos")
-            .getPublicUrl(data.path)
-          photo_id_url = publicUrl
+            .from('tenant_photos')
+            .getPublicUrl(uploadData.path)
+          photoUrl = publicUrl
         }
       }
 
       const tenantData = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
         email: formData.email,
-        phone_number: formData.phone_number,
-        birth_date: formData.birth_date,
-        photo_id_url,
+        phone_number: formData.phoneNumber,
+        birth_date: formData.birthDate,
+        photo_id_url: photoUrl,
         profession: formData.profession,
         emergency_contact_name: formData.emergency_contact_name,
         emergency_contact_phone: formData.emergency_contact_phone,
         emergency_contact_relationship: formData.emergency_contact_relationship,
-        agency_id: profile.agency_id
+        agency_id: profile.agency_id,
+        unit_id: formData.unit_id,
+        status: 'active'
       }
 
-      if (initialData?.id) {
-        const { error: updateError } = await supabase
-          .from("apartment_tenants")
-          .update(tenantData)
-          .eq("id", initialData.id)
+      // Start a transaction using multiple operations
+      const { data: tenant, error: tenantError } = await supabase
+        .from("apartment_tenants")
+        .upsert(initialData?.id ? { id: initialData.id, ...tenantData } : tenantData)
+        .select()
+        .single()
 
-        if (updateError) throw updateError
-      } else {
-        const { error: insertError } = await supabase
-          .from("apartment_tenants")
-          .insert([tenantData])
+      if (tenantError) throw tenantError
 
-        if (insertError) throw insertError
-      }
+      // Update unit status to occupied
+      const { error: unitError } = await supabase
+        .from("apartment_units")
+        .update({ status: "occupied" })
+        .eq("id", formData.unit_id)
+
+      if (unitError) throw unitError
+
+      await queryClient.invalidateQueries({ queryKey: ["apartment-tenants"] })
+      await queryClient.invalidateQueries({ queryKey: ["apartment-units"] })
 
       toast({
         title: initialData ? "Locataire modifié" : "Locataire ajouté",
-        description: "Les informations ont été enregistrées avec succès"
+        description: "Les informations ont été enregistrées avec succès.",
       })
 
       onSuccess()
@@ -103,8 +113,8 @@ export function useApartmentTenantForm({
       console.error("Error:", error)
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue",
-        variant: "destructive"
+        description: error.message,
+        variant: "destructive",
       })
     } finally {
       setIsSubmitting(false)
