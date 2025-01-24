@@ -36,6 +36,8 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
     }
   })
 
+  const selectedUnitId = watch("unit_id")
+
   const { data: tenants = [], isLoading: isLoadingTenants } = useQuery({
     queryKey: ["apartment-tenants"],
     queryFn: async () => {
@@ -68,6 +70,16 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
     }
   })
 
+  // Mettre à jour automatiquement les montants lors de la sélection d'une unité
+  const handleUnitChange = (unitId: string) => {
+    const selectedUnit = units.find(unit => unit.id === unitId)
+    if (selectedUnit) {
+      setValue("unit_id", unitId)
+      setValue("rent_amount", selectedUnit.rent_amount)
+      setValue("deposit_amount", selectedUnit.deposit_amount || selectedUnit.rent_amount)
+    }
+  }
+
   const createLease = useMutation({
     mutationFn: async (data: any) => {
       const { error: leaseError } = await supabase
@@ -80,7 +92,6 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
 
       if (leaseError) throw leaseError
 
-      // Update unit status
       const { error: unitError } = await supabase
         .from("apartment_units")
         .update({ status: "occupied" })
@@ -176,7 +187,7 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
           <Label htmlFor="unit_id">Unité</Label>
           <Select
             value={watch("unit_id")}
-            onValueChange={(value) => setValue("unit_id", value)}
+            onValueChange={handleUnitChange}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner une unité" />
@@ -218,6 +229,8 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
           <Input
             type="number"
             {...register("rent_amount", { required: true })}
+            readOnly={!!selectedUnitId}
+            className={selectedUnitId ? "bg-gray-100" : ""}
           />
         </div>
 
@@ -226,6 +239,8 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
           <Input
             type="number"
             {...register("deposit_amount", { required: true })}
+            readOnly={!!selectedUnitId}
+            className={selectedUnitId ? "bg-gray-100" : ""}
           />
         </div>
       </div>
