@@ -9,6 +9,7 @@ interface LeaseTableRowProps {
   onEdit: (lease: any) => void
   onDelete: (id: string) => void
   onGeneratePaymentPeriods: (id: string) => void
+  onGeneratePaymentPeriodsDirectly: (id: string) => void
   isGenerating: boolean
 }
 
@@ -17,6 +18,7 @@ export function LeaseTableRow({
   onEdit,
   onDelete,
   onGeneratePaymentPeriods,
+  onGeneratePaymentPeriodsDirectly,
   isGenerating,
 }: LeaseTableRowProps) {
   return (
@@ -81,7 +83,7 @@ export function LeaseTableRow({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onGeneratePaymentPeriods(lease.id)}
+            onClick={() => onGeneratePaymentPeriodsDirectly(lease.id)}
             disabled={isGenerating}
           >
             <Database className="h-4 w-4" />

@@ -1,4 +1,4 @@
-import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from "@/components/ui/table"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { EditLeaseDialog } from "./EditLeaseDialog"
@@ -13,7 +13,8 @@ export function ApartmentLeasesTable() {
   const { 
     leases, 
     isLoading, 
-    generatePaymentPeriods, 
+    generatePaymentPeriods,
+    generatePaymentPeriodsDirectly,
     deleteLease 
   } = useLeaseOperations()
 
@@ -55,7 +56,8 @@ export function ApartmentLeasesTable() {
                 onEdit={setLeaseToEdit}
                 onDelete={setLeaseToDelete}
                 onGeneratePaymentPeriods={(id) => generatePaymentPeriods.mutate(id)}
-                isGenerating={generatePaymentPeriods.isPending}
+                onGeneratePaymentPeriodsDirectly={(id) => generatePaymentPeriodsDirectly.mutate(id)}
+                isGenerating={generatePaymentPeriods.isPending || generatePaymentPeriodsDirectly.isPending}
               />
             ))}
             {leases.length === 0 && (
