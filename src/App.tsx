@@ -30,6 +30,7 @@ import ApartmentTenants from "@/pages/ApartmentTenants"
 import ApartmentTenantPayments from "@/pages/ApartmentTenantPayments"
 import ApartmentTenantLeases from "@/pages/ApartmentTenantLeases"
 import ApartmentTenantDetails from "@/pages/ApartmentTenantDetails"
+import ApartmentLeases from "@/pages/ApartmentLeases"
 import { TenantPaymentsTab } from "@/components/apartment/tenant/TenantPaymentsTab"
 import PaymentSuccess from "@/pages/PaymentSuccess"
 
@@ -73,6 +74,7 @@ export default function App() {
                 <Route path="apartment-tenants/:tenantId/payments" element={<ApartmentTenantPayments />} />
                 <Route path="apartment-tenants/:tenantId/leases" element={<ApartmentTenantLeases />} />
                 <Route path="apartment-tenants/:tenantId/dashboard" element={<TenantPaymentsTab />} />
+                <Route path="apartment-leases" element={<ApartmentLeases />} />
               </Route>
             </Routes>
             <Toaster />
