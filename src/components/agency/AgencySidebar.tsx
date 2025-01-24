@@ -8,8 +8,7 @@ import {
   FileText,
   CreditCard,
   Building,
-  UserSquare2,
-  FileContract
+  UserSquare2
 } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { cn } from "@/lib/utils"
@@ -50,7 +49,7 @@ const menuItems = [
   {
     title: "Baux d'appartements",
     href: "/agence/apartment-leases",
-    icon: FileContract,
+    icon: FileText,
   },
   {
     title: "Ventes",
