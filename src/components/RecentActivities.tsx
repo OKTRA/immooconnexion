@@ -37,7 +37,7 @@ export function RecentActivities() {
 
       return profile
     },
-    staleTime: 30 * 60 * 1000, // Cache pendant 30 minutes
+    staleTime: 30 * 60 * 1000,
   })
 
   const { data: recentContracts, isLoading } = useQuery({
@@ -52,11 +52,11 @@ export function RecentActivities() {
           montant,
           type,
           created_at,
-          tenant_id (
+          tenant_id:tenants!contracts_tenant_id_fkey (
             nom,
             prenom
           ),
-          property_id (
+          property_id:properties!contracts_property_id_fkey (
             bien
           )
         `)
@@ -64,11 +64,20 @@ export function RecentActivities() {
         .order("created_at", { ascending: false })
         .limit(5)
 
-      if (error) throw error
-      return contracts as Contract[]
+      if (error) {
+        console.error("Erreur lors de la récupération des contrats:", error)
+        throw error
+      }
+
+      // Transformer les données pour correspondre au type Contract
+      return (contracts || []).map(contract => ({
+        ...contract,
+        tenant_id: contract.tenant_id?.[0] || { nom: '', prenom: '' },
+        property_id: contract.property_id?.[0] || { bien: '' }
+      })) as Contract[]
     },
     enabled: !!userProfile?.agency_id,
-    staleTime: 1 * 60 * 1000, // Cache pendant 1 minute
+    staleTime: 1 * 60 * 1000,
   })
 
   if (isLoading) {
