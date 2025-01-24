@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { Pencil, Send, Trash2 } from "lucide-react"
+import { Pencil, Send, Database, Trash2 } from "lucide-react"
 
 interface LeaseTableRowProps {
   lease: any
@@ -77,6 +77,14 @@ export function LeaseTableRow({
             disabled={isGenerating}
           >
             <Send className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onGeneratePaymentPeriods(lease.id)}
+            disabled={isGenerating}
+          >
+            <Database className="h-4 w-4" />
           </Button>
         </div>
       </TableCell>
