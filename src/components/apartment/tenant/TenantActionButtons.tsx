@@ -1,10 +1,11 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit, Eye, Trash2, Receipt, CreditCard, ClipboardList, FileCheck, FileText } from "lucide-react"
+import { Edit, Eye, Trash2, Receipt, ClipboardList, FileCheck, FileText } from "lucide-react"
 import { ActionButton } from "./actions/ActionButton"
 import { DeleteAction } from "./actions/DeleteAction"
 import { LeaseDialog } from "./LeaseDialog"
 import { ApartmentLease } from "@/types/apartment"
+import { PaymentActionButton } from "../payment/PaymentActionButton"
 
 interface TenantActionButtonsProps {
   tenant: {
@@ -27,10 +28,6 @@ export function TenantActionButtons({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showLeaseDialog, setShowLeaseDialog] = useState(false)
 
-  const handleDelete = () => {
-    setShowDeleteDialog(true)
-  }
-
   return (
     <>
       <div className="flex gap-2">
@@ -52,10 +49,9 @@ export function TenantActionButtons({
           title="Créer un bail"
         />
 
-        <ActionButton
-          icon={CreditCard}
-          onClick={() => navigate(`/agence/apartment-tenants/${tenant.id}/payments`)}
-          title="Paiements"
+        <PaymentActionButton 
+          tenantId={tenant.id}
+          leaseId={currentLease?.id}
         />
 
         <ActionButton
@@ -81,7 +77,7 @@ export function TenantActionButtons({
 
         <ActionButton
           icon={Trash2}
-          onClick={handleDelete}
+          onClick={() => setShowDeleteDialog(true)}
           title="Supprimer"
         />
       </div>

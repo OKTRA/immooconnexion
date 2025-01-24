@@ -3,6 +3,7 @@ import { TableCell, TableRow } from "@/components/ui/table"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Pencil, Send, Database, Trash2 } from "lucide-react"
+import { PaymentActionButton } from "../../payment/PaymentActionButton"
 
 interface LeaseTableRowProps {
   lease: any
@@ -72,6 +73,10 @@ export function LeaseTableRow({
           >
             <Trash2 className="h-4 w-4" />
           </Button>
+          <PaymentActionButton
+            tenantId={lease.tenant_id}
+            leaseId={lease.id}
+          />
           <Button
             variant="ghost"
             size="icon"
