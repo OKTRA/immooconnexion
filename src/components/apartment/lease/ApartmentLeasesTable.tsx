@@ -3,22 +3,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { Button } from "@/components/ui/button"
-import { Pencil, Trash2, CalendarRange } from "lucide-react"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 import { EditLeaseDialog } from "./EditLeaseDialog"
+import { useState } from "react"
+import { LeaseActions } from "./table/LeaseActions"
+import { LeaseStatus } from "./table/LeaseStatus"
+import { DeleteLeaseDialog } from "./table/DeleteLeaseDialog"
 
 export function ApartmentLeasesTable() {
   const [leaseToDelete, setLeaseToDelete] = useState<string | null>(null)
@@ -26,7 +17,7 @@ export function ApartmentLeasesTable() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  const { data: leases = [], isLoading, refetch } = useQuery({
+  const { data: leases = [], isLoading } = useQuery({
     queryKey: ["apartment-leases"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -50,18 +41,13 @@ export function ApartmentLeasesTable() {
         `)
         .order("created_at", { ascending: false })
 
-      if (error) {
-        console.error("Error fetching leases:", error)
-        throw error
-      }
-
+      if (error) throw error
       return data
     },
   })
 
   const generatePaymentPeriods = useMutation({
     mutationFn: async (leaseId: string) => {
-      // Générer les périodes de paiement
       const lease = leases.find(l => l.id === leaseId)
       if (!lease) throw new Error("Bail non trouvé")
 
@@ -75,7 +61,6 @@ export function ApartmentLeasesTable() {
 
       if (periodsError) throw periodsError
 
-      // Mettre à jour le statut du bail à "active"
       const { error: updateError } = await supabase
         .from('apartment_leases')
         .update({ status: 'active' })
@@ -127,7 +112,7 @@ export function ApartmentLeasesTable() {
         description: "Le bail a été supprimé avec succès",
       })
 
-      refetch()
+      queryClient.invalidateQueries({ queryKey: ["apartment-leases"] })
     } catch (error: any) {
       console.error("Error deleting lease:", error)
       toast({
@@ -184,53 +169,16 @@ export function ApartmentLeasesTable() {
                   {lease.rent_amount.toLocaleString()} FCFA
                 </TableCell>
                 <TableCell>
-                  <span
-                    className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                      lease.status === "active"
-                        ? "bg-green-50 text-green-700"
-                        : lease.status === "expired"
-                        ? "bg-red-50 text-red-700"
-                        : "bg-yellow-50 text-yellow-700"
-                    }`}
-                  >
-                    {lease.status === "active"
-                      ? "Actif"
-                      : lease.status === "expired"
-                      ? "Expiré"
-                      : "En attente"}
-                  </span>
+                  <LeaseStatus status={lease.status} />
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setLeaseToEdit(lease)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setLeaseToDelete(lease.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                    {lease.status === 'pending' && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => generatePaymentPeriods.mutate(lease.id)}
-                        disabled={generatePaymentPeriods.isPending}
-                      >
-                        {generatePaymentPeriods.isPending ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <CalendarRange className="h-4 w-4" />
-                        )}
-                      </Button>
-                    )}
-                  </div>
+                  <LeaseActions
+                    lease={lease}
+                    onEdit={setLeaseToEdit}
+                    onDelete={setLeaseToDelete}
+                    onGeneratePeriods={(id) => generatePaymentPeriods.mutate(id)}
+                    isGenerating={generatePaymentPeriods.isPending}
+                  />
                 </TableCell>
               </TableRow>
             ))}
@@ -245,22 +193,11 @@ export function ApartmentLeasesTable() {
         </Table>
       </div>
 
-      <AlertDialog open={!!leaseToDelete} onOpenChange={() => setLeaseToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer ce bail ? Cette action est irréversible.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">
-              Supprimer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteLeaseDialog
+        open={!!leaseToDelete}
+        onOpenChange={() => setLeaseToDelete(null)}
+        onConfirm={handleDelete}
+      />
 
       {leaseToEdit && (
         <EditLeaseDialog
