@@ -1,19 +1,14 @@
 import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { toast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
 import { ApartmentLease } from "@/types/apartment"
+import { DateFields } from "./form/DateFields"
+import { PaymentFields } from "./form/PaymentFields"
+import { FrequencyFields } from "./form/FrequencyFields"
+import { LeaseFormData } from "./types"
 
 interface LeaseFormProps {
   initialData?: ApartmentLease
@@ -22,7 +17,7 @@ interface LeaseFormProps {
 
 export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
   const queryClient = useQueryClient()
-  const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm({
+  const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<LeaseFormData>({
     defaultValues: initialData || {
       tenant_id: "",
       unit_id: "",
@@ -33,11 +28,12 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
       payment_frequency: "monthly",
       duration_type: "month_to_month",
       payment_type: "upfront",
+      status: "active"
     }
   })
 
   const selectedUnitId = watch("unit_id")
-  const durationType = watch("duration_type")
+  const formData = watch()
 
   const { data: tenants = [], isLoading: isLoadingTenants } = useQuery({
     queryKey: ["apartment-tenants"],
@@ -81,7 +77,7 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
   }
 
   const createLease = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: LeaseFormData) => {
       if (!data.start_date) {
         throw new Error("La date de début est requise")
       }
@@ -126,7 +122,7 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
   })
 
   const updateLease = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: LeaseFormData) => {
       if (!data.start_date) {
         throw new Error("La date de début est requise")
       }
@@ -161,7 +157,7 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
     }
   })
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: LeaseFormData) => {
     if (initialData) {
       await updateLease.mutateAsync(data)
     } else {
@@ -179,141 +175,39 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="tenant_id">Locataire</Label>
-          <Select
-            value={watch("tenant_id")}
-            onValueChange={(value) => setValue("tenant_id", value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionner un locataire" />
-            </SelectTrigger>
-            <SelectContent>
-              {tenants.map((tenant) => (
-                <SelectItem key={tenant.id} value={tenant.id}>
-                  {tenant.first_name} {tenant.last_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="unit_id">Unité</Label>
-          <Select
-            value={watch("unit_id")}
-            onValueChange={handleUnitChange}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionner une unité" />
-            </SelectTrigger>
-            <SelectContent>
-              {units.map((unit) => (
-                <SelectItem key={unit.id} value={unit.id}>
-                  {unit.apartment?.name} - Unité {unit.unit_number}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="start_date">Date de début</Label>
-          <Input
-            type="date"
-            {...register("start_date", { required: true })}
-          />
-        </div>
-
-        {durationType === "fixed" && (
-          <div className="space-y-2">
-            <Label htmlFor="end_date">Date de fin</Label>
-            <Input
-              type="date"
-              {...register("end_date")}
-            />
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="rent_amount">Montant du loyer</Label>
-          <Input
-            type="number"
-            {...register("rent_amount", { required: true })}
-            readOnly={!!selectedUnitId}
-            className={selectedUnitId ? "bg-gray-100" : ""}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="deposit_amount">Montant de la caution</Label>
-          <Input
-            type="number"
-            {...register("deposit_amount", { required: true })}
-            readOnly={!!selectedUnitId}
-            className={selectedUnitId ? "bg-gray-100" : ""}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="payment_frequency">Fréquence de paiement</Label>
-          <Select
-            value={watch("payment_frequency")}
-            onValueChange={(value) => setValue("payment_frequency", value)}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="daily">Quotidien</SelectItem>
-              <SelectItem value="weekly">Hebdomadaire</SelectItem>
-              <SelectItem value="monthly">Mensuel</SelectItem>
-              <SelectItem value="quarterly">Trimestriel</SelectItem>
-              <SelectItem value="yearly">Annuel</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="duration_type">Type de durée</Label>
-          <Select
-            value={watch("duration_type")}
-            onValueChange={(value) => setValue("duration_type", value)}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="fixed">Durée déterminée</SelectItem>
-              <SelectItem value="month_to_month">Mois par mois</SelectItem>
-              <SelectItem value="yearly">Annuel</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="payment_type">Type de paiement</Label>
-          <Select
-            value={watch("payment_type")}
-            onValueChange={(value) => setValue("payment_type", value)}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="upfront">Paiement d'avance</SelectItem>
-              <SelectItem value="end_of_period">Fin de période</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      <DateFields 
+        formData={formData} 
+        setFormData={(data) => {
+          Object.entries(data).forEach(([key, value]) => {
+            setValue(key as keyof LeaseFormData, value)
+          })
+        }} 
+      />
+      
+      <PaymentFields 
+        formData={formData} 
+        setFormData={(data) => {
+          Object.entries(data).forEach(([key, value]) => {
+            setValue(key as keyof LeaseFormData, value)
+          })
+        }}
+        selectedUnitId={selectedUnitId}
+      />
+      
+      <FrequencyFields 
+        formData={formData}
+        setFormData={(data) => {
+          Object.entries(data).forEach(([key, value]) => {
+            setValue(key as keyof LeaseFormData, value)
+          })
+        }}
+        onDurationTypeChange={(value) => {
+          setValue("duration_type", value)
+          if (value !== "fixed") {
+            setValue("end_date", "")
+          }
+        }}
+      />
 
       <div className="flex justify-end gap-2">
         <Button type="submit" disabled={isSubmitting}>
