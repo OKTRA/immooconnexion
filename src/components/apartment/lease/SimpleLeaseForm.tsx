@@ -88,7 +88,7 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
 
       if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
 
-      // Direct insert into apartment_leases table
+      // Simple direct insert into apartment_leases table only
       const { data: lease, error } = await supabase
         .from('apartment_leases')
         .insert({
