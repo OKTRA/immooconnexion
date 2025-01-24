@@ -74,7 +74,19 @@ export function useLeaseForm(initialData?: ApartmentLease, onSuccess?: () => voi
 
       if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
 
-      // Utiliser la nouvelle fonction create_lease_with_periods
+      console.log("Calling create_lease_with_periods with data:", {
+        p_tenant_id: data.tenant_id,
+        p_unit_id: data.unit_id,
+        p_start_date: data.start_date,
+        p_end_date: data.duration_type === "fixed" ? data.end_date : null,
+        p_rent_amount: data.rent_amount,
+        p_deposit_amount: data.deposit_amount,
+        p_payment_frequency: data.payment_frequency,
+        p_duration_type: data.duration_type,
+        p_payment_type: data.payment_type,
+        p_agency_id: userProfile.agency_id
+      })
+
       const { data: lease, error } = await supabase
         .rpc('create_lease_with_periods', {
           p_tenant_id: data.tenant_id,
@@ -89,7 +101,12 @@ export function useLeaseForm(initialData?: ApartmentLease, onSuccess?: () => voi
           p_agency_id: userProfile.agency_id
         })
 
-      if (error) throw error
+      if (error) {
+        console.error("Error creating lease:", error)
+        throw error
+      }
+
+      console.log("Lease created successfully:", lease)
       return lease
     },
     onSuccess: () => {
