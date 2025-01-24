@@ -11,6 +11,8 @@ interface PaymentActionButtonProps {
 export function PaymentActionButton({ tenantId, leaseId }: PaymentActionButtonProps) {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
 
+  if (!tenantId) return null
+
   return (
     <>
       <Button

@@ -9,10 +9,18 @@ import { PaymentForm } from "./PaymentForm"
 interface PaymentDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  tenantId: string
+  tenantId?: string
+  leaseId?: string
 }
 
-export function PaymentDialog({ open, onOpenChange, tenantId }: PaymentDialogProps) {
+export function PaymentDialog({ 
+  open, 
+  onOpenChange, 
+  tenantId,
+  leaseId 
+}: PaymentDialogProps) {
+  if (!tenantId) return null
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -22,6 +30,7 @@ export function PaymentDialog({ open, onOpenChange, tenantId }: PaymentDialogPro
         <PaymentForm 
           onSuccess={() => onOpenChange(false)} 
           tenantId={tenantId}
+          leaseId={leaseId}
         />
       </DialogContent>
     </Dialog>

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { usePaymentForm } from "./hooks/usePaymentForm"
 import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
-import { PaymentFormData, PaymentFormProps } from "./types"
+import { PaymentFormData } from "./types"
 import { LeaseSelector } from "./components/LeaseSelector"
 import { PaymentDetails } from "./components/PaymentDetails"
 import { PeriodSelector } from "./components/PeriodSelector"
@@ -12,7 +12,13 @@ import { useLeaseSelection } from "./hooks/useLeaseSelection"
 import { usePeriodManagement } from "./hooks/usePeriodManagement"
 import { usePaymentSubmission } from "./hooks/usePaymentSubmission"
 
-export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
+interface PaymentFormProps {
+  onSuccess: () => void
+  tenantId: string
+  leaseId?: string
+}
+
+export function PaymentForm({ onSuccess, tenantId, leaseId }: PaymentFormProps) {
   const {
     leases,
     isLoadingLeases,
@@ -22,7 +28,7 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
 
   const { register, handleSubmit, setValue, watch } = useForm<PaymentFormData>({
     defaultValues: {
-      leaseId: "",
+      leaseId: leaseId || "",
       amount: 0,
       paymentMethod: "cash",
       paymentPeriods: []
@@ -34,7 +40,7 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
     setSelectedLeaseId,
     selectedLease,
     setSelectedLease
-  } = useLeaseSelection(leases, setValue)
+  } = useLeaseSelection(leases, setValue, leaseId)
 
   const {
     periodOptions,
@@ -46,11 +52,9 @@ export function PaymentForm({ onSuccess, tenantId }: PaymentFormProps) {
   const { isSubmitting, handleSubmit: submitPayment } = usePaymentSubmission(onSuccess)
 
   const handleInitialPaymentsSuccess = async () => {
-    console.log("Initial payments successful, refreshing data...")
     await refetchLeases()
     const updatedLease = leases.find(l => l.id === selectedLeaseId)
     if (updatedLease) {
-      console.log("Updated lease found:", updatedLease)
       setSelectedLease(updatedLease)
     }
   }
