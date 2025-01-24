@@ -18,7 +18,7 @@ export function ApartmentTenantsTab({
 }: ApartmentTenantsTabProps) {
   const { toast } = useToast();
   
-  const { data: tenants = [], isLoading: queryLoading } = useQuery({
+  const { data: tenants = [], isLoading: queryLoading, error } = useQuery({
     queryKey: ["apartment-tenants"],
     queryFn: async () => {
       try {
@@ -42,40 +42,25 @@ export function ApartmentTenantsTab({
           return [];
         }
 
-        const { data, error } = await supabase
-          .from("apartment_tenants")
-          .select(`
-            *,
-            apartment_leases (
-              id,
-              tenant_id,
-              unit_id,
-              start_date,
-              end_date,
-              rent_amount,
-              deposit_amount,
-              payment_frequency,
-              duration_type,
-              status,
-              payment_type,
-              agency_id
-            ),
-            apartment_units!apartment_tenants_unit_id_fkey (
-              unit_number,
-              apartment:apartments (
-                name
-              )
-            )
-          `)
+        // Log the agency_id to verify we're using the correct one
+        console.log('Fetching tenants for agency:', profileData.agency_id);
+
+        const { data, error: tenantsError } = await supabase
+          .from('apartment_tenants')
+          .select('*')
           .eq('agency_id', profileData.agency_id);
 
-        if (error) {
-          console.error('Erreur lors de la récupération des locataires:', error);
-          throw error;
+        if (tenantsError) {
+          console.error('Erreur lors de la récupération des locataires:', tenantsError);
+          throw tenantsError;
         }
+
+        // Log the fetched data to verify what we're getting
+        console.log('Fetched tenants:', data);
 
         return data as ApartmentTenant[];
       } catch (error: any) {
+        console.error('Error in tenant query:', error);
         toast({
           title: "Erreur",
           description: error.message || "Une erreur est survenue lors de la récupération des locataires",
@@ -88,6 +73,10 @@ export function ApartmentTenantsTab({
   });
 
   const isLoading = externalLoading || queryLoading;
+
+  if (error) {
+    console.error('Error in ApartmentTenantsTab:', error);
+  }
 
   if (isLoading) {
     return (
