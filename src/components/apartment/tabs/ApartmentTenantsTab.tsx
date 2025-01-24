@@ -60,6 +60,12 @@ export function ApartmentTenantsTab({
               status,
               payment_type,
               agency_id
+            ),
+            apartment_units!apartment_tenants_unit_id_fkey (
+              unit_number,
+              apartment:apartments (
+                name
+              )
             )
           `)
           .eq('agency_id', profileData.agency_id)
