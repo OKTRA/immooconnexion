@@ -21,7 +21,7 @@ export function useSimpleLeaseForm({ onSuccess }: UseSimpleLeaseFormProps) {
       payment_frequency: "monthly",
       duration_type: "month_to_month",
       payment_type: "upfront",
-      status: "pending"
+      status: "draft"
     }
   })
 
@@ -35,7 +35,7 @@ export function useSimpleLeaseForm({ onSuccess }: UseSimpleLeaseFormProps) {
         .from('profiles')
         .select('agency_id')
         .eq('id', profile.user.id)
-        .single()
+        .maybeSingle()
 
       if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
 
@@ -78,7 +78,7 @@ export function useSimpleLeaseForm({ onSuccess }: UseSimpleLeaseFormProps) {
         .from('profiles')
         .select('agency_id')
         .eq('id', profile.user.id)
-        .single()
+        .maybeSingle()
 
       if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
 
@@ -88,7 +88,7 @@ export function useSimpleLeaseForm({ onSuccess }: UseSimpleLeaseFormProps) {
         .select('*')
         .eq('tenant_id', data.tenant_id)
         .eq('unit_id', data.unit_id)
-        .single()
+        .maybeSingle()
 
       // Si l'association existe, la mettre à jour
       if (existingTenantUnit) {
@@ -112,7 +112,7 @@ export function useSimpleLeaseForm({ onSuccess }: UseSimpleLeaseFormProps) {
         if (tenantUnitError) throw tenantUnitError
       }
 
-      // Créer le bail avec le statut 'pending'
+      // Créer le bail avec le statut 'draft'
       const { data: lease, error: leaseError } = await supabase
         .from('apartment_leases')
         .insert({
@@ -126,7 +126,7 @@ export function useSimpleLeaseForm({ onSuccess }: UseSimpleLeaseFormProps) {
           duration_type: data.duration_type,
           payment_type: data.payment_type,
           agency_id: userProfile.agency_id,
-          status: 'pending'
+          status: 'draft'
         })
         .select()
         .single()
@@ -174,6 +174,15 @@ export function useSimpleLeaseForm({ onSuccess }: UseSimpleLeaseFormProps) {
       })
 
       if (error) throw error
+
+      // Mettre à jour le statut du bail à 'active' après la génération des périodes
+      const { error: updateError } = await supabase
+        .from('apartment_leases')
+        .update({ status: 'active' })
+        .eq('id', leaseId)
+
+      if (updateError) throw updateError
+
       return data
     },
     onSuccess: () => {

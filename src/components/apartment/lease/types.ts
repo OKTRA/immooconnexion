@@ -1,7 +1,7 @@
 export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 export type DurationType = 'fixed' | 'month_to_month' | 'yearly';
-export type PaymentType = 'upfront' | 'end_of_period';
-export type LeaseStatus = 'active' | 'expired' | 'terminated';
+export type PaymentType = 'upfront' | 'periodic';
+export type LeaseStatus = 'draft' | 'active' | 'expired' | 'terminated';
 
 export interface LeaseFormData {
   tenant_id: string;
