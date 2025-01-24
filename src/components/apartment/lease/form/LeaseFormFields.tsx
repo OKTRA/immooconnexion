@@ -5,7 +5,6 @@ import { FrequencyFields } from "./FrequencyFields"
 import { UnitSelector } from "./UnitSelector"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Unit } from "./UnitSelector"
 
 interface LeaseFormFieldsProps {
   formData: {
@@ -48,8 +47,6 @@ export function LeaseFormFields({
 
       if (!profile?.agency_id) throw new Error("Agency ID not found")
 
-      console.log("Fetching units for agency:", profile.agency_id)
-
       const { data, error } = await supabase
         .from("apartment_units")
         .select(`
@@ -62,7 +59,7 @@ export function LeaseFormFields({
           )
         `)
         .eq("status", "available")
-        .eq("apartments.agency_id", profile.agency_id)
+        .order('unit_number')
 
       if (error) {
         console.error("Error fetching units:", error)
@@ -70,7 +67,7 @@ export function LeaseFormFields({
       }
       
       console.log("Available units:", data)
-      return data as Unit[]
+      return data || []
     }
   })
 
@@ -94,7 +91,7 @@ export function LeaseFormFields({
     const valid = !!(
       formData.unit_id &&
       formData.start_date &&
-      formData.rent_amount &&
+      formData.rent_amount > 0 &&
       formData.deposit_amount >= 0 &&
       formData.payment_frequency &&
       formData.duration_type &&
@@ -140,7 +137,7 @@ export function LeaseFormFields({
         </Button>
         <Button 
           type="submit" 
-          disabled={disabled || !isFormValid() || isSubmitting}
+          disabled={isSubmitting || !isFormValid()}
         >
           {isSubmitting ? "Chargement..." : "Créer le bail"}
         </Button>
