@@ -82,12 +82,10 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
 
   const createLease = useMutation({
     mutationFn: async (data: any) => {
-      // Ensure we have valid dates
       if (!data.start_date) {
         throw new Error("La date de début est requise")
       }
 
-      // Only include end_date if duration_type is "fixed"
       const leaseData = {
         ...data,
         end_date: data.duration_type === "fixed" ? data.end_date : null,
@@ -129,12 +127,10 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
 
   const updateLease = useMutation({
     mutationFn: async (data: any) => {
-      // Ensure we have valid dates
       if (!data.start_date) {
         throw new Error("La date de début est requise")
       }
 
-      // Only include end_date if duration_type is "fixed"
       const leaseData = {
         ...data,
         end_date: data.duration_type === "fixed" ? data.end_date : null
@@ -232,7 +228,7 @@ export function LeaseForm({ initialData, onSuccess }: LeaseFormProps) {
           />
         </div>
 
-        {watch("duration_type") === "fixed" && (
+        {durationType === "fixed" && (
           <div className="space-y-2">
             <Label htmlFor="end_date">Date de fin</Label>
             <Input
