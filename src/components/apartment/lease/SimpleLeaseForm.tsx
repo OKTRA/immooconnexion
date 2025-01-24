@@ -27,7 +27,7 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
       payment_frequency: "monthly",
       duration_type: "month_to_month",
       payment_type: "upfront",
-      status: "active"
+      status: "pending" // Changé de 'active' à 'pending'
     }
   })
 
@@ -118,7 +118,7 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
         if (tenantUnitError) throw tenantUnitError
       }
 
-      // Créer le bail
+      // Créer le bail avec le statut 'pending'
       const { data: lease, error: leaseError } = await supabase
         .from('apartment_leases')
         .insert({
@@ -132,7 +132,7 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
           duration_type: data.duration_type,
           payment_type: data.payment_type,
           agency_id: userProfile.agency_id,
-          status: 'active'
+          status: 'pending' // Changé de 'active' à 'pending'
         })
         .select()
         .single()
@@ -154,7 +154,7 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
       queryClient.invalidateQueries({ queryKey: ["available-units"] })
       toast({
         title: "Bail créé",
-        description: "Le bail a été créé avec succès",
+        description: "Le bail a été créé avec succès. N'oubliez pas de générer les périodes de paiement.",
       })
       onSuccess?.()
     },
