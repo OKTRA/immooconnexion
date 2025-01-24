@@ -88,21 +88,45 @@ export function SimpleLeaseForm({ onSuccess }: SimpleLeaseFormProps) {
 
       if (!userProfile?.agency_id) throw new Error("Aucune agence associée")
 
+      // Direct insert into apartment_leases table
       const { data: lease, error } = await supabase
-        .rpc('create_apartment_lease', {
-          p_tenant_id: data.tenant_id,
-          p_unit_id: data.unit_id,
-          p_start_date: data.start_date,
-          p_end_date: data.end_date || null,
-          p_rent_amount: data.rent_amount,
-          p_deposit_amount: data.deposit_amount,
-          p_payment_frequency: data.payment_frequency,
-          p_duration_type: data.duration_type,
-          p_payment_type: data.payment_type,
-          p_agency_id: userProfile.agency_id
+        .from('apartment_leases')
+        .insert({
+          tenant_id: data.tenant_id,
+          unit_id: data.unit_id,
+          start_date: data.start_date,
+          end_date: data.end_date || null,
+          rent_amount: data.rent_amount,
+          deposit_amount: data.deposit_amount,
+          payment_frequency: data.payment_frequency,
+          duration_type: data.duration_type,
+          payment_type: data.payment_type,
+          agency_id: userProfile.agency_id,
+          status: 'active'
         })
+        .select()
+        .single()
 
       if (error) throw error
+
+      // Update unit status
+      const { error: unitError } = await supabase
+        .from('apartment_units')
+        .update({ status: 'occupied' })
+        .eq('id', data.unit_id)
+
+      if (unitError) throw unitError
+
+      // Create tenant_units association
+      const { error: tenantUnitError } = await supabase
+        .from('tenant_units')
+        .insert({
+          tenant_id: data.tenant_id,
+          unit_id: data.unit_id
+        })
+
+      if (tenantUnitError) throw tenantUnitError
+
       return lease
     },
     onSuccess: () => {
