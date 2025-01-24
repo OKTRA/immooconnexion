@@ -3,21 +3,13 @@ import { DateFields } from "./DateFields"
 import { PaymentFields } from "./PaymentFields"
 import { FrequencyFields } from "./FrequencyFields"
 import { UnitSelector } from "./UnitSelector"
+import { LeaseFormData } from "../types"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 
 interface LeaseFormFieldsProps {
-  formData: {
-    unit_id: string;
-    start_date: string;
-    end_date?: string;
-    rent_amount: number;
-    deposit_amount: number;
-    payment_frequency: string;
-    duration_type: string;
-    payment_type: string;
-  };
-  setFormData: (data: any) => void;
+  formData: LeaseFormData;
+  setFormData: (data: LeaseFormData) => void;
   onSubmit: () => Promise<void>;
   isSubmitting: boolean;
   onCancel: () => void;
@@ -54,18 +46,13 @@ export function LeaseFormFields({
           unit_number,
           rent_amount,
           apartment:apartments (
-            id,
-            name
+            name,
+            address
           )
         `)
         .eq("status", "available")
-        .order('unit_number')
 
-      if (error) {
-        console.error("Error fetching units:", error)
-        throw error
-      }
-      
+      if (error) throw error
       console.log("Available units:", data)
       return data || []
     }
@@ -77,6 +64,7 @@ export function LeaseFormFields({
   }
 
   const isFormValid = () => {
+    // Ajout de logs pour déboguer
     console.log("Form validation check:", {
       unit_id: formData.unit_id,
       start_date: formData.start_date,

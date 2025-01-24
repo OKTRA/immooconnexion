@@ -1,3 +1,5 @@
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 import {
   Select,
   SelectContent,
@@ -13,7 +15,6 @@ interface Unit {
   unit_number: string;
   rent_amount: number;
   apartment: {
-    id: string;
     name: string;
   };
 }
@@ -25,9 +26,7 @@ interface UnitSelectorProps {
   isLoading: boolean;
 }
 
-export function UnitSelector({ value, onChange, units = [], isLoading }: UnitSelectorProps) {
-  console.log("UnitSelector received units:", units)
-
+export function UnitSelector({ value, onChange, units, isLoading }: UnitSelectorProps) {
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -45,14 +44,20 @@ export function UnitSelector({ value, onChange, units = [], isLoading }: UnitSel
         onValueChange={onChange}
       >
         <SelectTrigger id="unit" className="w-full">
-          <SelectValue placeholder="Sélectionner une unité" />
+          <SelectValue placeholder="Sélectionner une unité disponible" />
         </SelectTrigger>
         <SelectContent>
-          {units.map((unit) => (
-            <SelectItem key={unit.id} value={unit.id}>
-              {unit.apartment?.name} - Unité {unit.unit_number} ({unit.rent_amount.toLocaleString()} FCFA)
+          {units.length === 0 ? (
+            <SelectItem value="" disabled>
+              Aucune unité disponible
             </SelectItem>
-          ))}
+          ) : (
+            units.map((unit) => (
+              <SelectItem key={unit.id} value={unit.id}>
+                {unit.apartment?.name} - Unité {unit.unit_number} ({unit.rent_amount.toLocaleString()} FCFA)
+              </SelectItem>
+            ))
+          )}
         </SelectContent>
       </Select>
     </div>
