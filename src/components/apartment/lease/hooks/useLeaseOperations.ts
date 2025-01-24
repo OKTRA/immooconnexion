@@ -40,19 +40,33 @@ export function useLeaseOperations() {
 
   const generatePaymentPeriods = useMutation({
     mutationFn: async (leaseId: string) => {
+      console.log("Generating payment periods for lease:", leaseId)
+      
       const lease = leases.find(l => l.id === leaseId)
-      if (!lease) throw new Error("Bail non trouvé")
+      if (!lease) {
+        throw new Error("Bail non trouvé")
+      }
 
-      const { data, error } = await supabase.rpc('generate_lease_payment_periods', {
-        p_lease_id: leaseId,
-        p_start_date: lease.start_date,
-        p_end_date: lease.end_date || null,
-        p_rent_amount: lease.rent_amount,
-        p_payment_frequency: lease.payment_frequency
-      })
+      try {
+        const { data, error } = await supabase.rpc('generate_lease_payment_periods', {
+          p_lease_id: leaseId,
+          p_start_date: lease.start_date,
+          p_end_date: lease.end_date || null,
+          p_rent_amount: lease.rent_amount,
+          p_payment_frequency: lease.payment_frequency
+        })
 
-      if (error) throw error
-      return data
+        if (error) {
+          console.error("RPC Error:", error)
+          throw error
+        }
+
+        console.log("Payment periods generated successfully:", data)
+        return data
+      } catch (error) {
+        console.error("Detailed error:", error)
+        throw error
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["apartment-leases"] })
@@ -61,7 +75,7 @@ export function useLeaseOperations() {
         description: "Les périodes de paiement ont été générées avec succès",
       })
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Error generating payment periods:", error)
       toast({
         title: "Erreur",
