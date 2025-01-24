@@ -26,22 +26,24 @@ export function AdminLoginForm() {
       return
     }
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/reset-password`,
-    })
-    
-    if (error) {
-      console.error('Password reset error:', error)
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue. Veuillez réessayer.",
-        variant: "destructive",
-        duration: 5000,
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/reset-password`,
       })
-    } else {
+      
+      if (error) throw error
+
       toast({
         title: "Email envoyé",
         description: "Vérifiez votre boîte mail pour réinitialiser votre mot de passe.",
+        duration: 5000,
+      })
+    } catch (error) {
+      console.error('Password reset error:', error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la réinitialisation du mot de passe.",
+        variant: "destructive",
         duration: 5000,
       })
     }
@@ -52,31 +54,37 @@ export function AdminLoginForm() {
     setIsLoading(true)
 
     try {
-      // First clear any existing session
+      const trimmedEmail = email.trim()
+      const trimmedPassword = password.trim()
+
+      // Validate inputs
+      if (!trimmedEmail || !trimmedPassword) {
+        toast({
+          title: "Erreur",
+          description: "Veuillez remplir tous les champs",
+          variant: "destructive",
+          duration: 5000,
+        })
+        setIsLoading(false)
+        return
+      }
+
+      // Clear any existing session
       await supabase.auth.signOut()
       
+      console.log('Attempting login with:', { email: trimmedEmail })
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
+        email: trimmedEmail,
+        password: trimmedPassword,
       })
 
       if (signInError) {
         console.error('Login error:', signInError)
-        toast({
-          title: "Échec de la connexion",
-          description: "Email ou mot de passe incorrect",
-          variant: "destructive",
-        })
-        return
+        throw signInError
       }
 
       if (!data.user) {
-        toast({
-          title: "Échec de la connexion",
-          description: "Email ou mot de passe incorrect",
-          variant: "destructive",
-        })
-        return
+        throw new Error("No user data returned")
       }
 
       // Check if the user is a super admin in the administrators table
@@ -88,13 +96,11 @@ export function AdminLoginForm() {
 
       if (adminError || !adminData) {
         console.error('Admin verification error:', adminError)
-        toast({
-          title: "Accès refusé",
-          description: "Email ou mot de passe incorrect",
-          variant: "destructive",
-        })
-        await supabase.auth.signOut()
-        return
+        throw new Error("Accès non autorisé")
+      }
+
+      if (!adminData.is_super_admin) {
+        throw new Error("Accès réservé aux super administrateurs")
       }
 
       // If not a super admin, check agency status
@@ -106,36 +112,12 @@ export function AdminLoginForm() {
           .single()
 
         if (agencyError || !agencyData) {
-          console.error('Agency verification error:', agencyError)
-          toast({
-            title: "Erreur de vérification",
-            description: "Impossible de vérifier le statut de l'agence",
-            variant: "destructive",
-          })
-          await supabase.auth.signOut()
-          return
+          throw new Error("Erreur de vérification de l'agence")
         }
 
         if (agencyData.status === 'blocked') {
-          toast({
-            title: "Accès refusé",
-            description: "Votre agence est actuellement bloquée. Veuillez contacter l'administrateur.",
-            variant: "destructive",
-          })
-          await supabase.auth.signOut()
-          return
+          throw new Error("Votre agence est actuellement bloquée")
         }
-      }
-
-      if (!adminData.is_super_admin) {
-        console.error('User is not a super admin')
-        toast({
-          title: "Accès refusé",
-          description: "Email ou mot de passe incorrect",
-          variant: "destructive",
-        })
-        await supabase.auth.signOut()
-        return
       }
 
       toast({
@@ -145,12 +127,16 @@ export function AdminLoginForm() {
 
       navigate("/super-admin/admin")
     } catch (error: any) {
-      console.error('General error:', error)
+      console.error('Authentication error:', error)
       toast({
         title: "Erreur de connexion",
-        description: "Email ou mot de passe incorrect",
+        description: error.message === "Invalid login credentials" 
+          ? "Email ou mot de passe incorrect"
+          : error.message || "Une erreur est survenue lors de la connexion",
         variant: "destructive",
+        duration: 5000,
       })
+      await supabase.auth.signOut()
     } finally {
       setIsLoading(false)
     }
