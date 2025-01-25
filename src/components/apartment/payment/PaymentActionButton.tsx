@@ -18,8 +18,6 @@ export function PaymentActionButton({ tenantId, leaseId }: PaymentActionButtonPr
     }
   }
 
-  if (!tenantId && !leaseId) return null
-
   return (
     <Button
       variant="ghost"
