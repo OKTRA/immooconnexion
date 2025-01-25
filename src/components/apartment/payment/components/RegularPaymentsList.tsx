@@ -3,11 +3,7 @@ import { fr } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CalendarDays } from "lucide-react"
-import { PaymentActions } from "./PaymentActions"
-
-interface RegularPaymentsListProps {
-  payments: any[]
-}
+import { RegularPaymentsListProps } from "../types"
 
 export function RegularPaymentsList({ payments }: RegularPaymentsListProps) {
   if (!payments?.length) return null
@@ -58,7 +54,6 @@ export function RegularPaymentsList({ payments }: RegularPaymentsListProps) {
                     ? 'En attente'
                     : 'En retard'}
                 </Badge>
-                <PaymentActions payment={payment} onAction={() => {}} />
               </div>
             </div>
           ))}

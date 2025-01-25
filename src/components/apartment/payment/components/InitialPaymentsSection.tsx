@@ -3,15 +3,12 @@ import { fr } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle, XCircle, AlertCircle, Receipt } from "lucide-react"
-
-interface InitialPaymentsSectionProps {
-  payments: any[]
-}
+import { InitialPaymentsSectionProps } from "../types"
 
 export function InitialPaymentsSection({ payments }: InitialPaymentsSectionProps) {
   if (!payments?.length) return null
 
-  const getStatusIcon = (status: string | null) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'paid':
         return <CheckCircle className="h-4 w-4 text-green-500" />

@@ -4,20 +4,14 @@ import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { InitialPaymentsSection } from "./components/InitialPaymentsSection"
 import { RegularPaymentsList } from "./components/RegularPaymentsList"
-import { PaymentPeriodFilter, PaymentStatusFilter } from "./types"
+import { PaymentPeriodFilter, PaymentStatusFilter, PaymentListProps } from "./types"
 import { Card, CardContent } from "@/components/ui/card"
-
-interface PaymentsListProps {
-  periodFilter: PaymentPeriodFilter
-  statusFilter: PaymentStatusFilter
-  leaseId: string
-}
 
 export function PaymentsList({ 
   periodFilter, 
   statusFilter, 
   leaseId 
-}: PaymentsListProps) {
+}: PaymentListProps) {
   const { toast } = useToast()
 
   const { data: payments, isLoading } = useQuery({
@@ -39,12 +33,10 @@ export function PaymentsList({
         `)
         .eq("lease_id", leaseId)
 
-      // Appliquer les filtres de statut
       if (statusFilter !== "all") {
         query = query.eq("status", statusFilter)
       }
 
-      // Appliquer les filtres de période
       const today = new Date()
       
       if (periodFilter === "current") {
@@ -59,7 +51,6 @@ export function PaymentsList({
         query = query.gt("due_date", today.toISOString())
       }
 
-      // Ordonner par date d'échéance
       query = query.order("due_date", { ascending: false })
 
       const { data, error } = await query
@@ -73,10 +64,7 @@ export function PaymentsList({
         })
         throw error
       }
-      
-      console.log("Fetched payments:", data)
 
-      // Séparer les paiements initiaux des paiements réguliers
       const initialPayments = (data || []).filter(p => 
         p.type === 'deposit' || p.type === 'agency_fees'
       )
