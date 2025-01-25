@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { PaymentForm } from "@/components/apartment/payment/PaymentForm"
-import { CreditCard, PlusCircle } from "lucide-react"
+import { CreditCard, PlusCircle, Loader2 } from "lucide-react"
 
 interface LeasePaymentViewProps {
   leaseId: string;
@@ -16,7 +16,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
   const [showRegularPaymentDialog, setShowRegularPaymentDialog] = useState(false)
 
-  const { data: lease } = useQuery({
+  const { data: lease, isLoading: isLoadingLease } = useQuery({
     queryKey: ["lease", leaseId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -27,10 +27,18 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
             id,
             first_name,
             last_name
+          ),
+          unit:unit_id (
+            id,
+            unit_number,
+            apartment:apartments (
+              id,
+              name
+            )
           )
         `)
         .eq("id", leaseId)
-        .single()
+        .maybeSingle()
 
       if (error) throw error
       return data
@@ -105,8 +113,16 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
     }
   })
 
-  if (isLoadingStats) {
-    return <div>Chargement...</div>
+  if (isLoadingLease || isLoadingStats) {
+    return (
+      <div className="flex items-center justify-center h-48">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!lease) {
+    return <div className="text-center p-4 text-muted-foreground">Bail non trouvé</div>
   }
 
   return (
@@ -150,13 +166,12 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
           <DialogHeader>
             <DialogTitle>Paiements Initiaux</DialogTitle>
           </DialogHeader>
-          {lease?.tenant && (
-            <PaymentForm 
-              onSuccess={() => setShowInitialPaymentDialog(false)}
-              tenantId={lease.tenant.id}
-              leaseId={leaseId}
-            />
-          )}
+          <PaymentForm 
+            onSuccess={() => setShowInitialPaymentDialog(false)}
+            tenantId={lease.tenant.id}
+            leaseId={leaseId}
+            initialPayment={true}
+          />
         </DialogContent>
       </Dialog>
 
@@ -165,13 +180,12 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
           <DialogHeader>
             <DialogTitle>Nouveau Paiement de Loyer</DialogTitle>
           </DialogHeader>
-          {lease?.tenant && (
-            <PaymentForm 
-              onSuccess={() => setShowRegularPaymentDialog(false)}
-              tenantId={lease.tenant.id}
-              leaseId={leaseId}
-            />
-          )}
+          <PaymentForm 
+            onSuccess={() => setShowRegularPaymentDialog(false)}
+            tenantId={lease.tenant.id}
+            leaseId={leaseId}
+            initialPayment={false}
+          />
         </DialogContent>
       </Dialog>
     </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { LeaseData } from "../types"
 
 export function useLeaseSelection(
-  leases: LeaseData[] = [], // Provide default empty array
+  leases: LeaseData[] = [],
   setValue: (field: string, value: any) => void,
   initialLeaseId?: string
 ) {
@@ -20,9 +20,7 @@ export function useLeaseSelection(
   }, [initialLeaseId, leases])
 
   const handleLeaseSelect = (leaseId: string) => {
-    if (!leases) return
-
-    const lease = leases.find(l => l.id === leaseId)
+    const lease = leases?.find(l => l.id === leaseId)
     setSelectedLeaseId(leaseId)
     setSelectedLease(lease || null)
     setValue("leaseId", leaseId)
