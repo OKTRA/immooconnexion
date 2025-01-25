@@ -16,6 +16,15 @@ export interface LeaseFormData {
   status: LeaseStatus;
 }
 
+export interface LeaseFormFieldsProps {
+  formData: LeaseFormData;
+  setFormData: (data: LeaseFormData) => void;
+  onSubmit: () => Promise<void>;
+  isSubmitting: boolean;
+  onCancel: () => void;
+  disabled?: boolean;
+}
+
 export interface CreateLeaseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;

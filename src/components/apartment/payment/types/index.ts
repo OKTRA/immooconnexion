@@ -1,3 +1,6 @@
+export type PaymentMethod = 'cash' | 'bank_transfer' | 'mobile_money';
+export type PaymentType = 'deposit' | 'agency_fees' | 'rent';
+
 export interface PaymentFormData {
   leaseId: string;
   amount: number;
@@ -5,7 +8,12 @@ export interface PaymentFormData {
   paymentPeriods: string[];
 }
 
-export type PaymentMethod = 'cash' | 'bank_transfer' | 'mobile_money';
+export interface PaymentFormProps {
+  onSuccess: () => void;
+  leaseId: string;
+  tenantId?: string;
+  paymentType?: PaymentType;
+}
 
 export interface LeaseData {
   id: string;
@@ -19,15 +27,11 @@ export interface LeaseData {
   duration_type: string;
   status: string;
   payment_type: string;
-  apartment_tenants: {
+  tenant: {
+    id: string;
     first_name: string;
     last_name: string;
-  };
-  apartment_units: {
-    unit_number: string;
-    apartment: {
-      name: string;
-    };
+    phone_number?: string;
   };
 }
 
@@ -41,11 +45,4 @@ export interface LeaseSelectProps {
 export interface PeriodOption {
   value: number;
   label: string;
-}
-
-export interface PaymentFormProps {
-  onSuccess: () => void;
-  leaseId: string;
-  tenantId?: string;
-  paymentType?: 'deposit' | 'agency_fees' | 'rent';
 }
