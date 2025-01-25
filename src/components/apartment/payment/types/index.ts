@@ -8,11 +8,17 @@ export interface PaymentFormData {
   amount: number;
   paymentMethod: PaymentMethod;
   paymentDate: Date;
-  numberOfPeriods: number;
+  selectedPeriods: string[];
   notes?: string;
   isHistorical?: boolean;
-  periodStart?: Date;
-  periodEnd?: Date;
+}
+
+export interface PaymentPeriod {
+  id: string;
+  startDate: Date;
+  endDate: Date;
+  amount: number;
+  status: PaymentStatus;
 }
 
 export interface LeaseData {
@@ -43,17 +49,9 @@ export interface LeaseData {
   };
 }
 
-export interface PeriodOption {
-  value: number;
-  label: string;
-  startDate: Date;
-  endDate: Date;
-  amount: number;
-}
-
 export interface PaymentDetailsProps {
   selectedLease: LeaseData;
-  selectedPeriods: number;
+  selectedPeriods: PaymentPeriod[];
   isHistorical?: boolean;
 }
 
@@ -62,13 +60,6 @@ export interface PaymentDialogProps {
   onOpenChange: (open: boolean) => void;
   leaseId: string;
   isHistorical?: boolean;
-}
-
-export interface LeaseSelectProps {
-  leases: LeaseData[];
-  selectedLeaseId: string;
-  onLeaseSelect: (value: string) => void;
-  isLoading: boolean;
 }
 
 export interface PaymentListProps {
