@@ -9,7 +9,7 @@ interface InitialPaymentsSectionProps {
 }
 
 export function InitialPaymentsSection({ payments }: InitialPaymentsSectionProps) {
-  if (payments.length === 0) return null
+  if (!payments?.length) return null
 
   const getStatusIcon = (status: string | null) => {
     switch (status) {

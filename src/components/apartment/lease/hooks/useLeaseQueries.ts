@@ -76,9 +76,20 @@ export function useLeaseQueries() {
             return lease
           }
 
+          // Séparer les paiements par type
+          const payments = lease.payments || []
+          const initialPayments = payments.filter(p => 
+            p.type === 'deposit' || p.type === 'agency_fees'
+          )
+          const regularPayments = payments.filter(p => 
+            p.type !== 'deposit' && p.type !== 'agency_fees'
+          )
+
           return {
             ...lease,
-            other_leases: otherLeases || []
+            other_leases: otherLeases || [],
+            initialPayments,
+            regularPayments
           }
         })
       )

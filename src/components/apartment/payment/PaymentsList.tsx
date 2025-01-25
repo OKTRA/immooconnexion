@@ -75,7 +75,20 @@ export function PaymentsList({
       }
       
       console.log("Fetched payments:", data)
-      return data || []
+
+      // Séparer les paiements initiaux des paiements réguliers
+      const initialPayments = (data || []).filter(p => 
+        p.type === 'deposit' || p.type === 'agency_fees'
+      )
+
+      const regularPayments = (data || []).filter(p => 
+        p.type !== 'deposit' && p.type !== 'agency_fees'
+      )
+
+      return {
+        initialPayments,
+        regularPayments
+      }
     }
   })
 
@@ -87,7 +100,7 @@ export function PaymentsList({
     )
   }
 
-  if (!payments.length) {
+  if (!payments.initialPayments?.length && !payments.regularPayments?.length) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-muted-foreground">
@@ -97,19 +110,10 @@ export function PaymentsList({
     )
   }
 
-  // Séparer les paiements initiaux des paiements réguliers
-  const initialPayments = payments.filter(p => 
-    p.type === 'deposit' || p.type === 'agency_fees'
-  )
-
-  const regularPayments = payments.filter(p => 
-    p.type !== 'deposit' && p.type !== 'agency_fees'
-  )
-
   return (
     <div className="space-y-6">
-      <InitialPaymentsSection payments={initialPayments} />
-      <RegularPaymentsList payments={regularPayments} />
+      <InitialPaymentsSection payments={payments.initialPayments} />
+      <RegularPaymentsList payments={payments.regularPayments} />
     </div>
   )
 }

@@ -10,7 +10,7 @@ interface RegularPaymentsListProps {
 }
 
 export function RegularPaymentsList({ payments }: RegularPaymentsListProps) {
-  if (payments.length === 0) return null
+  if (!payments?.length) return null
 
   return (
     <Card>
