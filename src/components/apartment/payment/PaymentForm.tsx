@@ -14,16 +14,12 @@ import { Label } from "@/components/ui/label"
 interface PaymentFormProps {
   onSuccess?: () => void;
   leaseId: string;
-  tenantId?: string;
-  initialPayment?: boolean;
   isHistorical?: boolean;
 }
 
 export function PaymentForm({ 
   onSuccess, 
   leaseId,
-  tenantId,
-  initialPayment = false,
   isHistorical = false
 }: PaymentFormProps) {
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([])
@@ -37,8 +33,7 @@ export function PaymentForm({
       paymentPeriods: [],
       paymentDate: new Date(),
       notes: "",
-      isHistorical,
-      tenantId
+      isHistorical
     }
   })
 

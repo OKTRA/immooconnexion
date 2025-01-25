@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { PaymentForm } from "@/components/apartment/payment/PaymentForm"
 import { CreditCard, PlusCircle, Loader2 } from "lucide-react"
 import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "../payment/types"
+import { toast } from "@/components/ui/use-toast"
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
@@ -22,12 +23,12 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         .from("apartment_leases")
         .select(`
           *,
-          tenant:tenant_id (
+          tenant:apartment_tenants (
             id,
             first_name,
             last_name
           ),
-          unit:unit_id (
+          unit:apartment_units (
             id,
             unit_number,
             apartment:apartments (
@@ -114,6 +115,15 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
     }
   })
 
+  const handlePaymentSuccess = () => {
+    toast({
+      title: "Succès",
+      description: "Le paiement a été enregistré avec succès",
+    })
+    setShowRegularPaymentDialog(false)
+    setShowInitialPaymentDialog(false)
+  }
+
   if (isLoadingLease || isLoadingStats) {
     return (
       <div className="flex items-center justify-center h-48">
@@ -170,7 +180,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
             <DialogTitle>Paiements Initiaux</DialogTitle>
           </DialogHeader>
           <PaymentForm 
-            onSuccess={() => setShowInitialPaymentDialog(false)}
+            onSuccess={handlePaymentSuccess}
             leaseId={leaseId}
             isHistorical={true}
           />
@@ -183,7 +193,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
             <DialogTitle>Nouveau Paiement de Loyer</DialogTitle>
           </DialogHeader>
           <PaymentForm 
-            onSuccess={() => setShowRegularPaymentDialog(false)}
+            onSuccess={handlePaymentSuccess}
             leaseId={leaseId}
             isHistorical={false}
           />
