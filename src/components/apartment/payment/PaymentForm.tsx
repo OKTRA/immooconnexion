@@ -1,34 +1,26 @@
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { PaymentMethodSelect } from "./components/PaymentMethodSelect";
-import { PaymentFormData } from "./types";
-import { PaymentDetails } from "./components/PaymentDetails";
-import { PeriodSelector } from "./components/PeriodSelector";
-import { usePaymentSubmission } from "./hooks/usePaymentSubmission";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
-import { useEffect, useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-
-interface PaymentFormProps {
-  onSuccess?: () => void;
-  leaseId: string;
-  isHistorical?: boolean;
-}
+import { useForm } from "react-hook-form"
+import { Button } from "@/components/ui/button"
+import { Loader2 } from "lucide-react"
+import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
+import { PaymentFormData, PaymentFormProps } from "./types"
+import { PaymentDetails } from "./components/PaymentDetails"
+import { PeriodSelector } from "./components/PeriodSelector"
+import { usePaymentSubmission } from "./hooks/usePaymentSubmission"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/lib/supabase"
+import { useEffect, useState } from "react"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 
 export function PaymentForm({ 
   onSuccess, 
   leaseId,
   isHistorical = false
 }: PaymentFormProps) {
-  const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
-  const [paymentDate, setPaymentDate] = useState<Date>(new Date());
+  const [selectedPeriods, setSelectedPeriods] = useState<string[]>([])
+  const [paymentDate, setPaymentDate] = useState<Date>(new Date())
 
-  const { data: lease, isLoading: isLoadingLease } = useQuery({
+  const { data: lease } = useQuery({
     queryKey: ["lease-details", leaseId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -50,87 +42,56 @@ export function PaymentForm({
           )
         `)
         .eq("id", leaseId)
-        .maybeSingle();
+        .single()
 
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!leaseId
-  });
-
-  const { data: periods, isLoading: isLoadingPeriods } = useQuery({
-    queryKey: ["payment-periods", leaseId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("apartment_payment_periods")
-        .select("*")
-        .eq("lease_id", leaseId)
-        .order("start_date", { ascending: true });
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!leaseId
-  });
+      if (error) throw error
+      return data
+    }
+  })
 
   const { register, handleSubmit, setValue, watch } = useForm<PaymentFormData>({
     defaultValues: {
       leaseId,
       amount: 0,
       paymentMethod: "cash",
-      paymentDate: new Date(),
       selectedPeriods: [],
+      paymentDate: new Date(),
       notes: "",
       isHistorical
     }
-  });
+  })
 
-  const { isSubmitting, handleSubmit: submitPayment } = usePaymentSubmission(onSuccess);
+  const { isSubmitting, handleSubmit: submitPayment } = usePaymentSubmission(onSuccess)
 
   useEffect(() => {
     if (lease && selectedPeriods.length > 0) {
-      const totalAmount = selectedPeriods.length * lease.rent_amount;
-      setValue('amount', totalAmount);
+      const totalAmount = selectedPeriods.length * lease.rent_amount
+      setValue('amount', totalAmount)
     }
-  }, [selectedPeriods, lease, setValue]);
+  }, [selectedPeriods, lease, setValue])
 
-  const onSubmit = (data: PaymentFormData) => {
-    if (lease) {
-      submitPayment({
-        ...data,
-        selectedPeriods,
-        paymentDate,
-        isHistorical
-      });
-    }
-  };
+  const onSubmit = async (data: PaymentFormData) => {
+    await submitPayment(data)
+  }
 
-  if (isLoadingLease || isLoadingPeriods) {
+  if (!lease) {
     return (
       <div className="flex items-center justify-center p-4">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
-    );
-  }
-
-  if (!lease || !periods) {
-    return (
-      <div className="text-center p-4 text-muted-foreground">
-        Bail non trouvé
-      </div>
-    );
+    )
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <PaymentDetails
-        selectedLease={lease}
-        selectedPeriods={periods.filter(p => selectedPeriods.includes(p.id))}
-        isHistorical={isHistorical}
+        lease={lease}
+        selectedPeriods={selectedPeriods}
+        totalAmount={watch('amount')}
       />
 
       <PeriodSelector
-        periods={periods}
+        leaseId={leaseId}
         selectedPeriods={selectedPeriods}
         onPeriodsChange={setSelectedPeriods}
         paymentDate={paymentDate}
@@ -156,7 +117,11 @@ export function PaymentForm({
         </div>
       </div>
 
-      <Button type="submit" disabled={isSubmitting || selectedPeriods.length === 0} className="w-full">
+      <Button 
+        type="submit" 
+        disabled={isSubmitting || selectedPeriods.length === 0}
+        className="w-full"
+      >
         {isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -167,5 +132,5 @@ export function PaymentForm({
         )}
       </Button>
     </form>
-  );
+  )
 }
