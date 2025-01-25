@@ -24,7 +24,7 @@ export function usePaymentSubmission(onSuccess?: () => void) {
           amount: formData.amount || selectedLease.rent_amount,
           payment_method: formData.paymentMethod,
           payment_date: formData.paymentDate.toISOString(),
-          status: formData.isHistorical ? "paid" : "pending",
+          status: "paid",
           agency_id: agencyId,
           type: "rent",
           payment_period_start: formData.periodStart?.toISOString(),
