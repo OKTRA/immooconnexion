@@ -126,7 +126,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {stats && <PaymentStats stats={stats} />}
       
       <div className="flex gap-4 justify-end">
@@ -149,15 +149,17 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
           </Button>
         )}
       </div>
-      
-      <div className="grid gap-6 md:grid-cols-2">
+
+      <div className="space-y-8">
         <PaymentsList 
           title="Paiements Initiaux" 
-          payments={initialPayments} 
+          payments={initialPayments}
+          className="w-full"
         />
         <PaymentsList 
           title="Paiements de Loyer" 
           payments={regularPayments}
+          className="w-full"
         />
       </div>
 
