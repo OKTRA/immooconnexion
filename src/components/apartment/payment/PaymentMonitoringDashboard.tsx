@@ -18,7 +18,6 @@ export function PaymentMonitoringDashboard({ leaseId }: PaymentMonitoringDashboa
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   const [periodFilter, setPeriodFilter] = useState<PaymentPeriodFilter>("all")
   const [statusFilter, setStatusFilter] = useState<PaymentStatusFilter>("all")
-  const [paymentType, setPaymentType] = useState<'rent' | 'deposit' | 'agency_fees'>('rent')
 
   const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ["payment-stats", leaseId],
@@ -40,29 +39,14 @@ export function PaymentMonitoringDashboard({ leaseId }: PaymentMonitoringDashboa
     }
   })
 
-  const handleNewPayment = (type: 'rent' | 'deposit' | 'agency_fees') => {
-    setPaymentType(type)
-    setShowPaymentDialog(true)
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Suivi des paiements</h2>
-        <div className="flex gap-2">
-          <Button onClick={() => handleNewPayment('rent')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Paiement de loyer
-          </Button>
-          <Button variant="outline" onClick={() => handleNewPayment('deposit')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Paiement caution
-          </Button>
-          <Button variant="outline" onClick={() => handleNewPayment('agency_fees')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Frais d'agence
-          </Button>
-        </div>
+        <Button onClick={() => setShowPaymentDialog(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nouveau paiement
+        </Button>
       </div>
 
       {isLoadingStats ? (
@@ -93,7 +77,6 @@ export function PaymentMonitoringDashboard({ leaseId }: PaymentMonitoringDashboa
         open={showPaymentDialog}
         onOpenChange={setShowPaymentDialog}
         leaseId={leaseId}
-        paymentType={paymentType}
       />
     </div>
   )

@@ -30,6 +30,7 @@ export function PaymentsList({
         .eq("lease_id", leaseId)
         .order("due_date", { ascending: false })
 
+      // N'appliquer les filtres que pour les paiements réguliers
       if (statusFilter !== "all") {
         query = query.eq("status", statusFilter)
       }
