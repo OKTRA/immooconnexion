@@ -1,17 +1,6 @@
 export type PaymentPeriodFilter = "all" | "current" | "overdue" | "upcoming";
 export type PaymentStatusFilter = "all" | "pending" | "paid" | "late";
-
-export interface PaymentDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  tenantId: string;
-}
-
-export interface PaymentsListProps {
-  periodFilter: PaymentPeriodFilter;
-  statusFilter: PaymentStatusFilter;
-  tenantId: string;
-}
+export type PaymentMethod = "cash" | "bank_transfer" | "mobile_money";
 
 export interface TenantPaymentDetails {
   id: string | null;
@@ -32,6 +21,18 @@ export interface TenantPaymentDetails {
   tenant_last_name: string | null;
   unit_number: string | null;
   apartment_name: string | null;
+}
+
+export interface PaymentDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  tenantId: string;
+}
+
+export interface PaymentsListProps {
+  periodFilter: PaymentPeriodFilter;
+  statusFilter: PaymentStatusFilter;
+  tenantId: string;
 }
 
 export interface PeriodOption {
