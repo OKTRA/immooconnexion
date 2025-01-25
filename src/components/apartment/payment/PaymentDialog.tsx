@@ -1,35 +1,25 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { PaymentForm } from "./PaymentForm"
 
 interface PaymentDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  tenantId?: string
-  leaseId?: string
+  leaseId: string
 }
 
 export function PaymentDialog({ 
   open, 
-  onOpenChange, 
-  tenantId,
+  onOpenChange,
   leaseId 
 }: PaymentDialogProps) {
-  if (!tenantId) return null
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Nouveau Paiement</DialogTitle>
+          <DialogTitle>Nouveau paiement</DialogTitle>
         </DialogHeader>
         <PaymentForm 
-          onSuccess={() => onOpenChange(false)} 
-          tenantId={tenantId}
+          onSuccess={() => onOpenChange(false)}
           leaseId={leaseId}
         />
       </DialogContent>

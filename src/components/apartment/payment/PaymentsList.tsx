@@ -4,24 +4,30 @@ import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { InitialPaymentsSection } from "./components/InitialPaymentsSection"
 import { RegularPaymentsList } from "./components/RegularPaymentsList"
-import { PaymentPeriodFilter, PaymentStatusFilter, PaymentsListProps, TenantPaymentDetails } from "./types"
+import { PaymentPeriodFilter, PaymentStatusFilter } from "./types"
+
+interface PaymentsListProps {
+  periodFilter: PaymentPeriodFilter
+  statusFilter: PaymentStatusFilter
+  leaseId: string
+}
 
 export function PaymentsList({ 
   periodFilter, 
   statusFilter, 
-  tenantId 
+  leaseId 
 }: PaymentsListProps) {
   const { toast } = useToast()
 
   const { data: payments = [], isLoading } = useQuery({
-    queryKey: ["tenant-payment-details", periodFilter, statusFilter, tenantId],
+    queryKey: ["tenant-payment-details", periodFilter, statusFilter, leaseId],
     queryFn: async () => {
-      console.log("Fetching payments for tenant:", tenantId)
+      console.log("Fetching payments for lease:", leaseId)
       
       let query = supabase
         .from("tenant_payment_details")
         .select("*")
-        .eq("tenant_id", tenantId)
+        .eq("lease_id", leaseId)
 
       if (statusFilter !== "all") {
         query = query.eq("status", statusFilter)
@@ -54,7 +60,7 @@ export function PaymentsList({
         throw error
       }
       
-      return data as TenantPaymentDetails[]
+      return data
     }
   })
 
