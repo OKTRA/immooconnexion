@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { format } from "date-fns"
@@ -5,11 +6,10 @@ import { fr } from "date-fns/locale"
 import { PaymentStats } from "./components/PaymentStats"
 import { PaymentsList } from "./components/PaymentsList"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { PaymentForm } from "@/components/apartment/payment/PaymentForm"
 import { CreditCard, PlusCircle, Loader2 } from "lucide-react"
-import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "../payment/types"
+import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "../../payment/types"
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
@@ -45,7 +45,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   })
 
   const { data: stats, isLoading: isLoadingStats } = useQuery({
-    queryKey: ["lease-payment-stats", leaseId],
+    queryKey: ["tenant-payment-stats", leaseId],
     queryFn: async () => {
       console.log("Fetching payment stats for lease:", leaseId)
       
@@ -54,7 +54,10 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         .select("amount, status, due_date")
         .eq("lease_id", leaseId)
 
-      if (error) throw error
+      if (error) {
+        console.error("Error fetching payment stats:", error)
+        throw error
+      }
 
       const totalReceived = payments
         ?.filter(p => p.status === 'paid')
@@ -81,36 +84,6 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
           due_date: nextPayment.due_date
         } : undefined
       } as PaymentSummary
-    }
-  })
-
-  const { data: initialPayments = [] } = useQuery({
-    queryKey: ["lease-initial-payments", leaseId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("apartment_lease_payments")
-        .select("*")
-        .eq("lease_id", leaseId)
-        .in("type", ["deposit", "agency_fees"])
-        .order("due_date", { ascending: true })
-
-      if (error) throw error
-      return data
-    }
-  })
-
-  const { data: regularPayments = [] } = useQuery({
-    queryKey: ["lease-regular-payments", leaseId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("apartment_lease_payments")
-        .select("*")
-        .eq("lease_id", leaseId)
-        .eq("type", "rent")
-        .order("due_date", { ascending: true })
-
-      if (error) throw error
-      return data
     }
   })
 
@@ -151,18 +124,11 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         )}
       </div>
 
-      <div className="space-y-8">
-        <PaymentsList 
-          title="Paiements Initiaux" 
-          payments={initialPayments}
-          className="w-full"
-        />
-        <PaymentsList 
-          title="Paiements de Loyer" 
-          payments={regularPayments}
-          className="w-full"
-        />
-      </div>
+      <PaymentsList 
+        title="Paiements" 
+        payments={[]}
+        className="w-full"
+      />
 
       <Dialog open={showInitialPaymentDialog} onOpenChange={setShowInitialPaymentDialog}>
         <DialogContent>
