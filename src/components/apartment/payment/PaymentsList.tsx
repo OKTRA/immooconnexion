@@ -72,14 +72,18 @@ export function PaymentsList({
     )
   }
 
+  const initialPayments = payments.filter(p => 
+    p.type === 'deposit' || p.type === 'agency_fees'
+  )
+
+  const regularPayments = payments.filter(p => 
+    p.type !== 'deposit' && p.type !== 'agency_fees'
+  )
+
   return (
     <div className="space-y-6">
-      <InitialPaymentsSection 
-        payments={payments.filter(p => p.type === 'deposit' || p.type === 'agency_fees')}
-      />
-      <RegularPaymentsList 
-        payments={payments.filter(p => p.type !== 'deposit' && p.type !== 'agency_fees')}
-      />
+      <InitialPaymentsSection payments={initialPayments} />
+      <RegularPaymentsList payments={regularPayments} />
     </div>
   )
 }

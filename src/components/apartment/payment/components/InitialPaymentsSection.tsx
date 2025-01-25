@@ -2,8 +2,10 @@ import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle, XCircle, AlertCircle } from "lucide-react"
+import { CheckCircle, XCircle, AlertCircle, ClipboardCheck } from "lucide-react"
 import { TenantPaymentDetails } from "../types"
+import { Button } from "@/components/ui/button"
+import { InspectionDialog } from "@/components/inspections/InspectionDialog"
 
 interface InitialPaymentsSectionProps {
   payments: TenantPaymentDetails[];
@@ -69,6 +71,17 @@ export function InitialPaymentsSection({ payments }: InitialPaymentsSectionProps
                     ? 'En attente'
                     : 'En retard'}
                 </Badge>
+                {payment.type === 'deposit' && payment.status === 'paid' && (
+                  <InspectionDialog 
+                    leaseId={payment.lease_id || ''} 
+                    className="ml-2"
+                  >
+                    <Button variant="outline" size="sm">
+                      <ClipboardCheck className="h-4 w-4 mr-2" />
+                      Inspection
+                    </Button>
+                  </InspectionDialog>
+                )}
               </div>
             </div>
           ))}
