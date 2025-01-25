@@ -7,16 +7,24 @@ interface PaymentActionButtonProps {
   leaseId?: string
 }
 
-export function PaymentActionButton({ tenantId }: PaymentActionButtonProps) {
+export function PaymentActionButton({ tenantId, leaseId }: PaymentActionButtonProps) {
   const navigate = useNavigate()
 
-  if (!tenantId) return null
+  const handleClick = () => {
+    if (leaseId) {
+      navigate(`/agence/apartment-leases/${leaseId}/payments`)
+    } else if (tenantId) {
+      navigate(`/agence/apartment-tenants/${tenantId}/payments`)
+    }
+  }
+
+  if (!tenantId && !leaseId) return null
 
   return (
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => navigate(`/agence/apartment-tenants/${tenantId}/payments`)}
+      onClick={handleClick}
       title="Gérer les paiements"
     >
       <CreditCard className="h-4 w-4" />

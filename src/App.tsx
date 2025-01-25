@@ -75,6 +75,7 @@ export default function App() {
                 <Route path="apartment-tenants/:tenantId/leases" element={<ApartmentTenantLeases />} />
                 <Route path="apartment-tenants/:tenantId/dashboard" element={<TenantPaymentsTab />} />
                 <Route path="apartment-leases" element={<ApartmentLeases />} />
+                <Route path="apartment-leases/:leaseId/payments" element={<ApartmentTenantPayments />} />
               </Route>
             </Routes>
             <Toaster />
