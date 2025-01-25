@@ -11,7 +11,7 @@ export function usePaymentSubmission(onSuccess?: () => void) {
   const handleSubmit = async (
     formData: PaymentFormData,
     selectedLease: LeaseData,
-    selectedPeriods: string[],
+    selectedPeriod: number,
     agencyId: string
   ) => {
     try {
@@ -21,11 +21,13 @@ export function usePaymentSubmission(onSuccess?: () => void) {
         .from("apartment_lease_payments")
         .insert({
           lease_id: selectedLease.id,
-          amount: formData.amount,
+          amount: formData.amount || selectedLease.rent_amount,
           payment_method: formData.paymentMethod,
           status: "pending",
           agency_id: agencyId,
-          payment_periods: selectedPeriods
+          payment_type: "rent",
+          payment_period_start: selectedLease.start_date,
+          payment_period_end: selectedLease.end_date
         })
 
       if (error) throw error
