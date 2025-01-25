@@ -23,35 +23,20 @@ export function PaymentsList({
         .from("apartment_lease_payments")
         .select(`
           *,
-          apartment_leases!inner (
+          lease:apartment_leases!inner(
             tenant_id,
-            apartment_tenants (
+            tenant:apartment_tenants(
               first_name,
               last_name
             )
           )
         `)
         .eq("lease_id", leaseId)
+        .order("created_at", { ascending: false })
 
       if (statusFilter !== "all") {
         query = query.eq("status", statusFilter)
       }
-
-      const today = new Date()
-      
-      if (periodFilter === "current") {
-        query = query
-          .gte("payment_period_start", new Date(today.getFullYear(), today.getMonth(), 1).toISOString())
-          .lt("payment_period_end", new Date(today.getFullYear(), today.getMonth() + 1, 1).toISOString())
-      } else if (periodFilter === "overdue") {
-        query = query
-          .lt("due_date", today.toISOString())
-          .neq("status", "paid")
-      } else if (periodFilter === "upcoming") {
-        query = query.gt("due_date", today.toISOString())
-      }
-
-      query = query.order("due_date", { ascending: false })
 
       const { data, error } = await query
 
@@ -65,6 +50,7 @@ export function PaymentsList({
         throw error
       }
 
+      // Séparer les paiements initiaux des paiements réguliers
       const initialPayments = (data || []).filter(p => 
         p.type === 'deposit' || p.type === 'agency_fees'
       )
@@ -72,6 +58,8 @@ export function PaymentsList({
       const regularPayments = (data || []).filter(p => 
         p.type !== 'deposit' && p.type !== 'agency_fees'
       )
+
+      console.log("Fetched payments:", { initialPayments, regularPayments })
 
       return {
         initialPayments,
