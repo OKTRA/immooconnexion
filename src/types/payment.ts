@@ -22,7 +22,7 @@ export interface PaymentPenalty {
 
 export interface PaymentFormData {
   leaseId: string;
-  amount?: number;
+  amount: number;
   paymentMethod: PaymentMethod;
   paymentPeriods: string[];
   paymentDate: Date;
@@ -35,9 +35,9 @@ export interface PaymentFormData {
 }
 
 export interface PaymentSummary {
-  totalAmount: number;
-  rentAmount: number;
-  penaltiesAmount: number;
+  totalReceived: number;
+  pendingAmount: number;
+  lateAmount: number;
   periodsCount: number;
 }
 
@@ -47,7 +47,7 @@ export interface LeasePaymentStats {
   lateAmount: number;
   nextPayment?: {
     amount: number;
-    due_date: string;
+    dueDate: string;
   };
 }
 
@@ -94,13 +94,6 @@ export interface LeaseData {
   };
 }
 
-export interface LeaseSelectProps {
-  leases: LeaseData[];
-  selectedLeaseId: string;
-  onLeaseSelect: (leaseId: string) => void;
-  isLoading: boolean;
-}
-
 export interface PeriodOption {
   id: string;
   value: number;
@@ -117,4 +110,23 @@ export interface PaymentFormProps {
   isHistorical?: boolean;
   tenantId?: string;
   initialPayment?: boolean;
+}
+
+export interface LeaseSelectProps {
+  leases: LeaseData[];
+  selectedLeaseId: string;
+  onLeaseSelect: (leaseId: string) => void;
+  isLoading: boolean;
+}
+
+export interface RegularPaymentsListProps {
+  payments: Array<{
+    id: string;
+    amount: number;
+    status: PaymentStatusType;
+    payment_date?: string;
+    due_date: string;
+    payment_period_start?: string;
+    payment_period_end?: string;
+  }>;
 }
