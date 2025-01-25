@@ -12,14 +12,18 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 
 interface PaymentFormProps {
-  onSuccess?: () => void
-  leaseId: string
-  isHistorical?: boolean
+  onSuccess?: () => void;
+  leaseId: string;
+  tenantId?: string;
+  initialPayment?: boolean;
+  isHistorical?: boolean;
 }
 
 export function PaymentForm({ 
   onSuccess, 
   leaseId,
+  tenantId,
+  initialPayment = false,
   isHistorical = false
 }: PaymentFormProps) {
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([])
@@ -33,7 +37,8 @@ export function PaymentForm({
       paymentPeriods: [],
       paymentDate: new Date(),
       notes: "",
-      isHistorical
+      isHistorical,
+      tenantId
     }
   })
 
@@ -71,8 +76,9 @@ export function PaymentForm({
       const totalAmount = selectedPeriods.length * lease.rent_amount
       setValue('amount', totalAmount)
       setValue('paymentPeriods', selectedPeriods)
+      setValue('paymentDate', paymentDate)
     }
-  }, [selectedPeriods, lease, setValue])
+  }, [selectedPeriods, lease, setValue, paymentDate])
 
   const { isSubmitting, handleSubmit: submitPayment } = usePaymentSubmission(onSuccess)
 

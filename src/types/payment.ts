@@ -30,6 +30,8 @@ export interface PaymentFormData {
   isHistorical?: boolean;
   periodStart?: Date;
   periodEnd?: Date;
+  tenantId?: string;
+  initialPayment?: boolean;
 }
 
 export interface PaymentSummary {
@@ -57,7 +59,10 @@ export interface PaymentListProps {
     status: PaymentStatusType;
     paymentDate?: Date;
     dueDate: Date;
+    periodStart?: string;
+    periodEnd?: string;
   }>;
+  className?: string;
 }
 
 export interface LeaseData {
@@ -77,6 +82,7 @@ export interface LeaseData {
     id: string;
     first_name: string;
     last_name: string;
+    phone_number?: string;
   };
   unit: {
     id: string;
@@ -96,10 +102,19 @@ export interface LeaseSelectProps {
 }
 
 export interface PeriodOption {
+  id: string;
   value: number;
   label: string;
   startDate: Date;
   endDate: Date;
   amount: number;
   status: PaymentStatusType;
+}
+
+export interface PaymentFormProps {
+  onSuccess?: () => void;
+  leaseId: string;
+  isHistorical?: boolean;
+  tenantId?: string;
+  initialPayment?: boolean;
 }
