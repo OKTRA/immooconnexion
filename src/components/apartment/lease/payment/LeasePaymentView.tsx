@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
 import { PaymentStats } from "./components/PaymentStats"
 import { PaymentsList } from "./components/PaymentsList"
 import { Button } from "@/components/ui/button"
@@ -7,7 +9,7 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { PaymentForm } from "@/components/apartment/payment/PaymentForm"
 import { CreditCard, PlusCircle, Loader2 } from "lucide-react"
-import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "./types"
+import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "../payment/types"
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
@@ -169,9 +171,8 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
           </DialogHeader>
           <PaymentForm 
             onSuccess={() => setShowInitialPaymentDialog(false)}
-            tenantId={lease.tenant.id}
             leaseId={leaseId}
-            initialPayment={true}
+            isHistorical={true}
           />
         </DialogContent>
       </Dialog>
@@ -183,9 +184,8 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
           </DialogHeader>
           <PaymentForm 
             onSuccess={() => setShowRegularPaymentDialog(false)}
-            tenantId={lease.tenant.id}
             leaseId={leaseId}
-            initialPayment={false}
+            isHistorical={false}
           />
         </DialogContent>
       </Dialog>
