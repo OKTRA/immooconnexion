@@ -4,18 +4,18 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle, XCircle, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { TenantPaymentDetails } from "../types"
 
 interface InitialPaymentsSectionProps {
-  payments: any[]
-  onPaymentAction: (paymentId: string, action: string) => void
+  payments: TenantPaymentDetails[];
 }
 
-export function InitialPaymentsSection({ payments, onPaymentAction }: InitialPaymentsSectionProps) {
+export function InitialPaymentsSection({ payments }: InitialPaymentsSectionProps) {
   const initialPayments = payments.filter(p => 
     p.type === 'deposit' || p.type === 'agency_fees'
   )
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: string | null) => {
     switch (status) {
       case 'paid':
         return <CheckCircle className="h-4 w-4 text-green-500" />
@@ -47,13 +47,13 @@ export function InitialPaymentsSection({ payments, onPaymentAction }: InitialPay
                     {payment.type === 'deposit' ? 'Caution' : 'Frais d\'agence'}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(payment.due_date), "d MMMM yyyy", { locale: fr })}
+                    {payment.due_date && format(new Date(payment.due_date), "d MMMM yyyy", { locale: fr })}
                   </p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
                 <p className="font-medium">
-                  {payment.amount.toLocaleString()} FCFA
+                  {payment.amount?.toLocaleString()} FCFA
                 </p>
                 <Badge
                   variant={
@@ -70,15 +70,6 @@ export function InitialPaymentsSection({ payments, onPaymentAction }: InitialPay
                     ? 'En attente'
                     : 'En retard'}
                 </Badge>
-                {payment.status !== 'paid' && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onPaymentAction(payment.id, 'mark_as_paid')}
-                  >
-                    Marquer comme payé
-                  </Button>
-                )}
               </div>
             </div>
           ))}

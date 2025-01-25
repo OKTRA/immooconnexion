@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { InitialPaymentsSection } from "./components/InitialPaymentsSection"
 import { RegularPaymentsList } from "./components/RegularPaymentsList"
-import { PaymentPeriodFilter, PaymentStatusFilter, PaymentsListProps } from "./types"
+import { PaymentPeriodFilter, PaymentStatusFilter, PaymentsListProps, TenantPaymentDetails } from "./types"
 
 export function PaymentsList({ 
   periodFilter, 
@@ -46,52 +46,17 @@ export function PaymentsList({
       
       if (error) {
         console.error("Error fetching payments:", error)
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les paiements",
+          variant: "destructive",
+        })
         throw error
       }
       
-      return data || []
+      return data as TenantPaymentDetails[]
     }
   })
-
-  const handlePaymentAction = async (paymentId: string, action: string) => {
-    try {
-      switch (action) {
-        case 'mark_as_paid':
-          await supabase
-            .from('apartment_lease_payments')
-            .update({ 
-              status: 'paid',
-              payment_date: new Date().toISOString()
-            })
-            .eq('id', paymentId)
-          
-          toast({
-            title: "Paiement mis à jour",
-            description: "Le paiement a été marqué comme payé",
-          })
-          break
-
-        case 'download_receipt':
-          // Implémenter le téléchargement du reçu
-          break
-
-        case 'send_reminder':
-          // Implémenter l'envoi de rappel
-          break
-
-        case 'view_details':
-          // Implémenter l'affichage des détails
-          break
-      }
-    } catch (error) {
-      console.error('Error handling payment action:', error)
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'action",
-        variant: "destructive",
-      })
-    }
-  }
 
   if (isLoading) {
     return (
@@ -105,11 +70,9 @@ export function PaymentsList({
     <div className="space-y-6">
       <InitialPaymentsSection 
         payments={payments.filter(p => p.type === 'deposit' || p.type === 'agency_fees')}
-        onPaymentAction={handlePaymentAction}
       />
       <RegularPaymentsList 
         payments={payments.filter(p => p.type !== 'deposit' && p.type !== 'agency_fees')}
-        onPaymentAction={handlePaymentAction}
       />
     </div>
   )

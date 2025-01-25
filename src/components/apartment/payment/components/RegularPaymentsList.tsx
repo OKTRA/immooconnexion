@@ -3,13 +3,13 @@ import { fr } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { PaymentActions } from "./PaymentActions"
+import { TenantPaymentDetails } from "../types"
 
 interface RegularPaymentsListProps {
-  payments: any[]
-  onPaymentAction: (paymentId: string, action: string) => void
+  payments: TenantPaymentDetails[];
 }
 
-export function RegularPaymentsList({ payments, onPaymentAction }: RegularPaymentsListProps) {
+export function RegularPaymentsList({ payments }: RegularPaymentsListProps) {
   if (payments.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -34,7 +34,7 @@ export function RegularPaymentsList({ payments, onPaymentAction }: RegularPaymen
         {payments.map((payment) => (
           <TableRow key={payment.id}>
             <TableCell>
-              {format(new Date(payment.due_date), "d MMM yyyy", { locale: fr })}
+              {payment.due_date && format(new Date(payment.due_date), "d MMM yyyy", { locale: fr })}
             </TableCell>
             <TableCell>
               {payment.period_start && payment.period_end ? (
@@ -47,7 +47,7 @@ export function RegularPaymentsList({ payments, onPaymentAction }: RegularPaymen
               )}
             </TableCell>
             <TableCell>
-              {payment.amount.toLocaleString()} FCFA
+              {payment.amount?.toLocaleString()} FCFA
             </TableCell>
             <TableCell>
               <Badge
@@ -74,7 +74,6 @@ export function RegularPaymentsList({ payments, onPaymentAction }: RegularPaymen
             <TableCell className="text-right">
               <PaymentActions 
                 payment={payment}
-                onAction={onPaymentAction}
               />
             </TableCell>
           </TableRow>
