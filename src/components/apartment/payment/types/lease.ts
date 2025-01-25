@@ -1,19 +1,27 @@
 export interface LeaseData {
   id: string;
-  rent_amount: number;
   tenant_id: string;
   unit_id: string;
-  payment_frequency: string;
+  start_date: string;
+  end_date?: string;
+  rent_amount: number;
   deposit_amount: number;
-  initial_payments_completed: boolean;
-  apartment_tenants: {
-    first_name: string | null;
-    last_name: string | null;
+  payment_frequency: string;
+  duration_type: string;
+  status: string;
+  payment_type: string;
+  tenant?: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    phone_number?: string;
   };
-  apartment_units: {
-    unit_number: string | null;
-    apartment: {
-      name: string | null;
+  unit?: {
+    id: string;
+    unit_number: string;
+    apartment?: {
+      id: string;
+      name: string;
     };
   };
 }

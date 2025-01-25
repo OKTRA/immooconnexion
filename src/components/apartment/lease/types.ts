@@ -16,28 +16,9 @@ export interface LeaseFormData {
   status: LeaseStatus;
 }
 
-export interface PaymentFieldsProps {
-  formData: LeaseFormData;
-  setFormData: (data: LeaseFormData) => void;
-  selectedUnitId: string;
-}
-
-export interface FrequencyFieldsProps {
-  formData: LeaseFormData;
-  setFormData: (data: LeaseFormData) => void;
-  onDurationTypeChange: (value: DurationType) => void;
-}
-
-export interface DateFieldsProps {
-  formData: LeaseFormData;
-  setFormData: (data: LeaseFormData) => void;
-}
-
-export interface LeaseFormFieldsProps {
-  formData: LeaseFormData;
-  setFormData: (data: LeaseFormData) => void;
-  onSubmit: () => Promise<void>;
-  isSubmitting: boolean;
-  onCancel: () => void;
-  disabled?: boolean;
+export interface CreateLeaseDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  tenantId?: string;
+  unitId?: string;
 }

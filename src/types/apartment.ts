@@ -1,26 +1,13 @@
-export type ApartmentUnitStatus = 'available' | 'occupied' | 'maintenance' | 'reserved';
-
-export interface Apartment {
-  id: string;
-  agency_id: string;
-  name: string;
-  address?: string;
-  total_units?: number;
-  description?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
 export interface ApartmentUnitFormData {
   unit_number: string;
   unit_name?: string;
-  floor_number?: number | null;
-  area?: number | null;
+  floor_number?: number;
+  area?: number;
   rent_amount: number;
-  deposit_amount?: number | null;
-  status: ApartmentUnitStatus;
-  description?: string | null;
-  commission_percentage?: number | null;
+  deposit_amount?: number;
+  status: string;
+  description?: string;
+  commission_percentage?: number;
   store_count?: number;
   kitchen_count?: number;
   has_pool?: boolean;
@@ -29,32 +16,11 @@ export interface ApartmentUnitFormData {
   bathrooms?: number;
 }
 
-export interface ApartmentUnit extends Omit<ApartmentUnitFormData, 'status'> {
-  id: string;
-  apartment_id: string;
-  status: ApartmentUnitStatus;
-  created_at?: string;
-  updated_at?: string;
-  current_lease?: ApartmentLease;
-  apartment?: {
-    name: string;
-  };
-}
-
-export interface ApartmentLease {
-  id: string;
-  tenant_id: string;
-  unit_id: string;
-  start_date: string;
-  end_date?: string;
-  rent_amount: number;
-  deposit_amount: number;
-  payment_frequency: string;
-  duration_type: string;
-  status: string;
-  payment_type: string;
-  tenant?: ApartmentTenant;
-  initial_fees_paid?: boolean;
+export interface ApartmentTenantFormProps {
+  onSuccess: () => void;
+  isSubmitting: boolean;
+  setIsSubmitting: (value: boolean) => void;
+  initialData?: ApartmentTenant;
 }
 
 export interface ApartmentTenant {
@@ -74,28 +40,20 @@ export interface ApartmentTenant {
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
   emergency_contact_relationship?: string;
-  tenant_units?: {
-    unit_id: string;
-    apartment_units: {
-      unit_number: string;
-      apartment: {
-        name: string;
-      };
-    };
-  }[];
+  unit_id?: string;
 }
 
-export interface ApartmentInspection {
+export interface ApartmentLease {
   id: string;
-  lease_id: string;
-  inspection_date: string;
-  has_damages: boolean;
-  damage_description: string | null;
-  repair_costs: number;
-  deposit_returned: number;
-  photo_urls: string[];
+  tenant_id: string;
+  unit_id: string;
+  start_date: string;
+  end_date?: string;
+  rent_amount: number;
+  deposit_amount: number;
+  payment_frequency: string;
+  duration_type: string;
   status: string;
-  type: string;
-  created_at: string;
-  updated_at: string;
+  payment_type: string;
+  tenant: ApartmentTenant;
 }
