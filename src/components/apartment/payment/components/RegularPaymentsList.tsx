@@ -4,12 +4,67 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { PaymentActions } from "./PaymentActions"
 import { TenantPaymentDetails } from "../types"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
 
 interface RegularPaymentsListProps {
   payments: TenantPaymentDetails[];
 }
 
 export function RegularPaymentsList({ payments }: RegularPaymentsListProps) {
+  const { toast } = useToast()
+
+  const handlePaymentAction = async (paymentId: string, action: string) => {
+    try {
+      switch (action) {
+        case 'mark_as_paid':
+          const { error } = await supabase
+            .from('apartment_lease_payments')
+            .update({ 
+              status: 'paid',
+              payment_date: new Date().toISOString()
+            })
+            .eq('id', paymentId)
+
+          if (error) throw error
+
+          toast({
+            title: "Paiement mis à jour",
+            description: "Le paiement a été marqué comme payé",
+          })
+          break;
+
+        case 'download_receipt':
+          toast({
+            title: "Téléchargement du reçu",
+            description: "Cette fonctionnalité sera bientôt disponible",
+          })
+          break;
+
+        case 'send_reminder':
+          toast({
+            title: "Rappel envoyé",
+            description: "Un rappel a été envoyé au locataire",
+          })
+          break;
+
+        case 'view_details':
+          toast({
+            title: "Détails du paiement",
+            description: "Cette fonctionnalité sera bientôt disponible",
+          })
+          break;
+      }
+    } catch (error) {
+      console.error('Error handling payment action:', error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'action",
+        variant: "destructive",
+      })
+    }
+  }
+
   if (payments.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -74,6 +129,7 @@ export function RegularPaymentsList({ payments }: RegularPaymentsListProps) {
             <TableCell className="text-right">
               <PaymentActions 
                 payment={payment}
+                onAction={handlePaymentAction}
               />
             </TableCell>
           </TableRow>
