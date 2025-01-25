@@ -50,8 +50,8 @@ export interface PeriodOption {
 
 export interface PaymentFormProps {
   onSuccess: () => void
-  leaseId: string
-  tenantId?: string
+  leaseId?: string
+  tenantId: string
 }
 
 export interface RegularPaymentsListProps {
@@ -63,7 +63,7 @@ export interface RegularPaymentsListProps {
     status: string
     type: string
     payment_method?: string
-    period_start?: string
-    period_end?: string
+    payment_period_start?: string
+    payment_period_end?: string
   }>
 }
