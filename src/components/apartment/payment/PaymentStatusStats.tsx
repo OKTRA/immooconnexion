@@ -1,5 +1,6 @@
 import { CircleDollarSign, Clock, AlertCircle, CheckCircle2 } from "lucide-react"
 import { StatCard } from "@/components/StatCard"
+import { cn } from "@/lib/utils"
 
 interface PaymentStatsProps {
   stats: {
@@ -18,27 +19,34 @@ export function PaymentStatusStats({ stats }: PaymentStatsProps) {
       title: "Total des Paiements",
       value: stats.total.toLocaleString() + " FCFA",
       icon: CircleDollarSign,
-      className: "bg-primary/10",
+      description: "Montant total des paiements",
+      className: "bg-primary/10 hover:bg-primary/20 transition-colors",
     },
     {
       title: "Paiements Reçus",
       value: stats.paid.toLocaleString() + " FCFA",
       icon: CheckCircle2,
-      className: "bg-green-500/10",
+      description: "Paiements déjà effectués",
+      className: "bg-green-500/10 hover:bg-green-500/20 transition-colors",
       iconClassName: "text-green-500"
     },
     {
       title: "En Attente",
       value: stats.pending.toLocaleString() + " FCFA",
       icon: Clock,
-      className: "bg-yellow-500/10",
+      description: "Paiements à venir",
+      className: "bg-yellow-500/10 hover:bg-yellow-500/20 transition-colors",
       iconClassName: "text-yellow-500"
     },
     {
       title: "En Retard",
       value: stats.late.toLocaleString() + " FCFA",
       icon: AlertCircle,
-      className: "bg-red-500/10",
+      description: "Paiements en retard",
+      className: cn(
+        "bg-red-500/10 hover:bg-red-500/20 transition-colors",
+        stats.late > 0 && "animate-pulse"
+      ),
       iconClassName: "text-red-500"
     },
   ]
@@ -51,6 +59,7 @@ export function PaymentStatusStats({ stats }: PaymentStatsProps) {
           title={item.title}
           value={item.value}
           icon={item.icon}
+          description={item.description}
           className={item.className}
           iconClassName={item.iconClassName}
         />
