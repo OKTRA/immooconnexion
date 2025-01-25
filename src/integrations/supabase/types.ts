@@ -1140,6 +1140,13 @@ export type Database = {
             referencedRelation: "apartment_lease_payments"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "late_payment_fees_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_payment_details"
+            referencedColumns: ["id"]
+          },
         ]
       }
       owner_statements: {
@@ -2193,6 +2200,51 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_payment_details: {
+        Row: {
+          amount: number | null
+          apartment_name: string | null
+          due_date: string | null
+          id: string | null
+          lease_deposit_amount: number | null
+          lease_id: string | null
+          lease_rent_amount: number | null
+          payment_date: string | null
+          payment_frequency: string | null
+          payment_method: string | null
+          period_end: string | null
+          period_start: string | null
+          status: string | null
+          tenant_first_name: string | null
+          tenant_id: string | null
+          tenant_last_name: string | null
+          type: string | null
+          unit_number: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_lease_payments_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_leases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_leases_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_leases_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_tenants_with_rent"
             referencedColumns: ["id"]
           },
         ]

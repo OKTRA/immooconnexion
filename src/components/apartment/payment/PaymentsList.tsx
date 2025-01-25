@@ -14,43 +14,32 @@ export function PaymentsList({
   const { toast } = useToast()
 
   const { data: payments = [], isLoading } = useQuery({
-    queryKey: ["payments", periodFilter, statusFilter, tenantId],
+    queryKey: ["tenant-payment-details", periodFilter, statusFilter, tenantId],
     queryFn: async () => {
       console.log("Fetching payments for tenant:", tenantId)
       
       let query = supabase
-        .from("apartment_lease_payments")
-        .select(`
-          *,
-          apartment_leases (
-            tenant_id,
-            unit_id,
-            apartment_tenants (
-              first_name,
-              last_name
-            ),
-            apartment_units (
-              unit_number,
-              apartments (
-                name
-              )
-            )
-          )
-        `)
-        .eq("apartment_leases.tenant_id", tenantId)
+        .from("tenant_payment_details")
+        .select("*")
+        .eq("tenant_id", tenantId)
 
       if (statusFilter !== "all") {
         query = query.eq("status", statusFilter)
       }
 
       if (periodFilter === "current") {
-        query = query.gte("payment_period_start", new Date().toISOString().split("T")[0])
-          .lte("payment_period_end", new Date().toISOString().split("T")[0])
+        const today = new Date().toISOString().split("T")[0]
+        query = query
+          .lte("period_start", today)
+          .gte("period_end", today)
       } else if (periodFilter === "overdue") {
-        query = query.lt("payment_period_end", new Date().toISOString().split("T")[0])
+        const today = new Date().toISOString().split("T")[0]
+        query = query
+          .lt("period_end", today)
           .neq("status", "paid")
       } else if (periodFilter === "upcoming") {
-        query = query.gt("payment_period_start", new Date().toISOString().split("T")[0])
+        const today = new Date().toISOString().split("T")[0]
+        query = query.gt("period_start", today)
       }
 
       const { data, error } = await query.order("due_date", { ascending: false })
@@ -115,11 +104,11 @@ export function PaymentsList({
   return (
     <div className="space-y-6">
       <InitialPaymentsSection 
-        payments={payments}
+        payments={payments.filter(p => p.type === 'deposit' || p.type === 'agency_fees')}
         onPaymentAction={handlePaymentAction}
       />
       <RegularPaymentsList 
-        payments={payments}
+        payments={payments.filter(p => p.type !== 'deposit' && p.type !== 'agency_fees')}
         onPaymentAction={handlePaymentAction}
       />
     </div>

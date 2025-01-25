@@ -10,11 +10,7 @@ interface RegularPaymentsListProps {
 }
 
 export function RegularPaymentsList({ payments, onPaymentAction }: RegularPaymentsListProps) {
-  const regularPayments = payments.filter(p => 
-    p.type !== 'deposit' && p.type !== 'agency_fees'
-  )
-
-  if (regularPayments.length === 0) {
+  if (payments.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         Aucun paiement régulier trouvé
@@ -27,7 +23,7 @@ export function RegularPaymentsList({ payments, onPaymentAction }: RegularPaymen
       <TableHeader>
         <TableRow>
           <TableHead>Date d'échéance</TableHead>
-          <TableHead>Type</TableHead>
+          <TableHead>Période</TableHead>
           <TableHead>Montant</TableHead>
           <TableHead>Statut</TableHead>
           <TableHead>Date de paiement</TableHead>
@@ -35,13 +31,20 @@ export function RegularPaymentsList({ payments, onPaymentAction }: RegularPaymen
         </TableRow>
       </TableHeader>
       <TableBody>
-        {regularPayments.map((payment) => (
+        {payments.map((payment) => (
           <TableRow key={payment.id}>
             <TableCell>
               {format(new Date(payment.due_date), "d MMM yyyy", { locale: fr })}
             </TableCell>
             <TableCell>
-              {payment.type === 'rent' ? 'Loyer' : payment.type}
+              {payment.period_start && payment.period_end ? (
+                <>
+                  {format(new Date(payment.period_start), "d MMM", { locale: fr })} - {" "}
+                  {format(new Date(payment.period_end), "d MMM yyyy", { locale: fr })}
+                </>
+              ) : (
+                payment.type === 'rent' ? 'Loyer' : payment.type
+              )}
             </TableCell>
             <TableCell>
               {payment.amount.toLocaleString()} FCFA

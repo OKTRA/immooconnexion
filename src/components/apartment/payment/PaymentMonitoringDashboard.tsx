@@ -47,9 +47,10 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
       if (!lease) return null
       
       const { data, error } = await supabase
-        .from("apartment_lease_payments")
+        .from("tenant_payment_details")
         .select("*")
-        .eq("lease_id", lease.id)
+        .eq("tenant_id", tenantId)
+        .order("due_date", { ascending: false })
       
       if (error) throw error
       return data
@@ -66,12 +67,7 @@ export function PaymentMonitoringDashboard({ tenantId }: PaymentMonitoringDashbo
       .reduce((sum, payment) => sum + payment.amount, 0),
     late: payments.filter(p => p.status === 'late')
       .reduce((sum, payment) => sum + payment.amount, 0)
-  } : {
-    total: 0,
-    paid: 0,
-    pending: 0,
-    late: 0
-  }
+  } : null
 
   if (isLoadingLease || isLoadingPayments) {
     return <div>Chargement...</div>
