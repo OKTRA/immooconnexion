@@ -1,6 +1,7 @@
 // Types de base
 export type PaymentMethod = 'cash' | 'bank_transfer' | 'mobile_money' | 'check';
 export type PaymentStatusType = 'pending' | 'paid_current' | 'paid_advance' | 'late' | 'cancelled';
+export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 
 // Interface pour les pénalités
 export interface PaymentPenalty {
@@ -99,17 +100,47 @@ export interface PaymentSummaryProps {
   onPaymentOptionChange?: (includePenalties: boolean) => void;
 }
 
-export interface LatePaymentHandlerProps {
-  leaseId: string;
-  onPaymentComplete?: () => void;
+export interface PaymentListProps {
+  title: string;
+  payments: PaymentHistoryEntry[];
+  className?: string;
 }
 
-export interface PaymentHistoryProps {
-  payments: PaymentHistoryEntry[];
-  filter?: {
-    status?: PaymentStatusType[];
-    dateRange?: { start: Date; end: Date };
-    type?: string[];
+export interface LeaseData {
+  id: string;
+  tenant_id: string;
+  unit_id: string;
+  start_date: string;
+  end_date?: string;
+  rent_amount: number;
+  deposit_amount: number;
+  payment_frequency: PaymentFrequency;
+  duration_type: string;
+  payment_type: string;
+  status: string;
+  tenant: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    phone_number?: string;
   };
-  onFilterChange?: (filter: any) => void;
+  unit?: {
+    id: string;
+    unit_number: string;
+    apartment?: {
+      id: string;
+      name: string;
+    };
+  };
+}
+
+export interface LeaseSelectProps {
+  leases: LeaseData[];
+  selectedLeaseId: string;
+  onLeaseSelect: (value: string) => void;
+  isLoading: boolean;
+}
+
+export interface RegularPaymentsListProps extends PaymentListProps {
+  onPaymentClick?: (payment: PaymentHistoryEntry) => void;
 }
