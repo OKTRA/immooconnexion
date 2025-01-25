@@ -5,8 +5,6 @@ import { useToast } from "@/hooks/use-toast"
 import { InitialPaymentsSection } from "./components/InitialPaymentsSection"
 import { RegularPaymentsList } from "./components/RegularPaymentsList"
 import { PaymentPeriodFilter, PaymentStatusFilter } from "./types"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
 import { Card, CardContent } from "@/components/ui/card"
 
 interface PaymentsListProps {
@@ -51,8 +49,8 @@ export function PaymentsList({
       
       if (periodFilter === "current") {
         query = query
-          .gte("payment_period_start", format(new Date(today.getFullYear(), today.getMonth(), 1), "yyyy-MM-dd"))
-          .lt("payment_period_end", format(new Date(today.getFullYear(), today.getMonth() + 1, 1), "yyyy-MM-dd"))
+          .gte("payment_period_start", new Date(today.getFullYear(), today.getMonth(), 1).toISOString())
+          .lt("payment_period_end", new Date(today.getFullYear(), today.getMonth() + 1, 1).toISOString())
       } else if (periodFilter === "overdue") {
         query = query
           .lt("due_date", today.toISOString())
