@@ -2,7 +2,7 @@ import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle, XCircle, AlertCircle } from "lucide-react"
+import { CheckCircle, XCircle, AlertCircle, Receipt } from "lucide-react"
 
 interface InitialPaymentsSectionProps {
   payments: any[]
@@ -24,8 +24,11 @@ export function InitialPaymentsSection({ payments }: InitialPaymentsSectionProps
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Paiements Initiaux</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="flex items-center gap-2">
+          <Receipt className="h-5 w-5" />
+          Paiements Initiaux
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
