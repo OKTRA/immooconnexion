@@ -1,7 +1,7 @@
 import { PaymentMethodSelect } from "./PaymentMethodSelect";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PaymentMethod } from "../types";
+import { PaymentMethod } from "@/types/payment";
 
 interface PaymentFormFieldsProps {
   paymentMethod: PaymentMethod;

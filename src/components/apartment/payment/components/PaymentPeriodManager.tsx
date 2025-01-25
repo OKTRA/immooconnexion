@@ -2,11 +2,11 @@ import { useState } from "react";
 import { PeriodSelector } from "./PeriodSelector";
 import { PaymentSummary } from "./PaymentSummary";
 import { usePaymentCalculations } from "../hooks/usePaymentCalculations";
-import { PaymentPeriod } from "../types";
+import { PaymentPeriod } from "@/types/payment";
 
 interface PaymentPeriodManagerProps {
   lease: {
-    rent_amount: number;
+    rentAmount: number;
   };
   onPeriodsChange: (periods: string[]) => void;
   onPaymentDateChange: (date: Date) => void;
@@ -22,7 +22,7 @@ export function PaymentPeriodManager({
 
   const { summary } = usePaymentCalculations(
     selectedPeriods as unknown as PaymentPeriod[],
-    lease.rent_amount
+    lease.rentAmount
   );
 
   const handlePeriodsChange = (periods: string[]) => {
