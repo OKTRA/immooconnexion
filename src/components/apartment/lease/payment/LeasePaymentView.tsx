@@ -7,11 +7,7 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { PaymentForm } from "@/components/apartment/payment/PaymentForm"
 import { CreditCard, PlusCircle, Loader2 } from "lucide-react"
-import { PaymentSummary } from "@/components/apartment/payment/types"
-
-interface LeasePaymentViewProps {
-  leaseId: string;
-}
+import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "./types"
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
@@ -42,13 +38,15 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         .maybeSingle()
 
       if (error) throw error
-      return data
+      return data as LeaseData
     }
   })
 
   const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ["lease-payment-stats", leaseId],
     queryFn: async () => {
+      console.log("Fetching payment stats for lease:", leaseId)
+      
       const { data: payments, error } = await supabase
         .from("apartment_lease_payments")
         .select("amount, status, due_date")
@@ -57,19 +55,19 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
       if (error) throw error
 
       const totalReceived = payments
-        .filter(p => p.status === 'paid')
-        .reduce((sum, p) => sum + (p.amount || 0), 0)
+        ?.filter(p => p.status === 'paid')
+        .reduce((sum, p) => sum + (p.amount || 0), 0) || 0
 
       const pendingAmount = payments
-        .filter(p => p.status === 'pending')
-        .reduce((sum, p) => sum + (p.amount || 0), 0)
+        ?.filter(p => p.status === 'pending')
+        .reduce((sum, p) => sum + (p.amount || 0), 0) || 0
 
       const lateAmount = payments
-        .filter(p => p.status === 'late')
-        .reduce((sum, p) => sum + (p.amount || 0), 0)
+        ?.filter(p => p.status === 'late')
+        .reduce((sum, p) => sum + (p.amount || 0), 0) || 0
 
       const nextPayment = payments
-        .filter(p => p.status === 'pending')
+        ?.filter(p => p.status === 'pending')
         .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())[0]
 
       return {
