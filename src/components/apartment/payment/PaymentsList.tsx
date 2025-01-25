@@ -28,6 +28,7 @@ export function PaymentsList({
         .from("tenant_payment_details")
         .select("*")
         .eq("lease_id", leaseId)
+        .order("due_date", { ascending: false })
 
       if (statusFilter !== "all") {
         query = query.eq("status", statusFilter)
@@ -48,8 +49,8 @@ export function PaymentsList({
         query = query.gt("period_start", today)
       }
 
-      const { data, error } = await query.order("due_date", { ascending: false })
-      
+      const { data, error } = await query
+
       if (error) {
         console.error("Error fetching payments:", error)
         toast({
@@ -60,6 +61,7 @@ export function PaymentsList({
         throw error
       }
       
+      console.log("Fetched payments:", data)
       return data
     }
   })
