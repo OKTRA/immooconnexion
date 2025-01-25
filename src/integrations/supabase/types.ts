@@ -1390,6 +1390,58 @@ export type Database = {
           },
         ]
       }
+      payment_status_history: {
+        Row: {
+          change_reason: string | null
+          changed_by: string | null
+          created_at: string | null
+          id: string
+          new_status: string
+          old_status: string | null
+          payment_id: string
+        }
+        Insert: {
+          change_reason?: string | null
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          new_status: string
+          old_status?: string | null
+          payment_id: string
+        }
+        Update: {
+          change_reason?: string | null
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          new_status?: string
+          old_status?: string | null
+          payment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_payment"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_lease_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_payment"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_payment_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_status_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           agency_id: string | null
