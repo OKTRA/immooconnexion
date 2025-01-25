@@ -7,6 +7,7 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { PaymentForm } from "@/components/apartment/payment/PaymentForm"
 import { CreditCard, PlusCircle, Loader2 } from "lucide-react"
+import { PaymentSummary } from "@/components/apartment/payment/types"
 
 interface LeasePaymentViewProps {
   leaseId: string;
@@ -79,7 +80,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
           amount: nextPayment.amount,
           due_date: nextPayment.due_date
         } : undefined
-      }
+      } as PaymentSummary
     }
   })
 

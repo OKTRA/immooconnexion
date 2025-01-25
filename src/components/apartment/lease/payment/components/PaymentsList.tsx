@@ -2,24 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import { PaymentListProps } from "@/components/apartment/payment/types"
 
-interface Payment {
-  id: string;
-  type: string;
-  amount: number;
-  due_date: string;
-  payment_date?: string;
-  status: string;
-}
-
-interface PaymentsListProps {
-  title: string;
-  payments: Payment[];
-}
-
-export function PaymentsList({ title, payments }: PaymentsListProps) {
+export function PaymentsList({ title, payments, className }: PaymentListProps) {
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
