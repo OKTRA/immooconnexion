@@ -11,7 +11,7 @@ export function usePaymentSubmission(onSuccess?: () => void) {
   const handleSubmit = async (
     formData: PaymentFormData,
     selectedLease: LeaseData,
-    selectedPeriod: number,
+    selectedPeriods: number,
     agencyId: string
   ) => {
     try {
