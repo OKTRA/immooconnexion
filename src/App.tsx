@@ -1,8 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import React from 'react';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ThemeProvider } from "@/providers/ThemeProvider"
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from "@/providers/AuthProvider"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import Login from "@/pages/Login"
 import Properties from "@/pages/Properties"
@@ -33,6 +34,7 @@ import ApartmentTenantDetails from "@/pages/ApartmentTenantDetails"
 import ApartmentLeases from "@/pages/ApartmentLeases"
 import { TenantPaymentsTab } from "@/components/apartment/tenant/TenantPaymentsTab"
 import PaymentSuccess from "@/pages/PaymentSuccess"
+import { LeasePaymentView } from "@/components/apartment/lease/payment/LeasePaymentView"
 
 const queryClient = new QueryClient()
 
@@ -75,7 +77,7 @@ export default function App() {
                 <Route path="apartment-tenants/:tenantId/leases" element={<ApartmentTenantLeases />} />
                 <Route path="apartment-tenants/:tenantId/dashboard" element={<TenantPaymentsTab />} />
                 <Route path="apartment-leases" element={<ApartmentLeases />} />
-                <Route path="apartment-leases/:leaseId/payments" element={<ApartmentTenantPayments />} />
+                <Route path="apartment-leases/:leaseId/payments" element={<LeasePaymentView />} />
               </Route>
             </Routes>
             <Toaster />
