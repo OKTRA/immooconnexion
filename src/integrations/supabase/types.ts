@@ -327,15 +327,19 @@ export type Database = {
           amount: number
           commission_percentage: number | null
           created_at: string | null
-          due_date: string
+          due_date: string | null
+          historical_entry: boolean | null
           id: string
           late_fee_amount: number | null
           lease_id: string
+          modification_date: string | null
+          modified_by: string | null
           monitoring_status: string | null
           payment_date: string | null
           payment_method: string | null
+          payment_notes: string | null
           payment_period_end: string | null
-          payment_period_start: string | null
+          payment_period_start: string
           payment_type: string | null
           status: string
           type: string | null
@@ -346,15 +350,19 @@ export type Database = {
           amount: number
           commission_percentage?: number | null
           created_at?: string | null
-          due_date: string
+          due_date?: string | null
+          historical_entry?: boolean | null
           id?: string
           late_fee_amount?: number | null
           lease_id: string
+          modification_date?: string | null
+          modified_by?: string | null
           monitoring_status?: string | null
           payment_date?: string | null
           payment_method?: string | null
+          payment_notes?: string | null
           payment_period_end?: string | null
-          payment_period_start?: string | null
+          payment_period_start: string
           payment_type?: string | null
           status?: string
           type?: string | null
@@ -365,15 +373,19 @@ export type Database = {
           amount?: number
           commission_percentage?: number | null
           created_at?: string | null
-          due_date?: string
+          due_date?: string | null
+          historical_entry?: boolean | null
           id?: string
           late_fee_amount?: number | null
           lease_id?: string
+          modification_date?: string | null
+          modified_by?: string | null
           monitoring_status?: string | null
           payment_date?: string | null
           payment_method?: string | null
+          payment_notes?: string | null
           payment_period_end?: string | null
-          payment_period_start?: string | null
+          payment_period_start?: string
           payment_type?: string | null
           status?: string
           type?: string | null
@@ -392,6 +404,13 @@ export type Database = {
             columns: ["lease_id"]
             isOneToOne: false
             referencedRelation: "apartment_leases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_lease_payments_modified_by_fkey"
+            columns: ["modified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
