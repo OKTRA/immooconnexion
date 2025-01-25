@@ -5,7 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { PaymentActions } from "./PaymentActions"
 import { TenantPaymentDetails } from "../types"
 import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase } from "@/lib/supabase"
+import { useQueryClient } from "@tanstack/react-query"
 
 interface RegularPaymentsListProps {
   payments: TenantPaymentDetails[];
@@ -13,6 +14,7 @@ interface RegularPaymentsListProps {
 
 export function RegularPaymentsList({ payments }: RegularPaymentsListProps) {
   const { toast } = useToast()
+  const queryClient = useQueryClient()
 
   const handlePaymentAction = async (paymentId: string, action: string) => {
     try {
@@ -27,6 +29,9 @@ export function RegularPaymentsList({ payments }: RegularPaymentsListProps) {
             .eq('id', paymentId)
 
           if (error) throw error
+
+          await queryClient.invalidateQueries({ queryKey: ["tenant-payment-details"] })
+          await queryClient.invalidateQueries({ queryKey: ["payment-stats"] })
 
           toast({
             title: "Paiement mis à jour",
@@ -74,67 +79,69 @@ export function RegularPaymentsList({ payments }: RegularPaymentsListProps) {
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Date d'échéance</TableHead>
-          <TableHead>Période</TableHead>
-          <TableHead>Montant</TableHead>
-          <TableHead>Statut</TableHead>
-          <TableHead>Date de paiement</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {payments.map((payment) => (
-          <TableRow key={payment.id}>
-            <TableCell>
-              {payment.due_date && format(new Date(payment.due_date), "d MMM yyyy", { locale: fr })}
-            </TableCell>
-            <TableCell>
-              {payment.period_start && payment.period_end ? (
-                <>
-                  {format(new Date(payment.period_start), "d MMM", { locale: fr })} - {" "}
-                  {format(new Date(payment.period_end), "d MMM yyyy", { locale: fr })}
-                </>
-              ) : (
-                payment.type === 'rent' ? 'Loyer' : payment.type
-              )}
-            </TableCell>
-            <TableCell>
-              {payment.amount?.toLocaleString()} FCFA
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant={
-                  payment.status === 'paid'
-                    ? 'success'
-                    : payment.status === 'pending'
-                    ? 'warning'
-                    : 'destructive'
-                }
-              >
-                {payment.status === 'paid'
-                  ? 'Payé'
-                  : payment.status === 'pending'
-                  ? 'En attente'
-                  : 'En retard'}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              {payment.payment_date
-                ? format(new Date(payment.payment_date), "d MMM yyyy", { locale: fr })
-                : '-'}
-            </TableCell>
-            <TableCell className="text-right">
-              <PaymentActions 
-                payment={payment}
-                onAction={handlePaymentAction}
-              />
-            </TableCell>
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Date d'échéance</TableHead>
+            <TableHead>Période</TableHead>
+            <TableHead>Montant</TableHead>
+            <TableHead>Statut</TableHead>
+            <TableHead>Date de paiement</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {payments.map((payment) => (
+            <TableRow key={payment.id}>
+              <TableCell>
+                {payment.due_date && format(new Date(payment.due_date), "d MMM yyyy", { locale: fr })}
+              </TableCell>
+              <TableCell>
+                {payment.period_start && payment.period_end ? (
+                  <>
+                    {format(new Date(payment.period_start), "d MMM", { locale: fr })} - {" "}
+                    {format(new Date(payment.period_end), "d MMM yyyy", { locale: fr })}
+                  </>
+                ) : (
+                  payment.type === 'rent' ? 'Loyer' : payment.type
+                )}
+              </TableCell>
+              <TableCell>
+                {payment.amount?.toLocaleString()} FCFA
+              </TableCell>
+              <TableCell>
+                <Badge
+                  variant={
+                    payment.status === 'paid'
+                      ? 'success'
+                      : payment.status === 'pending'
+                      ? 'warning'
+                      : 'destructive'
+                  }
+                >
+                  {payment.status === 'paid'
+                    ? 'Payé'
+                    : payment.status === 'pending'
+                    ? 'En attente'
+                    : 'En retard'}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                {payment.payment_date
+                  ? format(new Date(payment.payment_date), "d MMM yyyy", { locale: fr })
+                  : '-'}
+              </TableCell>
+              <TableCell className="text-right">
+                <PaymentActions 
+                  payment={payment}
+                  onAction={handlePaymentAction}
+                />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   )
 }
