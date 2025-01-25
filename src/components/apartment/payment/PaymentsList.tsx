@@ -5,6 +5,9 @@ import { useToast } from "@/hooks/use-toast"
 import { InitialPaymentsSection } from "./components/InitialPaymentsSection"
 import { RegularPaymentsList } from "./components/RegularPaymentsList"
 import { PaymentPeriodFilter, PaymentStatusFilter } from "./types"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface PaymentsListProps {
   periodFilter: PaymentPeriodFilter
@@ -20,13 +23,22 @@ export function PaymentsList({
   const { toast } = useToast()
 
   const { data: payments = [], isLoading } = useQuery({
-    queryKey: ["tenant-payment-details", periodFilter, statusFilter, leaseId],
+    queryKey: ["tenant-payment-details", leaseId, periodFilter, statusFilter],
     queryFn: async () => {
       console.log("Fetching payments for lease:", leaseId)
       
       let query = supabase
-        .from("tenant_payment_details")
-        .select("*")
+        .from("apartment_lease_payments")
+        .select(`
+          *,
+          apartment_leases!inner (
+            tenant_id,
+            apartment_tenants (
+              first_name,
+              last_name
+            )
+          )
+        `)
         .eq("lease_id", leaseId)
 
       // Appliquer les filtres de statut
@@ -39,15 +51,14 @@ export function PaymentsList({
       
       if (periodFilter === "current") {
         query = query
-          .gte("period_start", today.toISOString())
-          .lte("period_end", today.toISOString())
+          .gte("payment_period_start", format(new Date(today.getFullYear(), today.getMonth(), 1), "yyyy-MM-dd"))
+          .lt("payment_period_end", format(new Date(today.getFullYear(), today.getMonth() + 1, 1), "yyyy-MM-dd"))
       } else if (periodFilter === "overdue") {
         query = query
           .lt("due_date", today.toISOString())
           .neq("status", "paid")
       } else if (periodFilter === "upcoming") {
-        query = query
-          .gt("period_start", today.toISOString())
+        query = query.gt("due_date", today.toISOString())
       }
 
       // Ordonner par date d'échéance
@@ -66,7 +77,7 @@ export function PaymentsList({
       }
       
       console.log("Fetched payments:", data)
-      return data
+      return data || []
     }
   })
 
@@ -75,6 +86,16 @@ export function PaymentsList({
       <div className="flex justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
+    )
+  }
+
+  if (!payments.length) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center text-muted-foreground">
+          Aucun paiement trouvé pour cette période
+        </CardContent>
+      </Card>
     )
   }
 

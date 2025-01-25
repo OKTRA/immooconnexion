@@ -2,19 +2,14 @@ import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle, XCircle, AlertCircle, ClipboardCheck } from "lucide-react"
-import { TenantPaymentDetails } from "../types"
-import { Button } from "@/components/ui/button"
-import { InspectionDialog } from "@/components/inspections/InspectionDialog"
+import { CheckCircle, XCircle, AlertCircle } from "lucide-react"
 
 interface InitialPaymentsSectionProps {
-  payments: TenantPaymentDetails[];
+  payments: any[]
 }
 
 export function InitialPaymentsSection({ payments }: InitialPaymentsSectionProps) {
-  const initialPayments = payments.filter(p => 
-    p.type === 'deposit' || p.type === 'agency_fees'
-  )
+  if (payments.length === 0) return null
 
   const getStatusIcon = (status: string | null) => {
     switch (status) {
@@ -27,16 +22,14 @@ export function InitialPaymentsSection({ payments }: InitialPaymentsSectionProps
     }
   }
 
-  if (initialPayments.length === 0) return null
-
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Paiements Initiaux</CardTitle>
+        <CardTitle>Paiements Initiaux</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {initialPayments.map((payment) => (
+          {payments.map((payment) => (
             <div
               key={payment.id}
               className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
@@ -71,17 +64,6 @@ export function InitialPaymentsSection({ payments }: InitialPaymentsSectionProps
                     ? 'En attente'
                     : 'En retard'}
                 </Badge>
-                {payment.type === 'deposit' && payment.status === 'paid' && (
-                  <InspectionDialog 
-                    leaseId={payment.lease_id || ''} 
-                    className="ml-2"
-                  >
-                    <Button variant="outline" size="sm">
-                      <ClipboardCheck className="h-4 w-4 mr-2" />
-                      Inspection
-                    </Button>
-                  </InspectionDialog>
-                )}
               </div>
             </div>
           ))}
