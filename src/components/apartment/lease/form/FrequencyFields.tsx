@@ -33,6 +33,7 @@ export function FrequencyFields({ formData, setFormData, onDurationTypeChange }:
             <SelectItem value="weekly">Hebdomadaire</SelectItem>
             <SelectItem value="monthly">Mensuel</SelectItem>
             <SelectItem value="quarterly">Trimestriel</SelectItem>
+            <SelectItem value="biannual">Semestriel</SelectItem>
             <SelectItem value="yearly">Annuel</SelectItem>
           </SelectContent>
         </Select>
