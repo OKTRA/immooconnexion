@@ -16,12 +16,14 @@ export function usePaymentSubmission(onSuccess?: () => void) {
   ) => {
     try {
       setIsSubmitting(true);
+      console.log("Submitting payment:", formData);
 
-      const { error } = await supabase
+      // Créer le paiement
+      const { error: paymentError } = await supabase
         .from("apartment_lease_payments")
         .insert({
           lease_id: selectedLease.id,
-          amount: formData.amount || selectedLease.rent_amount,
+          amount: formData.amount,
           payment_method: formData.paymentMethod,
           payment_date: formData.paymentDate.toISOString(),
           status: "paid",
@@ -34,11 +36,22 @@ export function usePaymentSubmission(onSuccess?: () => void) {
           due_date: formData.paymentDate.toISOString()
         });
 
-      if (error) throw error;
+      if (paymentError) throw paymentError;
+
+      // Mettre à jour le statut des périodes sélectionnées
+      if (formData.paymentPeriods.length > 0) {
+        const { error: periodsError } = await supabase
+          .from("apartment_payment_periods")
+          .update({ status: "paid" })
+          .in("id", formData.paymentPeriods);
+
+        if (periodsError) throw periodsError;
+      }
 
       await queryClient.invalidateQueries({ queryKey: ["lease-payments"] });
       await queryClient.invalidateQueries({ queryKey: ["lease-payment-stats"] });
       await queryClient.invalidateQueries({ queryKey: ["lease-regular-payments"] });
+      await queryClient.invalidateQueries({ queryKey: ["lease-periods"] });
       
       toast({
         title: "Succès",

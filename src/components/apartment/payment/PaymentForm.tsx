@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabase"
 import { useEffect, useState } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { LeaseData } from "@/components/apartment/lease/payment/types"
 
 interface PaymentFormProps {
   onSuccess?: () => void;
@@ -59,11 +60,27 @@ export function PaymentForm({
           )
         `)
         .eq("id", leaseId)
-        .single()
+        .maybeSingle()
+
+      if (error) throw error
+      return data as LeaseData
+    }
+  })
+
+  const { data: periods = [] } = useQuery({
+    queryKey: ["lease-periods", leaseId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("apartment_payment_periods")
+        .select("*")
+        .eq("lease_id", leaseId)
+        .eq("status", "pending")
+        .order("start_date", { ascending: true })
 
       if (error) throw error
       return data
-    }
+    },
+    enabled: !!leaseId
   })
 
   useEffect(() => {
@@ -90,7 +107,7 @@ export function PaymentForm({
       />
 
       <PeriodSelector
-        periods={[]}
+        periods={periods}
         selectedPeriods={selectedPeriods}
         onPeriodsChange={setSelectedPeriods}
         paymentDate={paymentDate}
