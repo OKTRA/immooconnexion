@@ -26,13 +26,13 @@ export interface TenantPaymentDetails {
 export interface PaymentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  tenantId: string;
+  leaseId: string;
 }
 
 export interface PaymentsListProps {
   periodFilter: PaymentPeriodFilter;
   statusFilter: PaymentStatusFilter;
-  tenantId: string;
+  leaseId: string;
 }
 
 export interface PeriodOption {
