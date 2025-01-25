@@ -19,11 +19,12 @@ export interface PaymentFormProps {
 }
 
 export interface PeriodOption {
-  id: string
+  value: number
+  label: string
   startDate: Date
   endDate: Date
   amount: number
-  status: 'pending' | 'paid' | 'late'
+  status: 'pending' | 'paid' | 'late' | 'future'
 }
 
 export interface PaymentDetailsProps {

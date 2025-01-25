@@ -2,8 +2,7 @@ import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
-import { PaymentFormData, PaymentFormProps } from "./types"
-import { PaymentDetails } from "./components/PaymentDetails"
+import { PaymentFormData } from "./types"
 import { PeriodSelector } from "./components/PeriodSelector"
 import { usePaymentSubmission } from "./hooks/usePaymentSubmission"
 import { useQuery } from "@tanstack/react-query"
@@ -11,6 +10,12 @@ import { supabase } from "@/lib/supabase"
 import { useEffect, useState } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+
+interface PaymentFormProps {
+  onSuccess?: () => void
+  leaseId: string
+  isHistorical?: boolean
+}
 
 export function PaymentForm({ 
   onSuccess, 
@@ -20,19 +25,31 @@ export function PaymentForm({
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([])
   const [paymentDate, setPaymentDate] = useState<Date>(new Date())
 
+  const { register, handleSubmit, setValue, watch } = useForm<PaymentFormData>({
+    defaultValues: {
+      leaseId,
+      amount: 0,
+      paymentMethod: "cash",
+      paymentPeriods: [],
+      paymentDate: new Date(),
+      notes: "",
+      isHistorical
+    }
+  })
+
   const { data: lease } = useQuery({
-    queryKey: ["lease-details", leaseId],
+    queryKey: ["lease", leaseId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("apartment_leases")
         .select(`
           *,
-          tenant:tenant_id (
+          tenant:apartment_tenants (
             id,
             first_name,
             last_name
           ),
-          unit:unit_id (
+          unit:apartment_units (
             id,
             unit_number,
             apartment:apartments (
@@ -49,20 +66,6 @@ export function PaymentForm({
     }
   })
 
-  const { register, handleSubmit, setValue, watch } = useForm<PaymentFormData>({
-    defaultValues: {
-      leaseId,
-      amount: 0,
-      paymentMethod: "cash",
-      paymentPeriods: [],
-      paymentDate: new Date(),
-      notes: "",
-      isHistorical
-    }
-  })
-
-  const { isSubmitting, handleSubmit: submitPayment } = usePaymentSubmission(onSuccess)
-
   useEffect(() => {
     if (lease && selectedPeriods.length > 0) {
       const totalAmount = selectedPeriods.length * lease.rent_amount
@@ -71,24 +74,18 @@ export function PaymentForm({
     }
   }, [selectedPeriods, lease, setValue])
 
-  const onSubmit = async (data: PaymentFormData) => {
-    await submitPayment(data)
-  }
+  const { isSubmitting, handleSubmit: submitPayment } = usePaymentSubmission(onSuccess)
 
-  if (!lease) {
-    return (
-      <div className="flex items-center justify-center p-4">
-        <Loader2 className="h-6 w-6 animate-spin" />
-      </div>
-    )
+  const onSubmit = async (data: PaymentFormData) => {
+    if (!lease) return
+    await submitPayment(data, lease, selectedPeriods.length, lease.agency_id)
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <PaymentDetails
-        lease={lease}
-        selectedPeriods={selectedPeriods}
-        totalAmount={watch('amount')}
+      <PaymentMethodSelect
+        value={watch("paymentMethod")}
+        onChange={(value) => setValue("paymentMethod", value)}
       />
 
       <PeriodSelector
@@ -99,23 +96,13 @@ export function PaymentForm({
         onPaymentDateChange={setPaymentDate}
       />
 
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label>Méthode de paiement</Label>
-          <PaymentMethodSelect
-            value={watch("paymentMethod")}
-            onChange={(value) => setValue("paymentMethod", value)}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Notes</Label>
-          <Textarea
-            {...register("notes")}
-            placeholder="Ajouter des notes sur le paiement..."
-            className="min-h-[100px]"
-          />
-        </div>
+      <div className="space-y-2">
+        <Label>Notes</Label>
+        <Textarea
+          {...register("notes")}
+          placeholder="Ajouter des notes sur le paiement..."
+          className="min-h-[100px]"
+        />
       </div>
 
       <Button 
