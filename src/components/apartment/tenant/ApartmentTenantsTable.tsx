@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button"
-import { Trash, Pencil, FileText } from "lucide-react"
+import { Trash, Pencil, FileText, CreditCard } from "lucide-react"
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { CreateLeaseDialog } from "../lease/CreateLeaseDialog"
+import { useNavigate } from "react-router-dom"
 
 interface ApartmentTenantsTableProps {
   onEdit?: (tenant: any) => void
@@ -18,6 +19,7 @@ export function ApartmentTenantsTable({
 }: ApartmentTenantsTableProps) {
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null)
   const [showLeaseDialog, setShowLeaseDialog] = useState(false)
+  const navigate = useNavigate()
 
   const { data: tenants = [] } = useQuery({
     queryKey: ["apartment-tenants"],
@@ -122,6 +124,16 @@ export function ApartmentTenantsTable({
                   >
                     <FileText className="h-4 w-4" />
                   </Button>
+                  {tenant.apartment_leases?.[0]?.id && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => navigate(`/agence/apartment-leases/${tenant.apartment_leases[0].id}/payments`)}
+                      title="Gérer les paiements"
+                    >
+                      <CreditCard className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </td>
             </tr>
