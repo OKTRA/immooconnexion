@@ -2,8 +2,9 @@ import { Button } from "@/components/ui/button"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { Pencil, Send, Database, Trash2 } from "lucide-react"
+import { Pencil, Send, Database, Trash2, Receipt } from "lucide-react"
 import { PaymentActionButton } from "../../payment/PaymentActionButton"
+import { useNavigate } from "react-router-dom"
 
 interface LeaseTableRowProps {
   lease: any
@@ -22,6 +23,8 @@ export function LeaseTableRow({
   onGeneratePaymentPeriodsDirectly,
   isGenerating,
 }: LeaseTableRowProps) {
+  const navigate = useNavigate()
+
   return (
     <TableRow>
       <TableCell>
@@ -92,6 +95,14 @@ export function LeaseTableRow({
             disabled={isGenerating}
           >
             <Database className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(`/agence/apartment-leases/${lease.id}/payments`)}
+            title="Voir les paiements"
+          >
+            <Receipt className="h-4 w-4" />
           </Button>
         </div>
       </TableCell>
