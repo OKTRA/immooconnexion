@@ -1,4 +1,3 @@
-import React from 'react';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ThemeProvider } from "@/providers/ThemeProvider"
 import { Toaster } from "@/components/ui/toaster"
@@ -34,7 +33,7 @@ import ApartmentTenantDetails from "@/pages/ApartmentTenantDetails"
 import ApartmentLeases from "@/pages/ApartmentLeases"
 import { TenantPaymentsTab } from "@/components/apartment/tenant/TenantPaymentsTab"
 import PaymentSuccess from "@/pages/PaymentSuccess"
-import { LeasePaymentView } from "@/components/apartment/lease/payment/LeasePaymentView"
+import LeasePaymentPage from "@/pages/LeasePaymentPage"
 
 const queryClient = new QueryClient()
 
@@ -77,7 +76,7 @@ export default function App() {
                 <Route path="apartment-tenants/:tenantId/leases" element={<ApartmentTenantLeases />} />
                 <Route path="apartment-tenants/:tenantId/dashboard" element={<TenantPaymentsTab />} />
                 <Route path="apartment-leases" element={<ApartmentLeases />} />
-                <Route path="apartment-leases/:leaseId/payments" element={<LeasePaymentView />} />
+                <Route path="apartment-leases/:leaseId/payments" element={<LeasePaymentPage />} />
               </Route>
             </Routes>
             <Toaster />
