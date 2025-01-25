@@ -47,4 +47,5 @@ export interface PaymentFormProps {
   onSuccess: () => void;
   leaseId: string;
   tenantId?: string;
+  paymentType?: 'deposit' | 'agency_fees' | 'rent';
 }

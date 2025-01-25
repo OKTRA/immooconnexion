@@ -91,6 +91,7 @@ export interface ApartmentInspection {
   deposit_returned: number;
   photo_urls: string[];
   status: string;
+  type?: string;
   created_at: string;
   updated_at: string;
 }
@@ -115,4 +116,18 @@ export interface LeaseFormFieldsProps {
   isSubmitting: boolean;
   onCancel: () => void;
   disabled?: boolean;
+}
+
+export interface ApartmentTenantFormProps {
+  onSuccess: () => void;
+  isSubmitting: boolean;
+  setIsSubmitting: (value: boolean) => void;
+  initialData?: ApartmentTenant;
+  unitId?: string;
+}
+
+export interface CreateLeaseDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  tenantId?: string;
 }
