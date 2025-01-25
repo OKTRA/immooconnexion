@@ -4,7 +4,6 @@ import { Loader2 } from "lucide-react"
 import { usePaymentForm } from "./hooks/usePaymentForm"
 import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
 import { PaymentFormData } from "./types"
-import { LeaseSelector } from "./components/LeaseSelector"
 import { PaymentDetails } from "./components/PaymentDetails"
 import { PeriodSelector } from "./components/PeriodSelector"
 import { InitialPaymentsForm } from "./components/InitialPaymentsForm"
@@ -12,8 +11,8 @@ import { useLeaseSelection } from "./hooks/useLeaseSelection"
 import { usePeriodManagement } from "./hooks/usePeriodManagement"
 import { usePaymentSubmission } from "./hooks/usePaymentSubmission"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { useEffect } from "react"
+import { supabase } from "@/lib/supabase"
+import { useEffect, useState } from "react"
 
 interface PaymentFormProps {
   onSuccess: () => void
@@ -23,6 +22,9 @@ interface PaymentFormProps {
 }
 
 export function PaymentForm({ onSuccess, tenantId, leaseId, initialPayment = false }: PaymentFormProps) {
+  const [selectedPeriod, setSelectedPeriod] = useState(1)
+  const [paymentDate, setPaymentDate] = useState<Date>(new Date())
+
   const { data: lease, isLoading: isLoadingLease } = useQuery({
     queryKey: ["lease-details", leaseId],
     queryFn: async () => {
@@ -71,14 +73,16 @@ export function PaymentForm({ onSuccess, tenantId, leaseId, initialPayment = fal
 
   const {
     periodOptions,
-    selectedPeriods,
-    setSelectedPeriods,
-    generatePeriodOptions,
-    paymentDate,
-    setPaymentDate
+    generatePeriodOptions
   } = usePeriodManagement()
 
   const { isSubmitting, handleSubmit: submitPayment } = usePaymentSubmission(onSuccess)
+
+  useEffect(() => {
+    if (lease) {
+      generatePeriodOptions(lease.start_date, lease.payment_frequency)
+    }
+  }, [lease, generatePeriodOptions])
 
   if (isLoadingLease) {
     return (
@@ -110,27 +114,21 @@ export function PaymentForm({ onSuccess, tenantId, leaseId, initialPayment = fal
 
   const onSubmit = (data: PaymentFormData) => {
     if (selectedLease) {
-      submitPayment(data, selectedLease, selectedPeriods, lease.agency_id)
+      submitPayment(data, selectedLease, selectedPeriod, lease.agency_id)
     }
   }
-
-  useEffect(() => {
-    if (lease) {
-      generatePeriodOptions(lease.start_date, lease.payment_frequency)
-    }
-  }, [lease])
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <PaymentDetails
         selectedLease={lease}
-        selectedPeriods={selectedPeriods}
+        selectedPeriods={selectedPeriod}
       />
 
       <PeriodSelector
         periodOptions={periodOptions}
-        selectedPeriods={selectedPeriods}
-        onPeriodsChange={setSelectedPeriods}
+        selectedPeriods={selectedPeriod}
+        onPeriodsChange={setSelectedPeriod}
         paymentDate={paymentDate}
         onPaymentDateChange={setPaymentDate}
       />
