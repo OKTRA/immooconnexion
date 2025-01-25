@@ -20,7 +20,7 @@ export function PaymentsList({
 }: PaymentsListProps) {
   const { toast } = useToast()
 
-  const { data: payments = [], isLoading } = useQuery({
+  const { data: payments, isLoading } = useQuery({
     queryKey: ["tenant-payment-details", leaseId, periodFilter, statusFilter],
     queryFn: async () => {
       console.log("Fetching payments for lease:", leaseId)
@@ -100,7 +100,7 @@ export function PaymentsList({
     )
   }
 
-  if (!payments.initialPayments?.length && !payments.regularPayments?.length) {
+  if (!payments?.initialPayments?.length && !payments?.regularPayments?.length) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-muted-foreground">
