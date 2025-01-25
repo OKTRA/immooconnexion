@@ -40,7 +40,7 @@ export function PaymentForm({ onSuccess, tenantId, leaseId }: PaymentFormProps) 
     setSelectedLeaseId,
     selectedLease,
     setSelectedLease
-  } = useLeaseSelection(leases, setValue, leaseId)
+  } = useLeaseSelection(leases || [], setValue, leaseId)
 
   const {
     periodOptions,
@@ -53,7 +53,7 @@ export function PaymentForm({ onSuccess, tenantId, leaseId }: PaymentFormProps) 
 
   const handleInitialPaymentsSuccess = async () => {
     await refetchLeases()
-    const updatedLease = leases.find(l => l.id === selectedLeaseId)
+    const updatedLease = leases?.find(l => l.id === selectedLeaseId)
     if (updatedLease) {
       setSelectedLease(updatedLease)
     }
@@ -65,7 +65,15 @@ export function PaymentForm({ onSuccess, tenantId, leaseId }: PaymentFormProps) 
     }
   }
 
-  const filteredLeases = leases.filter(lease => lease.tenant_id === tenantId)
+  const filteredLeases = leases?.filter(lease => lease.tenant_id === tenantId) || []
+
+  if (isLoadingLeases) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

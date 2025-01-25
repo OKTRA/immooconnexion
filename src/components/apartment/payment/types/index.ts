@@ -43,15 +43,11 @@ export interface LeaseSelectProps {
   isLoading: boolean
 }
 
-export interface PeriodOption {
-  value: string
-  label: string
-}
-
 export interface PaymentFormProps {
   onSuccess: () => void
   leaseId?: string
   tenantId: string
+  paymentType?: PaymentType
 }
 
 export interface RegularPaymentsListProps {

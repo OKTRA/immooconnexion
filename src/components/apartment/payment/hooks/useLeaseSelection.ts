@@ -10,7 +10,7 @@ export function useLeaseSelection(
   const [selectedLease, setSelectedLease] = useState<LeaseData | null>(null)
 
   useEffect(() => {
-    if (initialLeaseId && leases.length > 0) {
+    if (initialLeaseId && leases && leases.length > 0) {
       const lease = leases.find(l => l.id === initialLeaseId)
       if (lease) {
         setSelectedLease(lease)
@@ -20,6 +20,8 @@ export function useLeaseSelection(
   }, [initialLeaseId, leases])
 
   const handleLeaseSelect = (leaseId: string) => {
+    if (!leases) return
+
     const lease = leases.find(l => l.id === leaseId)
     setSelectedLeaseId(leaseId)
     setSelectedLease(lease || null)
