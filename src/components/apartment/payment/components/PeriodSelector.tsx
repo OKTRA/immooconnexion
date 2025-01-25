@@ -1,20 +1,21 @@
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
+import { CalendarIcon } from "lucide-react"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
+import { cn } from "@/lib/utils"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { PeriodOption } from "../types"
 
 interface PeriodSelectorProps {
-  periods: any[];
-  selectedPeriods: string[];
-  onPeriodsChange: (periods: string[]) => void;
-  paymentDate: Date;
-  onPaymentDateChange: (date: Date) => void;
+  periods: PeriodOption[]
+  selectedPeriods: string[]
+  onPeriodsChange: (periods: string[]) => void
+  paymentDate: Date
+  onPaymentDateChange: (date: Date) => void
 }
 
 export function PeriodSelector({
@@ -26,11 +27,11 @@ export function PeriodSelector({
 }: PeriodSelectorProps) {
   const handlePeriodToggle = (periodId: string) => {
     if (selectedPeriods.includes(periodId)) {
-      onPeriodsChange(selectedPeriods.filter(id => id !== periodId));
+      onPeriodsChange(selectedPeriods.filter(id => id !== periodId))
     } else {
-      onPeriodsChange([...selectedPeriods, periodId]);
+      onPeriodsChange([...selectedPeriods, periodId])
     }
-  };
+  }
 
   return (
     <div className="space-y-4">
@@ -49,7 +50,7 @@ export function PeriodSelector({
                   htmlFor={period.id}
                   className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  {format(new Date(period.start_date), "d MMMM yyyy", { locale: fr })} - {format(new Date(period.end_date), "d MMMM yyyy", { locale: fr })}
+                  {format(period.startDate, "d MMMM yyyy", { locale: fr })} - {format(period.endDate, "d MMMM yyyy", { locale: fr })}
                 </label>
               </div>
             ))}
@@ -88,5 +89,5 @@ export function PeriodSelector({
         </Popover>
       </div>
     </div>
-  );
+  )
 }

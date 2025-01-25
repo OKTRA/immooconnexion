@@ -4,10 +4,12 @@ export interface PaymentFormData {
   leaseId: string
   amount: number
   paymentMethod: PaymentMethod
-  selectedPeriods: string[]
+  paymentPeriods: string[]
   paymentDate: Date
   notes?: string
   isHistorical?: boolean
+  periodStart?: Date
+  periodEnd?: Date
 }
 
 export interface PaymentFormProps {
@@ -39,7 +41,7 @@ export interface PaymentDetailsProps {
       }
     }
   }
-  selectedPeriods: PeriodOption[]
+  selectedPeriods: string[]
   totalAmount: number
 }
 
@@ -54,6 +56,41 @@ export interface PaymentListProps {
     payment_period_start?: string
     payment_period_end?: string
   }>
+}
+
+export interface LeaseData {
+  id: string
+  tenant_id: string
+  unit_id: string
+  start_date: string
+  end_date?: string
+  rent_amount: number
+  deposit_amount: number
+  payment_frequency: string
+  duration_type: string
+  payment_type: string
+  status: string
+  tenant: {
+    id: string
+    first_name: string
+    last_name: string
+    phone_number?: string
+  }
+  unit: {
+    id: string
+    unit_number: string
+    apartment: {
+      id: string
+      name: string
+    }
+  }
+}
+
+export interface LeaseSelectProps {
+  leases: LeaseData[]
+  selectedLeaseId: string
+  onLeaseSelect: (value: string) => void
+  isLoading: boolean
 }
 
 export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly'

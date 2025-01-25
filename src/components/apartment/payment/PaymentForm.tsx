@@ -54,7 +54,7 @@ export function PaymentForm({
       leaseId,
       amount: 0,
       paymentMethod: "cash",
-      selectedPeriods: [],
+      paymentPeriods: [],
       paymentDate: new Date(),
       notes: "",
       isHistorical
@@ -67,6 +67,7 @@ export function PaymentForm({
     if (lease && selectedPeriods.length > 0) {
       const totalAmount = selectedPeriods.length * lease.rent_amount
       setValue('amount', totalAmount)
+      setValue('paymentPeriods', selectedPeriods)
     }
   }, [selectedPeriods, lease, setValue])
 
@@ -91,7 +92,7 @@ export function PaymentForm({
       />
 
       <PeriodSelector
-        leaseId={leaseId}
+        periods={[]}
         selectedPeriods={selectedPeriods}
         onPeriodsChange={setSelectedPeriods}
         paymentDate={paymentDate}
