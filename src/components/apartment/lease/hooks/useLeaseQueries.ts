@@ -5,7 +5,9 @@ export function useLeaseQueries() {
   const { data: leases = [], isLoading } = useQuery({
     queryKey: ["apartment-leases"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      console.log("Fetching leases and payments...")
+      
+      const { data: leaseData, error: leaseError } = await supabase
         .from("apartment_leases")
         .select(`
           *,
@@ -22,16 +24,67 @@ export function useLeaseQueries() {
               id,
               name
             )
+          ),
+          payments:apartment_lease_payments(
+            id,
+            amount,
+            due_date,
+            payment_date,
+            status,
+            type,
+            payment_method,
+            payment_period_start,
+            payment_period_end
+          ),
+          payment_periods:apartment_payment_periods(
+            id,
+            start_date,
+            end_date,
+            amount,
+            status
           )
         `)
         .order("created_at", { ascending: false })
 
-      if (error) {
-        console.error("Error fetching leases:", error)
-        throw error
+      if (leaseError) {
+        console.error("Error fetching leases:", leaseError)
+        throw leaseError
       }
 
-      return data
+      // Pour chaque bail, récupérer les autres baux du même locataire
+      const leasesWithRelated = await Promise.all(
+        leaseData.map(async (lease) => {
+          const { data: otherLeases, error: otherLeasesError } = await supabase
+            .from("apartment_leases")
+            .select(`
+              *,
+              unit:apartment_units(
+                id,
+                unit_number,
+                apartment:apartments(
+                  id,
+                  name
+                )
+              )
+            `)
+            .eq("tenant_id", lease.tenant.id)
+            .neq("id", lease.id)
+            .eq("status", "active")
+
+          if (otherLeasesError) {
+            console.error("Error fetching other leases:", otherLeasesError)
+            return lease
+          }
+
+          return {
+            ...lease,
+            other_leases: otherLeases || []
+          }
+        })
+      )
+
+      console.log("Fetched leases with payments:", leasesWithRelated)
+      return leasesWithRelated
     },
   })
 

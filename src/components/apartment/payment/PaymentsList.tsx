@@ -28,27 +28,30 @@ export function PaymentsList({
         .from("tenant_payment_details")
         .select("*")
         .eq("lease_id", leaseId)
-        .order("due_date", { ascending: false })
 
-      // N'appliquer les filtres que pour les paiements réguliers
+      // Appliquer les filtres de statut
       if (statusFilter !== "all") {
         query = query.eq("status", statusFilter)
       }
 
+      // Appliquer les filtres de période
+      const today = new Date()
+      
       if (periodFilter === "current") {
-        const today = new Date().toISOString().split("T")[0]
         query = query
-          .lte("period_start", today)
-          .gte("period_end", today)
+          .gte("period_start", today.toISOString())
+          .lte("period_end", today.toISOString())
       } else if (periodFilter === "overdue") {
-        const today = new Date().toISOString().split("T")[0]
         query = query
-          .lt("period_end", today)
+          .lt("due_date", today.toISOString())
           .neq("status", "paid")
       } else if (periodFilter === "upcoming") {
-        const today = new Date().toISOString().split("T")[0]
-        query = query.gt("period_start", today)
+        query = query
+          .gt("period_start", today.toISOString())
       }
+
+      // Ordonner par date d'échéance
+      query = query.order("due_date", { ascending: false })
 
       const { data, error } = await query
 
@@ -75,6 +78,7 @@ export function PaymentsList({
     )
   }
 
+  // Séparer les paiements initiaux des paiements réguliers
   const initialPayments = payments.filter(p => 
     p.type === 'deposit' || p.type === 'agency_fees'
   )
