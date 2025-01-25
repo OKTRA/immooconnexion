@@ -15,6 +15,7 @@ interface PeriodSelectorProps {
   onPeriodsChange: (value: number) => void;
   paymentDate: Date;
   onPaymentDateChange: (date: Date) => void;
+  selectedPeriodRange?: { start: Date; end: Date } | null;
 }
 
 export function PeriodSelector({
@@ -23,6 +24,7 @@ export function PeriodSelector({
   onPeriodsChange,
   paymentDate,
   onPaymentDateChange,
+  selectedPeriodRange
 }: PeriodSelectorProps) {
   return (
     <div className="space-y-4">
@@ -44,6 +46,13 @@ export function PeriodSelector({
               ))}
             </SelectContent>
           </Select>
+          {selectedPeriodRange && (
+            <p className="text-sm text-muted-foreground">
+              Période: {format(selectedPeriodRange.start, "d MMM yyyy", { locale: fr })} 
+              {" - "}
+              {format(selectedPeriodRange.end, "d MMM yyyy", { locale: fr })}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -59,7 +68,7 @@ export function PeriodSelector({
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {paymentDate ? (
-                  format(paymentDate, "P", { locale: fr })
+                  format(paymentDate, "d MMMM yyyy", { locale: fr })
                 ) : (
                   <span>Choisir une date</span>
                 )}
@@ -71,6 +80,7 @@ export function PeriodSelector({
                 selected={paymentDate}
                 onSelect={(date) => date && onPaymentDateChange(date)}
                 initialFocus
+                locale={fr}
               />
             </PopoverContent>
           </Popover>

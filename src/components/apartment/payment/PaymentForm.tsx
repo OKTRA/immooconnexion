@@ -1,26 +1,18 @@
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { usePaymentForm } from "./hooks/usePaymentForm";
 import { PaymentMethodSelect } from "./components/PaymentMethodSelect";
 import { PaymentFormData } from "./types";
 import { PaymentDetails } from "./components/PaymentDetails";
 import { PeriodSelector } from "./components/PeriodSelector";
 import { InitialPaymentsForm } from "./components/InitialPaymentsForm";
-import { useLeaseSelection } from "./hooks/useLeaseSelection";
-import { usePeriodManagement } from "./hooks/usePeriodManagement";
 import { usePaymentSubmission } from "./hooks/usePaymentSubmission";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
+import { addMonths, startOfMonth, endOfMonth } from "date-fns";
 
 interface PaymentFormProps {
   onSuccess: () => void;
@@ -37,6 +29,7 @@ export function PaymentForm({
 }: PaymentFormProps) {
   const [selectedPeriod, setSelectedPeriod] = useState(1);
   const [paymentDate, setPaymentDate] = useState<Date>(new Date());
+  const [selectedPeriodRange, setSelectedPeriodRange] = useState<{ start: Date; end: Date } | null>(null);
 
   const { data: lease, isLoading: isLoadingLease } = useQuery({
     queryKey: ["lease-details", leaseId],
@@ -60,10 +53,10 @@ export function PaymentForm({
           )
         `)
         .eq("id", leaseId)
-        .maybeSingle()
+        .maybeSingle();
 
-      if (error) throw error
-      return data
+      if (error) throw error;
+      return data;
     },
     enabled: !!leaseId
   });
@@ -80,18 +73,19 @@ export function PaymentForm({
     }
   });
 
-  const {
-    periodOptions,
-    generatePeriodOptions
-  } = usePeriodManagement();
-
   const { isSubmitting, handleSubmit: submitPayment } = usePaymentSubmission(onSuccess);
 
+  // Calculer la plage de dates en fonction du nombre de périodes sélectionnées
   useEffect(() => {
     if (lease) {
-      generatePeriodOptions(lease.start_date, lease.payment_frequency);
+      const start = startOfMonth(new Date());
+      const end = endOfMonth(addMonths(start, selectedPeriod - 1));
+      setSelectedPeriodRange({ start, end });
+      
+      // Mettre à jour le montant total
+      setValue('amount', lease.rent_amount * selectedPeriod);
     }
-  }, [lease, generatePeriodOptions]);
+  }, [selectedPeriod, lease, setValue]);
 
   if (isLoadingLease) {
     return (
@@ -122,8 +116,13 @@ export function PaymentForm({
   }
 
   const onSubmit = (data: PaymentFormData) => {
-    if (lease) {
-      submitPayment(data, lease, selectedPeriod, lease.agency_id);
+    if (lease && selectedPeriodRange) {
+      submitPayment({
+        ...data,
+        periodStart: selectedPeriodRange.start,
+        periodEnd: selectedPeriodRange.end,
+        numberOfPeriods: selectedPeriod
+      }, lease, selectedPeriod, lease.agency_id);
     }
   };
 
@@ -136,49 +135,18 @@ export function PaymentForm({
       />
 
       <PeriodSelector
-        periodOptions={periodOptions}
+        periodOptions={Array.from({ length: 12 }, (_, i) => ({
+          value: i + 1,
+          label: `${i + 1} période${i + 1 > 1 ? 's' : ''}`
+        }))}
         selectedPeriods={selectedPeriod}
         onPeriodsChange={setSelectedPeriod}
         paymentDate={paymentDate}
         onPaymentDateChange={setPaymentDate}
+        selectedPeriodRange={selectedPeriodRange}
       />
 
       <div className="space-y-4">
-        <div className="space-y-2">
-          <Label>Date de paiement</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !paymentDate && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {paymentDate ? (
-                  format(paymentDate, "P", { locale: fr })
-                ) : (
-                  <span>Choisir une date</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={paymentDate}
-                onSelect={(date) => {
-                  if (date) {
-                    setPaymentDate(date);
-                    setValue("paymentDate", date);
-                  }
-                }}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-
         <div className="space-y-2">
           <Label>Méthode de paiement</Label>
           <PaymentMethodSelect
