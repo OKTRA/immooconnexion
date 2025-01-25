@@ -36,7 +36,7 @@ export interface PaymentSummary {
   totalAmount: number;
   rentAmount: number;
   penaltiesAmount: number;
-  selectedPeriods: PaymentPeriod[];
+  periodsCount: number;
 }
 
 export interface LeasePaymentStats {
@@ -96,7 +96,8 @@ export interface LeaseSelectProps {
 }
 
 export interface PeriodOption {
-  id: string;
+  value: number;
+  label: string;
   startDate: Date;
   endDate: Date;
   amount: number;

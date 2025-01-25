@@ -1,28 +1,31 @@
-import { useState, useMemo } from 'react'
-import { PaymentPeriod, PaymentSummary } from '../types'
+import { useState, useEffect } from "react"
+import { PaymentPeriod, PaymentSummary } from "../types"
 
-export function usePaymentCalculations(selectedPeriods: PaymentPeriod[], includePenalties: boolean = true) {
-  const [isCalculating, setIsCalculating] = useState(false)
+export function usePaymentCalculations(
+  selectedPeriods: PaymentPeriod[],
+  baseAmount: number
+) {
+  const [summary, setSummary] = useState<PaymentSummary>({
+    totalAmount: 0,
+    rentAmount: 0,
+    penaltiesAmount: 0,
+    periodsCount: 0
+  })
 
-  const summary = useMemo(() => {
+  useEffect(() => {
     const rentAmount = selectedPeriods.reduce((sum, period) => sum + period.amount, 0)
-    
-    const penaltiesAmount = includePenalties ? selectedPeriods.reduce((sum, period) => {
-      const periodPenalties = period.penalties?.reduce((pSum, penalty) => 
-        penalty.status === 'pending' ? pSum + penalty.amount : pSum, 0) || 0
-      return sum + periodPenalties
-    }, 0) : 0
+    const penaltiesAmount = selectedPeriods.reduce((sum, period) => {
+      const penalties = period.penalties || []
+      return sum + penalties.reduce((pSum, p) => pSum + p.amount, 0)
+    }, 0)
 
-    return {
-      totalAmount: rentAmount + (includePenalties ? penaltiesAmount : 0),
+    setSummary({
       rentAmount,
       penaltiesAmount,
-      selectedPeriods
-    } as PaymentSummary
-  }, [selectedPeriods, includePenalties])
+      totalAmount: rentAmount + penaltiesAmount,
+      periodsCount: selectedPeriods.length
+    })
+  }, [selectedPeriods, baseAmount])
 
-  return {
-    summary,
-    isCalculating
-  }
+  return { summary }
 }

@@ -1,46 +1,50 @@
-import { Card } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PaymentSummary as PaymentSummaryType } from "../types"
-import { formatDate } from "@/lib/utils"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
 
 interface PaymentSummaryProps {
   summary: PaymentSummaryType;
-  includesPenalties?: boolean;
+  className?: string;
 }
 
-export function PaymentSummary({ summary, includesPenalties = true }: PaymentSummaryProps) {
+export function PaymentSummary({ summary, className }: PaymentSummaryProps) {
   return (
-    <Card className="p-4">
-      <h3 className="font-semibold mb-4">Récapitulatif du paiement</h3>
-      
-      <div className="space-y-2">
-        <div className="flex justify-between">
-          <span>Loyer</span>
-          <span>{summary.rentAmount.toLocaleString()} FCFA</span>
-        </div>
-
-        {includesPenalties && summary.penaltiesAmount > 0 && (
-          <div className="flex justify-between text-red-600">
-            <span>Pénalités</span>
-            <span>{summary.penaltiesAmount.toLocaleString()} FCFA</span>
+    <Card className={className}>
+      <CardHeader>
+        <CardTitle>Récapitulatif du paiement</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Loyer</span>
+            <span className="font-medium">{summary.rentAmount.toLocaleString()} FCFA</span>
           </div>
-        )}
-
-        <div className="border-t pt-2 mt-2">
-          <div className="flex justify-between font-semibold">
-            <span>Total</span>
-            <span>{summary.totalAmount.toLocaleString()} FCFA</span>
-          </div>
-        </div>
-
-        <div className="mt-4 space-y-2">
-          <h4 className="font-medium">Périodes sélectionnées :</h4>
-          {summary.selectedPeriods.map((period) => (
-            <div key={period.id} className="text-sm text-gray-600">
-              {formatDate(period.startDate)} - {formatDate(period.endDate)}
+          
+          {summary.penaltiesAmount > 0 && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Pénalités</span>
+              <span className="font-medium text-destructive">
+                {summary.penaltiesAmount.toLocaleString()} FCFA
+              </span>
             </div>
-          ))}
+          )}
+
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Nombre de périodes</span>
+            <span className="font-medium">{summary.periodsCount}</span>
+          </div>
+
+          <div className="pt-4 border-t">
+            <div className="flex justify-between items-center">
+              <span className="font-semibold">Total</span>
+              <span className="font-bold text-lg">
+                {summary.totalAmount.toLocaleString()} FCFA
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
+      </CardContent>
     </Card>
   )
 }
