@@ -2,12 +2,41 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { PaymentStats } from "./components/PaymentStats"
 import { PaymentsList } from "./components/PaymentsList"
+import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { PaymentForm } from "@/components/apartment/payment/PaymentForm"
+import { CreditCard, PlusCircle } from "lucide-react"
 
 interface LeasePaymentViewProps {
   leaseId: string;
 }
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
+  const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
+  const [showRegularPaymentDialog, setShowRegularPaymentDialog] = useState(false)
+
+  const { data: lease } = useQuery({
+    queryKey: ["lease", leaseId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("apartment_leases")
+        .select(`
+          *,
+          tenant:tenant_id (
+            id,
+            first_name,
+            last_name
+          )
+        `)
+        .eq("id", leaseId)
+        .single()
+
+      if (error) throw error
+      return data
+    }
+  })
+
   const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ["lease-payment-stats", leaseId],
     queryFn: async () => {
@@ -84,6 +113,27 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
     <div className="space-y-6">
       {stats && <PaymentStats stats={stats} />}
       
+      <div className="flex gap-4 justify-end">
+        {!lease?.initial_payments_completed && (
+          <Button 
+            onClick={() => setShowInitialPaymentDialog(true)}
+            className="bg-green-500 hover:bg-green-600"
+          >
+            <CreditCard className="mr-2 h-4 w-4" />
+            Paiements Initiaux
+          </Button>
+        )}
+        
+        {lease?.initial_payments_completed && (
+          <Button 
+            onClick={() => setShowRegularPaymentDialog(true)}
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Nouveau Paiement de Loyer
+          </Button>
+        )}
+      </div>
+      
       <div className="grid gap-6 md:grid-cols-2">
         <PaymentsList 
           title="Paiements Initiaux" 
@@ -94,6 +144,36 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
           payments={regularPayments}
         />
       </div>
+
+      <Dialog open={showInitialPaymentDialog} onOpenChange={setShowInitialPaymentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Paiements Initiaux</DialogTitle>
+          </DialogHeader>
+          {lease?.tenant && (
+            <PaymentForm 
+              onSuccess={() => setShowInitialPaymentDialog(false)}
+              tenantId={lease.tenant.id}
+              leaseId={leaseId}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showRegularPaymentDialog} onOpenChange={setShowRegularPaymentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nouveau Paiement de Loyer</DialogTitle>
+          </DialogHeader>
+          {lease?.tenant && (
+            <PaymentForm 
+              onSuccess={() => setShowRegularPaymentDialog(false)}
+              tenantId={lease.tenant.id}
+              leaseId={leaseId}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
