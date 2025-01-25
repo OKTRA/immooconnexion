@@ -328,6 +328,7 @@ export type Database = {
           commission_percentage: number | null
           created_at: string | null
           due_date: string | null
+          effective_date: string | null
           historical_entry: boolean | null
           id: string
           late_fee_amount: number | null
@@ -340,6 +341,7 @@ export type Database = {
           payment_notes: string | null
           payment_period_end: string | null
           payment_period_start: string
+          payment_status_type: string | null
           payment_type: string | null
           status: string
           type: string | null
@@ -351,6 +353,7 @@ export type Database = {
           commission_percentage?: number | null
           created_at?: string | null
           due_date?: string | null
+          effective_date?: string | null
           historical_entry?: boolean | null
           id?: string
           late_fee_amount?: number | null
@@ -363,6 +366,7 @@ export type Database = {
           payment_notes?: string | null
           payment_period_end?: string | null
           payment_period_start: string
+          payment_status_type?: string | null
           payment_type?: string | null
           status?: string
           type?: string | null
@@ -374,6 +378,7 @@ export type Database = {
           commission_percentage?: number | null
           created_at?: string | null
           due_date?: string | null
+          effective_date?: string | null
           historical_entry?: boolean | null
           id?: string
           late_fee_amount?: number | null
@@ -386,6 +391,7 @@ export type Database = {
           payment_notes?: string | null
           payment_period_end?: string | null
           payment_period_start?: string
+          payment_status_type?: string | null
           payment_type?: string | null
           status?: string
           type?: string | null
@@ -1343,6 +1349,47 @@ export type Database = {
           },
         ]
       }
+      payment_period_penalties: {
+        Row: {
+          amount: number
+          calculated_at: string | null
+          created_at: string | null
+          days_late: number
+          id: string
+          payment_period_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount?: number
+          calculated_at?: string | null
+          created_at?: string | null
+          days_late?: number
+          id?: string
+          payment_period_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          calculated_at?: string | null
+          created_at?: string | null
+          days_late?: number
+          id?: string
+          payment_period_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_period_penalties_payment_period_id_fkey"
+            columns: ["payment_period_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_payment_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           agency_id: string | null
@@ -2270,6 +2317,10 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_payment_penalties: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       check_late_payments: {
         Args: Record<PropertyKey, never>
         Returns: undefined

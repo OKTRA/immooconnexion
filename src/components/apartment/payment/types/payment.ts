@@ -1,16 +1,27 @@
-export type PaymentPeriodFilter = "all" | "current" | "overdue" | "upcoming";
-export type PaymentStatusFilter = "all" | "pending" | "paid" | "late";
 export type PaymentMethod = "cash" | "bank_transfer" | "mobile_money";
+export type PaymentStatusType = "paid_current" | "paid_advance" | "late" | "pending";
 
-export interface PeriodOption {
-  value: number;
-  label: string;
+export interface PaymentPeriodPenalty {
+  id: string;
+  payment_period_id: string;
+  amount: number;
+  days_late: number;
+  calculated_at: string;
+  status: string;
 }
 
-export interface PaymentDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  leaseId: string;
-  tenantId?: string;
-  paymentType?: 'rent' | 'deposit' | 'agency_fees';
+export interface PaymentPeriod {
+  id: string;
+  start_date: string;
+  end_date: string;
+  amount: number;
+  status: string;
+  penalties?: PaymentPeriodPenalty[];
+}
+
+export interface PaymentSummary {
+  baseAmount: number;
+  penaltiesAmount: number;
+  totalAmount: number;
+  periodsCount: number;
 }
