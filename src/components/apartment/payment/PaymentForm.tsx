@@ -45,12 +45,13 @@ export function PaymentForm({
 
   const { register, handleSubmit, setValue, watch } = useForm<PaymentFormData>({
     defaultValues: {
-      amount: 0,
+      amount: lease.rent_amount,
       paymentMethod: 'cash',
       paymentDate: paymentDate,
       paymentPeriods: [],
       notes: '',
-      isHistorical: isHistorical
+      isHistorical: isHistorical,
+      type: 'rent'
     }
   })
 
@@ -60,10 +61,10 @@ export function PaymentForm({
   }, 0)
 
   useEffect(() => {
-    setValue('amount', totalAmount)
+    setValue('amount', totalAmount > 0 ? totalAmount : lease.rent_amount)
     setValue('paymentPeriods', selectedPeriods)
     setValue('paymentDate', paymentDate)
-  }, [totalAmount, selectedPeriods, paymentDate, setValue])
+  }, [totalAmount, selectedPeriods, paymentDate, setValue, lease.rent_amount])
 
   const onSubmit = async (data: PaymentFormData) => {
     if (!lease) return
