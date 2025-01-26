@@ -1,12 +1,12 @@
 import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { toast } from "@/components/ui/use-toast"
-import { FormData } from "../types"
+import { LeaseFormData } from "../types"
 
 export function useSimpleLease(onSuccess?: () => void) {
   const queryClient = useQueryClient()
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<LeaseFormData>({
     tenant_id: "",
     unit_id: "",
     start_date: new Date().toISOString().split('T')[0],
@@ -20,7 +20,7 @@ export function useSimpleLease(onSuccess?: () => void) {
   })
 
   const createLease = useMutation({
-    mutationFn: async (data: FormData) => {
+    mutationFn: async (data: LeaseFormData) => {
       const { data: profile } = await supabase.auth.getUser()
       if (!profile.user) throw new Error("Non authentifié")
 

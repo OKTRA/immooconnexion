@@ -5,6 +5,8 @@ import { UnitSelect } from "./form/UnitSelect"
 import { LeaseBasicFields } from "./form/LeaseBasicFields"
 import { LeaseFrequencyFields } from "./form/LeaseFrequencyFields"
 import { useSimpleLease } from "./hooks/useSimpleLease"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/lib/supabase"
 
 interface SimpleLeaseFormProps {
   onSuccess?: () => void;
@@ -22,6 +24,38 @@ export function SimpleLeaseForm({
   unitId: initialUnitId
 }: SimpleLeaseFormProps) {
   const { formData, setFormData, createLease } = useSimpleLease(onSuccess)
+
+  const { data: availableUnits = [] } = useQuery({
+    queryKey: ["available-units"],
+    queryFn: async () => {
+      const { data: profile } = await supabase.auth.getUser()
+      if (!profile.user) throw new Error("Non authentifié")
+
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("agency_id")
+        .eq("id", profile.user.id)
+        .single()
+
+      if (!userProfile?.agency_id) throw new Error("Agency ID not found")
+
+      const { data, error } = await supabase
+        .from("apartment_units")
+        .select(`
+          id,
+          unit_number,
+          rent_amount,
+          apartment:apartments (
+            name,
+            address
+          )
+        `)
+        .eq("status", "available")
+
+      if (error) throw error
+      return data || []
+    }
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,7 +76,7 @@ export function SimpleLeaseForm({
           <UnitSelect
             value={formData.unit_id}
             onChange={(unitId) => {
-              const selectedUnit = units.find(unit => unit.id === unitId)
+              const selectedUnit = availableUnits.find(unit => unit.id === unitId)
               if (selectedUnit) {
                 setFormData({
                   ...formData,
@@ -52,7 +86,7 @@ export function SimpleLeaseForm({
                 })
               }
             }}
-            units={units}
+            units={availableUnits}
           />
         </div>
 
