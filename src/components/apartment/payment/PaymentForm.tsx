@@ -1,15 +1,16 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
 import { PaymentPeriodSelector } from "./components/PaymentPeriodSelector"
 import { PaymentFormData, LeaseData } from "./types"
-import { submitPayment } from "./hooks/usePaymentSubmission"
+import { supabase } from "@/lib/supabase"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { toast } from "@/hooks/use-toast"
 
 interface PaymentFormProps {
   onSuccess?: () => void
@@ -42,15 +43,36 @@ export function PaymentForm({
   // Calculer le montant total basé sur le nombre de périodes sélectionnées
   const totalAmount = selectedPeriods * lease.rent_amount
 
-  useEffect(() => {
-    setValue('amount', totalAmount)
-    setValue('paymentDate', paymentDate)
-  }, [totalAmount, paymentDate, setValue])
-
   const onSubmit = async (data: PaymentFormData) => {
-    if (!lease) return
-    await submitPayment(data, lease, selectedPeriods, lease.agency_id)
-    onSuccess?.()
+    try {
+      const { data: result, error } = await supabase.rpc(
+        'handle_mixed_payment_insertion',
+        {
+          p_lease_id: leaseId,
+          p_payment_periods: data.paymentPeriods,
+          p_payment_date: data.paymentDate,
+          p_payment_method: data.paymentMethod,
+          p_agency_id: lease.agency_id,
+          p_notes: data.notes
+        }
+      )
+
+      if (error) throw error
+
+      toast({
+        title: "Succès",
+        description: "Le paiement a été enregistré avec succès",
+      })
+
+      onSuccess?.()
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement du paiement:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'enregistrement du paiement",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
