@@ -35,8 +35,7 @@ export function PaymentForm({
       paymentDate: paymentDate,
       paymentPeriods: [],
       notes: '',
-      isHistorical: isHistorical,
-      type: 'rent'
+      isHistorical: isHistorical
     }
   })
 
@@ -45,11 +44,27 @@ export function PaymentForm({
 
   const onSubmit = async (data: PaymentFormData) => {
     try {
+      // Récupérer les périodes sélectionnées
+      const { data: periods, error: periodsError } = await supabase
+        .from('apartment_payment_periods')
+        .select('id')
+        .eq('lease_id', leaseId)
+        .eq('status', 'pending')
+        .limit(selectedPeriods)
+        .order('start_date', { ascending: true });
+
+      if (periodsError) throw periodsError;
+      if (!periods?.length) {
+        throw new Error("Aucune période de paiement disponible");
+      }
+
+      const periodIds = periods.map(p => p.id);
+
       const { data: result, error } = await supabase.rpc(
         'handle_mixed_payment_insertion',
         {
           p_lease_id: leaseId,
-          p_payment_periods: data.paymentPeriods,
+          p_payment_periods: periodIds,
           p_payment_date: data.paymentDate,
           p_payment_method: data.paymentMethod,
           p_agency_id: lease.agency_id,
