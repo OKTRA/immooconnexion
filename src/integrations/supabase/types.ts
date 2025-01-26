@@ -2456,6 +2456,12 @@ export type Database = {
         | "terminated"
         | "pending_initial_payment"
       owner_status: "active" | "inactive"
+      payment_status_type:
+        | "paid"
+        | "paid_advance"
+        | "late"
+        | "pending"
+        | "historical"
       property_unit_status:
         | "available"
         | "occupied"
