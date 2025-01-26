@@ -2373,6 +2373,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      check_and_recover_missing_periods: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       check_late_payments: {
         Args: Record<PropertyKey, never>
         Returns: undefined
