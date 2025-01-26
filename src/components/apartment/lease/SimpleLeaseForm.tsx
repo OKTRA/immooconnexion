@@ -219,12 +219,48 @@ export function SimpleLeaseForm({
             onValueChange={(value) => setValue('payment_frequency', value)}
           >
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue placeholder="Sélectionner la fréquence" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="daily">Quotidien</SelectItem>
+              <SelectItem value="weekly">Hebdomadaire</SelectItem>
               <SelectItem value="monthly">Mensuel</SelectItem>
               <SelectItem value="quarterly">Trimestriel</SelectItem>
+              <SelectItem value="biannual">Semestriel</SelectItem>
               <SelectItem value="yearly">Annuel</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>Type de durée</Label>
+          <Select
+            value={watch('duration_type')}
+            onValueChange={(value) => setValue('duration_type', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner le type de durée" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="fixed">Durée fixe</SelectItem>
+              <SelectItem value="month_to_month">Mois par mois</SelectItem>
+              <SelectItem value="yearly">Annuel</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>Type de paiement</Label>
+          <Select
+            value={watch('payment_type')}
+            onValueChange={(value) => setValue('payment_type', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner le type de paiement" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="upfront">Début de période</SelectItem>
+              <SelectItem value="end_of_period">Fin de période</SelectItem>
             </SelectContent>
           </Select>
         </div>
