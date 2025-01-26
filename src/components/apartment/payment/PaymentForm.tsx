@@ -2,7 +2,6 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
-import { PaymentPeriodSelector } from "./components/PaymentPeriodSelector"
 import { PaymentFormData, LeaseData } from "./types"
 import { submitPayment } from "./hooks/usePaymentSubmission"
 import { format } from "date-fns"
@@ -13,6 +12,8 @@ import { Input } from "@/components/ui/input"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { Euro } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface PaymentFormProps {
   onSuccess?: () => void
@@ -30,6 +31,18 @@ export function PaymentForm({
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([])
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0])
 
+  const { register, handleSubmit, setValue, watch } = useForm<PaymentFormData>({
+    defaultValues: {
+      amount: lease.rent_amount,
+      paymentMethod: 'cash',
+      paymentDate: paymentDate,
+      paymentPeriods: [],
+      notes: '',
+      isHistorical: isHistorical,
+      type: 'rent'
+    }
+  })
+
   const { data: periods = [] } = useQuery({
     queryKey: ["lease-periods", leaseId],
     queryFn: async () => {
@@ -41,18 +54,6 @@ export function PaymentForm({
 
       if (error) throw error
       return data
-    }
-  })
-
-  const { register, handleSubmit, setValue, watch } = useForm<PaymentFormData>({
-    defaultValues: {
-      amount: lease.rent_amount,
-      paymentMethod: 'cash',
-      paymentDate: paymentDate,
-      paymentPeriods: [],
-      notes: '',
-      isHistorical: isHistorical,
-      type: 'rent'
     }
   })
 
@@ -100,12 +101,50 @@ export function PaymentForm({
         </Card>
 
         {/* Sélecteur de périodes */}
-        <PaymentPeriodSelector
-          periods={periods}
-          selectedPeriods={selectedPeriods}
-          onPeriodsChange={setSelectedPeriods}
-          totalAmount={totalAmount}
-        />
+        <Card className="p-4">
+          <Label className="mb-2 block">Périodes de paiement</Label>
+          <ScrollArea className="h-[200px] w-full rounded-md border">
+            <div className="p-4 space-y-2">
+              {periods.map((period) => (
+                <div 
+                  key={period.id} 
+                  className="flex items-center justify-between p-2 hover:bg-accent rounded-lg transition-colors"
+                >
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={selectedPeriods.includes(period.id)}
+                      onCheckedChange={() => {
+                        if (selectedPeriods.includes(period.id)) {
+                          setSelectedPeriods(selectedPeriods.filter(id => id !== period.id))
+                        } else {
+                          setSelectedPeriods([...selectedPeriods, period.id])
+                        }
+                      }}
+                    />
+                    <div>
+                      <p className="text-sm font-medium">
+                        {format(new Date(period.start_date), "d MMMM yyyy", { locale: fr })} - 
+                        {format(new Date(period.end_date), "d MMMM yyyy", { locale: fr })}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {period.amount?.toLocaleString()} FCFA
+                      </p>
+                    </div>
+                  </div>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    period.status === 'late' ? 'bg-destructive/10 text-destructive' :
+                    period.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-muted text-muted-foreground'
+                  }`}>
+                    {period.status === 'late' ? 'En retard' :
+                     period.status === 'pending' ? 'En attente' :
+                     'À venir'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </Card>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
