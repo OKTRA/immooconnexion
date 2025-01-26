@@ -3,9 +3,8 @@ import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/integrations/supabase/client"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useEffect } from "react"
 import { TenantSelect } from "./form/TenantSelect"
 import { UnitSelect } from "./form/UnitSelect"
 import { Label } from "@/components/ui/label"
@@ -56,7 +55,7 @@ export function SimpleLeaseForm({
           unit_number,
           rent_amount,
           deposit_amount,
-          apartment:apartment_id (
+          apartment:apartments (
             id,
             name,
             address
@@ -102,7 +101,7 @@ export function SimpleLeaseForm({
       }
 
       // Create lease
-      const { data: lease, error } = await supabase
+      const { data: lease, error: leaseError } = await supabase
         .from('apartment_leases')
         .insert({
           ...formData,
@@ -112,9 +111,9 @@ export function SimpleLeaseForm({
         .select()
         .single()
 
-      if (error) throw error
+      if (leaseError) throw leaseError
 
-      // Générer les périodes de paiement
+      // Generate payment periods using the RPC function
       const { error: periodsError } = await supabase.rpc('insert_lease_payments', {
         p_lease_id: lease.id
       })
@@ -132,11 +131,11 @@ export function SimpleLeaseForm({
       return lease
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["apartment-leases"] })
       toast({
         title: "Succès",
         description: "Le bail a été créé avec succès",
       })
-      queryClient.invalidateQueries({ queryKey: ["apartment-leases"] })
       onSuccess?.()
     },
     onError: (error) => {
@@ -222,10 +221,10 @@ export function SimpleLeaseForm({
       <div className="flex justify-end">
         <Button 
           type="submit" 
-          disabled={createLease.isLoading}
+          disabled={createLease.isPending}
           className="w-full sm:w-auto"
         >
-          {createLease.isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {createLease.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Créer le bail
         </Button>
       </div>
