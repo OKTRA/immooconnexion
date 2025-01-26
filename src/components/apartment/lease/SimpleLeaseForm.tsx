@@ -10,7 +10,7 @@ import { UnitSelect } from "./form/UnitSelect"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useLeaseMutations } from "./hooks/useLeaseMutations"
+import { PaymentFrequency, DurationType, PaymentType } from "../types"
 
 interface SimpleLeaseFormProps {
   onSuccess?: () => void
@@ -18,6 +18,18 @@ interface SimpleLeaseFormProps {
   setIsSubmitting?: (value: boolean) => void
   tenantId?: string
   unitId?: string
+}
+
+interface FormData {
+  tenant_id: string
+  unit_id: string
+  start_date: string
+  end_date?: string
+  rent_amount: number
+  deposit_amount: number
+  payment_frequency: PaymentFrequency
+  duration_type: DurationType
+  payment_type: PaymentType
 }
 
 export function SimpleLeaseForm({
@@ -29,9 +41,6 @@ export function SimpleLeaseForm({
 }: SimpleLeaseFormProps) {
   const queryClient = useQueryClient()
   const [selectedUnitId, setSelectedUnitId] = useState<string>(initialUnitId || '')
-  const [showGenerateButton, setShowGenerateButton] = useState(false)
-  const [createdLeaseId, setCreatedLeaseId] = useState<string>('')
-  const { generatePaymentPeriods } = useLeaseMutations()
 
   const { data: units = [] } = useQuery({
     queryKey: ['apartment-units'],
@@ -72,7 +81,7 @@ export function SimpleLeaseForm({
     }
   })
 
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormData>({
     defaultValues: {
       tenant_id: initialTenantId || '',
       unit_id: initialUnitId || '',
@@ -80,14 +89,14 @@ export function SimpleLeaseForm({
       end_date: '',
       rent_amount: 0,
       deposit_amount: 0,
-      payment_frequency: 'monthly' as const,
-      duration_type: 'month_to_month' as const,
-      payment_type: 'upfront' as const
+      payment_frequency: 'monthly',
+      duration_type: 'month_to_month',
+      payment_type: 'upfront'
     }
   })
 
   const createLease = useMutation({
-    mutationFn: async (formData: any) => {
+    mutationFn: async (formData: FormData) => {
       if (!formData.start_date) {
         throw new Error("La date de début est requise")
       }
@@ -129,14 +138,12 @@ export function SimpleLeaseForm({
       if (error) throw error
       return data
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["apartment-leases"] })
       toast({
         title: "Succès",
         description: "Le bail a été créé avec succès",
       })
-      setCreatedLeaseId(data.id)
-      setShowGenerateButton(true)
       onSuccess?.()
     },
     onError: (error) => {
@@ -156,23 +163,6 @@ export function SimpleLeaseForm({
       setValue('rent_amount', selectedUnit.rent_amount)
       setValue('deposit_amount', selectedUnit.deposit_amount || 0)
       setSelectedUnitId(unitId)
-    }
-  }
-
-  const handleGeneratePeriods = async () => {
-    try {
-      await generatePaymentPeriods.mutateAsync(createdLeaseId)
-      toast({
-        title: "Succès",
-        description: "Les périodes de paiement ont été générées avec succès",
-      })
-      setShowGenerateButton(false)
-    } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Erreur lors de la génération des périodes de paiement",
-        variant: "destructive",
-      })
     }
   }
 
@@ -228,7 +218,7 @@ export function SimpleLeaseForm({
           <Label>Fréquence de paiement</Label>
           <Select
             value={watch('payment_frequency')}
-            onValueChange={(value) => setValue('payment_frequency', value)}
+            onValueChange={(value: PaymentFrequency) => setValue('payment_frequency', value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner la fréquence" />
@@ -238,7 +228,6 @@ export function SimpleLeaseForm({
               <SelectItem value="weekly">Hebdomadaire</SelectItem>
               <SelectItem value="monthly">Mensuel</SelectItem>
               <SelectItem value="quarterly">Trimestriel</SelectItem>
-              <SelectItem value="biannual">Semestriel</SelectItem>
               <SelectItem value="yearly">Annuel</SelectItem>
             </SelectContent>
           </Select>
@@ -248,7 +237,7 @@ export function SimpleLeaseForm({
           <Label>Type de durée</Label>
           <Select
             value={watch('duration_type')}
-            onValueChange={(value) => setValue('duration_type', value)}
+            onValueChange={(value: DurationType) => setValue('duration_type', value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner le type de durée" />
@@ -265,7 +254,7 @@ export function SimpleLeaseForm({
           <Label>Type de paiement</Label>
           <Select
             value={watch('payment_type')}
-            onValueChange={(value) => setValue('payment_type', value)}
+            onValueChange={(value: PaymentType) => setValue('payment_type', value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner le type de paiement" />
@@ -278,17 +267,7 @@ export function SimpleLeaseForm({
         </div>
       </div>
 
-      <div className="flex justify-end gap-4">
-        {showGenerateButton && (
-          <Button 
-            type="button"
-            onClick={handleGeneratePeriods}
-            disabled={generatePaymentPeriods.isPending}
-          >
-            {generatePaymentPeriods.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Générer les périodes de paiement
-          </Button>
-        )}
+      <div className="flex justify-end">
         <Button 
           type="submit" 
           disabled={createLease.isPending}
