@@ -2451,6 +2451,12 @@ export type Database = {
         }
         Returns: Json
       }
+      insert_lease_payments: {
+        Args: {
+          p_lease_id: string
+        }
+        Returns: undefined
+      }
       update_expired_apartment_leases: {
         Args: Record<PropertyKey, never>
         Returns: undefined
