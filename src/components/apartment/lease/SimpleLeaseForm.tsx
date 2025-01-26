@@ -105,34 +105,24 @@ export function SimpleLeaseForm({
         throw new Error("Aucune agence associée")
       }
 
-      // Create lease with validated data
-      const { data: lease, error: leaseError } = await supabase
-        .from('apartment_leases')
-        .insert({
-          ...formData,
-          agency_id: userProfile.agency_id,
-          status: 'active',
-          end_date: formData.end_date || null // Ensure null instead of empty string
-        })
-        .select()
-        .single()
+      // Utiliser la fonction RPC create_lease_with_periods
+      const { data: lease, error: leaseError } = await supabase.rpc(
+        'create_lease_with_periods',
+        {
+          p_tenant_id: formData.tenant_id,
+          p_unit_id: formData.unit_id,
+          p_start_date: formData.start_date,
+          p_end_date: formData.end_date || null,
+          p_rent_amount: formData.rent_amount,
+          p_deposit_amount: formData.deposit_amount,
+          p_payment_frequency: formData.payment_frequency,
+          p_duration_type: formData.duration_type,
+          p_payment_type: formData.payment_type,
+          p_agency_id: userProfile.agency_id
+        }
+      )
 
       if (leaseError) throw leaseError
-
-      // Generate payment periods using the RPC function
-      const { error: periodsError } = await supabase.rpc('insert_lease_payments', {
-        p_lease_id: lease.id
-      })
-
-      if (periodsError) throw periodsError
-
-      // Update unit status
-      const { error: unitError } = await supabase
-        .from('apartment_units')
-        .update({ status: 'occupied' })
-        .eq('id', formData.unit_id)
-
-      if (unitError) throw unitError
 
       return lease
     },
