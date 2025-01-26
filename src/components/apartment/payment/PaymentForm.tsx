@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
+import { useQuery } from "@tanstack/react-query"
 
 interface PaymentFormProps {
   onSuccess?: () => void
@@ -28,6 +29,23 @@ export function PaymentForm({
   const [selectedPeriods, setSelectedPeriods] = useState(1)
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0])
 
+  const { data: periods = [], isLoading: isLoadingPeriods } = useQuery({
+    queryKey: ["payment-periods", leaseId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('apartment_payment_periods')
+        .select('*')
+        .eq('lease_id', leaseId)
+        .eq('status', 'pending')
+        .order('start_date', { ascending: true })
+        .limit(selectedPeriods)
+
+      if (error) throw error
+      return data
+    },
+    enabled: !!leaseId
+  })
+
   const { register, handleSubmit, setValue, watch } = useForm<PaymentFormData>({
     defaultValues: {
       amount: lease.rent_amount,
@@ -44,21 +62,11 @@ export function PaymentForm({
 
   const onSubmit = async (data: PaymentFormData) => {
     try {
-      // Récupérer les périodes sélectionnées
-      const { data: periods, error: periodsError } = await supabase
-        .from('apartment_payment_periods')
-        .select('id')
-        .eq('lease_id', leaseId)
-        .eq('status', 'pending')
-        .limit(selectedPeriods)
-        .order('start_date', { ascending: true });
-
-      if (periodsError) throw periodsError;
-      if (!periods?.length) {
-        throw new Error("Aucune période de paiement disponible");
+      if (periods.length === 0) {
+        throw new Error("Aucune période de paiement disponible")
       }
 
-      const periodIds = periods.map(p => p.id);
+      const periodIds = periods.map(p => p.id)
 
       const { data: result, error } = await supabase.rpc(
         'handle_mixed_payment_insertion',
@@ -80,11 +88,11 @@ export function PaymentForm({
       })
 
       onSuccess?.()
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur lors de l'enregistrement du paiement:", error)
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'enregistrement du paiement",
+        description: error.message || "Une erreur est survenue lors de l'enregistrement du paiement",
         variant: "destructive",
       })
     }
