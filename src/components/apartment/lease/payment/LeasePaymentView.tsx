@@ -19,6 +19,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const { data: lease, isLoading: isLoadingLease } = useQuery({
     queryKey: ["lease", leaseId],
     queryFn: async () => {
+      console.log("Fetching lease data for:", leaseId)
       const { data, error } = await supabase
         .from("apartment_leases")
         .select(`
@@ -40,7 +41,11 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         .eq("id", leaseId)
         .maybeSingle()
 
-      if (error) throw error
+      if (error) {
+        console.error("Error fetching lease:", error)
+        throw error
+      }
+      console.log("Lease data:", data)
       return data as LeaseData
     }
   })
@@ -55,7 +60,10 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         .select("amount, status, due_date")
         .eq("lease_id", leaseId)
 
-      if (error) throw error
+      if (error) {
+        console.error("Error fetching payment stats:", error)
+        throw error
+      }
 
       const totalReceived = payments
         ?.filter(p => p.status === 'paid')
@@ -72,6 +80,8 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
       const nextPayment = payments
         ?.filter(p => p.status === 'pending')
         .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())[0]
+
+      console.log("Payment stats calculated:", { totalReceived, pendingAmount, lateAmount, nextPayment })
 
       return {
         totalReceived,
@@ -182,6 +192,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
           <PaymentForm 
             onSuccess={handlePaymentSuccess}
             leaseId={leaseId}
+            lease={lease}
             isHistorical={true}
           />
         </DialogContent>
@@ -195,6 +206,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
           <PaymentForm 
             onSuccess={handlePaymentSuccess}
             leaseId={leaseId}
+            lease={lease}
             isHistorical={false}
           />
         </DialogContent>

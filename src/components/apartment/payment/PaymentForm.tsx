@@ -15,12 +15,14 @@ import { LeaseData } from "@/components/apartment/lease/payment/types"
 interface PaymentFormProps {
   onSuccess?: () => void;
   leaseId: string;
+  lease: LeaseData;
   isHistorical?: boolean;
 }
 
 export function PaymentForm({ 
   onSuccess, 
   leaseId,
+  lease,
   isHistorical = false
 }: PaymentFormProps) {
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([])
@@ -38,38 +40,10 @@ export function PaymentForm({
     }
   })
 
-  const { data: lease } = useQuery({
-    queryKey: ["lease", leaseId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("apartment_leases")
-        .select(`
-          *,
-          tenant:apartment_tenants (
-            id,
-            first_name,
-            last_name
-          ),
-          unit:apartment_units (
-            id,
-            unit_number,
-            apartment:apartments (
-              id,
-              name
-            )
-          )
-        `)
-        .eq("id", leaseId)
-        .maybeSingle()
-
-      if (error) throw error
-      return data as LeaseData
-    }
-  })
-
   const { data: periods = [] } = useQuery({
     queryKey: ["lease-periods", leaseId],
     queryFn: async () => {
+      console.log("Fetching payment periods for lease:", leaseId)
       const { data, error } = await supabase
         .from("apartment_payment_periods")
         .select("*")
@@ -77,7 +51,11 @@ export function PaymentForm({
         .eq("status", "pending")
         .order("start_date", { ascending: true })
 
-      if (error) throw error
+      if (error) {
+        console.error("Error fetching periods:", error)
+        throw error
+      }
+      console.log("Fetched periods:", data)
       return data
     },
     enabled: !!leaseId
@@ -86,6 +64,7 @@ export function PaymentForm({
   useEffect(() => {
     if (lease && selectedPeriods.length > 0) {
       const totalAmount = selectedPeriods.length * lease.rent_amount
+      console.log("Calculating total amount:", totalAmount, "for periods:", selectedPeriods.length)
       setValue('amount', totalAmount)
       setValue('paymentPeriods', selectedPeriods)
       setValue('paymentDate', paymentDate)
@@ -96,6 +75,7 @@ export function PaymentForm({
 
   const onSubmit = async (data: PaymentFormData) => {
     if (!lease) return
+    console.log("Submitting payment:", data)
     await submitPayment(data, lease, selectedPeriods.length, lease.agency_id)
   }
 
