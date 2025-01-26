@@ -68,7 +68,7 @@ export function SimpleLeaseForm({
     }
   })
 
-  const { register, handleSubmit, setValue, watch } = useForm({
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
       tenant_id: initialTenantId || '',
       unit_id: initialUnitId || '',
@@ -84,6 +84,11 @@ export function SimpleLeaseForm({
 
   const createLease = useMutation({
     mutationFn: async (formData: any) => {
+      // Validate required dates
+      if (!formData.start_date) {
+        throw new Error("La date de début est requise")
+      }
+
       const { data: profile } = await supabase.auth.getUser()
       
       if (!profile.user) {
@@ -100,13 +105,14 @@ export function SimpleLeaseForm({
         throw new Error("Aucune agence associée")
       }
 
-      // Create lease
+      // Create lease with validated data
       const { data: lease, error: leaseError } = await supabase
         .from('apartment_leases')
         .insert({
           ...formData,
           agency_id: userProfile.agency_id,
-          status: 'active'
+          status: 'active',
+          end_date: formData.end_date || null // Ensure null instead of empty string
         })
         .select()
         .single()
@@ -142,7 +148,7 @@ export function SimpleLeaseForm({
       console.error("Error creating lease:", error)
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la création du bail",
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la création du bail",
         variant: "destructive",
       })
     }
@@ -181,7 +187,13 @@ export function SimpleLeaseForm({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Date de début</Label>
-            <Input type="date" {...register('start_date')} />
+            <Input 
+              type="date" 
+              {...register('start_date', { required: "La date de début est requise" })} 
+            />
+            {errors.start_date && (
+              <p className="text-sm text-red-500 mt-1">{errors.start_date.message}</p>
+            )}
           </div>
           <div>
             <Label>Date de fin (optionnel)</Label>
