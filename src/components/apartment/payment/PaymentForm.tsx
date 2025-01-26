@@ -6,8 +6,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
-import { PaymentFormProps, PaymentFormData, LeaseData } from "./types"
+import { PaymentFormProps, PaymentFormData } from "./types"
 import { submitPayment } from "./hooks/usePaymentSubmission"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
+import { Card, CardContent } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export function PaymentForm({ 
   onSuccess, 
@@ -60,6 +65,14 @@ export function PaymentForm({
     }
   }, [lease, selectedPeriods, paymentDate, setValue])
 
+  const handlePeriodToggle = (periodId: string) => {
+    setSelectedPeriods(prev => 
+      prev.includes(periodId) 
+        ? prev.filter(id => id !== periodId)
+        : [...prev, periodId]
+    )
+  }
+
   const onSubmit = async (data: PaymentFormData) => {
     if (!lease) return
     console.log("Submitting payment:", data)
@@ -68,45 +81,80 @@ export function PaymentForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <Label>Montant</Label>
-        <Input
-          type="number"
-          {...register('amount')}
-          className="mt-1"
-        />
-      </div>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="grid gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="mb-4">
+              <Label>Montant du loyer mensuel</Label>
+              <div className="text-2xl font-bold">{lease?.rent_amount?.toLocaleString()} FCFA</div>
+            </div>
 
-      <div>
-        <Label>Mode de paiement</Label>
-        <PaymentMethodSelect
-          value={watch('paymentMethod')}
-          onChange={(value) => setValue('paymentMethod', value)}
-        />
-      </div>
+            <div className="space-y-2">
+              <Label>Périodes de paiement</Label>
+              <ScrollArea className="h-[200px] w-full rounded-md border">
+                <div className="p-4 space-y-2">
+                  {periods.map((period) => (
+                    <div key={period.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={period.id}
+                        checked={selectedPeriods.includes(period.id)}
+                        onCheckedChange={() => handlePeriodToggle(period.id)}
+                      />
+                      <label
+                        htmlFor={period.id}
+                        className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {format(new Date(period.start_date), "d MMMM yyyy", { locale: fr })} - {format(new Date(period.end_date), "d MMMM yyyy", { locale: fr })}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
 
-      <div>
-        <Label>Date de paiement</Label>
-        <Input
-          type="date"
-          value={paymentDate}
-          onChange={(e) => setPaymentDate(e.target.value)}
-          className="mt-1"
-        />
-      </div>
+            <div className="mt-4">
+              <Label>Montant total</Label>
+              <Input
+                type="number"
+                {...register('amount')}
+                className="mt-1"
+                readOnly
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-      <div>
-        <Label>Notes</Label>
-        <Input
-          {...register('notes')}
-          className="mt-1"
-        />
-      </div>
+        <div>
+          <Label>Mode de paiement</Label>
+          <PaymentMethodSelect
+            value={watch('paymentMethod')}
+            onChange={(value) => setValue('paymentMethod', value)}
+          />
+        </div>
 
-      <Button type="submit" className="w-full">
-        Enregistrer le paiement
-      </Button>
+        <div>
+          <Label>Date de paiement</Label>
+          <Input
+            type="date"
+            value={paymentDate}
+            onChange={(e) => setPaymentDate(e.target.value)}
+            className="mt-1"
+          />
+        </div>
+
+        <div>
+          <Label>Notes</Label>
+          <Input
+            {...register('notes')}
+            className="mt-1"
+          />
+        </div>
+
+        <Button type="submit" className="w-full">
+          Enregistrer le paiement
+        </Button>
+      </div>
     </form>
   )
 }

@@ -1,3 +1,4 @@
+import { PaymentMethod } from "@/types/payment"
 import { ApartmentLease } from "@/types/apartment"
 
 export interface LeaseData extends ApartmentLease {
