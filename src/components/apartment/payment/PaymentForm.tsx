@@ -10,8 +10,6 @@ import { fr } from "date-fns/locale"
 import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase"
 
 interface PaymentFormProps {
   onSuccess?: () => void
@@ -26,31 +24,12 @@ export function PaymentForm({
   lease,
   isHistorical = false
 }: PaymentFormProps) {
-  const [selectedPeriods, setSelectedPeriods] = useState<string[]>([])
+  const [selectedPeriods, setSelectedPeriods] = useState(1)
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0])
-
-  const { data: periods = [] } = useQuery({
-    queryKey: ["lease-periods", leaseId],
-    queryFn: async () => {
-      console.log("Fetching payment periods for lease:", leaseId)
-      const { data, error } = await supabase
-        .from("apartment_payment_periods")
-        .select("*")
-        .eq("lease_id", leaseId)
-        .order("start_date", { ascending: true })
-
-      if (error) {
-        console.error("Error fetching periods:", error)
-        throw error
-      }
-      console.log("Fetched periods:", data)
-      return data
-    }
-  })
 
   const { register, handleSubmit, setValue, watch } = useForm<PaymentFormData>({
     defaultValues: {
-      amount: lease.rent_amount, // Utiliser le montant du loyer du bail
+      amount: lease.rent_amount,
       paymentMethod: 'cash',
       paymentDate: paymentDate,
       paymentPeriods: [],
@@ -61,17 +40,16 @@ export function PaymentForm({
   })
 
   // Calculer le montant total basé sur le nombre de périodes sélectionnées
-  const totalAmount = selectedPeriods.length * lease.rent_amount
+  const totalAmount = selectedPeriods * lease.rent_amount
 
   useEffect(() => {
-    setValue('amount', totalAmount > 0 ? totalAmount : lease.rent_amount)
-    setValue('paymentPeriods', selectedPeriods)
+    setValue('amount', totalAmount)
     setValue('paymentDate', paymentDate)
-  }, [totalAmount, selectedPeriods, paymentDate, setValue, lease.rent_amount])
+  }, [totalAmount, paymentDate, setValue])
 
   const onSubmit = async (data: PaymentFormData) => {
     if (!lease) return
-    await submitPayment(data, lease, selectedPeriods.length, lease.agency_id)
+    await submitPayment(data, lease, selectedPeriods, lease.agency_id)
     onSuccess?.()
   }
 
@@ -89,8 +67,8 @@ export function PaymentForm({
       </Card>
 
       <PaymentPeriodSelector
-        periods={periods}
-        selectedPeriods={selectedPeriods}
+        paymentFrequency={lease.payment_frequency}
+        rentAmount={lease.rent_amount}
         onPeriodsChange={setSelectedPeriods}
         totalAmount={totalAmount}
       />
