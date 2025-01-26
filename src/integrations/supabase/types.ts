@@ -2440,6 +2440,17 @@ export type Database = {
         }
         Returns: Json
       }
+      handle_mixed_payment_insertion: {
+        Args: {
+          p_lease_id: string
+          p_payment_periods: string[]
+          p_payment_date: string
+          p_payment_method: string
+          p_agency_id: string
+          p_notes: string
+        }
+        Returns: Json
+      }
       update_expired_apartment_leases: {
         Args: Record<PropertyKey, never>
         Returns: undefined
