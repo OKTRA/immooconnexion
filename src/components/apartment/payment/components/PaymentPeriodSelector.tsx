@@ -1,12 +1,10 @@
-import { useState } from "react"
 import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Checkbox } from "@/components/ui/checkbox"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { PaymentPeriod } from "@/types/payment"
+import { Card } from "@/components/ui/card"
 
 interface PaymentPeriodSelectorProps {
   periods: PaymentPeriod[]
@@ -30,51 +28,43 @@ export function PaymentPeriodSelector({
   }
 
   return (
-    <Card>
-      <CardContent className="p-4 space-y-4">
-        <div>
-          <Label>Périodes de paiement</Label>
-          <ScrollArea className="h-[200px] w-full rounded-md border mt-2">
-            <div className="p-4 space-y-2">
-              {periods.map((period) => (
-                <div key={period.id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      checked={selectedPeriods.includes(period.id)}
-                      onCheckedChange={() => handlePeriodToggle(period.id)}
-                    />
-                    <div>
-                      <p className="text-sm font-medium">
-                        {format(new Date(period.startDate), "d MMMM yyyy", { locale: fr })} - 
-                        {format(new Date(period.endDate), "d MMMM yyyy", { locale: fr })}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {period.amount.toLocaleString()} FCFA
-                      </p>
-                    </div>
-                  </div>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    period.status === 'late' ? 'bg-red-100 text-red-800' :
-                    period.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {period.status === 'late' ? 'En retard' :
-                     period.status === 'pending' ? 'En attente' :
-                     'À venir'}
-                  </span>
+    <Card className="p-4">
+      <Label className="mb-2 block">Périodes de paiement</Label>
+      <ScrollArea className="h-[200px] w-full rounded-md border">
+        <div className="p-4 space-y-2">
+          {periods.map((period) => (
+            <div 
+              key={period.id} 
+              className="flex items-center justify-between p-2 hover:bg-accent rounded-lg transition-colors"
+            >
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  checked={selectedPeriods.includes(period.id)}
+                  onCheckedChange={() => handlePeriodToggle(period.id)}
+                />
+                <div>
+                  <p className="text-sm font-medium">
+                    {format(new Date(period.startDate), "d MMMM yyyy", { locale: fr })} - 
+                    {format(new Date(period.endDate), "d MMMM yyyy", { locale: fr })}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {period.amount?.toLocaleString()} FCFA
+                  </p>
                 </div>
-              ))}
+              </div>
+              <span className={`text-xs px-2 py-1 rounded-full ${
+                period.status === 'late' ? 'bg-destructive/10 text-destructive' :
+                period.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-muted text-muted-foreground'
+              }`}>
+                {period.status === 'late' ? 'En retard' :
+                 period.status === 'pending' ? 'En attente' :
+                 'À venir'}
+              </span>
             </div>
-          </ScrollArea>
+          ))}
         </div>
-
-        <div className="pt-4 border-t">
-          <div className="flex justify-between items-center">
-            <Label>Montant total</Label>
-            <span className="text-xl font-bold">{totalAmount.toLocaleString()} FCFA</span>
-          </div>
-        </div>
-      </CardContent>
+      </ScrollArea>
     </Card>
   )
 }
