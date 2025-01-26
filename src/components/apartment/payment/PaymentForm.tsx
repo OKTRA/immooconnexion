@@ -32,20 +32,25 @@ export function PaymentForm({
   const { data: periods = [] } = useQuery({
     queryKey: ["lease-periods", leaseId],
     queryFn: async () => {
+      console.log("Fetching payment periods for lease:", leaseId)
       const { data, error } = await supabase
         .from("apartment_payment_periods")
         .select("*")
         .eq("lease_id", leaseId)
         .order("start_date", { ascending: true })
 
-      if (error) throw error
+      if (error) {
+        console.error("Error fetching periods:", error)
+        throw error
+      }
+      console.log("Fetched periods:", data)
       return data
     }
   })
 
   const { register, handleSubmit, setValue, watch } = useForm<PaymentFormData>({
     defaultValues: {
-      amount: lease.rent_amount,
+      amount: lease.rent_amount, // Utiliser le montant du loyer du bail
       paymentMethod: 'cash',
       paymentDate: paymentDate,
       paymentPeriods: [],
@@ -55,10 +60,8 @@ export function PaymentForm({
     }
   })
 
-  const totalAmount = selectedPeriods.reduce((sum, periodId) => {
-    const period = periods.find(p => p.id === periodId)
-    return sum + (period?.amount || 0)
-  }, 0)
+  // Calculer le montant total basé sur le nombre de périodes sélectionnées
+  const totalAmount = selectedPeriods.length * lease.rent_amount
 
   useEffect(() => {
     setValue('amount', totalAmount > 0 ? totalAmount : lease.rent_amount)
@@ -74,6 +77,17 @@ export function PaymentForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <Card className="p-4">
+        <div className="space-y-2">
+          <Label>Informations du bail</Label>
+          <div className="text-sm space-y-1">
+            <p>Locataire: {lease.tenant.first_name} {lease.tenant.last_name}</p>
+            <p>Montant du loyer: {lease.rent_amount.toLocaleString()} FCFA</p>
+            <p>Fréquence: {lease.payment_frequency}</p>
+          </div>
+        </div>
+      </Card>
+
       <PaymentPeriodSelector
         periods={periods}
         selectedPeriods={selectedPeriods}
@@ -109,7 +123,7 @@ export function PaymentForm({
         </div>
 
         <Button type="submit" className="w-full">
-          Enregistrer le paiement
+          Enregistrer le paiement ({totalAmount.toLocaleString()} FCFA)
         </Button>
       </div>
     </form>
