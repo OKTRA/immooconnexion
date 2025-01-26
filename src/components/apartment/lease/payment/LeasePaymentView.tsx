@@ -1,13 +1,16 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
 import { PaymentStats } from "./components/PaymentStats"
 import { PaymentsList } from "./components/PaymentsList"
+import { Button } from "@/components/ui/button"
 import { useState } from "react"
-import { Loader2 } from "lucide-react"
-import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "./types"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { PaymentForm } from "@/components/apartment/payment/PaymentForm"
+import { CreditCard, PlusCircle, Loader2 } from "lucide-react"
+import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "../payment/types"
 import { toast } from "@/components/ui/use-toast"
-import { PaymentButtons } from "./components/PaymentButtons"
-import { PaymentDialogs } from "./components/PaymentDialogs"
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
@@ -147,11 +150,26 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
     <div className="space-y-8">
       {stats && <PaymentStats stats={stats} />}
       
-      <PaymentButtons 
-        initialPaymentsCompleted={lease.initial_payments_completed || false}
-        onInitialPaymentClick={() => setShowInitialPaymentDialog(true)}
-        onRegularPaymentClick={() => setShowRegularPaymentDialog(true)}
-      />
+      <div className="flex gap-4 justify-end">
+        {!lease?.initial_payments_completed && (
+          <Button 
+            onClick={() => setShowInitialPaymentDialog(true)}
+            className="bg-green-500 hover:bg-green-600"
+          >
+            <CreditCard className="mr-2 h-4 w-4" />
+            Paiements Initiaux
+          </Button>
+        )}
+        
+        {lease?.initial_payments_completed && (
+          <Button 
+            onClick={() => setShowRegularPaymentDialog(true)}
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Nouveau Paiement de Loyer
+          </Button>
+        )}
+      </div>
 
       <div className="space-y-8">
         <PaymentsList 
@@ -166,15 +184,33 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         />
       </div>
 
-      <PaymentDialogs 
-        showInitialPaymentDialog={showInitialPaymentDialog}
-        showRegularPaymentDialog={showRegularPaymentDialog}
-        setShowInitialPaymentDialog={setShowInitialPaymentDialog}
-        setShowRegularPaymentDialog={setShowRegularPaymentDialog}
-        onSuccess={handlePaymentSuccess}
-        leaseId={leaseId}
-        lease={lease}
-      />
+      <Dialog open={showInitialPaymentDialog} onOpenChange={setShowInitialPaymentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Paiements Initiaux</DialogTitle>
+          </DialogHeader>
+          <PaymentForm 
+            onSuccess={handlePaymentSuccess}
+            leaseId={leaseId}
+            lease={lease}
+            isHistorical={true}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showRegularPaymentDialog} onOpenChange={setShowRegularPaymentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nouveau Paiement de Loyer</DialogTitle>
+          </DialogHeader>
+          <PaymentForm 
+            onSuccess={handlePaymentSuccess}
+            leaseId={leaseId}
+            lease={lease}
+            isHistorical={false}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
