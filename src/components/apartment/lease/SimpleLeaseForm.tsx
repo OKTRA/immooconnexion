@@ -10,6 +10,7 @@ import { UnitSelect } from "./form/UnitSelect"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useLeaseMutations } from "./hooks/useLeaseMutations"
 
 interface SimpleLeaseFormProps {
   onSuccess?: () => void
@@ -28,6 +29,9 @@ export function SimpleLeaseForm({
 }: SimpleLeaseFormProps) {
   const queryClient = useQueryClient()
   const [selectedUnitId, setSelectedUnitId] = useState<string>(initialUnitId || '')
+  const [showGenerateButton, setShowGenerateButton] = useState(false)
+  const [createdLeaseId, setCreatedLeaseId] = useState<string>('')
+  const { generatePaymentPeriods } = useLeaseMutations()
 
   const { data: units = [] } = useQuery({
     queryKey: ['apartment-units'],
@@ -84,7 +88,6 @@ export function SimpleLeaseForm({
 
   const createLease = useMutation({
     mutationFn: async (formData: any) => {
-      // Validate required dates
       if (!formData.start_date) {
         throw new Error("La date de début est requise")
       }
@@ -105,33 +108,35 @@ export function SimpleLeaseForm({
         throw new Error("Aucune agence associée")
       }
 
-      // Utiliser la fonction RPC create_lease_with_periods
-      const { data: lease, error: leaseError } = await supabase.rpc(
-        'create_lease_with_periods',
-        {
-          p_tenant_id: formData.tenant_id,
-          p_unit_id: formData.unit_id,
-          p_start_date: formData.start_date,
-          p_end_date: formData.end_date || null,
-          p_rent_amount: formData.rent_amount,
-          p_deposit_amount: formData.deposit_amount,
-          p_payment_frequency: formData.payment_frequency,
-          p_duration_type: formData.duration_type,
-          p_payment_type: formData.payment_type,
-          p_agency_id: userProfile.agency_id
-        }
-      )
+      const { data, error } = await supabase
+        .from('apartment_leases')
+        .insert({
+          tenant_id: formData.tenant_id,
+          unit_id: formData.unit_id,
+          start_date: formData.start_date,
+          end_date: formData.end_date || null,
+          rent_amount: formData.rent_amount,
+          deposit_amount: formData.deposit_amount,
+          payment_frequency: formData.payment_frequency,
+          duration_type: formData.duration_type,
+          payment_type: formData.payment_type,
+          agency_id: userProfile.agency_id,
+          status: 'active'
+        })
+        .select()
+        .single()
 
-      if (leaseError) throw leaseError
-
-      return lease
+      if (error) throw error
+      return data
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["apartment-leases"] })
       toast({
         title: "Succès",
         description: "Le bail a été créé avec succès",
       })
+      setCreatedLeaseId(data.id)
+      setShowGenerateButton(true)
       onSuccess?.()
     },
     onError: (error) => {
@@ -151,6 +156,23 @@ export function SimpleLeaseForm({
       setValue('rent_amount', selectedUnit.rent_amount)
       setValue('deposit_amount', selectedUnit.deposit_amount || 0)
       setSelectedUnitId(unitId)
+    }
+  }
+
+  const handleGeneratePeriods = async () => {
+    try {
+      await generatePaymentPeriods.mutateAsync(createdLeaseId)
+      toast({
+        title: "Succès",
+        description: "Les périodes de paiement ont été générées avec succès",
+      })
+      setShowGenerateButton(false)
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la génération des périodes de paiement",
+        variant: "destructive",
+      })
     }
   }
 
@@ -256,7 +278,17 @@ export function SimpleLeaseForm({
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-4">
+        {showGenerateButton && (
+          <Button 
+            type="button"
+            onClick={handleGeneratePeriods}
+            disabled={generatePaymentPeriods.isPending}
+          >
+            {generatePaymentPeriods.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Générer les périodes de paiement
+          </Button>
+        )}
         <Button 
           type="submit" 
           disabled={createLease.isPending}
