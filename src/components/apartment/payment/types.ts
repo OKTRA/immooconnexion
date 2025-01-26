@@ -1,45 +1,6 @@
-import { PaymentMethod } from "@/types/payment"
+import { ApartmentLease } from "@/types/apartment"
 
-export type PaymentPeriodFilter = 'all' | 'current' | 'overdue' | 'upcoming';
-export type PaymentStatusFilter = 'all' | 'pending' | 'paid' | 'late';
-
-export interface PaymentSummary {
-  totalReceived: number
-  pendingAmount: number
-  lateAmount: number
-  nextPayment?: {
-    amount: number
-    due_date: string
-  }
-}
-
-export interface PaymentListItem {
-  id: string
-  amount: number
-  status: 'paid' | 'pending' | 'late'
-  payment_date?: string
-  due_date: string
-  payment_period_start?: string
-  payment_period_end?: string
-  type?: 'deposit' | 'agency_fees' | 'rent'
-  payment_method?: PaymentMethod
-}
-
-export interface PaymentListProps {
-  title: string
-  payments: PaymentListItem[]
-  className?: string
-  periodFilter?: PaymentPeriodFilter
-  statusFilter?: PaymentStatusFilter
-  leaseId?: string
-}
-
-export interface LeasePaymentViewProps {
-  leaseId: string
-}
-
-export interface LeaseData {
-  id: string
+export interface LeaseData extends ApartmentLease {
   tenant: {
     id: string
     first_name: string
@@ -53,46 +14,27 @@ export interface LeaseData {
       name: string
     }
   }
-  initial_payments_completed?: boolean
-  rent_amount: number
-  tenant_id: string
-}
-
-export interface PeriodOption {
-  id: string
-  value: number
-  label: string
-  startDate: Date
-  endDate: Date
-  amount: number
-  status: 'pending' | 'paid' | 'late' | 'future'
-}
-
-export interface PaymentPeriod {
-  id: string
-  startDate: Date
-  endDate: Date
-  amount: number
-  status: 'pending' | 'paid' | 'late' | 'future'
-  penalties?: Array<{
-    id: string
-    amount: number
-    daysLate: number
-    calculatedAt: Date
-    status: 'pending' | 'paid' | 'cancelled'
-  }>
 }
 
 export interface PaymentFormData {
-  leaseId: string
   amount: number
-  paymentMethod: PaymentMethod
+  paymentMethod: string
+  paymentDate: string
   paymentPeriods: string[]
-  paymentDate: Date
   notes?: string
-  periodStart?: Date
-  periodEnd?: Date
   isHistorical?: boolean
 }
 
-export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly'
+export interface PaymentFormProps {
+  onSuccess?: () => void
+  leaseId: string
+  lease: LeaseData
+  isHistorical?: boolean
+}
+
+export interface PaymentSummary {
+  totalAmount: number
+  rentAmount: number
+  penaltiesAmount: number
+  periodsCount: number
+}

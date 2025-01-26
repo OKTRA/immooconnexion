@@ -1,78 +1,46 @@
-import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
-import { toast } from "@/components/ui/use-toast";
-import { LeaseData, PaymentFormData } from "../types";
+import { supabase } from "@/integrations/supabase/client"
+import { PaymentFormData, LeaseData } from "../types"
+import { toast } from "@/hooks/use-toast"
 
-export function usePaymentSubmission(onSuccess?: () => void) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const queryClient = useQueryClient();
+export async function submitPayment(
+  data: PaymentFormData,
+  lease: LeaseData,
+  periodsCount: number,
+  agencyId: string
+) {
+  try {
+    const { error } = await supabase
+      .from("apartment_lease_payments")
+      .insert({
+        lease_id: lease.id,
+        amount: data.amount,
+        payment_date: data.paymentDate,
+        due_date: data.paymentDate,
+        status: 'paid',
+        payment_method: data.paymentMethod,
+        agency_id: agencyId,
+        payment_type: 'rent',
+        payment_notes: data.notes,
+        payment_period_start: lease.start_date,
+        payment_period_end: lease.end_date,
+        historical_entry: data.isHistorical
+      })
 
-  const handleSubmit = async (
-    formData: PaymentFormData,
-    selectedLease: LeaseData,
-    selectedPeriods: number,
-    agencyId: string
-  ) => {
-    try {
-      setIsSubmitting(true);
-      console.log("Submitting payment:", formData);
+    if (error) throw error
 
-      // Créer le paiement
-      const { error: paymentError } = await supabase
-        .from("apartment_lease_payments")
-        .insert({
-          lease_id: selectedLease.id,
-          amount: formData.amount,
-          payment_method: formData.paymentMethod,
-          payment_date: formData.paymentDate.toISOString(),
-          status: "paid",
-          agency_id: agencyId,
-          type: "rent",
-          payment_period_start: formData.periodStart?.toISOString(),
-          payment_period_end: formData.periodEnd?.toISOString(),
-          payment_notes: formData.notes,
-          historical_entry: formData.isHistorical,
-          due_date: formData.paymentDate.toISOString()
-        });
+    toast({
+      title: "Paiement enregistré",
+      description: `Paiement de ${data.amount} FCFA enregistré avec succès`,
+    })
 
-      if (paymentError) throw paymentError;
-
-      // Mettre à jour le statut des périodes sélectionnées
-      if (formData.paymentPeriods.length > 0) {
-        const { error: periodsError } = await supabase
-          .from("apartment_payment_periods")
-          .update({ status: "paid" })
-          .in("id", formData.paymentPeriods);
-
-        if (periodsError) throw periodsError;
-      }
-
-      await queryClient.invalidateQueries({ queryKey: ["lease-payments"] });
-      await queryClient.invalidateQueries({ queryKey: ["lease-payment-stats"] });
-      await queryClient.invalidateQueries({ queryKey: ["lease-regular-payments"] });
-      await queryClient.invalidateQueries({ queryKey: ["lease-periods"] });
-      
-      toast({
-        title: "Succès",
-        description: "Le paiement a été enregistré avec succès",
-      });
-
-      onSuccess?.();
-    } catch (error) {
-      console.error("Error:", error);
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'enregistrement du paiement",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return {
-    isSubmitting,
-    handleSubmit
-  };
+    return true
+  } catch (error: any) {
+    console.error("Error submitting payment:", error)
+    toast({
+      title: "Erreur",
+      description: "Une erreur est survenue lors de l'enregistrement du paiement",
+      variant: "destructive",
+    })
+    return false
+  }
 }

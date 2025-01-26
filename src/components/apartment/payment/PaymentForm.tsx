@@ -1,23 +1,13 @@
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
-import { Button } from "@/components/ui/button"
-import { Loader2 } from "lucide-react"
-import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
-import { PaymentFormData } from "./types"
-import { PeriodSelector } from "./components/PeriodSelector"
-import { usePaymentSubmission } from "./hooks/usePaymentSubmission"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase"
-import { useEffect, useState } from "react"
-import { Textarea } from "@/components/ui/textarea"
+import { supabase } from "@/integrations/supabase/client"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { LeaseData } from "@/components/apartment/lease/payment/types"
-
-interface PaymentFormProps {
-  onSuccess?: () => void;
-  leaseId: string;
-  lease: LeaseData;
-  isHistorical?: boolean;
-}
+import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
+import { PaymentFormProps, PaymentFormData, LeaseData } from "./types"
+import { submitPayment } from "./hooks/usePaymentSubmission"
 
 export function PaymentForm({ 
   onSuccess, 
@@ -26,17 +16,16 @@ export function PaymentForm({
   isHistorical = false
 }: PaymentFormProps) {
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([])
-  const [paymentDate, setPaymentDate] = useState<Date>(new Date())
+  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0])
 
   const { register, handleSubmit, setValue, watch } = useForm<PaymentFormData>({
     defaultValues: {
-      leaseId,
       amount: 0,
-      paymentMethod: "cash",
+      paymentMethod: 'cash',
+      paymentDate: paymentDate,
       paymentPeriods: [],
-      paymentDate: new Date(),
-      notes: "",
-      isHistorical
+      notes: '',
+      isHistorical: isHistorical
     }
   })
 
@@ -69,53 +58,54 @@ export function PaymentForm({
       setValue('paymentPeriods', selectedPeriods)
       setValue('paymentDate', paymentDate)
     }
-  }, [selectedPeriods, lease, setValue, paymentDate])
-
-  const { isSubmitting, handleSubmit: submitPayment } = usePaymentSubmission(onSuccess)
+  }, [lease, selectedPeriods, paymentDate, setValue])
 
   const onSubmit = async (data: PaymentFormData) => {
     if (!lease) return
     console.log("Submitting payment:", data)
     await submitPayment(data, lease, selectedPeriods.length, lease.agency_id)
+    onSuccess?.()
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <PaymentMethodSelect
-        value={watch("paymentMethod")}
-        onChange={(value) => setValue("paymentMethod", value)}
-      />
-
-      <PeriodSelector
-        periods={periods}
-        selectedPeriods={selectedPeriods}
-        onPeriodsChange={setSelectedPeriods}
-        paymentDate={paymentDate}
-        onPaymentDateChange={setPaymentDate}
-      />
-
-      <div className="space-y-2">
-        <Label>Notes</Label>
-        <Textarea
-          {...register("notes")}
-          placeholder="Ajouter des notes sur le paiement..."
-          className="min-h-[100px]"
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div>
+        <Label>Montant</Label>
+        <Input
+          type="number"
+          {...register('amount')}
+          className="mt-1"
         />
       </div>
 
-      <Button 
-        type="submit" 
-        disabled={isSubmitting || selectedPeriods.length === 0}
-        className="w-full"
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Traitement en cours...
-          </>
-        ) : (
-          "Effectuer le paiement"
-        )}
+      <div>
+        <Label>Mode de paiement</Label>
+        <PaymentMethodSelect
+          value={watch('paymentMethod')}
+          onChange={(value) => setValue('paymentMethod', value)}
+        />
+      </div>
+
+      <div>
+        <Label>Date de paiement</Label>
+        <Input
+          type="date"
+          value={paymentDate}
+          onChange={(e) => setPaymentDate(e.target.value)}
+          className="mt-1"
+        />
+      </div>
+
+      <div>
+        <Label>Notes</Label>
+        <Input
+          {...register('notes')}
+          className="mt-1"
+        />
+      </div>
+
+      <Button type="submit" className="w-full">
+        Enregistrer le paiement
       </Button>
     </form>
   )
