@@ -5,6 +5,38 @@ import { fr } from "date-fns/locale"
 import { PaymentListProps } from "@/components/apartment/payment/types"
 
 export function PaymentsList({ title, payments, className }: PaymentListProps) {
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'paid':
+      case 'paid_current':
+        return 'default'
+      case 'paid_advance':
+        return 'secondary'
+      case 'pending':
+        return 'warning'
+      case 'late':
+        return 'destructive'
+      default:
+        return 'outline'
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'paid':
+      case 'paid_current':
+        return 'Payé'
+      case 'paid_advance':
+        return 'Payé en avance'
+      case 'pending':
+        return 'En attente'
+      case 'late':
+        return 'En retard'
+      default:
+        return status
+    }
+  }
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -22,20 +54,20 @@ export function PaymentsList({ title, payments, className }: PaymentListProps) {
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {format(new Date(payment.due_date), 'PP', { locale: fr })}
+                  {payment.payment_period_start && payment.payment_period_end && (
+                    <span className="ml-2">
+                      (Période: {format(new Date(payment.payment_period_start), 'PP', { locale: fr })} - 
+                      {format(new Date(payment.payment_period_end), 'PP', { locale: fr })})
+                    </span>
+                  )}
                 </p>
               </div>
               <div className="text-right">
                 <p className="font-medium">{payment.amount.toLocaleString()} FCFA</p>
                 <Badge 
-                  variant={
-                    payment.status === 'paid' ? 'default' : 
-                    payment.status === 'pending' ? 'secondary' : 
-                    'destructive'
-                  }
+                  variant={getStatusBadgeVariant(payment.displayStatus || payment.status)}
                 >
-                  {payment.status === 'paid' ? 'Payé' : 
-                   payment.status === 'pending' ? 'En attente' : 
-                   'En retard'}
+                  {getStatusLabel(payment.displayStatus || payment.status)}
                 </Badge>
               </div>
             </div>

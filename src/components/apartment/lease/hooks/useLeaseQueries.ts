@@ -34,7 +34,8 @@ export function useLeaseQueries() {
             type,
             payment_method,
             payment_period_start,
-            payment_period_end
+            payment_period_end,
+            payment_status_type
           ),
           payment_periods:apartment_payment_periods(
             id,
@@ -51,7 +52,6 @@ export function useLeaseQueries() {
         throw leaseError
       }
 
-      // Pour chaque bail, récupérer les autres baux du même locataire
       const leasesWithRelated = await Promise.all(
         leaseData.map(async (lease) => {
           const { data: otherLeases, error: otherLeasesError } = await supabase
@@ -76,14 +76,17 @@ export function useLeaseQueries() {
             return lease
           }
 
-          // Séparer les paiements par type
+          // Séparer les paiements par type et statut
           const payments = lease.payments || []
           const initialPayments = payments.filter(p => 
             p.type === 'deposit' || p.type === 'agency_fees'
           )
           const regularPayments = payments.filter(p => 
             p.type !== 'deposit' && p.type !== 'agency_fees'
-          )
+          ).map(p => ({
+            ...p,
+            displayStatus: p.payment_status_type || p.status
+          }))
 
           return {
             ...lease,
