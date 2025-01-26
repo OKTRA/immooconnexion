@@ -10,7 +10,8 @@ import { UnitSelect } from "./form/UnitSelect"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { PaymentFrequency, DurationType, PaymentType } from "../types"
+import { PaymentFrequency, DurationType, PaymentType } from "./types"
+import { ApartmentUnit } from "@/types/apartment"
 
 interface SimpleLeaseFormProps {
   onSuccess?: () => void
@@ -30,6 +31,7 @@ interface FormData {
   payment_frequency: PaymentFrequency
   duration_type: DurationType
   payment_type: PaymentType
+  status: 'active'
 }
 
 export function SimpleLeaseForm({
@@ -77,7 +79,8 @@ export function SimpleLeaseForm({
         .eq('status', 'available')
 
       if (error) throw error
-      return data
+      
+      return data as ApartmentUnit[]
     }
   })
 
@@ -91,7 +94,8 @@ export function SimpleLeaseForm({
       deposit_amount: 0,
       payment_frequency: 'monthly',
       duration_type: 'month_to_month',
-      payment_type: 'upfront'
+      payment_type: 'upfront',
+      status: 'active'
     }
   })
 
@@ -130,12 +134,31 @@ export function SimpleLeaseForm({
           duration_type: formData.duration_type,
           payment_type: formData.payment_type,
           agency_id: userProfile.agency_id,
-          status: 'active'
+          status: formData.status
         })
         .select()
         .single()
 
       if (error) throw error
+
+      // Update unit status
+      const { error: unitError } = await supabase
+        .from('apartment_units')
+        .update({ status: 'occupied' })
+        .eq('id', formData.unit_id)
+
+      if (unitError) throw unitError
+
+      // Create tenant_units association
+      const { error: tenantUnitError } = await supabase
+        .from('tenant_units')
+        .insert({
+          tenant_id: formData.tenant_id,
+          unit_id: formData.unit_id
+        })
+
+      if (tenantUnitError) throw tenantUnitError
+
       return data
     },
     onSuccess: () => {

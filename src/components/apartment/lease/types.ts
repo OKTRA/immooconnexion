@@ -1,4 +1,4 @@
-export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'biannual' | 'yearly';
+export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 export type DurationType = 'fixed' | 'month_to_month' | 'yearly';
 export type PaymentType = 'upfront' | 'end_of_period';
 export type LeaseStatus = 'active' | 'expired' | 'terminated';
@@ -28,6 +28,4 @@ export interface LeaseFormFieldsProps {
 export interface CreateLeaseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  tenantId?: string;
-  unitId?: string;
 }
