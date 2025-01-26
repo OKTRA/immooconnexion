@@ -121,7 +121,8 @@ export function SimpleLeaseForm({
         throw new Error("Aucune agence associée")
       }
 
-      const { data, error } = await supabase
+      // Create lease
+      const { data: lease, error: leaseError } = await supabase
         .from('apartment_leases')
         .insert({
           tenant_id: formData.tenant_id,
@@ -139,7 +140,7 @@ export function SimpleLeaseForm({
         .select()
         .single()
 
-      if (error) throw error
+      if (leaseError) throw leaseError
 
       // Update unit status
       const { error: unitError } = await supabase
@@ -159,7 +160,7 @@ export function SimpleLeaseForm({
 
       if (tenantUnitError) throw tenantUnitError
 
-      return data
+      return lease
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["apartment-leases"] })
