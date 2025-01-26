@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { CreditCard, PlusCircle } from "lucide-react"
+import { CreditCard, Euro } from "lucide-react"
 
 interface PaymentButtonsProps {
   initialPaymentsCompleted: boolean
@@ -17,7 +17,7 @@ export function PaymentButtons({
       {!initialPaymentsCompleted && (
         <Button 
           onClick={onInitialPaymentClick}
-          className="bg-green-500 hover:bg-green-600"
+          className="bg-green-500 hover:bg-green-600 text-white"
         >
           <CreditCard className="mr-2 h-4 w-4" />
           Paiements Initiaux
@@ -25,9 +25,12 @@ export function PaymentButtons({
       )}
       
       {initialPaymentsCompleted && (
-        <Button onClick={onRegularPaymentClick}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Nouveau Paiement de Loyer
+        <Button 
+          onClick={onRegularPaymentClick}
+          className="bg-blue-500 hover:bg-blue-600 text-white"
+        >
+          <Euro className="mr-2 h-4 w-4" />
+          Payer le Loyer
         </Button>
       )}
     </div>
