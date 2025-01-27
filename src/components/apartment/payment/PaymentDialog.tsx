@@ -1,39 +1,57 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { PaymentForm } from "./PaymentForm"
-import { LatePaymentForm } from "./components/LatePaymentForm"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { PaymentFormFields } from "./components/PaymentFormFields"
+import { usePaymentForm } from "./hooks/usePaymentForm"
+import { toast } from "@/components/ui/use-toast"
+import { useLeaseQueries } from "../lease/hooks/useLeaseQueries"
 
 interface PaymentDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  leaseId: string;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  leaseId: string
 }
 
-export function PaymentDialog({ open, onOpenChange, leaseId }: PaymentDialogProps) {
+export function PaymentDialog({
+  open,
+  onOpenChange,
+  leaseId
+}: PaymentDialogProps) {
+  const { leases } = useLeaseQueries()
+  const lease = leases.find(l => l.id === leaseId)
+
+  const {
+    formData,
+    setFormData,
+    handleSubmit,
+    isSubmitting
+  } = usePaymentForm({
+    onSuccess: () => {
+      toast({
+        title: "Paiement enregistré",
+        description: "Le paiement a été enregistré avec succès",
+      })
+      onOpenChange(false)
+    }
+  })
+
+  if (!lease) return null
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Nouveau Paiement</DialogTitle>
+          <DialogTitle>Nouveau paiement</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="regular">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="regular">Paiement Normal</TabsTrigger>
-            <TabsTrigger value="late">Paiement en Retard</TabsTrigger>
-          </TabsList>
-          <TabsContent value="regular">
-            <PaymentForm
-              onSuccess={() => onOpenChange(false)}
-              leaseId={leaseId}
-            />
-          </TabsContent>
-          <TabsContent value="late">
-            <LatePaymentForm
-              leaseId={leaseId}
-              onSuccess={() => onOpenChange(false)}
-            />
-          </TabsContent>
-        </Tabs>
+        <ScrollArea className="max-h-[80vh] px-1">
+          <PaymentFormFields
+            formData={formData}
+            setFormData={setFormData}
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            onCancel={() => onOpenChange(false)}
+            lease={lease}
+          />
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   )

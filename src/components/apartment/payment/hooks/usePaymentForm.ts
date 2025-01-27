@@ -1,73 +1,46 @@
 import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { toast } from "@/hooks/use-toast"
-import { LeaseData } from "../types"
+import { toast } from "@/components/ui/use-toast"
+import { PaymentFormData } from "../types"
 
-export function usePaymentForm(onSuccess?: () => void) {
+interface UsePaymentFormProps {
+  onSuccess?: () => void
+}
+
+export function usePaymentForm({ onSuccess }: UsePaymentFormProps) {
+  const [formData, setFormData] = useState<PaymentFormData>({
+    amount: 0,
+    paymentMethod: "cash",
+    paymentDate: new Date().toISOString().split('T')[0],
+    paymentPeriods: [],
+    notes: ""
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const { data: profile } = useQuery({
-    queryKey: ["profile"],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Non authentifié")
-
-      const { data: userProfile } = await supabase
-        .from("profiles")
-        .select("agency_id")
-        .eq("id", user.id)
-        .single()
-
-      return userProfile
-    }
-  })
-
-  const { data: leases = [], isLoading: isLoadingLeases } = useQuery({
-    queryKey: ["leases", profile?.agency_id],
-    queryFn: async () => {
-      if (!profile?.agency_id) return []
-
-      const { data, error } = await supabase
-        .from("apartment_leases")
-        .select(`
-          *,
-          tenant:tenant_id (
-            id,
-            first_name,
-            last_name,
-            phone_number
-          ),
-          unit:unit_id (
-            id,
-            unit_number,
-            apartment:apartments (
-              id,
-              name
-            )
-          )
-        `)
-        .eq("agency_id", profile.agency_id)
-
-      if (error) throw error
-      return data as LeaseData[]
-    },
-    enabled: !!profile?.agency_id
-  })
-
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async () => {
     try {
       setIsSubmitting(true)
+      console.log("Submitting payment:", formData)
 
-      const { error } = await supabase
-        .from("apartment_lease_payments")
-        .insert({
-          ...formData,
-          agency_id: profile?.agency_id,
-          status: "pending"
-        })
+      const { data, error } = await supabase.rpc(
+        'handle_mixed_payment_insertion',
+        {
+          p_lease_id: formData.leaseId,
+          p_payment_periods: formData.paymentPeriods,
+          p_payment_date: formData.paymentDate,
+          p_payment_method: formData.paymentMethod,
+          p_agency_id: formData.agencyId,
+          p_notes: formData.notes
+        }
+      )
 
       if (error) throw error
+
+      console.log("Payment response:", data)
+      
+      if (!data.success) {
+        throw new Error(data.error || "Erreur lors du paiement")
+      }
 
       toast({
         title: "Succès",
@@ -75,11 +48,11 @@ export function usePaymentForm(onSuccess?: () => void) {
       })
 
       onSuccess?.()
-    } catch (error) {
-      console.error("Error:", error)
+    } catch (error: any) {
+      console.error("Payment error:", error)
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'enregistrement du paiement",
+        description: error.message || "Une erreur est survenue lors du paiement",
         variant: "destructive",
       })
     } finally {
@@ -88,11 +61,9 @@ export function usePaymentForm(onSuccess?: () => void) {
   }
 
   return {
-    isSubmitting,
+    formData,
+    setFormData,
     handleSubmit,
-    leases,
-    isLoadingLeases,
-    agencyId: profile?.agency_id,
-    refetchLeases: () => {}
+    isSubmitting
   }
 }

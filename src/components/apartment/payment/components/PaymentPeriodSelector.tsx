@@ -1,84 +1,77 @@
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
+import { Card } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
 import { useState } from "react"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { PaymentFrequency } from "@/types/payment"
 
 interface PaymentPeriodSelectorProps {
-  paymentFrequency: PaymentFrequency
-  rentAmount: number
-  onPeriodsChange: (periods: number) => void
-  totalAmount: number
+  leaseId: string
+  onPeriodsChange: (periods: string[]) => void
 }
 
 export function PaymentPeriodSelector({
-  paymentFrequency,
-  rentAmount,
-  onPeriodsChange,
-  totalAmount
+  leaseId,
+  onPeriodsChange
 }: PaymentPeriodSelectorProps) {
-  const [selectedPeriods, setSelectedPeriods] = useState<string>("1")
+  const [selectedPeriods, setSelectedPeriods] = useState<string[]>([])
 
-  // Définir le nombre maximum de périodes en fonction de la fréquence
-  const getMaxPeriods = () => {
-    switch (paymentFrequency) {
-      case 'daily': return 31
-      case 'weekly': return 4
-      case 'monthly': return 12
-      case 'quarterly': return 4
-      case 'biannual': return 2
-      case 'yearly': return 5
-      default: return 12
+  const { data: periods = [], isLoading } = useQuery({
+    queryKey: ["payment-periods", leaseId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("apartment_payment_periods")
+        .select("*")
+        .eq("lease_id", leaseId)
+        .eq("status", "pending")
+        .order("start_date", { ascending: true })
+
+      if (error) throw error
+      return data
     }
+  })
+
+  const handlePeriodToggle = (periodId: string) => {
+    const newSelection = selectedPeriods.includes(periodId)
+      ? selectedPeriods.filter(id => id !== periodId)
+      : [...selectedPeriods, periodId]
+    
+    setSelectedPeriods(newSelection)
+    onPeriodsChange(newSelection)
   }
 
-  // Générer les options de périodes
-  const periodOptions = Array.from({ length: getMaxPeriods() }, (_, i) => ({
-    value: (i + 1).toString(),
-    label: `${i + 1} ${
-      paymentFrequency === 'monthly' ? 'mois' : 
-      paymentFrequency === 'daily' ? 'jours' :
-      paymentFrequency === 'weekly' ? 'semaines' :
-      paymentFrequency === 'quarterly' ? 'trimestres' :
-      paymentFrequency === 'biannual' ? 'semestres' :
-      'années'
-    }`
-  }))
-
-  const handlePeriodChange = (value: string) => {
-    setSelectedPeriods(value)
-    onPeriodsChange(parseInt(value))
+  if (isLoading) {
+    return <div>Chargement des périodes...</div>
   }
 
   return (
-    <Card>
-      <CardContent className="p-4 space-y-4">
-        <div>
-          <Label>Nombre de périodes</Label>
-          <Select
-            value={selectedPeriods}
-            onValueChange={handlePeriodChange}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Sélectionner le nombre de périodes" />
-            </SelectTrigger>
-            <SelectContent>
-              {periodOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="pt-4 border-t">
-          <div className="flex justify-between items-center">
-            <Label>Montant total</Label>
-            <span className="text-xl font-bold">{totalAmount.toLocaleString()} FCFA</span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <h3 className="font-medium">Périodes de paiement</h3>
+      <div className="space-y-2">
+        {periods.map((period) => (
+          <Card key={period.id} className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id={period.id}
+                  checked={selectedPeriods.includes(period.id)}
+                  onCheckedChange={() => handlePeriodToggle(period.id)}
+                />
+                <label htmlFor={period.id} className="text-sm">
+                  {format(new Date(period.start_date), "PP", { locale: fr })} - {format(new Date(period.end_date), "PP", { locale: fr })}
+                </label>
+              </div>
+              <span className="font-medium">{period.amount.toLocaleString()} FCFA</span>
+            </div>
+          </Card>
+        ))}
+        {periods.length === 0 && (
+          <p className="text-center text-muted-foreground">
+            Aucune période de paiement en attente
+          </p>
+        )}
+      </div>
+    </div>
   )
 }

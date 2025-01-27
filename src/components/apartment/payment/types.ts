@@ -1,41 +1,18 @@
-import { PaymentMethod } from "@/types/payment"
-import { ApartmentLease } from "@/types/apartment"
-
-export interface LeaseData extends ApartmentLease {
-  tenant: {
-    id: string
-    first_name: string
-    last_name: string
-  }
-  unit: {
-    id: string
-    unit_number: string
-    apartment: {
-      id: string
-      name: string
-    }
-  }
-}
-
 export interface PaymentFormData {
+  leaseId?: string
   amount: number
   paymentMethod: string
   paymentDate: string
   paymentPeriods: string[]
   notes?: string
-  isHistorical?: boolean
+  agencyId?: string
 }
 
-export interface PaymentFormProps {
-  onSuccess?: () => void
-  leaseId: string
-  lease: LeaseData
-  isHistorical?: boolean
-}
-
-export interface PaymentSummary {
-  totalAmount: number
-  rentAmount: number
-  penaltiesAmount: number
-  periodsCount: number
+export interface PaymentFormFieldsProps {
+  formData: PaymentFormData
+  setFormData: (data: PaymentFormData) => void
+  onSubmit: () => Promise<void>
+  isSubmitting: boolean
+  onCancel: () => void
+  lease: any
 }
