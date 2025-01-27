@@ -58,6 +58,7 @@ export function SimpleLeaseForm({
           id,
           unit_number,
           rent_amount,
+          deposit_amount,
           apartment:apartments (
             name,
             address
@@ -66,6 +67,7 @@ export function SimpleLeaseForm({
         .eq("status", "available")
 
       if (error) throw error
+      console.log("Available units:", data)
       return data || []
     }
   })
@@ -159,6 +161,7 @@ export function SimpleLeaseForm({
             value={formData.unit_id}
             onChange={(unitId) => {
               const selectedUnit = availableUnits.find(unit => unit.id === unitId)
+              console.log("Selected unit:", selectedUnit)
               if (selectedUnit) {
                 setFormData({
                   ...formData,
