@@ -3,7 +3,6 @@ import { TableCell, TableRow } from "@/components/ui/table"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Pencil, Send, Database, Trash2, Receipt } from "lucide-react"
-import { PaymentActionButton } from "../../payment/PaymentActionButton"
 import { useNavigate } from "react-router-dom"
 import { ApartmentLease } from "@/types/apartment"
 
@@ -77,7 +76,14 @@ export function LeaseTableRow({
           >
             <Trash2 className="h-4 w-4" />
           </Button>
-          <PaymentActionButton lease={lease} />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(`/agence/apartment-leases/${lease.id}/payments`)}
+            title="Voir les paiements"
+          >
+            <Receipt className="h-4 w-4" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -93,14 +99,6 @@ export function LeaseTableRow({
             disabled={isGenerating}
           >
             <Database className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(`/agence/apartment-leases/${lease.id}/payments`)}
-            title="Voir les paiements"
-          >
-            <Receipt className="h-4 w-4" />
           </Button>
         </div>
       </TableCell>

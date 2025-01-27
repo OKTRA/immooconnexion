@@ -1,9 +1,9 @@
+import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { PaymentStats } from "./components/PaymentStats"
-import { PaymentsList } from "./components/PaymentsList"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -11,6 +11,9 @@ import { PaymentForm } from "@/components/apartment/payment/PaymentForm"
 import { CreditCard, PlusCircle, Loader2 } from "lucide-react"
 import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "../payment/types"
 import { toast } from "@/components/ui/use-toast"
+import { PaymentStats } from "./components/PaymentStats"
+import { PaymentsList } from "./components/PaymentsList"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
