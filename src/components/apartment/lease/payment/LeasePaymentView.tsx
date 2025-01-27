@@ -1,19 +1,14 @@
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { PaymentForm } from "@/components/apartment/payment/PaymentForm"
-import { InitialPaymentForm } from "@/components/apartment/payment/components/InitialPaymentForm"
-import { CreditCard, PlusCircle, Loader2 } from "lucide-react"
-import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "../payment/types"
+import { Loader2 } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { PaymentStats } from "./components/PaymentStats"
 import { PaymentsList } from "./components/PaymentsList"
+import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "./types"
+import { LeaseHeader } from "./components/LeaseHeader"
+import { PaymentDialogs } from "./components/PaymentDialogs"
+import { useState } from "react"
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
@@ -30,7 +25,9 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
           tenant:apartment_tenants (
             id,
             first_name,
-            last_name
+            last_name,
+            phone_number,
+            email
           ),
           unit:apartment_units (
             id,
@@ -53,7 +50,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
     }
   })
 
-  const { data: stats, isLoading: isLoadingStats } = useQuery({
+  const { data: stats } = useQuery({
     queryKey: ["lease-payment-stats", leaseId],
     queryFn: async () => {
       console.log("Fetching payment stats for lease:", leaseId)
@@ -63,10 +60,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         .select("amount, status, due_date")
         .eq("lease_id", leaseId)
 
-      if (error) {
-        console.error("Error fetching payment stats:", error)
-        throw error
-      }
+      if (error) throw error
 
       const totalReceived = payments
         ?.filter(p => p.status === 'paid')
@@ -84,8 +78,6 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         ?.filter(p => p.status === 'pending')
         .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())[0]
 
-      console.log("Payment stats calculated:", { totalReceived, pendingAmount, lateAmount, nextPayment })
-
       return {
         totalReceived,
         pendingAmount,
@@ -95,36 +87,6 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
           due_date: nextPayment.due_date
         } : undefined
       } as PaymentSummary
-    }
-  })
-
-  const { data: initialPayments = [] } = useQuery({
-    queryKey: ["lease-initial-payments", leaseId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("apartment_lease_payments")
-        .select("*")
-        .eq("lease_id", leaseId)
-        .in("type", ["deposit", "agency_fees"])
-        .order("due_date", { ascending: true })
-
-      if (error) throw error
-      return data
-    }
-  })
-
-  const { data: regularPayments = [] } = useQuery({
-    queryKey: ["lease-regular-payments", leaseId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("apartment_lease_payments")
-        .select("*")
-        .eq("lease_id", leaseId)
-        .eq("type", "rent")
-        .order("due_date", { ascending: true })
-
-      if (error) throw error
-      return data
     }
   })
 
@@ -151,64 +113,34 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
 
   return (
     <div className="space-y-8">
-      {stats && <PaymentStats stats={stats} />}
+      <LeaseHeader 
+        lease={lease}
+        onInitialPayment={() => setShowInitialPaymentDialog(true)}
+        onRegularPayment={() => setShowRegularPaymentDialog(true)}
+      />
       
-      <div className="flex gap-4 justify-end">
-        <Button 
-          onClick={() => setShowInitialPaymentDialog(true)}
-          className="bg-green-500 hover:bg-green-600"
-        >
-          <CreditCard className="mr-2 h-4 w-4" />
-          Paiements Initiaux
-        </Button>
-        
-        <Button 
-          onClick={() => setShowRegularPaymentDialog(true)}
-          disabled={!lease.initial_payments_completed}
-        >
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Nouveau Paiement de Loyer
-        </Button>
-      </div>
+      {stats && <PaymentStats stats={stats} />}
 
-      <div className="space-y-8">
-        <PaymentsList 
-          title="Paiements Initiaux" 
-          payments={initialPayments}
-          className="w-full"
-        />
-        <PaymentsList 
-          title="Paiements de Loyer" 
-          payments={regularPayments}
-          className="w-full"
-        />
-      </div>
+      <PaymentsList 
+        title="Paiements Initiaux" 
+        payments={[]}
+        className="w-full"
+      />
+      
+      <PaymentsList 
+        title="Paiements de Loyer" 
+        payments={[]}
+        className="w-full"
+      />
 
-      <Dialog open={showInitialPaymentDialog} onOpenChange={setShowInitialPaymentDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Paiements Initiaux</DialogTitle>
-          </DialogHeader>
-          <InitialPaymentForm 
-            onSuccess={handlePaymentSuccess}
-            lease={lease}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showRegularPaymentDialog} onOpenChange={setShowRegularPaymentDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Nouveau Paiement de Loyer</DialogTitle>
-          </DialogHeader>
-          <PaymentForm 
-            onSuccess={handlePaymentSuccess}
-            leaseId={leaseId}
-            lease={lease}
-            isHistorical={false}
-          />
-        </DialogContent>
-      </Dialog>
+      <PaymentDialogs 
+        lease={lease}
+        showInitialPaymentDialog={showInitialPaymentDialog}
+        showRegularPaymentDialog={showRegularPaymentDialog}
+        onInitialDialogChange={setShowInitialPaymentDialog}
+        onRegularDialogChange={setShowRegularPaymentDialog}
+        onSuccess={handlePaymentSuccess}
+      />
     </div>
   )
 }
