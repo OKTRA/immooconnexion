@@ -89,7 +89,37 @@ export function SimpleLeaseForm({
 
       if (!userProfile?.agency_id) throw new Error("Agency ID not found")
 
-      // Insertion directe dans apartment_leases
+      // Vérifier si l'association tenant_units existe déjà
+      const { data: existingTenantUnit } = await supabase
+        .from('tenant_units')
+        .select('*')
+        .eq('tenant_id', formData.tenant_id)
+        .eq('unit_id', formData.unit_id)
+        .single()
+
+      // Si elle existe, la mettre à jour
+      if (existingTenantUnit) {
+        const { error: updateError } = await supabase
+          .from('tenant_units')
+          .update({ status: 'active' })
+          .eq('tenant_id', formData.tenant_id)
+          .eq('unit_id', formData.unit_id)
+
+        if (updateError) throw updateError
+      } else {
+        // Sinon, créer une nouvelle association
+        const { error: tenantUnitError } = await supabase
+          .from('tenant_units')
+          .insert({
+            tenant_id: formData.tenant_id,
+            unit_id: formData.unit_id,
+            status: 'active'
+          })
+
+        if (tenantUnitError) throw tenantUnitError
+      }
+
+      // Insertion du bail
       const { data: lease, error } = await supabase
         .from('apartment_leases')
         .insert({
@@ -117,16 +147,6 @@ export function SimpleLeaseForm({
         .eq('id', formData.unit_id)
 
       if (unitError) throw unitError
-
-      // Créer l'association tenant_units
-      const { error: tenantUnitError } = await supabase
-        .from('tenant_units')
-        .insert({
-          tenant_id: formData.tenant_id,
-          unit_id: formData.unit_id
-        })
-
-      if (tenantUnitError) throw tenantUnitError
 
       toast({
         title: "Succès",
