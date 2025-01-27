@@ -1,4 +1,4 @@
-import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from "@/components/ui/table"
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { EditLeaseDialog } from "./EditLeaseDialog"

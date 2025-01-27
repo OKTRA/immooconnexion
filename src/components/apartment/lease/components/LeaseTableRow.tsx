@@ -5,6 +5,7 @@ import { fr } from "date-fns/locale"
 import { Pencil, Send, Database, Trash2, Receipt } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { ApartmentLease } from "@/types/apartment"
+import { Loader2 } from "lucide-react"
 
 interface LeaseTableRowProps {
   lease: ApartmentLease
@@ -90,7 +91,11 @@ export function LeaseTableRow({
             onClick={() => onGeneratePaymentPeriods(lease.id)}
             disabled={isGenerating}
           >
-            <Send className="h-4 w-4" />
+            {isGenerating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
           </Button>
           <Button
             variant="ghost"
@@ -98,7 +103,11 @@ export function LeaseTableRow({
             onClick={() => onGeneratePaymentPeriodsDirectly(lease.id)}
             disabled={isGenerating}
           >
-            <Database className="h-4 w-4" />
+            {isGenerating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Database className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </TableCell>
