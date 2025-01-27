@@ -5,10 +5,11 @@ import { fr } from "date-fns/locale"
 import { Pencil, Send, Database, Trash2, Receipt } from "lucide-react"
 import { PaymentActionButton } from "../../payment/PaymentActionButton"
 import { useNavigate } from "react-router-dom"
+import { ApartmentLease } from "@/types/apartment"
 
 interface LeaseTableRowProps {
-  lease: any
-  onEdit: (lease: any) => void
+  lease: ApartmentLease
+  onEdit: (lease: ApartmentLease) => void
   onDelete: (id: string) => void
   onGeneratePaymentPeriods: (id: string) => void
   onGeneratePaymentPeriodsDirectly: (id: string) => void
@@ -76,9 +77,7 @@ export function LeaseTableRow({
           >
             <Trash2 className="h-4 w-4" />
           </Button>
-          <PaymentActionButton
-            lease={lease}
-          />
+          <PaymentActionButton lease={lease} />
           <Button
             variant="ghost"
             size="icon"

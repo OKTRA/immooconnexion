@@ -21,6 +21,7 @@ export function PaymentActionButton({ lease }: PaymentActionButtonProps) {
           variant="ghost"
           size="icon"
           className="text-green-600"
+          title="Paiements Initiaux"
         >
           <CreditCard className="h-4 w-4" />
         </Button>
@@ -40,6 +41,7 @@ export function PaymentActionButton({ lease }: PaymentActionButtonProps) {
         onClick={() => setShowRegularPaymentDialog(true)}
         variant="ghost"
         size="icon"
+        title="Nouveau Paiement de Loyer"
       >
         <PlusCircle className="h-4 w-4" />
       </Button>

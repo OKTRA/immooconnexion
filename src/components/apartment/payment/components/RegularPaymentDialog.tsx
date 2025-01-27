@@ -4,27 +4,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { InitialPaymentForm } from "./InitialPaymentForm"
+import { PaymentForm } from "../PaymentForm"
 import { ApartmentLease } from "@/types/apartment"
 
-interface InitialPaymentDialogProps {
+interface RegularPaymentDialogProps {
   lease: ApartmentLease
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function InitialPaymentDialog({
+export function RegularPaymentDialog({
   lease,
   open,
   onOpenChange,
-}: InitialPaymentDialogProps) {
+}: RegularPaymentDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Paiements Initiaux</DialogTitle>
+          <DialogTitle>Nouveau Paiement de Loyer</DialogTitle>
         </DialogHeader>
-        <InitialPaymentForm 
+        <PaymentForm 
           lease={lease}
           onSuccess={() => onOpenChange(false)}
         />
