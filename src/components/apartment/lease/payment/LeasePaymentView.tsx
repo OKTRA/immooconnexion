@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { PaymentForm } from "@/components/apartment/payment/PaymentForm"
+import { InitialPaymentForm } from "@/components/apartment/payment/components/InitialPaymentForm"
 import { CreditCard, PlusCircle, Loader2 } from "lucide-react"
 import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "../payment/types"
 import { toast } from "@/components/ui/use-toast"
 import { PaymentStats } from "./components/PaymentStats"
 import { PaymentsList } from "./components/PaymentsList"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
@@ -137,7 +137,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
     setShowInitialPaymentDialog(false)
   }
 
-  if (isLoadingLease || isLoadingStats) {
+  if (isLoadingLease) {
     return (
       <div className="flex items-center justify-center h-48">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -192,11 +192,9 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
           <DialogHeader>
             <DialogTitle>Paiements Initiaux</DialogTitle>
           </DialogHeader>
-          <PaymentForm 
+          <InitialPaymentForm 
             onSuccess={handlePaymentSuccess}
-            leaseId={leaseId}
             lease={lease}
-            isHistorical={true}
           />
         </DialogContent>
       </Dialog>
