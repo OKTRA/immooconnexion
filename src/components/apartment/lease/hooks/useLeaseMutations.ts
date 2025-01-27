@@ -10,35 +10,50 @@ export function useLeaseMutations() {
       console.log("Handling initial payments for lease:", { leaseId, depositAmount, rentAmount })
       
       try {
-        // Créer le paiement de la caution
-        const { data: depositPayment, error: depositError } = await supabase.rpc(
-          'create_lease_payment',
-          {
-            p_lease_id: leaseId,
-            p_amount: depositAmount,
-            p_payment_type: 'deposit',
-            p_payment_method: 'cash',
-            p_payment_date: new Date().toISOString(),
-          }
-        )
+        // Insérer le paiement de la caution
+        const { error: depositError } = await supabase
+          .from('apartment_lease_payments')
+          .insert({
+            lease_id: leaseId,
+            amount: depositAmount,
+            payment_type: 'deposit',
+            payment_method: 'cash',
+            payment_date: new Date().toISOString(),
+            due_date: new Date().toISOString(),
+            status: 'paid',
+            payment_status_type: 'paid'
+          })
 
         if (depositError) throw depositError
 
-        // Créer le paiement des frais d'agence
-        const { data: feesPayment, error: feesError } = await supabase.rpc(
-          'create_lease_payment',
-          {
-            p_lease_id: leaseId,
-            p_amount: Math.round(rentAmount * 0.5),
-            p_payment_type: 'agency_fees',
-            p_payment_method: 'cash',
-            p_payment_date: new Date().toISOString(),
-          }
-        )
+        // Insérer le paiement des frais d'agence
+        const { error: feesError } = await supabase
+          .from('apartment_lease_payments')
+          .insert({
+            lease_id: leaseId,
+            amount: Math.round(rentAmount * 0.5),
+            payment_type: 'agency_fees',
+            payment_method: 'cash',
+            payment_date: new Date().toISOString(),
+            due_date: new Date().toISOString(),
+            status: 'paid',
+            payment_status_type: 'paid'
+          })
 
         if (feesError) throw feesError
 
-        return { depositPayment, feesPayment }
+        // Mettre à jour le statut du bail
+        const { error: leaseError } = await supabase
+          .from('apartment_leases')
+          .update({
+            initial_fees_paid: true,
+            initial_payments_completed: true
+          })
+          .eq('id', leaseId)
+
+        if (leaseError) throw leaseError
+
+        return true
       } catch (error) {
         console.error("Error handling initial payments:", error)
         throw error
