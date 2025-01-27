@@ -1,31 +1,54 @@
-import { CreditCard } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useNavigate } from "react-router-dom"
+import { useState } from "react"
+import { CreditCard, PlusCircle } from "lucide-react"
+import { InitialPaymentDialog } from "./components/InitialPaymentDialog"
+import { RegularPaymentDialog } from "./components/RegularPaymentDialog"
+import { ApartmentLease } from "@/types/apartment"
 
 interface PaymentActionButtonProps {
-  tenantId?: string
-  leaseId?: string
+  lease: ApartmentLease
 }
 
-export function PaymentActionButton({ tenantId, leaseId }: PaymentActionButtonProps) {
-  const navigate = useNavigate()
+export function PaymentActionButton({ lease }: PaymentActionButtonProps) {
+  const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
+  const [showRegularPaymentDialog, setShowRegularPaymentDialog] = useState(false)
 
-  const handleClick = () => {
-    if (leaseId) {
-      navigate(`/agence/apartment-leases/${leaseId}/payments`)
-    } else if (tenantId) {
-      navigate(`/agence/apartment-tenants/${tenantId}/payments`)
-    }
+  if (!lease.initial_payments_completed) {
+    return (
+      <>
+        <Button 
+          onClick={() => setShowInitialPaymentDialog(true)}
+          variant="ghost"
+          size="icon"
+          className="text-green-600"
+        >
+          <CreditCard className="h-4 w-4" />
+        </Button>
+
+        <InitialPaymentDialog
+          lease={lease}
+          open={showInitialPaymentDialog}
+          onOpenChange={setShowInitialPaymentDialog}
+        />
+      </>
+    )
   }
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={handleClick}
-      title="Gérer les paiements"
-    >
-      <CreditCard className="h-4 w-4" />
-    </Button>
+    <>
+      <Button 
+        onClick={() => setShowRegularPaymentDialog(true)}
+        variant="ghost"
+        size="icon"
+      >
+        <PlusCircle className="h-4 w-4" />
+      </Button>
+
+      <RegularPaymentDialog
+        lease={lease}
+        open={showRegularPaymentDialog}
+        onOpenChange={setShowRegularPaymentDialog}
+      />
+    </>
   )
 }

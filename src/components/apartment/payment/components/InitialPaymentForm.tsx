@@ -1,132 +1,116 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useInitialPayments } from "../hooks/useInitialPayments"
-import { z } from "zod"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { toast } from "@/components/ui/use-toast"
+import { supabase } from "@/integrations/supabase/client"
+import { ApartmentLease } from "@/types/apartment"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Loader2 } from "lucide-react"
-import { useNavigate } from "react-router-dom"
-import { useToast } from "@/hooks/use-toast"
-
-const formSchema = z.object({
-  deposit_amount: z.number().min(0, "Le montant doit être positif"),
-  agency_fees: z.number().min(0, "Le montant doit être positif"),
-})
-
-type FormData = z.infer<typeof formSchema>
+import { useState } from "react"
 
 interface InitialPaymentFormProps {
-  leaseId: string
-  agencyId: string
+  lease: ApartmentLease
   onSuccess?: () => void
-  defaultValues: {
-    deposit_amount: number
-    agency_fees: number
-  }
 }
 
-export function InitialPaymentForm({ 
-  leaseId, 
-  agencyId, 
-  onSuccess,
-  defaultValues
-}: InitialPaymentFormProps) {
-  const { handleInitialPayments, isSubmitting } = useInitialPayments({
-    leaseId,
-    agencyId,
-  })
-  const navigate = useNavigate()
-  const { toast } = useToast()
+export function InitialPaymentForm({ lease, onSuccess }: InitialPaymentFormProps) {
+  const queryClient = useQueryClient()
+  const [paymentMethod, setPaymentMethod] = useState("cash")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      deposit_amount: defaultValues.deposit_amount,
-      agency_fees: defaultValues.agency_fees
+  const handleInitialPayment = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc('handle_initial_payments', {
+        p_lease_id: lease.id,
+        p_deposit_amount: lease.deposit_amount,
+        p_agency_fees: Math.round(lease.rent_amount * 0.5)
+      })
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["apartment-leases"] })
+      toast({
+        title: "Paiements initiaux enregistrés",
+        description: "Les paiements initiaux ont été enregistrés avec succès",
+      })
+      onSuccess?.()
+    },
+    onError: (error) => {
+      console.error("Error:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'enregistrement des paiements",
+        variant: "destructive",
+      })
     }
   })
 
-  const onSubmit = async (data: FormData) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
     try {
-      const success = await handleInitialPayments({
-        deposit_amount: data.deposit_amount,
-        agency_fees: data.agency_fees
-      })
-      
-      if (success) {
-        toast({
-          title: "Paiements initiaux enregistrés",
-          description: "Les paiements ont été enregistrés avec succès",
-        })
-        
-        if (onSuccess) {
-          onSuccess()
-        }
-        
-        // Rediriger vers la même page sans paramètres
-        const currentPath = window.location.pathname
-        navigate(currentPath)
-      }
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'enregistrement des paiements",
-        variant: "destructive",
-      })
+      await handleInitialPayment.mutateAsync()
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="deposit_amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Montant de la caution</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-4">
+        <div>
+          <Label>Caution</Label>
+          <Input
+            type="text"
+            value={`${lease.deposit_amount?.toLocaleString()} FCFA`}
+            disabled
+          />
+        </div>
 
-        <FormField
-          control={form.control}
-          name="agency_fees"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Frais d'agence</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div>
+          <Label>Frais d'agence</Label>
+          <Input
+            type="text"
+            value={`${Math.round(lease.rent_amount * 0.5).toLocaleString()} FCFA`}
+            disabled
+          />
+        </div>
 
-        <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Enregistrement...
-            </>
-          ) : (
-            "Enregistrer les paiements"
-          )}
-        </Button>
-      </form>
-    </Form>
+        <div>
+          <Label>Mode de paiement</Label>
+          <Select
+            value={paymentMethod}
+            onValueChange={setPaymentMethod}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner le mode de paiement" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="cash">Espèces</SelectItem>
+              <SelectItem value="bank_transfer">Virement bancaire</SelectItem>
+              <SelectItem value="check">Chèque</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <Button 
+        type="submit" 
+        disabled={isSubmitting}
+        className="w-full"
+      >
+        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        Enregistrer les paiements
+      </Button>
+    </form>
   )
 }

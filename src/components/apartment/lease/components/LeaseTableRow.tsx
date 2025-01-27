@@ -77,8 +77,7 @@ export function LeaseTableRow({
             <Trash2 className="h-4 w-4" />
           </Button>
           <PaymentActionButton
-            tenantId={lease.tenant_id}
-            leaseId={lease.id}
+            lease={lease}
           />
           <Button
             variant="ghost"

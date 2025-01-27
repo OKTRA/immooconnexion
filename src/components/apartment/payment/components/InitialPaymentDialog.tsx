@@ -4,44 +4,34 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { InitialPaymentsForm } from "./InitialPaymentsForm"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase"
+import { InitialPaymentForm } from "./InitialPaymentForm"
+import { ApartmentLease } from "@/types/apartment"
 
 interface InitialPaymentDialogProps {
+  lease: ApartmentLease
   open: boolean
   onOpenChange: (open: boolean) => void
-  tenantId: string
+  onSuccess?: () => void
 }
 
-export function InitialPaymentDialog({ open, onOpenChange, tenantId }: InitialPaymentDialogProps) {
-  const { data: lease } = useQuery({
-    queryKey: ["tenant-lease", tenantId],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("apartment_leases")
-        .select("*")
-        .eq("tenant_id", tenantId)
-        .single()
-      
-      return data
-    }
-  })
-
-  if (!lease) return null
-
+export function InitialPaymentDialog({
+  lease,
+  open,
+  onOpenChange,
+  onSuccess
+}: InitialPaymentDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Paiements Initiaux</DialogTitle>
         </DialogHeader>
-        <InitialPaymentsForm
-          leaseId={lease.id}
-          depositAmount={lease.deposit_amount}
-          rentAmount={lease.rent_amount}
-          onSuccess={() => onOpenChange(false)}
-          agencyId={lease.agency_id}
+        <InitialPaymentForm 
+          lease={lease}
+          onSuccess={() => {
+            onSuccess?.()
+            onOpenChange(false)
+          }}
         />
       </DialogContent>
     </Dialog>
