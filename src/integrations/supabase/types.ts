@@ -319,6 +319,13 @@ export type Database = {
             referencedRelation: "apartment_leases"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "apartment_inspections_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "lease_details"
+            referencedColumns: ["id"]
+          },
         ]
       }
       apartment_lease_payments: {
@@ -410,6 +417,13 @@ export type Database = {
             columns: ["lease_id"]
             isOneToOne: false
             referencedRelation: "apartment_leases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_lease_payments_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "lease_details"
             referencedColumns: ["id"]
           },
           {
@@ -1118,6 +1132,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "late_payment_fees_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "lease_details"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "late_payment_fees_payment_id_fkey"
             columns: ["payment_id"]
             isOneToOne: false
@@ -1297,6 +1318,13 @@ export type Database = {
             columns: ["lease_id"]
             isOneToOne: false
             referencedRelation: "apartment_leases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_notifications_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "lease_details"
             referencedColumns: ["id"]
           },
           {
@@ -2046,6 +2074,69 @@ export type Database = {
           },
         ]
       }
+      lease_details: {
+        Row: {
+          agency_id: string | null
+          apartment_address: string | null
+          apartment_name: string | null
+          created_at: string | null
+          deposit_amount: number | null
+          deposit_return_amount: number | null
+          deposit_return_date: string | null
+          deposit_return_notes: string | null
+          deposit_returned: boolean | null
+          duration_type: string | null
+          end_date: string | null
+          id: string | null
+          initial_fees_paid: boolean | null
+          initial_payments_completed: boolean | null
+          payment_frequency: string | null
+          payment_type: string | null
+          payments: Json | null
+          rent_amount: number | null
+          start_date: string | null
+          status: string | null
+          tenant_email: string | null
+          tenant_first_name: string | null
+          tenant_id: string | null
+          tenant_last_name: string | null
+          tenant_phone: string | null
+          unit_id: string | null
+          unit_number: string | null
+          unit_rent_amount: number | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_leases_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_leases_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_leases_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_tenants_with_rent"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_leases_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "apartment_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       owner_apartment_revenues: {
         Row: {
           amount: number | null
@@ -2267,6 +2358,13 @@ export type Database = {
             columns: ["lease_id"]
             isOneToOne: false
             referencedRelation: "apartment_leases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_lease_payments_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "lease_details"
             referencedColumns: ["id"]
           },
           {

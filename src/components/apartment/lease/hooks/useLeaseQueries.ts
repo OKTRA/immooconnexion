@@ -8,7 +8,7 @@ export function useLeaseQueries() {
       console.log("Fetching leases and payments...")
       
       const { data: leaseData, error: leaseError } = await supabase
-        .from("apartment_leases")
+        .from("lease_details")
         .select(`
           *,
           tenant:apartment_tenants(
@@ -24,25 +24,6 @@ export function useLeaseQueries() {
               id,
               name
             )
-          ),
-          payments:apartment_lease_payments(
-            id,
-            amount,
-            due_date,
-            payment_date,
-            status,
-            type,
-            payment_method,
-            payment_period_start,
-            payment_period_end,
-            payment_status_type
-          ),
-          payment_periods:apartment_payment_periods(
-            id,
-            start_date,
-            end_date,
-            amount,
-            status
           )
         `)
         .order("created_at", { ascending: false })
@@ -52,50 +33,28 @@ export function useLeaseQueries() {
         throw leaseError
       }
 
-      const leasesWithRelated = await Promise.all(
-        leaseData.map(async (lease) => {
-          const { data: otherLeases, error: otherLeasesError } = await supabase
-            .from("apartment_leases")
-            .select(`
-              *,
-              unit:apartment_units(
-                id,
-                unit_number,
-                apartment:apartments(
-                  id,
-                  name
-                )
-              )
-            `)
-            .eq("tenant_id", lease.tenant.id)
-            .neq("id", lease.id)
-            .eq("status", "active")
+      const leasesWithRelated = leaseData.map(lease => {
+        // Convertir les paiements JSON en objets
+        const payments = lease.payments || []
+        
+        // Séparer les paiements par type
+        const initialPayments = payments.filter(p => 
+          p.payment_type === 'deposit' || p.payment_type === 'agency_fees'
+        )
+        
+        const regularPayments = payments.filter(p => 
+          p.payment_type !== 'deposit' && p.payment_type !== 'agency_fees'
+        ).map(p => ({
+          ...p,
+          displayStatus: p.payment_status_type || p.status
+        }))
 
-          if (otherLeasesError) {
-            console.error("Error fetching other leases:", otherLeasesError)
-            return lease
-          }
-
-          // Séparer les paiements par type et statut
-          const payments = lease.payments || []
-          const initialPayments = payments.filter(p => 
-            p.type === 'deposit' || p.type === 'agency_fees'
-          )
-          const regularPayments = payments.filter(p => 
-            p.type !== 'deposit' && p.type !== 'agency_fees'
-          ).map(p => ({
-            ...p,
-            displayStatus: p.payment_status_type || p.status
-          }))
-
-          return {
-            ...lease,
-            other_leases: otherLeases || [],
-            initialPayments,
-            regularPayments
-          }
-        })
-      )
+        return {
+          ...lease,
+          initialPayments,
+          regularPayments
+        }
+      })
 
       console.log("Fetched leases with payments:", leasesWithRelated)
       return leasesWithRelated
