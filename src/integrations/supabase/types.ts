@@ -519,47 +519,6 @@ export type Database = {
           },
         ]
       }
-      apartment_payment_periods: {
-        Row: {
-          amount: number
-          created_at: string | null
-          end_date: string
-          id: string
-          lease_id: string | null
-          start_date: string
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          amount: number
-          created_at?: string | null
-          end_date: string
-          id?: string
-          lease_id?: string | null
-          start_date: string
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          amount?: number
-          created_at?: string | null
-          end_date?: string
-          id?: string
-          lease_id?: string | null
-          start_date?: string
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "apartment_payment_periods_lease_id_fkey"
-            columns: ["lease_id"]
-            isOneToOne: false
-            referencedRelation: "apartment_leases"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       apartment_tenants: {
         Row: {
           additional_notes: string | null
@@ -1345,47 +1304,6 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      payment_period_penalties: {
-        Row: {
-          amount: number
-          calculated_at: string | null
-          created_at: string | null
-          days_late: number
-          id: string
-          payment_period_id: string | null
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          amount?: number
-          calculated_at?: string | null
-          created_at?: string | null
-          days_late?: number
-          id?: string
-          payment_period_id?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          amount?: number
-          calculated_at?: string | null
-          created_at?: string | null
-          days_late?: number
-          id?: string
-          payment_period_id?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payment_period_penalties_payment_period_id_fkey"
-            columns: ["payment_period_id"]
-            isOneToOne: false
-            referencedRelation: "apartment_payment_periods"
             referencedColumns: ["id"]
           },
         ]
@@ -2377,10 +2295,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      check_late_payments: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       check_subscription_expiry: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -2400,6 +2314,19 @@ export type Database = {
         }
         Returns: string
       }
+      create_lease_payment: {
+        Args: {
+          p_lease_id: string
+          p_amount: number
+          p_payment_type: string
+          p_payment_method: string
+          p_payment_date: string
+          p_period_start?: string
+          p_period_end?: string
+          p_notes?: string
+        }
+        Returns: Json
+      }
       create_lease_with_periods: {
         Args: {
           p_tenant_id: string
@@ -2415,22 +2342,18 @@ export type Database = {
         }
         Returns: string
       }
-      generate_lease_payment_periods: {
-        Args: {
-          p_lease_id: string
-          p_start_date: string
-          p_end_date: string
-          p_rent_amount: number
-          p_payment_frequency: string
-        }
-        Returns: number
-      }
       generate_monthly_owner_statements: {
         Args: {
           year: number
           month: number
         }
         Returns: undefined
+      }
+      get_next_payment_due: {
+        Args: {
+          p_lease_id: string
+        }
+        Returns: Json
       }
       handle_initial_payments: {
         Args: {
@@ -2450,12 +2373,6 @@ export type Database = {
           p_notes: string
         }
         Returns: Json
-      }
-      insert_lease_payments: {
-        Args: {
-          p_lease_id: string
-        }
-        Returns: undefined
       }
       update_expired_apartment_leases: {
         Args: Record<PropertyKey, never>

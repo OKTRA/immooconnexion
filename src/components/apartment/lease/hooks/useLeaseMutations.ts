@@ -5,67 +5,40 @@ import { toast } from "@/components/ui/use-toast"
 export function useLeaseMutations() {
   const queryClient = useQueryClient()
 
-  const generatePaymentPeriods = useMutation({
-    mutationFn: async (leaseId: string) => {
-      console.log("Generating payment periods for lease:", leaseId)
-      
-      try {
-        const { data, error } = await supabase.rpc('insert_lease_payments', {
-          p_lease_id: leaseId
-        })
-
-        if (error) throw error
-        return data
-      } catch (error) {
-        console.error("Error generating payment periods:", error)
-        throw error
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["apartment-leases"] })
-      toast({
-        title: "Succès",
-        description: "Les périodes de paiement ont été générées avec succès",
-      })
-    },
-    onError: (error: any) => {
-      console.error("Error generating payment periods:", error)
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la génération des périodes de paiement",
-        variant: "destructive",
-      })
-    }
-  })
-
   const handleInitialPayments = useMutation({
     mutationFn: async ({ leaseId, depositAmount, rentAmount }: { leaseId: string, depositAmount: number, rentAmount: number }) => {
       console.log("Handling initial payments for lease:", { leaseId, depositAmount, rentAmount })
       
       try {
-        // First check if payment periods exist
-        const { data: existingPeriods, error: periodsError } = await supabase
-          .from('apartment_payment_periods')
-          .select('id')
-          .eq('lease_id', leaseId)
-          .limit(1)
+        // Créer le paiement de la caution
+        const { data: depositPayment, error: depositError } = await supabase.rpc(
+          'create_lease_payment',
+          {
+            p_lease_id: leaseId,
+            p_amount: depositAmount,
+            p_payment_type: 'deposit',
+            p_payment_method: 'cash',
+            p_payment_date: new Date().toISOString(),
+          }
+        )
 
-        if (periodsError) throw periodsError
+        if (depositError) throw depositError
 
-        // If no periods exist, generate them first
-        if (!existingPeriods?.length) {
-          await generatePaymentPeriods.mutateAsync(leaseId)
-        }
+        // Créer le paiement des frais d'agence
+        const { data: feesPayment, error: feesError } = await supabase.rpc(
+          'create_lease_payment',
+          {
+            p_lease_id: leaseId,
+            p_amount: Math.round(rentAmount * 0.5),
+            p_payment_type: 'agency_fees',
+            p_payment_method: 'cash',
+            p_payment_date: new Date().toISOString(),
+          }
+        )
 
-        // Then handle initial payments using RPC
-        const { data, error } = await supabase.rpc('handle_initial_payments', {
-          p_lease_id: leaseId,
-          p_deposit_amount: depositAmount,
-          p_agency_fees: Math.round(rentAmount * 0.5)
-        })
+        if (feesError) throw feesError
 
-        if (error) throw error
-        return data
+        return { depositPayment, feesPayment }
       } catch (error) {
         console.error("Error handling initial payments:", error)
         throw error
@@ -88,91 +61,7 @@ export function useLeaseMutations() {
     }
   })
 
-  const generatePaymentPeriodsDirectly = useMutation({
-    mutationFn: async (leaseId: string) => {
-      console.log("Generating payment periods directly for lease:", leaseId)
-      
-      try {
-        const { data: lease, error: leaseError } = await supabase
-          .from("apartment_leases")
-          .select("*")
-          .eq("id", leaseId)
-          .single()
-
-        if (leaseError) throw leaseError
-        if (!lease) throw new Error("Bail non trouvé")
-
-        const periods = []
-        let currentStart = new Date(lease.start_date)
-        const endDate = lease.end_date ? new Date(lease.end_date) : new Date(currentStart)
-        endDate.setFullYear(endDate.getFullYear() + 1)
-
-        while (currentStart < endDate) {
-          let periodEnd = new Date(currentStart)
-          
-          switch (lease.payment_frequency) {
-            case 'daily':
-              periodEnd.setDate(periodEnd.getDate() + 1)
-              break
-            case 'weekly':
-              periodEnd.setDate(periodEnd.getDate() + 7)
-              break
-            case 'monthly':
-              periodEnd.setMonth(periodEnd.getMonth() + 1)
-              break
-            case 'quarterly':
-              periodEnd.setMonth(periodEnd.getMonth() + 3)
-              break
-            case 'yearly':
-              periodEnd.setFullYear(periodEnd.getFullYear() + 1)
-              break
-          }
-          periodEnd.setDate(periodEnd.getDate() - 1)
-
-          periods.push({
-            lease_id: leaseId,
-            start_date: currentStart.toISOString().split('T')[0],
-            end_date: periodEnd.toISOString().split('T')[0],
-            amount: lease.rent_amount,
-            status: currentStart <= new Date() ? 'pending' : 'future'
-          })
-
-          currentStart = new Date(periodEnd)
-          currentStart.setDate(currentStart.getDate() + 1)
-        }
-
-        const { error: insertError } = await supabase
-          .from("apartment_payment_periods")
-          .insert(periods)
-
-        if (insertError) throw insertError
-
-        return periods
-      } catch (error) {
-        console.error("Error generating payment periods directly:", error)
-        throw error
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["apartment-leases"] })
-      toast({
-        title: "Succès",
-        description: "Les périodes de paiement ont été générées directement avec succès",
-      })
-    },
-    onError: (error: any) => {
-      console.error("Error generating payment periods directly:", error)
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la génération directe des périodes de paiement",
-        variant: "destructive",
-      })
-    }
-  })
-
   return {
-    generatePaymentPeriods,
-    generatePaymentPeriodsDirectly,
     handleInitialPayments
   }
 }
