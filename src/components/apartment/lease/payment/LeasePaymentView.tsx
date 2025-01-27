@@ -164,6 +164,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         
         <Button 
           onClick={() => setShowRegularPaymentDialog(true)}
+          disabled={!lease.initial_payments_completed}
         >
           <PlusCircle className="mr-2 h-4 w-4" />
           Nouveau Paiement de Loyer
