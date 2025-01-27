@@ -154,24 +154,20 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
       {stats && <PaymentStats stats={stats} />}
       
       <div className="flex gap-4 justify-end">
-        {!lease?.initial_payments_completed && (
-          <Button 
-            onClick={() => setShowInitialPaymentDialog(true)}
-            className="bg-green-500 hover:bg-green-600"
-          >
-            <CreditCard className="mr-2 h-4 w-4" />
-            Paiements Initiaux
-          </Button>
-        )}
+        <Button 
+          onClick={() => setShowInitialPaymentDialog(true)}
+          className="bg-green-500 hover:bg-green-600"
+        >
+          <CreditCard className="mr-2 h-4 w-4" />
+          Paiements Initiaux
+        </Button>
         
-        {lease?.initial_payments_completed && (
-          <Button 
-            onClick={() => setShowRegularPaymentDialog(true)}
-          >
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Nouveau Paiement de Loyer
-          </Button>
-        )}
+        <Button 
+          onClick={() => setShowRegularPaymentDialog(true)}
+        >
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Nouveau Paiement de Loyer
+        </Button>
       </div>
 
       <div className="space-y-8">
