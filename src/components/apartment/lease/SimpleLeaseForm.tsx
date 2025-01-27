@@ -4,9 +4,10 @@ import { TenantSelect } from "./form/TenantSelect"
 import { UnitSelect } from "./form/UnitSelect"
 import { LeaseBasicFields } from "./form/LeaseBasicFields"
 import { LeaseFrequencyFields } from "./form/LeaseFrequencyFields"
-import { useSimpleLease } from "./hooks/useSimpleLease"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
+import { useState } from "react"
+import { toast } from "@/components/ui/use-toast"
 
 interface SimpleLeaseFormProps {
   onSuccess?: () => void;
@@ -23,7 +24,19 @@ export function SimpleLeaseForm({
   tenantId: initialTenantId,
   unitId: initialUnitId
 }: SimpleLeaseFormProps) {
-  const { formData, setFormData, createLease } = useSimpleLease(onSuccess)
+  const [isLoading, setIsLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    tenant_id: "",
+    unit_id: "",
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: "",
+    rent_amount: 0,
+    deposit_amount: 0,
+    payment_frequency: "monthly",
+    duration_type: "month_to_month",
+    payment_type: "upfront",
+    status: "active"
+  })
 
   const { data: availableUnits = [] } = useQuery({
     queryKey: ["available-units"],
@@ -59,7 +72,76 @@ export function SimpleLeaseForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    createLease.mutate(formData)
+    setIsLoading(true)
+
+    try {
+      // Récupérer l'agency_id
+      const { data: profile } = await supabase.auth.getUser()
+      if (!profile.user) throw new Error("Non authentifié")
+
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("agency_id")
+        .eq("id", profile.user.id)
+        .single()
+
+      if (!userProfile?.agency_id) throw new Error("Agency ID not found")
+
+      // Insertion directe dans apartment_leases
+      const { data: lease, error } = await supabase
+        .from('apartment_leases')
+        .insert({
+          tenant_id: formData.tenant_id,
+          unit_id: formData.unit_id,
+          start_date: formData.start_date,
+          end_date: formData.end_date || null,
+          rent_amount: formData.rent_amount,
+          deposit_amount: formData.deposit_amount,
+          payment_frequency: formData.payment_frequency,
+          duration_type: formData.duration_type,
+          payment_type: formData.payment_type,
+          status: 'active',
+          agency_id: userProfile.agency_id
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Mettre à jour le statut de l'unité
+      const { error: unitError } = await supabase
+        .from('apartment_units')
+        .update({ status: 'occupied' })
+        .eq('id', formData.unit_id)
+
+      if (unitError) throw unitError
+
+      // Créer l'association tenant_units
+      const { error: tenantUnitError } = await supabase
+        .from('tenant_units')
+        .insert({
+          tenant_id: formData.tenant_id,
+          unit_id: formData.unit_id
+        })
+
+      if (tenantUnitError) throw tenantUnitError
+
+      toast({
+        title: "Succès",
+        description: "Le bail a été créé avec succès",
+      })
+
+      onSuccess?.()
+    } catch (error) {
+      console.error('Error creating lease:', error)
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la création du bail",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -104,10 +186,10 @@ export function SimpleLeaseForm({
       <div className="flex justify-end">
         <Button 
           type="submit" 
-          disabled={createLease.isPending}
+          disabled={isLoading}
           className="w-full sm:w-auto"
         >
-          {createLease.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Créer le bail
         </Button>
       </div>
