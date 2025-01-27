@@ -72,7 +72,7 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
         disabled={isSubmitting}
         className="w-full"
       >
-        Enregistrer les paiements initiaux
+        {isSubmitting ? "Enregistrement..." : "Enregistrer les paiements initiaux"}
       </Button>
     </form>
   )
