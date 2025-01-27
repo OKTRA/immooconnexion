@@ -43,6 +43,52 @@ export function useLeaseMutations() {
     }
   })
 
+  const handleInitialPayments = useMutation({
+    mutationFn: async ({ leaseId, depositAmount, rentAmount }: { leaseId: string, depositAmount: number, rentAmount: number }) => {
+      console.log("Handling initial payments for lease:", { leaseId, depositAmount, rentAmount })
+      
+      try {
+        // First generate payment periods
+        await generatePaymentPeriods.mutateAsync(leaseId)
+
+        // Then handle initial payments
+        const { data, error } = await supabase.rpc('handle_initial_payments', {
+          p_lease_id: leaseId,
+          p_deposit_amount: depositAmount,
+          p_agency_fees: Math.round(rentAmount * 0.5)
+        })
+
+        if (error) {
+          console.error("RPC Error:", error)
+          throw error
+        }
+
+        console.log("Initial payments handled successfully:", data)
+        return data
+      } catch (error) {
+        console.error("Error handling initial payments:", error)
+        throw error
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["apartment-leases"] })
+      queryClient.invalidateQueries({ queryKey: ["lease-initial-payments"] })
+      queryClient.invalidateQueries({ queryKey: ["lease-payment-stats"] })
+      toast({
+        title: "Succès",
+        description: "Les paiements initiaux ont été enregistrés avec succès",
+      })
+    },
+    onError: (error: any) => {
+      console.error("Error handling initial payments:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'enregistrement des paiements initiaux",
+        variant: "destructive",
+      })
+    }
+  })
+
   const generatePaymentPeriodsDirectly = useMutation({
     mutationFn: async (leaseId: string) => {
       console.log("Generating payment periods directly for lease:", leaseId)
@@ -127,6 +173,7 @@ export function useLeaseMutations() {
 
   return {
     generatePaymentPeriods,
-    generatePaymentPeriodsDirectly
+    generatePaymentPeriodsDirectly,
+    handleInitialPayments
   }
 }
