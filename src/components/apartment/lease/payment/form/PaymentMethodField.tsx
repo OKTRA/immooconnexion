@@ -1,10 +1,9 @@
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PaymentMethod } from "@/types/payment";
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface PaymentMethodFieldProps {
-  value: PaymentMethod;
-  onChange: (value: PaymentMethod) => void;
+  value: string;
+  onChange: (value: string) => void;
 }
 
 export function PaymentMethodField({ value, onChange }: PaymentMethodFieldProps) {

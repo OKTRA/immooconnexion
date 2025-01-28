@@ -4,17 +4,35 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { supabase } from "@/lib/supabase"
 import { toast } from "@/hooks/use-toast"
-import { LeaseData } from "../types"
 import { Card, CardContent } from "@/components/ui/card"
 import { PaymentTypeField } from "./form/PaymentTypeField"
 import { PeriodSelector } from "./form/PeriodSelector"
 import { PaymentMethodField } from "./form/PaymentMethodField"
+import { LeaseData } from "@/types/apartment"
+
+const FREQUENCY_LIMITS = {
+  daily: 31,
+  weekly: 4,
+  monthly: 12,
+  quarterly: 4,
+  biannual: 2,
+  yearly: 5
+}
+
+const FREQUENCY_LABELS = {
+  daily: "jour(s)",
+  weekly: "semaine(s)",
+  monthly: "mois",
+  quarterly: "trimestre(s)",
+  biannual: "semestre(s)",
+  yearly: "année(s)"
+}
 
 interface PaymentFormProps {
-  onSuccess?: () => void
-  leaseId: string
-  lease: LeaseData
-  isHistorical?: boolean
+  onSuccess?: () => void;
+  leaseId: string;
+  lease: LeaseData;
+  isHistorical?: boolean;
 }
 
 export function PaymentForm({ 
@@ -29,6 +47,11 @@ export function PaymentForm({
   const [periods, setPeriods] = useState(1)
   const [notes, setNotes] = useState("")
   const [paymentType, setPaymentType] = useState<'current' | 'advance'>('current')
+
+  const frequency = lease.payment_frequency
+  const maxPeriods = FREQUENCY_LIMITS[frequency] || 12
+  const periodLabel = FREQUENCY_LABELS[frequency] || "mois"
+  const totalAmount = lease.rent_amount * periods
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,8 +91,6 @@ export function PaymentForm({
     }
   }
 
-  const totalAmount = lease.rent_amount * periods
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Card>
@@ -81,8 +102,8 @@ export function PaymentForm({
 
           <PeriodSelector
             periods={periods}
-            maxPeriods={12}
-            periodLabel={lease.payment_frequency === 'monthly' ? 'mois' : 'période(s)'}
+            maxPeriods={maxPeriods}
+            periodLabel={periodLabel}
             rentAmount={lease.rent_amount}
             onPeriodsChange={setPeriods}
           />
@@ -116,7 +137,7 @@ export function PaymentForm({
               <span className="text-lg font-bold">{totalAmount.toLocaleString()} FCFA</span>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
-              {periods} {lease.payment_frequency === 'monthly' ? 'mois' : 'période(s)'} × {lease.rent_amount.toLocaleString()} FCFA
+              {periods} {periodLabel} × {lease.rent_amount.toLocaleString()} FCFA
             </p>
           </div>
         </CardContent>

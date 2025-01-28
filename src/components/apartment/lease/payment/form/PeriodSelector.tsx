@@ -1,5 +1,5 @@
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface PeriodSelectorProps {
   periods: number;
@@ -16,6 +16,8 @@ export function PeriodSelector({
   rentAmount,
   onPeriodsChange
 }: PeriodSelectorProps) {
+  const totalAmount = rentAmount * periods;
+
   return (
     <div className="space-y-2">
       <Label>Nombre de {periodLabel}</Label>
@@ -34,6 +36,9 @@ export function PeriodSelector({
           ))}
         </SelectContent>
       </Select>
+      <p className="text-sm text-muted-foreground">
+        Montant par période : {rentAmount.toLocaleString()} FCFA
+      </p>
     </div>
   );
 }
