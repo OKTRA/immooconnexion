@@ -1,4 +1,5 @@
 import { PaymentMethod } from "@/types/payment"
+import { ApartmentLease } from "@/types/apartment"
 
 export interface PaymentSummary {
   totalReceived: number
@@ -13,7 +14,7 @@ export interface PaymentSummary {
 export interface PaymentListItem {
   id: string
   amount: number
-  status: 'paid' | 'pending' | 'late'
+  status: string
   payment_date?: string
   due_date: string
   payment_period_start?: string
@@ -34,26 +35,27 @@ export interface LeasePaymentViewProps {
   leaseId: string
 }
 
-export interface LeaseData {
-  id: string
-  tenant: {
-    id: string
-    first_name: string
-    last_name: string
-    phone_number?: string
-    email?: string
-  }
-  unit: {
-    id: string
-    unit_number: string
-    apartment: {
-      id: string
-      name: string
-    }
-  }
-  initial_payments_completed?: boolean
-  rent_amount: number
-  tenant_id: string
+export interface LeaseData extends ApartmentLease {
   initialPayments?: PaymentListItem[]
   regularPayments?: PaymentListItem[]
+}
+
+export type PaymentPeriodFilter = 'all' | 'current' | 'overdue' | 'upcoming'
+export type PaymentStatusFilter = 'all' | 'pending' | 'paid' | 'late'
+
+export interface PaymentFormData {
+  leaseId: string
+  amount: number
+  paymentMethod: PaymentMethod
+  paymentPeriods: string[]
+  paymentDate: Date
+  notes?: string
+  isHistorical?: boolean
+}
+
+export interface PaymentFormProps {
+  onSuccess?: () => void
+  leaseId: string
+  lease?: ApartmentLease
+  isHistorical?: boolean
 }

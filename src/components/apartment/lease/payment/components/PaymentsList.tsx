@@ -82,6 +82,11 @@ export function PaymentsList({ title, payments, className }: PaymentListProps) {
               </div>
             </div>
           ))}
+          {payments.length === 0 && (
+            <p className="text-center text-muted-foreground">
+              Aucun paiement trouvé
+            </p>
+          )}
         </div>
       </CardContent>
     </Card>
