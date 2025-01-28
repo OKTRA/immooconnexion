@@ -33,7 +33,6 @@ export interface PeriodOption {
   startDate: Date;
   endDate: Date;
   amount: number;
-  status: 'pending' | 'paid' | 'late' | 'future';
 }
 
 export interface PaymentFormData {
@@ -44,8 +43,6 @@ export interface PaymentFormData {
   paymentDate: Date;
   notes?: string;
   isHistorical?: boolean;
-  periodStart?: Date;
-  periodEnd?: Date;
 }
 
 export interface LeaseData {
@@ -58,8 +55,8 @@ export interface LeaseData {
   deposit_amount: number;
   payment_frequency: PaymentFrequency;
   duration_type: string;
-  payment_type: string;
   status: string;
+  payment_type: string;
   tenant: {
     id: string;
     first_name: string;
@@ -94,4 +91,11 @@ export interface LeaseSelectProps {
 
 export interface RegularPaymentsListProps extends PaymentListProps {
   onPaymentClick?: (payment: any) => void;
+}
+
+export interface PaymentFormProps {
+  leaseId: string;
+  lease?: LeaseData;
+  onSuccess?: () => void;
+  isHistorical?: boolean;
 }
