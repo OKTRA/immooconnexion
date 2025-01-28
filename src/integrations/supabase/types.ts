@@ -2472,6 +2472,15 @@ export type Database = {
         }
         Returns: Json
       }
+      handle_simple_initial_payments: {
+        Args: {
+          p_lease_id: string
+          p_deposit_amount: number
+          p_agency_fees: number
+          p_agency_id: string
+        }
+        Returns: Json
+      }
       update_expired_apartment_leases: {
         Args: Record<PropertyKey, never>
         Returns: undefined
