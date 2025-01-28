@@ -45,8 +45,33 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         console.error("Error fetching lease:", error)
         throw error
       }
-      console.log("Lease data:", data)
-      return data as LeaseData
+
+      // Fetch payments for this lease
+      const { data: payments, error: paymentsError } = await supabase
+        .from("apartment_lease_payments")
+        .select("*")
+        .eq("lease_id", leaseId)
+        .order("payment_date", { ascending: false })
+
+      if (paymentsError) {
+        console.error("Error fetching payments:", paymentsError)
+        throw paymentsError
+      }
+
+      // Add payments to lease data
+      const initialPayments = payments?.filter(p => 
+        p.payment_type === 'deposit' || p.payment_type === 'agency_fees'
+      ) || []
+      
+      const regularPayments = payments?.filter(p => 
+        p.payment_type !== 'deposit' && p.payment_type !== 'agency_fees'
+      ).map(p => ({
+        ...p,
+        displayStatus: p.payment_status_type || p.status
+      })) || []
+
+      console.log("Lease data:", { ...data, initialPayments, regularPayments })
+      return { ...data, initialPayments, regularPayments } as LeaseData
     }
   })
 
@@ -123,13 +148,13 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
 
       <PaymentsList 
         title="Paiements Initiaux" 
-        payments={[]}
+        payments={lease.initialPayments || []}
         className="w-full"
       />
       
       <PaymentsList 
         title="Paiements de Loyer" 
-        payments={[]}
+        payments={lease.regularPayments || []}
         className="w-full"
       />
 

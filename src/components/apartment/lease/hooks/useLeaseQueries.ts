@@ -33,31 +33,42 @@ export function useLeaseQueries() {
         throw leaseError
       }
 
-      const leasesWithRelated = leaseData.map(lease => {
-        // Convertir les paiements JSON en objets
-        const payments = lease.payments || []
-        
-        // Séparer les paiements par type
-        const initialPayments = payments.filter(p => 
-          p.payment_type === 'deposit' || p.payment_type === 'agency_fees'
-        )
-        
-        const regularPayments = payments.filter(p => 
-          p.payment_type !== 'deposit' && p.payment_type !== 'agency_fees'
-        ).map(p => ({
-          ...p,
-          displayStatus: p.payment_status_type || p.status
-        }))
+      // Fetch payments for each lease
+      const leasesWithPayments = await Promise.all(
+        leaseData.map(async (lease) => {
+          const { data: payments, error: paymentsError } = await supabase
+            .from("apartment_lease_payments")
+            .select("*")
+            .eq("lease_id", lease.id)
+            .order("payment_date", { ascending: false })
 
-        return {
-          ...lease,
-          initialPayments,
-          regularPayments
-        }
-      })
+          if (paymentsError) {
+            console.error("Error fetching payments for lease:", lease.id, paymentsError)
+            throw paymentsError
+          }
 
-      console.log("Fetched leases with payments:", leasesWithRelated)
-      return leasesWithRelated
+          // Séparer les paiements par type
+          const initialPayments = payments?.filter(p => 
+            p.payment_type === 'deposit' || p.payment_type === 'agency_fees'
+          ) || []
+          
+          const regularPayments = payments?.filter(p => 
+            p.payment_type !== 'deposit' && p.payment_type !== 'agency_fees'
+          ).map(p => ({
+            ...p,
+            displayStatus: p.payment_status_type || p.status
+          })) || []
+
+          return {
+            ...lease,
+            initialPayments,
+            regularPayments
+          }
+        })
+      )
+
+      console.log("Fetched leases with payments:", leasesWithPayments)
+      return leasesWithPayments
     },
   })
 
