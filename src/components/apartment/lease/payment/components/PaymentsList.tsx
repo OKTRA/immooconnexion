@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { PaymentListProps } from "@/components/apartment/payment/types"
+import { PaymentListProps } from "@/components/apartment/lease/payment/types"
 
 export function PaymentsList({ title, payments, className }: PaymentListProps) {
   const getStatusBadgeVariant = (status: string) => {
@@ -37,6 +37,18 @@ export function PaymentsList({ title, payments, className }: PaymentListProps) {
     }
   }
 
+  const getPaymentTypeLabel = (type: string) => {
+    switch (type) {
+      case 'deposit':
+        return 'Caution'
+      case 'agency_fees':
+        return 'Frais d\'agence'
+      case 'rent':
+      default:
+        return 'Loyer'
+    }
+  }
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -48,12 +60,10 @@ export function PaymentsList({ title, payments, className }: PaymentListProps) {
             <div key={payment.id} className="flex items-center justify-between p-4 border rounded-lg">
               <div>
                 <p className="font-medium">
-                  {payment.type === 'deposit' ? 'Caution' : 
-                   payment.type === 'agency_fees' ? 'Frais d\'agence' : 
-                   'Loyer'}
+                  {getPaymentTypeLabel(payment.payment_type || payment.type)}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {format(new Date(payment.due_date), 'PP', { locale: fr })}
+                  {payment.payment_date ? format(new Date(payment.payment_date), 'PP', { locale: fr }) : 'Date non définie'}
                   {payment.payment_period_start && payment.payment_period_end && (
                     <span className="ml-2">
                       (Période: {format(new Date(payment.payment_period_start), 'PP', { locale: fr })} - 
