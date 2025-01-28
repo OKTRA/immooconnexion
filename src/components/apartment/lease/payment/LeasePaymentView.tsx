@@ -61,7 +61,10 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
       // Add payments to lease data
       const initialPayments = payments?.filter(p => 
         p.payment_type === 'deposit' || p.payment_type === 'agency_fees'
-      ) || []
+      ).map(p => ({
+        ...p,
+        type: p.payment_type
+      })) || []
       
       const regularPayments = payments?.filter(p => 
         p.payment_type !== 'deposit' && p.payment_type !== 'agency_fees'

@@ -20,6 +20,8 @@ export interface PaymentListItem {
   payment_period_end?: string
   type?: 'deposit' | 'agency_fees' | 'rent'
   payment_method?: PaymentMethod
+  payment_type?: string
+  displayStatus?: string
 }
 
 export interface PaymentListProps {
@@ -38,6 +40,8 @@ export interface LeaseData {
     id: string
     first_name: string
     last_name: string
+    phone_number?: string
+    email?: string
   }
   unit: {
     id: string
@@ -50,4 +54,6 @@ export interface LeaseData {
   initial_payments_completed?: boolean
   rent_amount: number
   tenant_id: string
+  initialPayments?: PaymentListItem[]
+  regularPayments?: PaymentListItem[]
 }

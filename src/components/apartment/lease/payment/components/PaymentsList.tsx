@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { PaymentListProps } from "@/components/apartment/lease/payment/types"
+import { PaymentListProps } from "../types"
 
 export function PaymentsList({ title, payments, className }: PaymentListProps) {
   const getStatusBadgeVariant = (status: string) => {
@@ -37,7 +37,7 @@ export function PaymentsList({ title, payments, className }: PaymentListProps) {
     }
   }
 
-  const getPaymentTypeLabel = (type: string) => {
+  const getPaymentTypeLabel = (type?: string) => {
     switch (type) {
       case 'deposit':
         return 'Caution'
@@ -60,7 +60,7 @@ export function PaymentsList({ title, payments, className }: PaymentListProps) {
             <div key={payment.id} className="flex items-center justify-between p-4 border rounded-lg">
               <div>
                 <p className="font-medium">
-                  {getPaymentTypeLabel(payment.payment_type || payment.type)}
+                  {getPaymentTypeLabel(payment.type || payment.payment_type)}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {payment.payment_date ? format(new Date(payment.payment_date), 'PP', { locale: fr }) : 'Date non définie'}
