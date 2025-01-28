@@ -15,7 +15,7 @@ export function useLeaseMutations() {
           .from('apartment_leases')
           .select('agency_id')
           .eq('id', leaseId)
-          .single()
+          .maybeSingle()
 
         if (leaseError) throw leaseError
         if (!leaseData?.agency_id) throw new Error('Agency ID not found')
@@ -31,7 +31,6 @@ export function useLeaseMutations() {
             payment_date: new Date().toISOString(),
             due_date: new Date().toISOString(),
             status: 'paid',
-            payment_status_type: 'paid',
             agency_id: leaseData.agency_id,
             payment_period_start: new Date().toISOString()
           })
@@ -52,7 +51,6 @@ export function useLeaseMutations() {
             payment_date: new Date().toISOString(),
             due_date: new Date().toISOString(),
             status: 'paid',
-            payment_status_type: 'paid',
             agency_id: leaseData.agency_id,
             payment_period_start: new Date().toISOString()
           })
