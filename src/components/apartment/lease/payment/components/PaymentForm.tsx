@@ -8,7 +8,7 @@ import { toast } from "@/hooks/use-toast"
 import { LeaseData } from "../types"
 import { format, addDays, addWeeks, addMonths, addYears } from "date-fns"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 
 const FREQUENCY_LIMITS = {
   daily: 31,
@@ -48,7 +48,7 @@ export function PaymentForm({
   const [notes, setNotes] = useState("")
   const [paymentType, setPaymentType] = useState<'current' | 'advance'>('current')
 
-  const frequency = lease.payment_frequency as keyof typeof FREQUENCY_LIMITS
+  const frequency = lease.payment_frequency
   const maxPeriods = FREQUENCY_LIMITS[frequency] || 12
   const periodLabel = FREQUENCY_LABELS[frequency] || "mois"
 
@@ -117,8 +117,8 @@ export function PaymentForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <Card className="p-4">
-        <div className="space-y-4">
+      <Card>
+        <CardContent className="pt-6 space-y-4">
           <div>
             <Label>Type de paiement</Label>
             <Select
@@ -201,7 +201,7 @@ export function PaymentForm({
               className="mt-1"
             />
           </div>
-        </div>
+        </CardContent>
       </Card>
 
       <Button 
