@@ -8,7 +8,7 @@ interface PaymentTypeFieldProps {
 
 export function PaymentTypeField({ value, onChange }: PaymentTypeFieldProps) {
   return (
-    <div>
+    <div className="space-y-2">
       <Label>Type de paiement</Label>
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger>

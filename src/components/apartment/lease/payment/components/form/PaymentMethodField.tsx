@@ -1,5 +1,5 @@
 import { Label } from "@/components/ui/label"
-import { PaymentMethodSelect } from "../../components/PaymentMethodSelect"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface PaymentMethodFieldProps {
   value: string
@@ -8,12 +8,19 @@ interface PaymentMethodFieldProps {
 
 export function PaymentMethodField({ value, onChange }: PaymentMethodFieldProps) {
   return (
-    <div>
+    <div className="space-y-2">
       <Label>Mode de paiement</Label>
-      <PaymentMethodSelect
-        value={value}
-        onChange={onChange}
-      />
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="cash">Espèces</SelectItem>
+          <SelectItem value="bank_transfer">Virement bancaire</SelectItem>
+          <SelectItem value="mobile_money">Mobile Money</SelectItem>
+          <SelectItem value="check">Chèque</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   )
 }
