@@ -8,6 +8,8 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { useState } from "react"
 import { toast } from "@/components/ui/use-toast"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 
 interface SimpleLeaseFormProps {
   onSuccess?: () => void;
@@ -15,6 +17,24 @@ interface SimpleLeaseFormProps {
   setIsSubmitting?: (value: boolean) => void;
   tenantId?: string;
   unitId?: string;
+}
+
+const frequencyLabels = {
+  daily: "jour(s)",
+  weekly: "semaine(s)",
+  monthly: "mois",
+  quarterly: "trimestre(s)",
+  biannual: "semestre(s)",
+  yearly: "année(s)"
+}
+
+const frequencyLimits = {
+  daily: 31,
+  weekly: 4,
+  monthly: 12,
+  quarterly: 4,
+  biannual: 2,
+  yearly: 1
 }
 
 export function SimpleLeaseForm({
@@ -35,7 +55,8 @@ export function SimpleLeaseForm({
     payment_frequency: "monthly",
     duration_type: "month_to_month",
     payment_type: "upfront",
-    status: "active"
+    status: "active",
+    periods: 1
   })
 
   const { data: availableUnits = [] } = useQuery({
@@ -72,12 +93,15 @@ export function SimpleLeaseForm({
     }
   })
 
+  const calculateTotalAmount = () => {
+    return formData.rent_amount * formData.periods
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      // Récupérer l'agency_id
       const { data: profile } = await supabase.auth.getUser()
       if (!profile.user) throw new Error("Non authentifié")
 
@@ -204,6 +228,38 @@ export function SimpleLeaseForm({
           formData={formData}
           setFormData={setFormData}
         />
+
+        <div className="space-y-2">
+          <Label>Nombre de {frequencyLabels[formData.payment_frequency as keyof typeof frequencyLabels]}</Label>
+          <Select
+            value={formData.periods.toString()}
+            onValueChange={(value) => setFormData({ ...formData, periods: parseInt(value) })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={`Sélectionner le nombre de ${frequencyLabels[formData.payment_frequency as keyof typeof frequencyLabels]}`} />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from(
+                { length: frequencyLimits[formData.payment_frequency as keyof typeof frequencyLimits] },
+                (_, i) => (
+                  <SelectItem key={i + 1} value={(i + 1).toString()}>
+                    {i + 1} {frequencyLabels[formData.payment_frequency as keyof typeof frequencyLabels]}
+                  </SelectItem>
+                )
+              )}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Montant total</Label>
+          <div className="text-lg font-semibold">
+            {calculateTotalAmount().toLocaleString()} FCFA
+          </div>
+          <div className="text-sm text-muted-foreground">
+            {formData.rent_amount.toLocaleString()} FCFA × {formData.periods} {frequencyLabels[formData.payment_frequency as keyof typeof frequencyLabels]}
+          </div>
+        </div>
       </div>
 
       <div className="flex justify-end">
