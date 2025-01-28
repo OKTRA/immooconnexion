@@ -18,15 +18,48 @@ export function useLeaseMutations() {
         if (leaseError) throw leaseError
         if (!leaseData?.agency_id) throw new Error('Agency ID not found')
 
-        // Create both payment records in a single transaction
-        const { error: paymentsError } = await supabase.rpc('handle_simple_initial_payments', {
-          p_lease_id: leaseId,
-          p_deposit_amount: depositAmount,
-          p_agency_fees: Math.round(rentAmount * 0.5),
-          p_agency_id: leaseData.agency_id
-        })
+        // Create deposit payment
+        const { error: depositError } = await supabase
+          .from('apartment_lease_payments')
+          .insert({
+            lease_id: leaseId,
+            amount: depositAmount,
+            payment_type: 'deposit',
+            payment_method: 'cash',
+            payment_date: new Date().toISOString(),
+            status: 'paid',
+            agency_id: leaseData.agency_id,
+            payment_period_start: new Date().toISOString()
+          })
 
-        if (paymentsError) throw paymentsError
+        if (depositError) throw depositError
+
+        // Create agency fees payment
+        const { error: feesError } = await supabase
+          .from('apartment_lease_payments')
+          .insert({
+            lease_id: leaseId,
+            amount: Math.round(rentAmount * 0.5),
+            payment_type: 'agency_fees',
+            payment_method: 'cash',
+            payment_date: new Date().toISOString(),
+            status: 'paid',
+            agency_id: leaseData.agency_id,
+            payment_period_start: new Date().toISOString()
+          })
+
+        if (feesError) throw feesError
+
+        // Update lease status
+        const { error: updateError } = await supabase
+          .from('apartment_leases')
+          .update({
+            initial_fees_paid: true,
+            initial_payments_completed: true
+          })
+          .eq('id', leaseId)
+
+        if (updateError) throw updateError
 
         return true
       } catch (error) {
