@@ -6,7 +6,26 @@ import { Input } from "@/components/ui/input"
 import { supabase } from "@/lib/supabase"
 import { toast } from "@/hooks/use-toast"
 import { LeaseData } from "./types"
-import { format, addMonths } from "date-fns"
+import { format, addDays, addWeeks, addMonths, addYears } from "date-fns"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+const FREQUENCY_LIMITS = {
+  daily: 31,
+  weekly: 4,
+  monthly: 12,
+  quarterly: 4,
+  biannual: 2,
+  yearly: 5
+}
+
+const FREQUENCY_LABELS = {
+  daily: "jour(s)",
+  weekly: "semaine(s)",
+  monthly: "mois",
+  quarterly: "trimestre(s)",
+  biannual: "semestre(s)",
+  yearly: "année(s)"
+}
 
 interface PaymentFormProps {
   onSuccess?: () => void
@@ -24,8 +43,33 @@ export function PaymentForm({
   const [paymentMethod, setPaymentMethod] = useState("cash")
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0])
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [months, setMonths] = useState(1)
+  const [periods, setPeriods] = useState(1)
   const [notes, setNotes] = useState("")
+
+  const frequency = lease.payment_frequency as keyof typeof FREQUENCY_LIMITS
+  const maxPeriods = FREQUENCY_LIMITS[frequency] || 12
+  const periodLabel = FREQUENCY_LABELS[frequency] || "mois"
+
+  const calculateEndDate = (startDate: Date, periodsCount: number) => {
+    switch (frequency) {
+      case 'daily':
+        return addDays(startDate, periodsCount)
+      case 'weekly':
+        return addWeeks(startDate, periodsCount)
+      case 'monthly':
+        return addMonths(startDate, periodsCount)
+      case 'quarterly':
+        return addMonths(startDate, periodsCount * 3)
+      case 'biannual':
+        return addMonths(startDate, periodsCount * 6)
+      case 'yearly':
+        return addYears(startDate, periodsCount)
+      default:
+        return addMonths(startDate, periodsCount)
+    }
+  }
+
+  const totalAmount = lease.rent_amount * periods
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,13 +77,13 @@ export function PaymentForm({
 
     try {
       const periodStart = new Date(paymentDate)
-      const periodEnd = addMonths(periodStart, months)
+      const periodEnd = calculateEndDate(periodStart, periods)
 
       const { data, error } = await supabase.rpc(
         'create_lease_payment',
         {
           p_lease_id: leaseId,
-          p_amount: lease.rent_amount * months,
+          p_amount: totalAmount,
           p_payment_type: 'rent',
           p_payment_method: paymentMethod,
           p_payment_date: paymentDate,
@@ -82,23 +126,34 @@ export function PaymentForm({
         </div>
 
         <div>
-          <Label>Nombre de mois</Label>
-          <Input
-            type="number"
-            min="1"
-            value={months}
-            onChange={(e) => setMonths(parseInt(e.target.value))}
-            className="mt-1"
-          />
+          <Label>Nombre de {periodLabel}</Label>
+          <Select
+            value={periods.toString()}
+            onValueChange={(value) => setPeriods(parseInt(value))}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: maxPeriods }, (_, i) => i + 1).map((num) => (
+                <SelectItem key={num} value={num.toString()}>
+                  {num} {periodLabel}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
           <Label>Montant total</Label>
           <Input
             type="text"
-            value={`${(lease.rent_amount * months).toLocaleString()} FCFA`}
+            value={`${totalAmount.toLocaleString()} FCFA`}
             disabled
           />
+          <p className="text-sm text-muted-foreground mt-1">
+            {periods} {periodLabel} × {lease.rent_amount.toLocaleString()} FCFA
+          </p>
         </div>
 
         <div>
