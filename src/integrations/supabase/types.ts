@@ -2479,7 +2479,7 @@ export type Database = {
           p_agency_fees: number
           p_agency_id: string
         }
-        Returns: Json
+        Returns: boolean
       }
       update_expired_apartment_leases: {
         Args: Record<PropertyKey, never>
