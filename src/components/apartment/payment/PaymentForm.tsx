@@ -5,9 +5,10 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { supabase } from "@/lib/supabase"
 import { toast } from "@/hooks/use-toast"
-import { LeaseData } from "./types"
+import { LeaseData, PaymentFormData } from "./types"
 import { format, addDays, addWeeks, addMonths, addYears } from "date-fns"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent } from "@/components/ui/card"
 
 const FREQUENCY_LIMITS = {
   daily: 31,
@@ -28,10 +29,10 @@ const FREQUENCY_LABELS = {
 }
 
 interface PaymentFormProps {
-  onSuccess?: () => void
-  leaseId: string
-  lease: LeaseData
-  isHistorical?: boolean
+  onSuccess?: () => void;
+  leaseId: string;
+  lease: LeaseData;
+  isHistorical?: boolean;
 }
 
 export function PaymentForm({ 
@@ -40,13 +41,13 @@ export function PaymentForm({
   lease,
   isHistorical = false
 }: PaymentFormProps) {
-  const [paymentMethod, setPaymentMethod] = useState("cash")
+  const [paymentMethod, setPaymentMethod] = useState<PaymentFormData["paymentMethod"]>("cash")
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [periods, setPeriods] = useState(1)
   const [notes, setNotes] = useState("")
 
-  const frequency = lease.payment_frequency as keyof typeof FREQUENCY_LIMITS
+  const frequency = lease.payment_frequency
   const maxPeriods = FREQUENCY_LIMITS[frequency] || 12
   const periodLabel = FREQUENCY_LABELS[frequency] || "mois"
 
@@ -60,8 +61,6 @@ export function PaymentForm({
         return addMonths(startDate, periodsCount)
       case 'quarterly':
         return addMonths(startDate, periodsCount * 3)
-      case 'biannual':
-        return addMonths(startDate, periodsCount * 6)
       case 'yearly':
         return addYears(startDate, periodsCount)
       default:
@@ -115,74 +114,76 @@ export function PaymentForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-4">
-        <div>
-          <Label>Montant mensuel</Label>
-          <Input
-            type="text"
-            value={`${lease.rent_amount.toLocaleString()} FCFA`}
-            disabled
-          />
-        </div>
+      <Card>
+        <CardContent className="pt-6 space-y-4">
+          <div>
+            <Label>Montant mensuel</Label>
+            <Input
+              type="text"
+              value={`${lease.rent_amount.toLocaleString()} FCFA`}
+              disabled
+            />
+          </div>
 
-        <div>
-          <Label>Nombre de {periodLabel}</Label>
-          <Select
-            value={periods.toString()}
-            onValueChange={(value) => setPeriods(parseInt(value))}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: maxPeriods }, (_, i) => i + 1).map((num) => (
-                <SelectItem key={num} value={num.toString()}>
-                  {num} {periodLabel}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          <div>
+            <Label>Nombre de {periodLabel}</Label>
+            <Select
+              value={periods.toString()}
+              onValueChange={(value) => setPeriods(parseInt(value))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: maxPeriods }, (_, i) => i + 1).map((num) => (
+                  <SelectItem key={num} value={num.toString()}>
+                    {num} {periodLabel}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div>
-          <Label>Montant total</Label>
-          <Input
-            type="text"
-            value={`${totalAmount.toLocaleString()} FCFA`}
-            disabled
-          />
-          <p className="text-sm text-muted-foreground mt-1">
-            {periods} {periodLabel} × {lease.rent_amount.toLocaleString()} FCFA
-          </p>
-        </div>
+          <div>
+            <Label>Montant total</Label>
+            <Input
+              type="text"
+              value={`${totalAmount.toLocaleString()} FCFA`}
+              disabled
+            />
+            <p className="text-sm text-muted-foreground mt-1">
+              {periods} {periodLabel} × {lease.rent_amount.toLocaleString()} FCFA
+            </p>
+          </div>
 
-        <div>
-          <Label>Mode de paiement</Label>
-          <PaymentMethodSelect
-            value={paymentMethod}
-            onChange={setPaymentMethod}
-          />
-        </div>
+          <div>
+            <Label>Mode de paiement</Label>
+            <PaymentMethodSelect
+              value={paymentMethod}
+              onChange={setPaymentMethod}
+            />
+          </div>
 
-        <div>
-          <Label>Date de paiement</Label>
-          <Input
-            type="date"
-            value={paymentDate}
-            onChange={(e) => setPaymentDate(e.target.value)}
-            className="mt-1"
-          />
-        </div>
+          <div>
+            <Label>Date de paiement</Label>
+            <Input
+              type="date"
+              value={paymentDate}
+              onChange={(e) => setPaymentDate(e.target.value)}
+              className="mt-1"
+            />
+          </div>
 
-        <div>
-          <Label>Notes</Label>
-          <Input
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className="mt-1"
-          />
-        </div>
-      </div>
+          <div>
+            <Label>Notes</Label>
+            <Input
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <Button 
         type="submit" 
