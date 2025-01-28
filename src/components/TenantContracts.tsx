@@ -12,6 +12,7 @@ import { useParams } from "react-router-dom"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Loader2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 export function TenantContracts() {
   const { id } = useParams()
@@ -27,7 +28,15 @@ export function TenantContracts() {
         .from("contracts")
         .select(`
           *,
-          property:properties(*)
+          property:properties(*),
+          payment_periods:apartment_payment_periods(
+            id,
+            start_date,
+            end_date,
+            amount,
+            status,
+            payment_frequency
+          )
         `)
         .eq("tenant_id", id)
         .order('created_at', { ascending: false })
@@ -56,6 +65,21 @@ export function TenantContracts() {
       <div className="text-center py-8 text-red-500">
         Une erreur est survenue lors du chargement des contrats
       </div>
+    )
+  }
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      actif: { className: "bg-green-50 text-green-700", label: "Actif" },
+      terminé: { className: "bg-gray-100 text-gray-700", label: "Terminé" },
+      default: { className: "bg-yellow-50 text-yellow-700", label: "En attente" }
+    }
+
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.default
+    return (
+      <Badge className={config.className} variant="outline">
+        {config.label}
+      </Badge>
     )
   }
 
@@ -99,17 +123,7 @@ export function TenantContracts() {
                     : "En cours"}
                 </TableCell>
                 <TableCell>
-                  <span
-                    className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                      contract.statut === "actif"
-                        ? "bg-green-50 text-green-700"
-                        : contract.statut === "terminé"
-                        ? "bg-gray-100 text-gray-700"
-                        : "bg-yellow-50 text-yellow-700"
-                    }`}
-                  >
-                    {contract.statut || "En attente"}
-                  </span>
+                  {getStatusBadge(contract.statut || "en_attente")}
                 </TableCell>
               </TableRow>
             ))}
