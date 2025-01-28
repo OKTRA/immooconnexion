@@ -29,7 +29,8 @@ export function useLeaseMutations() {
             payment_date: new Date().toISOString(),
             status: 'paid',
             agency_id: leaseData.agency_id,
-            payment_period_start: new Date().toISOString()
+            payment_period_start: new Date().toISOString(),
+            payment_status_type: 'paid_current'
           })
 
         if (depositError) throw depositError
@@ -45,7 +46,8 @@ export function useLeaseMutations() {
             payment_date: new Date().toISOString(),
             status: 'paid',
             agency_id: leaseData.agency_id,
-            payment_period_start: new Date().toISOString()
+            payment_period_start: new Date().toISOString(),
+            payment_status_type: 'paid_current'
           })
 
         if (feesError) throw feesError
