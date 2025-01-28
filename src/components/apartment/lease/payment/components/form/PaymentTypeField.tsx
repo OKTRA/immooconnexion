@@ -1,5 +1,5 @@
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 interface PaymentTypeFieldProps {
   value: 'current' | 'advance'
@@ -10,15 +10,20 @@ export function PaymentTypeField({ value, onChange }: PaymentTypeFieldProps) {
   return (
     <div className="space-y-2">
       <Label>Type de paiement</Label>
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="current">Paiement période courante</SelectItem>
-          <SelectItem value="advance">Paiement d'avance</SelectItem>
-        </SelectContent>
-      </Select>
+      <RadioGroup
+        value={value}
+        onValueChange={onChange as (value: string) => void}
+        className="flex gap-4"
+      >
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="current" id="current" />
+          <Label htmlFor="current">Paiement période courante</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="advance" id="advance" />
+          <Label htmlFor="advance">Paiement d'avance</Label>
+        </div>
+      </RadioGroup>
     </div>
   )
 }

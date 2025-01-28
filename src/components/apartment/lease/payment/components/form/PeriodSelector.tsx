@@ -28,7 +28,7 @@ export function PeriodSelector({
         <SelectContent>
           {Array.from({ length: maxPeriods }, (_, i) => i + 1).map((num) => (
             <SelectItem key={num} value={num.toString()}>
-              {num} {periodLabel}
+              {num} {periodLabel} ({(num * rentAmount).toLocaleString()} FCFA)
             </SelectItem>
           ))}
         </SelectContent>
