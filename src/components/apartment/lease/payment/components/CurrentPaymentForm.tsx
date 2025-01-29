@@ -12,10 +12,10 @@ import { supabase } from "@/integrations/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 
 interface CurrentPaymentFormProps {
-  lease: LeaseData;
-  onSuccess?: () => void;
-  isSubmitting: boolean;
-  setIsSubmitting: (value: boolean) => void;
+  lease: LeaseData
+  onSuccess?: () => void
+  isSubmitting: boolean
+  setIsSubmitting: (value: boolean) => void
 }
 
 export function CurrentPaymentForm({
