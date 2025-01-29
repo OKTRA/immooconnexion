@@ -1,8 +1,7 @@
 import { Card, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Home, Phone, Mail } from "lucide-react"
+import { Home, Phone, Mail, Receipt, CreditCard, PlusCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { CreditCard, PlusCircle } from "lucide-react"
 import { LeaseData } from "../types"
 
 interface LeaseHeaderProps {
@@ -67,6 +66,14 @@ export function LeaseHeader({ lease, onInitialPayment, onRegularPayment }: Lease
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Nouveau Paiement de Loyer
+            </Button>
+
+            <Button
+              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg transition-all duration-300 animate-fade-in"
+              onClick={() => console.log("Gestion avancée des paiements")}
+            >
+              <Receipt className="mr-2 h-4 w-4" />
+              Gestion des Paiements
             </Button>
           </div>
         </div>
