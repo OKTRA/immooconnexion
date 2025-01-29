@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { PaymentTypeField } from "./form/PaymentTypeField"
@@ -8,7 +8,8 @@ import { PeriodSelector } from "./form/PeriodSelector"
 import { PaymentMethodField } from "./form/PaymentMethodField"
 import { LeaseData } from "../types"
 import { Loader2 } from "lucide-react"
-import { useLeaseMutations } from "../hooks/useLeaseMutations"
+import { supabase } from "@/integrations/supabase/client"
+import { toast } from "@/components/ui/use-toast"
 
 interface CurrentPaymentFormProps {
   lease: LeaseData;
@@ -29,7 +30,6 @@ export function CurrentPaymentForm({
   const [notes, setNotes] = useState("")
   const [advancePayment, setAdvancePayment] = useState(false)
 
-  const { handleInitialPayments } = useLeaseMutations()
   const totalAmount = lease.rent_amount * periods
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,17 +37,55 @@ export function CurrentPaymentForm({
     setIsSubmitting(true)
 
     try {
-      const { data, error } = await handleInitialPayments.mutateAsync({
-        leaseId: lease.id,
-        depositAmount: lease.deposit_amount,
-        rentAmount: totalAmount
+      const periodStart = new Date(advancePayment ? lease.start_date : paymentDate)
+      let periodEnd = new Date(periodStart)
+
+      // Calculer la date de fin selon la fréquence
+      switch (lease.payment_frequency) {
+        case 'monthly':
+          periodEnd.setMonth(periodEnd.getMonth() + periods)
+          break
+        case 'weekly':
+          periodEnd.setDate(periodEnd.getDate() + (7 * periods))
+          break
+        case 'daily':
+          periodEnd.setDate(periodEnd.getDate() + periods)
+          break
+        case 'quarterly':
+          periodEnd.setMonth(periodEnd.getMonth() + (3 * periods))
+          break
+        case 'yearly':
+          periodEnd.setFullYear(periodEnd.getFullYear() + periods)
+          break
+      }
+      periodEnd.setDate(periodEnd.getDate() - 1) // Ajuster pour la fin de période
+
+      const { data, error } = await supabase.rpc('create_lease_payment', {
+        p_lease_id: lease.id,
+        p_amount: totalAmount,
+        p_payment_type: 'rent',
+        p_payment_method: paymentMethod,
+        p_payment_date: paymentDate,
+        p_period_start: periodStart.toISOString().split('T')[0],
+        p_period_end: periodEnd.toISOString().split('T')[0],
+        p_notes: notes
       })
 
       if (error) throw error
 
+      toast({
+        title: "Succès",
+        description: "Le paiement a été enregistré avec succès",
+      })
+
       onSuccess?.()
     } catch (error) {
       console.error("Error submitting payment:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'enregistrement du paiement",
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -56,10 +94,7 @@ export function CurrentPaymentForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Détails du paiement</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="pt-6 space-y-4">
           <PaymentTypeField
             value={advancePayment ? 'advance' : 'current'}
             onChange={(value) => setAdvancePayment(value === 'advance')}
