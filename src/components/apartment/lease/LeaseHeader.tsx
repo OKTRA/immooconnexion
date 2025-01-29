@@ -2,7 +2,7 @@ import { Card, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Home, Phone, Mail, Receipt, CreditCard, PlusCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { LeaseData } from "../types"
+import { LeaseData } from "./types"
 
 interface LeaseHeaderProps {
   lease: LeaseData
