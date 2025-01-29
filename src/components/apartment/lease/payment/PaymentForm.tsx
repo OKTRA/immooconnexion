@@ -1,17 +1,9 @@
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { toast } from "@/hooks/use-toast"
-import { PaymentTypeField } from "./components/form/PaymentTypeField"
-import { PeriodSelector } from "./components/form/PeriodSelector"
-import { PaymentMethodField } from "./components/form/PaymentMethodField"
-import { LeaseData } from "../types"
-import { Loader2 } from "lucide-react"
-import { useLeaseMutations } from "../hooks/useLeaseMutations"
+import { useState, useEffect } from "react"
 import { PaymentTypeSelector, PaymentType } from "./components/PaymentTypeSelector"
 import { CurrentPaymentForm } from "./components/CurrentPaymentForm"
 import { HistoricalPaymentForm } from "./components/HistoricalPaymentForm"
 import { LatePaymentForm } from "./components/LatePaymentForm"
+import { useLeasePaymentStatus } from "./hooks/useLeasePaymentStatus"
 
 interface PaymentFormProps {
   onSuccess?: () => void;
@@ -28,6 +20,15 @@ export function PaymentForm({
 }: PaymentFormProps) {
   const [paymentType, setPaymentType] = useState<PaymentType>("current")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  const { data: paymentStatus } = useLeasePaymentStatus(leaseId)
+
+  // Forcer la sélection du type "late" s'il y a des retards
+  useEffect(() => {
+    if (paymentStatus?.hasLatePayments && paymentType === "current") {
+      setPaymentType("late")
+    }
+  }, [paymentStatus?.hasLatePayments])
 
   const renderPaymentForm = () => {
     switch (paymentType) {
@@ -68,6 +69,9 @@ export function PaymentForm({
       <PaymentTypeSelector
         value={paymentType}
         onChange={setPaymentType}
+        hasLatePayments={paymentStatus?.hasLatePayments}
+        latePaymentsCount={paymentStatus?.latePaymentsCount}
+        totalLateAmount={paymentStatus?.totalLateAmount}
       />
       {renderPaymentForm()}
     </div>
