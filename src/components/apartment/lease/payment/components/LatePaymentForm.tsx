@@ -1,12 +1,16 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { PaymentMethodField } from "./form/PaymentMethodField";
-import { LatePaymentFormProps } from "../types";
-import { Loader2 } from "lucide-react";
-import { useLeaseMutations } from "../hooks/useLeaseMutations";
+import { useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { PaymentMethodSelect } from "./PaymentMethodSelect"
+import { Checkbox } from "@/components/ui/checkbox"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
+import { Badge } from "@/components/ui/badge"
+import { toast } from "@/components/ui/use-toast"
+import { PaymentMethod } from "@/types/payment"
+import { LatePaymentFormProps } from "../types"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
 export function LatePaymentForm({
   lease,
@@ -14,82 +18,147 @@ export function LatePaymentForm({
   isSubmitting,
   setIsSubmitting
 }: LatePaymentFormProps) {
-  const [paymentMethod, setPaymentMethod] = useState("cash");
-  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
-  const [amount, setAmount] = useState(lease.rent_amount);
-  const [notes, setNotes] = useState("");
+  const [selectedPeriods, setSelectedPeriods] = useState<string[]>([])
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash")
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  // Récupérer les périodes en retard
+  const { data: periods = [] } = useQuery({
+    queryKey: ["late-payment-periods", lease.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("apartment_payment_periods")
+        .select("*")
+        .eq("lease_id", lease.id)
+        .in("status", ["late", "pending"])
+        .order("start_date", { ascending: true })
 
-    try {
-      // TODO: Implement late payment submission
-      onSuccess?.();
-    } catch (error) {
-      console.error("Error submitting late payment:", error);
-    } finally {
-      setIsSubmitting(false);
+      if (error) throw error
+      return data
     }
-  };
+  })
+
+  const calculateTotal = () => {
+    return periods
+      .filter(p => selectedPeriods.includes(p.id))
+      .reduce((sum, p) => sum + p.amount, 0)
+  }
+
+  const handleSubmit = async () => {
+    if (selectedPeriods.length === 0) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner au moins une période",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data, error } = await supabase.functions.invoke("handle-late-payment", {
+        body: {
+          leaseId: lease.id,
+          periodIds: selectedPeriods,
+          paymentMethod,
+          paymentDate: new Date().toISOString(),
+          amount: calculateTotal()
+        }
+      })
+
+      if (error) throw error
+
+      toast({
+        title: "Succès",
+        description: "Le paiement a été enregistré"
+      })
+
+      onSuccess?.()
+    } catch (error) {
+      console.error("Error submitting payment:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors du paiement",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Paiement en retard</CardTitle>
+          <CardTitle>Périodes en retard</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Montant</Label>
-            <Input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(Number(e.target.value))}
-              required
-            />
-          </div>
-
-          <PaymentMethodField
-            value={paymentMethod}
-            onChange={setPaymentMethod}
-          />
-
-          <div className="space-y-2">
-            <Label>Date de paiement</Label>
-            <Input
-              type="date"
-              value={paymentDate}
-              onChange={(e) => setPaymentDate(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Notes (optionnel)</Label>
-            <Input
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ajouter des notes sur le paiement"
-            />
+        <CardContent>
+          <div className="space-y-4">
+            {periods.map((period) => (
+              <div
+                key={period.id}
+                className="flex items-center justify-between p-4 border rounded-lg"
+              >
+                <div className="flex items-center space-x-4">
+                  <Checkbox
+                    checked={selectedPeriods.includes(period.id)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedPeriods([...selectedPeriods, period.id])
+                      } else {
+                        setSelectedPeriods(selectedPeriods.filter(id => id !== period.id))
+                      }
+                    }}
+                  />
+                  <div>
+                    <p className="font-medium">
+                      {format(new Date(period.start_date), "d MMMM yyyy", { locale: fr })} - {" "}
+                      {format(new Date(period.end_date), "d MMMM yyyy", { locale: fr })}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {period.amount.toLocaleString()} FCFA
+                    </p>
+                  </div>
+                </div>
+                <Badge variant={period.status === "late" ? "destructive" : "secondary"}>
+                  {period.status === "late" ? "En retard" : "En attente"}
+                </Badge>
+              </div>
+            ))}
+            {periods.length === 0 && (
+              <p className="text-center text-muted-foreground">
+                Aucune période en retard
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      <Button 
-        type="submit" 
-        className="w-full"
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Enregistrement...
-          </>
-        ) : (
-          "Enregistrer le paiement"
-        )}
-      </Button>
-    </form>
-  );
+      {selectedPeriods.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Paiement</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex justify-between text-lg font-medium">
+              <span>Montant total</span>
+              <span>{calculateTotal().toLocaleString()} FCFA</span>
+            </div>
+
+            <PaymentMethodSelect
+              value={paymentMethod}
+              onChange={setPaymentMethod}
+            />
+
+            <Button 
+              onClick={handleSubmit}
+              disabled={isSubmitting || selectedPeriods.length === 0}
+              className="w-full"
+            >
+              {isSubmitting ? "Traitement..." : "Effectuer le paiement"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
 }
