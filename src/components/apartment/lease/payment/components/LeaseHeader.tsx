@@ -3,6 +3,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Home, Phone, Mail, Receipt, CreditCard, PlusCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LeaseData } from "../types"
+import { useState } from "react"
+import { PaymentDialog } from "../PaymentDialog"
 
 interface LeaseHeaderProps {
   lease: LeaseData
@@ -11,6 +13,7 @@ interface LeaseHeaderProps {
 }
 
 export function LeaseHeader({ lease, onInitialPayment, onRegularPayment }: LeaseHeaderProps) {
+  const [showPaymentManagement, setShowPaymentManagement] = useState(false)
   const tenant = lease.tenant
   const unit = lease.unit
 
@@ -67,7 +70,7 @@ export function LeaseHeader({ lease, onInitialPayment, onRegularPayment }: Lease
 
             <Button 
               className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg transition-all duration-300 animate-fade-in"
-              onClick={() => console.log("Gestion avancée des paiements")}
+              onClick={() => setShowPaymentManagement(true)}
             >
               <Receipt className="mr-2 h-4 w-4" />
               Gestion des Paiements
@@ -75,6 +78,13 @@ export function LeaseHeader({ lease, onInitialPayment, onRegularPayment }: Lease
           </div>
         </div>
       </CardHeader>
+
+      <PaymentDialog
+        open={showPaymentManagement}
+        onOpenChange={setShowPaymentManagement}
+        leaseId={lease.id}
+        lease={lease}
+      />
     </Card>
   )
 }
