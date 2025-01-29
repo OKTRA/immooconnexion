@@ -11,10 +11,10 @@ import { Loader2 } from "lucide-react"
 import { useLeaseMutations } from "../hooks/useLeaseMutations"
 
 interface CurrentPaymentFormProps {
-  lease: LeaseData
-  onSuccess?: () => void
-  isSubmitting: boolean
-  setIsSubmitting: (value: boolean) => void
+  lease: LeaseData;
+  onSuccess?: () => void;
+  isSubmitting: boolean;
+  setIsSubmitting: (value: boolean) => void;
 }
 
 export function CurrentPaymentForm({

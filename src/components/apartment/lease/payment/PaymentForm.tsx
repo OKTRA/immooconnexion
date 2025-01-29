@@ -14,10 +14,10 @@ import { HistoricalPaymentForm } from "./components/HistoricalPaymentForm"
 import { LatePaymentForm } from "./components/LatePaymentForm"
 
 interface PaymentFormProps {
-  onSuccess?: () => void
-  leaseId: string
-  lease: LeaseData
-  isHistorical?: boolean
+  onSuccess?: () => void;
+  leaseId: string;
+  lease: LeaseData;
+  isHistorical?: boolean;
 }
 
 export function PaymentForm({ 
