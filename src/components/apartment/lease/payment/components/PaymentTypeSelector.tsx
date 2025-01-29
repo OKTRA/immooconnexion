@@ -1,18 +1,9 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertTriangle } from "lucide-react"
-
-export type PaymentType = 'current' | 'historical' | 'late';
-
-interface PaymentTypeSelectorProps {
-  value: PaymentType;
-  onChange: (value: PaymentType) => void;
-  hasLatePayments?: boolean;
-  latePaymentsCount?: number;
-  totalLateAmount?: number;
-}
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
+import { PaymentType, PaymentTypeSelectorProps } from "../types";
 
 export function PaymentTypeSelector({ 
   value, 
@@ -38,7 +29,7 @@ export function PaymentTypeSelector({
           <Label>Type de paiement</Label>
           <RadioGroup
             value={value}
-            onValueChange={onChange as (value: string) => void}
+            onValueChange={onChange}
             className="grid grid-cols-3 gap-4"
           >
             <div className="flex items-center space-x-2">
@@ -66,5 +57,5 @@ export function PaymentTypeSelector({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
