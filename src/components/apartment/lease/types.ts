@@ -1,4 +1,3 @@
-import { ApartmentTenant, ApartmentUnit } from "@/types/apartment";
 import { PaymentMethod } from "@/types/payment";
 
 export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
@@ -28,30 +27,14 @@ export interface LeaseFormFieldsProps {
   disabled?: boolean;
 }
 
-export interface LeaseData {
-  id: string;
-  tenant_id: string;
-  unit_id: string;
-  start_date: string;
-  end_date?: string;
-  rent_amount: number;
-  deposit_amount: number;
-  payment_frequency: PaymentFrequency;
-  duration_type: DurationType;
-  status: LeaseStatus;
-  payment_type: PaymentType;
-  tenant: ApartmentTenant;
-  unit?: {
-    id: string;
-    unit_number: string;
-    apartment?: {
-      id: string;
-      name: string;
-    };
-  };
-  initial_fees_paid?: boolean;
-  initial_payments_completed?: boolean;
-  agency_id: string;
+export interface PaymentFormData {
+  leaseId: string;
+  amount: number;
+  paymentMethod: PaymentMethod;
+  paymentPeriods: string[];
+  paymentDate: Date;
+  notes?: string;
+  isHistorical?: boolean;
 }
 
 export interface PaymentPeriod {
@@ -97,17 +80,43 @@ export interface PaymentListItem {
   displayStatus?: string;
 }
 
-export interface PropertyOwner {
-  id: string;
-  first_name: string;
-  last_name: string;
-  phone_number?: string;
+export interface LeaseHeaderProps {
+  lease: LeaseData;
+  onInitialPayment: () => void;
 }
 
-export interface PropertyDialogProps {
-  property?: any;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+export interface LeaseData {
+  id: string;
+  tenant_id: string;
+  unit_id: string;
+  start_date: string;
+  end_date?: string;
+  rent_amount: number;
+  deposit_amount: number;
+  payment_frequency: PaymentFrequency;
+  duration_type: DurationType;
+  status: LeaseStatus;
+  payment_type: PaymentType;
+  tenant: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    phone_number?: string;
+    email?: string;
+  };
+  unit?: {
+    id: string;
+    unit_number: string;
+    apartment?: {
+      id: string;
+      name: string;
+    };
+  };
+  initial_fees_paid?: boolean;
+  initial_payments_completed?: boolean;
+  agency_id: string;
+  initialPayments?: PaymentListItem[];
+  regularPayments?: PaymentListItem[];
 }
 
 export type PaymentPeriodFilter = 'all' | 'current' | 'overdue' | 'upcoming';
@@ -121,13 +130,10 @@ export interface PeriodOption {
   amount: number;
 }
 
-export interface PaymentFormData {
+export interface PaymentFormProps {
   leaseId: string;
-  amount: number;
-  paymentMethod: PaymentMethod;
-  paymentPeriods: string[];
-  paymentDate: Date;
-  notes?: string;
+  lease: LeaseData;
+  onSuccess?: () => void;
   isHistorical?: boolean;
 }
 
