@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { PaymentListProps } from "../types"
+import { CheckCircle2, Clock, AlertCircle } from "lucide-react"
 
 export function PaymentsList({ title, payments, className }: PaymentListProps) {
   const getStatusBadgeVariant = (status: string) => {
@@ -21,19 +22,18 @@ export function PaymentsList({ title, payments, className }: PaymentListProps) {
     }
   }
 
-  const getStatusLabel = (status: string) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'paid':
       case 'paid_current':
-        return 'Payé'
       case 'paid_advance':
-        return 'Payé en avance'
+        return <CheckCircle2 className="w-4 h-4 mr-1" />
       case 'pending':
-        return 'En attente'
+        return <Clock className="w-4 h-4 mr-1" />
       case 'late':
-        return 'En retard'
+        return <AlertCircle className="w-4 h-4 mr-1" />
       default:
-        return status
+        return null
     }
   }
 
@@ -57,13 +57,13 @@ export function PaymentsList({ title, payments, className }: PaymentListProps) {
       <CardContent>
         <div className="space-y-4">
           {payments?.map(payment => (
-            <div key={payment.id} className="flex items-center justify-between p-4 border rounded-lg">
+            <div key={payment.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/5 transition-colors">
               <div>
                 <p className="font-medium">
                   {getPaymentTypeLabel(payment.type || payment.payment_type)}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {payment.payment_date ? format(new Date(payment.payment_date), 'PP', { locale: fr }) : 'Date non définie'}
+                  {payment.payment_date ? format(new Date(payment.payment_date), 'PPP', { locale: fr }) : 'Date non définie'}
                   {payment.payment_period_start && payment.payment_period_end && (
                     <span className="ml-2">
                       (Période: {format(new Date(payment.payment_period_start), 'PP', { locale: fr })} - 
@@ -76,14 +76,22 @@ export function PaymentsList({ title, payments, className }: PaymentListProps) {
                 <p className="font-medium">{payment.amount.toLocaleString()} FCFA</p>
                 <Badge 
                   variant={getStatusBadgeVariant(payment.displayStatus || payment.status)}
+                  className="flex items-center"
                 >
-                  {getStatusLabel(payment.displayStatus || payment.status)}
+                  {getStatusIcon(payment.displayStatus || payment.status)}
+                  <span>
+                    {payment.displayStatus === 'paid_advance' ? 'Payé en avance' :
+                     payment.displayStatus === 'paid_current' ? 'Payé' :
+                     payment.status === 'pending' ? 'En attente' :
+                     payment.status === 'late' ? 'En retard' : 
+                     payment.status}
+                  </span>
                 </Badge>
               </div>
             </div>
           ))}
           {payments.length === 0 && (
-            <p className="text-center text-muted-foreground">
+            <p className="text-center text-muted-foreground py-8">
               Aucun paiement trouvé
             </p>
           )}

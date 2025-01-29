@@ -2,6 +2,13 @@ import { PaymentMethod } from "@/types/payment";
 
 export type PaymentType = 'current' | 'historical' | 'late';
 export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+export type DurationType = 'fixed' | 'month_to_month' | 'yearly';
+export type PaymentType = 'upfront' | 'end_of_period';
+export type LeaseStatus = 'active' | 'expired' | 'terminated';
+
+export interface LeasePaymentViewProps {
+  leaseId: string;
+}
 
 export interface PaymentPeriod {
   id: string;
@@ -16,19 +23,14 @@ export interface PaymentPeriod {
   }>;
 }
 
-export interface LatePaymentFormProps {
-  lease: LeaseData;
-  onSuccess?: () => void;
-  isSubmitting: boolean;
-  setIsSubmitting: (value: boolean) => void;
-}
-
-export interface PaymentTypeSelectorProps {
-  value: PaymentType;
-  onChange: (value: PaymentType) => void;
-  hasLatePayments?: boolean;
-  latePaymentsCount?: number;
-  totalLateAmount?: number;
+export interface PaymentSummary {
+  totalReceived: number;
+  pendingAmount: number;
+  lateAmount: number;
+  nextPayment?: {
+    amount: number;
+    due_date: string;
+  };
 }
 
 export interface LeaseData {
@@ -40,9 +42,9 @@ export interface LeaseData {
   rent_amount: number;
   deposit_amount: number;
   payment_frequency: PaymentFrequency;
-  duration_type: string;
-  status: string;
-  payment_type: string;
+  duration_type: DurationType;
+  status: LeaseStatus;
+  payment_type: PaymentType;
   tenant: {
     id: string;
     first_name: string;
@@ -58,7 +60,50 @@ export interface LeaseData {
       name: string;
     };
   };
-  agency_id: string;
   initial_fees_paid?: boolean;
   initial_payments_completed?: boolean;
+  agency_id: string;
+  currentPeriod?: {
+    id: string;
+    payment_period_start: string;
+    payment_period_end: string;
+    amount: number;
+    status: string;
+    payment_status_type?: string;
+  };
+  initialPayments?: PaymentListItem[];
+  regularPayments?: PaymentListItem[];
+}
+
+export interface PaymentListProps {
+  title: string;
+  payments: PaymentListItem[];
+  className?: string;
+}
+
+export interface PaymentListItem {
+  id: string;
+  amount: number;
+  status: string;
+  payment_date?: string;
+  due_date: string;
+  payment_period_start?: string;
+  payment_period_end?: string;
+  type?: 'deposit' | 'agency_fees' | 'rent';
+  payment_method?: PaymentMethod;
+  payment_type?: string;
+  displayStatus?: string;
+}
+
+export interface HistoricalPaymentFormProps {
+  lease: LeaseData;
+  onSuccess?: () => void;
+  isSubmitting: boolean;
+  setIsSubmitting: (value: boolean) => void;
+}
+
+export interface LeaseHeaderProps {
+  lease: LeaseData;
+  onInitialPayment: () => void;
+  onRegularPayment: () => void;
 }
