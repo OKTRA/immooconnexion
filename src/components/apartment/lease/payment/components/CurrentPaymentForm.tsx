@@ -10,6 +10,7 @@ import { LeaseData } from "../types"
 import { Loader2 } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { toast } from "@/components/ui/use-toast"
+import { useQuery } from "@tanstack/react-query"
 
 interface CurrentPaymentFormProps {
   lease: LeaseData
@@ -30,6 +31,28 @@ export function CurrentPaymentForm({
   const [notes, setNotes] = useState("")
   const [advancePayment, setAdvancePayment] = useState(false)
 
+  // Fetch the first rent start date from initial payment
+  const { data: firstRentStartDate } = useQuery({
+    queryKey: ["first-rent-date", lease.id],
+    queryFn: async () => {
+      console.log("Fetching first rent start date for lease:", lease.id)
+      const { data, error } = await supabase
+        .from("apartment_lease_payments")
+        .select("first_rent_start_date")
+        .eq("lease_id", lease.id)
+        .eq("payment_type", "deposit")
+        .single()
+
+      if (error) {
+        console.error("Error fetching first rent date:", error)
+        throw error
+      }
+
+      console.log("First rent start date:", data?.first_rent_start_date)
+      return data?.first_rent_start_date
+    }
+  })
+
   const totalAmount = lease.rent_amount * periods
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,7 +60,13 @@ export function CurrentPaymentForm({
     setIsSubmitting(true)
 
     try {
-      const periodStart = new Date(advancePayment ? lease.start_date : paymentDate)
+      if (!firstRentStartDate) {
+        throw new Error("Date de début du premier loyer non trouvée")
+      }
+
+      console.log("Starting payment submission with first rent date:", firstRentStartDate)
+
+      const periodStart = new Date(firstRentStartDate)
       let periodEnd = new Date(periodStart)
 
       // Calculer la date de fin selon la fréquence
@@ -60,6 +89,11 @@ export function CurrentPaymentForm({
       }
       periodEnd.setDate(periodEnd.getDate() - 1) // Ajuster pour la fin de période
 
+      console.log("Calculated period:", {
+        start: periodStart.toISOString(),
+        end: periodEnd.toISOString()
+      })
+
       const { data, error } = await supabase.rpc('create_lease_payment', {
         p_lease_id: lease.id,
         p_amount: totalAmount,
@@ -79,11 +113,11 @@ export function CurrentPaymentForm({
       })
 
       onSuccess?.()
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting payment:", error)
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'enregistrement du paiement",
+        description: error.message || "Une erreur est survenue lors de l'enregistrement du paiement",
         variant: "destructive",
       })
     } finally {
@@ -146,7 +180,7 @@ export function CurrentPaymentForm({
       <Button 
         type="submit" 
         className="w-full"
-        disabled={isSubmitting}
+        disabled={isSubmitting || !firstRentStartDate}
       >
         {isSubmitting ? (
           <>
