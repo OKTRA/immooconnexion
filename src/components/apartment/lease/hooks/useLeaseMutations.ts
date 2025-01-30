@@ -2,6 +2,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { toast } from "@/components/ui/use-toast"
 
+interface InitialPaymentsParams {
+  leaseId: string
+  depositAmount: number
+  rentAmount: number
+  firstRentStartDate: Date
+}
+
 export function useLeaseMutations() {
   const queryClient = useQueryClient()
 
@@ -11,14 +18,8 @@ export function useLeaseMutations() {
       depositAmount, 
       rentAmount,
       firstRentStartDate 
-    }: { 
-      leaseId: string, 
-      depositAmount: number, 
-      rentAmount: number,
-      firstRentStartDate: Date 
-    }) => {
+    }: InitialPaymentsParams) => {
       try {
-        // Get the lease data first
         const { data: leaseData, error: leaseError } = await supabase
           .from('apartment_leases')
           .select('agency_id')
