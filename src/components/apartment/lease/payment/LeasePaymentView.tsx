@@ -1,20 +1,14 @@
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Loader2, Calendar, AlertCircle, CheckCircle2, Clock, ArrowUpCircle, ArrowDownCircle } from "lucide-react"
-import { toast } from "@/components/ui/use-toast"
-import { format, differenceInDays, isAfter, isBefore } from "date-fns"
-import { fr } from "date-fns/locale"
-import { PaymentStats } from "./components/PaymentStats"
-import { PaymentsList } from "./components/PaymentsList"
+import { Loader2 } from "lucide-react"
 import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "./types"
 import { LeaseHeader } from "./components/LeaseHeader"
+import { PaymentsList } from "./components/PaymentsList"
 import { PaymentDialogs } from "./components/PaymentDialogs"
+import { PaymentStatusStats } from "./components/PaymentStatusStats"
+import { CurrentPeriodCard } from "./components/CurrentPeriodCard"
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Button } from "@/components/ui/button"
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
@@ -47,10 +41,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         .eq("id", leaseId)
         .maybeSingle()
 
-      if (error) {
-        console.error("Error fetching lease:", error)
-        throw error
-      }
+      if (error) throw error
 
       const { data: payments, error: paymentsError } = await supabase
         .from("apartment_lease_payments")
@@ -58,10 +49,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         .eq("lease_id", leaseId)
         .order("payment_date", { ascending: false })
 
-      if (paymentsError) {
-        console.error("Error fetching payments:", paymentsError)
-        throw paymentsError
-      }
+      if (paymentsError) throw paymentsError
 
       const initialPayments = payments?.filter(p => 
         p.payment_type === 'deposit' || p.payment_type === 'agency_fees'
@@ -134,70 +122,8 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   })
 
   const handlePaymentSuccess = () => {
-    toast({
-      title: "Succès",
-      description: "Le paiement a été enregistré avec succès",
-    })
     setShowRegularPaymentDialog(false)
     setShowInitialPaymentDialog(false)
-  }
-
-  const getPaymentProgress = (payment: any) => {
-    if (!payment?.payment_period_start || !payment?.payment_period_end) return 0
-    const start = new Date(payment.payment_period_start)
-    const end = new Date(payment.payment_period_end)
-    const now = new Date()
-    const totalDays = differenceInDays(end, start)
-    const elapsedDays = differenceInDays(now, start)
-    return Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100))
-  }
-
-  const getStatusBadge = (payment: any) => {
-    if (!payment) return null
-    
-    const getVariant = (status: string) => {
-      switch (status) {
-        case 'paid':
-        case 'paid_current':
-          return 'default'
-        case 'paid_advance':
-          return 'secondary'
-        case 'pending':
-          return 'warning'
-        case 'late':
-          return 'destructive'
-        default:
-          return 'outline'
-      }
-    }
-
-    const getIcon = (status: string) => {
-      switch (status) {
-        case 'paid':
-        case 'paid_current':
-        case 'paid_advance':
-          return <CheckCircle2 className="w-4 h-4 mr-1" />
-        case 'pending':
-          return <Clock className="w-4 h-4 mr-1" />
-        case 'late':
-          return <AlertCircle className="w-4 h-4 mr-1" />
-        default:
-          return <Calendar className="w-4 h-4 mr-1" />
-      }
-    }
-
-    return (
-      <Badge 
-        variant={getVariant(payment.status)}
-        className="flex items-center"
-      >
-        {getIcon(payment.status)}
-        {payment.status === 'paid' ? 'Payé' :
-         payment.status === 'pending' ? 'En attente' :
-         payment.status === 'late' ? 'En retard' : 
-         payment.status}
-      </Badge>
-    )
   }
 
   if (isLoadingLease) {
@@ -219,95 +145,13 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         onInitialPayment={() => setShowInitialPaymentDialog(true)}
       />
       
-      {stats && (
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="bg-green-500/10">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <ArrowUpCircle className="h-8 w-8 text-green-500" />
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total reçu</p>
-                  <p className="text-2xl font-bold">{stats.totalReceived.toLocaleString()} FCFA</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-yellow-500/10">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <Clock className="h-8 w-8 text-yellow-500" />
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">En attente</p>
-                  <p className="text-2xl font-bold">{stats.pendingAmount.toLocaleString()} FCFA</p>
-                  {stats.nextPayment && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Prochain: {format(new Date(stats.nextPayment.due_date), 'PP', { locale: fr })}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-red-500/10">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <ArrowDownCircle className="h-8 w-8 text-red-500" />
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">En retard</p>
-                  <p className="text-2xl font-bold">{stats.lateAmount.toLocaleString()} FCFA</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      {stats && <PaymentStatusStats stats={stats} />}
 
       {lease.currentPeriod && (
-        <Card className="border-2 border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Période en cours</span>
-              {getStatusBadge(lease.currentPeriod)}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between text-sm text-muted-foreground">
-              <span>
-                Du {format(new Date(lease.currentPeriod.payment_period_start), 'PP', { locale: fr })}
-              </span>
-              <span>
-                Au {format(new Date(lease.currentPeriod.payment_period_end), 'PP', { locale: fr })}
-              </span>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Progression</span>
-                <span>{Math.round(getPaymentProgress(lease.currentPeriod))}%</span>
-              </div>
-              <Progress 
-                value={getPaymentProgress(lease.currentPeriod)} 
-                className="h-2"
-              />
-            </div>
-
-            <div className="flex justify-between items-center pt-2">
-              <span className="text-lg font-semibold">
-                {lease.currentPeriod.amount.toLocaleString()} FCFA
-              </span>
-              {lease.currentPeriod.status === 'pending' && (
-                <Button
-                  onClick={() => setShowRegularPaymentDialog(true)}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  Payer maintenant
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <CurrentPeriodCard
+          currentPeriod={lease.currentPeriod}
+          onPaymentClick={() => setShowRegularPaymentDialog(true)}
+        />
       )}
 
       <PaymentsList 
