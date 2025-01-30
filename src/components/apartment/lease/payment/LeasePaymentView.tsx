@@ -1,9 +1,9 @@
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Loader2, Calendar, AlertCircle, CheckCircle2, Clock } from "lucide-react"
+import { Loader2, Calendar, AlertCircle, CheckCircle2, Clock, ArrowUpCircle, ArrowDownCircle } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
-import { format, differenceInDays, isAfter, isBefore, isToday } from "date-fns"
+import { format, differenceInDays, isAfter, isBefore } from "date-fns"
 import { fr } from "date-fns/locale"
 import { PaymentStats } from "./components/PaymentStats"
 import { PaymentsList } from "./components/PaymentsList"
@@ -14,6 +14,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { Button } from "@/components/ui/button"
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
@@ -76,7 +77,6 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         displayStatus: p.payment_status_type || p.status
       })) || []
 
-      // Find current period payment
       const currentPeriod = regularPayments.find(p => {
         const start = new Date(p.payment_period_start)
         const end = new Date(p.payment_period_end)
@@ -217,12 +217,53 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
       <LeaseHeader 
         lease={lease}
         onInitialPayment={() => setShowInitialPaymentDialog(true)}
-        onRegularPayment={() => setShowRegularPaymentDialog(true)}
       />
       
-      {stats && <PaymentStats stats={stats} />}
+      {stats && (
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card className="bg-green-500/10">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <ArrowUpCircle className="h-8 w-8 text-green-500" />
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total reçu</p>
+                  <p className="text-2xl font-bold">{stats.totalReceived.toLocaleString()} FCFA</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Current Period Card */}
+          <Card className="bg-yellow-500/10">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <Clock className="h-8 w-8 text-yellow-500" />
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">En attente</p>
+                  <p className="text-2xl font-bold">{stats.pendingAmount.toLocaleString()} FCFA</p>
+                  {stats.nextPayment && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Prochain: {format(new Date(stats.nextPayment.due_date), 'PP', { locale: fr })}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-red-500/10">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <ArrowDownCircle className="h-8 w-8 text-red-500" />
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">En retard</p>
+                  <p className="text-2xl font-bold">{stats.lateAmount.toLocaleString()} FCFA</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {lease.currentPeriod && (
         <Card className="border-2 border-primary/20">
           <CardHeader>
@@ -257,12 +298,12 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
                 {lease.currentPeriod.amount.toLocaleString()} FCFA
               </span>
               {lease.currentPeriod.status === 'pending' && (
-                <button
+                <Button
                   onClick={() => setShowRegularPaymentDialog(true)}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   Payer maintenant
-                </button>
+                </Button>
               )}
             </div>
           </CardContent>
