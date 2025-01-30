@@ -60,16 +60,18 @@ export function CurrentPeriodCard({ currentPeriod, onPaymentClick }: CurrentPeri
       }
     }
 
+    const status = currentPeriod.payment_status_type || currentPeriod.status
+
     return (
       <Badge 
-        variant={getVariant(currentPeriod.status)}
+        variant={getVariant(status)}
         className="flex items-center"
       >
-        {getIcon(currentPeriod.status)}
-        {currentPeriod.status === 'paid' ? 'Payé' :
-         currentPeriod.status === 'pending' ? 'En attente' :
-         currentPeriod.status === 'late' ? 'En retard' : 
-         currentPeriod.status}
+        {getIcon(status)}
+        {status === 'paid' ? 'Payé' :
+         status === 'pending' ? 'En attente' :
+         status === 'late' ? 'En retard' : 
+         status}
       </Badge>
     )
   }
