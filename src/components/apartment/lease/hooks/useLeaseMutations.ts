@@ -1,12 +1,22 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { toast } from "@/components/ui/use-toast"
 
 export function useLeaseMutations() {
   const queryClient = useQueryClient()
 
   const handleInitialPayments = useMutation({
-    mutationFn: async ({ leaseId, depositAmount, rentAmount }: { leaseId: string, depositAmount: number, rentAmount: number }) => {
+    mutationFn: async ({ 
+      leaseId, 
+      depositAmount, 
+      rentAmount,
+      firstRentStartDate 
+    }: { 
+      leaseId: string, 
+      depositAmount: number, 
+      rentAmount: number,
+      firstRentStartDate: Date 
+    }) => {
       try {
         // Get the lease data first
         const { data: leaseData, error: leaseError } = await supabase
@@ -18,7 +28,7 @@ export function useLeaseMutations() {
         if (leaseError) throw leaseError
         if (!leaseData?.agency_id) throw new Error('Agency ID not found')
 
-        // Create deposit payment
+        // Create deposit payment with first rent start date
         const { error: depositError } = await supabase
           .from('apartment_lease_payments')
           .insert({
@@ -30,7 +40,8 @@ export function useLeaseMutations() {
             status: 'paid',
             agency_id: leaseData.agency_id,
             payment_period_start: new Date().toISOString(),
-            payment_status_type: 'paid_current'
+            payment_status_type: 'paid_current',
+            first_rent_start_date: firstRentStartDate.toISOString()
           })
 
         if (depositError) throw depositError

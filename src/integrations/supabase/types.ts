@@ -336,6 +336,7 @@ export type Database = {
           created_at: string | null
           due_date: string | null
           effective_date: string | null
+          first_rent_start_date: string | null
           historical_entry: boolean | null
           id: string
           late_fee_amount: number | null
@@ -361,6 +362,7 @@ export type Database = {
           created_at?: string | null
           due_date?: string | null
           effective_date?: string | null
+          first_rent_start_date?: string | null
           historical_entry?: boolean | null
           id?: string
           late_fee_amount?: number | null
@@ -386,6 +388,7 @@ export type Database = {
           created_at?: string | null
           due_date?: string | null
           effective_date?: string | null
+          first_rent_start_date?: string | null
           historical_entry?: boolean | null
           id?: string
           late_fee_amount?: number | null
