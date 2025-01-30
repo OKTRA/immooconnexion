@@ -20,16 +20,30 @@ export function useLeaseMutations() {
       firstRentStartDate 
     }: InitialPaymentsParams) => {
       try {
+        console.log("Starting initial payments with params:", {
+          leaseId,
+          depositAmount,
+          rentAmount,
+          firstRentStartDate
+        })
+
         const { data: leaseData, error: leaseError } = await supabase
           .from('apartment_leases')
           .select('agency_id')
           .eq('id', leaseId)
           .single()
 
-        if (leaseError) throw leaseError
-        if (!leaseData?.agency_id) throw new Error('Agency ID not found')
+        if (leaseError) {
+          console.error("Error fetching lease:", leaseError)
+          throw leaseError
+        }
 
-        // Create deposit payment with first rent start date
+        if (!leaseData?.agency_id) {
+          console.error("No agency ID found for lease")
+          throw new Error('Agency ID not found')
+        }
+
+        console.log("Creating deposit payment...")
         const { error: depositError } = await supabase
           .from('apartment_lease_payments')
           .insert({
@@ -45,9 +59,12 @@ export function useLeaseMutations() {
             first_rent_start_date: firstRentStartDate.toISOString()
           })
 
-        if (depositError) throw depositError
+        if (depositError) {
+          console.error("Error creating deposit payment:", depositError)
+          throw depositError
+        }
 
-        // Create agency fees payment
+        console.log("Creating agency fees payment...")
         const { error: feesError } = await supabase
           .from('apartment_lease_payments')
           .insert({
@@ -62,9 +79,12 @@ export function useLeaseMutations() {
             payment_status_type: 'paid_current'
           })
 
-        if (feesError) throw feesError
+        if (feesError) {
+          console.error("Error creating agency fees payment:", feesError)
+          throw feesError
+        }
 
-        // Update lease status
+        console.log("Updating lease status...")
         const { error: updateError } = await supabase
           .from('apartment_leases')
           .update({
@@ -73,8 +93,12 @@ export function useLeaseMutations() {
           })
           .eq('id', leaseId)
 
-        if (updateError) throw updateError
+        if (updateError) {
+          console.error("Error updating lease status:", updateError)
+          throw updateError
+        }
 
+        console.log("Initial payments completed successfully")
         return true
       } catch (error) {
         console.error("Error in handleInitialPayments:", error)

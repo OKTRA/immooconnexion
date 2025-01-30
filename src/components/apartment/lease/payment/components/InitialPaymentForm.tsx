@@ -27,6 +27,7 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    console.log("Starting form submission with lease:", lease)
 
     try {
       await handleInitialPayments.mutateAsync({
@@ -35,6 +36,7 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
         rentAmount: lease.rent_amount,
         firstRentStartDate: firstRentDate
       })
+      console.log("Form submission completed successfully")
       onSuccess?.()
     } catch (error) {
       console.error("Error submitting initial payments:", error)
