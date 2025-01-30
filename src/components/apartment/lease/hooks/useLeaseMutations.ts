@@ -24,7 +24,7 @@ export function useLeaseMutations() {
           leaseId,
           depositAmount,
           rentAmount,
-          firstRentStartDate
+          firstRentStartDate: firstRentStartDate.toISOString()
         })
 
         const { data: leaseData, error: leaseError } = await supabase
@@ -96,6 +96,20 @@ export function useLeaseMutations() {
         if (updateError) {
           console.error("Error updating lease status:", updateError)
           throw updateError
+        }
+
+        // Appeler la fonction de génération des périodes
+        console.log("Calling generate_payment_periods function...")
+        const { error: periodsError } = await supabase
+          .rpc('generate_payment_periods', { 
+            p_lease_id: leaseId,
+            p_start_date: firstRentStartDate.toISOString(),
+            p_frequency: 'monthly'
+          })
+
+        if (periodsError) {
+          console.error("Error generating payment periods:", periodsError)
+          throw periodsError
         }
 
         console.log("Initial payments completed successfully")
