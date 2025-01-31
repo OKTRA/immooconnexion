@@ -43,7 +43,7 @@ export function useLeaseMutations() {
           throw new Error('Agency ID not found')
         }
 
-        console.log("Creating deposit payment...")
+        // Insert deposit payment
         const { error: depositError } = await supabase
           .from('apartment_lease_payments')
           .insert({
@@ -64,7 +64,7 @@ export function useLeaseMutations() {
           throw depositError
         }
 
-        console.log("Creating agency fees payment...")
+        // Insert agency fees payment
         const { error: feesError } = await supabase
           .from('apartment_lease_payments')
           .insert({
@@ -84,7 +84,7 @@ export function useLeaseMutations() {
           throw feesError
         }
 
-        console.log("Updating lease status...")
+        // Update lease status
         const { error: updateError } = await supabase
           .from('apartment_leases')
           .update({
@@ -96,20 +96,6 @@ export function useLeaseMutations() {
         if (updateError) {
           console.error("Error updating lease status:", updateError)
           throw updateError
-        }
-
-        // Appeler la fonction de génération des périodes
-        console.log("Calling generate_payment_periods function...")
-        const { error: periodsError } = await supabase
-          .rpc('generate_payment_periods', { 
-            p_lease_id: leaseId,
-            p_start_date: firstRentStartDate.toISOString(),
-            p_frequency: 'monthly'
-          })
-
-        if (periodsError) {
-          console.error("Error generating payment periods:", periodsError)
-          throw periodsError
         }
 
         console.log("Initial payments completed successfully")
