@@ -52,8 +52,6 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         return null
       }
 
-      console.log("Lease data retrieved:", leaseData)
-
       const { data: payments, error: paymentsError } = await supabase
         .from("apartment_lease_payments")
         .select("*")
@@ -153,11 +151,6 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   if (!lease) {
     return <div className="text-center p-4 text-muted-foreground">Bail non trouvé</div>
   }
-
-  console.log("Passing to PaymentDialogs:", {
-    depositAmount: lease.deposit_amount,
-    rentAmount: lease.rent_amount
-  })
 
   return (
     <div className="space-y-8">

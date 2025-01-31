@@ -3,16 +3,6 @@ import { PaymentMethod } from "@/types/payment";
 export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 export type DurationType = 'fixed' | 'month_to_month' | 'yearly';
 export type PaymentType = 'upfront' | 'end_of_period';
-
-export interface InitialPaymentFormProps {
-  leaseId: string;
-  depositAmount: number;
-  rentAmount: number;
-  paymentFrequency: PaymentFrequency;
-  firstRentDate?: Date;
-  onSuccess?: () => void;
-}
-
 export type LeaseStatus = 'active' | 'expired' | 'terminated';
 
 export interface LeaseFormData {

@@ -2424,6 +2424,21 @@ export type Database = {
         }
         Returns: Json
       }
+      create_lease_with_periods: {
+        Args: {
+          p_tenant_id: string
+          p_unit_id: string
+          p_start_date: string
+          p_end_date: string
+          p_rent_amount: number
+          p_deposit_amount: number
+          p_payment_frequency: string
+          p_duration_type: string
+          p_payment_type: string
+          p_agency_id: string
+        }
+        Returns: string
+      }
       generate_monthly_owner_statements: {
         Args: {
           year: number
@@ -2434,6 +2449,14 @@ export type Database = {
       get_next_payment_due: {
         Args: {
           p_lease_id: string
+        }
+        Returns: Json
+      }
+      handle_initial_payments: {
+        Args: {
+          p_lease_id: string
+          p_deposit_amount: number
+          p_agency_fees: number
         }
         Returns: Json
       }
@@ -2448,26 +2471,15 @@ export type Database = {
         }
         Returns: Json
       }
-      handle_simple_initial_payments:
-        | {
-            Args: {
-              p_lease_id: string
-              p_deposit_amount: number
-              p_agency_fees: number
-              p_agency_id: string
-            }
-            Returns: boolean
-          }
-        | {
-            Args: {
-              p_lease_id: string
-              p_deposit_amount: number
-              p_agency_fees: number
-              p_agency_id: string
-              p_first_rent_start_date: string
-            }
-            Returns: boolean
-          }
+      handle_simple_initial_payments: {
+        Args: {
+          p_lease_id: string
+          p_deposit_amount: number
+          p_agency_fees: number
+          p_agency_id: string
+        }
+        Returns: boolean
+      }
       update_expired_apartment_leases: {
         Args: Record<PropertyKey, never>
         Returns: undefined

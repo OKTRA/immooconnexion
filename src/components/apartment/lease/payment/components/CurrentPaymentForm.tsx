@@ -41,7 +41,7 @@ export function CurrentPaymentForm({
         .select("first_rent_start_date")
         .eq("lease_id", lease.id)
         .eq("payment_type", "deposit")
-        .maybeSingle()
+        .single()
 
       if (error) {
         console.error("Error fetching first rent date:", error)
@@ -53,10 +53,7 @@ export function CurrentPaymentForm({
     }
   })
 
-  // Calculate values outside JSX
-  const agencyFees = lease.rent_amount ? Math.round(lease.rent_amount * 0.5) : 0
-  const formattedDepositAmount = lease.deposit_amount ? lease.deposit_amount.toLocaleString() : "0"
-  const formattedAgencyFees = agencyFees.toLocaleString()
+  const totalAmount = lease.rent_amount * periods
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -72,7 +69,7 @@ export function CurrentPaymentForm({
       const periodStart = new Date(firstRentStartDate)
       let periodEnd = new Date(periodStart)
 
-      // Calculate end date based on frequency
+      // Calculer la date de fin selon la fréquence
       switch (lease.payment_frequency) {
         case 'monthly':
           periodEnd.setMonth(periodEnd.getMonth() + periods)
@@ -90,7 +87,7 @@ export function CurrentPaymentForm({
           periodEnd.setFullYear(periodEnd.getFullYear() + periods)
           break
       }
-      periodEnd.setDate(periodEnd.getDate() - 1) // Adjust for period end
+      periodEnd.setDate(periodEnd.getDate() - 1) // Ajuster pour la fin de période
 
       console.log("Calculated period:", {
         start: periodStart.toISOString(),
@@ -99,7 +96,7 @@ export function CurrentPaymentForm({
 
       const { data, error } = await supabase.rpc('create_lease_payment', {
         p_lease_id: lease.id,
-        p_amount: lease.rent_amount * periods,
+        p_amount: totalAmount,
         p_payment_type: 'rent',
         p_payment_method: paymentMethod,
         p_payment_date: paymentDate,
@@ -171,7 +168,7 @@ export function CurrentPaymentForm({
           <div className="pt-4 border-t">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium">Montant total</span>
-              <span className="text-lg font-bold">{(lease.rent_amount * periods).toLocaleString()} FCFA</span>
+              <span className="text-lg font-bold">{totalAmount.toLocaleString()} FCFA</span>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
               {periods} {lease.payment_frequency === 'monthly' ? 'mois' : 'semaines'} × {lease.rent_amount.toLocaleString()} FCFA

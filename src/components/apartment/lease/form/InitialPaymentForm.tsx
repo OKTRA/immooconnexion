@@ -1,87 +1,42 @@
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { PaymentMethodSelect } from "../payment/components/PaymentMethodSelect"
+import { Label } from "@/components/ui/label"
+import { PaymentMethodSelect } from "../../payment/components/PaymentMethodSelect"
 import { PaymentCountdown } from "../payment/components/PaymentCountdown"
-import { useLeaseMutations } from "../hooks/useLeaseMutations"
 import { CalendarIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { PaymentMethod } from "@/types/payment"
-import { toast } from "@/components/ui/use-toast"
+import { useState } from "react"
+import { PaymentFrequency } from "../types"
 
 interface InitialPaymentFormProps {
-  leaseId: string
-  depositAmount?: number
-  rentAmount?: number
-  paymentFrequency?: string
-  onSuccess?: () => void
+  depositAmount: number
+  agencyFees: number
+  paymentFrequency: PaymentFrequency
+  onSubmit: (firstRentDate: Date) => void
+  isSubmitting?: boolean
 }
 
-export function InitialPaymentForm({ 
-  leaseId, 
-  depositAmount = 0,
-  rentAmount = 0,
+export function InitialPaymentForm({
+  depositAmount,
+  agencyFees,
   paymentFrequency,
-  onSuccess 
+  onSubmit,
+  isSubmitting
 }: InitialPaymentFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash")
-  const [firstRentDate, setFirstRentDate] = useState<Date>(new Date())
-  const { handleInitialPayments } = useLeaseMutations()
+  const [paymentMethod, setPaymentMethod] = useState("cash")
+  const [firstRentDate, setFirstRentDate] = useState<Date | null>(new Date())
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (!depositAmount || !rentAmount) {
-      toast({
-        title: "Erreur",
-        description: "Les montants de la caution et du loyer sont requis",
-        variant: "destructive"
-      })
-      return
-    }
-
-    console.log("Starting initial payment submission:", {
-      leaseId,
-      depositAmount,
-      rentAmount,
-      firstRentDate: firstRentDate.toISOString(),
-      paymentFrequency
-    })
-
-    setIsSubmitting(true)
-
-    try {
-      await handleInitialPayments.mutateAsync({
-        leaseId,
-        depositAmount,
-        rentAmount,
-        firstRentStartDate: firstRentDate
-      })
-
-      onSuccess?.()
-    } catch (error) {
-      console.error("Error submitting initial payments:", error)
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'enregistrement des paiements",
-        variant: "destructive"
-      })
-    } finally {
-      setIsSubmitting(false)
+    if (firstRentDate) {
+      onSubmit(firstRentDate)
     }
   }
-
-  // Calculate values outside JSX
-  const agencyFees = rentAmount ? Math.round(rentAmount * 0.5) : 0
-  const formattedDepositAmount = depositAmount ? depositAmount.toLocaleString() : "0"
-  const formattedAgencyFees = agencyFees.toLocaleString()
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -91,69 +46,68 @@ export function InitialPaymentForm({
             <Label>Caution</Label>
             <Input
               type="text"
-              value={`${formattedDepositAmount} FCFA`}
+              value={`${depositAmount?.toLocaleString()} FCFA`}
               disabled
-              className="mt-1.5"
             />
           </div>
 
           <div>
-            <Label>Frais d'agence (50% du loyer)</Label>
+            <Label>Frais d'agence</Label>
             <Input
               type="text"
-              value={`${formattedAgencyFees} FCFA`}
+              value={`${agencyFees?.toLocaleString()} FCFA`}
               disabled
-              className="mt-1.5"
             />
+          </div>
+
+          <div>
+            <Label>Date de début du premier loyer</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !firstRentDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {firstRentDate ? (
+                    format(firstRentDate, "PPP", { locale: fr })
+                  ) : (
+                    <span>Choisir une date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={firstRentDate}
+                  onSelect={setFirstRentDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div>
             <Label>Mode de paiement</Label>
             <PaymentMethodSelect
               value={paymentMethod}
-              onChange={(value) => setPaymentMethod(value)}
+              onChange={setPaymentMethod}
             />
-          </div>
-
-          <div>
-            <Label>Date du premier loyer</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full mt-1.5 justify-start text-left font-normal",
-                    !firstRentDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {firstRentDate ? format(firstRentDate, "PPP", { locale: fr }) : "Sélectionner une date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={firstRentDate}
-                  onSelect={(date) => date && setFirstRentDate(date)}
-                  initialFocus
-                  locale={fr}
-                />
-              </PopoverContent>
-            </Popover>
           </div>
         </div>
       </Card>
 
-      {paymentFrequency && firstRentDate && (
-        <PaymentCountdown 
-          firstRentDate={firstRentDate}
-          frequency={paymentFrequency}
-        />
-      )}
+      <PaymentCountdown 
+        firstRentDate={firstRentDate}
+        frequency={paymentFrequency}
+      />
 
       <Button 
         type="submit" 
-        disabled={isSubmitting || !depositAmount || !rentAmount}
+        disabled={isSubmitting || !firstRentDate}
         className="w-full"
       >
         {isSubmitting ? "Enregistrement..." : "Enregistrer les paiements initiaux"}
