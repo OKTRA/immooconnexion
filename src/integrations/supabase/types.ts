@@ -2471,26 +2471,15 @@ export type Database = {
         }
         Returns: Json
       }
-      handle_simple_initial_payments:
-        | {
-            Args: {
-              p_lease_id: string
-              p_deposit_amount: number
-              p_agency_fees: number
-              p_agency_id: string
-            }
-            Returns: boolean
-          }
-        | {
-            Args: {
-              p_lease_id: string
-              p_deposit_amount: number
-              p_agency_fees: number
-              p_agency_id: string
-              p_first_rent_start_date: string
-            }
-            Returns: boolean
-          }
+      handle_simple_initial_payments: {
+        Args: {
+          p_lease_id: string
+          p_deposit_amount: number
+          p_agency_fees: number
+          p_agency_id: string
+        }
+        Returns: boolean
+      }
       update_expired_apartment_leases: {
         Args: Record<PropertyKey, never>
         Returns: undefined

@@ -2,13 +2,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { LeaseFormFields } from "./LeaseFormFields"
 import { useLease } from "./useLease"
-import { LeaseFormData } from "./types"
 
 interface LeaseDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  unitId: string;
-  tenantId?: string;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  unitId: string
+  tenantId?: string
 }
 
 export function LeaseDialog({
@@ -32,7 +31,7 @@ export function LeaseDialog({
         </DialogHeader>
         <ScrollArea className="max-h-[80vh] px-1">
           <LeaseFormFields
-            formData={formData as LeaseFormData}
+            formData={formData}
             setFormData={setFormData}
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
