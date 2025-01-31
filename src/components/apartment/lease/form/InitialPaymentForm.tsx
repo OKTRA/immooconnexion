@@ -62,6 +62,7 @@ export function InitialPaymentForm({
     }
   }
 
+  // Calculate values outside JSX
   const agencyFees = rentAmount ? Math.round(rentAmount * 0.5) : 0
   const formattedDepositAmount = depositAmount ? depositAmount.toLocaleString() : "0"
   const formattedAgencyFees = agencyFees.toLocaleString()
