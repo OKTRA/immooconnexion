@@ -43,13 +43,14 @@ export function useLeaseMutations() {
           throw new Error('Agency ID not found')
         }
 
-        // Call the simplified function
+        // Call the updated function with first_rent_start_date
         const { data, error } = await supabase
           .rpc('handle_simple_initial_payments', {
             p_lease_id: leaseId,
             p_deposit_amount: depositAmount,
             p_agency_fees: Math.round(rentAmount * 0.5),
-            p_agency_id: leaseData.agency_id
+            p_agency_id: leaseData.agency_id,
+            p_first_rent_start_date: firstRentStartDate.toISOString()
           })
 
         if (error) {
