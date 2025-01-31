@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { PaymentMethodSelect } from "./PaymentMethodSelect"
-import { ApartmentLease } from "@/types/apartment"
+import { LeaseData } from "../types"
 import { useLeaseMutations } from "@/components/apartment/lease/hooks/useLeaseMutations"
 import { CalendarIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
@@ -15,7 +15,7 @@ import { fr } from "date-fns/locale"
 
 interface InitialPaymentFormProps {
   onSuccess?: () => void
-  lease: ApartmentLease
+  lease: LeaseData
 }
 
 export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps) {
