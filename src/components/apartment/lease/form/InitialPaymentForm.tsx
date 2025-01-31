@@ -181,13 +181,10 @@ export function InitialPaymentForm({
       </Card>
 
       {paymentFrequency && firstRentDate && (
-        <div className="bg-muted p-4 rounded-lg">
-          <h3 className="font-medium mb-2">Prochain paiement</h3>
-          <PaymentCountdown 
-            firstRentDate={firstRentDate}
-            frequency={paymentFrequency}
-          />
-        </div>
+        <PaymentCountdown 
+          firstRentDate={firstRentDate}
+          frequency={paymentFrequency}
+        />
       )}
 
       <Button 
