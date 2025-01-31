@@ -63,6 +63,8 @@ export function InitialPaymentForm({
   }
 
   const agencyFees = rentAmount ? Math.round(rentAmount * 0.5) : 0
+  const formattedDepositAmount = depositAmount ? depositAmount.toLocaleString() : "0"
+  const formattedAgencyFees = agencyFees.toLocaleString()
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -72,7 +74,7 @@ export function InitialPaymentForm({
             <Label>Caution</Label>
             <Input
               type="text"
-              value={depositAmount ? `${depositAmount.toLocaleString()} FCFA` : "0 FCFA"}
+              value={`${formattedDepositAmount} FCFA`}
               disabled
               className="mt-1.5"
             />
@@ -82,7 +84,7 @@ export function InitialPaymentForm({
             <Label>Frais d'agence (50% du loyer)</Label>
             <Input
               type="text"
-              value={`${agencyFees.toLocaleString()} FCFA`}
+              value={`${formattedAgencyFees} FCFA`}
               disabled
               className="mt-1.5"
             />
