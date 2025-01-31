@@ -8,6 +8,8 @@ import { PaymentsList } from "./components/PaymentsList"
 import { PaymentDialogs } from "./components/PaymentDialogs"
 import { PaymentStatusStats } from "./components/PaymentStatusStats"
 import { CurrentPeriodCard } from "./components/CurrentPeriodCard"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PaymentCountdown } from "./components/PaymentCountdown"
 import { useState } from "react"
 import { isAfter, isBefore } from "date-fns"
 
@@ -87,11 +89,17 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         return isAfter(now, start) && isBefore(now, end)
       })
 
+      // Récupérer la date de début du premier loyer
+      const firstRentPayment = payments?.find(p => 
+        p.payment_type === 'deposit' && p.first_rent_start_date
+      )
+
       return { 
         ...leaseData, 
         initialPayments, 
         regularPayments,
-        currentPeriod 
+        currentPeriod,
+        first_rent_start_date: firstRentPayment?.first_rent_start_date
       } as LeaseData
     },
     retry: 1
@@ -154,25 +162,39 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
     return <div className="text-center p-4 text-muted-foreground">Bail non trouvé</div>
   }
 
-  console.log("Passing to PaymentDialogs:", {
-    depositAmount: lease.deposit_amount,
-    rentAmount: lease.rent_amount
-  })
-
   return (
     <div className="space-y-8">
       <LeaseHeader 
         lease={lease}
         onInitialPayment={() => setShowInitialPaymentDialog(true)}
+        onRegularPayment={() => setShowRegularPaymentDialog(true)}
       />
       
       {stats && <PaymentStatusStats stats={stats} />}
 
-      {lease.currentPeriod && (
-        <CurrentPeriodCard
-          currentPeriod={lease.currentPeriod}
-          onPaymentClick={() => setShowRegularPaymentDialog(true)}
-        />
+      {/* Section Compte à Rebours et Périodes */}
+      {lease.initial_fees_paid && lease.first_rent_start_date && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Prochain Paiement</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <PaymentCountdown 
+              firstRentDate={new Date(lease.first_rent_start_date)}
+              frequency={lease.payment_frequency}
+            />
+            
+            {lease.currentPeriod && (
+              <div className="mt-4">
+                <h4 className="font-medium mb-2">Période de paiement actuelle</h4>
+                <CurrentPeriodCard
+                  currentPeriod={lease.currentPeriod}
+                  onPaymentClick={() => setShowRegularPaymentDialog(true)}
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       <PaymentsList 
