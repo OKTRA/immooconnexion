@@ -10,7 +10,6 @@ interface PaymentDialogsProps {
   onInitialDialogChange: (show: boolean) => void;
   onRegularDialogChange: (show: boolean) => void;
   onSuccess?: () => void;
-  firstRentDate?: Date;
 }
 
 export function PaymentDialogs({
@@ -19,14 +18,11 @@ export function PaymentDialogs({
   showRegularPaymentDialog,
   onInitialDialogChange,
   onRegularDialogChange,
-  onSuccess,
-  firstRentDate
+  onSuccess
 }: PaymentDialogsProps) {
   console.log("PaymentDialogs received lease:", {
     depositAmount: lease.deposit_amount,
-    rentAmount: lease.rent_amount,
-    paymentFrequency: lease.payment_frequency,
-    firstRentDate
+    paymentFrequency: lease.payment_frequency
   })
 
   return (
@@ -39,9 +35,7 @@ export function PaymentDialogs({
           <InitialPaymentForm
             leaseId={lease.id}
             depositAmount={lease.deposit_amount}
-            rentAmount={lease.rent_amount}
             paymentFrequency={lease.payment_frequency}
-            firstRentDate={firstRentDate}
             onSuccess={onSuccess}
           />
         </DialogContent>
