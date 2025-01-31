@@ -43,18 +43,59 @@ export function useLeaseMutations() {
           throw new Error('Agency ID not found')
         }
 
-        // Call the simplified function
-        const { data, error } = await supabase
-          .rpc('handle_simple_initial_payments', {
-            p_lease_id: leaseId,
-            p_deposit_amount: depositAmount,
-            p_agency_fees: Math.round(rentAmount * 0.5),
-            p_agency_id: leaseData.agency_id
+        console.log("Creating deposit payment...")
+        const { error: depositError } = await supabase
+          .from('apartment_lease_payments')
+          .insert({
+            lease_id: leaseId,
+            amount: depositAmount,
+            payment_type: 'deposit',
+            payment_method: 'cash',
+            payment_date: new Date().toISOString(),
+            status: 'paid',
+            agency_id: leaseData.agency_id,
+            payment_period_start: new Date().toISOString(),
+            payment_status_type: 'paid_current',
+            first_rent_start_date: firstRentStartDate.toISOString()
           })
 
-        if (error) {
-          console.error("Error in handle_simple_initial_payments:", error)
-          throw error
+        if (depositError) {
+          console.error("Error creating deposit payment:", depositError)
+          throw depositError
+        }
+
+        console.log("Creating agency fees payment...")
+        const { error: feesError } = await supabase
+          .from('apartment_lease_payments')
+          .insert({
+            lease_id: leaseId,
+            amount: Math.round(rentAmount * 0.5),
+            payment_type: 'agency_fees',
+            payment_method: 'cash',
+            payment_date: new Date().toISOString(),
+            status: 'paid',
+            agency_id: leaseData.agency_id,
+            payment_period_start: new Date().toISOString(),
+            payment_status_type: 'paid_current'
+          })
+
+        if (feesError) {
+          console.error("Error creating agency fees payment:", feesError)
+          throw feesError
+        }
+
+        console.log("Updating lease status...")
+        const { error: updateError } = await supabase
+          .from('apartment_leases')
+          .update({
+            initial_fees_paid: true,
+            initial_payments_completed: true
+          })
+          .eq('id', leaseId)
+
+        if (updateError) {
+          console.error("Error updating lease status:", updateError)
+          throw updateError
         }
 
         // Appeler la fonction de génération des périodes
