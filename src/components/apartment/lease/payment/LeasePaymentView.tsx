@@ -2,20 +2,14 @@ import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Loader2 } from "lucide-react"
-import { LeaseData } from "../types"
+import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "./types"
 import { LeaseHeader } from "./components/LeaseHeader"
 import { PaymentsList } from "./components/PaymentsList"
 import { PaymentDialogs } from "./components/PaymentDialogs"
 import { PaymentStatusStats } from "./components/PaymentStatusStats"
 import { CurrentPeriodCard } from "./components/CurrentPeriodCard"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PaymentCountdown } from "./components/PaymentCountdown"
 import { useState } from "react"
 import { isAfter, isBefore } from "date-fns"
-
-interface LeasePaymentViewProps {
-  leaseId: string;
-}
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
@@ -25,7 +19,6 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
     queryKey: ["lease", leaseId],
     queryFn: async () => {
       console.log("Fetching lease data for:", leaseId)
-      
       const { data: leaseData, error: leaseError } = await supabase
         .from("apartment_leases")
         .select(`
@@ -49,35 +42,35 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         .eq("id", leaseId)
         .maybeSingle()
 
-      if (leaseError) throw leaseError
-      if (!leaseData) return null
-
-      // Récupérer le paiement de dépôt avec first_rent_start_date
-      const { data: depositPayment, error: depositError } = await supabase
-        .from("apartment_lease_payments")
-        .select("first_rent_start_date")
-        .eq("lease_id", leaseId)
-        .eq("payment_type", "deposit")
-        .maybeSingle()
-
-      if (depositError) {
-        console.error("Error fetching deposit payment:", depositError)
+      if (leaseError) {
+        console.error("Error fetching lease:", leaseError)
+        throw leaseError
       }
 
-      console.log("Found deposit payment:", depositPayment)
+      if (!leaseData) {
+        console.error("No lease found with ID:", leaseId)
+        return null
+      }
 
-      // Récupérer tous les paiements
+      console.log("Lease data retrieved:", leaseData)
+
       const { data: payments, error: paymentsError } = await supabase
         .from("apartment_lease_payments")
         .select("*")
         .eq("lease_id", leaseId)
         .order("payment_date", { ascending: false })
 
-      if (paymentsError) throw paymentsError
+      if (paymentsError) {
+        console.error("Error fetching payments:", paymentsError)
+        throw paymentsError
+      }
 
       const initialPayments = payments?.filter(p => 
         p.payment_type === 'deposit' || p.payment_type === 'agency_fees'
-      ) || []
+      ).map(p => ({
+        ...p,
+        type: p.payment_type
+      })) || []
       
       const regularPayments = payments?.filter(p => 
         p.payment_type !== 'deposit' && p.payment_type !== 'agency_fees'
@@ -98,9 +91,49 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         ...leaseData, 
         initialPayments, 
         regularPayments,
-        currentPeriod,
-        first_rent_start_date: depositPayment?.first_rent_start_date
+        currentPeriod 
       } as LeaseData
+    },
+    retry: 1
+  })
+
+  const { data: stats } = useQuery({
+    queryKey: ["lease-payment-stats", leaseId],
+    queryFn: async () => {
+      console.log("Fetching payment stats for lease:", leaseId)
+      
+      const { data: payments, error } = await supabase
+        .from("apartment_lease_payments")
+        .select("amount, status, due_date")
+        .eq("lease_id", leaseId)
+
+      if (error) throw error
+
+      const totalReceived = payments
+        ?.filter(p => p.status === 'paid')
+        .reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+
+      const pendingAmount = payments
+        ?.filter(p => p.status === 'pending')
+        .reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+
+      const lateAmount = payments
+        ?.filter(p => p.status === 'late')
+        .reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+
+      const nextPayment = payments
+        ?.filter(p => p.status === 'pending')
+        .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())[0]
+
+      return {
+        totalReceived,
+        pendingAmount,
+        lateAmount,
+        nextPayment: nextPayment ? {
+          amount: nextPayment.amount,
+          due_date: nextPayment.due_date
+        } : undefined
+      } as PaymentSummary
     }
   })
 
@@ -121,6 +154,11 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
     return <div className="text-center p-4 text-muted-foreground">Bail non trouvé</div>
   }
 
+  console.log("Passing to PaymentDialogs:", {
+    depositAmount: lease.deposit_amount,
+    rentAmount: lease.rent_amount
+  })
+
   return (
     <div className="space-y-8">
       <LeaseHeader 
@@ -128,28 +166,13 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         onInitialPayment={() => setShowInitialPaymentDialog(true)}
       />
       
-      {lease.initial_fees_paid && lease.first_rent_start_date && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Prochain Paiement</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <PaymentCountdown 
-              firstRentDate={new Date(lease.first_rent_start_date)}
-              frequency={lease.payment_frequency}
-            />
-            
-            {lease.currentPeriod && (
-              <div className="mt-4">
-                <h4 className="font-medium mb-2">Période de paiement actuelle</h4>
-                <CurrentPeriodCard
-                  currentPeriod={lease.currentPeriod}
-                  onPaymentClick={() => setShowRegularPaymentDialog(true)}
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      {stats && <PaymentStatusStats stats={stats} />}
+
+      {lease.currentPeriod && (
+        <CurrentPeriodCard
+          currentPeriod={lease.currentPeriod}
+          onPaymentClick={() => setShowRegularPaymentDialog(true)}
+        />
       )}
 
       <PaymentsList 
