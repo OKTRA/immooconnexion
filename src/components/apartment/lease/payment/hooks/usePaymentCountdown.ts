@@ -58,8 +58,8 @@ export const usePaymentCountdown = (
       setTimeLeft(remaining)
     }
     
-    const timer = setInterval(updateCountdown, 60000)
-    updateCountdown()
+    const timer = setInterval(updateCountdown, 60000) // Update every minute
+    updateCountdown() // Initial update
     
     return () => clearInterval(timer)
   }, [firstRentDate, frequency])
