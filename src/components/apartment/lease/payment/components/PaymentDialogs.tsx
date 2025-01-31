@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { InitialPaymentForm } from "../form/InitialPaymentForm"
+import { InitialPaymentForm } from "../../form/InitialPaymentForm"
 import { RegularPaymentForm } from "./RegularPaymentForm"
-import { LeaseData } from "../types"
+import { LeaseData } from "../../types"
 
 interface PaymentDialogsProps {
   lease: LeaseData;
@@ -10,6 +10,7 @@ interface PaymentDialogsProps {
   onInitialDialogChange: (show: boolean) => void;
   onRegularDialogChange: (show: boolean) => void;
   onSuccess?: () => void;
+  firstRentDate?: Date;
 }
 
 export function PaymentDialogs({
@@ -18,12 +19,14 @@ export function PaymentDialogs({
   showRegularPaymentDialog,
   onInitialDialogChange,
   onRegularDialogChange,
-  onSuccess
+  onSuccess,
+  firstRentDate
 }: PaymentDialogsProps) {
   console.log("PaymentDialogs received lease:", {
     depositAmount: lease.deposit_amount,
     rentAmount: lease.rent_amount,
-    paymentFrequency: lease.payment_frequency
+    paymentFrequency: lease.payment_frequency,
+    firstRentDate
   })
 
   return (
@@ -38,7 +41,7 @@ export function PaymentDialogs({
             depositAmount={lease.deposit_amount}
             rentAmount={lease.rent_amount}
             paymentFrequency={lease.payment_frequency}
-            firstRentDate={new Date(lease.start_date)}
+            firstRentDate={firstRentDate}
             onSuccess={onSuccess}
           />
         </DialogContent>
