@@ -147,7 +147,7 @@ export function InitialPaymentForm({
       {paymentFrequency && firstRentDate && (
         <PaymentCountdown 
           firstRentDate={firstRentDate}
-          frequency={paymentFrequency as any}
+          frequency={paymentFrequency}
         />
       )}
 
