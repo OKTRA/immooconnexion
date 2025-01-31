@@ -58,7 +58,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         .select("first_rent_start_date")
         .eq("lease_id", leaseId)
         .eq("payment_type", "deposit")
-        .single()
+        .maybeSingle()
 
       if (depositError) {
         console.error("Error fetching deposit payment:", depositError)
