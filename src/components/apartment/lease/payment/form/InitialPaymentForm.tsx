@@ -30,28 +30,6 @@ export function InitialPaymentForm({
   const [firstRentDate, setFirstRentDate] = useState<Date>(new Date())
   const { handleInitialPayments } = useLeaseMutations()
 
-  // Requête pour vérifier si first_rent_start_date existe déjà
-  const { data: existingPayment } = useQuery({
-    queryKey: ['first-rent-date', leaseId],
-    queryFn: async () => {
-      console.log("Fetching first rent date for lease:", leaseId)
-      const { data, error } = await supabase
-        .from('apartment_lease_payments')
-        .select('first_rent_start_date, payment_date')
-        .eq('lease_id', leaseId)
-        .eq('payment_type', 'deposit')
-        .maybeSingle()
-
-      if (error) {
-        console.error("Error fetching first rent date:", error)
-        return null
-      }
-
-      console.log("Existing payment data:", data)
-      return data
-    }
-  })
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -75,24 +53,12 @@ export function InitialPaymentForm({
     setIsSubmitting(true)
 
     try {
-      const result = await handleInitialPayments.mutateAsync({
+      await handleInitialPayments.mutateAsync({
         leaseId,
         depositAmount,
         rentAmount,
         firstRentStartDate: firstRentDate
       })
-
-      console.log("Initial payment submission result:", result)
-
-      // Vérifier si le paiement a été enregistré avec succès
-      const { data: verifyPayment, error } = await supabase
-        .from('apartment_lease_payments')
-        .select('first_rent_start_date, payment_date')
-        .eq('lease_id', leaseId)
-        .eq('payment_type', 'deposit')
-        .maybeSingle()
-
-      console.log("Payment verification:", { verifyPayment, error })
 
       onSuccess?.()
     } catch (error) {
@@ -111,13 +77,6 @@ export function InitialPaymentForm({
   const agencyFees = rentAmount ? Math.round(rentAmount * 0.5) : 0
   const formattedDepositAmount = depositAmount ? depositAmount.toLocaleString() : "0"
   const formattedAgencyFees = agencyFees.toLocaleString()
-
-  // Log when PaymentCountdown is rendered
-  console.log("Rendering PaymentCountdown with:", {
-    firstRentDate,
-    paymentFrequency,
-    existingPayment
-  })
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
