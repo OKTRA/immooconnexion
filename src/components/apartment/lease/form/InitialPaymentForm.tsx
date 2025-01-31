@@ -18,8 +18,8 @@ import { toast } from "@/components/ui/use-toast"
 
 export function InitialPaymentForm({ 
   leaseId, 
-  depositAmount = 0, // Ajout d'une valeur par défaut
-  rentAmount = 0, // Ajout d'une valeur par défaut
+  depositAmount = 0,
+  rentAmount = 0,
   paymentFrequency,
   onSuccess 
 }: InitialPaymentFormProps) {
@@ -62,6 +62,8 @@ export function InitialPaymentForm({
     }
   }
 
+  const agencyFees = rentAmount ? Math.round(rentAmount * 0.5) : 0
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Card className="p-4">
@@ -80,7 +82,7 @@ export function InitialPaymentForm({
             <Label>Frais d'agence (50% du loyer)</Label>
             <Input
               type="text"
-              value={rentAmount ? `${Math.round(rentAmount * 0.5).toLocaleString()} FCFA` : "0 FCFA"}
+              value={`${agencyFees.toLocaleString()} FCFA`}
               disabled
               className="mt-1.5"
             />
