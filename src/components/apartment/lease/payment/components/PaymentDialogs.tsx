@@ -1,15 +1,15 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { InitialPaymentForm } from "../form/InitialPaymentForm"
-import { RegularPaymentForm } from "./RegularPaymentForm"
+import { InitialPaymentForm } from "@/components/apartment/payment/components/InitialPaymentForm"
+import { PaymentForm } from "@/components/apartment/payment/PaymentForm"
 import { LeaseData } from "../types"
 
 interface PaymentDialogsProps {
   lease: LeaseData
   showInitialPaymentDialog: boolean
   showRegularPaymentDialog: boolean
-  onInitialDialogChange: (show: boolean) => void
-  onRegularDialogChange: (show: boolean) => void
-  onSuccess?: () => void
+  onInitialDialogChange: (open: boolean) => void
+  onRegularDialogChange: (open: boolean) => void
+  onSuccess: () => void
 }
 
 export function PaymentDialogs({
@@ -20,37 +20,30 @@ export function PaymentDialogs({
   onRegularDialogChange,
   onSuccess
 }: PaymentDialogsProps) {
-  console.log("PaymentDialogs received lease:", {
-    depositAmount: lease.deposit_amount,
-    rentAmount: lease.rent_amount,
-    paymentFrequency: lease.payment_frequency
-  })
-
   return (
     <>
       <Dialog open={showInitialPaymentDialog} onOpenChange={onInitialDialogChange}>
-        <DialogContent className="max-w-xl">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Paiements Initiaux</DialogTitle>
           </DialogHeader>
-          <InitialPaymentForm
-            leaseId={lease.id}
-            depositAmount={lease.deposit_amount}
-            rentAmount={lease.rent_amount}
-            paymentFrequency={lease.payment_frequency}
+          <InitialPaymentForm 
             onSuccess={onSuccess}
+            lease={lease}
           />
         </DialogContent>
       </Dialog>
 
       <Dialog open={showRegularPaymentDialog} onOpenChange={onRegularDialogChange}>
-        <DialogContent className="max-w-xl">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nouveau Paiement</DialogTitle>
+            <DialogTitle>Nouveau Paiement de Loyer</DialogTitle>
           </DialogHeader>
-          <RegularPaymentForm
-            lease={lease}
+          <PaymentForm 
             onSuccess={onSuccess}
+            leaseId={lease.id}
+            lease={lease}
+            isHistorical={false}
           />
         </DialogContent>
       </Dialog>

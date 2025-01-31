@@ -5,11 +5,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { PaymentMethod } from "@/types/payment"
 
 interface PaymentMethodSelectProps {
-  value: PaymentMethod
-  onChange: (value: PaymentMethod) => void
+  value: string
+  onChange: (value: string) => void
 }
 
 export function PaymentMethodSelect({

@@ -9,7 +9,6 @@ import { PaymentDialogs } from "./components/PaymentDialogs"
 import { PaymentStatusStats } from "./components/PaymentStatusStats"
 import { CurrentPeriodCard } from "./components/CurrentPeriodCard"
 import { useState } from "react"
-import { isAfter, isBefore } from "date-fns"
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
@@ -19,7 +18,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
     queryKey: ["lease", leaseId],
     queryFn: async () => {
       console.log("Fetching lease data for:", leaseId)
-      const { data: leaseData, error: leaseError } = await supabase
+      const { data, error } = await supabase
         .from("apartment_leases")
         .select(`
           *,
@@ -42,17 +41,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         .eq("id", leaseId)
         .maybeSingle()
 
-      if (leaseError) {
-        console.error("Error fetching lease:", leaseError)
-        throw leaseError
-      }
-
-      if (!leaseData) {
-        console.error("No lease found with ID:", leaseId)
-        return null
-      }
-
-      console.log("Lease data retrieved:", leaseData)
+      if (error) throw error
 
       const { data: payments, error: paymentsError } = await supabase
         .from("apartment_lease_payments")
@@ -60,10 +49,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         .eq("lease_id", leaseId)
         .order("payment_date", { ascending: false })
 
-      if (paymentsError) {
-        console.error("Error fetching payments:", paymentsError)
-        throw paymentsError
-      }
+      if (paymentsError) throw paymentsError
 
       const initialPayments = payments?.filter(p => 
         p.payment_type === 'deposit' || p.payment_type === 'agency_fees'
@@ -80,7 +66,6 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
       })) || []
 
       const currentPeriod = regularPayments.find(p => {
-        if (!p.payment_period_start || !p.payment_period_end) return false
         const start = new Date(p.payment_period_start)
         const end = new Date(p.payment_period_end)
         const now = new Date()
@@ -88,13 +73,12 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
       })
 
       return { 
-        ...leaseData, 
+        ...data, 
         initialPayments, 
         regularPayments,
         currentPeriod 
       } as LeaseData
-    },
-    retry: 1
+    }
   })
 
   const { data: stats } = useQuery({
@@ -153,11 +137,6 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   if (!lease) {
     return <div className="text-center p-4 text-muted-foreground">Bail non trouvé</div>
   }
-
-  console.log("Passing to PaymentDialogs:", {
-    depositAmount: lease.deposit_amount,
-    rentAmount: lease.rent_amount
-  })
 
   return (
     <div className="space-y-8">
