@@ -21,6 +21,8 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
     queryKey: ["lease", leaseId],
     queryFn: async () => {
       console.log("Fetching lease data for:", leaseId)
+      
+      // Récupérer les données du bail
       const { data: leaseData, error: leaseError } = await supabase
         .from("apartment_leases")
         .select(`
@@ -54,11 +56,10 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         return null
       }
 
-      console.log("Lease data retrieved:", leaseData)
-
+      // Récupérer les paiements et la date de début du premier loyer
       const { data: payments, error: paymentsError } = await supabase
         .from("apartment_lease_payments")
-        .select("*")
+        .select("*, first_rent_start_date")
         .eq("lease_id", leaseId)
         .order("payment_date", { ascending: false })
 
@@ -66,6 +67,11 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         console.error("Error fetching payments:", paymentsError)
         throw paymentsError
       }
+
+      // Trouver la date de début du premier loyer dans les paiements
+      const depositPayment = payments?.find(p => 
+        p.payment_type === 'deposit' && p.first_rent_start_date
+      )
 
       const initialPayments = payments?.filter(p => 
         p.payment_type === 'deposit' || p.payment_type === 'agency_fees'
@@ -89,17 +95,17 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         return isAfter(now, start) && isBefore(now, end)
       })
 
-      // Récupérer la date de début du premier loyer
-      const firstRentPayment = payments?.find(p => 
-        p.payment_type === 'deposit' && p.first_rent_start_date
-      )
+      console.log("Lease data retrieved:", {
+        ...leaseData,
+        first_rent_start_date: depositPayment?.first_rent_start_date
+      })
 
       return { 
         ...leaseData, 
         initialPayments, 
         regularPayments,
         currentPeriod,
-        first_rent_start_date: firstRentPayment?.first_rent_start_date
+        first_rent_start_date: depositPayment?.first_rent_start_date
       } as LeaseData
     },
     retry: 1
@@ -170,8 +176,6 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         onRegularPayment={() => setShowRegularPaymentDialog(true)}
       />
       
-      {stats && <PaymentStatusStats stats={stats} />}
-
       {/* Section Compte à Rebours et Périodes */}
       {lease.initial_fees_paid && lease.first_rent_start_date && (
         <Card>
