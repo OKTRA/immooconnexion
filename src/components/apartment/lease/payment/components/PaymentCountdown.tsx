@@ -1,13 +1,13 @@
+import { Clock } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { usePaymentCountdown } from "../hooks/usePaymentCountdown"
 import { PaymentFrequency } from "../../types"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { Clock } from "lucide-react"
 
 interface PaymentCountdownProps {
-  firstRentDate: Date | null
-  frequency: PaymentFrequency
+  firstRentDate: Date | null;
+  frequency: PaymentFrequency;
 }
 
 export function PaymentCountdown({ firstRentDate, frequency }: PaymentCountdownProps) {
