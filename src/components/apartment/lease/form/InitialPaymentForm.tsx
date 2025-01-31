@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { PaymentMethodSelect } from "../payment/components/PaymentMethodSelect"
-import { PaymentCountdown } from "../payment/components/PaymentCountdown"
+import { PaymentMethodSelect } from "../components/PaymentMethodSelect"
+import { PaymentCountdown } from "../components/PaymentCountdown"
+import { InitialPaymentFormProps } from "../types"
 import { useLeaseMutations } from "../hooks/useLeaseMutations"
 import { CalendarIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
@@ -14,14 +15,6 @@ import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { PaymentMethod } from "@/types/payment"
 import { toast } from "@/components/ui/use-toast"
-
-interface InitialPaymentFormProps {
-  leaseId: string
-  depositAmount?: number
-  rentAmount?: number
-  paymentFrequency?: string
-  onSuccess?: () => void
-}
 
 export function InitialPaymentForm({ 
   leaseId, 
@@ -111,7 +104,7 @@ export function InitialPaymentForm({
             <Label>Mode de paiement</Label>
             <PaymentMethodSelect
               value={paymentMethod}
-              onChange={(value) => setPaymentMethod(value)}
+              onChange={(value) => setPaymentMethod(value as PaymentMethod)}
             />
           </div>
 
@@ -147,7 +140,7 @@ export function InitialPaymentForm({
       {paymentFrequency && firstRentDate && (
         <PaymentCountdown 
           firstRentDate={firstRentDate}
-          frequency={paymentFrequency as any}
+          frequency={paymentFrequency}
         />
       )}
 
