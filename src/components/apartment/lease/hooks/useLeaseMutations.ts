@@ -43,19 +43,32 @@ export function useLeaseMutations() {
           throw new Error('Agency ID not found')
         }
 
-        // Call the simplified database function
+        // Call the simplified function
         const { data, error } = await supabase
           .rpc('handle_simple_initial_payments', {
             p_lease_id: leaseId,
             p_deposit_amount: depositAmount,
             p_agency_fees: Math.round(rentAmount * 0.5),
-            p_agency_id: leaseData.agency_id,
-            p_first_rent_start_date: firstRentStartDate.toISOString()
+            p_agency_id: leaseData.agency_id
           })
 
         if (error) {
           console.error("Error in handle_simple_initial_payments:", error)
           throw error
+        }
+
+        // Appeler la fonction de génération des périodes
+        console.log("Calling generate_payment_periods function...")
+        const { error: periodsError } = await supabase
+          .rpc('generate_payment_periods', { 
+            p_lease_id: leaseId,
+            p_start_date: firstRentStartDate.toISOString(),
+            p_frequency: 'monthly'
+          })
+
+        if (periodsError) {
+          console.error("Error generating payment periods:", periodsError)
+          throw periodsError
         }
 
         console.log("Initial payments completed successfully")

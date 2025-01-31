@@ -27,9 +27,7 @@ export function LoginFormFields() {
           title: "Erreur de saisie",
           description: "Veuillez remplir tous les champs",
           variant: "destructive",
-          duration: 5000,
         })
-        setIsLoading(false)
         return
       }
 
@@ -40,24 +38,13 @@ export function LoginFormFields() {
 
       if (signInError) {
         console.error('Login error:', signInError)
-        
-        // Handle specific error cases
-        if (signInError.message === "Invalid login credentials") {
-          toast({
-            title: "Échec de la connexion",
-            description: "Email ou mot de passe incorrect",
-            variant: "destructive",
-            duration: 5000,
-          })
-        } else {
-          toast({
-            title: "Erreur de connexion",
-            description: "Une erreur est survenue lors de la connexion",
-            variant: "destructive",
-            duration: 5000,
-          })
-        }
-        setIsLoading(false)
+        toast({
+          title: "Échec de la connexion",
+          description: signInError.message === "Invalid login credentials" 
+            ? "Email ou mot de passe incorrect"
+            : "Une erreur est survenue lors de la connexion",
+          variant: "destructive",
+        })
         return
       }
 
@@ -66,63 +53,62 @@ export function LoginFormFields() {
           title: "Échec de la connexion",
           description: "Impossible de récupérer les informations utilisateur",
           variant: "destructive",
-          duration: 5000,
         })
-        setIsLoading(false)
         return
       }
 
-      // Show success toast and navigate immediately after successful authentication
-      toast({
-        title: "Connexion réussie",
-        description: "Bienvenue dans votre espace",
-        duration: 3000,
-      })
-      navigate("/agence/dashboard")
-
-      // Continue with profile and agency checks in the background
-      const { data: profile, error: profileError } = await supabase
+      // Get user profile and agency info
+      const { data: profile } = await supabase
         .from('profiles')
-        .select('agency_id')
+        .select('agency_id, role')
         .eq('id', signInData.user.id)
         .single()
 
-      if (profileError || !profile?.agency_id) {
-        console.error('Profile verification error:', profileError)
+      if (!profile?.agency_id) {
+        toast({
+          title: "Erreur",
+          description: "Aucune agence associée à ce compte",
+          variant: "destructive",
+        })
         await supabase.auth.signOut()
         return
       }
 
-      const { data: agency, error: agencyError } = await supabase
+      // Check agency status
+      const { data: agency } = await supabase
         .from('agencies')
         .select('status')
         .eq('id', profile.agency_id)
         .single()
 
-      if (agencyError || !agency) {
-        console.error('Agency verification error:', agencyError)
-        await supabase.auth.signOut()
-        return
-      }
-
-      if (agency.status === 'blocked') {
+      if (agency?.status === 'blocked') {
         toast({
           title: "Accès refusé",
           description: "Votre agence est actuellement bloquée. Veuillez contacter l'administrateur.",
           variant: "destructive",
-          duration: 7000,
         })
         await supabase.auth.signOut()
         return
       }
 
+      toast({
+        title: "Connexion réussie",
+        description: "Bienvenue dans votre espace",
+      })
+
+      // Redirect based on role
+      if (profile.role === 'super_admin') {
+        navigate('/super-admin/dashboard')
+      } else {
+        navigate('/agence/dashboard')
+      }
+
     } catch (error) {
-      console.error('General error:', error)
+      console.error('Login error:', error)
       toast({
         title: "Erreur de connexion",
         description: "Une erreur est survenue lors de la connexion",
         variant: "destructive",
-        duration: 5000,
       })
     } finally {
       setIsLoading(false)

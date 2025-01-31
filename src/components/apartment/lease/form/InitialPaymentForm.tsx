@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { PaymentMethodSelect } from "./PaymentMethodSelect"
-import { PaymentCountdown } from "./PaymentCountdown"
+import { PaymentMethodSelect } from "../../payment/components/PaymentMethodSelect"
+import { PaymentCountdown } from "../payment/components/PaymentCountdown"
+import { InitialPaymentFormProps } from "../types"
 import { useLeaseMutations } from "../hooks/useLeaseMutations"
 import { CalendarIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
@@ -14,14 +15,8 @@ import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { PaymentMethod } from "@/types/payment"
 import { toast } from "@/components/ui/use-toast"
-
-interface InitialPaymentFormProps {
-  leaseId: string
-  depositAmount?: number
-  rentAmount?: number
-  paymentFrequency?: string
-  onSuccess?: () => void
-}
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
 export function InitialPaymentForm({ 
   leaseId, 
@@ -35,6 +30,28 @@ export function InitialPaymentForm({
   const [firstRentDate, setFirstRentDate] = useState<Date>(new Date())
   const { handleInitialPayments } = useLeaseMutations()
 
+  // Requête pour vérifier si first_rent_start_date existe déjà
+  const { data: existingPayment } = useQuery({
+    queryKey: ['first-rent-date', leaseId],
+    queryFn: async () => {
+      console.log("Fetching first rent date for lease:", leaseId)
+      const { data, error } = await supabase
+        .from('apartment_lease_payments')
+        .select('first_rent_start_date, payment_date')
+        .eq('lease_id', leaseId)
+        .eq('payment_type', 'deposit')
+        .maybeSingle()
+
+      if (error) {
+        console.error("Error fetching first rent date:", error)
+        return null
+      }
+
+      console.log("Existing payment data:", data)
+      return data
+    }
+  })
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -47,15 +64,36 @@ export function InitialPaymentForm({
       return
     }
 
+    console.log("Starting initial payment submission:", {
+      leaseId,
+      depositAmount,
+      rentAmount,
+      firstRentDate: firstRentDate.toISOString(),
+      paymentFrequency
+    })
+
     setIsSubmitting(true)
 
     try {
-      await handleInitialPayments.mutateAsync({
+      const result = await handleInitialPayments.mutateAsync({
         leaseId,
         depositAmount,
         rentAmount,
         firstRentStartDate: firstRentDate
       })
+
+      console.log("Initial payment submission result:", result)
+
+      // Vérifier si le paiement a été enregistré avec succès
+      const { data: verifyPayment, error } = await supabase
+        .from('apartment_lease_payments')
+        .select('first_rent_start_date, payment_date')
+        .eq('lease_id', leaseId)
+        .eq('payment_type', 'deposit')
+        .maybeSingle()
+
+      console.log("Payment verification:", { verifyPayment, error })
+
       onSuccess?.()
     } catch (error) {
       console.error("Error submitting initial payments:", error)
@@ -69,10 +107,17 @@ export function InitialPaymentForm({
     }
   }
 
-  // Calculate agency fees outside JSX
+  // Calculate values outside JSX
   const agencyFees = rentAmount ? Math.round(rentAmount * 0.5) : 0
-  const formattedDepositAmount = depositAmount?.toLocaleString() || "0"
+  const formattedDepositAmount = depositAmount ? depositAmount.toLocaleString() : "0"
   const formattedAgencyFees = agencyFees.toLocaleString()
+
+  // Log when PaymentCountdown is rendered
+  console.log("Rendering PaymentCountdown with:", {
+    firstRentDate,
+    paymentFrequency,
+    existingPayment
+  })
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -135,11 +180,14 @@ export function InitialPaymentForm({
         </div>
       </Card>
 
-      {paymentFrequency && (
-        <PaymentCountdown 
-          firstRentDate={firstRentDate}
-          frequency={paymentFrequency}
-        />
+      {paymentFrequency && firstRentDate && (
+        <div className="bg-muted p-4 rounded-lg">
+          <h3 className="font-medium mb-2">Prochain paiement</h3>
+          <PaymentCountdown 
+            firstRentDate={firstRentDate}
+            frequency={paymentFrequency}
+          />
+        </div>
       )}
 
       <Button 
