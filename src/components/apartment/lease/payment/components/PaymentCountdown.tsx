@@ -1,66 +1,47 @@
-import { useEffect, useState } from "react"
-import { differenceInDays, differenceInHours, differenceInMinutes } from "date-fns"
 import { Clock } from "lucide-react"
-import { PaymentFrequency } from "../types"
+import { Card, CardContent } from "@/components/ui/card"
+import { usePaymentCountdown } from "../hooks/usePaymentCountdown"
+import { PaymentFrequency } from "../../types"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
 
 interface PaymentCountdownProps {
-  firstRentDate: Date
-  frequency: PaymentFrequency
+  firstRentDate: Date | null;
+  frequency: PaymentFrequency;
 }
 
 export function PaymentCountdown({ firstRentDate, frequency }: PaymentCountdownProps) {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0
-  })
-
-  useEffect(() => {
-    console.log("PaymentCountdown mounted with:", { firstRentDate, frequency })
-    
-    const updateCountdown = () => {
-      const now = new Date()
-      const days = differenceInDays(firstRentDate, now)
-      const hours = differenceInHours(firstRentDate, now) % 24
-      const minutes = differenceInMinutes(firstRentDate, now) % 60
-
-      setTimeLeft({ days, hours, minutes })
-    }
-
-    updateCountdown()
-    const interval = setInterval(updateCountdown, 60000) // Update every minute
-
-    return () => clearInterval(interval)
-  }, [firstRentDate])
-
-  const getFrequencyLabel = () => {
-    switch (frequency) {
-      case 'monthly':
-        return 'mensuel'
-      case 'quarterly':
-        return 'trimestriel'
-      case 'yearly':
-        return 'annuel'
-      default:
-        return ''
-    }
-  }
-
-  if (timeLeft.days < 0) {
-    return null // Ne pas afficher si la date est passée
-  }
-
+  const timeLeft = usePaymentCountdown(firstRentDate, frequency)
+  
+  if (!firstRentDate || !timeLeft) return null
+  
   return (
-    <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
-      <Clock className="h-5 w-5 text-muted-foreground" />
-      <div>
-        <p className="font-medium">
-          Temps restant jusqu'au premier loyer {getFrequencyLabel()}:
-        </p>
-        <p className="text-lg">
-          {timeLeft.days} jours, {timeLeft.hours} heures et {timeLeft.minutes} minutes
-        </p>
-      </div>
-    </div>
+    <Card className="bg-primary/5 border-primary/20">
+      <CardContent className="pt-6">
+        <div className="flex items-center gap-2 text-primary mb-2">
+          <Clock className="h-5 w-5" />
+          <h3 className="font-semibold">Prochain paiement</h3>
+        </div>
+        
+        <div className="text-sm text-muted-foreground mb-2">
+          Premier loyer le {format(firstRentDate, "d MMMM yyyy", { locale: fr })}
+        </div>
+        
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="bg-background rounded-lg p-2">
+            <div className="text-2xl font-bold">{timeLeft.days}</div>
+            <div className="text-xs text-muted-foreground">jours</div>
+          </div>
+          <div className="bg-background rounded-lg p-2">
+            <div className="text-2xl font-bold">{timeLeft.hours}</div>
+            <div className="text-xs text-muted-foreground">heures</div>
+          </div>
+          <div className="bg-background rounded-lg p-2">
+            <div className="text-2xl font-bold">{timeLeft.minutes}</div>
+            <div className="text-xs text-muted-foreground">minutes</div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
