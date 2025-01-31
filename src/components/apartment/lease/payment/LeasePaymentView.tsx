@@ -56,10 +56,25 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         return null
       }
 
-      // Récupérer les paiements et la date de début du premier loyer
+      // Récupérer spécifiquement le paiement de dépôt avec first_rent_start_date
+      const { data: depositPayment, error: depositError } = await supabase
+        .from("apartment_lease_payments")
+        .select("first_rent_start_date")
+        .eq("lease_id", leaseId)
+        .eq("payment_type", "deposit")
+        .maybeSingle()
+
+      if (depositError) {
+        console.error("Error fetching deposit payment:", depositError)
+        throw depositError
+      }
+
+      console.log("Found deposit payment:", depositPayment)
+
+      // Récupérer tous les paiements
       const { data: payments, error: paymentsError } = await supabase
         .from("apartment_lease_payments")
-        .select("*, first_rent_start_date")
+        .select("*")
         .eq("lease_id", leaseId)
         .order("payment_date", { ascending: false })
 
@@ -67,11 +82,6 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         console.error("Error fetching payments:", paymentsError)
         throw paymentsError
       }
-
-      // Trouver la date de début du premier loyer dans les paiements
-      const depositPayment = payments?.find(p => 
-        p.payment_type === 'deposit' && p.first_rent_start_date
-      )
 
       const initialPayments = payments?.filter(p => 
         p.payment_type === 'deposit' || p.payment_type === 'agency_fees'
@@ -176,7 +186,6 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         onRegularPayment={() => setShowRegularPaymentDialog(true)}
       />
       
-      {/* Section Compte à Rebours et Périodes */}
       {lease.initial_fees_paid && lease.first_rent_start_date && (
         <Card>
           <CardHeader>
