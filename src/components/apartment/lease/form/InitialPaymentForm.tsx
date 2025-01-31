@@ -14,11 +14,12 @@ import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { PaymentMethod } from "@/types/payment"
+import { toast } from "@/components/ui/use-toast"
 
 export function InitialPaymentForm({ 
   leaseId, 
-  depositAmount, 
-  rentAmount,
+  depositAmount = 0, // Ajout d'une valeur par défaut
+  rentAmount = 0, // Ajout d'une valeur par défaut
   paymentFrequency,
   onSuccess 
 }: InitialPaymentFormProps) {
@@ -29,6 +30,16 @@ export function InitialPaymentForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!depositAmount || !rentAmount) {
+      toast({
+        title: "Erreur",
+        description: "Les montants de la caution et du loyer sont requis",
+        variant: "destructive"
+      })
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -41,6 +52,11 @@ export function InitialPaymentForm({
       onSuccess?.()
     } catch (error) {
       console.error("Error submitting initial payments:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'enregistrement des paiements",
+        variant: "destructive"
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -54,7 +70,7 @@ export function InitialPaymentForm({
             <Label>Caution</Label>
             <Input
               type="text"
-              value={`${depositAmount?.toLocaleString()} FCFA`}
+              value={depositAmount ? `${depositAmount.toLocaleString()} FCFA` : "0 FCFA"}
               disabled
               className="mt-1.5"
             />
@@ -64,7 +80,7 @@ export function InitialPaymentForm({
             <Label>Frais d'agence (50% du loyer)</Label>
             <Input
               type="text"
-              value={`${Math.round(rentAmount * 0.5).toLocaleString()} FCFA`}
+              value={rentAmount ? `${Math.round(rentAmount * 0.5).toLocaleString()} FCFA` : "0 FCFA"}
               disabled
               className="mt-1.5"
             />
@@ -107,14 +123,16 @@ export function InitialPaymentForm({
         </div>
       </Card>
 
-      <PaymentCountdown 
-        firstRentDate={firstRentDate}
-        frequency={paymentFrequency}
-      />
+      {paymentFrequency && (
+        <PaymentCountdown 
+          firstRentDate={firstRentDate}
+          frequency={paymentFrequency}
+        />
+      )}
 
       <Button 
         type="submit" 
-        disabled={isSubmitting}
+        disabled={isSubmitting || !depositAmount || !rentAmount}
         className="w-full"
       >
         {isSubmitting ? "Enregistrement..." : "Enregistrer les paiements initiaux"}
