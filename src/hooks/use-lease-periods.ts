@@ -1,14 +1,7 @@
 import { addDays, addMonths, addWeeks, addYears, format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useMemo } from "react";
-
-export type PaymentPeriod = {
-  startDate: Date;
-  endDate: Date;
-  amount: number;
-  label: string;
-  isPaid: boolean;
-};
+import { PaymentPeriod } from "@/types/payment";
 
 export function useLeasePeriods(lease: {
   start_date: string;

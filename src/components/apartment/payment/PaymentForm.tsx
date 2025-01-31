@@ -1,161 +1,83 @@
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { supabase } from "@/lib/supabase"
-import { toast } from "@/hooks/use-toast"
-import { LeaseData, PaymentFormData } from "./types"
-import { format, addDays, addWeeks, addMonths, addYears } from "date-fns"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent } from "@/components/ui/card"
-
-const FREQUENCY_LIMITS = {
-  daily: 31,
-  weekly: 4,
-  monthly: 12,
-  quarterly: 4,
-  biannual: 2,
-  yearly: 5
-}
-
-const FREQUENCY_LABELS = {
-  daily: "jour(s)",
-  weekly: "semaine(s)",
-  monthly: "mois",
-  quarterly: "trimestre(s)",
-  biannual: "semestre(s)",
-  yearly: "année(s)"
-}
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { PaymentMethodSelect } from "./PaymentMethodSelect";
+import { PaymentPeriodsList } from "./PaymentPeriodsList";
+import { useLeasePeriods, PaymentPeriod } from "@/hooks/use-lease-periods";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PaymentFormProps {
+  lease: any;
   onSuccess?: () => void;
-  leaseId: string;
-  lease: LeaseData;
-  isHistorical?: boolean;
 }
 
-export function PaymentForm({ 
-  onSuccess, 
-  leaseId,
-  lease,
-  isHistorical = false
-}: PaymentFormProps) {
-  const [paymentMethod, setPaymentMethod] = useState<PaymentFormData["paymentMethod"]>("cash")
-  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0])
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [periods, setPeriods] = useState(1)
-  const [notes, setNotes] = useState("")
+export function PaymentForm({ lease, onSuccess }: PaymentFormProps) {
+  const [selectedPeriods, setSelectedPeriods] = useState<PaymentPeriod[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const frequency = lease.payment_frequency
-  const maxPeriods = FREQUENCY_LIMITS[frequency] || 12
-  const periodLabel = FREQUENCY_LABELS[frequency] || "mois"
+  const { periods } = useLeasePeriods(lease, lease.payments || []);
 
-  const calculateEndDate = (startDate: Date, periodsCount: number) => {
-    switch (frequency) {
-      case 'daily':
-        return addDays(startDate, periodsCount)
-      case 'weekly':
-        return addWeeks(startDate, periodsCount)
-      case 'monthly':
-        return addMonths(startDate, periodsCount)
-      case 'quarterly':
-        return addMonths(startDate, periodsCount * 3)
-      case 'yearly':
-        return addYears(startDate, periodsCount)
-      default:
-        return addMonths(startDate, periodsCount)
+  const handlePeriodSelect = (period: PaymentPeriod) => {
+    if (selectedPeriods.includes(period)) {
+      setSelectedPeriods(selectedPeriods.filter(p => p !== period));
+    } else {
+      setSelectedPeriods([...selectedPeriods, period]);
     }
-  }
-
-  const totalAmount = lease.rent_amount * periods
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
-      const periodStart = new Date(paymentDate)
-      const periodEnd = calculateEndDate(periodStart, periods)
-
-      const { data, error } = await supabase.rpc(
-        'create_lease_payment',
-        {
-          p_lease_id: leaseId,
-          p_amount: totalAmount,
+      // Créer un paiement pour chaque période sélectionnée
+      for (const period of selectedPeriods) {
+        const { error } = await supabase.rpc('create_lease_payment', {
+          p_lease_id: lease.id,
+          p_amount: period.amount,
           p_payment_type: 'rent',
           p_payment_method: paymentMethod,
           p_payment_date: paymentDate,
-          p_period_start: format(periodStart, 'yyyy-MM-dd'),
-          p_period_end: format(periodEnd, 'yyyy-MM-dd'),
-          p_notes: notes
-        }
-      )
+          p_period_start: period.startDate.toISOString(),
+          p_period_end: period.endDate.toISOString()
+        });
 
-      if (error) throw error
+        if (error) throw error;
+      }
 
       toast({
-        title: "Succès",
+        title: "Paiement enregistré",
         description: "Le paiement a été enregistré avec succès",
-      })
+      });
 
-      onSuccess?.()
-    } catch (error) {
-      console.error("Error submitting payment:", error)
+      onSuccess?.();
+    } catch (error: any) {
+      console.error('Error submitting payment:', error);
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de l'enregistrement du paiement",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <Card>
-        <CardContent className="pt-6 space-y-4">
-          <div>
-            <Label>Montant mensuel</Label>
-            <Input
-              type="text"
-              value={`${lease.rent_amount.toLocaleString()} FCFA`}
-              disabled
-            />
-          </div>
+      <PaymentPeriodsList
+        periods={periods}
+        selectedPeriods={selectedPeriods}
+        onPeriodSelect={handlePeriodSelect}
+      />
 
-          <div>
-            <Label>Nombre de {periodLabel}</Label>
-            <Select
-              value={periods.toString()}
-              onValueChange={(value) => setPeriods(parseInt(value))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: maxPeriods }, (_, i) => i + 1).map((num) => (
-                  <SelectItem key={num} value={num.toString()}>
-                    {num} {periodLabel}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label>Montant total</Label>
-            <Input
-              type="text"
-              value={`${totalAmount.toLocaleString()} FCFA`}
-              disabled
-            />
-            <p className="text-sm text-muted-foreground mt-1">
-              {periods} {periodLabel} × {lease.rent_amount.toLocaleString()} FCFA
-            </p>
-          </div>
-
+      <Card className="p-4">
+        <div className="space-y-4">
           <div>
             <Label>Mode de paiement</Label>
             <PaymentMethodSelect
@@ -170,28 +92,27 @@ export function PaymentForm({
               type="date"
               value={paymentDate}
               onChange={(e) => setPaymentDate(e.target.value)}
-              className="mt-1"
             />
           </div>
 
-          <div>
-            <Label>Notes</Label>
-            <Input
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="mt-1"
-            />
+          <div className="pt-4 border-t">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Montant total</span>
+              <span className="text-lg font-bold">
+                {selectedPeriods.reduce((sum, p) => sum + p.amount, 0).toLocaleString()} FCFA
+              </span>
+            </div>
           </div>
-        </CardContent>
+        </div>
       </Card>
 
       <Button 
         type="submit" 
         className="w-full"
-        disabled={isSubmitting}
+        disabled={isSubmitting || selectedPeriods.length === 0}
       >
         {isSubmitting ? "Enregistrement..." : "Enregistrer le paiement"}
       </Button>
     </form>
-  )
+  );
 }
