@@ -9,6 +9,8 @@ interface TimeRemaining {
 }
 
 const calculateNextPayment = (firstRentDate: Date, frequency: PaymentFrequency): Date => {
+  console.log("Calculating next payment:", { firstRentDate, frequency })
+  
   let nextDate = new Date(firstRentDate)
   const today = new Date()
   
@@ -28,6 +30,7 @@ const calculateNextPayment = (firstRentDate: Date, frequency: PaymentFrequency):
     }
   }
   
+  console.log("Next payment date calculated:", nextDate)
   return nextDate
 }
 
@@ -36,11 +39,14 @@ const calculateTimeRemaining = (dueDate: Date): TimeRemaining => {
   const due = new Date(dueDate)
   const diff = due.getTime() - now.getTime()
   
-  return {
+  const remaining = {
     days: Math.floor(diff / (1000 * 60 * 60 * 24)),
     hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
     minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
   }
+
+  console.log("Time remaining calculated:", remaining)
+  return remaining
 }
 
 export const usePaymentCountdown = (
@@ -50,18 +56,27 @@ export const usePaymentCountdown = (
   const [timeLeft, setTimeLeft] = useState<TimeRemaining | null>(null)
   
   useEffect(() => {
-    if (!firstRentDate) return
+    console.log("usePaymentCountdown effect triggered:", { firstRentDate, frequency })
+    
+    if (!firstRentDate) {
+      console.log("No first rent date provided")
+      return
+    }
 
     const updateCountdown = () => {
       const nextPayment = calculateNextPayment(firstRentDate, frequency)
       const remaining = calculateTimeRemaining(nextPayment)
+      console.log("Updating countdown:", { nextPayment, remaining })
       setTimeLeft(remaining)
     }
     
     const timer = setInterval(updateCountdown, 60000) // Update every minute
     updateCountdown() // Initial update
     
-    return () => clearInterval(timer)
+    return () => {
+      console.log("Cleaning up countdown timer")
+      clearInterval(timer)
+    }
   }, [firstRentDate, frequency])
   
   return timeLeft
