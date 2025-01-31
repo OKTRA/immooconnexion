@@ -9,6 +9,7 @@ export interface InitialPaymentFormProps {
   depositAmount: number;
   rentAmount: number;
   paymentFrequency: PaymentFrequency;
+  firstRentDate?: Date;
   onSuccess?: () => void;
 }
 

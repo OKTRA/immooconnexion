@@ -15,19 +15,17 @@ import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { PaymentMethod } from "@/types/payment"
 import { toast } from "@/components/ui/use-toast"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
 
 export function InitialPaymentForm({ 
   leaseId, 
   depositAmount = 0,
   rentAmount = 0,
   paymentFrequency,
+  firstRentDate = new Date(),
   onSuccess 
 }: InitialPaymentFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash")
-  const [firstRentDate, setFirstRentDate] = useState<Date>(new Date())
   const { handleInitialPayments } = useLeaseMutations()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,29 +110,12 @@ export function InitialPaymentForm({
 
           <div>
             <Label>Date du premier loyer</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full mt-1.5 justify-start text-left font-normal",
-                    !firstRentDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {firstRentDate ? format(firstRentDate, "PPP", { locale: fr }) : "Sélectionner une date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={firstRentDate}
-                  onSelect={(date) => date && setFirstRentDate(date)}
-                  initialFocus
-                  locale={fr}
-                />
-              </PopoverContent>
-            </Popover>
+            <Input
+              type="text"
+              value={format(firstRentDate, "PPP", { locale: fr })}
+              disabled
+              className="mt-1.5"
+            />
           </div>
         </div>
       </Card>

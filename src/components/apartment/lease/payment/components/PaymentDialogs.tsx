@@ -4,12 +4,12 @@ import { RegularPaymentForm } from "./RegularPaymentForm"
 import { LeaseData } from "../types"
 
 interface PaymentDialogsProps {
-  lease: LeaseData
-  showInitialPaymentDialog: boolean
-  showRegularPaymentDialog: boolean
-  onInitialDialogChange: (show: boolean) => void
-  onRegularDialogChange: (show: boolean) => void
-  onSuccess?: () => void
+  lease: LeaseData;
+  showInitialPaymentDialog: boolean;
+  showRegularPaymentDialog: boolean;
+  onInitialDialogChange: (show: boolean) => void;
+  onRegularDialogChange: (show: boolean) => void;
+  onSuccess?: () => void;
 }
 
 export function PaymentDialogs({
@@ -38,6 +38,7 @@ export function PaymentDialogs({
             depositAmount={lease.deposit_amount}
             rentAmount={lease.rent_amount}
             paymentFrequency={lease.payment_frequency}
+            firstRentDate={new Date(lease.start_date)}
             onSuccess={onSuccess}
           />
         </DialogContent>

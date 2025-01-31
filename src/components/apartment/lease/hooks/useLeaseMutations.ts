@@ -3,10 +3,10 @@ import { supabase } from "@/lib/supabase"
 import { toast } from "@/components/ui/use-toast"
 
 interface InitialPaymentsParams {
-  leaseId: string
-  depositAmount: number
-  rentAmount: number
-  firstRentStartDate: Date
+  leaseId: string;
+  depositAmount: number;
+  rentAmount: number;
+  firstRentStartDate: Date;
 }
 
 export function useLeaseMutations() {
