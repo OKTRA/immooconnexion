@@ -1,38 +1,39 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { PaymentMethodSelect } from "./PaymentMethodSelect";
-import { PaymentPeriodsList } from "./PaymentPeriodsList";
-import { useLeasePeriods, PaymentPeriod } from "@/hooks/use-lease-periods";
-import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { PaymentMethodSelect } from "./components/PaymentMethodSelect"
+import { PaymentPeriodsList } from "./PaymentPeriodsList"
+import { useLeasePeriods, PaymentPeriod } from "@/hooks/use-lease-periods"
+import { toast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
+import { PaymentMethod } from "@/types/payment"
 
 interface PaymentFormProps {
-  lease: any;
-  onSuccess?: () => void;
+  lease: any
+  onSuccess?: () => void
 }
 
 export function PaymentForm({ lease, onSuccess }: PaymentFormProps) {
-  const [selectedPeriods, setSelectedPeriods] = useState<PaymentPeriod[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState("cash");
-  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedPeriods, setSelectedPeriods] = useState<PaymentPeriod[]>([])
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash")
+  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0])
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const { periods } = useLeasePeriods(lease, lease.payments || []);
+  const { periods } = useLeasePeriods(lease, lease.payments || [])
 
   const handlePeriodSelect = (period: PaymentPeriod) => {
     if (selectedPeriods.includes(period)) {
-      setSelectedPeriods(selectedPeriods.filter(p => p !== period));
+      setSelectedPeriods(selectedPeriods.filter(p => p !== period))
     } else {
-      setSelectedPeriods([...selectedPeriods, period]);
+      setSelectedPeriods([...selectedPeriods, period])
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+    e.preventDefault()
+    setIsSubmitting(true)
 
     try {
       // Créer un paiement pour chaque période sélectionnée
@@ -45,28 +46,28 @@ export function PaymentForm({ lease, onSuccess }: PaymentFormProps) {
           p_payment_date: paymentDate,
           p_period_start: period.startDate.toISOString(),
           p_period_end: period.endDate.toISOString()
-        });
+        })
 
-        if (error) throw error;
+        if (error) throw error
       }
 
       toast({
         title: "Paiement enregistré",
         description: "Le paiement a été enregistré avec succès",
-      });
+      })
 
-      onSuccess?.();
+      onSuccess?.()
     } catch (error: any) {
-      console.error('Error submitting payment:', error);
+      console.error('Error submitting payment:', error)
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de l'enregistrement du paiement",
         variant: "destructive",
-      });
+      })
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -114,5 +115,5 @@ export function PaymentForm({ lease, onSuccess }: PaymentFormProps) {
         {isSubmitting ? "Enregistrement..." : "Enregistrer le paiement"}
       </Button>
     </form>
-  );
+  )
 }
