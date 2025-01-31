@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { PaymentMethodSelect } from "../components/PaymentMethodSelect"
 import { PaymentCountdown } from "../components/PaymentCountdown"
-import { InitialPaymentFormProps } from "../types"
 import { useLeaseMutations } from "../hooks/useLeaseMutations"
 import { CalendarIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
@@ -15,19 +14,19 @@ import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { PaymentMethod } from "@/types/payment"
 import { toast } from "@/components/ui/use-toast"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
+import { InitialPaymentFormProps, PaymentFrequency } from "../types"
 
 export function InitialPaymentForm({ 
   leaseId, 
   depositAmount = 0,
   rentAmount = 0,
   paymentFrequency,
+  firstRentStartDate,
   onSuccess 
 }: InitialPaymentFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash")
-  const [firstRentDate, setFirstRentDate] = useState<Date>(new Date())
+  const [firstRentDate, setFirstRentDate] = useState<Date>(firstRentStartDate || new Date())
   const { handleInitialPayments } = useLeaseMutations()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -142,7 +141,7 @@ export function InitialPaymentForm({
       {paymentFrequency && firstRentDate && (
         <PaymentCountdown 
           firstRentDate={firstRentDate}
-          frequency={paymentFrequency}
+          frequency={paymentFrequency as PaymentFrequency}
         />
       )}
 
