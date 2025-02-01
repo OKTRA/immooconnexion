@@ -36,3 +36,12 @@ export interface PaymentSummary {
     dueDate: string;
   };
 }
+
+export interface PaymentPeriod {
+  id: string;
+  startDate: Date;
+  endDate: Date;
+  amount: number;
+  status: PaymentStatus;
+  isPaid: boolean;
+}

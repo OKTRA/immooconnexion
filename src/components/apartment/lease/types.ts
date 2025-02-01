@@ -1,6 +1,6 @@
 import { PaymentMethod } from "@/types/payment";
 
-export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly' | 'biannual';
 export type DurationType = 'fixed' | 'month_to_month' | 'yearly';
 export type PaymentType = 'upfront' | 'end_of_period';
 export type LeaseStatus = 'active' | 'expired' | 'terminated';
@@ -42,7 +42,10 @@ export interface PaymentPeriod {
   startDate: Date;
   endDate: Date;
   amount: number;
-  status: string;
+  status: 'pending' | 'due_soon' | 'late' | 'paid';
+  isPaid: boolean;
+  label: string;
+  paymentId?: string;
   penalties?: Array<{
     id: string;
     amount: number;
@@ -53,10 +56,10 @@ export interface PaymentPeriod {
 export interface PaymentSummary {
   totalReceived: number;
   pendingAmount: number;
-  lateAmount: number;
-  nextPayment?: {
+  latePayments: number;
+  nextPaymentDue?: {
     amount: number;
-    due_date: string;
+    dueDate: string;
   };
 }
 
@@ -78,6 +81,7 @@ export interface PaymentListItem {
   payment_method?: PaymentMethod;
   payment_type?: string;
   displayStatus?: string;
+  first_rent_start_date?: string;
 }
 
 export interface LeaseHeaderProps {
@@ -103,6 +107,7 @@ export interface LeaseData {
     last_name: string;
     phone_number?: string;
     email?: string;
+    status: string;
   };
   unit?: {
     id: string;
@@ -117,6 +122,11 @@ export interface LeaseData {
   agency_id: string;
   initialPayments?: PaymentListItem[];
   regularPayments?: PaymentListItem[];
+  currentPeriod?: PaymentListItem;
+}
+
+export interface LeasePaymentViewProps {
+  leaseId: string;
 }
 
 export type PaymentPeriodFilter = 'all' | 'current' | 'overdue' | 'upcoming';
@@ -146,4 +156,11 @@ export interface LeaseSelectProps {
 
 export interface RegularPaymentsListProps extends PaymentListProps {
   onPaymentClick?: (payment: PaymentListItem) => void;
+}
+
+export interface HistoricalPaymentFormProps {
+  lease: LeaseData;
+  onSuccess?: () => void;
+  isSubmitting: boolean;
+  setIsSubmitting: (value: boolean) => void;
 }
