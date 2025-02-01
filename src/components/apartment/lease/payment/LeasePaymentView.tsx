@@ -8,6 +8,7 @@ import { PaymentsList } from "./components/PaymentsList"
 import { PaymentDialogs } from "./components/PaymentDialogs"
 import { PaymentStatusStats } from "./components/PaymentStatusStats"
 import { CurrentPeriodCard } from "./components/CurrentPeriodCard"
+import { PaymentTimeline } from "./components/PaymentTimeline"
 import { useState } from "react"
 import { isAfter, isBefore } from "date-fns"
 
@@ -167,6 +168,11 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
           onPaymentClick={() => setShowRegularPaymentDialog(true)}
         />
       )}
+
+      <PaymentTimeline 
+        lease={lease}
+        initialPayments={lease.initialPayments || []}
+      />
 
       <PaymentsList 
         title="Paiements Initiaux" 
