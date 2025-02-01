@@ -76,7 +76,7 @@ export function PropertyDialog({
         first_name: ao.owner.first_name,
         last_name: ao.owner.last_name,
         phone_number: ao.owner.phone_number
-      } as PropertyOwner))
+      })) as PropertyOwner[]
     }
   })
 
