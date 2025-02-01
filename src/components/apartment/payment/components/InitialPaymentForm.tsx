@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import { PaymentMethod } from "@/types/payment"
 
 interface InitialPaymentFormProps {
   onSuccess?: () => void
@@ -20,7 +21,7 @@ interface InitialPaymentFormProps {
 
 export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState("cash")
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash")
   const [firstRentDate, setFirstRentDate] = useState<Date | undefined>(undefined)
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const { handleInitialPayments } = useLeaseMutations()
@@ -76,7 +77,6 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
             >
               <PopoverTrigger asChild>
                 <Button
-                  type="button"
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
@@ -85,6 +85,7 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
                   onClick={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
+                    setIsCalendarOpen(true)
                   }}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
@@ -98,8 +99,10 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
               <PopoverContent 
                 className="w-auto p-0" 
                 align="start"
-                onOpenAutoFocus={(e) => e.preventDefault()}
-                onPointerDownOutside={(e) => e.preventDefault()}
+                onInteractOutside={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                }}
                 onClick={(e) => e.stopPropagation()}
               >
                 <Calendar
