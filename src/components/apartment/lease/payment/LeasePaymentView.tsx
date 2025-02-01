@@ -53,6 +53,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         return null
       }
 
+      // Fetch all payments for this lease
       const { data: payments, error: paymentsError } = await supabase
         .from("apartment_lease_payments")
         .select("*")
@@ -63,6 +64,15 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         console.error("Error fetching payments:", paymentsError)
         throw paymentsError
       }
+
+      // Verify initial payments are actually completed
+      const hasDepositPayment = payments?.some(p => 
+        p.payment_type === 'deposit' && p.status === 'paid'
+      )
+      const hasAgencyFeesPayment = payments?.some(p => 
+        p.payment_type === 'agency_fees' && p.status === 'paid'
+      )
+      const initialPaymentsCompleted = hasDepositPayment && hasAgencyFeesPayment
 
       const initialPayments = payments?.filter(p => 
         p.payment_type === 'deposit' || p.payment_type === 'agency_fees'
@@ -88,9 +98,10 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
 
       return { 
         ...leaseData, 
-        initialPayments, 
+        initialPayments,
         regularPayments,
-        currentPeriod 
+        currentPeriod,
+        initial_payments_completed: initialPaymentsCompleted // Override with actual verification
       } as LeaseData
     },
     retry: 1
