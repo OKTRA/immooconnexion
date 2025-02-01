@@ -25,21 +25,6 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const { handleInitialPayments } = useLeaseMutations()
 
-  const handleCalendarSelect = (date: Date | undefined, e: React.MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation()
-    e.preventDefault()
-    
-    if (date) {
-      setFirstRentDate(date)
-    }
-  }
-
-  const handleCalendarTriggerClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsCalendarOpen(!isCalendarOpen)
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isSubmitting) return
@@ -61,7 +46,7 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" onClick={(e) => e.stopPropagation()}>
       <Card className="p-4">
         <div className="space-y-4">
           <div>
@@ -87,6 +72,7 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
             <Popover 
               open={isCalendarOpen} 
               onOpenChange={setIsCalendarOpen}
+              modal={true}
             >
               <PopoverTrigger asChild>
                 <Button
@@ -96,7 +82,10 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
                     "w-full justify-start text-left font-normal",
                     !firstRentDate && "text-muted-foreground"
                   )}
-                  onClick={handleCalendarTriggerClick}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                  }}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {firstRentDate ? (
@@ -109,20 +98,23 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
               <PopoverContent 
                 className="w-auto p-0" 
                 align="start"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                onPointerDownOutside={(e) => e.preventDefault()}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div 
-                  onClick={(e) => e.stopPropagation()}
-                  className="p-0"
-                >
-                  <Calendar
-                    mode="single"
-                    selected={firstRentDate}
-                    onSelect={(date, e) => handleCalendarSelect(date, e as React.MouseEvent<HTMLDivElement>)}
-                    initialFocus
-                    disabled={false}
-                  />
-                </div>
+                <Calendar
+                  mode="single"
+                  selected={firstRentDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      setFirstRentDate(date)
+                      // Ne pas fermer automatiquement
+                      // setIsCalendarOpen(false)
+                    }
+                  }}
+                  initialFocus
+                  disabled={false}
+                />
               </PopoverContent>
             </Popover>
           </div>
