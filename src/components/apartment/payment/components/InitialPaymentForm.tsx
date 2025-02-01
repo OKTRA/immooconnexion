@@ -111,11 +111,9 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
                   onSelect={(date) => {
                     if (date) {
                       setFirstRentDate(date)
-                      // Ne pas fermer automatiquement pour permettre à l'utilisateur de changer la date
                     }
                   }}
                   initialFocus
-                  disabled={(date) => date < new Date()}
                 />
               </PopoverContent>
             </Popover>
