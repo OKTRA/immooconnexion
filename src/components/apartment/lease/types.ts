@@ -18,15 +18,6 @@ export interface LeaseFormData {
   status: LeaseStatus;
 }
 
-export interface LeaseFormFieldsProps {
-  formData: LeaseFormData;
-  setFormData: (data: LeaseFormData) => void;
-  onSubmit: () => Promise<void>;
-  isSubmitting: boolean;
-  onCancel: () => void;
-  disabled?: boolean;
-}
-
 export interface PaymentFormData {
   leaseId: string;
   amount: number;
@@ -42,7 +33,7 @@ export interface PaymentPeriod {
   startDate: Date;
   endDate: Date;
   amount: number;
-  status: 'pending' | 'due_soon' | 'late' | 'paid';
+  status: 'pending' | 'paid' | 'late' | 'due_soon';
   isPaid: boolean;
   label: string;
   paymentId?: string;
@@ -82,11 +73,6 @@ export interface PaymentListItem {
   payment_type?: string;
   displayStatus?: string;
   first_rent_start_date?: string;
-}
-
-export interface LeaseHeaderProps {
-  lease: LeaseData;
-  onInitialPayment: () => void;
 }
 
 export interface LeaseData {
@@ -129,19 +115,14 @@ export interface LeasePaymentViewProps {
   leaseId: string;
 }
 
-export type PaymentPeriodFilter = 'all' | 'current' | 'overdue' | 'upcoming';
-export type PaymentStatusFilter = 'all' | 'pending' | 'paid' | 'late';
-
-export interface PeriodOption {
-  value: number;
-  label: string;
-  startDate: Date;
-  endDate: Date;
-  amount: number;
+export interface HistoricalPaymentFormProps {
+  lease: LeaseData;
+  onSuccess?: () => void;
+  isSubmitting: boolean;
+  setIsSubmitting: (value: boolean) => void;
 }
 
 export interface PaymentFormProps {
-  leaseId: string;
   lease: LeaseData;
   onSuccess?: () => void;
   isHistorical?: boolean;
@@ -154,13 +135,17 @@ export interface LeaseSelectProps {
   isLoading: boolean;
 }
 
+export interface PeriodOption {
+  value: number;
+  label: string;
+  startDate: Date;
+  endDate: Date;
+  amount: number;
+}
+
 export interface RegularPaymentsListProps extends PaymentListProps {
   onPaymentClick?: (payment: PaymentListItem) => void;
 }
 
-export interface HistoricalPaymentFormProps {
-  lease: LeaseData;
-  onSuccess?: () => void;
-  isSubmitting: boolean;
-  setIsSubmitting: (value: boolean) => void;
-}
+export type PaymentPeriodFilter = 'all' | 'current' | 'overdue' | 'upcoming';
+export type PaymentStatusFilter = 'all' | 'pending' | 'paid' | 'late';
