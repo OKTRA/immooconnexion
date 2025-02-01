@@ -22,21 +22,36 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState("cash")
   const [firstRentDate, setFirstRentDate] = useState<Date>(new Date())
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const { handleInitialPayments } = useLeaseMutations()
+
+  const handleCalendarSelect = (date: Date | undefined, e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation()
+    e.preventDefault()
+    
+    if (date) {
+      setFirstRentDate(date)
+    }
+  }
+
+  const handleCalendarTriggerClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsCalendarOpen(!isCalendarOpen)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
-    console.log("Starting form submission with lease:", lease)
+    if (isSubmitting) return
 
     try {
+      setIsSubmitting(true)
       await handleInitialPayments.mutateAsync({
         leaseId: lease.id,
         depositAmount: lease.deposit_amount,
         rentAmount: lease.rent_amount,
         firstRentStartDate: firstRentDate
       })
-      console.log("Form submission completed successfully")
       onSuccess?.()
     } catch (error) {
       console.error("Error submitting initial payments:", error)
@@ -67,16 +82,21 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
             />
           </div>
 
-          <div>
+          <div className="space-y-2">
             <Label>Date de début du premier loyer</Label>
-            <Popover>
+            <Popover 
+              open={isCalendarOpen} 
+              onOpenChange={setIsCalendarOpen}
+            >
               <PopoverTrigger asChild>
                 <Button
-                  variant={"outline"}
+                  type="button"
+                  variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
                     !firstRentDate && "text-muted-foreground"
                   )}
+                  onClick={handleCalendarTriggerClick}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {firstRentDate ? (
@@ -86,13 +106,23 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={firstRentDate}
-                  onSelect={(date) => date && setFirstRentDate(date)}
-                  initialFocus
-                />
+              <PopoverContent 
+                className="w-auto p-0" 
+                align="start"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div 
+                  onClick={(e) => e.stopPropagation()}
+                  className="p-0"
+                >
+                  <Calendar
+                    mode="single"
+                    selected={firstRentDate}
+                    onSelect={(date, e) => handleCalendarSelect(date, e as React.MouseEvent<HTMLDivElement>)}
+                    initialFocus
+                    disabled={false}
+                  />
+                </div>
               </PopoverContent>
             </Popover>
           </div>
