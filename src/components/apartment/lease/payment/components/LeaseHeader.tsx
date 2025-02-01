@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { LeaseData } from "../types"
 import { useState } from "react"
 import { PaymentDialog } from "../PaymentDialog"
+import { Badge } from "@/components/ui/badge"
 
 interface LeaseHeaderProps {
   lease: LeaseData
@@ -50,23 +51,36 @@ export function LeaseHeader({ lease, onInitialPayment }: LeaseHeaderProps) {
               </div>
             </div>
           </div>
-          <div className="flex gap-4">
-            <Button 
-              onClick={onInitialPayment}
-              className="bg-green-500 hover:bg-green-600"
-            >
-              <CreditCard className="mr-2 h-4 w-4" />
-              Paiements Initiaux
-            </Button>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-4">
+              <Button 
+                onClick={onInitialPayment}
+                disabled={lease.initial_payments_completed}
+                className="bg-green-500 hover:bg-green-600"
+              >
+                <CreditCard className="mr-2 h-4 w-4" />
+                Paiements Initiaux
+              </Button>
 
-            <Button 
-              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg transition-all duration-300 animate-fade-in"
-              onClick={() => setShowPaymentManagement(true)}
-              disabled={!lease.initial_payments_completed}
-            >
-              <Receipt className="mr-2 h-4 w-4" />
-              Gestion des Paiements
-            </Button>
+              <Button 
+                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg transition-all duration-300 animate-fade-in"
+                onClick={() => setShowPaymentManagement(true)}
+                disabled={!lease.initial_payments_completed}
+              >
+                <Receipt className="mr-2 h-4 w-4" />
+                Gestion des Paiements
+              </Button>
+            </div>
+            {lease.initial_payments_completed && (
+              <Badge variant="success" className="self-end">
+                Paiements initiaux effectués
+              </Badge>
+            )}
+            {!lease.initial_payments_completed && (
+              <p className="text-sm text-muted-foreground text-right">
+                Veuillez effectuer les paiements initiaux pour activer la gestion des paiements
+              </p>
+            )}
           </div>
         </div>
       </CardHeader>

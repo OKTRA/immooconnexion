@@ -162,17 +162,21 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
       
       {stats && <PaymentStatusStats stats={stats} />}
 
-      {lease.currentPeriod && (
-        <CurrentPeriodCard
-          currentPeriod={lease.currentPeriod}
-          onPaymentClick={() => setShowRegularPaymentDialog(true)}
-        />
-      )}
+      {lease.initial_payments_completed && (
+        <>
+          {lease.currentPeriod && (
+            <CurrentPeriodCard
+              currentPeriod={lease.currentPeriod}
+              onPaymentClick={() => setShowRegularPaymentDialog(true)}
+            />
+          )}
 
-      <PaymentTimeline 
-        lease={lease}
-        initialPayments={lease.initialPayments || []}
-      />
+          <PaymentTimeline 
+            lease={lease}
+            initialPayments={lease.initialPayments || []}
+          />
+        </>
+      )}
 
       <PaymentsList 
         title="Paiements Initiaux" 
@@ -180,11 +184,13 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         className="w-full"
       />
       
-      <PaymentsList 
-        title="Paiements de Loyer" 
-        payments={lease.regularPayments || []}
-        className="w-full"
-      />
+      {lease.initial_payments_completed && (
+        <PaymentsList 
+          title="Paiements de Loyer" 
+          payments={lease.regularPayments || []}
+          className="w-full"
+        />
+      )}
 
       <PaymentDialogs 
         lease={lease}
