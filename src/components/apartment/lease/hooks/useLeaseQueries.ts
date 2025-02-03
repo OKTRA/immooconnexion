@@ -50,7 +50,11 @@ export function useLeaseQueries() {
           // Séparer les paiements par type
           const initialPayments = payments?.filter(p => 
             p.payment_type === 'deposit' || p.payment_type === 'agency_fees'
-          ) || []
+          ).map(p => ({
+            ...p,
+            type: p.payment_type,
+            displayStatus: p.payment_status_type || p.status
+          })) || []
           
           const regularPayments = payments?.filter(p => 
             p.payment_type !== 'deposit' && p.payment_type !== 'agency_fees'
