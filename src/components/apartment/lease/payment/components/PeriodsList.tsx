@@ -20,8 +20,8 @@ export function PeriodsList({ periods }: PeriodsListProps) {
               <p className="font-medium">
                 Période {format(period.startDate, 'PP', { locale: fr })} - {format(period.endDate, 'PP', { locale: fr })}
               </p>
-              <Badge variant={period.status === "paid" ? "default" : "secondary"}>
-                {period.status === "paid" ? "Payé" : "En attente"}
+              <Badge variant={period.isPaid ? "default" : "secondary"}>
+                {period.isPaid ? "Payé" : "En attente"}
               </Badge>
             </div>
           </div>

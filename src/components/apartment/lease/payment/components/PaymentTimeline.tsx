@@ -27,14 +27,27 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
       while (currentDate <= now) {
         const endDate = calculatePeriodEndDate(currentDate, lease.payment_frequency);
         
+        // Vérifier si un paiement existe pour cette période
+        const periodPayment = lease.regularPayments?.find(p => {
+          const paymentStart = new Date(p.payment_period_start);
+          const paymentEnd = new Date(p.payment_period_end);
+          return (
+            paymentStart <= currentDate &&
+            paymentEnd >= endDate
+          );
+        });
+
+        const isPaid = periodPayment?.status === 'paid' || 
+                      periodPayment?.payment_status_type?.includes('paid');
+        
         if (currentDate < now) {
           newPeriods.push({
             id: `${currentDate.getTime()}`,
             startDate: currentDate,
             endDate,
             amount: lease.rent_amount,
-            status: "pending",
-            isPaid: false,
+            status: isPaid ? "paid" : "pending",
+            isPaid,
             label: `${currentDate.toISOString()} - ${endDate.toISOString()}`
           });
         }
@@ -49,13 +62,26 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
       const startDate = new Date(firstRentStartDate);
       const endDate = calculatePeriodEndDate(startDate, lease.payment_frequency);
 
+      // Vérifier si un paiement existe pour la période actuelle
+      const currentPayment = lease.regularPayments?.find(p => {
+        const paymentStart = new Date(p.payment_period_start);
+        const paymentEnd = new Date(p.payment_period_end);
+        return (
+          paymentStart <= startDate &&
+          paymentEnd >= endDate
+        );
+      });
+
+      const isPaid = currentPayment?.status === 'paid' || 
+                    currentPayment?.payment_status_type?.includes('paid');
+
       return {
         id: `current-${startDate.getTime()}`,
         startDate,
         endDate,
         amount: lease.rent_amount,
-        status: "pending",
-        isPaid: false,
+        status: isPaid ? "paid" : "pending",
+        isPaid,
         label: `${startDate.toISOString()} - ${endDate.toISOString()}`
       };
     };
