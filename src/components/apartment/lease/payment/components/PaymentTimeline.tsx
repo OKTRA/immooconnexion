@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { LeaseData, PaymentPeriod } from "../types";
 import { calculatePeriodEndDate, getNextPeriodStart } from "../utils/periodCalculations";
+import { CurrentPeriodDisplay } from "./CurrentPeriodDisplay";
 import { PeriodsList } from "./PeriodsList";
 
 interface PaymentTimelineProps {
@@ -26,6 +27,7 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
       while (currentDate <= now) {
         const endDate = calculatePeriodEndDate(currentDate, lease.payment_frequency);
         
+        // Vérifier si un paiement existe pour cette période
         const periodPayment = lease.regularPayments?.find(p => {
           const paymentStart = new Date(p.payment_period_start);
           const paymentEnd = new Date(p.payment_period_end);
@@ -53,13 +55,14 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
         currentDate = getNextPeriodStart(currentDate, lease.payment_frequency);
       }
       
-      return newPeriods.sort((a, b) => b.startDate.getTime() - a.startDate.getTime());
+      return newPeriods;
     };
 
     const generateCurrentPeriod = () => {
       const startDate = new Date(firstRentStartDate);
       const endDate = calculatePeriodEndDate(startDate, lease.payment_frequency);
 
+      // Vérifier si un paiement existe pour la période actuelle
       const currentPayment = lease.regularPayments?.find(p => {
         const paymentStart = new Date(p.payment_period_start);
         const paymentEnd = new Date(p.payment_period_end);
@@ -90,6 +93,13 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
     setCurrentPeriod(current);
   }, [lease, initialPayments]);
 
+  const calculateProgress = (period: PaymentPeriod) => {
+    const now = new Date();
+    const total = differenceInDays(period.endDate, period.startDate);
+    const elapsed = differenceInDays(now, period.startDate);
+    return Math.min(100, Math.max(0, (elapsed / total) * 100));
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -97,17 +107,14 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {currentPeriod && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-4">Période en cours</h3>
-              <PeriodsList periods={[currentPeriod]} />
-            </div>
-          )}
+          <PeriodsList periods={periods} />
           
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Périodes précédentes</h3>
-            <PeriodsList periods={periods} />
-          </div>
+          {currentPeriod && (
+            <CurrentPeriodDisplay 
+              period={currentPeriod}
+              progress={calculateProgress(currentPeriod)}
+            />
+          )}
         </div>
       </CardContent>
     </Card>
