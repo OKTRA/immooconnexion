@@ -46,7 +46,7 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6" onClick={(e) => e.stopPropagation()}>
+    <form onSubmit={handleSubmit} className="space-y-6">
       <Card className="p-4">
         <div className="space-y-4">
           <div>
@@ -69,23 +69,14 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
 
           <div className="space-y-2">
             <Label>Date de début du premier loyer</Label>
-            <Popover 
-              open={isCalendarOpen} 
-              onOpenChange={setIsCalendarOpen}
-              modal={true}
-            >
+            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
               <PopoverTrigger asChild>
                 <Button
-                  type="button"
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
                     !firstRentDate && "text-muted-foreground"
                   )}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                  }}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {firstRentDate ? (
@@ -95,25 +86,17 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent 
-                className="w-auto p-0" 
-                align="start"
-                onOpenAutoFocus={(e) => e.preventDefault()}
-                onPointerDownOutside={(e) => e.preventDefault()}
-                onClick={(e) => e.stopPropagation()}
-              >
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={firstRentDate}
                   onSelect={(date) => {
                     if (date) {
                       setFirstRentDate(date)
-                      // Ne pas fermer automatiquement
-                      // setIsCalendarOpen(false)
+                      setIsCalendarOpen(false) // Ferme le calendrier après la sélection
                     }
                   }}
                   initialFocus
-                  disabled={false}
                 />
               </PopoverContent>
             </Popover>
