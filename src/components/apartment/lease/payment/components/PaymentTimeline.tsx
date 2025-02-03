@@ -1,150 +1,74 @@
-import { differenceInDays } from "date-fns";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useEffect, useState } from "react";
-import { LeaseData, PaymentPeriod } from "../types";
-import { calculatePeriodEndDate, getNextPeriodStart } from "../utils/periodCalculations";
-import { CurrentPeriodDisplay } from "./CurrentPeriodDisplay";
-import { PeriodsList } from "./PeriodsList";
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
+import { Badge } from "@/components/ui/badge"
+import { PaymentListItem } from "../types"
 
 interface PaymentTimelineProps {
-  lease: LeaseData;
-  initialPayments: PaymentListItem[];
+  payments: PaymentListItem[];
 }
 
-export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps) {
-  const [periods, setPeriods] = useState<PaymentPeriod[]>([]);
-  const [currentPeriod, setCurrentPeriod] = useState<PaymentPeriod | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Vérifier s'il y a des paiements initiaux
-    if (!initialPayments?.length) {
-      setError("Aucun paiement enregistré");
-      return;
+export function PaymentTimeline({ payments }: PaymentTimelineProps) {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'paid':
+      case 'paid_current':
+      case 'paid_advance':
+        return 'bg-green-500';
+      case 'pending':
+        return 'bg-yellow-500';
+      case 'late':
+      case 'paid_late':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
     }
+  }
 
-    // Vérifier si le paiement de dépôt existe et a une date de début de loyer
-    const depositPayment = initialPayments.find(p => p.payment_type === 'deposit');
-    if (!depositPayment?.first_rent_start_date) {
-      setError("Date de début du premier loyer non définie");
-      return;
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'paid':
+      case 'paid_current':
+        return 'Payé';
+      case 'paid_advance':
+        return 'Payé en avance';
+      case 'pending':
+        return 'En attente';
+      case 'late':
+        return 'En retard';
+      case 'paid_late':
+        return 'Payé en retard';
+      default:
+        return status;
     }
-
-    const firstRentStartDate = depositPayment.first_rent_start_date || lease.start_date;
-    
-    const generatePastPeriods = () => {
-      const newPeriods: PaymentPeriod[] = [];
-      let currentDate = new Date(firstRentStartDate);
-      const now = new Date();
-      
-      while (currentDate <= now) {
-        const endDate = calculatePeriodEndDate(currentDate, lease.payment_frequency);
-        
-        // Vérifier si un paiement existe pour cette période
-        const periodPayment = lease.regularPayments?.find(p => {
-          const paymentStart = new Date(p.payment_period_start);
-          const paymentEnd = new Date(p.payment_period_end);
-          return (
-            paymentStart <= currentDate &&
-            paymentEnd >= endDate
-          );
-        });
-
-        const isPaid = periodPayment?.status === 'paid' || 
-                      periodPayment?.payment_status_type?.includes('paid');
-        
-        if (currentDate < now) {
-          newPeriods.push({
-            id: `${currentDate.getTime()}`,
-            startDate: currentDate,
-            endDate,
-            amount: lease.rent_amount,
-            status: isPaid ? "paid" : "pending",
-            isPaid,
-            label: `${currentDate.toISOString()} - ${endDate.toISOString()}`
-          });
-        }
-        
-        currentDate = getNextPeriodStart(currentDate, lease.payment_frequency);
-      }
-      
-      return newPeriods;
-    };
-
-    const generateCurrentPeriod = () => {
-      const startDate = new Date(firstRentStartDate);
-      const endDate = calculatePeriodEndDate(startDate, lease.payment_frequency);
-
-      // Vérifier si un paiement existe pour la période actuelle
-      const currentPayment = lease.regularPayments?.find(p => {
-        const paymentStart = new Date(p.payment_period_start);
-        const paymentEnd = new Date(p.payment_period_end);
-        return (
-          paymentStart <= startDate &&
-          paymentEnd >= endDate
-        );
-      });
-
-      const isPaid = currentPayment?.status === 'paid' || 
-                    currentPayment?.payment_status_type?.includes('paid');
-
-      return {
-        id: `current-${startDate.getTime()}`,
-        startDate,
-        endDate,
-        amount: lease.rent_amount,
-        status: isPaid ? "paid" : "pending",
-        isPaid,
-        label: `${startDate.toISOString()} - ${endDate.toISOString()}`
-      };
-    };
-
-    const pastPeriods = generatePastPeriods();
-    const current = generateCurrentPeriod();
-    
-    setPeriods(pastPeriods);
-    setCurrentPeriod(current);
-  }, [lease, initialPayments]);
-
-  const calculateProgress = (period: PaymentPeriod) => {
-    const now = new Date();
-    const total = differenceInDays(period.endDate, period.startDate);
-    const elapsed = differenceInDays(now, period.startDate);
-    return Math.min(100, Math.max(0, (elapsed / total) * 100));
-  };
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Suivi Chronologique des Paiements</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-center">
-            {error}
-          </p>
-        </CardContent>
-      </Card>
-    );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Suivi Chronologique des Paiements</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <PeriodsList periods={periods} />
-          
-          {currentPeriod && (
-            <CurrentPeriodDisplay 
-              period={currentPeriod}
-              progress={calculateProgress(currentPeriod)}
-            />
-          )}
+    <div className="space-y-8">
+      {payments.map((payment) => (
+        <div key={payment.id} className="relative pl-8">
+          <div className={`absolute left-0 w-4 h-4 rounded-full ${getStatusColor(payment.payment_status_type || payment.status)}`} />
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <span className="text-sm font-medium">
+                  {format(new Date(payment.payment_date || payment.due_date), 'PP', { locale: fr })}
+                </span>
+                <Badge variant={payment.payment_status_type === 'paid' ? 'default' : 'secondary'}>
+                  {getStatusLabel(payment.payment_status_type || payment.status)}
+                </Badge>
+              </div>
+              <span className="font-bold">
+                {payment.amount.toLocaleString()} FCFA
+              </span>
+            </div>
+            {payment.payment_period_start && payment.payment_period_end && (
+              <p className="text-sm text-muted-foreground">
+                Période: {format(new Date(payment.payment_period_start), 'PP', { locale: fr })} - {format(new Date(payment.payment_period_end), 'PP', { locale: fr })}
+              </p>
+            )}
+          </div>
         </div>
-      </CardContent>
-    </Card>
-  );
+      ))}
+    </div>
+  )
 }

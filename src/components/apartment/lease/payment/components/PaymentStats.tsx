@@ -38,9 +38,9 @@ export function PaymentStats({ stats }: PaymentStatsProps) {
               <p className="text-2xl font-bold">
                 {stats.pendingAmount.toLocaleString()} FCFA
               </p>
-              {stats.nextPayment && (
+              {stats.nextPaymentDue && (
                 <p className="text-sm text-muted-foreground mt-1">
-                  Prochain: {format(new Date(stats.nextPayment.due_date), 'PP', { locale: fr })}
+                  Prochain: {format(new Date(stats.nextPaymentDue.dueDate), 'PP', { locale: fr })}
                 </p>
               )}
             </div>
