@@ -53,29 +53,10 @@ export function AdminLoginForm() {
     setIsLoading(true)
 
     try {
-      // First check if there's an existing session
-      const { data: { session: existingSession } } = await supabase.auth.getSession()
+      // Déconnexion forcée pour nettoyer le cache
+      await supabase.auth.signOut()
       
-      if (existingSession) {
-        try {
-          // Verify if the existing session is for a super admin
-          const adminData = await verifyAdminAccess(existingSession.user.id)
-          if (adminData.is_super_admin) {
-            // If verification passes, use existing session
-            toast({
-              title: "Session active",
-              description: "Utilisation de la session existante",
-            })
-            navigate("/super-admin/admin")
-            return
-          }
-        } catch (error) {
-          // Only sign out if verification fails
-          console.log("Existing session is not a super admin, proceeding with login")
-        }
-      }
-
-      // If no valid existing session, proceed with login
+      // Nouvelle tentative de connexion
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -89,7 +70,12 @@ export function AdminLoginForm() {
         throw new Error('No user data returned')
       }
 
-      await verifyAdminAccess(data.user.id)
+      // Vérification avec cache nettoyé
+      const adminData = await verifyAdminAccess(data.user.id)
+      
+      if (!adminData.is_super_admin) {
+        throw new Error('Not a super admin')
+      }
 
       toast({
         title: "Connexion réussie",
@@ -104,7 +90,7 @@ export function AdminLoginForm() {
         description: "Email ou mot de passe incorrect",
         variant: "destructive",
       })
-      // Only sign out if there was an error during login
+      // Nettoyage de la session en cas d'erreur
       await supabase.auth.signOut()
     } finally {
       setIsLoading(false)
