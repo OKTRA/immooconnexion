@@ -32,7 +32,7 @@ export function CurrentPaymentForm({
   const [advancePayment, setAdvancePayment] = useState(false)
 
   // Fetch the first rent start date from initial payment
-  const { data: firstRentStartDate } = useQuery({
+  const { data: firstRentStartDate, isLoading: isLoadingFirstRentDate } = useQuery({
     queryKey: ["first-rent-date", lease.id],
     queryFn: async () => {
       console.log("Fetching first rent start date for lease:", lease.id)
@@ -41,11 +41,20 @@ export function CurrentPaymentForm({
         .select("first_rent_start_date")
         .eq("lease_id", lease.id)
         .eq("payment_type", "deposit")
-        .single()
+        .maybeSingle() // Changed from .single() to .maybeSingle()
 
       if (error) {
         console.error("Error fetching first rent date:", error)
         throw error
+      }
+
+      if (!data?.first_rent_start_date) {
+        toast({
+          title: "Attention",
+          description: "La date de début du premier loyer n'a pas été définie lors du paiement initial",
+          variant: "destructive",
+        })
+        return null
       }
 
       console.log("First rent start date:", data?.first_rent_start_date)
@@ -61,7 +70,7 @@ export function CurrentPaymentForm({
 
     try {
       if (!firstRentStartDate) {
-        throw new Error("Date de début du premier loyer non trouvée")
+        throw new Error("La date de début du premier loyer n'a pas été définie")
       }
 
       console.log("Starting payment submission with first rent date:", firstRentStartDate)
@@ -180,7 +189,7 @@ export function CurrentPaymentForm({
       <Button 
         type="submit" 
         className="w-full"
-        disabled={isSubmitting || !firstRentStartDate}
+        disabled={isSubmitting || !firstRentStartDate || isLoadingFirstRentDate}
       >
         {isSubmitting ? (
           <>
