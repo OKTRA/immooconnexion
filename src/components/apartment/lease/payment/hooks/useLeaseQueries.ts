@@ -1,11 +1,12 @@
-import { supabase } from "@/integrations/supabase/client"
-import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { LeaseData, PaymentListItem } from "../types";
 
 export function useLeaseQueries() {
-  const { data: leases = [], isLoading } = useQuery({
+  return useQuery({
     queryKey: ["apartment-leases"],
     queryFn: async () => {
-      console.log("Fetching leases and payments...")
+      console.log("Fetching leases and payments...");
       
       const { data: leaseData, error: leaseError } = await supabase
         .from("lease_details")
@@ -15,7 +16,9 @@ export function useLeaseQueries() {
             id,
             first_name,
             last_name,
-            phone_number
+            phone_number,
+            email,
+            status
           ),
           unit:apartment_units(
             id,
@@ -26,11 +29,11 @@ export function useLeaseQueries() {
             )
           )
         `)
-        .order("created_at", { ascending: false })
+        .order("created_at", { ascending: false });
 
       if (leaseError) {
-        console.error("Error fetching leases:", leaseError)
-        throw leaseError
+        console.error("Error fetching leases:", leaseError);
+        throw leaseError;
       }
 
       // Fetch payments for each lease
@@ -40,50 +43,47 @@ export function useLeaseQueries() {
             .from("apartment_lease_payments")
             .select("*")
             .eq("lease_id", lease.id)
-            .order("payment_date", { ascending: false })
+            .order("payment_period_start", { ascending: true });
 
           if (paymentsError) {
-            console.error("Error fetching payments for lease:", lease.id, paymentsError)
-            throw paymentsError
+            console.error("Error fetching payments for lease:", lease.id, paymentsError);
+            throw paymentsError;
           }
 
-          // Séparer les paiements par type
           const initialPayments = payments?.filter(p => 
             p.payment_type === 'deposit' || p.payment_type === 'agency_fees'
-          ) || []
+          ).map(p => ({
+            ...p,
+            type: p.payment_type,
+            displayStatus: p.payment_status_type || p.status
+          })) as PaymentListItem[];
           
           const regularPayments = payments?.filter(p => 
             p.payment_type !== 'deposit' && p.payment_type !== 'agency_fees'
           ).map(p => ({
             ...p,
             displayStatus: p.payment_status_type || p.status
-          })) || []
+          })) as PaymentListItem[];
 
-          // Trouver la période en cours
           const currentPeriod = regularPayments.find(p => {
-            if (!p.payment_period_start || !p.payment_period_end) return false
-            const start = new Date(p.payment_period_start)
-            const end = new Date(p.payment_period_end)
-            const now = new Date()
-            return now >= start && now <= end
-          })
+            if (!p.payment_period_start || !p.payment_period_end) return false;
+            const start = new Date(p.payment_period_start);
+            const end = new Date(p.payment_period_end);
+            const now = new Date();
+            return now >= start && now <= end;
+          });
 
           return {
             ...lease,
             initialPayments,
             regularPayments,
             currentPeriod
-          }
+          } as LeaseData;
         })
-      )
+      );
 
-      console.log("Fetched leases with payments:", leasesWithPayments)
-      return leasesWithPayments
+      console.log("Fetched leases with payments:", leasesWithPayments);
+      return leasesWithPayments;
     },
-  })
-
-  return {
-    leases,
-    isLoading
-  }
+  });
 }
