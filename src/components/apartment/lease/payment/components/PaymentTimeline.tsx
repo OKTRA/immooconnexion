@@ -1,22 +1,15 @@
-import { differenceInDays } from "date-fns";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useEffect, useState } from "react";
-import { LeaseData, PaymentPeriod } from "../types";
+import { LeaseData, PaymentPeriod, PaymentTimelineProps } from "../types";
 import { calculatePeriodEndDate, getNextPeriodStart } from "../utils/periodCalculations";
-import { CurrentPeriodDisplay } from "./CurrentPeriodDisplay";
 import { PeriodsList } from "./PeriodsList";
-
-interface PaymentTimelineProps {
-  lease: LeaseData;
-  initialPayments: PaymentListItem[];
-}
 
 export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps) {
   const [periods, setPeriods] = useState<PaymentPeriod[]>([]);
   const [currentPeriod, setCurrentPeriod] = useState<PaymentPeriod | null>(null);
 
   useEffect(() => {
-    const depositPayment = initialPayments.find(p => p.payment_type === 'deposit');
+    const depositPayment = initialPayments.find(p => p.type === 'deposit');
     const firstRentStartDate = depositPayment?.first_rent_start_date || lease.start_date;
     
     const generatePastPeriods = () => {
@@ -28,8 +21,8 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
         const endDate = calculatePeriodEndDate(currentDate, lease.payment_frequency);
         
         const periodPayment = lease.regularPayments?.find(p => {
-          const paymentStart = new Date(p.payment_period_start);
-          const paymentEnd = new Date(p.payment_period_end);
+          const paymentStart = new Date(p.payment_period_start || '');
+          const paymentEnd = new Date(p.payment_period_end || '');
           return (
             paymentStart <= currentDate &&
             paymentEnd >= endDate
@@ -37,7 +30,7 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
         });
 
         const isPaid = periodPayment?.status === 'paid' || 
-                      periodPayment?.payment_status_type?.includes('paid');
+                      periodPayment?.displayStatus?.includes('paid');
         
         if (currentDate < now) {
           newPeriods.push({
@@ -54,7 +47,7 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
         currentDate = getNextPeriodStart(currentDate, lease.payment_frequency);
       }
       
-      return newPeriods;
+      return newPeriods.sort((a, b) => b.startDate.getTime() - a.startDate.getTime());
     };
 
     const generateCurrentPeriod = () => {
@@ -62,8 +55,8 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
       const endDate = calculatePeriodEndDate(startDate, lease.payment_frequency);
 
       const currentPayment = lease.regularPayments?.find(p => {
-        const paymentStart = new Date(p.payment_period_start);
-        const paymentEnd = new Date(p.payment_period_end);
+        const paymentStart = new Date(p.payment_period_start || '');
+        const paymentEnd = new Date(p.payment_period_end || '');
         return (
           paymentStart <= startDate &&
           paymentEnd >= endDate
@@ -71,7 +64,7 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
       });
 
       const isPaid = currentPayment?.status === 'paid' || 
-                    currentPayment?.payment_status_type?.includes('paid');
+                    currentPayment?.displayStatus?.includes('paid');
 
       return {
         id: `current-${startDate.getTime()}`,
@@ -87,17 +80,9 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
     const pastPeriods = generatePastPeriods();
     const current = generateCurrentPeriod();
     
-    // Place current period first, then past periods
-    setPeriods([current, ...pastPeriods]);
+    setPeriods(pastPeriods);
     setCurrentPeriod(current);
   }, [lease, initialPayments]);
-
-  const calculateProgress = (period: PaymentPeriod) => {
-    const now = new Date();
-    const total = differenceInDays(period.endDate, period.startDate);
-    const elapsed = differenceInDays(now, period.startDate);
-    return Math.min(100, Math.max(0, (elapsed / total) * 100));
-  };
 
   return (
     <Card>
@@ -106,14 +91,17 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <PeriodsList periods={periods} />
-          
           {currentPeriod && (
-            <CurrentPeriodDisplay 
-              period={currentPeriod}
-              progress={calculateProgress(currentPeriod)}
-            />
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-4">Période en cours</h3>
+              <PeriodsList periods={[currentPeriod]} />
+            </div>
           )}
+          
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Périodes précédentes</h3>
+            <PeriodsList periods={periods} />
+          </div>
         </div>
       </CardContent>
     </Card>
