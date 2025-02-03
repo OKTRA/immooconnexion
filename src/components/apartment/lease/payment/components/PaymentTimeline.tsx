@@ -29,6 +29,22 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
     const depositPayment = initialPayments.find(p => p.payment_type === 'deposit')
     const firstRentStartDate = depositPayment?.first_rent_start_date || lease.start_date
     
+    const calculatePeriodEndDate = (startDate: Date, frequency: string) => {
+      const date = new Date(startDate)
+      switch (frequency) {
+        case 'monthly':
+          return new Date(date.setMonth(date.getMonth() + 1, date.getDate() - 1))
+        case 'quarterly':
+          return new Date(date.setMonth(date.getMonth() + 3, date.getDate() - 1))
+        case 'yearly':
+          return new Date(date.setFullYear(date.getFullYear() + 1, date.getMonth(), date.getDate() - 1))
+        case 'biannual':
+          return new Date(date.setMonth(date.getMonth() + 6, date.getDate() - 1))
+        default:
+          return new Date(date.setMonth(date.getMonth() + 1, date.getDate() - 1))
+      }
+    }
+    
     // Générer les périodes jusqu'à aujourd'hui
     const generatePastPeriods = () => {
       const newPeriods: PaymentPeriod[] = []
@@ -36,30 +52,12 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
       const now = new Date()
       
       while (currentDate <= now) {
-        let endDate = new Date(currentDate)
-        
-        // Calculer la date de fin selon la fréquence
-        switch (lease.payment_frequency) {
-          case 'monthly':
-            endDate = endOfMonth(currentDate)
-            break
-          case 'quarterly':
-            endDate = endOfMonth(addMonths(currentDate, 3))
-            break
-          case 'yearly':
-            endDate = endOfMonth(addMonths(currentDate, 12))
-            break
-          case 'biannual':
-            endDate = endOfMonth(addMonths(currentDate, 6))
-            break
-          default:
-            endDate = endOfMonth(currentDate)
-        }
+        const endDate = calculatePeriodEndDate(currentDate, lease.payment_frequency)
 
         // Ne pas ajouter la période en cours
-        if (!isSameMonth(currentDate, now)) {
+        if (currentDate < now) {
           newPeriods.push({
-            startDate: startOfMonth(currentDate),
+            startDate: currentDate,
             endDate: endDate,
             amount: lease.rent_amount,
             status: 'pending',
@@ -68,22 +66,8 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
         }
         
         // Passer à la période suivante
-        switch (lease.payment_frequency) {
-          case 'monthly':
-            currentDate = startOfMonth(addMonths(currentDate, 1))
-            break
-          case 'quarterly':
-            currentDate = startOfMonth(addMonths(currentDate, 3))
-            break
-          case 'yearly':
-            currentDate = startOfMonth(addMonths(currentDate, 12))
-            break
-          case 'biannual':
-            currentDate = startOfMonth(addMonths(currentDate, 6))
-            break
-          default:
-            currentDate = startOfMonth(addMonths(currentDate, 1))
-        }
+        currentDate = new Date(endDate)
+        currentDate.setDate(currentDate.getDate() + 1)
       }
       
       return newPeriods
@@ -92,27 +76,10 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
     // Générer la période en cours
     const generateCurrentPeriod = () => {
       const now = new Date()
-      let endDate = new Date(now)
-      
-      switch (lease.payment_frequency) {
-        case 'monthly':
-          endDate = endOfMonth(now)
-          break
-        case 'quarterly':
-          endDate = endOfMonth(addMonths(startOfMonth(now), 3))
-          break
-        case 'yearly':
-          endDate = endOfMonth(addMonths(startOfMonth(now), 12))
-          break
-        case 'biannual':
-          endDate = endOfMonth(addMonths(startOfMonth(now), 6))
-          break
-        default:
-          endDate = endOfMonth(now)
-      }
+      const endDate = calculatePeriodEndDate(now, lease.payment_frequency)
 
       return {
-        startDate: startOfMonth(now),
+        startDate: now,
         endDate,
         amount: lease.rent_amount,
         status: 'pending',
