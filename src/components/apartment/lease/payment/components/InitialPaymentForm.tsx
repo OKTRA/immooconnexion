@@ -92,8 +92,8 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
                   selected={firstRentDate}
                   onSelect={(date) => {
                     if (date) {
-                      setFirstRentDate(date)
-                      setIsCalendarOpen(false) // Ferme le calendrier après la sélection
+                      setFirstRentDate(date);
+                      setTimeout(() => setIsCalendarOpen(false), 100);
                     }
                   }}
                   initialFocus
