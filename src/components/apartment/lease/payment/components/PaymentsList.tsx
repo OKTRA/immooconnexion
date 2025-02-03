@@ -37,6 +37,22 @@ export function PaymentsList({ title, payments, className }: PaymentListProps) {
     }
   }
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'paid_advance':
+        return 'Payé en avance'
+      case 'paid_current':
+      case 'paid':
+        return 'Payé'
+      case 'pending':
+        return 'En attente'
+      case 'late':
+        return 'En retard'
+      default:
+        return status
+    }
+  }
+
   const getPaymentTypeLabel = (type?: string) => {
     switch (type) {
       case 'deposit':
@@ -79,18 +95,12 @@ export function PaymentsList({ title, payments, className }: PaymentListProps) {
                   className="flex items-center"
                 >
                   {getStatusIcon(payment.displayStatus || payment.status)}
-                  <span>
-                    {payment.displayStatus === 'paid_advance' ? 'Payé en avance' :
-                     payment.displayStatus === 'paid_current' ? 'Payé' :
-                     payment.status === 'pending' ? 'En attente' :
-                     payment.status === 'late' ? 'En retard' : 
-                     payment.status}
-                  </span>
+                  {getStatusLabel(payment.displayStatus || payment.status)}
                 </Badge>
               </div>
             </div>
           ))}
-          {payments.length === 0 && (
+          {(!payments || payments.length === 0) && (
             <p className="text-center text-muted-foreground py-8">
               Aucun paiement trouvé
             </p>

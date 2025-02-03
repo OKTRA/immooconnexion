@@ -40,7 +40,7 @@ export function useLeaseQueries() {
             .from("apartment_lease_payments")
             .select("*")
             .eq("lease_id", lease.id)
-            .order("payment_date", { ascending: false })
+            .order("payment_period_start", { ascending: true })
 
           if (paymentsError) {
             console.error("Error fetching payments for lease:", lease.id, paymentsError)
@@ -56,13 +56,28 @@ export function useLeaseQueries() {
             p.payment_type !== 'deposit' && p.payment_type !== 'agency_fees'
           ).map(p => ({
             ...p,
-            displayStatus: p.payment_status_type || p.status
+            displayStatus: p.payment_status_type || p.status,
+            periodLabel: p.payment_period_start && p.payment_period_end ? 
+              `${new Date(p.payment_period_start).toLocaleDateString()} - ${new Date(p.payment_period_end).toLocaleDateString()}` : 
+              undefined
           })) || []
+
+          // Trouver la période en cours
+          const now = new Date()
+          const currentPeriod = regularPayments.find(p => {
+            if (!p.payment_period_start || !p.payment_period_end) return false
+            const start = new Date(p.payment_period_start)
+            const end = new Date(p.payment_period_end)
+            return now >= start && now <= end
+          })
+
+          console.log("Regular payments for lease:", lease.id, regularPayments)
 
           return {
             ...lease,
             initialPayments,
-            regularPayments
+            regularPayments,
+            currentPeriod
           }
         })
       )
