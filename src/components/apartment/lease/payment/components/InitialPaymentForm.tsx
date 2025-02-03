@@ -21,12 +21,12 @@ interface InitialPaymentFormProps {
 export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState("cash")
-  const [firstRentDate, setFirstRentDate] = useState<Date>(new Date())
+  const [firstRentDate, setFirstRentDate] = useState<Date | undefined>(undefined)
   const { handleInitialPayments } = useLeaseMutations()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (isSubmitting) return
+    if (isSubmitting || !firstRentDate) return
 
     try {
       setIsSubmitting(true)
@@ -89,7 +89,11 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
                 <Calendar
                   mode="single"
                   selected={firstRentDate}
-                  onSelect={(date) => date && setFirstRentDate(date)}
+                  onSelect={(date) => {
+                    if (date) {
+                      setFirstRentDate(date)
+                    }
+                  }}
                   initialFocus
                 />
               </PopoverContent>
