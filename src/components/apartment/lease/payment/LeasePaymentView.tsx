@@ -2,14 +2,12 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
-import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "./types";
-import { LeaseHeader } from "./components/LeaseHeader";
-import { PaymentsList } from "./components/PaymentsList";
-import { PaymentDialogs } from "./components/PaymentDialogs";
-import { PaymentStatusStats } from "./components/PaymentStatusStats";
-import { PaymentTimeline } from "./components/PaymentTimeline";
+import { LeasePaymentViewProps } from "./types";
 import { useState } from "react";
-import { isAfter, isBefore } from "date-fns";
+import { PaymentDialogs } from "./components/PaymentDialogs";
+import { LeasePaymentHeader } from "./components/LeasePaymentHeader";
+import { LeasePaymentStats } from "./components/LeasePaymentStats";
+import { LeasePaymentContent } from "./components/LeasePaymentContent";
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false);
@@ -43,15 +41,8 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         .eq("id", leaseId)
         .maybeSingle();
 
-      if (leaseError) {
-        console.error("Error fetching lease:", leaseError);
-        throw leaseError;
-      }
-
-      if (!leaseData) {
-        console.error("No lease found with ID:", leaseId);
-        return null;
-      }
+      if (leaseError) throw leaseError;
+      if (!leaseData) return null;
 
       const { data: payments, error: paymentsError } = await supabase
         .from("apartment_lease_payments")
@@ -59,64 +50,35 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         .eq("lease_id", leaseId)
         .order("payment_date", { ascending: false });
 
-      if (paymentsError) {
-        console.error("Error fetching payments:", paymentsError);
-        throw paymentsError;
-      }
+      if (paymentsError) throw paymentsError;
 
-      const hasDepositPayment = payments?.some(
-        (p) => p.payment_type === "deposit" && p.status === "paid"
-      );
-      const hasAgencyFeesPayment = payments?.some(
-        (p) => p.payment_type === "agency_fees" && p.status === "paid"
-      );
-      const initialPaymentsCompleted = hasDepositPayment && hasAgencyFeesPayment;
+      const initialPayments = payments?.filter(p => 
+        p.payment_type === "deposit" || p.payment_type === "agency_fees"
+      ).map(p => ({
+        ...p,
+        type: p.payment_type,
+        displayStatus: p.payment_status_type || p.status
+      })) || [];
 
-      const initialPayments =
-        payments
-          ?.filter(
-            (p) => p.payment_type === "deposit" || p.payment_type === "agency_fees"
-          )
-          .map((p) => ({
-            ...p,
-            type: p.payment_type,
-          })) || [];
-
-      const regularPayments =
-        payments
-          ?.filter(
-            (p) =>
-              p.payment_type !== "deposit" && p.payment_type !== "agency_fees"
-          )
-          .map((p) => ({
-            ...p,
-            displayStatus: p.payment_status_type || p.status,
-          })) || [];
-
-      const currentPeriod = regularPayments.find((p) => {
-        if (!p.payment_period_start || !p.payment_period_end) return false;
-        const start = new Date(p.payment_period_start);
-        const end = new Date(p.payment_period_end);
-        const now = new Date();
-        return isAfter(now, start) && isBefore(now, end);
-      });
+      const regularPayments = payments?.filter(p => 
+        p.payment_type !== "deposit" && p.payment_type !== "agency_fees"
+      ).map(p => ({
+        ...p,
+        displayStatus: p.payment_status_type || p.status
+      })) || [];
 
       return {
         ...leaseData,
         initialPayments,
-        regularPayments,
-        currentPeriod,
-        initial_payments_completed: initialPaymentsCompleted,
-      } as LeaseData;
-    },
-    retry: 1,
+        regularPayments
+      };
+    }
   });
 
   const { data: stats } = useQuery({
     queryKey: ["lease-payment-stats", leaseId],
     queryFn: async () => {
       console.log("Fetching payment stats for lease:", leaseId);
-
       const { data: payments, error } = await supabase
         .from("apartment_lease_payments")
         .select("amount, status, due_date")
@@ -124,44 +86,16 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
 
       if (error) throw error;
 
-      const totalReceived =
-        payments
-          ?.filter((p) => p.status === "paid")
-          .reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
-
-      const pendingAmount =
-        payments
-          ?.filter((p) => p.status === "pending")
-          .reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
-
-      const lateAmount =
-        payments
-          ?.filter((p) => p.status === "late")
-          .reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
-
-      const latePayments =
-        payments?.filter((p) => p.status === "late").length || 0;
-
-      const nextPayment = payments
-        ?.filter((p) => p.status === "pending")
-        .sort(
-          (a, b) =>
-            new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
-        )[0];
-
       return {
-        totalReceived,
-        pendingAmount,
-        latePayments,
-        lateAmount,
-        nextPaymentDue: nextPayment
-          ? {
-              amount: nextPayment.amount,
-              dueDate: nextPayment.due_date,
-            }
-          : undefined,
-      } as PaymentSummary;
-    },
+        totalReceived: payments?.filter(p => p.status === "paid")
+          .reduce((sum, p) => sum + (p.amount || 0), 0) || 0,
+        pendingAmount: payments?.filter(p => p.status === "pending")
+          .reduce((sum, p) => sum + (p.amount || 0), 0) || 0,
+        lateAmount: payments?.filter(p => p.status === "late")
+          .reduce((sum, p) => sum + (p.amount || 0), 0) || 0,
+        latePayments: payments?.filter(p => p.status === "late").length || 0
+      };
+    }
   });
 
   const handlePaymentSuccess = () => {
@@ -187,33 +121,18 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
 
   return (
     <div className="space-y-8">
-      <LeaseHeader
+      <LeasePaymentHeader
         lease={lease}
         onInitialPayment={() => setShowInitialPaymentDialog(true)}
       />
 
-      {stats && <PaymentStatusStats stats={stats} />}
+      {stats && <LeasePaymentStats stats={stats} />}
 
-      {lease.initial_payments_completed && (
-        <PaymentTimeline
-          lease={lease}
-          initialPayments={lease.initialPayments || []}
-        />
-      )}
-
-      <PaymentsList
-        title="Paiements Initiaux"
-        payments={lease.initialPayments || []}
-        className="w-full"
+      <LeasePaymentContent 
+        lease={lease}
+        initialPayments={lease.initialPayments || []}
+        regularPayments={lease.regularPayments || []}
       />
-
-      {lease.initial_payments_completed && (
-        <PaymentsList
-          title="Paiements de Loyer"
-          payments={lease.regularPayments || []}
-          className="w-full"
-        />
-      )}
 
       <PaymentDialogs
         lease={lease}
