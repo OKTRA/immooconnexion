@@ -98,6 +98,11 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
     }
   });
 
+  const handlePaymentSuccess = () => {
+    setShowRegularPaymentDialog(false);
+    setShowInitialPaymentDialog(false);
+  };
+
   if (isLoadingLease) {
     return (
       <div className="flex items-center justify-center h-48">
@@ -119,7 +124,6 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
       <LeasePaymentHeader
         lease={lease}
         onInitialPayment={() => setShowInitialPaymentDialog(true)}
-        onRegularPayment={() => setShowRegularPaymentDialog(true)}
       />
 
       {stats && <LeasePaymentStats stats={stats} />}
@@ -136,10 +140,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         showRegularPaymentDialog={showRegularPaymentDialog}
         onInitialDialogChange={setShowInitialPaymentDialog}
         onRegularDialogChange={setShowRegularPaymentDialog}
-        onSuccess={() => {
-          setShowInitialPaymentDialog(false);
-          setShowRegularPaymentDialog(false);
-        }}
+        onSuccess={handlePaymentSuccess}
       />
     </div>
   );
