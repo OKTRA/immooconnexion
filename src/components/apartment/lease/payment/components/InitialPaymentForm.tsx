@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { PaymentMethodSelect } from "./PaymentMethodSelect"
 import { LeaseData } from "../types"
 import { useLeaseMutations } from "@/components/apartment/lease/hooks/useLeaseMutations"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, X } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
@@ -91,9 +91,16 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
                 </Button>
               </PopoverTrigger>
               <PopoverContent 
-                className="w-auto p-0" 
+                className="w-auto p-0 relative" 
                 align="start"
               >
+                <Button
+                  variant="ghost"
+                  className="absolute right-2 top-2 h-6 w-6 p-0"
+                  onClick={() => setIsCalendarOpen(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
                 <Calendar
                   mode="single"
                   selected={firstRentDate}
