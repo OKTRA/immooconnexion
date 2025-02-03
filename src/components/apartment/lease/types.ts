@@ -18,6 +18,15 @@ export interface LeaseFormData {
   status: LeaseStatus;
 }
 
+export interface LeaseFormFieldsProps {
+  formData: LeaseFormData;
+  setFormData: (data: LeaseFormData) => void;
+  onSubmit: () => Promise<void>;
+  isSubmitting: boolean;
+  onCancel: () => void;
+  disabled?: boolean;
+}
+
 export interface PaymentFormData {
   leaseId: string;
   amount: number;
@@ -48,6 +57,7 @@ export interface PaymentSummary {
   totalReceived: number;
   pendingAmount: number;
   latePayments: number;
+  lateAmount: number;
   nextPaymentDue?: {
     amount: number;
     dueDate: string;
@@ -87,6 +97,7 @@ export interface LeaseData {
   duration_type: DurationType;
   status: LeaseStatus;
   payment_type: PaymentType;
+  agency_id: string;
   tenant: {
     id: string;
     first_name: string;
@@ -105,7 +116,6 @@ export interface LeaseData {
   };
   initial_fees_paid?: boolean;
   initial_payments_completed?: boolean;
-  agency_id: string;
   initialPayments?: PaymentListItem[];
   regularPayments?: PaymentListItem[];
   currentPeriod?: PaymentListItem;
