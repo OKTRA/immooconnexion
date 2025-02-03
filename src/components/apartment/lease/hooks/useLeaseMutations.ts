@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { toast } from "@/components/ui/use-toast"
+import { calculatePeriodEndDate, getNextPeriodStart } from "../payment/utils/periodCalculations"
 
 interface InitialPaymentsParams {
   leaseId: string
@@ -29,7 +30,7 @@ export function useLeaseMutations() {
 
         const { data: leaseData, error: leaseError } = await supabase
           .from('apartment_leases')
-          .select('agency_id')
+          .select('agency_id, payment_frequency')
           .eq('id', leaseId)
           .single()
 
