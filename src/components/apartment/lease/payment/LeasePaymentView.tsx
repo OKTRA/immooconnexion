@@ -1,147 +1,216 @@
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Plus, User, Phone, Mail, Home } from "lucide-react"
-import { AgencyLayout } from "@/components/agency/AgencyLayout"
+import { supabase } from "@/integrations/supabase/client"
+import { Loader2 } from "lucide-react"
+import { LeasePaymentViewProps, PaymentSummary, LeaseData } from "./types"
+import { LeaseHeader } from "./components/LeaseHeader"
+import { PaymentsList } from "./components/PaymentsList"
+import { PaymentDialogs } from "./components/PaymentDialogs"
 import { PaymentStatusStats } from "./components/PaymentStatusStats"
-import { PaymentFilters } from "@/components/apartment/payment/PaymentFilters"
-import { PaymentsList } from "@/components/apartment/payment/PaymentsList"
-import { PaymentDialog } from "@/components/apartment/payment/PaymentDialog"
-import { useLeaseQueries } from "@/components/apartment/lease/hooks/useLeaseQueries"
-import { PaymentPeriodFilter, PaymentStatusFilter, PaymentSummary } from "./types"
+import { CurrentPeriodCard } from "./components/CurrentPeriodCard"
+import { PaymentTimeline } from "./components/PaymentTimeline"
 import { useState } from "react"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { isAfter, isBefore } from "date-fns"
 
-export function LeasePaymentView() {
-  const { leaseId } = useParams<{ leaseId: string }>()
-  const [periodFilter, setPeriodFilter] = useState<PaymentPeriodFilter>("current")
-  const [statusFilter, setStatusFilter] = useState<PaymentStatusFilter>("all")
-  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false)
+export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
+  const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
+  const [showRegularPaymentDialog, setShowRegularPaymentDialog] = useState(false)
 
-  const { leases, isLoading: isLoadingLeases } = useLeaseQueries()
-  const currentLease = leases.find(lease => lease.id === leaseId)
+  const { data: lease, isLoading: isLoadingLease } = useQuery({
+    queryKey: ["lease", leaseId],
+    queryFn: async () => {
+      console.log("Fetching lease data for:", leaseId)
+      const { data: leaseData, error: leaseError } = await supabase
+        .from("apartment_leases")
+        .select(`
+          *,
+          tenant:apartment_tenants (
+            id,
+            first_name,
+            last_name,
+            phone_number,
+            email
+          ),
+          unit:apartment_units (
+            id,
+            unit_number,
+            apartment:apartments (
+              id,
+              name
+            )
+          )
+        `)
+        .eq("id", leaseId)
+        .maybeSingle()
 
-  const { data: stats, isLoading: isLoadingStats } = useQuery({
-    queryKey: ["tenant-payment-stats", leaseId],
+      if (leaseError) {
+        console.error("Error fetching lease:", leaseError)
+        throw leaseError
+      }
+
+      if (!leaseData) {
+        console.error("No lease found with ID:", leaseId)
+        return null
+      }
+
+      // Fetch all payments for this lease
+      const { data: payments, error: paymentsError } = await supabase
+        .from("apartment_lease_payments")
+        .select("*")
+        .eq("lease_id", leaseId)
+        .order("payment_date", { ascending: false })
+
+      if (paymentsError) {
+        console.error("Error fetching payments:", paymentsError)
+        throw paymentsError
+      }
+
+      // Verify initial payments are actually completed
+      const hasDepositPayment = payments?.some(p => 
+        p.payment_type === 'deposit' && p.status === 'paid'
+      )
+      const hasAgencyFeesPayment = payments?.some(p => 
+        p.payment_type === 'agency_fees' && p.status === 'paid'
+      )
+      const initialPaymentsCompleted = hasDepositPayment && hasAgencyFeesPayment
+
+      const initialPayments = payments?.filter(p => 
+        p.payment_type === 'deposit' || p.payment_type === 'agency_fees'
+      ).map(p => ({
+        ...p,
+        type: p.payment_type
+      })) || []
+      
+      const regularPayments = payments?.filter(p => 
+        p.payment_type !== 'deposit' && p.payment_type !== 'agency_fees'
+      ).map(p => ({
+        ...p,
+        displayStatus: p.payment_status_type || p.status
+      })) || []
+
+      const currentPeriod = regularPayments.find(p => {
+        if (!p.payment_period_start || !p.payment_period_end) return false
+        const start = new Date(p.payment_period_start)
+        const end = new Date(p.payment_period_end)
+        const now = new Date()
+        return isAfter(now, start) && isBefore(now, end)
+      })
+
+      return { 
+        ...leaseData, 
+        initialPayments,
+        regularPayments,
+        currentPeriod,
+        initial_payments_completed: initialPaymentsCompleted // Override with actual verification
+      } as LeaseData
+    },
+    retry: 1
+  })
+
+  const { data: stats } = useQuery({
+    queryKey: ["lease-payment-stats", leaseId],
     queryFn: async () => {
       console.log("Fetching payment stats for lease:", leaseId)
       
       const { data: payments, error } = await supabase
         .from("apartment_lease_payments")
-        .select("amount, status")
+        .select("amount, status, due_date")
         .eq("lease_id", leaseId)
 
-      if (error) {
-        console.error("Error fetching payment stats:", error)
-        throw error
-      }
+      if (error) throw error
 
-      const stats: PaymentSummary = {
-        totalReceived: payments?.filter(p => p.status === "paid")
-          .reduce((sum, p) => sum + (p.amount || 0), 0) || 0,
-        pendingAmount: payments?.filter(p => p.status === "pending")
-          .reduce((sum, p) => sum + (p.amount || 0), 0) || 0,
-        latePayments: payments?.filter(p => p.status === "late").length || 0,
-        lateAmount: payments?.filter(p => p.status === "late")
-          .reduce((sum, p) => sum + (p.amount || 0), 0) || 0
-      }
+      const totalReceived = payments
+        ?.filter(p => p.status === 'paid')
+        .reduce((sum, p) => sum + (p.amount || 0), 0) || 0
 
-      return stats
-    },
-    enabled: !!leaseId
+      const pendingAmount = payments
+        ?.filter(p => p.status === 'pending')
+        .reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+
+      const lateAmount = payments
+        ?.filter(p => p.status === 'late')
+        .reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+
+      const nextPayment = payments
+        ?.filter(p => p.status === 'pending')
+        .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())[0]
+
+      return {
+        totalReceived,
+        pendingAmount,
+        lateAmount,
+        nextPayment: nextPayment ? {
+          amount: nextPayment.amount,
+          due_date: nextPayment.due_date
+        } : undefined
+      } as PaymentSummary
+    }
   })
 
-  if (!leaseId || !currentLease) return null
+  const handlePaymentSuccess = () => {
+    setShowRegularPaymentDialog(false)
+    setShowInitialPaymentDialog(false)
+  }
 
-  const tenant = currentLease.tenant
-  const unit = currentLease.unit
+  if (isLoadingLease) {
+    return (
+      <div className="flex items-center justify-center h-48">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!lease) {
+    return <div className="text-center p-4 text-muted-foreground">Bail non trouvé</div>
+  }
 
   return (
-    <AgencyLayout>
-      <div className="container mx-auto p-6 space-y-6">
-        <Card>
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex items-start space-x-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarFallback>
-                    {tenant?.first_name?.[0]}{tenant?.last_name?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h2 className="text-2xl font-bold">
-                    {tenant?.first_name} {tenant?.last_name}
-                  </h2>
-                  <div className="space-y-1 mt-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Home className="h-4 w-4" />
-                      <span>{unit?.apartment?.name} - Unité {unit?.unit_number}</span>
-                    </div>
-                    {tenant?.phone_number && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
-                        <span>{tenant.phone_number}</span>
-                      </div>
-                    )}
-                    {tenant?.email && (
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
-                        <span>{tenant.email}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="font-semibold">Loyer mensuel</p>
-                <p className="text-2xl font-bold">{currentLease.rent_amount?.toLocaleString()} FCFA</p>
-                <p className="text-sm text-muted-foreground">
-                  Début du bail: {format(new Date(currentLease.start_date), "d MMMM yyyy", { locale: fr })}
-                </p>
-                {currentLease.initial_payments_completed && (
-                  <Button 
-                    onClick={() => setIsPaymentDialogOpen(true)}
-                    className="mt-2"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nouveau paiement
-                  </Button>
-                )}
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
+    <div className="space-y-8">
+      <LeaseHeader 
+        lease={lease}
+        onInitialPayment={() => setShowInitialPaymentDialog(true)}
+      />
+      
+      {stats && <PaymentStatusStats stats={stats} />}
 
-        {stats && <PaymentStatusStats stats={stats} />}
-
-        <Card>
-          <CardContent className="p-6">
-            <PaymentFilters
-              periodFilter={periodFilter}
-              statusFilter={statusFilter}
-              onPeriodFilterChange={setPeriodFilter}
-              onStatusFilterChange={setStatusFilter}
+      {lease.initial_payments_completed && (
+        <>
+          {lease.currentPeriod && (
+            <CurrentPeriodCard
+              currentPeriod={lease.currentPeriod}
+              onPaymentClick={() => setShowRegularPaymentDialog(true)}
             />
-          </CardContent>
-        </Card>
+          )}
 
-        <PaymentsList
-          periodFilter={periodFilter}
-          statusFilter={statusFilter}
-          leaseId={leaseId}
-        />
+          <PaymentTimeline 
+            lease={lease}
+            initialPayments={lease.initialPayments || []}
+          />
+        </>
+      )}
 
-        <PaymentDialog
-          open={isPaymentDialogOpen}
-          onOpenChange={setIsPaymentDialogOpen}
-          leaseId={leaseId}
-          lease={currentLease}
+      <PaymentsList 
+        title="Paiements Initiaux" 
+        payments={lease.initialPayments || []}
+        className="w-full"
+      />
+      
+      {lease.initial_payments_completed && (
+        <PaymentsList 
+          title="Paiements de Loyer" 
+          payments={lease.regularPayments || []}
+          className="w-full"
         />
-      </div>
-    </AgencyLayout>
+      )}
+
+      <PaymentDialogs 
+        lease={lease}
+        showInitialPaymentDialog={showInitialPaymentDialog}
+        showRegularPaymentDialog={showRegularPaymentDialog}
+        onInitialDialogChange={setShowInitialPaymentDialog}
+        onRegularDialogChange={setShowRegularPaymentDialog}
+        onSuccess={handlePaymentSuccess}
+      />
+    </div>
   )
 }
