@@ -23,7 +23,7 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash")
   const [firstRentDate, setFirstRentDate] = useState<Date | undefined>(undefined)
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+  const [open, setOpen] = useState(false)
   const { handleInitialPayments } = useLeaseMutations()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,11 +70,7 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
 
           <div className="space-y-2">
             <Label>Date de début du premier loyer</Label>
-            <Popover 
-              open={isCalendarOpen} 
-              onOpenChange={setIsCalendarOpen}
-              modal={true}
-            >
+            <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -82,11 +78,6 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
                     "w-full justify-start text-left font-normal",
                     !firstRentDate && "text-muted-foreground"
                   )}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    setIsCalendarOpen(true)
-                  }}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {firstRentDate ? (
@@ -96,21 +87,14 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent 
-                className="w-auto p-0" 
-                align="start"
-                onInteractOutside={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                }}
-                onClick={(e) => e.stopPropagation()}
-              >
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={firstRentDate}
                   onSelect={(date) => {
                     if (date) {
                       setFirstRentDate(date)
+                      setOpen(false)
                     }
                   }}
                   initialFocus
