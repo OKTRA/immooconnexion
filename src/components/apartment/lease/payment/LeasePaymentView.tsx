@@ -7,6 +7,7 @@ import { LeaseHeader } from "./components/LeaseHeader"
 import { PaymentsList } from "./components/PaymentsList"
 import { PaymentDialogs } from "./components/PaymentDialogs"
 import { PaymentStatusStats } from "./components/PaymentStatusStats"
+import { CurrentPeriodCard } from "./components/CurrentPeriodCard"
 import { PaymentTimeline } from "./components/PaymentTimeline"
 import { useState } from "react"
 import { isAfter, isBefore } from "date-fns"
@@ -100,7 +101,7 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         initialPayments,
         regularPayments,
         currentPeriod,
-        initial_payments_completed: initialPaymentsCompleted
+        initial_payments_completed: initialPaymentsCompleted // Override with actual verification
       } as LeaseData
     },
     retry: 1
@@ -173,10 +174,19 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
       {stats && <PaymentStatusStats stats={stats} />}
 
       {lease.initial_payments_completed && (
-        <PaymentTimeline 
-          lease={lease}
-          initialPayments={lease.initialPayments || []}
-        />
+        <>
+          {lease.currentPeriod && (
+            <CurrentPeriodCard
+              currentPeriod={lease.currentPeriod}
+              onPaymentClick={() => setShowRegularPaymentDialog(true)}
+            />
+          )}
+
+          <PaymentTimeline 
+            lease={lease}
+            initialPayments={lease.initialPayments || []}
+          />
+        </>
       )}
 
       <PaymentsList 
