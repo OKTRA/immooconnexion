@@ -102,8 +102,7 @@ export function CurrentPaymentForm({
         p_payment_date: paymentDate,
         p_period_start: periodStart.toISOString().split('T')[0],
         p_period_end: periodEnd.toISOString().split('T')[0],
-        p_notes: notes,
-        p_payment_status_type: advancePayment ? 'paid_advance' : 'late'
+        p_notes: notes
       })
 
       if (error) throw error
