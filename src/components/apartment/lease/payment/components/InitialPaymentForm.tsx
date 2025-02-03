@@ -69,7 +69,11 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
 
           <div className="space-y-2">
             <Label>Date de début du premier loyer</Label>
-            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+            <Popover 
+              open={isCalendarOpen} 
+              onOpenChange={setIsCalendarOpen}
+              modal={true}
+            >
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -86,14 +90,17 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent 
+                className="w-auto p-0" 
+                align="start"
+              >
                 <Calendar
                   mode="single"
                   selected={firstRentDate}
                   onSelect={(date) => {
                     if (date) {
                       setFirstRentDate(date);
-                      setTimeout(() => setIsCalendarOpen(false), 100);
+                      requestAnimationFrame(() => setIsCalendarOpen(false));
                     }
                   }}
                   initialFocus
