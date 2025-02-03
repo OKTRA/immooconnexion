@@ -7,7 +7,15 @@ interface PaymentTimelineProps {
   payments: PaymentListItem[];
 }
 
-export function PaymentTimeline({ payments }: PaymentTimelineProps) {
+export function PaymentTimeline({ payments = [] }: PaymentTimelineProps) {
+  if (!payments || payments.length === 0) {
+    return (
+      <div className="text-center p-4 text-muted-foreground">
+        Aucun paiement à afficher
+      </div>
+    );
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'paid':
@@ -46,15 +54,15 @@ export function PaymentTimeline({ payments }: PaymentTimelineProps) {
     <div className="space-y-8">
       {payments.map((payment) => (
         <div key={payment.id} className="relative pl-8">
-          <div className={`absolute left-0 w-4 h-4 rounded-full ${getStatusColor(payment.payment_status_type || payment.status)}`} />
+          <div className={`absolute left-0 w-4 h-4 rounded-full ${getStatusColor(payment.status)}`} />
           <div className="flex flex-col space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <span className="text-sm font-medium">
                   {format(new Date(payment.payment_date || payment.due_date), 'PP', { locale: fr })}
                 </span>
-                <Badge variant={payment.payment_status_type === 'paid' ? 'default' : 'secondary'}>
-                  {getStatusLabel(payment.payment_status_type || payment.status)}
+                <Badge variant={payment.status === 'paid' ? 'default' : 'secondary'}>
+                  {getStatusLabel(payment.status)}
                 </Badge>
               </div>
               <span className="font-bold">

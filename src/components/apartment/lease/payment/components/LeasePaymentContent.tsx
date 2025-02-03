@@ -16,10 +16,7 @@ export function LeasePaymentContent({
   return (
     <div className="space-y-8">
       {lease.initial_payments_completed && (
-        <PaymentTimeline 
-          lease={lease}
-          initialPayments={initialPayments}
-        />
+        <PaymentTimeline payments={regularPayments} />
       )}
 
       <PaymentsList
