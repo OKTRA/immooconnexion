@@ -27,7 +27,6 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
       while (currentDate <= now) {
         const endDate = calculatePeriodEndDate(currentDate, lease.payment_frequency);
         
-        // Vérifier si un paiement existe pour cette période
         const periodPayment = lease.regularPayments?.find(p => {
           const paymentStart = new Date(p.payment_period_start);
           const paymentEnd = new Date(p.payment_period_end);
@@ -62,7 +61,6 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
       const startDate = new Date(firstRentStartDate);
       const endDate = calculatePeriodEndDate(startDate, lease.payment_frequency);
 
-      // Vérifier si un paiement existe pour la période actuelle
       const currentPayment = lease.regularPayments?.find(p => {
         const paymentStart = new Date(p.payment_period_start);
         const paymentEnd = new Date(p.payment_period_end);
@@ -89,7 +87,8 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
     const pastPeriods = generatePastPeriods();
     const current = generateCurrentPeriod();
     
-    setPeriods(pastPeriods);
+    // Place current period first, then past periods
+    setPeriods([current, ...pastPeriods]);
     setCurrentPeriod(current);
   }, [lease, initialPayments]);
 
