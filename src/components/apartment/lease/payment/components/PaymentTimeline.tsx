@@ -14,42 +14,23 @@ interface PaymentTimelineProps {
 export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps) {
   const [periods, setPeriods] = useState<PaymentPeriod[]>([]);
   const [currentPeriod, setCurrentPeriod] = useState<PaymentPeriod | null>(null);
-
-  // Vérifier s'il y a des paiements initiaux
-  if (!initialPayments?.length) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Suivi Chronologique des Paiements</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-center">
-            Aucun paiement enregistré
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Vérifier si le paiement de dépôt existe et a une date de début de loyer
-  const depositPayment = initialPayments.find(p => p.payment_type === 'deposit');
-  if (!depositPayment?.first_rent_start_date) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Suivi Chronologique des Paiements</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-center">
-            Date de début du premier loyer non définie
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const firstRentStartDate = depositPayment?.first_rent_start_date || lease.start_date;
+    // Vérifier s'il y a des paiements initiaux
+    if (!initialPayments?.length) {
+      setError("Aucun paiement enregistré");
+      return;
+    }
+
+    // Vérifier si le paiement de dépôt existe et a une date de début de loyer
+    const depositPayment = initialPayments.find(p => p.payment_type === 'deposit');
+    if (!depositPayment?.first_rent_start_date) {
+      setError("Date de début du premier loyer non définie");
+      return;
+    }
+
+    const firstRentStartDate = depositPayment.first_rent_start_date || lease.start_date;
     
     const generatePastPeriods = () => {
       const newPeriods: PaymentPeriod[] = [];
@@ -123,7 +104,7 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
     
     setPeriods(pastPeriods);
     setCurrentPeriod(current);
-  }, [lease, initialPayments, depositPayment]);
+  }, [lease, initialPayments]);
 
   const calculateProgress = (period: PaymentPeriod) => {
     const now = new Date();
@@ -131,6 +112,21 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
     const elapsed = differenceInDays(now, period.startDate);
     return Math.min(100, Math.max(0, (elapsed / total) * 100));
   };
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Suivi Chronologique des Paiements</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-center">
+            {error}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
