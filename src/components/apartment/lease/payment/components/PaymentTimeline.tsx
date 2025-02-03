@@ -1,15 +1,21 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { differenceInDays } from "date-fns";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-import { LeaseData, PaymentPeriod, PaymentTimelineProps } from "../types";
+import { LeaseData, PaymentPeriod } from "../types";
 import { calculatePeriodEndDate, getNextPeriodStart } from "../utils/periodCalculations";
 import { PeriodsList } from "./PeriodsList";
+
+interface PaymentTimelineProps {
+  lease: LeaseData;
+  initialPayments: PaymentListItem[];
+}
 
 export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps) {
   const [periods, setPeriods] = useState<PaymentPeriod[]>([]);
   const [currentPeriod, setCurrentPeriod] = useState<PaymentPeriod | null>(null);
 
   useEffect(() => {
-    const depositPayment = initialPayments.find(p => p.type === 'deposit');
+    const depositPayment = initialPayments.find(p => p.payment_type === 'deposit');
     const firstRentStartDate = depositPayment?.first_rent_start_date || lease.start_date;
     
     const generatePastPeriods = () => {
@@ -21,8 +27,8 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
         const endDate = calculatePeriodEndDate(currentDate, lease.payment_frequency);
         
         const periodPayment = lease.regularPayments?.find(p => {
-          const paymentStart = new Date(p.payment_period_start || '');
-          const paymentEnd = new Date(p.payment_period_end || '');
+          const paymentStart = new Date(p.payment_period_start);
+          const paymentEnd = new Date(p.payment_period_end);
           return (
             paymentStart <= currentDate &&
             paymentEnd >= endDate
@@ -30,7 +36,7 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
         });
 
         const isPaid = periodPayment?.status === 'paid' || 
-                      periodPayment?.displayStatus?.includes('paid');
+                      periodPayment?.payment_status_type?.includes('paid');
         
         if (currentDate < now) {
           newPeriods.push({
@@ -55,8 +61,8 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
       const endDate = calculatePeriodEndDate(startDate, lease.payment_frequency);
 
       const currentPayment = lease.regularPayments?.find(p => {
-        const paymentStart = new Date(p.payment_period_start || '');
-        const paymentEnd = new Date(p.payment_period_end || '');
+        const paymentStart = new Date(p.payment_period_start);
+        const paymentEnd = new Date(p.payment_period_end);
         return (
           paymentStart <= startDate &&
           paymentEnd >= endDate
@@ -64,7 +70,7 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
       });
 
       const isPaid = currentPayment?.status === 'paid' || 
-                    currentPayment?.displayStatus?.includes('paid');
+                    currentPayment?.payment_status_type?.includes('paid');
 
       return {
         id: `current-${startDate.getTime()}`,
