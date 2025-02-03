@@ -2,6 +2,9 @@ export type PaymentMethod = 'cash' | 'bank_transfer' | 'mobile_money' | 'card';
 export type PaymentStatus = 'pending' | 'paid' | 'late' | 'cancelled';
 export type PaymentStatusType = 'paid_current' | 'paid_advance' | 'paid_late' | 'pending';
 export type PaymentType = 'rent' | 'deposit' | 'agency_fees';
+export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+export type PaymentPeriodFilter = 'all' | 'current' | 'overdue' | 'upcoming';
+export type PaymentStatusFilter = 'all' | 'pending' | 'paid' | 'late';
 
 export interface PaymentSummary {
   totalReceived: number;
@@ -12,10 +15,6 @@ export interface PaymentSummary {
     amount: number;
     dueDate: string;
   };
-  rentAmount?: number;
-  penaltiesAmount?: number;
-  periodsCount?: number;
-  totalAmount?: number;
 }
 
 export interface PaymentPeriod {
@@ -38,23 +37,8 @@ export interface PaymentFormData {
   leaseId: string;
   amount: number;
   paymentMethod: PaymentMethod;
+  paymentPeriods: string[];
   paymentDate: Date;
   notes?: string;
   isHistorical?: boolean;
-  paymentType: PaymentType;
-  periodStart?: Date;
-  periodEnd?: Date;
-}
-
-export interface PaymentHistoryEntry {
-  id: string;
-  amount: number;
-  status: PaymentStatus;
-  paymentDate?: string;
-  date?: string;
-  paymentMethod?: PaymentMethod;
-  notes?: string;
-  periodStart?: string;
-  periodEnd?: string;
-  type: PaymentType;
 }

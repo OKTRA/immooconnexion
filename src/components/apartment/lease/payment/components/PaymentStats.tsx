@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card"
-import { PaymentSummary } from "../types"
+import { PaymentSummary } from "@/types/payment"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { ArrowUpCircle, ArrowDownCircle, Clock } from "lucide-react"
@@ -38,9 +38,9 @@ export function PaymentStats({ stats }: PaymentStatsProps) {
               <p className="text-2xl font-bold">
                 {stats.pendingAmount.toLocaleString()} FCFA
               </p>
-              {stats.nextPayment && (
+              {stats.nextPaymentDue && (
                 <p className="text-sm text-muted-foreground mt-1">
-                  Prochain: {format(new Date(stats.nextPayment.due_date), 'PP', { locale: fr })}
+                  Prochain: {format(new Date(stats.nextPaymentDue.dueDate), 'PP', { locale: fr })}
                 </p>
               )}
             </div>

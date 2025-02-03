@@ -1,6 +1,5 @@
-import { PaymentMethod } from './payment';
+import { PaymentFrequency } from './payment';
 
-export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 export type DurationType = 'fixed' | 'month_to_month' | 'yearly';
 export type PaymentType = 'upfront' | 'end_of_period';
 export type LeaseStatus = 'active' | 'expired' | 'terminated';
@@ -16,19 +15,6 @@ export interface LeaseFormData {
   duration_type: DurationType;
   payment_type: PaymentType;
   status: LeaseStatus;
-}
-
-export interface LeaseFormFieldsProps {
-  formData: LeaseFormData;
-  setFormData: (data: LeaseFormData) => void;
-  onSubmit: () => Promise<void>;
-  isSubmitting: boolean;
-  onCancel: () => void;
-  disabled?: boolean;
-}
-
-export interface LeasePaymentViewProps {
-  leaseId: string;
 }
 
 export interface LeaseData {
@@ -62,7 +48,4 @@ export interface LeaseData {
   };
   initial_fees_paid?: boolean;
   initial_payments_completed?: boolean;
-  initialPayments?: any[];
-  regularPayments?: any[];
-  currentPeriod?: any;
 }
