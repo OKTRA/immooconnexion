@@ -1,40 +1,38 @@
-import { PaymentMethod } from "@/types/payment";
+import { PaymentMethod, PaymentPeriod, PaymentSummary } from '@/types/payment';
+import { LeaseData } from '@/types/lease';
 
-export interface PaymentFormData {
-  leaseId?: string;
-  amount: number;
-  paymentMethod: PaymentMethod;
-  paymentDate: string;
-  paymentPeriods: string[];
-  notes?: string;
-  agencyId?: string;
+export interface PaymentFormProps {
+  lease: LeaseData;
+  onSuccess?: () => void;
   isHistorical?: boolean;
 }
 
-export interface PaymentFormFieldsProps {
-  formData: PaymentFormData;
-  setFormData: (data: PaymentFormData) => void;
-  onSubmit: () => Promise<void>;
+export interface HistoricalPaymentFormProps {
+  lease: LeaseData;
+  onSuccess?: () => void;
   isSubmitting: boolean;
-  onCancel: () => void;
-  lease: any;
+  setIsSubmitting: (value: boolean) => void;
 }
 
-export interface PaymentListProps {
-  periodFilter: PaymentPeriodFilter;
-  statusFilter: PaymentStatusFilter;
+export interface PaymentPeriodsListProps {
+  selectedPeriods: PaymentPeriod[];
+  onPeriodSelect: (period: PaymentPeriod) => void;
+  isLoading?: boolean;
+}
+
+export interface PaymentSummaryProps {
+  summary: PaymentSummary;
+  className?: string;
+}
+
+export interface PaymentActionButtonProps {
   leaseId: string;
+  onSuccess?: () => void;
 }
 
-export type PaymentPeriodFilter = 'all' | 'current' | 'overdue' | 'upcoming';
-export type PaymentStatusFilter = 'all' | 'pending' | 'paid' | 'late';
-
-export interface PaymentSummary {
-  totalReceived: number;
-  pendingAmount: number;
-  latePayments: number;
-  nextPaymentDue?: {
-    amount: number;
-    dueDate: string;
-  };
+export interface PaymentDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  leaseId: string;
+  lease: LeaseData;
 }
