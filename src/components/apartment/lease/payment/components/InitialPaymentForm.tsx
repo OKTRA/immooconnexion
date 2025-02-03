@@ -22,7 +22,6 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState("cash")
   const [firstRentDate, setFirstRentDate] = useState<Date>(new Date())
-  const [open, setOpen] = useState(false)
   const { handleInitialPayments } = useLeaseMutations()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,7 +68,7 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
 
           <div className="space-y-2">
             <Label>Date de début du premier loyer</Label>
-            <Popover open={open} onOpenChange={setOpen}>
+            <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -90,12 +89,7 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
                 <Calendar
                   mode="single"
                   selected={firstRentDate}
-                  onSelect={(date) => {
-                    if (date) {
-                      setFirstRentDate(date)
-                      setOpen(false)
-                    }
-                  }}
+                  onSelect={(date) => date && setFirstRentDate(date)}
                   initialFocus
                 />
               </PopoverContent>
