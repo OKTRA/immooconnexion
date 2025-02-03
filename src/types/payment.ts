@@ -1,3 +1,5 @@
+import { ApartmentLease } from "./apartment";
+
 export type PaymentMethod = 'cash' | 'bank_transfer' | 'mobile_money' | 'card';
 export type PaymentStatus = 'pending' | 'paid' | 'late' | 'cancelled';
 export type PaymentStatusType = 'paid_current' | 'paid_advance' | 'paid_late' | 'pending';

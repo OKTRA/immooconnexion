@@ -48,6 +48,7 @@ export interface PaymentSummary {
   totalReceived: number;
   pendingAmount: number;
   latePayments: number;
+  lateAmount: number;
   nextPaymentDue?: {
     amount: number;
     dueDate: string;
