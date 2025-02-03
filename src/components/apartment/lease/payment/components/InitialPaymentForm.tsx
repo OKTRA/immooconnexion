@@ -21,12 +21,13 @@ interface InitialPaymentFormProps {
 export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState("cash")
-  const [firstRentDate, setFirstRentDate] = useState<Date | undefined>(undefined)
+  const [firstRentDate, setFirstRentDate] = useState<Date>(new Date())
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const { handleInitialPayments } = useLeaseMutations()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (isSubmitting || !firstRentDate) return
+    if (isSubmitting) return
 
     try {
       setIsSubmitting(true)
@@ -68,7 +69,7 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
 
           <div className="space-y-2">
             <Label>Date de début du premier loyer</Label>
-            <Popover>
+            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -92,6 +93,7 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
                   onSelect={(date) => {
                     if (date) {
                       setFirstRentDate(date)
+                      setIsCalendarOpen(false) // Ferme le calendrier après la sélection
                     }
                   }}
                   initialFocus
@@ -112,7 +114,7 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
 
       <Button 
         type="submit" 
-        disabled={isSubmitting || !firstRentDate}
+        disabled={isSubmitting}
         className="w-full"
       >
         {isSubmitting ? "Enregistrement..." : "Enregistrer les paiements initiaux"}
