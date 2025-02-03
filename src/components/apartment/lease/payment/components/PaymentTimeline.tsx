@@ -1,4 +1,4 @@
-import { format, differenceInDays, differenceInHours, addDays, addMonths, addQuarters, addYears, startOfMonth, endOfMonth, isSameMonth, isAfter, isBefore, lastDayOfMonth } from "date-fns"
+import { format, addDays, addMonths, addYears, differenceInDays, differenceInHours, isAfter, isBefore } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -29,43 +29,58 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
     const depositPayment = initialPayments.find(p => p.payment_type === 'deposit')
     const firstRentStartDate = depositPayment?.first_rent_start_date || lease.start_date
     
-    const calculatePeriodEndDate = (startDate: Date, frequency: string) => {
-      const date = new Date(startDate)
+    const calculatePeriodEndDate = (startDate: Date, frequency: string): Date => {
+      const start = new Date(startDate)
+      
       switch (frequency) {
         case 'daily':
-          return startDate // Même jour
-        case 'weekly':
-          return addDays(startDate, 6) // 7 jours au total (début + 6)
-        case 'monthly':
-          return lastDayOfMonth(startDate)
-        case 'quarterly':
-          return lastDayOfMonth(addMonths(startDate, 2)) // Dernier jour du 3ème mois
-        case 'biannual':
-          return lastDayOfMonth(addMonths(startDate, 5)) // Dernier jour du 6ème mois
-        case 'yearly':
-          return lastDayOfMonth(addMonths(startDate, 11)) // Dernier jour du 12ème mois
+          return start // Même jour
+        case 'weekly': {
+          // 7 jours complets à partir de la date de début
+          const end = addDays(start, 6)
+          return end
+        }
+        case 'monthly': {
+          // Un mois complet à partir de la date de début
+          const end = addDays(addMonths(start, 1), -1)
+          return end
+        }
+        case 'quarterly': {
+          // Trois mois complets à partir de la date de début
+          const end = addDays(addMonths(start, 3), -1)
+          return end
+        }
+        case 'biannual': {
+          // Six mois complets à partir de la date de début
+          const end = addDays(addMonths(start, 6), -1)
+          return end
+        }
+        case 'yearly': {
+          // Un an complet à partir de la date de début
+          const end = addDays(addYears(start, 1), -1)
+          return end
+        }
         default:
-          return lastDayOfMonth(startDate)
+          return addDays(addMonths(start, 1), -1)
       }
     }
 
-    const getNextPeriodStart = (currentEndDate: Date, frequency: string) => {
-      const nextDay = addDays(currentEndDate, 1)
+    const getNextPeriodStart = (currentStartDate: Date, frequency: string): Date => {
       switch (frequency) {
         case 'daily':
-          return addDays(currentEndDate, 1)
+          return addDays(currentStartDate, 1)
         case 'weekly':
-          return addDays(currentEndDate, 1)
+          return addDays(currentStartDate, 7)
         case 'monthly':
-          return startOfMonth(addMonths(nextDay, 0))
+          return addMonths(currentStartDate, 1)
         case 'quarterly':
-          return startOfMonth(addMonths(nextDay, 0))
+          return addMonths(currentStartDate, 3)
         case 'biannual':
-          return startOfMonth(addMonths(nextDay, 0))
+          return addMonths(currentStartDate, 6)
         case 'yearly':
-          return startOfMonth(addYears(nextDay, 0))
+          return addYears(currentStartDate, 1)
         default:
-          return startOfMonth(addMonths(nextDay, 0))
+          return addMonths(currentStartDate, 1)
       }
     }
     
@@ -77,7 +92,7 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
       
       while (currentDate <= now) {
         const endDate = calculatePeriodEndDate(currentDate, lease.payment_frequency)
-
+        
         // Ne pas ajouter la période en cours
         if (currentDate < now) {
           newPeriods.push({
@@ -90,7 +105,7 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
         }
         
         // Passer à la période suivante
-        currentDate = getNextPeriodStart(endDate, lease.payment_frequency)
+        currentDate = getNextPeriodStart(currentDate, lease.payment_frequency)
       }
       
       return newPeriods
@@ -98,11 +113,11 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
 
     // Générer la période en cours
     const generateCurrentPeriod = () => {
-      const now = new Date()
-      const endDate = calculatePeriodEndDate(now, lease.payment_frequency)
+      const startDate = new Date(firstRentStartDate)
+      const endDate = calculatePeriodEndDate(startDate, lease.payment_frequency)
 
       return {
-        startDate: now,
+        startDate,
         endDate,
         amount: lease.rent_amount,
         status: 'pending',
@@ -116,41 +131,6 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
     setPeriods(pastPeriods)
     setCurrentPeriod(current)
   }, [lease, initialPayments])
-
-  useEffect(() => {
-    // Mettre à jour les statuts toutes les heures
-    const updateStatuses = () => {
-      setPeriods(currentPeriods => 
-        currentPeriods.map(period => {
-          const now = new Date()
-          const daysUntilDue = differenceInDays(period.endDate, now)
-          
-          if (period.isPaid) return { ...period, status: 'paid' }
-          if (daysUntilDue < 0) return { ...period, status: 'late' }
-          if (daysUntilDue <= 3) return { ...period, status: 'due_soon' }
-          return { ...period, status: 'pending' }
-        })
-      )
-
-      if (currentPeriod) {
-        const now = new Date()
-        const daysUntilDue = differenceInDays(currentPeriod.endDate, now)
-        
-        setCurrentPeriod(current => {
-          if (!current) return null
-          if (current.isPaid) return { ...current, status: 'paid' }
-          if (daysUntilDue < 0) return { ...current, status: 'late' }
-          if (daysUntilDue <= 3) return { ...current, status: 'due_soon' }
-          return { ...current, status: 'pending' }
-        })
-      }
-    }
-
-    const interval = setInterval(updateStatuses, 3600000) // Toutes les heures
-    updateStatuses() // Mise à jour initiale
-
-    return () => clearInterval(interval)
-  }, [currentPeriod])
 
   const getStatusBadge = (status: string) => {
     const config = {
@@ -191,14 +171,9 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
               <div className="space-y-2 flex-1">
                 <div className="flex justify-between items-center">
                   <p className="font-medium">
-                    Période {format(period.startDate, 'MMMM yyyy', { locale: fr })}
+                    Période {format(period.startDate, 'PP', { locale: fr })} - {format(period.endDate, 'PP', { locale: fr })}
                   </p>
                   {getStatusBadge(period.status)}
-                </div>
-                
-                <div className="text-sm text-muted-foreground">
-                  Du {format(period.startDate, 'PP', { locale: fr })} au{' '}
-                  {format(period.endDate, 'PP', { locale: fr })}
                 </div>
               </div>
               
@@ -216,7 +191,7 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
               <div className="space-y-2 flex-1">
                 <div className="flex justify-between items-center">
                   <p className="font-medium">
-                    Période en cours ({format(currentPeriod.startDate, 'MMMM yyyy', { locale: fr })})
+                    Période en cours
                   </p>
                   {getStatusBadge(currentPeriod.status)}
                 </div>
