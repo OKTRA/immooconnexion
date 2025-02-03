@@ -108,7 +108,7 @@ export function InitialPaymentForm({ onSuccess, lease }: InitialPaymentFormProps
 
       <Button 
         type="submit" 
-        disabled={isSubmitting}
+        disabled={isSubmitting || !firstRentDate}
         className="w-full"
       >
         {isSubmitting ? "Enregistrement..." : "Enregistrer les paiements initiaux"}
