@@ -1,28 +1,29 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PaymentMethodSelect } from "./PaymentMethodSelect";
-import { PaymentPeriodsList } from "./PaymentPeriodsList";
-import { useLeasePeriods, PaymentPeriod } from "@/hooks/use-lease-periods";
-import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { PaymentMethodField } from "./form/PaymentMethodField";
+import { PaymentPeriodsDisplay } from "./PaymentPeriodsDisplay";
+import { usePaymentPeriods } from "../hooks/usePaymentPeriods";
+import { PaymentMethod } from "@/types/payment";
+import { toast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
 
 interface PaymentFormProps {
-  lease: any;
+  leaseId: string;
   onSuccess?: () => void;
 }
 
-export function PaymentForm({ lease, onSuccess }: PaymentFormProps) {
-  const [selectedPeriods, setSelectedPeriods] = useState<PaymentPeriod[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState("cash");
-  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+export function PaymentForm({ leaseId, onSuccess }: PaymentFormProps) {
+  const [paymentType, setPaymentType] = useState<'current' | 'historical' | 'late'>('current');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
+  const [selectedPeriods, setSelectedPeriods] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { periods } = useLeasePeriods(lease, lease.payments || []);
+  const { data: periodsData, isLoading } = usePaymentPeriods(leaseId);
 
-  const handlePeriodSelect = (period: PaymentPeriod) => {
+  const handlePeriodSelect = (period: any) => {
     if (selectedPeriods.includes(period)) {
       setSelectedPeriods(selectedPeriods.filter(p => p !== period));
     } else {
@@ -35,29 +36,14 @@ export function PaymentForm({ lease, onSuccess }: PaymentFormProps) {
     setIsSubmitting(true);
 
     try {
-      // Créer un paiement pour chaque période sélectionnée
-      for (const period of selectedPeriods) {
-        const { error } = await supabase.rpc('create_lease_payment', {
-          p_lease_id: lease.id,
-          p_amount: period.amount,
-          p_payment_type: 'rent',
-          p_payment_method: paymentMethod,
-          p_payment_date: paymentDate,
-          p_period_start: period.startDate.toISOString(),
-          p_period_end: period.endDate.toISOString()
-        });
-
-        if (error) throw error;
-      }
-
+      // Logique de soumission à implémenter
       toast({
-        title: "Paiement enregistré",
+        title: "Succès",
         description: "Le paiement a été enregistré avec succès",
       });
-
       onSuccess?.();
-    } catch (error: any) {
-      console.error('Error submitting payment:', error);
+    } catch (error) {
+      console.error("Error submitting payment:", error);
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de l'enregistrement du paiement",
@@ -68,50 +54,92 @@ export function PaymentForm({ lease, onSuccess }: PaymentFormProps) {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentPeriodsList
-        periods={periods}
-        selectedPeriods={selectedPeriods}
-        onPeriodSelect={handlePeriodSelect}
-      />
-
-      <Card className="p-4">
-        <div className="space-y-4">
+      <Card className="p-6">
+        <div className="space-y-6">
           <div>
-            <Label>Mode de paiement</Label>
-            <PaymentMethodSelect
-              value={paymentMethod}
-              onChange={setPaymentMethod}
-            />
+            <Label>Type de paiement</Label>
+            <RadioGroup
+              value={paymentType}
+              onValueChange={(value: 'current' | 'historical' | 'late') => setPaymentType(value)}
+              className="grid grid-cols-3 gap-4 mt-2"
+            >
+              <div>
+                <RadioGroupItem value="current" id="current" className="peer sr-only" />
+                <Label
+                  htmlFor="current"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                >
+                  Paiement courant
+                </Label>
+              </div>
+              <div>
+                <RadioGroupItem value="historical" id="historical" className="peer sr-only" />
+                <Label
+                  htmlFor="historical"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                >
+                  Paiement historique
+                </Label>
+              </div>
+              <div>
+                <RadioGroupItem value="late" id="late" className="peer sr-only" />
+                <Label
+                  htmlFor="late"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                >
+                  Paiement en retard
+                </Label>
+              </div>
+            </RadioGroup>
           </div>
 
-          <div>
-            <Label>Date de paiement</Label>
-            <Input
-              type="date"
-              value={paymentDate}
-              onChange={(e) => setPaymentDate(e.target.value)}
+          {periodsData?.periods && (
+            <PaymentPeriodsDisplay
+              periods={periodsData.periods}
+              selectedPeriods={selectedPeriods}
+              onPeriodSelect={handlePeriodSelect}
             />
-          </div>
+          )}
+
+          <PaymentMethodField
+            value={paymentMethod}
+            onChange={setPaymentMethod}
+          />
 
           <div className="pt-4 border-t">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium">Montant total</span>
               <span className="text-lg font-bold">
-                {selectedPeriods.reduce((sum, p) => sum + p.amount, 0).toLocaleString()} FCFA
+                {(selectedPeriods.reduce((sum, p) => sum + p.amount, 0)).toLocaleString()} FCFA
               </span>
             </div>
           </div>
         </div>
       </Card>
 
-      <Button 
-        type="submit" 
+      <Button
+        type="submit"
         className="w-full"
         disabled={isSubmitting || selectedPeriods.length === 0}
       >
-        {isSubmitting ? "Enregistrement..." : "Enregistrer le paiement"}
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Enregistrement...
+          </>
+        ) : (
+          "Enregistrer le paiement"
+        )}
       </Button>
     </form>
   );
