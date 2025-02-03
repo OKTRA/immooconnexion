@@ -1,11 +1,26 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { PaymentListProps } from "../types"
-import { CheckCircle2, Clock, AlertCircle } from "lucide-react"
+import { CheckCircle2, Clock, AlertCircle, Trash2 } from "lucide-react"
+import { usePaymentDeletion } from "../hooks/usePaymentDeletion"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export function PaymentsList({ title, payments, className }: PaymentListProps) {
+  const { deletePayment } = usePaymentDeletion();
+
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'paid':
@@ -65,6 +80,10 @@ export function PaymentsList({ title, payments, className }: PaymentListProps) {
     }
   }
 
+  const handleDelete = async (paymentId: string) => {
+    await deletePayment.mutateAsync(paymentId);
+  };
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -88,15 +107,41 @@ export function PaymentsList({ title, payments, className }: PaymentListProps) {
                   )}
                 </p>
               </div>
-              <div className="text-right">
-                <p className="font-medium">{payment.amount.toLocaleString()} FCFA</p>
-                <Badge 
-                  variant={getStatusBadgeVariant(payment.displayStatus || payment.status)}
-                  className="flex items-center"
-                >
-                  {getStatusIcon(payment.displayStatus || payment.status)}
-                  {getStatusLabel(payment.displayStatus || payment.status)}
-                </Badge>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="font-medium">{payment.amount.toLocaleString()} FCFA</p>
+                  <Badge 
+                    variant={getStatusBadgeVariant(payment.displayStatus || payment.status)}
+                    className="flex items-center"
+                  >
+                    {getStatusIcon(payment.displayStatus || payment.status)}
+                    {getStatusLabel(payment.displayStatus || payment.status)}
+                  </Badge>
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Êtes-vous sûr de vouloir supprimer ce paiement ? Cette action est irréversible.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={() => handleDelete(payment.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Supprimer
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           ))}
