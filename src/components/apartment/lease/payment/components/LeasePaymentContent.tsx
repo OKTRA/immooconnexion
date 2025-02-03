@@ -10,25 +10,25 @@ interface LeasePaymentContentProps {
 
 export function LeasePaymentContent({ 
   lease,
-  initialPayments,
-  regularPayments
+  initialPayments = [],
+  regularPayments = []
 }: LeasePaymentContentProps) {
   return (
     <div className="space-y-8">
-      {lease.initial_payments_completed && (
+      {lease.initial_payments_completed && regularPayments && regularPayments.length > 0 && (
         <PaymentTimeline payments={regularPayments} />
       )}
 
       <PaymentsList
         title="Paiements Initiaux"
-        payments={initialPayments}
+        payments={initialPayments || []}
         className="w-full"
       />
 
       {lease.initial_payments_completed && (
         <PaymentsList
           title="Paiements de Loyer"
-          payments={regularPayments}
+          payments={regularPayments || []}
           className="w-full"
         />
       )}
