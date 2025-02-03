@@ -13,9 +13,13 @@ export function LeasePaymentContent({
   initialPayments,
   regularPayments
 }: LeasePaymentContentProps) {
+  // Vérifier si first_rent_start_date existe dans le paiement de dépôt
+  const depositPayment = initialPayments.find(p => p.payment_type === 'deposit');
+  const shouldShowTimeline = depositPayment?.first_rent_start_date;
+
   return (
     <div className="space-y-8">
-      {lease.initial_payments_completed && (
+      {shouldShowTimeline && lease.initial_payments_completed && (
         <PaymentTimeline 
           lease={lease}
           initialPayments={initialPayments}
