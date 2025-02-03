@@ -1,4 +1,4 @@
-import { format, differenceInDays, differenceInHours, addMonths, addQuarters, addYears, startOfMonth, endOfMonth, isSameMonth, isAfter, isBefore } from "date-fns"
+import { format, differenceInDays, differenceInHours, addDays, addMonths, addQuarters, addYears, startOfMonth, endOfMonth, isSameMonth, isAfter, isBefore, lastDayOfMonth } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -32,16 +32,40 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
     const calculatePeriodEndDate = (startDate: Date, frequency: string) => {
       const date = new Date(startDate)
       switch (frequency) {
+        case 'daily':
+          return startDate // Même jour
+        case 'weekly':
+          return addDays(startDate, 6) // 7 jours au total (début + 6)
         case 'monthly':
-          return new Date(date.setMonth(date.getMonth() + 1, date.getDate() - 1))
+          return lastDayOfMonth(startDate)
         case 'quarterly':
-          return new Date(date.setMonth(date.getMonth() + 3, date.getDate() - 1))
-        case 'yearly':
-          return new Date(date.setFullYear(date.getFullYear() + 1, date.getMonth(), date.getDate() - 1))
+          return lastDayOfMonth(addMonths(startDate, 2)) // Dernier jour du 3ème mois
         case 'biannual':
-          return new Date(date.setMonth(date.getMonth() + 6, date.getDate() - 1))
+          return lastDayOfMonth(addMonths(startDate, 5)) // Dernier jour du 6ème mois
+        case 'yearly':
+          return lastDayOfMonth(addMonths(startDate, 11)) // Dernier jour du 12ème mois
         default:
-          return new Date(date.setMonth(date.getMonth() + 1, date.getDate() - 1))
+          return lastDayOfMonth(startDate)
+      }
+    }
+
+    const getNextPeriodStart = (currentEndDate: Date, frequency: string) => {
+      const nextDay = addDays(currentEndDate, 1)
+      switch (frequency) {
+        case 'daily':
+          return addDays(currentEndDate, 1)
+        case 'weekly':
+          return addDays(currentEndDate, 1)
+        case 'monthly':
+          return startOfMonth(addMonths(nextDay, 0))
+        case 'quarterly':
+          return startOfMonth(addMonths(nextDay, 0))
+        case 'biannual':
+          return startOfMonth(addMonths(nextDay, 0))
+        case 'yearly':
+          return startOfMonth(addYears(nextDay, 0))
+        default:
+          return startOfMonth(addMonths(nextDay, 0))
       }
     }
     
@@ -58,7 +82,7 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
         if (currentDate < now) {
           newPeriods.push({
             startDate: currentDate,
-            endDate: endDate,
+            endDate,
             amount: lease.rent_amount,
             status: 'pending',
             isPaid: false
@@ -66,8 +90,7 @@ export function PaymentTimeline({ lease, initialPayments }: PaymentTimelineProps
         }
         
         // Passer à la période suivante
-        currentDate = new Date(endDate)
-        currentDate.setDate(currentDate.getDate() + 1)
+        currentDate = getNextPeriodStart(endDate, lease.payment_frequency)
       }
       
       return newPeriods
