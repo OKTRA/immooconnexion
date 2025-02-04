@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
-import { calculatePeriodEndDate, getNextPeriodStart } from "../payment/utils/periodCalculations";
 
 interface InitialPaymentsParams {
   leaseId: string;
@@ -46,20 +45,19 @@ export function useLeaseMutations() {
 
         // Insérer le paiement de dépôt avec first_rent_start_date
         console.log("Creating deposit payment...");
-        const { error: depositError } = await supabase
-          .from('apartment_lease_payments')
-          .insert({
-            lease_id: leaseId,
-            amount: depositAmount,
-            payment_type: 'deposit',
-            payment_method: 'cash',
-            payment_date: new Date().toISOString(),
-            status: 'paid',
-            agency_id: leaseData.agency_id,
-            payment_period_start: new Date().toISOString(),
-            payment_status_type: 'paid_current',
-            first_rent_start_date: firstRentStartDate.toISOString()
-          });
+        const { error: depositError } = await supabase.rpc(
+          'create_lease_payment',
+          {
+            p_lease_id: leaseId,
+            p_amount: depositAmount,
+            p_payment_type: 'deposit',
+            p_payment_method: 'cash',
+            p_payment_date: new Date().toISOString().split('T')[0],
+            p_period_start: new Date().toISOString().split('T')[0],
+            p_period_end: new Date().toISOString().split('T')[0],
+            p_notes: 'Initial deposit payment'
+          }
+        );
 
         if (depositError) {
           console.error("Error creating deposit payment:", depositError);
@@ -68,19 +66,19 @@ export function useLeaseMutations() {
 
         // Insérer les frais d'agence
         console.log("Creating agency fees payment...");
-        const { error: feesError } = await supabase
-          .from('apartment_lease_payments')
-          .insert({
-            lease_id: leaseId,
-            amount: Math.round(rentAmount * 0.5),
-            payment_type: 'agency_fees',
-            payment_method: 'cash',
-            payment_date: new Date().toISOString(),
-            status: 'paid',
-            agency_id: leaseData.agency_id,
-            payment_period_start: new Date().toISOString(),
-            payment_status_type: 'paid_current'
-          });
+        const { error: feesError } = await supabase.rpc(
+          'create_lease_payment',
+          {
+            p_lease_id: leaseId,
+            p_amount: Math.round(rentAmount * 0.5),
+            p_payment_type: 'agency_fees',
+            p_payment_method: 'cash',
+            p_payment_date: new Date().toISOString().split('T')[0],
+            p_period_start: new Date().toISOString().split('T')[0],
+            p_period_end: new Date().toISOString().split('T')[0],
+            p_notes: 'Initial agency fees'
+          }
+        );
 
         if (feesError) {
           console.error("Error creating agency fees payment:", feesError);
