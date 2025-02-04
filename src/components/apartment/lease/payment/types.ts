@@ -13,12 +13,6 @@ export interface PaymentTypeSelectorProps {
   totalLateAmount?: number;
 }
 
-export interface PaymentListProps {
-  title: string;
-  payments: PaymentListItem[];
-  className?: string;
-}
-
 export interface PaymentListItem {
   id: string;
   amount: number;
@@ -30,19 +24,9 @@ export interface PaymentListItem {
   type?: 'deposit' | 'agency_fees' | 'rent';
   payment_method?: PaymentMethod;
   payment_type?: string;
+  payment_status_type?: string;
   displayStatus?: string;
   first_rent_start_date?: string;
-}
-
-export interface PaymentSummary {
-  totalReceived: number;
-  pendingAmount: number;
-  latePayments: number;
-  lateAmount: number;
-  nextPaymentDue?: {
-    amount: number;
-    dueDate: string;
-  };
 }
 
 export interface PaymentPeriod {
@@ -59,10 +43,6 @@ export interface PaymentPeriod {
     amount: number;
     daysLate: number;
   }>;
-}
-
-export interface LeasePaymentViewProps {
-  leaseId: string;
 }
 
 export interface LeaseData {
@@ -107,20 +87,6 @@ export interface PaymentFormProps {
   isHistorical?: boolean;
 }
 
-export interface HistoricalPaymentFormProps {
-  lease: LeaseData;
-  onSuccess?: () => void;
-  isSubmitting: boolean;
-  setIsSubmitting: (value: boolean) => void;
-}
-
-export interface LatePaymentFormProps {
-  lease: LeaseData;
-  onSuccess?: () => void;
-  isSubmitting: boolean;
-  setIsSubmitting: (value: boolean) => void;
-}
-
 export interface PaymentFormData {
   leaseId: string;
   amount: number;
@@ -129,4 +95,55 @@ export interface PaymentFormData {
   paymentDate: Date;
   notes?: string;
   isHistorical?: boolean;
+}
+
+export interface PaymentSummary {
+  totalReceived: number;
+  pendingAmount: number;
+  latePayments: number;
+  lateAmount: number;
+  nextPaymentDue?: {
+    amount: number;
+    dueDate: string;
+  };
+}
+
+export interface PaymentDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  leaseId: string;
+  lease: LeaseData;
+}
+
+export interface PaymentFormFieldsProps {
+  formData: PaymentFormData;
+  setFormData: (data: PaymentFormData) => void;
+  onSubmit: () => Promise<void>;
+  isSubmitting: boolean;
+  onCancel: () => void;
+  disabled?: boolean;
+}
+
+export interface PaymentPeriodsListProps {
+  selectedPeriods: PaymentPeriod[];
+  onPeriodSelect: (period: PaymentPeriod) => void;
+  isLoading?: boolean;
+}
+
+export interface PeriodOption {
+  value: number;
+  label: string;
+  startDate: Date;
+  endDate: Date;
+  amount: number;
+}
+
+export interface PaymentListProps {
+  title: string;
+  payments: PaymentListItem[];
+  className?: string;
+}
+
+export interface RegularPaymentsListProps extends PaymentListProps {
+  onPaymentClick?: (payment: PaymentListItem) => void;
 }

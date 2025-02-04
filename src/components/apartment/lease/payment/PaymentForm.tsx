@@ -1,29 +1,22 @@
 import { useState, useEffect } from "react"
-import { PaymentTypeSelector, PaymentType } from "./components/PaymentTypeSelector"
+import { PaymentTypeSelector } from "./components/PaymentTypeSelector"
 import { CurrentPaymentForm } from "./components/CurrentPaymentForm"
 import { HistoricalPaymentForm } from "./components/HistoricalPaymentForm"
 import { LatePaymentForm } from "./components/LatePaymentForm"
 import { useLeasePaymentStatus } from "./hooks/useLeasePaymentStatus"
-
-interface PaymentFormProps {
-  onSuccess?: () => void;
-  leaseId: string;
-  lease: LeaseData;
-  isHistorical?: boolean;
-}
+import { PaymentType, PaymentFormProps } from "./types"
 
 export function PaymentForm({ 
   onSuccess, 
-  leaseId,
   lease,
   isHistorical = false
 }: PaymentFormProps) {
   const [paymentType, setPaymentType] = useState<PaymentType>("current")
   const [isSubmitting, setIsSubmitting] = useState(false)
   
-  const { data: paymentStatus } = useLeasePaymentStatus(leaseId)
+  const { data: paymentStatus } = useLeasePaymentStatus(lease.id)
 
-  // Forcer la sélection du type "late" s'il y a des retards
+  // Force late payment type if there are late payments
   useEffect(() => {
     if (paymentStatus?.hasLatePayments && paymentType === "current") {
       setPaymentType("late")
