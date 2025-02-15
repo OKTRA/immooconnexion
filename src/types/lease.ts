@@ -1,3 +1,4 @@
+
 import { PaymentFrequency } from './payment';
 
 export type DurationType = 'fixed' | 'month_to_month' | 'yearly';

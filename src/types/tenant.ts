@@ -1,3 +1,4 @@
+
 export interface TenantFormData {
   id?: string;
   first_name: string;
@@ -8,6 +9,8 @@ export interface TenantFormData {
   agency_fees?: number;
   property_id?: string;
   profession?: string;
+  agency_id: string;
+  status: string;
 }
 
 export interface TenantDisplay extends TenantFormData {
