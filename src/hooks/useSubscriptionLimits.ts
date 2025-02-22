@@ -1,92 +1,101 @@
+
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { SubscriptionLimits, SubscriptionPlan } from "@/types/subscription";
+import { supabase } from "@/lib/supabase";
+import { SubscriptionPlan, SubscriptionLimits } from "@/types/payment";
 
 export function useSubscriptionLimits() {
-  const { data: limits } = useQuery({
-    queryKey: ['subscription-limits'],
+  const { data: planData } = useQuery({
+    queryKey: ["subscription-plan"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('agency_id')
-        .eq('id', user.id)
+      const { data, error } = await supabase
+        .from("subscription_plans")
+        .select("*")
         .single();
 
-      if (!profile?.agency_id) {
-        throw new Error("No agency associated");
-      }
+      if (error) throw error;
 
-      const { data: agency } = await supabase
-        .from('agencies')
-        .select(`
-          current_properties_count,
-          current_tenants_count,
-          current_profiles_count,
-          subscription_plan:subscription_plans (
-            id,
-            name,
-            price,
-            max_properties,
-            max_tenants,
-            max_users,
-            features
-          )
-        `)
-        .eq('id', profile.agency_id)
-        .single();
+      const plan: SubscriptionPlan = {
+        id: data.id,
+        name: data.name,
+        price: data.price,
+        maxProperties: data.max_properties,
+        maxTenants: data.max_tenants,
+        maxUsers: data.max_users,
+        features: data.features,
+      };
 
-      if (!agency) throw new Error("Agency not found");
-
-      const plan = agency.subscription_plan as SubscriptionPlan;
-
-      return {
-        max_properties: plan?.max_properties ?? -1,
-        max_tenants: plan?.max_tenants ?? -1,
-        max_users: plan?.max_users ?? -1,
-        current_properties: agency.current_properties_count,
-        current_tenants: agency.current_tenants_count,
-        current_users: agency.current_profiles_count,
-      } as SubscriptionLimits;
-    }
+      return plan;
+    },
   });
 
-  const checkLimitReached = async (type: "property" | "user" | "tenant") => {
-    if (!limits) return false;
+  const { data: limitsData } = useQuery({
+    queryKey: ["subscription-limits"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("subscription_limits")
+        .select("*")
+        .single();
 
-    switch (type) {
-      case "property":
-        return limits.max_properties !== -1 && limits.current_properties >= limits.max_properties;
-      case "tenant":
-        return limits.max_tenants !== -1 && limits.current_tenants >= limits.max_tenants;
-      case "user":
-        return limits.max_users !== -1 && limits.current_users >= limits.max_users;
-      default:
-        return false;
-    }
+      if (error) throw error;
+
+      const limits: SubscriptionLimits = {
+        maxProperties: data.max_properties,
+        maxTenants: data.max_tenants,
+        maxUsers: data.max_users,
+        currentProperties: data.current_properties,
+        currentTenants: data.current_tenants,
+        currentUsers: data.current_users,
+      };
+
+      return limits;
+    },
+  });
+
+  const isNearLimit = (current: number, max: number) => {
+    return current >= max * 0.8;
   };
 
-  const checkDowngradeEligibility = (newPlan: SubscriptionPlan) => {
-    if (!limits) return false;
-
-    // Si le max est -1, c'est illimité donc toujours éligible
-    const isPropertiesEligible = newPlan.max_properties === -1 || 
-      limits.current_properties <= newPlan.max_properties;
-    
-    const isTenantsEligible = newPlan.max_tenants === -1 || 
-      limits.current_tenants <= newPlan.max_tenants;
-    
-    const isUsersEligible = newPlan.max_users === -1 || 
-      limits.current_users <= newPlan.max_users;
-
-    return isPropertiesEligible && isTenantsEligible && isUsersEligible;
+  const hasReachedLimit = (current: number, max: number) => {
+    return current >= max;
   };
+
+  if (!planData || !limitsData) {
+    return {
+      isLoading: true,
+      hasReachedPropertyLimit: false,
+      hasReachedTenantLimit: false,
+      hasReachedUserLimit: false,
+      isNearPropertyLimit: false,
+      isNearTenantLimit: false,
+      isNearUserLimit: false,
+    };
+  }
 
   return {
-    limits,
-    checkLimitReached,
-    checkDowngradeEligibility
+    isLoading: false,
+    hasReachedPropertyLimit: hasReachedLimit(
+      limitsData.currentProperties,
+      planData.maxProperties
+    ),
+    hasReachedTenantLimit: hasReachedLimit(
+      limitsData.currentTenants,
+      planData.maxTenants
+    ),
+    hasReachedUserLimit: hasReachedLimit(
+      limitsData.currentUsers,
+      planData.maxUsers
+    ),
+    isNearPropertyLimit: isNearLimit(
+      limitsData.currentProperties,
+      planData.maxProperties
+    ),
+    isNearTenantLimit: isNearLimit(
+      limitsData.currentTenants,
+      planData.maxTenants
+    ),
+    isNearUserLimit: isNearLimit(
+      limitsData.currentUsers,
+      planData.maxUsers
+    ),
   };
 }

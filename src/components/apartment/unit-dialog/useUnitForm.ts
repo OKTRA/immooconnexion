@@ -1,5 +1,6 @@
+
 import { useState } from "react"
-import { ApartmentUnit, ApartmentUnitFormData } from "@/types/apartment"
+import { ApartmentUnit, ApartmentUnitFormData, ApartmentUnitStatus } from "@/types/apartment"
 
 export function useUnitForm(
   apartmentId: string,
@@ -13,14 +14,15 @@ export function useUnitForm(
     area: initialData?.area || null,
     rent_amount: initialData?.rent_amount || 0,
     deposit_amount: initialData?.deposit_amount || null,
-    status: initialData?.status || "available",
+    status: initialData?.status as ApartmentUnitStatus || "available",
     description: initialData?.description || null,
     commission_percentage: initialData?.commission_percentage || null,
     store_count: initialData?.store_count || 0,
     kitchen_count: initialData?.kitchen_count || 0,
     has_pool: initialData?.has_pool || false,
     living_rooms: initialData?.living_rooms || 0,
-    bedrooms: initialData?.bedrooms || 0
+    bedrooms: initialData?.bedrooms || 0,
+    bathrooms: initialData?.bathrooms || 0
   })
 
   const [images, setImages] = useState<File[]>([])
