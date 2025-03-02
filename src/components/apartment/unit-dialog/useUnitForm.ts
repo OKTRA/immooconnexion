@@ -14,7 +14,7 @@ export function useUnitForm(
     area: initialData?.area || null,
     rent_amount: initialData?.rent_amount || 0,
     deposit_amount: initialData?.deposit_amount || null,
-    status: initialData?.status as ApartmentUnitStatus || "available",
+    status: initialData?.status || "available",
     description: initialData?.description || null,
     commission_percentage: initialData?.commission_percentage || null,
     store_count: initialData?.store_count || 0,

@@ -1,12 +1,15 @@
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { PaymentMethod } from "@/types/payment";
 
 interface InitialPaymentsParams {
   leaseId: string;
   depositAmount: number;
   rentAmount: number;
   firstRentStartDate: Date;
+  paymentMethod?: PaymentMethod;
 }
 
 export function useLeaseMutations() {
@@ -17,14 +20,16 @@ export function useLeaseMutations() {
       leaseId, 
       depositAmount, 
       rentAmount,
-      firstRentStartDate 
+      firstRentStartDate,
+      paymentMethod = "cash"
     }: InitialPaymentsParams) => {
       try {
         console.log("Starting initial payments with params:", {
           leaseId,
           depositAmount,
           rentAmount,
-          firstRentStartDate: firstRentStartDate.toISOString()
+          firstRentStartDate: firstRentStartDate.toISOString(),
+          paymentMethod
         });
 
         const { data: leaseData, error: leaseError } = await supabase
@@ -43,7 +48,7 @@ export function useLeaseMutations() {
           throw new Error('Agency ID not found');
         }
 
-        // Insérer le paiement de dépôt avec first_rent_start_date
+        // Insérer le paiement de dépôt
         console.log("Creating deposit payment...");
         const { error: depositError } = await supabase.rpc(
           'create_lease_payment',
@@ -51,7 +56,7 @@ export function useLeaseMutations() {
             p_lease_id: leaseId,
             p_amount: depositAmount,
             p_payment_type: 'deposit',
-            p_payment_method: 'cash',
+            p_payment_method: paymentMethod,
             p_payment_date: new Date().toISOString().split('T')[0],
             p_period_start: new Date().toISOString().split('T')[0],
             p_period_end: new Date().toISOString().split('T')[0],
@@ -72,7 +77,7 @@ export function useLeaseMutations() {
             p_lease_id: leaseId,
             p_amount: Math.round(rentAmount * 0.5),
             p_payment_type: 'agency_fees',
-            p_payment_method: 'cash',
+            p_payment_method: paymentMethod,
             p_payment_date: new Date().toISOString().split('T')[0],
             p_period_start: new Date().toISOString().split('T')[0],
             p_period_end: new Date().toISOString().split('T')[0],
@@ -84,14 +89,15 @@ export function useLeaseMutations() {
           console.error("Error creating agency fees payment:", feesError);
           throw feesError;
         }
-
+        
         // Mettre à jour le statut du bail
         console.log("Updating lease status...");
         const { error: updateError } = await supabase
           .from('apartment_leases')
           .update({
             initial_fees_paid: true,
-            initial_payments_completed: true
+            initial_payments_completed: true,
+            first_rent_start_date: firstRentStartDate.toISOString().split('T')[0]
           })
           .eq('id', leaseId);
 
@@ -110,6 +116,7 @@ export function useLeaseMutations() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lease"] });
       queryClient.invalidateQueries({ queryKey: ["lease-payment-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["lease-payment-view"] });
       toast({
         title: "Succès",
         description: "Les paiements initiaux ont été enregistrés avec succès",

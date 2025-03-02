@@ -1,89 +1,74 @@
-import { Card, CardHeader } from "@/components/ui/card"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Home, Phone, Mail, Receipt, CreditCard } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { LeaseData } from "../types"
-import { useState } from "react"
-import { PaymentDialog } from "../PaymentDialog"
-import { Badge } from "@/components/ui/badge"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
+import { PlusCircle, RefreshCw } from "lucide-react"
 
 interface LeaseHeaderProps {
   lease: LeaseData
   onInitialPayment: () => void
+  onRegularPayment: () => void
+  canMakeRegularPayments: boolean
+  needsInitialPayments: boolean
 }
 
-export function LeaseHeader({ lease, onInitialPayment }: LeaseHeaderProps) {
-  const [showPaymentManagement, setShowPaymentManagement] = useState(false)
-  const tenant = lease.tenant
-  const unit = lease.unit
-
+export function LeaseHeader({ 
+  lease, 
+  onInitialPayment,
+  onRegularPayment,
+  canMakeRegularPayments,
+  needsInitialPayments
+}: LeaseHeaderProps) {
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex items-start space-x-4">
-            <Avatar className="h-12 w-12">
-              <AvatarFallback>
-                {tenant?.first_name?.[0]}{tenant?.last_name?.[0]}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h2 className="text-2xl font-bold">
-                {tenant?.first_name} {tenant?.last_name}
-              </h2>
-              <div className="space-y-1 mt-2 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Home className="h-4 w-4" />
-                  <span>{unit?.apartment?.name} - Unité {unit?.unit_number}</span>
-                </div>
-                {tenant?.phone_number && (
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4" />
-                    <span>{tenant.phone_number}</span>
-                  </div>
-                )}
-                {tenant?.email && (
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4" />
-                    <span>{tenant.email}</span>
-                  </div>
-                )}
-              </div>
+      <CardContent className="p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">
+              Paiements du Bail
+            </h1>
+            <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+              <p>
+                <span className="font-medium">Locataire:</span> {lease.tenant.first_name} {lease.tenant.last_name}
+              </p>
+              <p>
+                <span className="font-medium">Appartement:</span> {lease.unit?.apartment?.name} - Unité {lease.unit?.unit_number}
+              </p>
+              <p>
+                <span className="font-medium">Loyer:</span> {lease.rent_amount.toLocaleString()} FCFA
+              </p>
+              <p>
+                <span className="font-medium">Date de début:</span> {format(new Date(lease.start_date), "d MMMM yyyy", { locale: fr })}
+              </p>
             </div>
           </div>
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-4">
+          
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {needsInitialPayments && (
               <Button 
                 onClick={onInitialPayment}
-                className="bg-green-500 hover:bg-green-600"
+                className="w-full sm:w-auto"
               >
-                <CreditCard className="mr-2 h-4 w-4" />
+                <PlusCircle className="mr-2 h-4 w-4" />
                 Paiements Initiaux
               </Button>
-
+            )}
+            
+            {canMakeRegularPayments && (
               <Button 
-                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg transition-all duration-300 animate-fade-in"
-                onClick={() => setShowPaymentManagement(true)}
+                onClick={onRegularPayment}
+                className="w-full sm:w-auto"
+                variant={needsInitialPayments ? "outline" : "default"}
               >
-                <Receipt className="mr-2 h-4 w-4" />
+                <RefreshCw className="mr-2 h-4 w-4" />
                 Gestion des Paiements
               </Button>
-            </div>
-            {lease.initial_payments_completed && (
-              <Badge variant="success" className="self-end">
-                Paiements initiaux effectués
-              </Badge>
             )}
           </div>
         </div>
-      </CardHeader>
-
-      <PaymentDialog
-        open={showPaymentManagement}
-        onOpenChange={setShowPaymentManagement}
-        leaseId={lease.id}
-        lease={lease}
-      />
+      </CardContent>
     </Card>
   )
 }

@@ -1,38 +1,32 @@
-import { PaymentMethod, PaymentPeriod, PaymentSummary } from '@/types/payment';
-import { LeaseData } from '@/types/lease';
 
-export interface PaymentFormProps {
-  lease: LeaseData;
-  onSuccess?: () => void;
-  isHistorical?: boolean;
-}
-
-export interface HistoricalPaymentFormProps {
-  lease: LeaseData;
-  onSuccess?: () => void;
-  isSubmitting: boolean;
-  setIsSubmitting: (value: boolean) => void;
-}
-
-export interface PaymentPeriodsListProps {
-  selectedPeriods: PaymentPeriod[];
-  onPeriodSelect: (period: PaymentPeriod) => void;
-  isLoading?: boolean;
-}
-
-export interface PaymentSummaryProps {
-  summary: PaymentSummary;
-  className?: string;
-}
+import { PaymentMethod } from "@/types/payment";
+import { LeaseData, PaymentPeriodFilter, PaymentStatusFilter, PaymentFormData, PaymentPeriod, PeriodOption, PaymentSummary } from "../lease/payment/types";
 
 export interface PaymentActionButtonProps {
   leaseId: string;
-  onSuccess?: () => void;
+}
+
+export interface LeaseSelectProps {
+  value: string;
+  onChange: (value: string) => void;
+  filter?: (lease: LeaseData) => boolean;
+}
+
+export interface PaymentPeriodsListProps {
+  periods: PaymentPeriod[];
+  selectedPeriods: PaymentPeriod[];
+  onPeriodSelect: (period: PaymentPeriod) => void;
 }
 
 export interface PaymentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   leaseId: string;
-  lease: LeaseData;
+  tenantId?: string;
 }
+
+export interface UsePaymentFormProps {
+  onSuccess?: () => void;
+}
+
+export { LeaseData, PaymentPeriodFilter, PaymentStatusFilter, PaymentFormData, PaymentPeriod, PeriodOption, PaymentSummary };

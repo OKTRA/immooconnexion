@@ -1,3 +1,4 @@
+
 import { PaymentMethod } from "@/types/payment";
 
 export type PaymentType = 'current' | 'historical' | 'late';
@@ -5,12 +6,30 @@ export type PaymentPeriodFilter = 'all' | 'current' | 'overdue' | 'upcoming';
 export type PaymentStatusFilter = 'all' | 'pending' | 'paid' | 'late';
 export type PaymentFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly' | 'biannual';
 
+export interface LeasePaymentViewProps {
+  leaseId: string;
+}
+
 export interface PaymentTypeSelectorProps {
   value: PaymentType;
   onChange: (value: PaymentType) => void;
   hasLatePayments?: boolean;
   latePaymentsCount?: number;
   totalLateAmount?: number;
+}
+
+export interface HistoricalPaymentFormProps {
+  lease: LeaseData;
+  onSuccess?: () => void;
+  isSubmitting: boolean;
+  setIsSubmitting: (value: boolean) => void;
+}
+
+export interface LatePaymentFormProps {
+  lease: LeaseData;
+  onSuccess?: () => void;
+  isSubmitting: boolean;
+  setIsSubmitting: (value: boolean) => void;
 }
 
 export interface PaymentListItem {
@@ -27,6 +46,11 @@ export interface PaymentListItem {
   payment_status_type?: string;
   displayStatus?: string;
   first_rent_start_date?: string;
+  periodStart?: string;
+  periodEnd?: string;
+  date?: string;
+  notes?: string;
+  paymentMethod?: string;
 }
 
 export interface PaymentPeriod {
@@ -85,14 +109,16 @@ export interface PaymentFormProps {
   lease: LeaseData;
   onSuccess?: () => void;
   isHistorical?: boolean;
+  leaseId?: string;
 }
 
 export interface PaymentFormData {
   leaseId: string;
+  agencyId?: string;
   amount: number;
   paymentMethod: PaymentMethod;
   paymentPeriods: string[];
-  paymentDate: Date;
+  paymentDate: string;
   notes?: string;
   isHistorical?: boolean;
 }
@@ -112,7 +138,7 @@ export interface PaymentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   leaseId: string;
-  lease: LeaseData;
+  lease?: LeaseData;
 }
 
 export interface PaymentFormFieldsProps {
@@ -121,6 +147,7 @@ export interface PaymentFormFieldsProps {
   onSubmit: () => Promise<void>;
   isSubmitting: boolean;
   onCancel: () => void;
+  lease: LeaseData;
   disabled?: boolean;
 }
 

@@ -1,147 +1,130 @@
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
-import { LeasePaymentViewProps } from "./types";
-import { useState } from "react";
-import { PaymentDialogs } from "./components/PaymentDialogs";
-import { LeasePaymentHeader } from "./components/LeasePaymentHeader";
-import { LeasePaymentStats } from "./components/LeasePaymentStats";
-import { LeasePaymentContent } from "./components/LeasePaymentContent";
+
+import { useState, useEffect } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { LeaseHeader } from "./components/LeaseHeader"
+import { LeasePaymentContent } from "./components/LeasePaymentContent"
+import { InitialPaymentForm } from "@/components/apartment/payment/components/InitialPaymentForm"
+import { PaymentForm } from "./PaymentForm"
+import { Skeleton } from "@/components/ui/skeleton"
+import { LeasePaymentViewProps, LeaseData } from "./types"
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
-  const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false);
-  const [showRegularPaymentDialog, setShowRegularPaymentDialog] = useState(false);
-
-  const { data: lease, isLoading: isLoadingLease } = useQuery({
-    queryKey: ["lease", leaseId],
+  const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false)
+  
+  // Fetch lease data
+  const { data: lease, isLoading, refetch } = useQuery({
+    queryKey: ["lease-payment-view", leaseId],
     queryFn: async () => {
-      console.log("Fetching lease data for:", leaseId);
-      const { data: leaseData, error: leaseError } = await supabase
-        .from("apartment_leases")
-        .select(`
-          *,
-          tenant:apartment_tenants (
-            id,
-            first_name,
-            last_name,
-            phone_number,
-            email,
-            status
-          ),
-          unit:apartment_units (
-            id,
-            unit_number,
-            apartment:apartments (
-              id,
-              name
+      try {
+        // Fetch lease details
+        const { data: leaseData, error: leaseError } = await supabase
+          .from("apartment_leases")
+          .select(`
+            *,
+            tenant:apartment_tenants(*),
+            unit:apartment_units(
+              *,
+              apartment:apartments(*)
             )
-          )
-        `)
-        .eq("id", leaseId)
-        .maybeSingle();
+          `)
+          .eq("id", leaseId)
+          .single()
 
-      if (leaseError) throw leaseError;
-      if (!leaseData) return null;
+        if (leaseError) throw leaseError
 
-      const { data: payments, error: paymentsError } = await supabase
-        .from("apartment_lease_payments")
-        .select("*")
-        .eq("lease_id", leaseId)
-        .order("payment_date", { ascending: false });
+        // Fetch payments for this lease
+        const { data: payments, error: paymentsError } = await supabase
+          .from("apartment_lease_payments")
+          .select("*")
+          .eq("lease_id", leaseId)
+          .order("due_date", { ascending: true })
 
-      if (paymentsError) throw paymentsError;
+        if (paymentsError) throw paymentsError
 
-      const initialPayments = payments?.filter(p => 
-        p.payment_type === "deposit" || p.payment_type === "agency_fees"
-      ).map(p => ({
-        ...p,
-        type: p.payment_type,
-        displayStatus: p.payment_status_type || p.status
-      })) || [];
+        // Format the lease data
+        const formattedLease: LeaseData = {
+          ...leaseData,
+          initialPayments: payments?.filter(p => 
+            p.payment_type === "deposit" || p.payment_type === "agency_fees"
+          ),
+          regularPayments: payments?.filter(p => 
+            p.payment_type === "rent"
+          ),
+        }
 
-      const regularPayments = payments?.filter(p => 
-        p.payment_type !== "deposit" && p.payment_type !== "agency_fees"
-      ).map(p => ({
-        ...p,
-        displayStatus: p.payment_status_type || p.status
-      })) || [];
-
-      return {
-        ...leaseData,
-        initialPayments,
-        regularPayments
-      };
+        return formattedLease
+      } catch (error) {
+        console.error("Error fetching lease data:", error)
+        throw error
+      }
     }
-  });
+  })
 
-  const { data: stats } = useQuery({
-    queryKey: ["lease-payment-stats", leaseId],
-    queryFn: async () => {
-      console.log("Fetching payment stats for lease:", leaseId);
-      const { data: payments, error } = await supabase
-        .from("apartment_lease_payments")
-        .select("amount, status, due_date")
-        .eq("lease_id", leaseId);
+  const handleInitialPaymentSuccess = async () => {
+    setShowInitialPaymentDialog(false)
+    await refetch()
+  }
 
-      if (error) throw error;
+  const handlePaymentSuccess = async () => {
+    setShowPaymentDialog(false)
+    await refetch()
+  }
 
-      return {
-        totalReceived: payments?.filter(p => p.status === "paid")
-          .reduce((sum, p) => sum + (p.amount || 0), 0) || 0,
-        pendingAmount: payments?.filter(p => p.status === "pending")
-          .reduce((sum, p) => sum + (p.amount || 0), 0) || 0,
-        lateAmount: payments?.filter(p => p.status === "late")
-          .reduce((sum, p) => sum + (p.amount || 0), 0) || 0,
-        latePayments: payments?.filter(p => p.status === "late").length || 0
-      };
-    }
-  });
-
-  const handlePaymentSuccess = () => {
-    setShowRegularPaymentDialog(false);
-    setShowInitialPaymentDialog(false);
-  };
-
-  if (isLoadingLease) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-48">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="space-y-6">
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-48 w-full" />
       </div>
-    );
+    )
   }
 
   if (!lease) {
-    return (
-      <div className="text-center p-4 text-muted-foreground">
-        Bail non trouvé
-      </div>
-    );
+    return <div>Bail non trouvé</div>
   }
 
+  const canMakeRegularPayments = lease.initial_payments_completed || lease.initial_fees_paid
+  const needsInitialPayments = !lease.initial_payments_completed && !lease.initial_fees_paid
+  
   return (
-    <div className="space-y-8">
-      <LeasePaymentHeader
+    <div className="space-y-6">
+      {/* Header with information and buttons */}
+      <LeaseHeader
         lease={lease}
         onInitialPayment={() => setShowInitialPaymentDialog(true)}
+        onRegularPayment={() => setShowPaymentDialog(true)}
+        canMakeRegularPayments={canMakeRegularPayments}
+        needsInitialPayments={needsInitialPayments}
       />
 
-      {stats && <LeasePaymentStats stats={stats} />}
+      {/* Payment content */}
+      <LeasePaymentContent lease={lease} />
 
-      <LeasePaymentContent 
-        lease={lease}
-        initialPayments={lease.initialPayments || []}
-        regularPayments={lease.regularPayments || []}
-      />
+      {/* Initial payment dialog */}
+      <Dialog open={showInitialPaymentDialog} onOpenChange={setShowInitialPaymentDialog}>
+        <DialogContent className="max-w-xl">
+          <h2 className="text-xl font-bold mb-4">Paiements Initiaux</h2>
+          <InitialPaymentForm 
+            lease={lease}
+            onSuccess={handleInitialPaymentSuccess}
+          />
+        </DialogContent>
+      </Dialog>
 
-      <PaymentDialogs
-        lease={lease}
-        showInitialPaymentDialog={showInitialPaymentDialog}
-        showRegularPaymentDialog={showRegularPaymentDialog}
-        onInitialDialogChange={setShowInitialPaymentDialog}
-        onRegularDialogChange={setShowRegularPaymentDialog}
-        onSuccess={handlePaymentSuccess}
-      />
+      {/* Regular payment dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent className="max-w-4xl">
+          <h2 className="text-xl font-bold mb-4">Gestion des Paiements</h2>
+          <PaymentForm 
+            lease={lease}
+            leaseId={leaseId}
+            onSuccess={handlePaymentSuccess}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
-  );
+  )
 }
