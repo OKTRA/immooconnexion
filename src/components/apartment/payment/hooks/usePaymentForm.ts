@@ -1,3 +1,4 @@
+
 import { useState } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { toast } from "@/components/ui/use-toast"
@@ -9,6 +10,7 @@ interface UsePaymentFormProps {
 
 export function usePaymentForm({ onSuccess }: UsePaymentFormProps) {
   const [formData, setFormData] = useState<PaymentFormData>({
+    leaseId: "",  // Initialize with empty string instead of undefined
     amount: 0,
     paymentMethod: "cash",
     paymentDate: new Date().toISOString().split('T')[0],
@@ -21,6 +23,10 @@ export function usePaymentForm({ onSuccess }: UsePaymentFormProps) {
     try {
       setIsSubmitting(true)
       console.log("Submitting payment:", formData)
+
+      if (!formData.leaseId) {
+        throw new Error("Lease ID is required")
+      }
 
       const { data, error } = await supabase.rpc(
         'handle_mixed_payment_insertion',

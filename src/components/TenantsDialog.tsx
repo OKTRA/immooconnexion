@@ -1,3 +1,4 @@
+
 import {
   Dialog,
   DialogContent,
@@ -21,7 +22,7 @@ interface TenantsDialogProps {
 
 export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps) {
   const [showReceipt, setShowReceipt] = useState(false);
-  const [formData, setFormData] = useState<TenantFormData>({
+  const [formData, setFormData] = useState<Partial<TenantFormData>>({
     first_name: tenant?.first_name || "",
     last_name: tenant?.last_name || "",
     birth_date: tenant?.birth_date || "",
@@ -30,6 +31,9 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
     agency_fees: tenant?.agency_fees,
     property_id: tenant?.property_id || "",
     profession: tenant?.profession || "",
+    // Add missing required fields with default values
+    agency_id: tenant?.agency_id || "",
+    status: tenant?.status || "active"
   });
 
   const { data: userProfile } = useUserProfile();
@@ -57,9 +61,9 @@ export function TenantsDialog({ open, onOpenChange, tenant }: TenantsDialogProps
             <div className="space-y-4">
               <TenantReceipt 
                 tenant={{
-                  first_name: formData.first_name,
-                  last_name: formData.last_name,
-                  phone_number: formData.phone_number,
+                  first_name: formData.first_name || "",
+                  last_name: formData.last_name || "",
+                  phone_number: formData.phone_number || "",
                   agency_fees: formData.agency_fees,
                   property_id: formData.property_id,
                   profession: formData.profession,

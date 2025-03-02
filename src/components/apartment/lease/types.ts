@@ -2,7 +2,7 @@
 import { DurationType, LeaseStatus, PaymentType } from "@/types/lease";
 import { PaymentFrequency } from "@/types/payment";
 
-export interface FormData {
+export interface LeaseFormData {
   tenant_id: string;
   unit_id: string;
   start_date: string;
@@ -16,8 +16,8 @@ export interface FormData {
 }
 
 export interface LeaseFormFieldsProps {
-  formData: FormData;
-  setFormData: (data: FormData) => void;
+  formData: LeaseFormData;
+  setFormData: (data: LeaseFormData) => void;
   onSubmit: () => Promise<void>;
   isSubmitting: boolean;
   onCancel: () => void;
@@ -34,7 +34,8 @@ export interface LeaseDialogProps {
 export interface CreateLeaseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  unitId: string;
+  unitId?: string;
+  tenantId?: string;
 }
 
-export { DurationType, LeaseStatus, PaymentType };
+export type { DurationType, LeaseStatus, PaymentType, PaymentFrequency };

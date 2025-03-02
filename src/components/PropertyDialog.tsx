@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { PropertyFormFields } from "./property/PropertyFormFields"
 import { useState } from "react"
@@ -71,6 +72,7 @@ export function PropertyDialog({
 
       if (!agencyOwners) return []
 
+      // Transform array of objects to array of owner data
       return agencyOwners.map(ao => ({
         id: ao.owner.id,
         first_name: ao.owner.first_name,

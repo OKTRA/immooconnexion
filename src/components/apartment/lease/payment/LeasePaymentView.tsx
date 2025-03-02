@@ -8,7 +8,7 @@ import { LeasePaymentContent } from "./components/LeasePaymentContent"
 import { InitialPaymentForm } from "@/components/apartment/payment/components/InitialPaymentForm"
 import { PaymentForm } from "./PaymentForm"
 import { Skeleton } from "@/components/ui/skeleton"
-import { LeasePaymentViewProps, LeaseData } from "./types"
+import { LeasePaymentViewProps, LeaseData, PaymentListItem } from "./types"
 
 export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
   const [showInitialPaymentDialog, setShowInitialPaymentDialog] = useState(false)
@@ -45,14 +45,18 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
         if (paymentsError) throw paymentsError
 
         // Format the lease data
+        const initialPayments = payments?.filter(p => 
+          p.payment_type === "deposit" || p.payment_type === "agency_fees"
+        ) || [];
+        
+        const regularPayments = payments?.filter(p => 
+          p.payment_type === "rent"
+        ) || [];
+
         const formattedLease: LeaseData = {
           ...leaseData,
-          initialPayments: payments?.filter(p => 
-            p.payment_type === "deposit" || p.payment_type === "agency_fees"
-          ),
-          regularPayments: payments?.filter(p => 
-            p.payment_type === "rent"
-          ),
+          initialPayments,
+          regularPayments,
         }
 
         return formattedLease
@@ -88,6 +92,8 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
 
   const canMakeRegularPayments = lease.initial_payments_completed || lease.initial_fees_paid
   const needsInitialPayments = !lease.initial_payments_completed && !lease.initial_fees_paid
+  const initialPayments = lease.initialPayments || []
+  const regularPayments = lease.regularPayments || []
   
   return (
     <div className="space-y-6">
@@ -101,7 +107,11 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
       />
 
       {/* Payment content */}
-      <LeasePaymentContent lease={lease} />
+      <LeasePaymentContent 
+        lease={lease} 
+        initialPayments={initialPayments}
+        regularPayments={regularPayments}
+      />
 
       {/* Initial payment dialog */}
       <Dialog open={showInitialPaymentDialog} onOpenChange={setShowInitialPaymentDialog}>
@@ -120,7 +130,6 @@ export function LeasePaymentView({ leaseId }: LeasePaymentViewProps) {
           <h2 className="text-xl font-bold mb-4">Gestion des Paiements</h2>
           <PaymentForm 
             lease={lease}
-            leaseId={leaseId}
             onSuccess={handlePaymentSuccess}
           />
         </DialogContent>

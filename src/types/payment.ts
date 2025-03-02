@@ -14,6 +14,11 @@ export interface PaymentHistoryEntry {
   payment_type: PaymentType;
   payment_method: PaymentMethod;
   status: PaymentStatus;
+  periodStart?: string;
+  periodEnd?: string;
+  date?: string;
+  notes?: string;
+  paymentMethod?: string;
 }
 
 export interface PaymentSummary {
@@ -25,6 +30,11 @@ export interface PaymentSummary {
     amount: number;
     dueDate: string;
   };
+  // Additional properties needed by components
+  totalAmount?: number;
+  rentAmount?: number;
+  penaltiesAmount?: number;
+  periodsCount?: number;
 }
 
 export interface PaymentPeriod {

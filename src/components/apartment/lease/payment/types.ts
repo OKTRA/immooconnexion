@@ -132,6 +132,10 @@ export interface PaymentSummary {
     amount: number;
     dueDate: string;
   };
+  totalAmount?: number;
+  rentAmount?: number;
+  penaltiesAmount?: number;
+  periodsCount?: number;
 }
 
 export interface PaymentDialogProps {
@@ -139,6 +143,7 @@ export interface PaymentDialogProps {
   onOpenChange: (open: boolean) => void;
   leaseId: string;
   lease?: LeaseData;
+  tenantId?: string;
 }
 
 export interface PaymentFormFieldsProps {
@@ -158,6 +163,7 @@ export interface PaymentPeriodsListProps {
 }
 
 export interface PeriodOption {
+  id: string;
   value: number;
   label: string;
   startDate: Date;
@@ -173,4 +179,18 @@ export interface PaymentListProps {
 
 export interface RegularPaymentsListProps extends PaymentListProps {
   onPaymentClick?: (payment: PaymentListItem) => void;
+}
+
+export interface LeasePaymentContentProps {
+  lease: LeaseData;
+  initialPayments: PaymentListItem[];
+  regularPayments: PaymentListItem[];
+}
+
+export interface LeaseHeaderProps {
+  lease: LeaseData;
+  onInitialPayment: () => void;
+  onRegularPayment: () => void;
+  canMakeRegularPayments: boolean;
+  needsInitialPayments: boolean;
 }
